@@ -1,0 +1,14 @@
+keys:
+  - &user_beatlink age17a6q5twedcy3lea98t6ey6g822wh6cphv7aj0mzdenkccc5t5cgqpw0d3v 
+  - &host_heimdall age1yggjnkvxm45ssrlwx56pcps43gzglrvfnqdmv8hxcqsqcuj68v7qdj25sg
+creation_rules:
+  - path_regex: server/secrets.(yaml|json|env|ini)$
+    key_groups:
+      - age:
+        - *user_beatlink
+        - *host_heimdall
+  - path_regex: secrets.(yaml|json|env|ini)$
+    key_groups:
+      - age:
+        - *user_beatlink
+        - *host_heimdall
