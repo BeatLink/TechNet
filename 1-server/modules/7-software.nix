@@ -1,5 +1,5 @@
 # Software Management################################################################################################################## 
-This section handles enabling flakes, configuring upgrades and installing additional system packages
+# This section handles enabling flakes, configuring upgrades and installing additional system packages
 #######################################################################################################################################                                                   
 { config, lib, pkgs, modulesPath, ... }: 
 {
