@@ -4,7 +4,7 @@
 { 
     sops.age.sshKeyPaths = [ "/persistent/etc/ssh/ssh_host_ed25519_key" ];
     sops.secrets.beatlink_hashed_password = {
-        sopsFile = ./secrets.yaml;
+        sopsFile = ../secrets.yaml;
         neededForUsers = true;
     };
     users = {

@@ -28,7 +28,7 @@
                     sops-nix.nixosModules.sops
                     impermanence.nixosModules.impermanence
                     ./common/default.nix
-                    ./server/configuration.nix
+                    ./server/default.nix
                 ];
             };
         };

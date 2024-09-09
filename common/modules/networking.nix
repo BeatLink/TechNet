@@ -4,7 +4,7 @@
         domain = "TechNet";
         firewall = {
             enable = true;                                              # Enable the Firewall
-                                            
+            logRefusedConnections = true;
         };
     };
 }
