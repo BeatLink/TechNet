@@ -21,5 +21,5 @@
     };
     systemd.tmpfiles.rules = [ 
         "d /Storage 1770 beatlink beatlink"                             # Creates the mount point and sets needed permissions
-    ]
+    ];
 }
