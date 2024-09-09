@@ -1,5 +1,5 @@
 # Docker ##############################################################################################################################
-Almost all server services are provisioned with docker. These settings configure it. I may move to arion or nix containers at some point
+# Almost all server services are provisioned with docker. These settings configure it. I may move to arion or nix containers at some point
 #######################################################################################################################################
 { config, lib, pkgs, modulesPath, ... }: 
 {
