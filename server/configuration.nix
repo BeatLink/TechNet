@@ -1,5 +1,5 @@
 # Home Server Configuration ###############################################################################################################
-TODO: Add Notes
+# TODO: Add Notes
 ###########################################################################################################################################
 
 { config, lib, pkgs, ... }:
@@ -111,24 +111,24 @@ TODO: Add Notes
             };
         };
     };
+                networking.firewall.allowedUDPPorts = [ 51820 ];                                # Allows Wireguard on Firewall
+
 
     # Initrd SSH ##########################################################################################################################
     # Enables SSH in Boot for Remote LUKS Unlock
     #######################################################################################################################################
-    boot.initrd = {
-        network.ssh = {                                             
-            port = 22;
-            enable = true;
-            authorizedKeys = [ 
-                "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILYQ9aXy5sS9PCKopaB58c8ZA/JGOEoBLMSg4a0n4aw7 beatlink@heimdall" 
-            ];
-            hostKeys = [
-                "/persistent/etc/ssh/ssh_host_ed25519_key"
-                "/persistent/etc/ssh/ssh_host_rsa_key"
-            ];
-        };
-        systemd.users.root.shell = "/bin/systemd-tty-ask-password-agent";
+    boot.initrd.network.ssh = {                                             
+        port = 22;
+        enable = true;
+        authorizedKeys = [ 
+            "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILYQ9aXy5sS9PCKopaB58c8ZA/JGOEoBLMSg4a0n4aw7 beatlink@heimdall" 
+        ];
+        hostKeys = [
+            "/persistent/etc/ssh/ssh_host_ed25519_key"
+            "/persistent/etc/ssh/ssh_host_rsa_key"
+        ];
     };
+    boot.initrd.systemd.users.root.shell = "/bin/systemd-tty-ask-password-agent";
 
     # Rollback Root #######################################################################################################################
     # The rollback service below clears the BTRFS root filesystem to a clean snapshot in order to prevent the buildup of state.
@@ -187,6 +187,7 @@ TODO: Add Notes
         extraOptions = ''experimental-features = nix-command flakes'';
         settings.trusted-users = [ "root" "beatlink" ];                 # Allows me to remote update by sending the flake over ssh
     };
+    system.stateVersion = "23.11";                                      # Sets the base version. Don't change unless reinstalling everything
     system.autoUpgrade.allowReboot = lib.mkForce  false;                # Prevents rebooting since LUKS manual decryption is needed
     environment.systemPackages = with pkgs; [                           # Set packages installed on system
         arion
