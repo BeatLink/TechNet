@@ -27,8 +27,8 @@
                     disko.nixosModules.disko
                     sops-nix.nixosModules.sops
                     impermanence.nixosModules.impermanence
-                    ./common/default.nix
-                    ./server/default.nix
+                    ./0-common/default.nix
+                    ./1-server/default.nix
                 ];
             };
         };
