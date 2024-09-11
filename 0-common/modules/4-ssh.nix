@@ -5,9 +5,9 @@
         enable = true;                                                  # Enable the OpenSSH daemon.
         allowSFTP = true;                                               # Allows file transfers over SSH
         settings = {
-            PasswordAuthentication = false;                             # Disables password based login
-            KbdInteractiveAuthentication = false;                       # Disables keyboard based login
-            PermitRootLogin = "no";                                     # Disables root login
+            PasswordAuthentication = true;                             # Enables password based login
+            KbdInteractiveAuthentication = true;                       # Enables keyboard based login
+            PermitRootLogin = "no";                                    # Disables root login
         };
         hostKeys = [
             { 
