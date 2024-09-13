@@ -31,6 +31,10 @@
                     ./1-server/default.nix
                 ];
             };
+
+            BackupServer = nixpkgs.lib.nixosSystem {
+
+            };
         };
     };
 }
