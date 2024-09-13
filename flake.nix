@@ -21,6 +21,14 @@
     };
     outputs = { self, nixpkgs, disko, home-manager, sops-nix, impermanence, ... }: {
         nixosConfigurations = {
+            BackupServer = nixpkgs.lib.nixosSystem {
+                system = "aarch64-linux";
+                modules = [
+                    sops-nix.nixosModules.sops
+                    ./0-common/default.nix
+                    ./1-backup-server.nix
+                ]                
+            };
             Heimdall = nixpkgs.lib.nixosSystem {
                 system = "x86_64-linux";
                 modules = [
@@ -28,12 +36,8 @@
                     sops-nix.nixosModules.sops
                     impermanence.nixosModules.impermanence
                     ./0-common/default.nix
-                    ./1-server/default.nix
+                    ./2-server/default.nix
                 ];
-            };
-
-            BackupServer = nixpkgs.lib.nixosSystem {
-
             };
         };
     };
