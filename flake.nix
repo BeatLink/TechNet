@@ -14,6 +14,10 @@
             url = "github:Mic92/sops-nix";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        arion = {
+            url = "github:hercules-ci/arion";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
         home-manager = {
             url = "github:nix-community/home-manager";
             inputs.nixpkgs.follows = "nixpkgs";
@@ -21,7 +25,7 @@
     };
     outputs = { self, nixpkgs, disko, home-manager, sops-nix, impermanence, ... }: {
         nixosConfigurations = {
-            BackupServer = nixpkgs.lib.nixosSystem {
+            Ragnarok = nixpkgs.lib.nixosSystem {
                 system = "aarch64-linux";
                 modules = [
                     sops-nix.nixosModules.sops
@@ -35,6 +39,7 @@
                     disko.nixosModules.disko
                     sops-nix.nixosModules.sops
                     impermanence.nixosModules.impermanence
+                    arion.nixosModules.arion
                     ./0-common/default.nix
                     ./2-server/default.nix
                 ];
