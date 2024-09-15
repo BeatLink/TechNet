@@ -1,5 +1,5 @@
-# Networking ##########################################################################################################################    
-# The systemd.network configuration is used over networking or networkmanager as it has support for wireguard in initrd. Also, Systemd 
+# Networking ##########################################################################################################################
+# The systemd.network configuration is used over networking or networkmanager as it has support for wireguard in initrd. Also, Systemd
 # doesn't really separate networking between initrd and the main system so all networking is configured here. Subsequently, changing
 # network settings will usually require a restart (since the wireguard private key can only really be accessed from initrd)
 ######################################################################################################################################
@@ -24,18 +24,18 @@
             systemd = {
                 services.fix_wireguard_key_perms = {            # The Wireguard privatekey must be owned by systemd-network to be used.
                     description = "Set permissions for wireguard private key";
-                    wantedBy = [ 
-                        "initrd.target" 
+                    wantedBy = [
+                        "initrd.target"
                     ];
-                    after = [ 
-                        "initrd-nixos-copy-secrets.service" 
+                    after = [
+                        "initrd-nixos-copy-secrets.service"
                     ];
-                    before = [ 
-                        "systemd-networkd.service" 
+                    before = [
+                        "systemd-networkd.service"
                     ];
                     unitConfig.DefaultDependencies = "no";
                     serviceConfig.Type = "oneshot";
-                    script = '' 
+                    script = ''
                         chown systemd-network:systemd-network /wireguard_private_key
                     '';
                 };
@@ -58,7 +58,7 @@
                                 AllowedIPs = ["10.100.100.2/32"];
                             }
                             {
-                                # Tablet 
+                                # Tablet
                                 PublicKey = "JruIjfXKUUz75fTnwgPfJ/4vBixSAgAodj9NwVAoyl8=";
                                 AllowedIPs = ["10.100.100.3/32"];
                             }
@@ -70,7 +70,7 @@
                             {
                                 # Backup Server
                                 PublicKey = "rntfoR0iPjL90MhrwIFOVI0hSoZ8hHj8A512Q4+1hk4=";
-                                AllowedIPs = ["10.100.100.5/32"];
+                                AllowedIPs = ["10.100.100.6/32"];
                             }
                         ];
                     };
@@ -89,7 +89,7 @@
                                 IPv4Forwarding = true;
                             };
                         };
-                    };               
+                    };
                 };
             };
         };
