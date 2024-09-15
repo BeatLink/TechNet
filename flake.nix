@@ -23,7 +23,7 @@
             inputs.nixpkgs.follows = "nixpkgs";
         };
     };
-    outputs = { self, nixpkgs, disko, home-manager, sops-nix, impermanence, ... }: {
+    outputs = { self, nixpkgs, disko, impermanence, sops-nix, arion, home-manager,  ... }: {
         nixosConfigurations = {
             Ragnarok = nixpkgs.lib.nixosSystem {
                 system = "aarch64-linux";
@@ -31,7 +31,7 @@
                     sops-nix.nixosModules.sops
                     ./0-common/default.nix
                     ./1-backup-server.nix
-                ]                
+                ];                
             };
             Heimdall = nixpkgs.lib.nixosSystem {
                 system = "x86_64-linux";
