@@ -4,7 +4,9 @@
 
 { config, lib, pkgs, ... }:
 {
-    imports = [                                       
+    imports = [              
+
+        # Core Modules                         
         ./modules/0-hardware-configuration.nix
         ./modules/1-disk-config.nix
         ./modules/2-boot.nix
@@ -15,5 +17,8 @@
         ./modules/7-software.nix
         ./modules/8-docker.nix
         ./modules/9-borgmatic.nix
+
+        # Docker Services
+        ./services/blockurl.nix
     ];
 }
