@@ -14,12 +14,12 @@
         };    
         initrd.luks.devices.Storage.device = "/dev/md/0";               # Decrypts the data storage drive
     };
+    systemd.tmpfiles.rules = [ 
+        "d /Storage 1770 beatlink beatlink"                             # Creates the mount point and sets needed permissions
+    ];
     fileSystems."/Storage" = {
         device = "/dev/mapper/Storage";
         fsType = "ext4";
         options = ["defaults" "nofail" "discard"];
     };
-    systemd.tmpfiles.rules = [ 
-        "d /Storage 1770 beatlink beatlink"                             # Creates the mount point and sets needed permissions
-    ];
 }
