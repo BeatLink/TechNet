@@ -1,6 +1,8 @@
 # Heimdall
 
+
 Heimdall is a multi-role personal home server that acts as the hub of the TechNet.
+
 
 ## Hardware
 
@@ -12,3 +14,53 @@ Heimdall is a multi-role personal home server that acts as the hub of the TechNe
 *   Storage Drives: 2 x 1 TB HDDs  
 *   Service Tag: See KeePassXC | Run `sudo dmidecode -s system-serial-number`  
 *   Ethernet MAC: See KeePassXC
+
+
+## UEFI Settings
+
+### Main
+
+| Setting | Value |
+| --- | --- |
+| System Time | Ignore (set by OS) |
+| System Date | Ignore (set by OS) |
+| Network Boot | Disabled |
+| F12 Boot Menu | Enabled |
+| Wake on LAN | Enabled |
+| Touchpad | Basic |
+| Lid Open Resume | Disabled |
+| D2D Recovery | Disabled |
+| GPT Partition Recovery | None |
+
+### Security
+| Setting | Value |
+| --- | --- |
+| Set Supervisor Password | Set to temporary password to make changes below |
+| User Password | Clear |
+| HDD 0 Password | Clear |
+| HDD 1 Password | Clear |
+| Password on Boot | Disabled |
+| Erase Secure Boot Settings | Erase |
+| Select an UEFI File | Ignore |
+| Restore Secure Boot Factory | Restore |
+| Change TPM State | Enabled |
+| Clear TPM | Clear (Save changes first) |
+
+### Boot
+| Setting | Value |
+| --- | --- |
+| Boot Mode | UEFI |
+| Secure Boot | Disabled |
+
+#### Boot Priority
+1.  HDD 1 (128 GB M.2)  
+2.  HDD 0  
+3.  USB HDD  
+4.  USB CD-ROM  
+5.  USB FDD  
+6.  ATAPI CD-ROM  
+7.  Network Boot IPv6  
+8.  Network Boot IPv4
+
+### Exit
+*   Exit Saving Changes
