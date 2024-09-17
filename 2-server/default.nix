@@ -21,6 +21,5 @@
         # Docker Services
         ./services/blockurl.nix
         ./services/calibre.nix
-        ./services/calibre-web.nix
     ];
 }
