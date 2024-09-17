@@ -3,15 +3,22 @@
 #######################################################################################################################################
 { config, lib, pkgs, modulesPath, ... }: 
 {
+
+    sops.age.sshKeyPaths = [ "/persistent/etc/ssh/ssh_host_ed25519_key" ];
+    sops.secrets.borg_repo_encryption_key.sopsFile = ../secrets.yaml;
     services.borgmatic = {
         enable = true;
         settings = {
+            
+
             
             # Sources ---------------------------------------------------------------------------------------------------------------------
             source_directories = [
                 "/Storage/Services"
                 "/Storage/Scripts"
             ];
+
+            # Excludes --------------------------------------------------------------------------------------------------------------------
             exclude_patterns = [
                 "/Storage/Files/Backups/Server"
             ];
@@ -21,17 +28,19 @@
                 ".thumbnails"
             ];
 
-            # Excludes --------------------------------------------------------------------------------------------------------------------
+            
+            # Repositories ----------------------------------------------------------------------------------------------------------------
             repositories = [
                 {
-                    label = "On Disk Backup"
-                    path = "/Storage/Files/Backups/Server/Borgmatic"
+                    label = "On Disk Backup";
+                    path = "/Storage/Files/Backups/Server/Borgmatic";
                 }
                 {
-                    label = "Backup Server"
-                    path = "ssh://borg@10.100.100.6/Storage/Backups/Server/Borgmatic"
+                    label = "Backup Server";
+                    path = "ssh://borg@10.100.100.6/Storage/Backups/Server/Borgmatic";
                 }
             ];
+            encryption_passcommand = "cat " + config.sops.secrets.borg_repo_encryption_key.path;
 
             # Backup Settings -------------------------------------------------------------------------------------------------------------
             compression = "lz4";
@@ -60,20 +69,20 @@
             # Consistency Checks ----------------------------------------------------------------------------------------------------------
             checks = [
                 {
-                    name = "repository"
-                    frequency = "always"
+                    name = "repository";
+                    frequency = "always";
                 }
                 {
-                    name = "archives"
-                    frequency = "always"
+                    name = "archives";
+                    frequency = "always";
                 }
                 {
-                    name = data
-                    frequency = "always"
+                    name = "data";
+                    frequency = "always";
                 }
                 {
-                    name = "extract"
-                    frequency = "always"
+                    name = "extract";
+                    frequency = "always";
                 } 
             ];
             check_last = 3;
@@ -81,24 +90,24 @@
             # Notifications ---------------------------------------------------------------------------------------------------------------
             ntfy = {
                 topic = "borgmatic";
-                server = "http://ntfy"
+                server = "http://ntfy.heimdall.technet";
                 start = {
                     title = "Heimdall Borgmatic Backup Started";
-                    message = "Updates will follow"
-                    tags = [ "borgmatic" ]
-                    priority = "min"
+                    message = "Updates will follow";
+                    tags =  "borgmatic";
+                    priority = "min";
                 };
                 finish = {
                     title = "Heimdall Borgmatic Backup Completed";
-                    message = "Nice!"
-                    tags = ["borgmatic" "+1"]
-                    priority = ["min"]
+                    message = "Nice!";
+                    tags = "borgmatic,+1";
+                    priority = "min";
                 };
                 fail = {
-                    title = "Heimdall Borgmatic Backup Failed!"
-                    message = "You should probably fix it"
-                    tags = [ "borgmatic" "-1" "skull" ]
-                    priority = "max"
+                    title = "Heimdall Borgmatic Backup Failed!";
+                    message = "You should probably fix it";
+                    tags = "borgmatic,-1,skull";
+                    priority = "max";
                 };
                 states = [
                     "start"
