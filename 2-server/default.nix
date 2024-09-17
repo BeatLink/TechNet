@@ -20,5 +20,6 @@
 
         # Docker Services
         ./services/blockurl.nix
+        ./services/calibre.nix
     ];
 }
