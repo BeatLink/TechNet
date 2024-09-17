@@ -22,5 +22,6 @@
         ./services/blockurl.nix
         ./services/calibre.nix
         ./services/dashy.nix
+        ./services/deluge.nix
     ];
 }
