@@ -7,6 +7,7 @@
         enable = true;
         liveRestore = false;                            # Solves hangs on shutdown
     };
+    virtualisation.arion.backend = "docker";
     environment.persistence."/persistent".directories = ["/var/lib/docker"];
     networking.firewall = {
         allowedTCPPorts = [
