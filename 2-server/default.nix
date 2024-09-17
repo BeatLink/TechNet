@@ -21,5 +21,6 @@
         # Docker Services
         ./services/blockurl.nix
         ./services/calibre.nix
+        ./services/dashy.nix
     ];
 }
