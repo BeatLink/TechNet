@@ -4,13 +4,13 @@
 
 { config, lib, pkgs, modulesPath, ... }: 
 {
-    virtualisation.arion.projects.calibre = {
-        serviceName = "calibre";
+    virtualisation.arion.projects.calibre-web = {
+        serviceName = "calibre-web";
         settings = {
             services = {
-                calibre.service = {
-                    image = "linuxserver/calibre:latest";
-                    container_name = "calibre";
+                calibre-web.service = {
+                    image = "linuxserver/calibre-web:latest";
+                    container_name = "calibre-web";
                     restart = "unless-stopped";
                     environment = {
                         "PUID" = "1000";
@@ -18,14 +18,11 @@
                         "TZ" = "America/Jamaica";
                     };
                     volumes = [ 
-                        "/Storage/Services/Calibre/Config:/config"
-                        "/Storage/Services/Calibre/Uploads:/uploads"
-                        "/Storage/Services/Calibre/Plugins:/plugins"
+                        "/Storage/Services/Calibre-Web/Config:/config"
                         "/Storage/Files/eBooks/Calibre/Library:/Calibre_Library"
                     ];
                     expose = [
-                        "8080"
-                        "8081"
+                        "8083"
                     ];
                     networks = [
                         "nginx_public"
