@@ -1,6 +1,12 @@
+# Calibre #################################################################################################################################
+#
+# Calibre and Calibre Web are used for eBook viewing and management.
+#
 # https://hub.docker.com/r/linuxserver/calibre-web
 # https://github.com/janeczku/calibre-web
 # https://academy.pointtosource.com/containers/ebooks-calibre-readarr/
+#
+###########################################################################################################################################
 
 { config, lib, pkgs, modulesPath, ... }: 
 {
