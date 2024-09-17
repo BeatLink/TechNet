@@ -23,5 +23,6 @@
         ./services/calibre.nix
         ./services/dashy.nix
         ./services/deluge.nix
+        ./services/freshrss.nix
     ];
 }
