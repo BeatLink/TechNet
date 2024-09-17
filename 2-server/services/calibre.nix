@@ -31,6 +31,26 @@
                         "nginx_public"
                     ];
                 };
+                calibre-web.service = {
+                    image = "linuxserver/calibre-web:latest";
+                    container_name = "calibre-web";
+                    restart = "unless-stopped";
+                    environment = {
+                        "PUID" = "1000";
+                        "PGID" = "1000";
+                        "TZ" = "America/Jamaica";
+                    };
+                    volumes = [ 
+                        "/Storage/Services/Calibre/Calibre-Web-Config:/config"
+                        "/Storage/Files/eBooks/Calibre/Library:/Calibre_Library"
+                    ];
+                    expose = [
+                        "8083"
+                    ];
+                    networks = [
+                        "nginx_public"
+                    ];
+                };
             };
             networks = {
                 nginx_public = {
