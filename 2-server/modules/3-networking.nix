@@ -12,7 +12,7 @@
         nameservers = [ "10.100.100.1" "8.8.8.8" "1.1.1.1" ];           # Sets up dns
         firewall = {
             checkReversePath = "loose";                                 # Needed for wireguard
-            allowedUDPPorts = [ 51820 ];                                # Allows Wireguard on Firewall
+            allowedUDPPorts = [ 44444 ];                                # Allows Wireguard on Firewall
         };
     };
     boot = {
@@ -49,7 +49,7 @@
                         };
                         wireguardConfig = {
                             PrivateKeyFile = /wireguard_private_key;
-                            ListenPort = 51820;
+                            ListenPort = 44444;
                         };
                         wireguardPeers = [
                             {
