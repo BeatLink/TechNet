@@ -19,4 +19,23 @@
     users.users."beatlink".openssh.authorizedKeys.keys = [              # Sets the SSH key for the user
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILYQ9aXy5sS9PCKopaB58c8ZA/JGOEoBLMSg4a0n4aw7 beatlink@heimdall"
     ]; 
+    services.openssh = {
+        hostKeys = [
+            { 
+                type = "ed25519"; 
+                path = "/persistent/etc/ssh/ssh_host_ed25519_key"; 
+            }
+            { 
+                type = "rsa"; 
+                bits = 4096; 
+                path = "/persistent/etc/ssh/ssh_host_rsa_key"; 
+            }
+        ];
+    };
 }
+
+
+
+
+
+
