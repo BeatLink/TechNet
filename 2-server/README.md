@@ -1,20 +1,20 @@
 # Heimdall
 
-
 Heimdall is a multi-role personal home server that acts as the hub of the TechNet.
 
+Heimdall uses NixOS as its main operating system with services deployed by docker containers. The root filesystem is on an encrypted M.2 SATA SSD while files and databases for all docker services are stored on 2 1TB HDDs in RAID 1 Configuration
 
 ## Hardware
 
 ### Specifications
-*   Model: Acer Aspire E5-575
-*   Processor: Intel i3 7th gen
-*   RAM: 8 GB
-*   Root Drive 128 GB M.2 SATA Drive
-*   Storage Drives: 2 x 1 TB HDDs  
-*   Service Tag: See KeePassXC | Run `sudo dmidecode -s system-serial-number`  
-*   Ethernet MAC: See KeePassXC
-
+- Model: Acer Aspire E5-575
+- Processor: Intel i3 7th gen
+- RAM: 8 GB
+- Storage:
+    - NixOS         - 120GB M.2 2280 SATA SSD
+    - Data Drives   - 2 x 1TB 2.5in SATA HDD (RAID 1)   
+- Service Tag: See KeePassXC | Run `sudo dmidecode -s system-serial-number`  
+- Ethernet MAC: See KeePassXC
 
 ## UEFI Settings
 
@@ -64,3 +64,24 @@ Heimdall is a multi-role personal home server that acts as the hub of the TechNe
 
 ### Exit
 *   Exit Saving Changes
+
+
+## NixOS
+
+### Installation
+
+#### Download ISO
+1. Download the latest minimal 64-bit Intel/AMD ISO and its checksum from here https://nixos.org/download/
+2. Verify the ISO using `sha256sum --check *.sha256`
+3. Write the ISO to a USB Drive using dd (DO NOT USE VENTOY)
+
+#### Boot
+1. Connect the Drive to the server and boot it
+2. On the boot screen select the NixOS Installer Options
+3. On the login screen, set an initial password for root by running `sudo -i` then `passwd`
+4. Get the IP address of the server by running ifconfig
+
+#### Installation
+1. Run the `install.sh` script located in the scripts folder with the given ip address
+    Eg. `install.sh 192.168.0.2`
+2. When prompted, enter the temporary password for the root account
