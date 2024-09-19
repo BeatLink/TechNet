@@ -49,7 +49,7 @@
                         };
                         wireguardConfig = {
                             PrivateKeyFile = /wireguard_private_key;
-                            ListenPort = 44444;
+                            ListenPort = 51820;
                         };
                         wireguardPeers = [
                             {
@@ -70,7 +70,7 @@
                             {
                                 # Backup Server
                                 PublicKey = "rntfoR0iPjL90MhrwIFOVI0hSoZ8hHj8A512Q4+1hk4=";
-                                AllowedIPs = ["10.100.100.6/32"];
+                                AllowedIPs = ["10.100.100.5/32"];
                             }
                             {
                                 # Work Server
