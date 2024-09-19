@@ -1,7 +1,12 @@
 # Networking ##########################################################################################################################
+#
+# Wireguard is a simple, high performance VPN that allows each device in the TechNet to securely connect with each other and to 
+# connect to the internet via a secure relay through Heimdall. It also allows the server to be accessed during boot for remote decryption
+# 
 # The systemd.network configuration is used over networking or networkmanager as it has support for wireguard in initrd. Also, Systemd
 # doesn't really separate networking between initrd and the main system so all networking is configured here. Subsequently, changing
 # network settings will usually require a restart (since the wireguard private key can only really be accessed from initrd)
+#
 ######################################################################################################################################
 { config, lib, pkgs, ... }:
 {
