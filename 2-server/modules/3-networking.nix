@@ -72,6 +72,11 @@
                                 PublicKey = "rntfoR0iPjL90MhrwIFOVI0hSoZ8hHj8A512Q4+1hk4=";
                                 AllowedIPs = ["10.100.100.6/32"];
                             }
+                            {
+                                # Work Server
+                                PublicKey = "e4NiZgFqDoddb3RDNLaLCNyQsZR9sH8SaNIoB+c5HAQ="
+                                AllowedIPs = ["10.100.100.50/32"]
+                            }
                         ];
                     };
                     networks = {
