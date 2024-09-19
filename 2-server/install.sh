@@ -41,4 +41,4 @@ flatpak run --command="keepassxc-cli" org.keepassxc.KeePassXC \
   heimdall_luks_decryption_passwordfile "/tmp/disk-1.key"
 
 # Begin the installation
-nix run github:nix-community/nixos-anywhere -- --extra-files "$temp" --disk-encryption-keys /tmp/disk-1.key --no-reboot --flake ../#Heimdall root@192.168.0.2
+nix run github:nix-community/nixos-anywhere -- --extra-files "$temp" --disk-encryption-keys /tmp/disk-1.key --no-reboot --flake ../#Heimdall root@$1
