@@ -1,0 +1,58 @@
+<mxfile host="65bd71144e">
+    <diagram id="cuJ5v9-8x7WkNOMGfS_O" name="Page-1">
+        <mxGraphModel dx="781" dy="757" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="4" value="Windows EHD&lt;br&gt;USB SATA SSD&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;1 TB" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="120" y="480" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="&amp;nbsp;ISO Drive&lt;br&gt;USB SATA SSD&lt;br&gt;128GB" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="440" y="480" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="Data Drive&lt;br&gt;USB SATA HDD&lt;br&gt;1 TB" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="280" y="480" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="120" y="120" width="260" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="Backup Server" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;" parent="18" vertex="1">
+                    <mxGeometry width="260" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="Backup Data&lt;br&gt;USB SATA HDD&lt;br&gt;5 TB" style="rounded=1;whiteSpace=wrap;html=1;" parent="18" vertex="1">
+                    <mxGeometry x="130" y="30" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="NixOS&lt;br&gt;MicroSD Card&lt;br&gt;128 GB" style="rounded=1;whiteSpace=wrap;html=1;" parent="18" vertex="1">
+                    <mxGeometry x="10" y="30" width="110" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="20" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="120" y="360" width="270" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="2" value="Laptop" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;" parent="20" vertex="1">
+                    <mxGeometry width="270" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="NixOS&lt;br&gt;M.2 2242 NVMe&lt;br&gt;256 GB" style="rounded=1;whiteSpace=wrap;html=1;" parent="20" vertex="1">
+                    <mxGeometry x="10" y="30" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="17" value="Data Drive&lt;br&gt;M.2 2242 NVMe&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;1TB" style="rounded=1;whiteSpace=wrap;html=1;" parent="20" vertex="1">
+                    <mxGeometry x="140" y="30" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="21" value="" style="group" vertex="1" connectable="0" parent="1">
+                    <mxGeometry x="120" y="240" width="400" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="5" value="Server" style="rounded=1;whiteSpace=wrap;html=1;verticalAlign=top;" parent="21" vertex="1">
+                    <mxGeometry width="400" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="7" value="Data Drive RAID 1&lt;br&gt;SATA HDD&lt;br&gt;1 TB" style="rounded=1;whiteSpace=wrap;html=1;" parent="21" vertex="1">
+                    <mxGeometry x="140" y="30" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="NixOS&lt;br&gt;M.2 2280 SATA&lt;br&gt;120 GB" style="rounded=1;whiteSpace=wrap;html=1;" parent="21" vertex="1">
+                    <mxGeometry x="10" y="30" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" value="Data Drive RAID 1&lt;br&gt;SATA HDD&lt;br&gt;1 TB" style="rounded=1;whiteSpace=wrap;html=1;" parent="21" vertex="1">
+                    <mxGeometry x="270" y="30" width="120" height="60" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
