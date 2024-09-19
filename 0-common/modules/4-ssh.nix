@@ -18,9 +18,9 @@
             KbdInteractiveAuthentication = false;                       # Disables keyboard based login
             PermitRootLogin = "no";                                     # Disables root login
         };
-        extraConfig = [
-            "MaxStartups 1"
-        ]
+        extraConfig = ''
+            MaxStartups 1
+        '';
     };
     systemd.tmpfiles.rules = [                                          # Sets permissions for SSH folder 
         "d /etc 0755 root root"
