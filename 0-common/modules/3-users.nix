@@ -18,8 +18,6 @@
                 hashedPasswordFile = config.sops.secrets.beatlink_hashed_password.path;    # Sets my password using sops
                 group = "beatlink";                                     # Adds me to my group
                 extraGroups = [ "networkmanager" "wheel"];              # Allows management of the network and using sudo
-                # packages = with pkgs; [                               # Installs user specific packages
-                # ];
             };
         };
     };
