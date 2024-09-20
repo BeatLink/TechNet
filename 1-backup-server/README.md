@@ -37,7 +37,6 @@ Ragnarok is a single board computer based backup server installed offsite to bac
     ```bash
         sudo sed -i 's/loglevel=7/loglevel=7 video=HDMI-A-1:1920x1080@60/g' /media/beatlink/NIXOS_SD/boot/extlinux/extlinux.conf
         sudo sed -i 's/TIMEOUT 50/TIMEOUT 5/g' /media/beatlink/NIXOS_SD/boot/extlinux/extlinux.conf
-        
     ```
 7. Insert the SD card and boot. Note that it may take several minutes for anything to be displayed
 4. On the login screen, set an initial password by running `passwd`
