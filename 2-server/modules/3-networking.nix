@@ -50,11 +50,11 @@
                         netdevConfig = {
                             Kind = "wireguard";
                             Name = "wg0";
-                            MTUBytes = "1280";
+                            MTUBytes = "1500";
                         };
                         wireguardConfig = {
                             PrivateKeyFile = /wireguard_private_key;
-                            ListenPort = 51820;
+                            ListenPort = 44444;
                         };
                         wireguardPeers = [
                             {
