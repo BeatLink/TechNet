@@ -1,12 +1,13 @@
 keys:
   - &user_beatlink age17a6q5twedcy3lea98t6ey6g822wh6cphv7aj0mzdenkccc5t5cgqpw0d3v 
   - &host_heimdall age1yggjnkvxm45ssrlwx56pcps43gzglrvfnqdmv8hxcqsqcuj68v7qdj25sg
+  - &host_ragnarok age18a3msuyfem87qzknt6s64z086lt5lptf7fnqsp3wkt27wrl57fas80c86k
 creation_rules:
   - path_regex: 1-backup-server/secrets.(yaml|json|env|ini)$
     key_groups:
       - age:
         - *user_beatlink
-        - *host_heimdall
+        - *host_ragnarok
   - path_regex: 2-server/secrets.(yaml|json|env|ini)$
     key_groups:
       - age:
@@ -17,3 +18,4 @@ creation_rules:
       - age:
         - *user_beatlink
         - *host_heimdall
+        - *host_ragnarok
