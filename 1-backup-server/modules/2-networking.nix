@@ -2,7 +2,7 @@
 
 { config, lib, pkgs, ... }:
 {
-    networking.hostname = "Ragnarok";
+    networking.hostName = "Ragnarok";
     sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
     sops.secrets.wireguard_private_key = {
         sopsFile = ../secrets.yaml;
