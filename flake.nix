@@ -30,7 +30,7 @@
                 modules = [
                     sops-nix.nixosModules.sops
                     ./0-common/default.nix
-                    ./1-backup-server.nix
+                    ./1-backup-server/default.nix
                 ];                
             };
             Heimdall = nixpkgs.lib.nixosSystem {
