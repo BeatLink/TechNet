@@ -22,8 +22,4 @@
             MaxStartups 1
         '';
     };
-    systemd.tmpfiles.rules = [                                          # Sets permissions for SSH folder 
-        "d /etc 0755 root root"
-        "d /etc/ssh 0755 root root"
-    ];
 }
