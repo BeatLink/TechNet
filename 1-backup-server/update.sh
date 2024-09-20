@@ -2,5 +2,11 @@
 #
 # This scripts automatically updates Ragnarok from this flake
 #
-nixos-rebuild switch --use-remote-sudo --flake ../#Ragnarok --target-host "beatlink@10.100.100.5"
+nixos-rebuild \
+    --flake ../#Ragnarok \
+    --build-host "pearson@10.100.100.5" \
+    --target-host "pearson@10.100.100.5" \
+    --use-remote-sudo  \
+    --fast \
+    switch
 
