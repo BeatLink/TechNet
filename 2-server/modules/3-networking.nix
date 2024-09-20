@@ -17,7 +17,7 @@
         nameservers = [ "10.100.100.1" "8.8.8.8" "1.1.1.1" ];           # Sets up dns
         firewall = {
             checkReversePath = "loose";                                 # Needed for wireguard
-            allowedUDPPorts = [ 44444 ];                                # Allows Wireguard on Firewall
+            allowedUDPPorts = [ 51820 ];                                # Allows Wireguard on Firewall
         };
     };
     boot = {
