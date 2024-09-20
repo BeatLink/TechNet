@@ -1,10 +1,6 @@
 # SSH #####################################################################################################################################
 #
-# SSH will be the primary way to remotely access devices.
-#
-# It will provide the following services:  
-#   - Remote Access  
-#   - File Access through SFTP
+# Configures SSH for remote access and file transfers
 #
 ###########################################################################################################################################
 
@@ -19,7 +15,7 @@
             PermitRootLogin = "no";                                     # Disables root login
         };
         extraConfig = ''
-            MaxStartups 1
+            MaxStartups 1                                               # Limits number of concurrent connection attempts
         '';
     };
 }
