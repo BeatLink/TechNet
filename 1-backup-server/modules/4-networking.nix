@@ -1,18 +1,23 @@
-# Networking ------------------------------------------------------------------------------------------------------------------------------------
+# Networking ##############################################################################################################################
+#
+# This file configures wireguard and networking settings
+#
+###########################################################################################################################################
 
 { config, lib, pkgs, ... }:
 {
     networking = {
-        hostName = "Ragnarok";
-        useNetworkd = true;
+        hostName = "Ragnarok";                                                      # Sets the hostName
+        useNetworkd = true;                                                         # Use Systemd-Networkd
+        useDHCP = lib.mkDefault true;                                               # Enables DHCP
     };
     sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
     sops.secrets.wireguard_private_key = {
-        sopsFile = ../secrets.yaml;
+        sopsFile = ../secrets/secrets.yaml;
     };
     systemd.network = {
         enable = true;
-        netdevs."01-wireguard" = {
+        netdevs."01-wireguard" = {                                                  # Adds the wireguard virtual network device
             netdevConfig = {
                 Kind = "wireguard";
                 Name = "wg0";
@@ -31,13 +36,13 @@
                 }
             ];
         };
-        networks = {
+        networks = {                                                                # Sets up the Ethernet Network
             "01-end0" = {
                 matchConfig.Name = "end0";
                 address = [ "192.168.100.254/24"];
                 gateway = ["192.168.100.1"];
                 linkConfig.RequiredForOnline = "routable";
-            };
+            };                                                                      # Sets up the Wireguard Network
             "01-wireguard" = {
                 matchConfig.Name = "wg0";
                 address = ["10.100.100.5/24"];
