@@ -5,7 +5,7 @@
 {
 
     sops.age.sshKeyPaths = [ "/persistent/etc/ssh/ssh_host_ed25519_key" ];
-    sops.secrets.borg_repo_encryption_key.sopsFile = ../secrets.yaml;
+    sops.secrets.borg_repo_encryption_key.sopsFile = ../secrets/secrets.yaml;
     services.borgmatic = {
         enable = true;
         settings = {
