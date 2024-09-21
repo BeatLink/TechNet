@@ -89,6 +89,9 @@
                             address = [ "192.168.0.2/24"];
                             gateway = ["192.168.0.1"];
                             linkConfig.RequiredForOnline = "routable";
+                            networkConfig = {                           # Enables forwarding of VPN traffic to the internet
+                                IPv4Forwarding = true;
+                            };
                         };
                         "01-wireguard" = {
                             matchConfig.Name = "wg0";
