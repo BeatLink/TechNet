@@ -17,12 +17,6 @@
         ./modules/7-software.nix
         ./modules/8-docker.nix
         ./modules/9-borgmatic.nix
-
-        # Docker Services
-        ./services/blockurl.nix
-        ./services/calibre.nix
-        ./services/dashy.nix
-        ./services/deluge.nix
-        ./services/freshrss.nix
+        ./modules/10-services.nix
     ];
 }

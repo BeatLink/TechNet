@@ -34,3 +34,19 @@
         };
     };
 }
+
+
+
+
+
+
+# System info
+
+# HDD Storage
+# Network Connectivity and Speed
+# Docker container health
+# Uptime
+# Neofetch
+# Processes
+
+# uptime kuma
