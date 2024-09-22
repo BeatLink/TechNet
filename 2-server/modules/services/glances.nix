@@ -21,7 +21,7 @@
                     };
                     pid = "host";
                     privileged = true;
-                    network_mode = "host"
+                    network_mode = "host";
                     volumes = [ 
                         "./glances.conf:/glances/conf/glances.conf"
                         "/var/run/docker.sock:/var/run/docker.sock:ro"
