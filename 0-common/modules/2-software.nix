@@ -15,6 +15,13 @@
     system.autoUpgrade = {
         enable = true;
         allowReboot = true;
+        flake = "github:BeatLink/TechNet";
+        flags = [
+            "--no-write-lock-file"
+            "-L"
+        ];
+        dates = "02:00";
+        randomizedDelaySec = "45min";
     };
     environment.systemPackages = with pkgs; [                           # Set packages installed on system
         wget                                                            # For downloading stuff
