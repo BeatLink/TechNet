@@ -11,5 +11,8 @@
         ./services/dashy.nix
         ./services/deluge.nix
         ./services/freshrss.nix
+        ./services/glances.nix
+        ./services/motioneye.nix
+        ./services/esphome.nix
     ];
 }
