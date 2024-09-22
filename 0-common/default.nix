@@ -14,5 +14,6 @@
         ./modules/4-ssh.nix
         ./modules/5-avahi.nix
         ./modules/6-fail2ban.nix
+        ./modules/7-permissions.nix
     ];
 }
