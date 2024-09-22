@@ -11,7 +11,6 @@
         useNetworkd = true;                                                         # Use Systemd-Networkd
         useDHCP = lib.mkDefault true;                                               # Enables DHCP
     };
-    sops.age.sshKeyPaths = [ "/etc/ssh/ssh_host_ed25519_key" ];
     sops.secrets.wireguard_private_key = {
         sopsFile = ../secrets/secrets.yaml;
     };
