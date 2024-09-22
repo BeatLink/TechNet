@@ -7,7 +7,6 @@
 
 { config, lib, pkgs, modulesPath, ... }:
 { 
-    sops.age.sshKeyPaths = [ "/persistent/etc/ssh/ssh_host_ed25519_key" ];
     sops.secrets.beatlink_hashed_password = {
         sopsFile = ../secrets/secrets.yaml;
         neededForUsers = true;
