@@ -40,7 +40,8 @@
             "/var/log"
         ];
         files = [
-            "/etc/machine-id"
+            # The parent directory mode is crucial for not breaking SSH
+            { file = "/etc/machine-id"; parentDirectory = { mode = "0755"; }; }
         ];
     };
 }
