@@ -38,8 +38,7 @@
         networks = {                                                                # Sets up the Ethernet Network
             "01-end0" = {
                 matchConfig.Name = "end0";
-                address = [ "192.168.100.254/24"];
-                gateway = ["192.168.100.1"];
+                networkConfig.DHCP = "ipv4";
                 linkConfig.RequiredForOnline = "routable";
             };                                                                      # Sets up the Wireguard Network
             "01-wireguard" = {
