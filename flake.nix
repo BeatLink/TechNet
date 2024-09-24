@@ -23,11 +23,12 @@
             inputs.nixpkgs.follows = "nixpkgs";
         };
     };
-    outputs = { self, nixpkgs, disko, impermanence, sops-nix, arion, home-manager,  ... }: {
+    outputs = { self, nixpkgs, disko, impermanence, sops-nix, arion, home-manager,  ... }: rec {
         nixosConfigurations = {
             Ragnarok = nixpkgs.lib.nixosSystem {
                 system = "aarch64-linux";
                 modules = [
+                    "${nixpkgs}/nixos/modules/installer/sd-card/sd-image.nix"
                     sops-nix.nixosModules.sops
                     ./0-common/default.nix
                     ./1-backup-server/default.nix
@@ -45,5 +46,6 @@
                 ];
             };
         };
+        images.Ragnarok = nixosConfigurations.Ragnarok.config.system.build.sdImage;
     };
 }
