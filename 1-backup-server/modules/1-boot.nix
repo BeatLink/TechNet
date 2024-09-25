@@ -20,7 +20,7 @@
         kernelParams = [
             "console=tty1"
             "loglevel=7"
-            "video=HDMI-A-1:1920x1080@120.21"
+            "video=HDMI-A-1:1024x768@60"
         ];
     };
 }
