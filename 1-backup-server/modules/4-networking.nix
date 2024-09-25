@@ -12,7 +12,7 @@
         useDHCP = lib.mkDefault true;                                               # Enables DHCP
     };
     sops.secrets.wireguard_private_key = {
-        sopsFile = ../secrets/secrets.yaml;
+        sopsFile = ../secrets.yaml;
     };
     systemd.network = {
         enable = true;
@@ -27,11 +27,13 @@
             };        
             wireguardPeers = [
                 {
-                    # Server
-                    PublicKey = "SLW2DFKk+Cf5K5KZl0OLYrEGyqTCqYHBKV2mTA3W2hQ=";
-                    AllowedIPs = ["10.100.100.0/24"];
-                    Endpoint = "72.252.37.234:51820";
-                    PersistentKeepalive = 15;
+                    wireguardPeerConfig = {
+                        # Server
+                        PublicKey = "SLW2DFKk+Cf5K5KZl0OLYrEGyqTCqYHBKV2mTA3W2hQ=";
+                        AllowedIPs = ["10.100.100.0/24"];
+                        Endpoint = "72.252.37.234:51820";
+                        PersistentKeepalive = 15;
+                    };
                 }
             ];
         };
