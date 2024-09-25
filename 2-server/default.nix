@@ -4,9 +4,7 @@
 
 { config, lib, pkgs, ... }:
 {
-    imports = [              
-
-        # Core Modules                         
+    imports = [                                   
         ./modules/0-hardware-configuration.nix
         ./modules/1-disk-config.nix
         ./modules/2-boot.nix
