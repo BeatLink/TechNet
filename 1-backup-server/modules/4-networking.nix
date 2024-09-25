@@ -13,6 +13,9 @@
     };
     sops.secrets.wireguard_private_key = {
         sopsFile = ../secrets.yaml;
+        group = config.users.users.systemd-network.group;
+        mode = "0640";
+        reloadUnits = [ "systemd-networkd.service" ];
     };
     systemd.network = {
         enable = true;
@@ -38,8 +41,8 @@
             ];
         };
         networks = {                                                                # Sets up the Ethernet Network
-            "01-end0" = {
-                matchConfig.Name = "end0";
+            "01-eth0" = {
+                matchConfig.Name = "eth0";
                 networkConfig.DHCP = "ipv4";
                 linkConfig.RequiredForOnline = "routable";
             };                                                                      # Sets up the Wireguard Network
