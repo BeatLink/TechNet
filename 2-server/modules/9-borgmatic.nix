@@ -3,19 +3,15 @@
 #######################################################################################################################################
 { config, lib, pkgs, modulesPath, ... }: 
 {
-    sops.secrets.borg_repo_encryption_key.sopsFile = ../secrets/secrets.yaml;
+    sops.secrets.borg_repo_encryption_key.sopsFile = ../secrets.yaml;
     services.borgmatic = {
         enable = true;
         settings = {
-            
-
-            
             # Sources ---------------------------------------------------------------------------------------------------------------------
             source_directories = [
                 "/Storage/Services"
                 "/Storage/Scripts"
             ];
-
             # Excludes --------------------------------------------------------------------------------------------------------------------
             exclude_patterns = [
                 "/Storage/Files/Backups/Server"
@@ -26,7 +22,6 @@
                 ".thumbnails"
             ];
 
-            
             # Repositories ----------------------------------------------------------------------------------------------------------------
             repositories = [
                 {
@@ -35,7 +30,7 @@
                 }
                 {
                     label = "Backup Server";
-                    path = "ssh://borg@10.100.100.6/Storage/Backups/Server/Borgmatic";
+                    path = "ssh://borg@10.100.100.5/Storage/Backups/Server/Borgmatic";
                 }
             ];
             encryption_passcommand = "cat " + config.sops.secrets.borg_repo_encryption_key.path;
@@ -55,7 +50,7 @@
             # Hooks -----------------------------------------------------------------------------------------------------------------------
             before_backup = [
                 "echo Starting a backup job."
-                # "ping -q -c 1 10.100.100.6 > /dev/null || exit 75"
+                "ping -q -c 1 10.100.100.5 > /dev/null || exit 75"
             ];
             after_backup = [
                 "echo Backup created."
