@@ -1,40 +1,41 @@
 {
     description = "flake for TechNet";
     inputs = {
-        nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+        nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+        nixpkgs-tapir.url = "github:NixOS/nixpkgs/nixos-23.11";
 
         disko = {
             url = "github:nix-community/disko";
-            inputs.nixpkgs.follows = "nixpkgs";
+            inputs.nixpkgs.follows = "nixpkgs-unstable";
         };
         impermanence = {
            url = "github:nix-community/impermanence";
         };
         sops-nix = {
             url = "github:Mic92/sops-nix";
-            inputs.nixpkgs.follows = "nixpkgs";
+            inputs.nixpkgs.follows = "nixpkgs-unstable";
         };
         arion = {
             url = "github:hercules-ci/arion";
-            inputs.nixpkgs.follows = "nixpkgs";
+            inputs.nixpkgs.follows = "nixpkgs-unstable";
         };
         home-manager = {
             url = "github:nix-community/home-manager";
-            inputs.nixpkgs.follows = "nixpkgs";
+            inputs.nixpkgs.follows = "nixpkgs-unstable";
         };
     };
-    outputs = { self, nixpkgs, disko, impermanence, sops-nix, arion, home-manager,  ... }: rec {
+    outputs = { self, nixpkgs-unstable, nixpkgs-tapir, disko, impermanence, sops-nix, arion, home-manager,  ... }: rec {
         nixosConfigurations = {
-            Ragnarok = nixpkgs.lib.nixosSystem {
+            Ragnarok = nixpkgs-tapir.lib.nixosSystem {
                 system = "aarch64-linux";
                 modules = [
-                    "${nixpkgs}/nixos/modules/installer/sd-card/sd-image.nix"
+                    "${nixpkgs-tapir}/nixos/modules/installer/sd-card/sd-image.nix"
                     sops-nix.nixosModules.sops
                     ./0-common/default.nix
                     ./1-backup-server/default.nix
                 ];                
             };
-            Heimdall = nixpkgs.lib.nixosSystem {
+            Heimdall = nixpkgs-unstable.lib.nixosSystem {
                 system = "x86_64-linux";
                 modules = [
                     disko.nixosModules.disko
