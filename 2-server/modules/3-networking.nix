@@ -10,8 +10,7 @@
 ######################################################################################################################################
 { config, lib, pkgs, ... }:
 {
-    sops.age.sshKeyPaths = [ "/persistent/etc/ssh/ssh_host_ed25519_key" ];
-    sops.secrets.wireguard_private_key.sopsFile = ../secrets/secrets.yaml;
+    sops.secrets.wireguard_private_key.sopsFile = ../secrets.yaml;
     networking = {
         hostName = "Heimdall";                                          # Sets hostname
         nameservers = [ "10.100.100.1" "8.8.8.8" "1.1.1.1" ];           # Sets up dns
