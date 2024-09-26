@@ -5,14 +5,14 @@
 { config, lib, pkgs, ... }:
 {
     imports = [              
-        # Docker Services
-        ./services/blockurl.nix
-        ./services/calibre.nix
-        ./services/dashy.nix
-        ./services/deluge.nix
-        ./services/freshrss.nix
-        ./services/glances.nix
-        ./services/motioneye.nix
-        ./services/esphome.nix
+        ./blockurl.nix
+        ./calibre-web.nix
+        ./dashy.nix
+        ./deluge.nix
+        ./esphome.nix
+        ./freshrss.nix
+        ./glances.nix
+        ./home-assistant.nix
+        ./motioneye.nix
     ];
 }

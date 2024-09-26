@@ -20,8 +20,8 @@
                     ];
                     volumes = [ 
                         "/etc/localtime:/etc/localtime:ro"
-                        "./etc:/etc/motioneye"
-                        "./data:/var/lib/motioneye"
+                        "/Storage/Services/MotionEye/etc:/etc/motioneye"
+                        "/Storage/Services/MotionEye/data:/var/lib/motioneye"
                     ];
                     expose = [
                         "8765"
