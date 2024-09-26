@@ -33,6 +33,7 @@
             umount /mnt
         '';
     };
+    
     environment.persistence."/persistent" = {
         hideMounts = true;
         directories = [
@@ -42,6 +43,8 @@
         files = [
             # The parent directory mode is crucial for not breaking SSH
             { file = "/etc/machine-id"; parentDirectory = { mode = "0755"; }; }
+            { file = "/etc/ssh/ssh_host_rsa_key"; parentDirectory = { mode = "0755"; }; }
+            { file = "/etc/ssh/ssh_host_ed25519_key"; parentDirectory = { mode = "0755"; }; }
         ];
     };
 }
