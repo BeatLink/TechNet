@@ -10,6 +10,7 @@
         hostName = "Ragnarok";                                                      # Sets the hostName
         useNetworkd = true;                                                         # Use Systemd-Networkd
         useDHCP = lib.mkDefault true;                                               # Enables DHCP
+        firewall.trustedInterfaces = [ "wireguard0" ];
     };
     sops.secrets.wireguard_private_key = {
         sopsFile = ../secrets.yaml;
@@ -22,7 +23,7 @@
         netdevs."01-wireguard" = {                                                  # Adds the wireguard virtual network device
             netdevConfig = {
                 Kind = "wireguard";
-                Name = "wg0";
+                Name = "wireguard0";
             };
             wireguardConfig = {
                 PrivateKeyFile = config.sops.secrets.wireguard_private_key.path;
@@ -47,7 +48,7 @@
                 linkConfig.RequiredForOnline = "routable";
             };                                                                      # Sets up the Wireguard Network
             "01-wireguard" = {
-                matchConfig.Name = "wg0";
+                matchConfig.Name = "wireguard0";
                 address = ["10.100.100.5/24"];
             };
         };
