@@ -15,7 +15,7 @@
         hostName = "Heimdall";                                          # Sets hostname
         nameservers = [ "10.100.100.1" "8.8.8.8" "1.1.1.1" ];           # Sets up dns
         firewall = {
-            allowedUDPPorts = [ 51820 ];
+            allowedUDPPorts = [ 51820 ];                                # Allows Wireguard on Firewall
             # Allows full VPN Routing
             extraCommands = ''                                          
             iptables -t nat -A POSTROUTING -o enp2s0f1 -j MASQUERADE
@@ -29,8 +29,7 @@
             ip46tables -D FORWARD -i wireguard0 -j ACCEPT
             '';
             trustedInterfaces = [ "wireguard0" ];
-            checkReversePath = "loose";                                 # Needed for wireguard
-            allowedUDPPorts = [ 51820 ];                                # Allows Wireguard on Firewall
+            checkReversePath = "loose";                                 # Needed for wireguard`
         };
     };
     boot = {
