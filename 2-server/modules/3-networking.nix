@@ -110,7 +110,6 @@
                             address = ["10.100.100.1/24"];
                             networkConfig = {                           # Enables forwarding of VPN traffic to the internet
                                 IPMasquerade = "ipv4";
-                                IPForward = true;
                                 IPv4Forwarding = true;
                             };
                         };
