@@ -21,7 +21,7 @@
                         "/Storage/Services/Homeassistant/media:/media"
                     ];
                     environment = {
-                        "TZ=America/Jamaica"
+                        "TZ" = "America/Jamaica";
                     };
                     expose = [
                         "8123" 
