@@ -26,4 +26,5 @@
         };
     };
     security.sudo.wheelNeedsPassword = false;                           # Removes the need for entering passwords for sudo
+    security.sudo.execWheelOnly = true;
 }
