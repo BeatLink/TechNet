@@ -15,6 +15,20 @@
         hostName = "Heimdall";                                          # Sets hostname
         nameservers = [ "10.100.100.1" "8.8.8.8" "1.1.1.1" ];           # Sets up dns
         firewall = {
+            allowedUDPPorts = [ 51820 ];
+            # Allows full VPN Routing
+            extraCommands = ''                                          
+            iptables -t nat -A POSTROUTING -o enp2s0f1 -j MASQUERADE
+            ip46tables -A FORWARD -i enp2s0f1 -o wireguard0 -j ACCEPT
+            ip46tables -A FORWARD -i wireguard0 -j ACCEPT
+            '';
+            #flush the chain then remove it
+            extraStopCommands = ''
+            iptables -t nat -D POSTROUTING -o enp2s0f1 -j MASQUERADE
+            ip46tables -D FORWARD -i enp2s0f1 -o wireguard0 -j ACCEPT
+            ip46tables -D FORWARD -i wireguard0 -j ACCEPT
+            '';
+            trustedInterfaces = [ "wireguard0" ];
             checkReversePath = "loose";                                 # Needed for wireguard
             allowedUDPPorts = [ 51820 ];                                # Allows Wireguard on Firewall
         };
@@ -48,7 +62,7 @@
                     netdevs."01-wireguard" = {
                         netdevConfig = {
                             Kind = "wireguard";
-                            Name = "wg0";
+                            Name = "wireguard0";
                         };
                         wireguardConfig = {
                             PrivateKeyFile = /wireguard_private_key;
@@ -93,10 +107,11 @@
                             };
                         };
                         "01-wireguard" = {
-                            matchConfig.Name = "wg0";
+                            matchConfig.Name = "wireguard0";
                             address = ["10.100.100.1/24"];
                             networkConfig = {                           # Enables forwarding of VPN traffic to the internet
                                 IPMasquerade = "ipv4";
+                                IPForward = true;
                                 IPv4Forwarding = true;
                             };
                         };
