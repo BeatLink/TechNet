@@ -46,9 +46,11 @@ echo ""
 echo "# Importing SSH Host Keys for SOPS #################################################################################################"
 
 echo ""
-echo "Mounting the Filesystem..."
+echo "Mounting the Filesystem and creating the folder..."
 mkdir -p $WORKDIR/mnt
 sudo mount "$1"2 $WORKDIR/mnt
+sudo mkdir -p "$WORKDIR/mnt/etc/ssh/" && sudo chmod -R 755 "$WORKDIR/mnt/etc/" 
+
 
 echo ""
 echo "Copying the SSH host ed25519 Key and setting permissions..."
