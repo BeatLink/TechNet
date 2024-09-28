@@ -26,10 +26,10 @@
     };
     outputs = { self, nixpkgs-unstable, nixpkgs-tapir, disko, impermanence, sops-nix, arion, home-manager,  ... }: rec {
         nixosConfigurations = {
-            Ragnarok = nixpkgs-tapir.lib.nixosSystem {
+            Ragnarok = nixpkgs-unstable.lib.nixosSystem {
                 system = "aarch64-linux";
                 modules = [
-                    "${nixpkgs-tapir}/nixos/modules/installer/sd-card/sd-image.nix"
+                    "${nixpkgs-unstable}/nixos/modules/installer/sd-card/sd-image.nix"
                     sops-nix.nixosModules.sops
                     ./0-common/default.nix
                     ./1-backup-server/default.nix
@@ -44,6 +44,13 @@
                     arion.nixosModules.arion
                     ./0-common/default.nix
                     ./2-server/default.nix
+                ];
+            };
+            iso = nixpkgs-unstable.lib.nixosSystem {
+                modules = [
+                    "${nixpkgs-unstable}/nixos/modules/installer/cd-dvd/installation-cd-graphical-gnome.nix"
+                    "${nixpkgs-unstable}/nixos/modules/installer/cd-dvd/channel.nix"
+                    ./hosts/iso/configuration.nix
                 ];
             };
         };
