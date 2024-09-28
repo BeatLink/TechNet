@@ -8,8 +8,8 @@
     sdImage.firmwarePartitionOffset = 50;
     sdImage.firmwareSize = 1;
     sdImage.postBuildCommands = ''
-        dd if=\${pkgs.ubootRock64}/idbloader.img of=$img  conv=fsync,notrunc bs=512 seek=64
-        dd if=\${pkgs.ubootRock64}/u-boot.itb of=$img  conv=fsync,notrunc bs=512 seek=16384
+        dd if=\${pkgs.ubootRock64}/u-boot-rockchip.bin of=$img  conv=fsync,notrunc bs=512 seek=64
+        sync
     '';
     fileSystems."/boot/firmware" = {};    
     swapDevices = [ ];                                                              # Disables Swap
