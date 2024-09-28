@@ -10,7 +10,6 @@
         firewall = {
             enable = true;                                              # Enable the Firewall
             logRefusedConnections = true;                               # Records any refused connections
-            allowedUDPPorts = [ 51820 ];                                # Allow Wireguard in Firewall
         };
     };
 }
