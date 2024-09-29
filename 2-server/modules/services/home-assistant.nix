@@ -11,7 +11,7 @@
                 home-assistant.service = {
                     image = "home-assistant/home-assistant:latest";
                     container_name = "home-assistant";
-                    restart = "unless-stopped";
+                    restart = "always";
                     devices = [
                         "/dev/video0:/dev/video0"
                         "/dev/dri:/dev/dri"
