@@ -13,7 +13,9 @@
         ./freshrss.nix
         ./glances.nix
         ./home-assistant.nix
+        ./mealie.nix
         ./motioneye.nix
         ./nextcloud.nix
+        ./nginx-proxy-manager.nix
     ];
 }

@@ -9,7 +9,7 @@
         settings = {
             services = {
                 home-assistant.service = {
-                    image = "home-assistant/home-assistant:latest";
+                    image = "ghcr.io/home-assistant/home-assistant:stable";
                     container_name = "home-assistant";
                     restart = "always";
                     devices = [
@@ -27,7 +27,7 @@
                         "8123" 
                     ];
                     networks = [
-                        "nginx_public"
+                        "nginx-proxy-manager_public"
                     ];
                     ports = [
                         "9170:9170"
@@ -37,7 +37,7 @@
                 };
             };
             networks = {
-                nginx_public = {
+                nginx-proxy-manager_public = {
                     external = true;
                 };
             };

@@ -27,12 +27,12 @@
                         "80"
                     ];
                     networks = [
-                        "nginx_public"
+                        "nginx-proxy-manager_public"
                     ];
                 };
             };
             networks = {
-                nginx_public = {
+                nginx-proxy-manager_public = {
                     external = true;
                 };
             };
