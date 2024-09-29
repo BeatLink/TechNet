@@ -19,7 +19,7 @@
                         "8080" 
                     ];
                     networks = [
-                        "nginx_public"
+                        "nginx-proxy-manager_public"
                     ];
                     extra_hosts = [
                         "host.docker.internal:host-gateway"
@@ -27,7 +27,7 @@
                 };
             };
             networks = {
-                nginx_public = {
+                nginx-proxy-manager_public = {
                     external = true;
                 };
             };
