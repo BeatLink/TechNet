@@ -14,5 +14,6 @@
         ./glances.nix
         ./home-assistant.nix
         ./motioneye.nix
+        ./nextcloud.nix
     ];
 }
