@@ -5,7 +5,7 @@
     '';
     sdImage.populateFirmwareCommands = '''';
     sdImage.compressImage = false;
-    sdImage.firmwarePartitionOffset = 50;
+    sdImage.firmwarePartitionOffset = 32;
     sdImage.firmwareSize = 1;
     sdImage.postBuildCommands = ''
         dd if=\${pkgs.ubootRock64}/idbloader.img of=$img  conv=fsync,notrunc bs=512 seek=64;
