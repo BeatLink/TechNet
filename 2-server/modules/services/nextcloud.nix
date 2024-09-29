@@ -19,12 +19,90 @@
             serviceName = "nextcloud";
             settings = {
                 services = {
-                    db.services = {
+                    nextcloud-db.service = {
                         image = "mariadb:latest";
-                        container_name = ""
-                    }
-                }
-                imports = [ ./arion-compose.nix ];
+                        container_name = "nextcloud-db";
+                        restart = "always";
+                        command = "--transaction-isolation=READ-COMMITTED --binlog-format=ROW";
+                        volumes = [
+                            "/Storage/Services/Nextcloud/db:/var/lib/mysql"
+                        ];
+                        env_file = [
+                            "/Storage/Services/Nextcloud/.env"
+                        ];
+                        environment = {
+                            "MYSQL_DATABASE" = "nextcloud";
+                            "MYSQL_USER" = "nextcloud";
+                            "TZ" = "America/Jamaica";
+                        };
+                        expose = [
+                            "3306"
+                        ];
+                        networks = [
+                            "nextcloud"
+                        ];
+                    };
+                    nextcloud-cron.service = {
+                        image = "rcdailey/nextcloud-cronjob:latest";
+                        container_name = "nextcloud-cron";
+                        restart = "always";
+                        depends_on = [
+                            "nextcloud-app"
+                        ];
+                        volumes = [
+                            "/var/run/docker.sock:/var/run/docker.sock:ro"
+                            "/etc/localtime:/etc/localtime:ro"
+                        ];
+                        environment = {
+                            "NEXTCLOUD_CONTAINER_NAME" = "nextcloud-app";
+                            "NEXTCLOUD_CRON_MINUTE_INTERVAL" = "1";
+                        };
+                    };
+                    nextcloud-app.service = {
+                        image = "nextcloud:latest";
+                        container_name = "nextcloud-app";
+                        hostname = "nextcloud.heimdall.technet";
+                        restart = "always";
+                        links = [
+                            "nextcloud-db"
+                        ];    
+                        volumes = [
+                            "/Storage/Services/Nextcloud/nextcloud:/var/www/html"
+                        ];
+                        env_file = [
+                            "/Storage/Services/Nextcloud/.env"
+                        ];
+                        environment = {
+                            "MYSQL_DATABASE" = "nextcloud";
+                            "MYSQL_USER" = "nextcloud";
+                            "MYSQL_HOST" = "nextcloud-db";
+                            "TZ" = "America/Jamaica";
+                        };
+                        healthcheck = {
+                            test = [
+                                "CMD"
+                                "curl -f http://127.0.0.1 || exit 1"
+                            ];
+                            interval = "30s";
+                            retries = 3;
+                        };
+                        expose = [
+                            "80"
+                        ];
+                        networks = [
+                            "nextcloud"
+                            "nginx-proxy-manager_public"
+                        ];
+                    };
+                };
+                networks = {
+                    nextcloud = {
+                        driver = "bridge";
+                    };
+                    nginx-proxy-manager_public = {
+                        "external" = true;
+                    };
+                };
             };
         };
     };
