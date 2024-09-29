@@ -3,7 +3,6 @@
     inputs = {
         nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
         nixpkgs-tapir.url = "github:NixOS/nixpkgs/nixos-23.11";
-
         disko = {
             url = "github:nix-community/disko";
             inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -26,10 +25,10 @@
     };
     outputs = { self, nixpkgs-unstable, nixpkgs-tapir, disko, impermanence, sops-nix, arion, home-manager,  ... }: rec {
         nixosConfigurations = {
-            Ragnarok = nixpkgs-unstable.lib.nixosSystem {
+            Ragnarok = nixpkgs-tapir.lib.nixosSystem {
                 system = "aarch64-linux";
                 modules = [
-                    "${nixpkgs-unstable}/nixos/modules/installer/sd-card/sd-image.nix"
+                    "${nixpkgs-tapir}/nixos/modules/installer/sd-card/sd-image.nix"
                     sops-nix.nixosModules.sops
                     ./0-common/default.nix
                     ./1-backup-server/default.nix

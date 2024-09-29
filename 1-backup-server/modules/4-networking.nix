@@ -9,7 +9,6 @@
     networking = {
         hostName = "Ragnarok";                                                      # Sets the hostName
         useNetworkd = true;                                                         # Use Systemd-Networkd
-        useDHCP = lib.mkDefault true;                                               # Enables DHCP
         firewall.trustedInterfaces = [ "wireguard0" ];
     };
     sops.secrets.wireguard_private_key = {

@@ -15,13 +15,5 @@
             challengeResponseAuthentication = false;
             PermitRootLogin = "no";                                     # Disables root login
         };
-        extraConfig = ''
-            MaxStartups 1                                               # Limits number of concurrent connection attempts
-            AllowTcpForwarding yes
-            X11Forwarding no
-            AllowAgentForwarding no
-            AllowStreamLocalForwarding no
-            AuthenticationMethods publickey
-        '';
     };
 }
