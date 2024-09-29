@@ -17,7 +17,7 @@
                 calibre-web.service = {
                     image = "linuxserver/calibre-web:latest";
                     container_name = "calibre-web";
-                    restart = "unless-stopped";
+                    restart = "always";
                     environment = {
                         "PUID" = "1000";
                         "PGID" = "1000";
