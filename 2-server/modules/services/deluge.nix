@@ -14,7 +14,7 @@
                 deluge.service = {
                     image = "linuxserver/deluge:latest";
                     container_name = "deluge";
-                    restart = "unless-stopped";
+                    restart = "always";
                     environment = {
                         "PUID" = "1000";
                         "PGID" = "1000";

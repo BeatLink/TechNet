@@ -10,7 +10,7 @@
                 esphome.service = {
                     image = "ghcr.io/esphome/esphome";
                     container_name = "esphome";
-                    restart = "unless-stopped";
+                    restart = "always";
                     privileged = true;
                     volumes = [ 
                         "/Storage/Services/ESPHome/config:/config"
