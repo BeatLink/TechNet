@@ -13,7 +13,7 @@
                     image = "freshrss/freshrss:latest";
                     container_name = "freshrss";
                     hostname = "freshrss";
-                    restart = "unless-stopped";
+                    restart = "always";
                     environment = {
                         "LISTEN" = "0.0.0.0:80";
                         "CRON_MIN" = "1,31";
