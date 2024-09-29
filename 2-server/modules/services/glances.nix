@@ -12,7 +12,7 @@
                 glances.service = {
                     image = "nicolargo/glances:latest-full";
                     container_name = "glances";
-                    restart = "unless-stopped";
+                    restart = "always";
                     environment = {
                         "PUID" = "1000";
                         "PGID" = "1000";
