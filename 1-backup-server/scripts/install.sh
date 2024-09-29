@@ -17,13 +17,15 @@ mkdir -p "$WORKDIR" && cd "$WORKDIR";                           # Create and ent
 
 nix build "$FLAKEDIR"#images.Ragnarok
 
-sudo umount "$1"*; sudo sfdisk --delete "$1";  sudo partprobe "$1"; # Wipe the SD Card
+sudo umount "$1"*; sudo sfdisk --delete "$1"; sudo dd if=/dev/zero of=$1 bs=1M count=32;  sudo partprobe "$1"; # Wipe the SD Card
 sudo dd if=$WORKDIR/result/sd-image/$(ls $WORKDIR/result/sd-image) of="$1" bs=512 status=progress && sync;  # Writes the image 
+sudo sfdisk --delete "$1" 1; sudo partprobe "$1"
 
 mkdir -p $WORKDIR/mnt && sudo mount "$1"2 $WORKDIR/mnt
 sudo mkdir -p "$WORKDIR/mnt/etc/ssh/" && sudo chmod -R 755 "$WORKDIR/mnt/etc/" 
 
-flatpak run --command="keepassxc-cli" \                         # Exports the SSH host ed25519 Key and sets permissions
+# Exports the SSH host ed25519 Key and sets permissions
+flatpak run --command="keepassxc-cli" \
   org.keepassxc.KeePassXC \
   attachment-export \
   /media/beatlink/Storage/Files/Documents/SecurityDatabase.kdbx \
@@ -34,7 +36,8 @@ sudo mv $WORKDIR/ssh_host_ed25519_key "$WORKDIR/mnt/etc/ssh/ssh_host_ed25519_key
 sudo chmod 600 "$WORKDIR/mnt/etc/ssh/ssh_host_ed25519_key"
 sudo chown root:root "$WORKDIR/mnt/etc/ssh/ssh_host_ed25519_key"
 
-flatpak run --command="keepassxc-cli" \                         # Exports the SSH host RSA Key and sets permissions
+# Exports the SSH host RSA Key and sets permissions
+flatpak run --command="keepassxc-cli" \
   org.keepassxc.KeePassXC \
   attachment-export \
   /media/beatlink/Storage/Files/Documents/SecurityDatabase.kdbx \
@@ -44,6 +47,8 @@ flatpak run --command="keepassxc-cli" \                         # Exports the SS
 sudo mv $WORKDIR/ssh_host_rsa_key "$WORKDIR/mnt/etc/ssh/ssh_host_rsa_key"
 sudo chmod 600 "$WORKDIR/mnt/etc/ssh/ssh_host_rsa_key"
 sudo chown root:root "$WORKDIR/mnt/etc/ssh/ssh_host_rsa_key"
+
+set +x;
 
 echo ">> INSTALLATION COMPLETE - SD CARD READY <<"
 echo "Insert the SD card and boot. Note that it may take a couple of minutes for anything to be displayed."     
