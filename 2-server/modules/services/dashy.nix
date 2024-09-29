@@ -10,7 +10,7 @@
                 dashy.service = {
                     image = "lissy93/dashy:latest";
                     container_name = "dashy";
-                    restart = "unless-stopped";
+                    restart = "always";
                     volumes = [ 
                         "/Storage/Services/Dashy/config.yaml:/app/user-data/conf.yml"
                         "/Storage/Services/Dashy/icons:/app/public/item-icons"
