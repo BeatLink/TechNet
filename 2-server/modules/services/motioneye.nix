@@ -13,7 +13,7 @@
                     image = "ccrisan/motioneye:master-amd64";
                     container_name = "motioneye";
                     hostname = "motioneye";
-                    restart = "unless-stopped";
+                    restart = "always";
                     devices = [
                         "/dev/video0:/dev/video0"
                         "/dev/dri:/dev/dri"
@@ -28,12 +28,12 @@
                         "8081"
                     ];
                     networks = [
-                        "nginx_public"
+                        "nginx-proxy-manager_public"
                     ];
                 };
             };
             networks = {
-                nginx_public = {
+                nginx-proxy-manager_public = {
                     external = true;
                 };
             };
