@@ -13,13 +13,6 @@
                     image = "ghcr.io/mealie-recipes/mealie:v1.3.2";
                     container_name = "mealie";
                     restart = "always";
-                    deploy = {
-                      resources = {
-                        limits = {
-                          memory = "1000M";
-                        };
-                      };
-                    };
                     depends_on = [
                       "mealie-postgres"
                     ];
