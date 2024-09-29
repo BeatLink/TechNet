@@ -10,7 +10,7 @@
                 blockurl.service = {
                     image = "beatlink/blockurl:latest";
                     container_name = "blockurl";
-                    restart = "unless-stopped";
+                    restart = "always";
                     volumes = [ 
                         "/Storage/Services/BlockURL/database:/app/database"
                     ];
