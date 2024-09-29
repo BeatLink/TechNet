@@ -10,7 +10,6 @@
         package = pkgs.nixFlakes;
         extraOptions = ''experimental-features = nix-command flakes'';
         settings.trusted-users = [ "root" "beatlink" ];                 # Allows me to remote update by sending the flake over ssh
-        allowedUsers = [ "@wheel" ];
         gc = {
             automatic = true;
             dates = "weekly";
@@ -33,7 +32,6 @@
         defaultPackages = lib.mkForce [];
         systemPackages = with pkgs; [                                   # Set packages installed on system
             wget                                                        # For downloading stuff
-            curl                                                        # Also for downloading stuff
             htop                                                        # For checking the system status
             ncdu                                                        # For checking disk usage
             git                                                         # For downloading git repos
