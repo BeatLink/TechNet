@@ -25,10 +25,10 @@
     };
     outputs = { self, nixpkgs-unstable, nixpkgs-tapir, disko, impermanence, sops-nix, arion, home-manager,  ... }: rec {
         nixosConfigurations = {
-            Ragnarok = nixpkgs-tapir.lib.nixosSystem {
+            Ragnarok = nixpkgs-unstable.lib.nixosSystem {
                 system = "aarch64-linux";
                 modules = [
-                    "${nixpkgs-tapir}/nixos/modules/installer/sd-card/sd-image.nix"
+                    "${nixpkgs-unstable}/nixos/modules/installer/sd-card/sd-image.nix"
                     sops-nix.nixosModules.sops
                     ./0-common/default.nix
                     ./1-backup-server/default.nix
