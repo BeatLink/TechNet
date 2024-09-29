@@ -19,7 +19,10 @@
     users.users."beatlink".openssh.authorizedKeys.keys = [              # Sets the SSH key for the user
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILYQ9aXy5sS9PCKopaB58c8ZA/JGOEoBLMSg4a0n4aw7 beatlink@heimdall"
     ]; 
-
+    environment.persistence."/persistent".files = [
+        { file = "/etc/ssh/ssh_host_rsa_key"; parentDirectory = { mode = "0755"; }; }
+        { file = "/etc/ssh/ssh_host_ed25519_key"; parentDirectory = { mode = "0755"; }; }
+    ];
 }
 
 
