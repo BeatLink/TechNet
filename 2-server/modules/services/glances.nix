@@ -12,6 +12,7 @@
                 glances.service = {
                     image = "nicolargo/glances:latest-full";
                     container_name = "glances";
+                    hostname = "Heimdall";
                     restart = "always";
                     environment = {
                         "PUID" = "1000";
@@ -20,7 +21,6 @@
                         "GLANCES_OPT" = "-w -C /glances/conf/glances.conf";
                     };
                     privileged = true;
-                    network_mode = "host";
                     volumes = [ 
                         "/Storage/Services/Glances/glances.conf:/glances/conf/glances.conf"
                         "/var/run/docker.sock:/var/run/docker.sock:ro"
@@ -29,6 +29,17 @@
                         "/:/rootfs:ro"
                         "/Storage:/storagefs:ro"
                     ];
+                    expose = [
+                        "61208"
+                    ];
+                    networks = [
+                        "nginx-proxy-manager_public"
+                    ];
+                };
+            };
+            networks = {
+                nginx-proxy-manager_public = {
+                    external = true;
                 };
             };
         };
