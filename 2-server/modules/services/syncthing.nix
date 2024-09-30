@@ -26,6 +26,7 @@
                     environment = {
                         "PUID" = "1000";
                         "PGID" = "1000";
+                        "APP_BASE_URL" = "syncthing.heimdall.technet";
                     };
                     expose = [
                         "8384" 
