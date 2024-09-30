@@ -34,12 +34,25 @@
                     ];
                     networks = [
                         "nginx-proxy-manager_public"
+                        "hostnet"
                     ];
                 };
             };
             networks = {
                 nginx-proxy-manager_public = {
                     external = true;
+                };
+                hostnet = {
+                    driver = "macvlan";
+                    driver_opts = {
+                        parent = "enp2s0f1";
+                    };
+                    ipam = {
+                        config = [{
+                            subnet = "192.168.0.0/24";
+                            gateway = "192.168.0.1"; 
+                        }];  
+                    };
                 };
             };
         };
