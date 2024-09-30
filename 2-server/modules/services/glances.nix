@@ -5,6 +5,7 @@
 ###########################################################################################################################################
 { config, lib, pkgs, modulesPath, ... }: 
 {
+    networking.firewall.allowedTCPPorts = [ 61208 ]; 
     virtualisation.arion.projects.glances = {
         serviceName = "glances";
         settings = {
@@ -21,6 +22,7 @@
                         "GLANCES_OPT" = "-w -C /glances/conf/glances.conf";
                     };
                     privileged = true;
+                    network_mode =  "host";
                     volumes = [ 
                         "/Storage/Services/Glances/glances.conf:/glances/conf/glances.conf"
                         "/var/run/docker.sock:/var/run/docker.sock:ro"
@@ -29,30 +31,24 @@
                         "/:/rootfs:ro"
                         "/Storage:/storagefs:ro"
                     ];
-                    expose = [
-                        "61208"
+
+                };
+                glances-proxy.service ={
+                    image = "alpine/socat:1.0.3";
+                    entrypoint = "/bin/sh";
+                    container_name = "glances-proxy";
+                    command = [
+                        "-c" 
+                        "ip -4 route list match 0/0 | awk '{print $$3\" host.docker.internal\"}' >> /etc/hosts && socat tcp-listen:61208,fork,reuseaddr tcp-connect:host.docker.internal:61208"
                     ];
                     networks = [
                         "nginx-proxy-manager_public"
-                        "hostnet"
                     ];
                 };
             };
             networks = {
                 nginx-proxy-manager_public = {
                     external = true;
-                };
-                hostnet = {
-                    driver = "macvlan";
-                    driver_opts = {
-                        parent = "enp2s0f1";
-                    };
-                    ipam = {
-                        config = [{
-                            subnet = "192.168.0.0/24";
-                            gateway = "192.168.0.1"; 
-                        }];  
-                    };
                 };
             };
         };
