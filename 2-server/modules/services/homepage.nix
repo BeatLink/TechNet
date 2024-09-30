@@ -1,22 +1,19 @@
-# https://hub.docker.com/repository/docker/beatlink/blockurl
-# https://github.com/BeatLink/BlockURL
-
 { config, lib, pkgs, modulesPath, ... }: 
 {
-    virtualisation.arion.projects.dashy = {
+    virtualisation.arion.projects.homepage = {
         serviceName = "dashy";
         settings = {
             services = {
                 dashy.service = {
-                    image = "lissy93/dashy:latest";
-                    container_name = "dashy";
+                    image = "ghcr.io/gethomepage/homepage:latest";
+                    container_name = "homepage";
                     restart = "always";
                     volumes = [ 
-                        "/Storage/Services/Dashy/config.yaml:/app/user-data/conf.yml"
-                        "/Storage/Services/Dashy/icons:/app/public/item-icons"
+                        "/Storage/Services/Homepage/config:/app/config"
+                        "/var/run/docker.sock:/var/run/docker.sock"
                     ];
                     expose = [
-                        "8080" 
+                        "3000" 
                     ];
                     networks = [
                         "nginx-proxy-manager_public"
@@ -35,18 +32,6 @@
     };
 }
 
-
-
-
-
-
-# System info
-
-# HDD Storage
-# Network Connectivity and Speed
-# Docker container health
-# Uptime
-# Neofetch
 # Processes
 
 # uptime kuma
