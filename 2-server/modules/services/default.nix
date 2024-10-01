@@ -22,5 +22,6 @@
         ./pihole.nix
         ./syncthing.nix
         ./traccar.nix
+        ./tubearchivist.nix
     ];
 }
