@@ -79,10 +79,7 @@
                             "TZ" = "America/Jamaica";
                         };
                         healthcheck = {
-                            test = [
-                                "CMD"
-                                "curl -f http://127.0.0.1 || exit 1"
-                            ];
+                            test = ["CMD-SHELL" "curl -sSf 'http://localhost/status.php' | grep '\"installed\":true' | grep '\"maintenance\":false' | grep '\"needsDbUpgrade\":false' || exit 1"];
                             interval = "30s";
                             retries = 3;
                         };
