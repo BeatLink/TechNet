@@ -16,8 +16,8 @@
                       "serve"
                     ];
                     volumes = [ 
-                        "/Storage/Services/Ntfy/cache:/var/cache/ntfy"
-                        "/Storage/Services/Ntfy/etc:/etc/ntfy"
+                        "/Storage/Services/ntfy/cache:/var/cache/ntfy"
+                        "/Storage/Services/ntfy/etc:/etc/ntfy"
                     ];
                     environment = {
                         "TZ" = "America/Jamaica";
