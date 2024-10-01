@@ -13,7 +13,7 @@
                     container_name = "openbooks";
                     restart = "always";
                     command = [
-                      "openbooks --name=beatlink --persist"
+                      "--name" "beatlink" "--persist"
                     ];
                     volumes = [ 
                         "/Storage/Files/eBooks/OpenBooks:/books"
