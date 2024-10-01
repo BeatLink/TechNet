@@ -10,31 +10,23 @@
 ######################################################################################################################################
 { config, lib, pkgs, ... }:
 {
-    sops.secrets.wireguard_private_key.sopsFile = ../secrets.yaml;
     networking = {
         hostName = "Heimdall";                                          # Sets hostname
         nameservers = [ "10.100.100.1" "8.8.8.8" "1.1.1.1" ];           # Sets up dns
         firewall = {
             allowedUDPPorts = [ 51820 ];                                # Allows Wireguard on Firewall
-            # Allows full VPN Routing
-            extraCommands = ''                                          
-            iptables -t nat -A POSTROUTING -o enp2s0f1 -j MASQUERADE
-            ip46tables -A FORWARD -i enp2s0f1 -o wireguard0 -j ACCEPT
-            ip46tables -A FORWARD -i wireguard0 -j ACCEPT
-            '';
-            #flush the chain then remove it
-            extraStopCommands = ''
-            iptables -t nat -D POSTROUTING -o enp2s0f1 -j MASQUERADE
-            ip46tables -D FORWARD -i enp2s0f1 -o wireguard0 -j ACCEPT
-            ip46tables -D FORWARD -i wireguard0 -j ACCEPT
-            '';
             trustedInterfaces = [ "wireguard0" ];
             checkReversePath = "loose";                                 # Needed for wireguard`
         };
     };
+    sops.secrets.wireguard_private_key.sopsFile = ../secrets.yaml;
     boot = {
-        kernel.sysctl."net.ipv4.ip_forward" = 1;                        # Enables routing between peers for wireguard
+        #kernel.sysctl."net.ipv4.ip_forward" = 1;                        # Enables routing between peers for wireguard
         initrd = {
+            availableKernelModules = [
+                "wireguard"                                             # Needed for wireguard in initrd for remote LUKS unlocking
+                "r8169"                                                 # Ethernet NIC driver
+            ];
             secrets = {                                                 # Sops doesn't work in initrd so we use boot.initrd.secrets
                 "/wireguard_private_key" = config.sops.secrets.wireguard_private_key.path;
             };
@@ -101,17 +93,17 @@
                             address = [ "192.168.0.2/24"];
                             gateway = ["192.168.0.1"];
                             linkConfig.RequiredForOnline = "routable";
-                            networkConfig = {                           # Enables forwarding of VPN traffic to the internet
-                                IPv4Forwarding = true;
-                            };
+                            #networkConfig = {                           # Enables forwarding of VPN traffic to the internet
+                            #    IPv4Forwarding = true;
+                            #    IPMasquerade = "ipv4";
+                            #};
                         };
                         "01-wireguard" = {
                             matchConfig.Name = "wireguard0";
                             address = ["10.100.100.1/24"];
-                            networkConfig = {                           # Enables forwarding of VPN traffic to the internet
-                                IPMasquerade = "ipv4";
-                                IPv4Forwarding = true;
-                            };
+                            #networkConfig = {                           # Enables forwarding of VPN traffic to the internet
+                            #    IPv4Forwarding = true;
+                            #};
                         };
                     };
                 };
