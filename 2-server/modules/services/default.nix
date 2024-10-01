@@ -23,5 +23,6 @@
         ./syncthing.nix
         ./traccar.nix
         ./tubearchivist.nix
+        ./watchtower.nix
     ];
 }
