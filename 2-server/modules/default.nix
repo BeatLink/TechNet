@@ -15,6 +15,7 @@
         ./7-software.nix
         ./8-docker.nix
         ./9-borgmatic.nix
+        ./10-utilities.nix
         ./services
     ];
 }
