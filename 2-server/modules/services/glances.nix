@@ -33,18 +33,6 @@
                     ];
 
                 };
-                glances-proxy.service ={
-                    image = "alpine/socat:1.0.3";
-                    entrypoint = "/bin/sh";
-                    container_name = "glances-proxy";
-                    command = [
-                        "-c" 
-                        "ip -4 route list match 0/0 | awk '{print $$3\" host.docker.internal\"}' >> /etc/hosts && socat tcp-listen:61208,fork,reuseaddr tcp-connect:host.docker.internal:61208"
-                    ];
-                    networks = [
-                        "nginx-proxy-manager_public"
-                    ];
-                };
             };
             networks = {
                 nginx-proxy-manager_public = {
