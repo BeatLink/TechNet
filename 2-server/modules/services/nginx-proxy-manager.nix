@@ -30,9 +30,6 @@
                     networks = [
                         "public"
                     ];
-                    extra_hosts = [
-                        "host.docker.internal:host-gateway"
-                    ];
                 };
             };
             networks = {
