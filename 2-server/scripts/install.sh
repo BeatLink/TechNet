@@ -14,13 +14,14 @@ trap cleanup EXIT
 
 # Create a temporary folder to be copied to the install system
 mkdir -p $temp/persistent/etc/ssh/
+chmod 755 $temp/persistent/etc/ssh/
 
 # Copy the SSH host ed25519 Key
 flatpak run --command="keepassxc-cli" org.keepassxc.KeePassXC \
   attachment-export \
   /media/beatlink/Storage/Files/Documents/SecurityDatabase.kdbx \
   "Heimdall SSH Login" \
-  heimdall_ssh_host_key_ed25519.priv \
+  heimdall_ssh_host_ed25519_key \
   "$temp/persistent/etc/ssh/ssh_host_ed25519_key"
 chmod 600 "$temp/persistent/etc/ssh/ssh_host_ed25519_key"
 
@@ -29,9 +30,27 @@ flatpak run --command="keepassxc-cli" org.keepassxc.KeePassXC \
   attachment-export \
   /media/beatlink/Storage/Files/Documents/SecurityDatabase.kdbx \
   "Heimdall SSH Login" \
-  heimdall_ssh_host_key_rsa.priv \
+  heimdall_ssh_host_rsa_key \
   "$temp/persistent/etc/ssh/ssh_host_rsa_key"
 chmod 600 "$temp/persistent/etc/ssh/ssh_host_rsa_key"
+
+# Copy the SSH Initrd host ed25519 Key
+flatpak run --command="keepassxc-cli" org.keepassxc.KeePassXC \
+  attachment-export \
+  /media/beatlink/Storage/Files/Documents/SecurityDatabase.kdbx \
+  "Heimdall SSH Login" \
+  heimdall_ssh_initrd_host_ed25519_key \
+  "$temp/persistent/etc/ssh/ssh_initrd_host_ed25519_key"
+chmod 600 "$temp/persistent/etc/ssh/ssh_initrd_host_ed25519_key"
+
+# Copy the SSH Initrd host RSA Key
+flatpak run --command="keepassxc-cli" org.keepassxc.KeePassXC \
+  attachment-export \
+  /media/beatlink/Storage/Files/Documents/SecurityDatabase.kdbx \
+  "Heimdall SSH Login" \
+  heimdall_ssh_initrd_host_rsa_key \
+  "$temp/persistent/etc/ssh/ssh_initrd_host_rsa_key"
+chmod 600 "$temp/persistent/etc/ssh/ssh_initrd_host_rsa_key"
 
 # Copy the LUKS decryption Key
 flatpak run --command="keepassxc-cli" org.keepassxc.KeePassXC \
