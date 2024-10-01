@@ -1,10 +1,10 @@
 { config, lib, pkgs, modulesPath, ... }: 
 {
     virtualisation.arion.projects.homepage = {
-        serviceName = "dashy";
+        serviceName = "homepage";
         settings = {
             services = {
-                dashy.service = {
+                homepage.service = {
                     image = "ghcr.io/gethomepage/homepage:latest";
                     container_name = "homepage";
                     restart = "always";
