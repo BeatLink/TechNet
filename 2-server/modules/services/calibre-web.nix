@@ -24,7 +24,7 @@
                         "TZ" = "America/Jamaica";
                     };
                     volumes = [ 
-                        "/Storage/Services/Calibre/Calibre-Web-Config:/config"
+                        "/Storage/Services/Calibre-Web/config:/config"
                         "/Storage/Files/eBooks/Calibre/Library:/Calibre_Library"
                     ];
                     expose = [
