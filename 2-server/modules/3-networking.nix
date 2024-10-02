@@ -7,6 +7,8 @@
 # doesn't really separate networking between initrd and the main system so all networking is configured here. Subsequently, changing
 # network settings will usually require a restart (since the wireguard private key can only really be accessed from initrd)
 #
+# This link helped a lot with getting this configuration working: https://flo-the.dev/posts/wireguard/
+#
 ######################################################################################################################################
 { config, lib, pkgs, ... }:
 {
@@ -15,13 +17,22 @@
         nameservers = [ "10.100.100.1" "8.8.8.8" "1.1.1.1" ];           # Sets up dns
         firewall = {
             allowedUDPPorts = [ 51820 ];                                # Allows Wireguard on Firewall
-            trustedInterfaces = [ "wireguard0" ];
-            checkReversePath = "loose";                                 # Needed for wireguard`
+            extraCommands = ''
+            iptables -t nat -A POSTROUTING -o enp2s0f1 -j MASQUERADE
+            ip46tables -A FORWARD -i enp2s0f1 -o wireguard0 -j ACCEPT
+            ip46tables -A FORWARD -i wireguard0 -j ACCEPT
+            '';
+            #flush the chain then remove it
+            extraStopCommands = ''
+            iptables -t nat -D POSTROUTING -o enp2s0f1 -j MASQUERADE
+            ip46tables -D FORWARD -i enp2s0f1 -o wireguard0 -j ACCEPT
+            ip46tables -D FORWARD -i wireguard0 -j ACCEPT
+            '';
         };
     };
     sops.secrets.wireguard_private_key.sopsFile = ../secrets.yaml;
     boot = {
-        #kernel.sysctl."net.ipv4.ip_forward" = 1;                        # Enables routing between peers for wireguard
+        kernel.sysctl."net.ipv4.conf.all.forwarding" = true;            # Enables routing between peers for wireguard
         initrd = {
             availableKernelModules = [
                 "wireguard"                                             # Needed for wireguard in initrd for remote LUKS unlocking
@@ -64,26 +75,31 @@
                                 # Laptop
                                 PublicKey = "WlTdwgmdSvXTGjB+kaOkZEV9vyOk/fKELv3IkRdJOAE=";
                                 AllowedIPs = ["10.100.100.2/32"];
+                                PersistentKeepalive = 15;
                             }
                             {
                                 # Tablet
                                 PublicKey = "JruIjfXKUUz75fTnwgPfJ/4vBixSAgAodj9NwVAoyl8=";
                                 AllowedIPs = ["10.100.100.3/32"];
+                                PersistentKeepalive = 15;
                             }
                             {
                                 # Phone
                                 PublicKey = "/TCFjby/XxSkAQxuWcL5Kv5ggOlYJtloyU+z1I8wGWs=";
                                 AllowedIPs = ["10.100.100.4/32"];
+                                PersistentKeepalive = 15;
                             }
                             {
                                 # Backup Server
                                 PublicKey = "rntfoR0iPjL90MhrwIFOVI0hSoZ8hHj8A512Q4+1hk4=";
                                 AllowedIPs = ["10.100.100.5/32"];
+                                PersistentKeepalive = 15;
                             }
                             {
                                 # Work Server
                                 PublicKey = "e4NiZgFqDoddb3RDNLaLCNyQsZR9sH8SaNIoB+c5HAQ=";
                                 AllowedIPs = ["10.100.100.50/32"];
+                                PersistentKeepalive = 15;
                             }
                         ];
                     };
@@ -93,17 +109,13 @@
                             address = [ "192.168.0.2/24"];
                             gateway = ["192.168.0.1"];
                             linkConfig.RequiredForOnline = "routable";
-                            #networkConfig = {                           # Enables forwarding of VPN traffic to the internet
-                            #    IPv4Forwarding = true;
-                            #    IPMasquerade = "ipv4";
-                            #};
                         };
                         "01-wireguard" = {
                             matchConfig.Name = "wireguard0";
                             address = ["10.100.100.1/24"];
-                            #networkConfig = {                           # Enables forwarding of VPN traffic to the internet
-                            #    IPv4Forwarding = true;
-                            #};
+                            networkConfig = {
+                                IPv4Forwarding = true;
+                            };
                         };
                     };
                 };
