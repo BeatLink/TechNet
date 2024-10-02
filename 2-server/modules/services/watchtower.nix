@@ -10,12 +10,13 @@
                     restart = "always";
                     volumes = [ 
                       "/var/run/docker.sock:/var/run/docker.sock"
+                      "/etc/localtime:/etc/localtime:ro"
                     ];    
                     env_file = [
                       "/Storage/Services/Watchtower/.env"
                     ];
                     command = [
-                      "--interval" "1800"  "--http-api-update" "--http-api-periodic-polls" "--http-api-metrics"
+                      "--schedule" "0 0 3 * * *"  "--stop-timeout" "60s" "--cleanup" "--http-api-update" "--http-api-periodic-polls" "--http-api-metrics"
                     ];
                     expose = [
                       "8080"
