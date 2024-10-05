@@ -22,6 +22,7 @@
         ./pihole.nix
         ./syncthing.nix
         ./traccar.nix
+        ./trilium.nix
         ./tubearchivist.nix
         ./watchtower.nix
     ];
