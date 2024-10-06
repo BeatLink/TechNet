@@ -24,7 +24,6 @@
         ./traccar.nix
         ./trilium.nix
         ./tubearchivist.nix
-        ./vikunja.nix
         ./watchtower.nix
     ];
 }
