@@ -1,5 +1,5 @@
 diff --git a/include/configs/rk3288_common.h b/include/configs/rk3288_common.h
-index 0c449e3109..e996cbc5a8 100644
+index 0c449e3109..ca6da64806 100644
 --- a/include/configs/rk3288_common.h
 +++ b/include/configs/rk3288_common.h
 @@ -20,7 +20,7 @@
