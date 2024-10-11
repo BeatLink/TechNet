@@ -3,11 +3,11 @@ index 0c449e3109..e996cbc5a8 100644
 --- a/include/configs/rk3288_common.h
 +++ b/include/configs/rk3288_common.h
 @@ -20,7 +20,7 @@
-        "pxefile_addr_r=0x00100000\0" \
-        "fdt_addr_r=0x01f00000\0" \
-        "kernel_addr_r=0x02000000\0" \
--       "ramdisk_addr_r=0x04000000\0"
-+       "ramdisk_addr_r=0x06000000\0"
-
-/* Linux fails to load the fdt if it's loaded above 256M on a Rock 2 board, so
-* limit the fdt reallocation to that */
+ 	"pxefile_addr_r=0x00100000\0" \
+ 	"fdt_addr_r=0x01f00000\0" \
+ 	"kernel_addr_r=0x02000000\0" \
+-	"ramdisk_addr_r=0x04000000\0"
++	"ramdisk_addr_r=0x08000000\0"
+ 
+ /* Linux fails to load the fdt if it's loaded above 256M on a Rock 2 board, so
+  * limit the fdt reallocation to that */
