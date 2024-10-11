@@ -8,8 +8,8 @@
     sdImage.firmwarePartitionOffset = 30;
     sdImage.firmwareSize = 1;
     sdImage.postBuildCommands = ''
-        dd if=\${pkgs.ubootRock64v2.override {extraPatches = [./1-boot-fix-rockpro-uboot-initrd.patch];}}/idbloader.img of=$img  conv=fsync,notrunc bs=512 seek=64;
-        dd if=\${pkgs.ubootRock64v2.override {extraPatches = [./1-boot-fix-rockpro-uboot-initrd.patch];}}/u-boot.itb of=$img  conv=fsync,notrunc bs=512 seek=16384;
+        dd if=\${pkgs.ubootRock64v2.override {extraPatches = [./1-boot-fix-uboot-initrd.patch];}}/idbloader.img of=$img  conv=fsync,notrunc bs=512 seek=64;
+        dd if=\${pkgs.ubootRock64v2.override {extraPatches = [./1-boot-fix-uboot-initrd.patch];}}/u-boot.itb of=$img  conv=fsync,notrunc bs=512 seek=16384;
         sync;
     '';
     fileSystems."/boot/firmware" = {};
