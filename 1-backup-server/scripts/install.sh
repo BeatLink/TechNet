@@ -17,7 +17,7 @@ mkdir -p "$WORKDIR" && cd "$WORKDIR";                           # Create and ent
 
 nix build "$FLAKEDIR"#images.Ragnarok
 
-sudo umount "$1"*; sudo sfdisk --delete "$1"; sudo dd if=/dev/zero of=$1 bs=1M count=32;  sudo partprobe "$1"; # Wipe the SD Card
+sudo umount "$1"*; sudo sfdisk --delete "$1"; sudo dd if=/dev/zero of=$1 bs=1M count=32 status=progress;  sudo partprobe "$1"; # Wipe the SD Card
 sudo dd if=$WORKDIR/result/sd-image/$(ls $WORKDIR/result/sd-image) of="$1" bs=512 status=progress && sync;  # Writes the image 
 sudo sfdisk --delete "$1" 1; sudo partprobe "$1"
 
