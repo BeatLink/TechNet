@@ -4,6 +4,7 @@
 { config, lib, pkgs, modulesPath, ... }: 
 {
     sops.secrets.borg_repo_encryption_key.sopsFile = ../secrets.yaml;
+    sops.secrets.borg_repo_ssh_key.sopsFile = ../secrets.yaml;
     services.borgmatic = {
         enable = true;
         settings = {
@@ -34,6 +35,7 @@
                 }
             ];
             encryption_passcommand = "cat " + config.sops.secrets.borg_repo_encryption_key.path;
+            ssh_command = "ssh -i" + config.sops.secrets.borg_repo_ssh_key.path;
 
             # Backup Settings -------------------------------------------------------------------------------------------------------------
             compression = "lz4";
