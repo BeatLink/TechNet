@@ -13,6 +13,7 @@
 
 { config, lib, pkgs, modulesPath, ... }: 
 {
+    sops.secrets.nextcloud_env.sopsFile = ../../secrets.yaml;
     virtualisation.arion = {
         backend = "docker";
         projects.nextcloud = {
@@ -28,7 +29,7 @@
                             "/Storage/Services/Nextcloud/db:/var/lib/mysql"
                         ];
                         env_file = [
-                            "/Storage/Services/Nextcloud/.env"
+                            config.sops.secrets.nextcloud_env.path
                         ];
                         environment = {
                             "MYSQL_DATABASE" = "nextcloud";
@@ -70,7 +71,7 @@
                             "/Storage/Services/Nextcloud/nextcloud:/var/www/html"
                         ];
                         env_file = [
-                            "/Storage/Services/Nextcloud/.env"
+                            config.sops.secrets.nextcloud_env.path
                         ];
                         environment = {
                             "MYSQL_DATABASE" = "nextcloud";

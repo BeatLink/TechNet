@@ -19,6 +19,7 @@
 
 { config, lib, pkgs, modulesPath, ... }: 
 {
+    sops.secrets.pihole_env.sopsFile = ../../secrets.yaml;
     virtualisation.arion.projects.pihole = {
         serviceName = "pihole";
         settings = {
@@ -32,7 +33,7 @@
                         "/Storage/Services/PiHole/etc-dnsmasq.d:/etc/dnsmasq.d"
                     ];
                     env_file = [
-                        "/Storage/Services/PiHole/.env"
+                        config.sops.secrets.pihole_env.path
                     ];
                     environment = {
                         "TZ" = "America/Jamaica";

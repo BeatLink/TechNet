@@ -1,5 +1,6 @@
 { config, lib, pkgs, modulesPath, ... }: 
 {
+    sops.secrets.watchtower_env.sopsFile = ../../secrets.yaml;
     virtualisation.arion.projects.watchtower = {
         serviceName = "watchtower";
         settings = {
@@ -13,7 +14,7 @@
                       "/etc/localtime:/etc/localtime:ro"
                     ];    
                     env_file = [
-                      "/Storage/Services/Watchtower/.env"
+                      config.sops.secrets.watchtower_env.path
                     ];
                     command = [
                       "--schedule" "0 0 3 * * *"  "--stop-timeout" "60s" "--cleanup" "--http-api-update" "--http-api-periodic-polls" "--http-api-metrics"
