@@ -5,6 +5,7 @@
 ###########################################################################################################################################
 { config, lib, pkgs, modulesPath, ... }: 
 {
+    sops.secrets.tubearchivist_env.sopsFile = ../../secrets.yaml;
     virtualisation.arion.projects.tubearchivist = {
         serviceName = "tubearchivist";
         settings = {
@@ -19,7 +20,7 @@
                         "/Storage/Files/Videos/TubeArchivist:/youtube"
                     ];
                     env_file = [
-                        "/Storage/Services/TubeArchivist/.env"
+                        config.sops.secrets.tubearchivist_env.path
                     ];
                     environment = {
                         "ES_URL" = "http://archivist-es:9200";
@@ -72,7 +73,7 @@
                     container_name = "archivist-es";
                     restart =  "always";
                     env_file = [
-                        "/Storage/Services/TubeArchivist/.env"
+                        config.sops.secrets.tubearchivist_env.path
                     ];
                     environment = {
                         "ES_JAVA_OPTS" = "-Xms1g -Xmx1g";

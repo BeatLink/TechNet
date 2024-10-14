@@ -5,6 +5,7 @@
 ###########################################################################################################################################
 { config, lib, pkgs, modulesPath, ... }: 
 {
+    sops.secrets.mealie_env.sopsFile = ../../secrets.yaml;
     virtualisation.arion.projects.mealie = {
         serviceName = "mealie";
         settings = {
@@ -17,7 +18,7 @@
                       "mealie-postgres"
                     ];
                     env_file = [
-                      "/Storage/Services/Mealie/.env"
+                      config.sops.secrets.mealie_env.path
                     ];
                     environment = {
                         "ALLOW_SIGNUP" = "true";
