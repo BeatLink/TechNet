@@ -24,6 +24,7 @@
         ./traccar.nix
         ./trilium.nix
         ./tubearchivist.nix
+        ./uptime-kuma.nix
         ./watchtower.nix
     ];
 }
