@@ -54,7 +54,7 @@
                         "/Storage/Services/Mealie//mealie-pgdata:/var/lib/postgresql/data"
                     ];
                     env_file = [
-                      "/Storage/Services/Mealie/.env"
+                      config.sops.secrets.mealie_env.path
                     ];
                     environment = {
                         "POSTGRES_USER" = "mealie";
