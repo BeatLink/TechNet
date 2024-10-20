@@ -10,9 +10,14 @@
                     restart = "always";
                     volumes = [ 
                         "/Storage/Services/Uptime-Kuma:/app/data"
+                        "/var/run/docker.sock:/var/run/docker.sock"
                     ];
                     expose = [
                         "3001" 
+                    ];
+                    dns = [
+                        "10.100.100.1"
+                        "192.168.0.2"
                     ];
                     networks = [
                         "nginx-proxy-manager_public"
