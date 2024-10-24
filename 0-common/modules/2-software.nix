@@ -35,7 +35,8 @@
             htop                                                        # For checking the system status
             ncdu                                                        # For checking disk usage
             git                                                         # For downloading git repos
-            nano                                                        # For editing config files
+            nano
+            tree                                                    # For editing config files
         ];
     };
 

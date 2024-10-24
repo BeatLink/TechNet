@@ -2,7 +2,6 @@
     description = "flake for TechNet";
     inputs = {
         nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
-        nixpkgs-tapir.url = "github:NixOS/nixpkgs/nixos-23.11";
         disko = {
             url = "github:nix-community/disko";
             inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -23,15 +22,15 @@
             inputs.nixpkgs.follows = "nixpkgs-unstable";
         };
     };
-    outputs = { self, nixpkgs-unstable, nixpkgs-tapir, disko, impermanence, sops-nix, arion, home-manager,  ... }: rec {
+    outputs = { self, nixpkgs-unstable, disko, impermanence, sops-nix, arion, home-manager,  ... }: rec {
         nixosConfigurations = {
             Ragnarok = nixpkgs-unstable.lib.nixosSystem {
                 system = "aarch64-linux";
                 modules = [
                     "${nixpkgs-unstable}/nixos/modules/installer/sd-card/sd-image.nix"
                     sops-nix.nixosModules.sops
-                    ./0-common/default.nix
-                    ./1-backup-server/default.nix
+                    ./0-common
+                    ./1-backup-server
                 ];                
             };
             Heimdall = nixpkgs-unstable.lib.nixosSystem {
@@ -41,17 +40,20 @@
                     sops-nix.nixosModules.sops
                     impermanence.nixosModules.impermanence
                     arion.nixosModules.arion
-                    ./0-common/default.nix
-                    ./2-server/default.nix
+                    ./0-common
+                    ./2-server
                 ];
             };
-            iso = nixpkgs-unstable.lib.nixosSystem {
+            /*Odin = nixpkgs-unstable.lib.nixosSystem {
+                system = "x86_64-linux";
                 modules = [
-                    "${nixpkgs-unstable}/nixos/modules/installer/cd-dvd/installation-cd-graphical-gnome.nix"
-                    "${nixpkgs-unstable}/nixos/modules/installer/cd-dvd/channel.nix"
-                    ./hosts/iso/configuration.nix
+                    disko.nixosModules.disko
+                    sops-nix.nixosModules.sops
+                    impermanence.nixosModules.impermanence
+                    ./0-common
+                    ./3-laptop
                 ];
-            };
+            };*/
         };
         images.Ragnarok = nixosConfigurations.Ragnarok.config.system.build.sdImage;
     };
