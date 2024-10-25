@@ -13,13 +13,10 @@
                         "/Storage/Services/Traccar/traccar.xml:/opt/traccar/conf/traccar.xml:ro"
                         "/Storage/Services/Traccar/data:/opt/traccar/data:rw"
                     ];
-                    env_file = [
-                        "/Storage/Services/PiHole/.env"
-                    ];
                     environment = {
                         "PUID" = "1000";
                         "PGID" = "1000";
-                        "APP_BASE_URL" = "syncthing.heimdall.technet";
+                        "APP_BASE_URL" = "traccar.heimdall.technet";
                     };
                     expose = [
                         "8082" 
