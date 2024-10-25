@@ -7,6 +7,7 @@
 
 { config, lib, pkgs, modulesPath, ... }: 
 {
+
     virtualisation.arion.projects.syncthing = {
         serviceName = "syncthing";
         settings = {
@@ -19,9 +20,6 @@
                     volumes = [ 
                         "/Storage/Services/Syncthing:/var/syncthing"
                         "/Storage/Files:/Files"
-                    ];
-                    env_file = [
-                        "/Storage/Services/PiHole/.env"
                     ];
                     environment = {
                         "PUID" = "1000";
