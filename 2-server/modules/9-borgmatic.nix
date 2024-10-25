@@ -11,7 +11,6 @@
             # Sources ---------------------------------------------------------------------------------------------------------------------
             source_directories = [
                 "/Storage/Services"
-                "/Storage/Scripts"
             ];
             # Excludes --------------------------------------------------------------------------------------------------------------------
             exclude_patterns = [
@@ -83,27 +82,8 @@
             check_last = 3;
 
             # Notifications ---------------------------------------------------------------------------------------------------------------
-            ntfy = {
-                topic = "borgmatic";
-                server = "http://ntfy.heimdall.technet";
-                start = {
-                    title = "Heimdall Borgmatic Backup Started";
-                    message = "Updates will follow";
-                    tags =  "borgmatic";
-                    priority = "min";
-                };
-                finish = {
-                    title = "Heimdall Borgmatic Backup Completed";
-                    message = "Nice!";
-                    tags = "borgmatic,+1";
-                    priority = "min";
-                };
-                fail = {
-                    title = "Heimdall Borgmatic Backup Failed!";
-                    message = "You should probably fix it";
-                    tags = "borgmatic,-1,skull";
-                    priority = "max";
-                };
+            uptime_kuma = {
+                push_url = "http://uptime-kuma.heimdall.technet/api/push/nDXOzelHhZ";
                 states = [
                     "start"
                     "finish"

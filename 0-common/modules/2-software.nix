@@ -7,7 +7,6 @@
 { config, lib, pkgs, modulesPath, ... }: 
 {
     nix = {                                                             # Enables Flakes
-        package = pkgs.nixFlakes;
         extraOptions = ''experimental-features = nix-command flakes'';
         settings.trusted-users = [ "root" "beatlink" ];                 # Allows me to remote update by sending the flake over ssh
         gc = {
