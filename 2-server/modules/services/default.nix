@@ -17,7 +17,6 @@
         ./motioneye.nix
         ./nextcloud.nix
         ./nginx-proxy-manager.nix
-        ./ntfy.nix
         ./openbooks.nix
         ./pihole.nix
         ./syncthing.nix
