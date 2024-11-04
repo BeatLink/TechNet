@@ -8,7 +8,7 @@
         ./0-hardware-configuration.nix
         ./1-disk-config.nix
         ./2-boot.nix
-        ./3-filesystem
+        ./3-filesystem.nix
         ./4-networking.nix
         ./5-ssh.nix
         ./6-software.nix
