@@ -24,6 +24,16 @@ Thor is my smartphone and mobile command center. It is mainly used for communica
 ### Loki
 Loki is my smart watch and biometric monitor. It a PineTime watch running wasp-os
 
-
 ### Tech Kit
 I also maintain a tech kit containing computer repair tools and useful peripherals and accessories. 
+
+## Network
+
+All devices in the TechNet are linked by a WireGuard VPN that is not routable by the public internet
+
+* IP Subnet:    10.100.100.0/24
+* Heimdall:     10.100.100.1 
+* Odin:         10.100.100.2
+* Hela:         10.100.100.3
+* Thor:         10.100.100.4
+* Ragnarok:     10.100.100.5
