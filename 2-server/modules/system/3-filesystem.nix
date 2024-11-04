@@ -61,8 +61,8 @@
                 PROGRAM /bin/wall
             '';
         };    
-        initrd.luks.devices.Storage.device = "/dev/md/0";               # Decrypts the data storage drive
     };
+    boot.initrd.luks.devices.Storage.device = "/dev/md/0";               # Decrypts the data storage drive
     systemd.tmpfiles.rules = [ 
         "d /Storage 1770 beatlink beatlink"                             # Creates the mount point and sets needed permissions
     ];
