@@ -2,12 +2,13 @@
 
 Heimdall is a multi-role personal home server that acts as the hub of the TechNet.
 
-Heimdall uses NixOS as its main operating system with services deployed by docker containers. The root filesystem is on an encrypted M.2 SATA SSD while files and databases for all docker services are stored on 2 1TB HDDs in RAID 1 Configuration
+Heimdall uses NixOS as its main operating system with services deployed by docker containers. The root filesystem is on an encrypted 128GB M.2 SATA SSD while files and databases for all docker services are stored on 2 1TB HDDs in RAID 1 Configuration which is subsequently encrypted
 
 ## Hardware
 
 ### Specifications
-- Model: Acer Aspire E5-575
+- Brand: Acer
+- Model: Aspire E5-575
 - Processor: Intel i3 7th gen
 - RAM: 8 GB
 - Storage:
