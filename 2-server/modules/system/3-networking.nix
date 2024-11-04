@@ -95,12 +95,6 @@
                                 AllowedIPs = ["10.100.100.5/32"];
                                 PersistentKeepalive = 15;
                             }
-                            {
-                                # Work Server
-                                PublicKey = "e4NiZgFqDoddb3RDNLaLCNyQsZR9sH8SaNIoB+c5HAQ=";
-                                AllowedIPs = ["10.100.100.50/32"];
-                                PersistentKeepalive = 15;
-                            }
                         ];
                     };
                     networks = {
