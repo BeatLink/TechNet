@@ -8,13 +8,12 @@
         ./0-hardware-configuration.nix
         ./1-disk-config.nix
         ./2-boot.nix
-        ./3-networking.nix
-        ./4-ssh.nix
-        ./5-impermanence.nix
-        ./6-data-drive.nix
-        ./7-software.nix
-        ./8-docker.nix
-        ./9-borgmatic.nix
-        ./10-utilities.nix
+        ./3-filesystem
+        ./4-networking.nix
+        ./5-ssh.nix
+        ./6-software.nix
+        ./7-docker.nix
+        ./8-borgmatic.nix
+        ./9-utilities.nix
     ];
 }
