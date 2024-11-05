@@ -44,7 +44,7 @@
                     ./2-server
                 ];
             };
-            /*Odin = nixpkgs-unstable.lib.nixosSystem {
+            Odin = nixpkgs-unstable.lib.nixosSystem {
                 system = "x86_64-linux";
                 modules = [
                     disko.nixosModules.disko
@@ -53,7 +53,7 @@
                     ./0-common
                     ./3-laptop
                 ];
-            };*/
+            };
         };
         images.Ragnarok = nixosConfigurations.Ragnarok.config.system.build.sdImage;
     };
