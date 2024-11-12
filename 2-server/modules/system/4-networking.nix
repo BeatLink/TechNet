@@ -79,7 +79,7 @@
                             }
                             {
                                 # Tablet
-                                PublicKey = "JruIjfXKUUz75fTnwgPfJ/4vBixSAgAodj9NwVAoyl8=";
+                                PublicKey = "rvOxr8WYaQRMHI8Ic0Td6mBOTwkI9U842AHkLrZDDkQ=";
                                 AllowedIPs = ["10.100.100.3/32"];
                                 PersistentKeepalive = 15;
                             }
