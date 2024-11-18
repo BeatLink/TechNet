@@ -31,7 +31,3 @@
         };
     };
 }
-
-# Processes
-
-# uptime kuma
