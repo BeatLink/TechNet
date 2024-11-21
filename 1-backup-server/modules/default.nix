@@ -6,8 +6,7 @@
         ./1-boot.nix
         ./3-software.nix
         ./4-networking.nix
-        ./5-ssh.nix
-        ./6-backup-drive.nix
-        ./7-borg.nix
+        ./5-backup-drive.nix
+        ./6-borg.nix
     ];
 }
