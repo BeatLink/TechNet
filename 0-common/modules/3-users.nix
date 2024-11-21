@@ -22,6 +22,9 @@
                 hashedPasswordFile = config.sops.secrets.beatlink_hashed_password.path;    # Sets my password using sops
                 group = "beatlink";                                     # Adds me to my group
                 extraGroups = [ "networkmanager" "wheel"];              # Allows management of the network and using sudo
+                openssh.authorizedKeys.keys = [                         # Sets the SSH key for the user
+                    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM4GfJHxZu55mhQPpL1MqLCrS4ws/1ZUodC/QicApyGF beatlink@technet"
+                ]; 
             };
         };
     };
