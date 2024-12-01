@@ -22,8 +22,11 @@
             url = "github:nix-community/home-manager";
             inputs.nixpkgs.follows = "nixpkgs-unstable";
         };
+        flatpaks = {
+            url = "github:GermanBread/declarative-flatpak/stable-v3";
+        };
     };
-    outputs = { self, nixpkgs-unstable, disko, impermanence, sops-nix, arion, home-manager,  ... }: rec {
+    outputs = { self, nixpkgs-unstable, disko, impermanence, sops-nix, arion, home-manager,  flatpaks, ... }: rec {
         nixosConfigurations = {
             Ragnarok = nixpkgs-unstable.lib.nixosSystem {
                 system = "aarch64-linux";
@@ -59,7 +62,8 @@
         homeConfigurations = {
             "beatlink" = home-manager.lib.homeManagerConfiguration {
                 pkgs = import nixpkgs-unstable { system = "x86_64-linux"; };
-                modules = [ 
+                modules = [
+                    flatpaks.homeManagerModules.declarative-flatpak
                     ./users/beatlink
                 ];
             };

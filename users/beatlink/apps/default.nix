@@ -2,6 +2,7 @@
 {
     imports = [     
         ./comms
+        ./fun
         ./system
         ./tools
     ];
