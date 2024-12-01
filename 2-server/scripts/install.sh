@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# This scripts automatically installs heimdall given the root drive
+# This scripts automatically installs Odin given the IP address of the install environment
 #
 # https://mt-caret.github.io/blog/posts/2020-06-29-optin-state.html
 #
@@ -24,15 +24,6 @@ flatpak run --command="keepassxc-cli" org.keepassxc.KeePassXC \
   heimdall_ssh_host_ed25519_key \
   "$temp/persistent/etc/ssh/ssh_host_ed25519_key"
 chmod 600 "$temp/persistent/etc/ssh/ssh_host_ed25519_key"
-
-# Copy the SSH host RSA Key
-flatpak run --command="keepassxc-cli" org.keepassxc.KeePassXC \
-  attachment-export \
-  /media/beatlink/Storage/Files/Documents/SecurityDatabase.kdbx \
-  "Heimdall SSH Login" \
-  heimdall_ssh_host_rsa_key \
-  "$temp/persistent/etc/ssh/ssh_host_rsa_key"
-chmod 600 "$temp/persistent/etc/ssh/ssh_host_rsa_key"
 
 # Copy the SSH Initrd host ed25519 Key
 flatpak run --command="keepassxc-cli" org.keepassxc.KeePassXC \
