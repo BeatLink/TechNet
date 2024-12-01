@@ -1,5 +1,11 @@
 # Odin
 
+# build unatttended installer
+  # add command to move ssh keys from iso to /etc/ssh
+# Extract built iso
+# add ssh keys
+# isntall
+
 Odin is a gaming laptop that acts as my daily driver. 
 
 Odin uses NixOS as its main operating system with software installed via FlatPak. The root filesystem is on an encrypted 256GB M.2 NVMe Drive while files and settings for all applications are stored on an encrypted 1TB M.2 NVMe Drive

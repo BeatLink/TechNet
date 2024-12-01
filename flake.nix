@@ -1,5 +1,6 @@
 {
     description = "flake for TechNet";
+
     inputs = {
         nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
         disko = {
@@ -29,8 +30,8 @@
                 modules = [
                     "${nixpkgs-unstable}/nixos/modules/installer/sd-card/sd-image.nix"
                     sops-nix.nixosModules.sops
-                    ./0-common
-                    ./1-backup-server
+                    ./systems/0-common
+                    ./systems/1-backup-server
                 ];                
             };
             Heimdall = nixpkgs-unstable.lib.nixosSystem {
@@ -40,8 +41,8 @@
                     sops-nix.nixosModules.sops
                     impermanence.nixosModules.impermanence
                     arion.nixosModules.arion
-                    ./0-common
-                    ./2-server
+                    ./systems/0-common
+                    ./systems/2-server
                 ];
             };
             Odin = nixpkgs-unstable.lib.nixosSystem {
@@ -50,11 +51,20 @@
                     disko.nixosModules.disko
                     sops-nix.nixosModules.sops
                     impermanence.nixosModules.impermanence
-                    ./0-common
-                    ./3-laptop
+                    ./systems/0-common
+                    ./systems/3-laptop
                 ];
             };
         };
+        homeConfigurations = {
+            "beatlink" = home-manager.lib.homeManagerConfiguration {
+                pkgs = import nixpkgs-unstable { system = "x86_64-linux"; };
+                modules = [ 
+                    ./users/beatlink
+                ];
+            };
+        };
+
         images.Ragnarok = nixosConfigurations.Ragnarok.config.system.build.sdImage;
     };
 }
