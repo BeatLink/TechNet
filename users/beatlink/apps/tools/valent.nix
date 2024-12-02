@@ -1,5 +1,6 @@
 { config, pkgs, ... }: 
 {
+    services.flatpak.packages = ["flathub:app/ca.andyholmes.Valent//stable"];
     home.file = {
         ".config/autostart/ca.andyholmes.Valent.desktop".text = ''
             [Desktop Entry]
