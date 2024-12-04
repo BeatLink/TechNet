@@ -1,27 +1,28 @@
 { config, pkgs, ... }: 
 {
-    home.file = {
-        ".local/share/applications/WhatsApp (Private).desktop".text = ''
-            [Desktop Entry]
-            Name=WhatsApp (Private)
-            Exec=firefox 'ext+container:name=Private&url=https://web.whatsapp.com'
-            Comment=
-            Terminal=false
-            PrefersNonDefaultGPU=false
-            Icon=whatsapp
-            Type=Application
-        '';
+    xdg.desktopEntries = {
+        "WhatsApp (Private)" = {
+            name = "WhatsApp (Private)";
+            comment = "";
+            exec = "firefox 'ext+container:name=Private&url=https://web.whatsapp.com'";
+            terminal = false;
+            type = "Application";
+            prefersNonDefaultGPU = false;
+            icon = "whatsapp";
+            categories = ["Internet"];
+        };
+    };
 
-    home.file = {
-        ".local/share/applications/WhatsApp.desktop".text = ''
-            [Desktop Entry]
-            Name=WhatsApp
-            Exec=firefox https://web.whatsapp.com
-            Comment=
-            Terminal=false
-            PrefersNonDefaultGPU=false
-            Icon=whatsapp
-            Type=Application
-        '';
+    xdg.desktopEntries = {
+        "WhatsApp" = {
+            name = "WhatsApp";
+            comment = "";
+            exec = "firefox https://web.whatsapp.com";
+            terminal = false;
+            type = "Application";
+            prefersNonDefaultGPU = false;
+            icon = "whatsapp";
+            categories = ["Internet"];
+        };
     };
 }
