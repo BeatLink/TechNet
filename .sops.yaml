@@ -1,25 +1,28 @@
 keys:
-  - &user_beatlink age17a6q5twedcy3lea98t6ey6g822wh6cphv7aj0mzdenkccc5t5cgqpw0d3v 
-  - &host_heimdall age1yggjnkvxm45ssrlwx56pcps43gzglrvfnqdmv8hxcqsqcuj68v7qdj25sg
+  - &user_beatlink age1tckne6re77p0hw425vjqxlel6h5aw9q060cw8zayw7f7x6p43c9svcxrg0
   - &host_ragnarok age18a3msuyfem87qzknt6s64z086lt5lptf7fnqsp3wkt27wrl57fas80c86k
+  - &host_heimdall age1yggjnkvxm45ssrlwx56pcps43gzglrvfnqdmv8hxcqsqcuj68v7qdj25sg
+  - &host_odin age19lxeg27tf95vs67jjh6e68ukf0d9hjyj5q4pcprzrvpwnnt6j3fsvjh4rd
 creation_rules:
-  - path_regex: 0-common/secrets.(yaml|json|env|ini)$
+  - path_regex: 0-common/secrets/secrets.(yaml|json|env|ini)$
     key_groups:
       - age:
         - *user_beatlink
         - *host_heimdall
         - *host_ragnarok
-  - path_regex: 1-backup-server/secrets.(yaml|json|env|ini)$
+        - *host_odin
+  - path_regex: 1-backup-server/secrets/secrets.(yaml|json|env|ini)$
     key_groups:
       - age:
         - *user_beatlink
         - *host_ragnarok
-  - path_regex: 2-server/secrets.(yaml|json|env|ini)$
+  - path_regex: 2-server/secrets/secrets.(yaml|json|env|ini)$
     key_groups:
       - age:
         - *user_beatlink
         - *host_heimdall
-  - path_regex: 3-laptop/secrets.(yaml|json|env|ini)$
+  - path_regex: 3-laptop/secrets/secrets.(yaml|json|env|ini)$
     key_groups:
       - age:
         - *user_beatlink
+        - *host_odin

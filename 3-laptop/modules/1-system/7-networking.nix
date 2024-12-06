@@ -6,7 +6,7 @@
 ######################################################################################################################################
 { config, lib, pkgs, ... }:
 {
-    sops.secrets.networkmanager_env_file.sopsFile = ../..//secrets/secrets.yaml;
+    sops.secrets.networkmanager_env_file.sopsFile = ../../../secrets/secrets.yaml;
     networking = {
         hostName = "Odin";                                              # Sets hostname
         hostId = "ee42298c";
@@ -53,7 +53,7 @@
                         ipv4 = {
                             method = "manual";
                             dns-search = "";
-                            addresses = "10.100.100.2/24" 
+                            addresses = "10.100.100.2/24" ;
                         };
                         ipv6 = {
                             method = "ignore";
@@ -61,7 +61,7 @@
                         wireguard = {
                             listen-port = "51820";
                             peer-routes = "yes";
-                            private-key = "$WIREGUARD_PRIVATE_KEY"
+                            private-key = "$WIREGUARD_PRIVATE_KEY";
                         };
                         wireguard-peer = {
                             "SLW2DFKk+Cf5K5KZl0OLYrEGyqTCqYHBKV2mTA3W2hQ=" = {
@@ -74,7 +74,7 @@
                     };
                 };
                 environmentFiles = [
-                    "/run/secrets/network-manager.env" config.sops.secrets.wireguard_private_key.path;
+                    config.sops.secrets.networkmanager_env_file.path
                 ];
             };
         };
