@@ -15,7 +15,7 @@
         disk = {
             main = {
                 type = "disk";
-                device = "/dev/disk/by-id/ata-WDC_WDS120G2G0B-00EPW0_185253802728";
+                device = "/dev/sda";
                 content = {
                     type = "gpt";                                       # GPT Partition tables used on modern systems
                     partitions = {
@@ -77,9 +77,9 @@
                             atime = "off";                              # Nix does not use atime (impure), might as well turn it off                    
                         };
                     };
-                    persist = {                                         # The dataset for persist system files that are preserved between rollbacks (ssh host keys, docker volumes, etc), mounted at /persist
+                    persistent = {                                         # The dataset for persistent system files that are preserved between rollbacks (ssh host keys, docker volumes, etc), mounted at /persist
                         type = "zfs_fs";
-                        mountpoint = "/persist";
+                        mountpoint = "/persistent";
                         options = {
                             mountpoint = "legacy";
                             "com.sun:auto-snapshot" = "true";           # Generates snapshots to persist data
