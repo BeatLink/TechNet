@@ -56,8 +56,8 @@
                     disko.nixosModules.disko
                     impermanence.nixosModules.impermanence
                     sops-nix.nixosModules.sops
-                    flatpaks.nixosModules.declarative-flatpak
                     home-manager.nixosModules.home-manager
+                    flatpaks.nixosModules.declarative-flatpak
                     ./0-common
                     ./3-laptop
                 ];
