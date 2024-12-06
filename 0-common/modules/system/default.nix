@@ -10,9 +10,8 @@
         ./0-locale.nix
         ./1-networking.nix
         ./2-software.nix
-        ./3-users.nix
-        ./4-ssh.nix
-        ./5-avahi.nix
-        ./6-fail2ban.nix
+        ./3-ssh.nix
+        ./4-avahi.nix
+        ./5-fail2ban.nix
     ];
 }
