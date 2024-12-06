@@ -2,11 +2,11 @@
 { config, lib, pkgs, modulesPath, ... }: 
 {
     imports = [
-        ./0-sd-image.nix
-        ./1-boot.nix
-        ./2-networking.nix
+        ./1-sd-image.nix
+        ./2-boot.nix
         ./3-software.nix
-        ./4-backup-drive.nix
-        ./5-borg.nix
+        ./4-networking.nix
+        ./5-backup-drive.nix
+        ./6-borg.nix
     ];
 }

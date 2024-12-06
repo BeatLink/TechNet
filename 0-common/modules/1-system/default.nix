@@ -7,11 +7,11 @@
 { config, lib, pkgs, modulesPath, ... }: 
 {
     imports = [                                       
-        ./0-locale.nix
-        ./1-networking.nix
-        ./2-software.nix
-        ./3-ssh.nix
-        ./4-avahi.nix
-        ./5-fail2ban.nix
+        ./1-software.nix
+        ./2-networking.nix
+        ./3-locale.nix
+        ./4-ssh.nix
+        ./5-avahi.nix
+        ./6-fail2ban.nix
     ];
 }
