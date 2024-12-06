@@ -104,7 +104,7 @@
         "/".neededForBoot = true;
         "/boot".neededForBoot = true;
         "/nix".neededForBoot = true;
-        "/persist".neededForBoot = true;
+        "/persistent".neededForBoot = true;
         "/home".neededForBoot = true;    
     };
 }
