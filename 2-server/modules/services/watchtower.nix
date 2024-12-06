@@ -1,6 +1,6 @@
 { config, lib, pkgs, modulesPath, ... }: 
 {
-    sops.secrets.watchtower_env.sopsFile = ../../secrets.yaml;
+    sops.secrets.watchtower_env.sopsFile = ../../secrets/secrets.yaml;
     virtualisation.arion.projects.watchtower = {
         serviceName = "watchtower";
         settings = {

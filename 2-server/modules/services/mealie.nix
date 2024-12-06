@@ -5,7 +5,7 @@
 ###########################################################################################################################################
 { config, lib, pkgs, modulesPath, ... }: 
 {
-    sops.secrets.mealie_env.sopsFile = ../../secrets.yaml;
+    sops.secrets.mealie_env.sopsFile = ../../secrets/secrets.yaml;
     virtualisation.arion.projects.mealie = {
         serviceName = "mealie";
         settings = {

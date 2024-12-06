@@ -3,8 +3,8 @@
 #######################################################################################################################################
 { config, lib, pkgs, modulesPath, ... }: 
 {
-    sops.secrets.borg_repo_encryption_key.sopsFile = ../../secrets.yaml;
-    sops.secrets.borg_repo_ssh_key.sopsFile = ../../secrets.yaml;
+    sops.secrets.borg_repo_encryption_key.sopsFile = ../../secrets/secrets.yaml;
+    sops.secrets.borg_repo_ssh_key.sopsFile = ../../secrets/secrets.yaml;
     services.borgmatic = {
         enable = true;
         settings = {
