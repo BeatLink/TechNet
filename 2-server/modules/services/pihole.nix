@@ -19,7 +19,7 @@
 
 { config, lib, pkgs, modulesPath, ... }: 
 {
-    sops.secrets.pihole_env.sopsFile = ../../secrets.yaml;
+    sops.secrets.pihole_env.sopsFile = ../../secrets/secrets.yaml;
     virtualisation.arion.projects.pihole = {
         serviceName = "pihole";
         settings = {

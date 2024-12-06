@@ -8,7 +8,7 @@
 { config, lib, pkgs, modulesPath, ... }:
 { 
     sops.secrets.beatlink_hashed_password = {
-        sopsFile = ../secrets/secrets.yaml;
+        sopsFile = ../../../secrets/secrets.yaml;
         neededForUsers = true;
     };
     users = {
