@@ -12,7 +12,7 @@
         ./4-impermanence.nix
         #./5-data-drive.nix
         ./6-software.nix
-        #./7-networking.nix
+        ./7-networking.nix
         ./8-desktop-environment.nix
         ./9-sound.nix
         ./10-printing.nix
