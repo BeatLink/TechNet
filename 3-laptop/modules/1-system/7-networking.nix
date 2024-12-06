@@ -1,0 +1,91 @@
+# Networking ##########################################################################################################################
+#
+# Wireguard is a simple, high performance VPN that allows each device in the TechNet to securely connect with each other and to 
+# connect to the internet via a secure relay through Heimdall. 
+#
+######################################################################################################################################
+{ config, lib, pkgs, ... }:
+{
+    sops.secrets.networkmanager_env_file.sopsFile = ../..//secrets/secrets.yaml;
+    networking = {
+        hostName = "Odin";                                              # Sets hostname
+        networkmanager = {
+            enable = true;
+            wifi.powersave = true;
+            ensureProfiles = {
+                profiles = {
+                    TechNet-WiFi = {
+                        connection = {
+                            id = "TechNet-WiFi";
+                            permissions = "";
+                            type = "wifi";
+                        };
+                        ipv4 = {
+                            dns = "10.100.100.1";
+                            dns-search = "";
+                            method = "auto";
+                        };
+                        ipv6 = {
+                            addr-gen-mode = "stable-privacy";
+                            dns-search = "";
+                            method = "auto";
+                        };
+                        wifi = {
+                            mac-address-blacklist = "";
+                            mode = "infrastructure";
+                            ssid = "Home Wi-Fi";
+                        };
+                        wifi-security = {
+                            auth-alg = "open";
+                            key-mgmt = "wpa-psk";
+                            psk = "$TECHNET_WIFI_PASSWORD";
+                        };
+                    };
+                    TechNet-WireGuard-VPN = {
+                        connection = {
+                            id = "TechNet-Wireguard-VPN";
+                            permissions = "";
+                            type = "wireguard";
+                            interface-name = "wireguard0";
+                            autoconnect = "yes";
+                        };
+                        ipv4 = {
+                            method = "manual";
+                            dns-search = "";
+                            addresses = "10.100.100.2/24" 
+                        };
+                        ipv6 = {
+                            method = "ignore";
+                        };
+                        wireguard = {
+                            listen-port = "51820";
+                            peer-routes = "yes";
+                            private-key = "$WIREGUARD_PRIVATE_KEY"
+                        };
+                        wireguard-peer = {
+                            "SLW2DFKk+Cf5K5KZl0OLYrEGyqTCqYHBKV2mTA3W2hQ=" = {
+                                endpoint = "72.252.37.234:51820";
+                                persistent-keepalive = 25;
+                                allowed-ips = "0.0.0.0/0";
+
+                            };
+                        };
+                    };
+                };
+                environmentFiles = [
+                    "/run/secrets/network-manager.env" config.sops.secrets.wireguard_private_key.path;
+                ];
+            };
+        };
+        firewall = {
+            allowedUDPPorts = [ 51820 ];                                # Allows Wireguard on Firewall
+            checkReversePath = false; 
+        };
+    };
+}
+
+  # Open ports in the firewall.
+  # networking.firewall.allowedTCPPorts = [ ... ];
+  # networking.firewall.allowedUDPPorts = [ ... ];
+  # Or disable the firewall altogether.
+  # networking.firewall.enable = false;
