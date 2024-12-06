@@ -91,16 +91,15 @@
         "systems": "systems"
       },
       "locked": {
-        "lastModified": 1732008249,
-        "narHash": "sha256-cGq/ybv2/S5oNHQUBCUZplXZC4nV1dx5MZ9VhMDZTNI=",
-        "owner": "GermanBread",
+        "lastModified": 1733272915,
+        "narHash": "sha256-8iUydk1OUJihFto46SLDJb0Pd6VCmVujh1BBziYKbnc=",
+        "owner": "BeatLink",
         "repo": "declarative-flatpak",
-        "rev": "fb59bd957efb6580ceeba35d66bd2c6f14306bcf",
+        "rev": "95c10317f619ac21b140fc13b1fbe57722b97d1d",
         "type": "github"
       },
       "original": {
-        "owner": "GermanBread",
-        "ref": "stable-v3",
+        "owner": "BeatLink",
         "repo": "declarative-flatpak",
         "type": "github"
       }
