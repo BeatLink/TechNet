@@ -4,13 +4,9 @@
     home = {
         username = "beatlink";
         homeDirectory = "/home/beatlink";
-        stateVersion = "24.11"; # Please read the comment before changing.
+        stateVersion = "24.11";                             # Please read the comment before changing.
 
-        # The home.packages option allows you to install Nix packages into your
-        # environment.
         packages = [
-            # # Adds the 'hello' command to your environment. It prints a friendly
-            # # "Hello, world!" when run.
             # pkgs.hello
 
             # # It is sometimes useful to fine-tune packages, for example, by applying
@@ -62,12 +58,4 @@
             EDITOR = "nano";
         };
     };
-
-
-    # Let Home Manager install and manage itself.
-    programs.home-manager.enable = true;
-
-    imports = [                         
-      ./apps
-    ];
 }
