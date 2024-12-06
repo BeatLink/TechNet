@@ -34,8 +34,8 @@
                     "${nixpkgs-unstable}/nixos/modules/installer/sd-card/sd-image.nix"
                     home-manager.nixosModules.home-manager
                     sops-nix.nixosModules.sops
-                    ./systems/0-common
-                    ./systems/1-backup-server
+                    ./0-common
+                    ./1-backup-server
                 ];                
             };
             Heimdall = nixpkgs-unstable.lib.nixosSystem {
@@ -46,8 +46,8 @@
                     sops-nix.nixosModules.sops
                     home-manager.nixosModules.home-manager
                     arion.nixosModules.arion
-                    ./systems/0-common
-                    ./systems/2-server
+                    ./0-common
+                    ./2-server
                 ];
             };
             Odin = nixpkgs-unstable.lib.nixosSystem {
@@ -58,16 +58,8 @@
                     sops-nix.nixosModules.sops
                     flatpaks.nixosModules.declarative-flatpak
                     home-manager.nixosModules.home-manager
-                    ./systems/0-common
-                    ./systems/3-laptop
-                ];
-            };
-        };
-        homeConfigurations = {
-            "beatlink" = home-manager.lib.homeManagerConfiguration {
-                pkgs = import nixpkgs-unstable { system = "x86_64-linux"; };
-                modules = [
-                    ./users/beatlink
+                    ./0-common
+                    ./3-laptop
                 ];
             };
         };
