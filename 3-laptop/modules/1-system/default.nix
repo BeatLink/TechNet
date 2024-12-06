@@ -13,8 +13,9 @@
         #./5-data-drive.nix
         ./6-software.nix
         ./7-networking.nix
-        ./8-desktop-environment.nix
-        ./9-sound.nix
-        ./10-printing.nix
+        ./8-ssh.nix
+        ./9-desktop-environment.nix
+        ./10-sound.nix
+        ./11-printing.nix
     ];
 }

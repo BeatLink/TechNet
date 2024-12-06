@@ -22,7 +22,6 @@
                         efi = {                                         # The EFI System Partition (ESP) stores bootloader information used on UEFI systems
                             size = "512M";
                             type = "EF00";
-                            name = "efi";
                             content = {
                                 type = "filesystem";
                                 format = "vfat";
