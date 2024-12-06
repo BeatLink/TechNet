@@ -6,7 +6,7 @@
 ######################################################################################################################################
 { config, lib, pkgs, ... }:
 {
-    sops.secrets.networkmanager_env_file.sopsFile = ../../../secrets/secrets.yaml;
+    sops.secrets.networkmanager_env_file.sopsFile = ../../secrets/secrets.yaml;
     networking = {
         hostName = "Odin";                                              # Sets hostname
         hostId = "ee42298c";
@@ -45,10 +45,20 @@
                     TechNet-WireGuard-VPN = {
                         connection = {
                             id = "TechNet-Wireguard-VPN";
-                            permissions = "";
                             type = "wireguard";
+                            permissions = "";
                             interface-name = "wireguard0";
                             autoconnect = "yes";
+                        };
+                        wireguard = {
+                            listen-port = "51820";
+                            peer-routes = "yes";
+                            private-key = "$WIREGUARD_PRIVATE_KEY";
+                        };
+                        "wireguard-peer.SLW2DFKk+Cf5K5KZl0OLYrEGyqTCqYHBKV2mTA3W2hQ=" = {
+                            endpoint = "72.252.37.234:51820";
+                            persistent-keepalive = 25;
+                            allowed-ips = "0.0.0.0/0";
                         };
                         ipv4 = {
                             method = "manual";
@@ -57,19 +67,6 @@
                         };
                         ipv6 = {
                             method = "ignore";
-                        };
-                        wireguard = {
-                            listen-port = "51820";
-                            peer-routes = "yes";
-                            private-key = "$WIREGUARD_PRIVATE_KEY";
-                        };
-                        wireguard-peer = {
-                            "SLW2DFKk+Cf5K5KZl0OLYrEGyqTCqYHBKV2mTA3W2hQ=" = {
-                                endpoint = "72.252.37.234:51820";
-                                persistent-keepalive = 25;
-                                allowed-ips = "0.0.0.0/0";
-
-                            };
                         };
                     };
                 };
