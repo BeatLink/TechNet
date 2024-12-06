@@ -6,7 +6,7 @@ let
             url = "https://ftp.denx.de/pub/u-boot/u-boot-2024.10.tar.bz2";
             hash = "sha256-so2vSsF+QxVjYweL9RApdYQTf231D87ZsS3zT2GpL7A=";
         };
-        extraPatches = [./1-boot-fix-uboot.patch];
+        extraPatches = [./fix-uboot.patch ];
     };
 in
 {
