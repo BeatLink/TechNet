@@ -23,7 +23,7 @@
             inputs.nixpkgs.follows = "nixpkgs-unstable";
         };
         flatpaks = {
-            url = "github:GermanBread/declarative-flatpak/stable-v3";
+            url = "github:BeatLink/declarative-flatpak";
         };
     };
     outputs = { self, nixpkgs-unstable, disko, impermanence, sops-nix, arion, home-manager,  flatpaks, ... }: rec {
@@ -32,6 +32,7 @@
                 system = "aarch64-linux";
                 modules = [
                     "${nixpkgs-unstable}/nixos/modules/installer/sd-card/sd-image.nix"
+                    home-manager.nixosModules.home-manager
                     sops-nix.nixosModules.sops
                     ./systems/0-common
                     ./systems/1-backup-server
@@ -41,8 +42,9 @@
                 system = "x86_64-linux";
                 modules = [
                     disko.nixosModules.disko
-                    sops-nix.nixosModules.sops
                     impermanence.nixosModules.impermanence
+                    sops-nix.nixosModules.sops
+                    home-manager.nixosModules.home-manager
                     arion.nixosModules.arion
                     ./systems/0-common
                     ./systems/2-server
@@ -52,8 +54,10 @@
                 system = "x86_64-linux";
                 modules = [
                     disko.nixosModules.disko
-                    sops-nix.nixosModules.sops
                     impermanence.nixosModules.impermanence
+                    sops-nix.nixosModules.sops
+                    flatpaks.nixosModules.declarative-flatpak
+                    home-manager.nixosModules.home-manager
                     ./systems/0-common
                     ./systems/3-laptop
                 ];
@@ -63,12 +67,10 @@
             "beatlink" = home-manager.lib.homeManagerConfiguration {
                 pkgs = import nixpkgs-unstable { system = "x86_64-linux"; };
                 modules = [
-                    flatpaks.homeManagerModules.declarative-flatpak
                     ./users/beatlink
                 ];
             };
         };
-
         images.Ragnarok = nixosConfigurations.Ragnarok.config.system.build.sdImage;
     };
 }
