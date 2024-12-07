@@ -76,7 +76,7 @@
                             atime = "off";                              # Nix does not use atime (impure), might as well turn it off                    
                         };
                     };
-                    persistent = {                                      # The dataset for persistent system files that are preserved between rollbacks (ssh host keys, docker volumes, etc), mounted at /persist
+                    persistent = {                                      # The dataset for persistent system files that are preserved between rollbacks (ssh host keys, docker volumes, etc), mounted at /persistent
                         type = "zfs_fs";
                         mountpoint = "/persistent";
                         options = {
