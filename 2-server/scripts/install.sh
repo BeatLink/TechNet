@@ -34,15 +34,6 @@ flatpak run --command="keepassxc-cli" org.keepassxc.KeePassXC \
   "$temp/persistent/etc/ssh/ssh_initrd_host_ed25519_key"
 chmod 600 "$temp/persistent/etc/ssh/ssh_initrd_host_ed25519_key"
 
-# Copy the SSH Initrd host RSA Key
-flatpak run --command="keepassxc-cli" org.keepassxc.KeePassXC \
-  attachment-export \
-  /media/beatlink/Storage/Files/Documents/SecurityDatabase.kdbx \
-  "Heimdall SSH Login" \
-  heimdall_ssh_initrd_host_rsa_key \
-  "$temp/persistent/etc/ssh/ssh_initrd_host_rsa_key"
-chmod 600 "$temp/persistent/etc/ssh/ssh_initrd_host_rsa_key"
-
 # Copy the LUKS decryption Key
 flatpak run --command="keepassxc-cli" org.keepassxc.KeePassXC \
   attachment-export \
