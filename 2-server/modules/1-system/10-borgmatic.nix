@@ -34,7 +34,7 @@
                 }
             ];
             encryption_passcommand = "cat " + config.sops.secrets.borg_repo_encryption_key.path;
-            ssh_command = "ssh -i" + config.sops.secrets.borg_repo_ssh_key.path;
+            ssh_command = "ssh -i " + config.sops.secrets.borg_repo_ssh_key.path;
 
             # Backup Settings -------------------------------------------------------------------------------------------------------------
             compression = "lz4";
