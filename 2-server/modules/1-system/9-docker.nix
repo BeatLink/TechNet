@@ -3,6 +3,10 @@
 #######################################################################################################################################
 { config, lib, pkgs, modulesPath, ... }: 
 {
+    environment.systemPackages = with pkgs; [                           # Set packages installed on system
+        arion
+        docker-client
+    ];  
     virtualisation.docker = {
         enable = true;
         liveRestore = false;                            # Solves hangs on shutdown
