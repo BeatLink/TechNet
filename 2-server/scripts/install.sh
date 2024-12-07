@@ -14,7 +14,7 @@ trap cleanup EXIT
 
 # Create a temporary folder to be copied to the install system
 mkdir -p $temp/persistent/etc/ssh/
-chmod 755 $temp/persistent/etc/ssh/
+chmod -R 755 $temp/persistent/etc/ssh/
 
 # Copy the SSH host ed25519 Key
 flatpak run --command="keepassxc-cli" org.keepassxc.KeePassXC \
