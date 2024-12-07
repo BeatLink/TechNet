@@ -36,18 +36,6 @@ sudo mv $WORKDIR/ssh_host_ed25519_key "$WORKDIR/mnt/etc/ssh/ssh_host_ed25519_key
 sudo chmod 600 "$WORKDIR/mnt/etc/ssh/ssh_host_ed25519_key"
 sudo chown root:root "$WORKDIR/mnt/etc/ssh/ssh_host_ed25519_key"
 
-# Exports the SSH host RSA Key and sets permissions
-flatpak run --command="keepassxc-cli" \
-  org.keepassxc.KeePassXC \
-  attachment-export \
-  /media/beatlink/Storage/Files/Documents/SecurityDatabase.kdbx \
-  "Backup Server SSH Login" \
-  ragnarok_ssh_host_rsa_key \
-  $WORKDIR/ssh_host_rsa_key
-sudo mv $WORKDIR/ssh_host_rsa_key "$WORKDIR/mnt/etc/ssh/ssh_host_rsa_key"
-sudo chmod 600 "$WORKDIR/mnt/etc/ssh/ssh_host_rsa_key"
-sudo chown root:root "$WORKDIR/mnt/etc/ssh/ssh_host_rsa_key"
-
 set +x;
 
 echo ">> INSTALLATION COMPLETE - SD CARD READY <<"
