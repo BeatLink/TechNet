@@ -14,7 +14,7 @@ trap cleanup EXIT
 
 # Create a temporary folder to be copied to the install system
 mkdir -p $temp/persistent/etc/ssh/
-chmod -R 755 $temp/persistent/etc/ssh/
+chmod -Rvf 755 $temp
 
 # Copy the SSH host ed25519 Key
 flatpak run --command="keepassxc-cli" org.keepassxc.KeePassXC \
@@ -23,7 +23,7 @@ flatpak run --command="keepassxc-cli" org.keepassxc.KeePassXC \
   "Heimdall SSH Login" \
   heimdall_ssh_host_ed25519_key \
   "$temp/persistent/etc/ssh/ssh_host_ed25519_key"
-chmod 600 "$temp/persistent/etc/ssh/ssh_host_ed25519_key"
+chmod -vf 600 "$temp/persistent/etc/ssh/ssh_host_ed25519_key"
 
 # Copy the SSH Initrd host ed25519 Key
 flatpak run --command="keepassxc-cli" org.keepassxc.KeePassXC \
