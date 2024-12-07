@@ -35,7 +35,9 @@
             ncdu                                                        # For checking disk usage
             git                                                         # For downloading git repos
             nano
-            tree                                                    # For editing config files
+            tree                                                        # For editing config files
+            curl
+            iputils
         ];
     };
 
