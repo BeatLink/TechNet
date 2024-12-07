@@ -10,11 +10,12 @@
         ./3-disk-config.nix
         ./4-impermanence.nix
         #./5-data-drive.nix
-        ./6-software.nix
-        ./7-networking.nix
-        ./8-sops.nix
-        ./9-desktop-environment.nix
-        ./10-sound.nix
-        ./11-printing.nix
+        ./6-sops.nix
+        ./7-software.nix
+        ./8-networking.nix
+        ./9-ssh.nix
+        ./10-desktop-environment.nix
+        ./11-sound.nix
+        ./12-printing.nix
     ];
 }
