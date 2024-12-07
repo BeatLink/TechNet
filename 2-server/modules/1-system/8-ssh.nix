@@ -11,10 +11,17 @@
             ];
             hostKeys = [
                 "/persistent/etc/ssh/ssh_initrd_host_ed25519_key"
-                "/persistent/etc/ssh/ssh_initrd_host_rsa_key"
             ];
         };
         systemd.users.root.shell = "/bin/systemd-tty-ask-password-agent";
+    };
+    services.openssh = {                                                # This is needed to solve problems with SSH permissions 
+        hostKeys = [
+            { 
+                type = "ed25519"; 
+                path = "/persistent/etc/ssh/ssh_host_ed25519_key"; 
+            }
+        ];
     };
 }
 
