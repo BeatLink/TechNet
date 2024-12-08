@@ -12,6 +12,6 @@
 {
     imports = [                                   
         ./1-system
-        #./apps
+        ./4-apps
     ];
 }
