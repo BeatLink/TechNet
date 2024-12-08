@@ -15,7 +15,7 @@
         disk = {
             main = {
                 type = "disk";
-                device = "/dev/sda";
+                device = "/dev/disk/by-id/nvme-WDC_PC_SN530_SDBPMPZ-256G-1101_22215C456623";
                 content = {
                     type = "gpt";                                       # GPT Partition tables used on modern systems
                     partitions = {
