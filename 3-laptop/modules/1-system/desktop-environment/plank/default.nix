@@ -7,4 +7,10 @@
     environment.systemPackages = [
         pkgs.plank
     ];
+    home-manager.users.beatlink = {
+        dconf.enable = true;
+        imports = [
+            ./2-dconf-settings.nix
+        ];
+    };
 }
