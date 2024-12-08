@@ -5,7 +5,7 @@
 { config, lib, pkgs, ... }:
 {
     imports = [                                   
-        ./1-hardware-configuration-vm.nix
+        ./1-hardware-configuration.nix
         ./2-boot.nix
         ./3-disk-config.nix
         ./4-impermanence.nix
