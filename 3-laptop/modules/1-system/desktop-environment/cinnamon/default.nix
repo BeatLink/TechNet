@@ -24,7 +24,7 @@
         dconf.enable = true;
         imports = [
             ./2-dconf-settings.nix
-        ]
+        ];
     };
 }
 
