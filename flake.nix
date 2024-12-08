@@ -23,7 +23,7 @@
             inputs.nixpkgs.follows = "nixpkgs-unstable";
         };
         flatpaks = {
-            url = "github:BeatLink/declarative-flatpak";
+            url = "github:GermanBread/declarative-flatpak";
         };
     };
     outputs = { self, nixpkgs-unstable, disko, impermanence, sops-nix, arion, home-manager,  flatpaks, ... }: rec {

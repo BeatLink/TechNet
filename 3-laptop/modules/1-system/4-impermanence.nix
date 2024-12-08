@@ -37,6 +37,7 @@
         directories = [
             "/var/lib/nixos"
             "/var/log"
+            "/var/lib/flatpak"
         ];
         files = [
             { file = "/etc/machine-id"; parentDirectory = { mode = "0755"; }; }
