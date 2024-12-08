@@ -14,8 +14,8 @@
         ./7-software.nix
         ./8-networking.nix
         ./9-ssh.nix
-        ./10-desktop-environment.nix
         ./11-sound.nix
         ./12-printing.nix
+        ./desktop-environment
     ];
 }
