@@ -4,6 +4,6 @@
         #./comms
         #./fun
         ./system
-        #./tools
+        ./tools
     ];
 }
