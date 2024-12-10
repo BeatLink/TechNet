@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 {
     imports = [     
-        #./comms
+        ./comms
         #./fun
         ./system
         ./tools
