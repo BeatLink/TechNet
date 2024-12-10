@@ -1,8 +1,9 @@
-{ config, pkgs, ... }:
+{ impermanence, config, pkgs, ... }:
 
 {
 
     home-manager.users.beatlink = {
+        imports = [ impermanence.homeManagerModules.impermanence ];
         home = {
             username = "beatlink";
             homeDirectory = "/home/beatlink";
