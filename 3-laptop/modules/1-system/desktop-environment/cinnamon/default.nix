@@ -11,6 +11,7 @@
     services.libinput.enable = true;
     services.xserver = {
         enable = true;
+        videoDrivers = ["nvidia"];
         displayManager.lightdm.enable = true;
         desktopManager.cinnamon.enable = true;
         xkb = {
