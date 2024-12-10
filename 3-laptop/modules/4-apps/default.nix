@@ -2,6 +2,7 @@
 {
     imports = [     
         ./comms
+        ./core
         #./fun
         ./system
         ./tools
