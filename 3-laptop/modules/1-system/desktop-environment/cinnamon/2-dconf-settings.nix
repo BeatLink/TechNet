@@ -10,7 +10,7 @@ with lib.hm.gvariant;
       alttab-switcher-style = "icons+preview";
       desktop-effects-maximize = true;
       device-aliases = [ "/org/freedesktop/UPower/devices/battery_BAT1:=Internal Battery" "/org/freedesktop/UPower/devices/keyboard_hidpp_battery_0:= Wireless Keyboard" ];
-      enabled-applets = [ "panel1:right:3:xapp-status@cinnamon.org:4" "panel1:right:9:notifications@cinnamon.org:5" "panel1:right:11:network@cinnamon.org:10" "panel1:right:10:sound@cinnamon.org:11" "panel1:right:14:power@cinnamon.org:12" "panel1:center:0:calendar@cinnamon.org:120" "panel1:right:5:printers@cinnamon.org:134" "panel1:right:8:show-hide-applets@mohammad-sn:142" "panel1:right:4:systray@cinnamon.org:143" "panel1:right:6:gpaste-reloaded@feuerfuchs.eu:144" "panel1:center:2:paneldo@beatlink:145" "panel1:right:7:power-profiles@rcalixte:147" "panel1:right:12:qredshift@quintao:148" "panel1:center:1:cinnamon-timer@jake1164:149" "panel1:left:1:places-bookmarks@dmo60.de:154" "panel1:right:13:inhibit@cinnamon.org:156" "panel1:right:1:panel-launchers@cinnamon.org:168" "panel1:left:0:menu@cinnamon.org:172" ];
+      enabled-applets = [ "panel1:right:3:xapp-status@cinnamon.org:4" "panel1:right:9:notifications@cinnamon.org:5" "panel1:right:11:network@cinnamon.org:10" "panel1:right:10:sound@cinnamon.org:11" "panel1:right:14:power@cinnamon.org:12" "panel1:center:0:calendar@cinnamon.org:120" "panel1:right:5:printers@cinnamon.org:134" "panel1:right:8:show-hide-applets@mohammad-sn:142" "panel1:right:4:systray@cinnamon.org:143" "panel1:right:6:gpaste-reloaded@feuerfuchs.eu:144" "panel1:center:2:paneldo@beatlink:145" "panel1:right:7:power-profiles@rcalixte:147" "panel1:right:12:qredshift@quintao:148" "panel1:center:1:cinnamon-timer@jake1164:149" "panel1:left:1:places-bookmarks@dmo60.de:154" "panel1:right:13:inhibit@cinnamon.org:156" "panel1:left:0:menu@cinnamon.org:172" ];
       enabled-desklets = [];
       enabled-extensions = [ "user-shadows@nathan818fr" "transparent-panels@germanfr" ];
       hotcorner-layout = [ "expo:false:0" "desktop:true:100" "expo:true:100" "scale:true:100" ];
@@ -94,7 +94,7 @@ with lib.hm.gvariant;
 
     "org/cinnamon/desktop/background" = {
       picture-options = "zoom";
-      picture-uri = "file:///home/beatlink/.config/variety/wallpaper/wallpaper-quote-cb20c22f2883bb728c47935b0bb5519a.jpg";
+      picture-uri = "file:///home/beatlink/.config/variety/wallpaper/wallpaper-auto-rotated-ce8933df703e360804412e1432009a52.jpg";
     };
 
     "org/cinnamon/desktop/background/slideshow" = {
