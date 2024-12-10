@@ -4,8 +4,6 @@
 
 { config, lib, pkgs, ... }:
 {
-    disabledModules = lib.mkIf config.installationEnvironmentEnable [ "./5-disko-data-drive.nix ];
-
     imports = [                                   
         ./1-hardware-configuration.nix
         ./2-boot.nix
