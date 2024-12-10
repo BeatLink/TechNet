@@ -20,7 +20,7 @@
             verbose = false;
     
         };
-        plymouth = {
+        /*plymouth = {
             enable = true;
             theme = "double";
             themePackages = with pkgs; [
@@ -40,6 +40,6 @@
             "rd.systemd.show_status=false"
             "rd.udev.log_level=3"
             "udev.log_priority=3"
-        ];
+        ];*/
     };
 }
