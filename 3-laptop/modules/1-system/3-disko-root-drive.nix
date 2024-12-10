@@ -27,7 +27,7 @@
                             mountpoint = "/boot";
                         };
                     };
-                    zroot = {                                       # This creates a ZFS partition to be added to the ZFS pool
+                    zroot = {                                       # This creates a partition to be added to the ZFS pool
                         size = "100%";
                         content = {
                             type = "zfs";
@@ -37,7 +37,7 @@
                 };
             };
         };
-        zpool.root-pool = {                                                 # Creates a ZFS pool for managing storage volumes
+        zpool.root-pool = {                                                 # Creates a pool for managing zfs datasets
             type = "zpool";
             options = {
                 autotrim = "on";
