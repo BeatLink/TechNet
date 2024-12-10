@@ -61,6 +61,7 @@
                     ./0-common
                     ./3-laptop
                 ];
+                specialArgs = { inherit impermanence; };
             };
         };
         images.Ragnarok = nixosConfigurations.Ragnarok.config.system.build.sdImage;
