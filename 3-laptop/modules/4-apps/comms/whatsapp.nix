@@ -1,19 +1,16 @@
 { config, pkgs, ... }: 
 {
-    xdg.desktopEntries = {
+    home-manager.users.beatlink.xdg.desktopEntries = {
         "WhatsApp (Private)" = {
             name = "WhatsApp (Private)";
             comment = "";
-            exec = "firefox 'ext+container:name=Private&url=https://web.whatsapp.com'";
+            exec = "firefox \"ext+container:name=Private&url=https://web.whatsapp.com\"";
             terminal = false;
             type = "Application";
             prefersNonDefaultGPU = false;
             icon = "whatsapp";
-            categories = ["Internet"];
+            categories = ["Network" "InstantMessaging"];
         };
-    };
-
-    xdg.desktopEntries = {
         "WhatsApp" = {
             name = "WhatsApp";
             comment = "";
@@ -22,7 +19,7 @@
             type = "Application";
             prefersNonDefaultGPU = false;
             icon = "whatsapp";
-            categories = ["Internet"];
+            categories = ["Network" "InstantMessaging"];
         };
     };
 }
