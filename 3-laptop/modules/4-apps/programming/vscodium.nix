@@ -4,7 +4,7 @@
         packages = ["flathub:app/com.vscodium.codium//stable"];
         overrides."com.vscodium.codium" = {
             filesystems = [
-                "~/.config/git:ro"
+                "/home/beatlink/.config/git:ro"
             ];
         };
     };
