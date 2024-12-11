@@ -6,6 +6,6 @@
         #./deluge.nix
         #./fastfetch.nix
         #./redshift.nix
-        #./valent.nix
+        ./valent.nix
     ];
 }
