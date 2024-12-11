@@ -15,9 +15,9 @@
             wifi.powersave = true;
             ensureProfiles = {
                 profiles = {
-                    TechNet-WiFi = {
+                    "TechNet Wi-Fi" = {
                         connection = {
-                            id = "TechNet-WiFi";
+                            id = "TechNet Wi-Fi";
                             permissions = "";
                             type = "wifi";
                         };
@@ -34,7 +34,7 @@
                         wifi = {
                             mac-address-blacklist = "";
                             mode = "infrastructure";
-                            ssid = "Home Wi-Fi";
+                            ssid = "TechNet Wi-Fi";
                         };
                         wifi-security = {
                             auth-alg = "open";
@@ -42,9 +42,9 @@
                             psk = "$TECHNET_WIFI_PASSWORD";
                         };
                     };
-                    TechNet-WireGuard-VPN = {
+                    "TechNet WireGuard" = {
                         connection = {
-                            id = "TechNet-Wireguard-VPN";
+                            id = "TechNet Wireguard";
                             type = "wireguard";
                             permissions = "";
                             interface-name = "wireguard0";
