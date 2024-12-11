@@ -20,6 +20,9 @@
                     ".config/nemo"
                     ".local/share/nemo"
                 ];
+                files = [
+                    ".config/gtk-3.0/bookmarks"
+                ];
                 allowOther = true;
             };
         };
