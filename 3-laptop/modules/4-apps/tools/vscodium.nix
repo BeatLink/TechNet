@@ -5,7 +5,7 @@
     home-manager.users.beatlink = { config, pkgs, ... }: {
         home.persistence."/Storage/Apps/Programming/VsCodium" = {
             directories = [
-                ".var/app/im.riot.Riot"
+                ".var/app/com.vscodium.codium"
                 ".vscode-oss"
             ];
             allowOther = true;
