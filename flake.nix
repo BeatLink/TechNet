@@ -2,7 +2,12 @@
     description = "flake for TechNet";
 
     inputs = {
-        nixpkgs-unstable.url = "github:NixOS/nixpkgs/nixos-unstable";
+        nixpkgs-unstable = {
+            url = "github:NixOS/nixpkgs/nixos-unstable";
+        };
+        nixos-hardware = {
+            url = "github:NixOS/nixos-hardware/master";
+        };
         disko = {
             url = "github:nix-community/disko";
             inputs.nixpkgs.follows = "nixpkgs-unstable";
@@ -26,7 +31,7 @@
             url = "github:GermanBread/declarative-flatpak";
         };
     };
-    outputs = { self, nixpkgs-unstable, disko, impermanence, sops-nix, arion, home-manager,  flatpaks, ... }: rec {
+    outputs = { self, nixpkgs-unstable, nixos-hardware, disko, impermanence, sops-nix, arion, home-manager,  flatpaks, ... }: rec {
         nixosConfigurations = {
             Ragnarok = nixpkgs-unstable.lib.nixosSystem {
                 system = "aarch64-linux";
@@ -58,6 +63,7 @@
                     sops-nix.nixosModules.sops
                     home-manager.nixosModules.home-manager
                     flatpaks.nixosModules.declarative-flatpak
+                    nixos-hardware.nixosModules.lenovo-ideapad-15ach6
                     ./0-common
                     ./3-laptop
                 ];
