@@ -2,14 +2,9 @@
 
 {
 
+    home-manager.backupFileExtension = "hmbackup";
     home-manager.users.beatlink = {
         imports = [ impermanence.homeManagerModules.impermanence ];
-
-        programs.git = {
-            enable = true;
-            userEmail = "github@beatlink.simplelogin.com";
-            userName = "BeatLink";
-        };
         home = {
             username = "beatlink";
             homeDirectory = "/home/beatlink";
