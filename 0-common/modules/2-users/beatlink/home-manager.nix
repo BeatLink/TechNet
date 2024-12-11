@@ -4,10 +4,17 @@
 
     home-manager.users.beatlink = {
         imports = [ impermanence.homeManagerModules.impermanence ];
+
+        programs.git = {
+            enable = true;
+            userEmail = "github@beatlink.simplelogin.com";
+            userName = "BeatLink";
+        };
         home = {
             username = "beatlink";
             homeDirectory = "/home/beatlink";
             stateVersion = "24.11";                             # Please read the comment before changing.
+
 
             packages = [
                 # pkgs.hello
