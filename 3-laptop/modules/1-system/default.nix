@@ -16,6 +16,7 @@
         ./9-ssh.nix
         ./11-sound.nix
         ./12-printing.nix
+        ./fuse.nix
         ./desktop-environment
     ];
 }
