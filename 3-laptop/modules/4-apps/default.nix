@@ -4,6 +4,7 @@
         ./comms
         ./core
         #./fun
+        ./programming
         ./system
         ./tools
     ];
