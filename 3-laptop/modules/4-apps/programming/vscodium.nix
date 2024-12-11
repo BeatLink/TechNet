@@ -1,6 +1,13 @@
 { config, lib, pkgs, ... }:
 {
-    services.flatpak.packages = ["flathub:app/com.vscodium.codium//stable"];
+    services.flatpak = {
+        packages = ["flathub:app/com.vscodium.codium//stable"];
+        overrides."com.vscodium.codium" = {
+            filesystems = [
+                "~/.config/git:ro"
+            ];
+        };
+    };
     programs.fuse.userAllowOther = true;
     home-manager.users.beatlink = { config, pkgs, ... }: {
         home.persistence."/Storage/Apps/Programming/VsCodium" = {
