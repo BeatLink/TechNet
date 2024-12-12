@@ -6,6 +6,7 @@
         ./fun
         ./programming
         ./system
+        ./technet
         ./tools
     ];
 }
