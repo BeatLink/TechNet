@@ -11,5 +11,6 @@
             Icon=home-assistant
             Type=Application
         '';
+        home.file.".local/share/icons/home-assistant.png".source = ./home-assistant.png;
     };
 }
