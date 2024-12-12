@@ -3,7 +3,7 @@
     imports = [     
         ./comms
         ./core
-        #./fun
+        ./fun
         ./programming
         ./system
         ./tools
