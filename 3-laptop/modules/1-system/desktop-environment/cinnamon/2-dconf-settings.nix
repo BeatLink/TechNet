@@ -266,21 +266,21 @@ with lib.hm.gvariant;
     "org/cinnamon/sounds" = {
       close-enabled = true;
       close-file = "/usr/share/mint-artwork/sounds/close.oga";
-      login-file = "/media/beatlink/Storage/Files/Sounds/Interface Sounds/Steam/860895(1)/steamdeck_startup_v01_A_01-06 - Blip blip swirl whom.wav";
+      login-file = "/Storage/Files/Sounds/Interface Sounds/Steam/860895(1)/steamdeck_startup_v01_A_01-06 - Blip blip swirl whom.wav";
       logout-file = "/usr/share/mint-artwork/sounds/logout.ogg";
       map-enabled = true;
       map-file = "/usr/share/mint-artwork/sounds/map.oga";
       maximize-enabled = true;
       maximize-file = "/usr/share/mint-artwork/sounds/maximize.oga";
       minimize-enabled = true;
-      minimize-file = "/media/beatlink/Storage/Files/Sounds/Interface Sounds/Orwell 2/system_datachunk_pickup-sharedassets1.assets-126.wav";
+      minimize-file = "/Storage/Files/Sounds/Interface Sounds/Orwell 2/system_datachunk_pickup-sharedassets1.assets-126.wav";
       notification-enabled = true;
-      notification-file = "/media/beatlink/Storage/Files/Sounds/Interface Sounds/Steam/860895(1)/deck_ui_achievement_toast.wav";
-      plug-file = "/media/beatlink/Storage/Files/Sounds/Interface Sounds/Orwell 2/main_menu_create_profile-sharedassets1.assets-146.wav";
+      notification-file = "/Storage/Files/Sounds/Interface Sounds/Steam/860895(1)/deck_ui_achievement_toast.wav";
+      plug-file = "/Storage/Files/Sounds/Interface Sounds/Orwell 2/main_menu_create_profile-sharedassets1.assets-146.wav";
       switch-file = "/usr/share/mint-artwork/sounds/switch.oga";
-      tile-file = "/media/beatlink/Storage/Files/Sounds/Interface Sounds/Orwell 2/system_datachunk_pickup-sharedassets1.assets-126.wav";
+      tile-file = "/Storage/Files/Sounds/Interface Sounds/Orwell 2/system_datachunk_pickup-sharedassets1.assets-126.wav";
       unmaximize-enabled = true;
-      unplug-file = "/media/beatlink/Storage/Files/Sounds/Interface Sounds/Orwell 2/system_connection_lost_notification-sharedassets1.assets-124.wav";
+      unplug-file = "/Storage/Files/Sounds/Interface Sounds/Orwell 2/system_connection_lost_notification-sharedassets1.assets-124.wav";
     };
 
     "org/cinnamon/theme" = {
