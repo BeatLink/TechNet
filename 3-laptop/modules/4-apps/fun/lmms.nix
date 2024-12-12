@@ -2,13 +2,11 @@
 {
 
     services.flatpak = {
+        preSwitchCommand = ''flatpak override --persist=.lmmsrc.xml io.lmms.LMMS'';
         packages = ["flathub:app/io.lmms.LMMS//stable"];
         overrides."io.lmms.LMMS" = {
             filesystems = [
                 "/Storage/Files/Sounds"
-            ];
-            persist = [
-                ".lmmsrc.xml"
             ];
         };
     };
