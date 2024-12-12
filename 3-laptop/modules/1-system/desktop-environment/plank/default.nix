@@ -51,6 +51,12 @@
                     Launcher=file:///var/lib/flatpak/exports/share/applications/org.gmusicbrowser.gmusicbrowser.desktop
                 '';
 
+
+                ".config/plank/dock1/com.stremio.Stremio.dockitem".text = ''
+                    [PlankDockItemPreferences]
+                    Launcher=file:///var/lib/flatpak/exports/share/applications/com.stremio.Stremio.desktop
+                '';
+
                 ".config/plank/dock1/launchers/com.vscodium.codium.dockitem".text = ''
                     [PlankDockItemPreferences]
                     Launcher=file:///var/lib/flatpak/exports/share/applications/com.vscodium.codium.desktop

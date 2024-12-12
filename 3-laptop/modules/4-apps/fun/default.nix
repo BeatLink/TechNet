@@ -4,5 +4,6 @@
         ./gmusicbrowser.nix
         ./lmms.nix
         #./steam.nix
+        ./stremio.nix
     ];
 }
