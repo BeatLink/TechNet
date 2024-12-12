@@ -7,6 +7,9 @@
             filesystems = [
                 "/Storage/Files/Sounds"
             ];
+            persist = [
+                ".lmmsrc.xml"
+            ];
         };
     };
     home-manager.users.beatlink = { config, pkgs, ... }: {
