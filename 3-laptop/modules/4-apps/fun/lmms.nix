@@ -7,6 +7,9 @@
             filesystems = [
                 "/Storage/Files/Sounds"
             ];
+            persist = [
+                ".lmmsrc.xml"
+            ];
         };
     };
     home-manager.users.beatlink = { config, pkgs, ... }: {
@@ -14,9 +17,6 @@
             persistence."/Storage/Apps/Fun/LMMS" = {
                 directories = [
                     ".var/app/io.lmms.LMMS"
-                ];
-                files = [
-                    ".lmmsrc.xml"
                 ];
                 allowOther = true;
             };
