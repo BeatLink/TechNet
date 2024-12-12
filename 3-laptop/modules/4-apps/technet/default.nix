@@ -2,5 +2,6 @@
 {
     imports = [     
         ./home-assistant
+        ./nextcloud.nix
     ];
 }

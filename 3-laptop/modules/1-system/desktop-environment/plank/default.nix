@@ -54,6 +54,10 @@
                     [PlankDockItemPreferences]
                     Launcher=file:///home/beatlink/.local/share/applications/home-assistant.desktop
                 '';
+                ".config/plank/dock1/launchers/nextcloud.dockitem".text = ''
+                    [PlankDockItemPreferences]
+                    Launcher=file:///home/beatlink/.local/share/applications/nextcloud.desktop
+                '';
             };
         };
         dconf.enable = true;                                    # Enables dconf which stores plank settings
