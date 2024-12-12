@@ -2,6 +2,7 @@
 {
     imports = [
         ./gmusicbrowser.nix
+        ./lmms.nix
         #./steam.nix
     ];
 }
