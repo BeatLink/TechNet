@@ -8,7 +8,7 @@
             Comment=
             Terminal=false
             PrefersNonDefaultGPU=false
-            Icon=home-assistant
+            Icon=home-assistant.png
             Type=Application
         '';
         home.file.".local/share/icons/home-assistant.png".source = ./home-assistant.png;
