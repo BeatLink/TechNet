@@ -15,6 +15,9 @@
                 directories = [
                     ".var/app/io.lmms.LMMS"
                 ];
+                files = [
+                    ".lmmsrc.xml"
+                ];
                 allowOther = true;
             };
         };
