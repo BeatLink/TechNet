@@ -19,7 +19,7 @@ chmod -Rvf 755 $temp
 # Copy the SSH host ed25519 Key
 flatpak run --command="keepassxc-cli" org.keepassxc.KeePassXC \
   attachment-export \
-  /media/beatlink/Storage/Files/Documents/SecurityDatabase.kdbx \
+  /Storage/Files/Documents/SecurityDatabase.kdbx \
   "Heimdall SSH Login" \
   heimdall_ssh_host_ed25519_key \
   "$temp/persistent/etc/ssh/ssh_host_ed25519_key"
@@ -28,7 +28,7 @@ chmod -vf 600 "$temp/persistent/etc/ssh/ssh_host_ed25519_key"
 # Copy the SSH Initrd host ed25519 Key
 flatpak run --command="keepassxc-cli" org.keepassxc.KeePassXC \
   attachment-export \
-  /media/beatlink/Storage/Files/Documents/SecurityDatabase.kdbx \
+  /Storage/Files/Documents/SecurityDatabase.kdbx \
   "Heimdall SSH Login" \
   heimdall_ssh_initrd_host_ed25519_key \
   "$temp/persistent/etc/ssh/ssh_initrd_host_ed25519_key"
@@ -37,7 +37,7 @@ chmod 600 "$temp/persistent/etc/ssh/ssh_initrd_host_ed25519_key"
 # Copy the LUKS decryption Key
 flatpak run --command="keepassxc-cli" org.keepassxc.KeePassXC \
   attachment-export \
-  /media/beatlink/Storage/Files/Documents/SecurityDatabase.kdbx \
+  /Storage/Files/Documents/SecurityDatabase.kdbx \
   "Heimdall Storage Drive Key" \
   heimdall_luks_decryption_passwordfile "/tmp/disk-1.key"
 
