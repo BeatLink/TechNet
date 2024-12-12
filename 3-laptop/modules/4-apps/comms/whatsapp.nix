@@ -11,7 +11,7 @@
             icon = "whatsapp";
             categories = ["Network" "InstantMessaging"];
         };
-        "whatssapp" = {
+        "whatsapp" = {
             name = "WhatsApp";
             comment = "";
             exec = "firefox https://web.whatsapp.com";
