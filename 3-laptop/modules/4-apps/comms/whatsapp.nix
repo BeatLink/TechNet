@@ -1,7 +1,7 @@
 { config, pkgs, ... }: 
 {
     home-manager.users.beatlink.xdg.desktopEntries = {
-        "WhatsApp (Private)" = {
+        "whatsapp-private" = {
             name = "WhatsApp (Private)";
             comment = "";
             exec = "firefox \"ext+container:name=Private&url=https://web.whatsapp.com\"";
@@ -11,7 +11,7 @@
             icon = "whatsapp";
             categories = ["Network" "InstantMessaging"];
         };
-        "WhatsApp" = {
+        "whatssapp" = {
             name = "WhatsApp";
             comment = "";
             exec = "firefox https://web.whatsapp.com";
