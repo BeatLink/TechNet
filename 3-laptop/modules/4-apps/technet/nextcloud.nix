@@ -3,7 +3,7 @@
     home-manager.users.beatlink = { config, pkgs, ... }: {
         home.file.".local/share/applications/nextcloud.desktop".text = ''
             [Desktop Entry]
-            Name=Home Assistant
+            Name=Nextcloud
             Exec=flatpak run org.mozilla.firefox https://nextcloud.heimdall.technet
             Comment=
             Terminal=false
