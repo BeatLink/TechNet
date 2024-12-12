@@ -10,6 +10,6 @@
             PrefersNonDefaultGPU=false
             Icon=home-assistant
             Type=Application
-        ''
+        '';
     };
 }
