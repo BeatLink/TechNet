@@ -28,7 +28,7 @@ sudo mkdir -p "$WORKDIR/mnt/etc/ssh/" && sudo chmod -R 755 "$WORKDIR/mnt/etc/"
 flatpak run --command="keepassxc-cli" \
   org.keepassxc.KeePassXC \
   attachment-export \
-  /media/beatlink/Storage/Files/Documents/SecurityDatabase.kdbx \
+  /Storage/Files/Documents/SecurityDatabase.kdbx \
   "Backup Server SSH Login" \
   ragnarok_ssh_host_ed25519_key \
   $WORKDIR/ssh_host_ed25519_key
