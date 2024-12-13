@@ -22,7 +22,7 @@
         };
         libinput.enable = true;                                                     # Enables Touchpad Functionality
         flatpak.packages = [                                                        # Installs flatpak GTK theme for Cinnamon
-            "flathub:runtime/org.gtk.Gtk3theme.Mint-Y//stable"
+            "flathub:runtime/org.gtk.Gtk3theme.Mint-Y//3.22"
         ];
     };
     programs.dconf.enable = true;
