@@ -12,6 +12,7 @@
                 Terminal=false
                 PrefersNonDefaultGPU=false
                 Icon=home-assistant.png
+                Categories=Network
                 Type=Application
             '';
 
