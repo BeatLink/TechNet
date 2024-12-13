@@ -28,6 +28,9 @@
     programs.dconf.enable = true;
     environment.cinnamon.excludePackages = with pkgs; [
         onboard
+        gnome-calendar
+        warpinator
+        xterm
     ];
     home-manager.users.beatlink = {
         dconf.enable = true;                                                        # Enables dconf for Cinnamon setting Management
