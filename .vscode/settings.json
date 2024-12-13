@@ -2,5 +2,9 @@
     "editor.indentSize": "tabSize",
     "[nix]": {
         "editor.tabSize": 4
-    }
+    },
+    "cSpell.words": [
+        "disko",
+        "pkgs"
+    ]
 }
