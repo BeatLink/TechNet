@@ -1,4 +1,4 @@
 { config, lib, pkgs, ... }:
 {
-    programs.fastfetch.enable = true;
+    environment.systemPackages = with pkgs; [ fastfetch ];                          # Install fastfetch
 }
