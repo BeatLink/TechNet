@@ -17,6 +17,7 @@
         ./11-sound.nix
         ./12-printing.nix
         ./13-fuse.nix
+        ./14-home-folders.nix
         ./desktop-environment
     ];
 }
