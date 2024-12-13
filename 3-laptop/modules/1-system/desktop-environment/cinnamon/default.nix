@@ -8,29 +8,36 @@
 
 { config, lib, pkgs, ... }:
 {  
-    services.libinput.enable = true;
-    services.xserver = {
-        enable = true;
-        displayManager.lightdm.enable = true;
-        desktopManager.cinnamon.enable = true;
-        xkb = {
-            layout = "us";
-            variant = "";
+
+    services = {
+        xserver = {
+            enable = true;                                                          # Enables X11 Server
+            displayManager.lightdm.enable = true;                                   # Enables LightDM Login Manager
+            desktopManager.cinnamon.enable = true;                                  # Enables Cinnamon
+            xkb = {                                                                 # Sets the Keyboard Layout
+                layout = "us";
+                variant = "";
+            };
+            enableCtrlAltBackspace = true;                                          # Enables CTRL+ALT+Backspace for restarting X11
         };
-    };
-    programs.dconf.enable = true;
-
-    services.flatpak.packages = [
-        "flathub:app/org.gtk.Gtk3theme.Mint-Y-Dark-Aqua//stable"
-        "flathub:app/org.gtk.Gtk3theme.Mint-Y-Aqua//stable"
-    ];
-
-
-    home-manager.users.beatlink = {
-        dconf.enable = true;
-        imports = [
-            ./2-dconf-settings.nix
+        libinput.enable = true;                                                     # Enables Touchpad Functionality
+        flatpak.packages = [                                                        # Installs flatpak GTK theme for Cinnamon
+            "flathub:runtime/org.gtk.Gtk3theme.Mint-Y//stable"
         ];
     };
-}
+    programs.dconf.enable = true;
+    environment.cinnamon.excludePackages = with pkgs; [
+        onboard
+    ];
+    home-manager.users.beatlink = {
+        dconf.enable = true;                                                        # Enables dconf for Cinnamon setting Management
+        imports = [                                                                 # Imports Cinnamon Dconf Settings
+            ./2-dconf-settings.nix
+        ];
+        xsession =  {
+            scriptPath = ".local/share/X11/xsession";
+            initExtra =  "ERRFILE=$HOME/.local/share/X11/xsession-errors";
+        };
+    };
+ }
 
