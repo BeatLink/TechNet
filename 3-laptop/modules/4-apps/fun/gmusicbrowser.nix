@@ -17,7 +17,13 @@
                 ];
                 allowOther = true;
             };
-            file.".config/autostart/org.gmusicbrowser.gmusicbrowser.desktop".source = config.lib.file.mkOutOfStoreSymlink "/var/lib/flatpak/app/org.gmusicbrowser.gmusicbrowser/current/active/files/share/applications/org.gmusicbrowser.gmusicbrowser.desktop";
+            file = {
+                ".config/autostart/org.gmusicbrowser.gmusicbrowser.desktop".source = config.lib.file.mkOutOfStoreSymlink "/var/lib/flatpak/exports/share/applications/org.gmusicbrowser.gmusicbrowser.desktop";
+                ".config/plank/dock1/launchers/org.gmusicbrowser.gmusicbrowser.dockitem".text = ''
+                    [PlankDockItemPreferences]
+                    Launcher=file:///var/lib/flatpak/exports/share/applications/org.gmusicbrowser.gmusicbrowser.desktop
+                '';
+            };
         };
     };
 }
