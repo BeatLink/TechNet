@@ -5,6 +5,7 @@
         home.persistence."/Storage/Files" = {
             directories = [
                 "Backups"
+                "Desktop"
                 "Documents"
                 "Downloads"
                 "eBooks"
