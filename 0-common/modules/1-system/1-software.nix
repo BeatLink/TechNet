@@ -38,7 +38,6 @@
             tree                                                        # For editing config files
             curl
             iputils
-            fastfetch
         ];
     };
 
