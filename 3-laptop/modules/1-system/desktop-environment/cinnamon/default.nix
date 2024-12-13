@@ -20,6 +20,12 @@
     };
     programs.dconf.enable = true;
 
+    services.flatpak.packages = [
+        "flathub:app/org.gtk.Gtk3theme.Mint-Y-Dark-Aqua//stable"
+        "flathub:app/org.gtk.Gtk3theme.Mint-Y-Aqua//stable"
+    ];
+
+
     home-manager.users.beatlink = {
         dconf.enable = true;
         imports = [
