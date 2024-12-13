@@ -14,7 +14,14 @@
                 ];
                 allowOther = true;
             };
-            file.".config/autostart/com.ulduzsoft.Birdtray.desktop".source = config.lib.file.mkOutOfStoreSymlink "/var/lib/flatpak/app/com.ulduzsoft.Birdtray/current/active/files/share/applications/com.ulduzsoft.Birdtray";
+            file = {
+                ".config/autostart/com.ulduzsoft.Birdtray.desktop".source = config.lib.file.mkOutOfStoreSymlink "/var/lib/flatpak/app/com.ulduzsoft.Birdtray/current/active/files/share/applications/com.ulduzsoft.Birdtray";
+                ".config/plank/dock1/launchers/org.mozilla.Thunderbird.dockitem".text = ''
+                    [PlankDockItemPreferences]
+                    Launcher=file:///var/lib/flatpak/exports/share/applications/org.mozilla.Thunderbird.desktop
+                '';
+
+            };
         };
     };
 }
