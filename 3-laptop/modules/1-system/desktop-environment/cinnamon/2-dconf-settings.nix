@@ -113,7 +113,7 @@ with lib.hm.gvariant;
       first-day-of-week = 0;
       font-name = "Noto Sans 12";
       gtk-overlay-scrollbars = true;
-      gtk-theme = "Mint-Y-Deep-Sky";
+      gtk-theme = "Mint-Y-Aqua";
       gtk-theme-backup = "Mint-Y-Aqua";
       icon-theme = "Mint-Y-Aqua";
       icon-theme-backup = "Mint-Y-Aqua";
@@ -284,7 +284,7 @@ with lib.hm.gvariant;
     };
 
     "org/cinnamon/theme" = {
-      name = "Mint-Y-Dark-Deep-Sky";
+      name = "Mint-Y-Dark-Aqua";
     };
 
   };
