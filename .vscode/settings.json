@@ -4,7 +4,18 @@
         "editor.tabSize": 4
     },
     "cSpell.words": [
+        "avahi",
+        "dconf",
         "disko",
-        "pkgs"
+        "dockitem",
+        "flathub",
+        "gvariant",
+        "libinput",
+        "nemo",
+        "nixpkgs",
+        "pkgs",
+        "virt",
+        "warpinator",
+        "xsession"
     ]
 }
