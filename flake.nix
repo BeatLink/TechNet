@@ -43,6 +43,7 @@
                     ./0-common
                     ./1-backup-server
                 ];                
+                specialArgs = { inherit impermanence; };
             };
             Heimdall = nixpkgs-unstable.lib.nixosSystem {
                 system = "x86_64-linux";
@@ -55,6 +56,7 @@
                     ./0-common
                     ./2-server
                 ];
+                specialArgs = { inherit impermanence; };
             };
             Odin = nixpkgs-unstable.lib.nixosSystem {
                 system = "x86_64-linux";
