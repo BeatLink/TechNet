@@ -5,5 +5,7 @@
 ###########################################################################################################################################
 { config, lib, pkgs, modulesPath, ... }: 
 {
-    environment.systemPackages = with pkgs; [ earlyoom ];                     # Installs earlyoom
+    services.earlyoom = {
+      enable = true;
+    };
 }
