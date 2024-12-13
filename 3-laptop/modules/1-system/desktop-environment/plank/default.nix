@@ -25,55 +25,6 @@
             };
             file = {
                 ".config/autostart/plank.desktop".source = "${pkgs.plank}/share/applications/plank.desktop";       # Configures plank to autostart on login
-                
-                ".config/plank/dock1/launchers/firefox.dockitem".text = ''
-                    [PlankDockItemPreferences]
-                    Launcher=file:///var/lib/flatpak/exports/share/applications/org.mozilla.firefox.desktop
-                '';
-
-                ".config/plank/dock1/launchers/org.keepassxc.KeePassXC.dockitem".text = ''
-                    [PlankDockItemPreferences]
-                    Launcher=file:///var/lib/flatpak/exports/share/applications/org.keepassxc.KeePassXC.desktop
-                '';
-
-                ".config/plank/dock1/launchers/org.mozilla.Thunderbird.dockitem".text = ''
-                    [PlankDockItemPreferences]
-                    Launcher=file:///var/lib/flatpak/exports/share/applications/org.mozilla.Thunderbird.desktop
-                '';
-
-                ".config/plank/dock1/launchers/im.riot.Riot.dockitem".text = ''
-                    [PlankDockItemPreferences]
-                    Launcher=file:///var/lib/flatpak/exports/share/applications/im.riot.Riot.desktop
-                '';
-
-                ".config/plank/dock1/org.gmusicbrowser.gmusicbrowser.dockitem".text = ''
-                    [PlankDockItemPreferences]
-                    Launcher=file:///var/lib/flatpak/exports/share/applications/org.gmusicbrowser.gmusicbrowser.desktop
-                '';
-
-
-                ".config/plank/dock1/com.stremio.Stremio.dockitem".text = ''
-                    [PlankDockItemPreferences]
-                    Launcher=file:///var/lib/flatpak/exports/share/applications/com.stremio.Stremio.desktop
-                '';
-
-                ".config/plank/dock1/io.lmms.LMMS.dockitem".text = ''
-                    [PlankDockItemPreferences]
-                    Launcher=file:///var/lib/flatpak/exports/share/applications/io.lmms.LMMS.desktop
-                '';
-
-                ".config/plank/dock1/launchers/com.vscodium.codium.dockitem".text = ''
-                    [PlankDockItemPreferences]
-                    Launcher=file:///var/lib/flatpak/exports/share/applications/com.vscodium.codium.desktop
-                '';
-                ".config/plank/dock1/launchers/home-assistant.dockitem".text = ''
-                    [PlankDockItemPreferences]
-                    Launcher=file:///home/beatlink/.local/share/applications/home-assistant.desktop
-                '';
-                ".config/plank/dock1/launchers/nextcloud.dockitem".text = ''
-                    [PlankDockItemPreferences]
-                    Launcher=file:///home/beatlink/.local/share/applications/nextcloud.desktop
-                '';
             };
         };
         dconf.enable = true;                                    # Enables dconf which stores plank settings
