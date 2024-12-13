@@ -2,7 +2,7 @@
 {
 
     services.flatpak = {
-        preSwitchCommand = ''flatpak override --persist=.lmmsrc.xml io.lmms.LMMS'';
+        preSwitchCommand = ''sudo flatpak override --persist=. io.lmms.LMMS'';
         packages = ["flathub:app/io.lmms.LMMS//stable"];
         overrides."io.lmms.LMMS" = {
             filesystems = [
