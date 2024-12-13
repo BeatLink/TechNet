@@ -6,6 +6,7 @@
 { config, lib, pkgs, modulesPath, ... }: 
 {
     services.earlyoom = {
-      enable = true;
+        enable = true;
+        enableNotifications = true;
     };
 }
