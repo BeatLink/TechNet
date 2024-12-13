@@ -11,6 +11,7 @@
                 PrefersNonDefaultGPU=false
                 Icon=goa-account-owncloud
                 Type=Application
+                Categories=Network
             '';
 
             ".config/plank/dock1/launchers/nextcloud.dockitem".text = ''
