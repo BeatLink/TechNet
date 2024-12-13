@@ -37,8 +37,9 @@
                 system = "aarch64-linux";
                 modules = [
                     "${nixpkgs-unstable}/nixos/modules/installer/sd-card/sd-image.nix"
-                    home-manager.nixosModules.home-manager
+                    impermanence.nixosModules.impermanence
                     sops-nix.nixosModules.sops
+                    home-manager.nixosModules.home-manager
                     ./0-common
                     ./1-backup-server
                 ];                
