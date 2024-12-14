@@ -6,6 +6,6 @@
         ./dconf-editor.nix
         ./nvidia.nix
         ./nemo
-        #./vorta.nix
+        ./vorta.nix
     ];
 }
