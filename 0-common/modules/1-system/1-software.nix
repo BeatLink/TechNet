@@ -38,6 +38,7 @@
             tree                                                        # For editing config files
             curl
             iputils
+            sops
         ];
     };
 
