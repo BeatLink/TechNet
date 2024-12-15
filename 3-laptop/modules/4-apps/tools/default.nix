@@ -3,6 +3,7 @@
     imports = [
         ./decoder.nix
         #./deluge.nix
+        ./dupeguru.nix
         ./libreoffice.nix
         ./partition-manager.nix
         ./qdirstat.nix
