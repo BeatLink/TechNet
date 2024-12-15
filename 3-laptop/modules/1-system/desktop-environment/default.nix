@@ -5,7 +5,8 @@
 { config, lib, pkgs, ... }:
 {
     imports = [              
-        ./cinnamon
+        ./budgie
+        #./cinnamon
         ./plank
     ];
 }

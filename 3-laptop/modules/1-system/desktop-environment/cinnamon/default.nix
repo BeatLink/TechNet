@@ -11,6 +11,7 @@
 
     services = {
         displayManager.logToFile = false;
+        displayManager.logToJournal = false;
         xserver = {
             enable = true;                                                          # Enables X11 Server
             displayManager.lightdm.enable = true;                                   # Enables LightDM Login Manager
