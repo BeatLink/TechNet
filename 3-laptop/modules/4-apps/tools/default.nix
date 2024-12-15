@@ -2,10 +2,9 @@
 {
     imports = [
         ./decoder.nix
-        ./virt-manager.nix
         #./deluge.nix
+        ./partition-manager.nix
         ./qdirstat.nix
-        #./redshift.nix
-        #./valent.nix
+        ./virt-manager.nix
     ];
 }
