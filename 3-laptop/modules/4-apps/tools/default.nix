@@ -4,7 +4,7 @@
         ./decoder.nix
         ./virt-manager.nix
         #./deluge.nix
-        ./filelight.nix
+        ./qdirstat.nix
         #./redshift.nix
         #./valent.nix
     ];
