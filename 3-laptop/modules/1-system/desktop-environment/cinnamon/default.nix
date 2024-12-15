@@ -10,10 +10,10 @@
 {  
 
     services = {
+        displayManager.logToFile = false;
         xserver = {
             enable = true;                                                          # Enables X11 Server
             displayManager.lightdm.enable = true;                                   # Enables LightDM Login Manager
-            displayManager.logToFile = false;
             desktopManager.cinnamon.enable = true;                                  # Enables Cinnamon
             xkb = {                                                                 # Sets the Keyboard Layout
                 layout = "us";
