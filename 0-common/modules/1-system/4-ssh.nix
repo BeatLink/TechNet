@@ -2,18 +2,52 @@
 #
 # Configures SSH for remote access and file transfers
 #
+# Settings
+#   - Enable SSH Daemon
+#   - Allow SFTP for file transfers
+#   - Disable all except public key authentication
+#   - Enable SSH in initrd for drive decryption
+#   - Set initrd ssh authentication to my client key
+#   - Set the initrd login command to the ask password agent
+#   - Add Heimdall's initrd and main ssh public keys for identification
+#   - Add configuration to login as root when accessing heimdall initrd and my user when accessing heimdall's main ssh
+#
 ###########################################################################################################################################
 
 { config, lib, pkgs, modulesPath, ... }: 
 {
     services.openssh = {
-        enable = true;                                                  # Enable the OpenSSH daemon.
-        allowSFTP = true;                                               # Allows file transfers over SSH
+        enable = true;
+        allowSFTP = true;
         settings = {
-            PasswordAuthentication = false;                             # Disables password based login
-            KbdInteractiveAuthentication = false;                       # Disables keyboard based login
+            PasswordAuthentication = false;
+            KbdInteractiveAuthentication = false;
             challengeResponseAuthentication = false;
-            PermitRootLogin = "no";                                     # Disables root login
+            PermitRootLogin = "no";
         };
+    };
+    boot.initrd = {
+        network.ssh = {
+            enable = true;
+            authorizedKeys = [ 
+                "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM4GfJHxZu55mhQPpL1MqLCrS4ws/1ZUodC/QicApyGF beatlink@technet" 
+            ];
+        };
+        systemd.users.root.shell = "/bin/systemd-tty-ask-password-agent";
+    };
+    programs.ssh = {
+        knownHosts = {
+            "heimdall-boot".publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJoZQ1rR5JCvRHw0PykObtYgoEIonLL/vaomPc3qscGF";
+            "heimdall".publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICBUbcOarWmNGo5LRtmpx8Tr7cW3nNO6UvfwMdv/qoMc";
+        };
+        extraConfig = ''
+            Host heimdall-boot
+                HostName 10.100.100.1
+                User root
+
+            Host heimdall
+                HostName 10.100.100.1
+                User beatlink
+        '';
     };
 }
