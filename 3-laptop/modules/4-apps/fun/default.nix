@@ -7,5 +7,6 @@
         ./lmms.nix
         #./steam.nix
         ./stremio.nix
+        ./vlc.nix
     ];
 }
