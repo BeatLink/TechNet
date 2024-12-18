@@ -16,6 +16,6 @@
         ./7-earlyoom.nix
         ./8-fastfetch.nix
         ./9-zramswap.nix
-        ./11-sops.nix
+        #./11-sops.nix
     ];
 }
