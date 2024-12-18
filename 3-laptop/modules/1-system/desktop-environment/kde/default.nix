@@ -21,8 +21,9 @@
         ];*/
 
         imports = [
-            ./workspace.nix
+            ./hot-corners.nix
             ./panels.nix
+            ./workspace.nix
         ];
     };
 }
