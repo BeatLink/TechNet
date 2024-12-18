@@ -39,6 +39,8 @@
             curl
             iputils
             sops
+            pciutils
+            usbutils
         ];
     };
 
