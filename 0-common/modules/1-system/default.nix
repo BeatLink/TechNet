@@ -17,5 +17,6 @@
         ./8-fastfetch.nix
         ./9-zramswap.nix
         #./11-sops.nix
+        ./bluetooth.nix
     ];
 }
