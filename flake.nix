@@ -2,7 +2,7 @@
     description = "flake for TechNet";
 
     inputs = {
-        nixpkgs-unstable = {
+        nixpkgs = {
             url = "github:NixOS/nixpkgs/nixos-unstable";
         };
         nixos-hardware = {
@@ -10,33 +10,38 @@
         };
         disko = {
             url = "github:nix-community/disko";
-            inputs.nixpkgs.follows = "nixpkgs-unstable";
+            inputs.nixpkgs.follows = "nixpkgs";
         };
         impermanence = {
            url = "github:nix-community/impermanence";
         };
         sops-nix = {
             url = "github:Mic92/sops-nix";
-            inputs.nixpkgs.follows = "nixpkgs-unstable";
+            inputs.nixpkgs.follows = "nixpkgs";
         };
         arion = {
             url = "github:hercules-ci/arion";
-            inputs.nixpkgs.follows = "nixpkgs-unstable";
+            inputs.nixpkgs.follows = "nixpkgs";
         };
         home-manager = {
             url = "github:nix-community/home-manager";
-            inputs.nixpkgs.follows = "nixpkgs-unstable";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
+        plasma-manager = {
+            url = "github:nix-community/plasma-manager";
+            inputs.nixpkgs.follows = "nixpkgs";
+            inputs.home-manager.follows = "home-manager";
         };
         flatpaks = {
             url = "github:GermanBread/declarative-flatpak";
         };
     };
-    outputs = { self, nixpkgs-unstable, nixos-hardware, disko, impermanence, sops-nix, arion, home-manager,  flatpaks, ... }: rec {
+    outputs = { self, nixpkgs, nixos-hardware, disko, impermanence, sops-nix, arion, home-manager, plasma-manager, flatpaks, ... }: rec {
         nixosConfigurations = {
-            Ragnarok = nixpkgs-unstable.lib.nixosSystem {
+            Ragnarok = nixpkgs.lib.nixosSystem {
                 system = "aarch64-linux";
                 modules = [
-                    "${nixpkgs-unstable}/nixos/modules/installer/sd-card/sd-image.nix"
+                    "${nixpkgs}/nixos/modules/installer/sd-card/sd-image.nix"
                     impermanence.nixosModules.impermanence
                     sops-nix.nixosModules.sops
                     home-manager.nixosModules.home-manager
@@ -45,7 +50,7 @@
                 ];                
                 specialArgs = { inherit impermanence; };
             };
-            Heimdall = nixpkgs-unstable.lib.nixosSystem {
+            Heimdall = nixpkgs.lib.nixosSystem {
                 system = "x86_64-linux";
                 modules = [
                     disko.nixosModules.disko
@@ -58,13 +63,14 @@
                 ];
                 specialArgs = { inherit impermanence; };
             };
-            Odin = nixpkgs-unstable.lib.nixosSystem {
+            Odin = nixpkgs.lib.nixosSystem {
                 system = "x86_64-linux";
                 modules = [
                     disko.nixosModules.disko
                     impermanence.nixosModules.impermanence
                     sops-nix.nixosModules.sops
                     home-manager.nixosModules.home-manager
+                    {home-manager.sharedModules = [ plasma-manager.homeManagerModules.plasma-manager ];}
                     flatpaks.nixosModules.declarative-flatpak
                     nixos-hardware.nixosModules.lenovo-ideapad-15ach6
                     ./0-common
