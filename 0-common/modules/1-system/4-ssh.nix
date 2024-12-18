@@ -49,5 +49,6 @@
                 HostName 10.100.100.1
                 User beatlink
         '';
+        startAgent = true;
     };
 }
