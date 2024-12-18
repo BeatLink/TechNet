@@ -2,7 +2,7 @@
 {
     # services.flatpak.packages = [ "flathub:app/com.borgbase.Vorta//stable" ];
     
-    
+    environment.systemPackages = with pkgs; [ syncthingtray ];
     home-manager.users.beatlink = { config, pkgs, ... }: {
         services.syncthing = {
             enable = true;
