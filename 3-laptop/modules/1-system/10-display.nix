@@ -1,12 +1,12 @@
 { config, lib, pkgs, ... }:
 {
     hardware.graphics.enable = true;
-    services.xserver.videoDrivers = ["nvidia" "amdgpu"];
+    services.xserver.videoDrivers = ["amdgpu" "nvidia"];
     hardware.nvidia = {
         modesetting.enable = true;
         powerManagement = {
-            enable = true;
-            finegrained = true;
+            enable = false;
+            finegrained = false;
         };
         open = false;
         nvidiaSettings = true;
