@@ -5,23 +5,22 @@
             powerButtonAction = "showLogoutScreen";
             autoSuspend = {
                 action = "sleep";
-                idleTimeout = 300;
+                idleTimeout = 900;
             };
             whenSleepingEnter = "standby";
             whenLaptopLidClosed = "sleep"; 
             dimDisplay = {
                 enable = true;
-                idleTimeout = 90;
+                idleTimeout = 240;
             };
             turnOffDisplay = {
-                idleTimeout = 120;
-                idleTimeoutWhenLocked = 30;
+                idleTimeout = 300;
+                idleTimeoutWhenLocked = 60;
             };
             inhibitLidActionWhenExternalMonitorConnected = true;
             displayBrightness = 100;
             powerProfile = "performance";
         };
-        
         battery = {
             powerButtonAction = "showLogoutScreen";
             autoSuspend = {
