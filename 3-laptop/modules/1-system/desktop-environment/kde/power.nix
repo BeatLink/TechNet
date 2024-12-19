@@ -2,7 +2,7 @@
 {
     programs.plasma.powerdevil = {
         AC = {
-            powerButtonActions = "showLogoutScreen";
+            powerButtonAction = "showLogoutScreen";
             autoSuspend = {
                 action = "sleep";
                 idleTimeout = 300;
@@ -13,15 +13,17 @@
                 enable = true;
                 idleTimeout = 90;
             };
-            turnOffDisplay = 120;
+            turnOffDisplay = {
+                idleTimeout = 120;
+                idleTimeoutWhenLocked = 30;
+            };
             inhibitLidActionWhenExternalMonitorConnected = true;
-            idleTimeoutWhenLocked = 30;
             displayBrightness = 100;
             powerProfile = "performance";
         };
         
         battery = {
-            powerButtonActions = "showLogoutScreen";
+            powerButtonAction = "showLogoutScreen";
             autoSuspend = {
                 action = "sleep";
                 idleTimeout = 120;
@@ -32,14 +34,16 @@
                 enable = true;
                 idleTimeout = 60;
             };
-            turnOffDisplay = 90;
+        turnOffDisplay = {
+                idleTimeout = 90;
+                idleTimeoutWhenLocked = 30;
+            };
             inhibitLidActionWhenExternalMonitorConnected = true;
-            idleTimeoutWhenLocked = 30;
             displayBrightness = 100;
             powerProfile = "balanced";
         };
         lowBattery = {
-            powerButtonActions = "showLogoutScreen";
+            powerButtonAction = "showLogoutScreen";
             autoSuspend = {
                 action = "sleep";
                 idleTimeout = 60;
@@ -50,9 +54,11 @@
                 enable = true;
                 idleTimeout = 30;
             };
-            turnOffDisplay = 45;
+            turnOffDisplay = {
+                idleTimeout = 45;
+                idleTimeoutWhenLocked = 30;
+            };    
             inhibitLidActionWhenExternalMonitorConnected = true;
-            idleTimeoutWhenLocked = 30;
             displayBrightness = 10;
             powerProfile = "powerSaving";
         };
