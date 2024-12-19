@@ -4,8 +4,10 @@
     services.xserver.videoDrivers = ["nvidia" "amdgpu"];
     hardware.nvidia = {
         modesetting.enable = true;
-        powerManagement.enable = false;
-        powerManagement.finegrained = false;
+        powerManagement = {
+            enable = true;
+            finegrained = true;
+        };
         open = false;
         nvidiaSettings = true;
         package = config.boot.kernelPackages.nvidiaPackages.stable;
