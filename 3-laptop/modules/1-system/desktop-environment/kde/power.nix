@@ -2,7 +2,7 @@
 {
     programs.plasma.powerdevil = {
         AC = {
-            powerButtonActions = "showLogoutScreen";
+            powerButtonAction = "showLogoutScreen";
             autoSuspend = {
                 action = "sleep";
                 idleTimeout = 300;
@@ -23,7 +23,7 @@
         };
         
         battery = {
-            powerButtonActions = "showLogoutScreen";
+            powerButtonAction = "showLogoutScreen";
             autoSuspend = {
                 action = "sleep";
                 idleTimeout = 120;
@@ -43,7 +43,7 @@
             powerProfile = "balanced";
         };
         lowBattery = {
-            powerButtonActions = "showLogoutScreen";
+            powerButtonAction = "showLogoutScreen";
             autoSuspend = {
                 action = "sleep";
                 idleTimeout = 60;
