@@ -4,7 +4,12 @@
     services.displayManager.sddm.wayland.enable = true;
     services.desktopManager.plasma6.enable = true;
 
+
     programs.kdeconnect.enable = true;
+
+    services.flatpak.packages = [ "flathub:app/org.gtk.Gtk3theme.Breeze//stable" ];
+
+    #org.gtk.Gtk3theme.Breeze
 
     environment.plasma6.excludePackages = with pkgs.kdePackages; [
         elisa
@@ -13,7 +18,6 @@
     ];
 
     home-manager.users.beatlink = { config, pkgs, ... }: {
-
         programs.plasma.enable = true;
 
         /*input.touchpads = [
