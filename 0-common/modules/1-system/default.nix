@@ -15,7 +15,6 @@
         ./6-fail2ban.nix
         ./7-earlyoom.nix
         ./8-fastfetch.nix
-        ./9-zramswap.nix
         #./11-sops.nix
         ./bluetooth.nix
     ];
