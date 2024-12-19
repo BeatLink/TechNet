@@ -24,6 +24,7 @@
             ./hot-corners.nix
             ./panels.nix
             ./power.nix
+            ./screenlock.nix
             ./workspace.nix
         ];
     };
