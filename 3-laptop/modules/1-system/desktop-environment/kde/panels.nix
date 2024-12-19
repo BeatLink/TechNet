@@ -21,12 +21,13 @@
                     };
                 }
                 "org.kde.plasma.panelspacer"
+                "martchus.syncthingplasmoid"
                 "org.kde.plasma.systemtray"
             ];
         }
         {
             location = "bottom";
-            height = 32;
+            height = 48;
             lengthMode = "fit";
             hiding = "dodgewindows";
             floating = true;
