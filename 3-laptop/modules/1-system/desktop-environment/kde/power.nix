@@ -13,9 +13,11 @@
                 enable = true;
                 idleTimeout = 90;
             };
-            turnOffDisplay.idleTimeout = 120;
+            turnOffDisplay = {
+                idleTimeout = 120;
+                idleTimeoutWhenLocked = 30;
+            };
             inhibitLidActionWhenExternalMonitorConnected = true;
-            idleTimeoutWhenLocked = 30;
             displayBrightness = 100;
             powerProfile = "performance";
         };
@@ -32,9 +34,11 @@
                 enable = true;
                 idleTimeout = 60;
             };
-            turnOffDisplay.idleTimeout = 90;
+        turnOffDisplay = {
+                idleTimeout = 90;
+                idleTimeoutWhenLocked = 30;
+            };
             inhibitLidActionWhenExternalMonitorConnected = true;
-            idleTimeoutWhenLocked = 30;
             displayBrightness = 100;
             powerProfile = "balanced";
         };
@@ -50,9 +54,11 @@
                 enable = true;
                 idleTimeout = 30;
             };
-            turnOffDisplay.idleTimeout = 45;
+            turnOffDisplay = {
+                idleTimeout = 45;
+                idleTimeoutWhenLocked = 30;
+            };    
             inhibitLidActionWhenExternalMonitorConnected = true;
-            idleTimeoutWhenLocked = 30;
             displayBrightness = 10;
             powerProfile = "powerSaving";
         };
