@@ -4,7 +4,8 @@
         Effect-overview.BorderActivate = 5;
         Effect-windowview.BorderActivateAll = 3;
         ElectricBorders.TopRight = "ShowDesktop";
-
+        Windows.ElectricBorderCooldown = 50;
+        Windows.ElectricBorderDelay = 0;
     };
 }
 

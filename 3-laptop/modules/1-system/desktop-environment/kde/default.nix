@@ -23,6 +23,7 @@
         imports = [
             ./hot-corners.nix
             ./panels.nix
+            ./power.nix
             ./workspace.nix
         ];
     };
