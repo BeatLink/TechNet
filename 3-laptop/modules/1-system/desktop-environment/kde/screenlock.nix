@@ -12,4 +12,4 @@
             showMediaControls = false;
         };
     };
-};
+}
