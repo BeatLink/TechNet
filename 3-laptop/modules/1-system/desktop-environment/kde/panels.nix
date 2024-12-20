@@ -1,34 +1,19 @@
 { config, lib, pkgs, ... }:
 {
-    home.file = {
-        ".local/share/plasma-manager/separator-blank.png".source = ./separator-blank.png;
-        ".local/share/applications/separator1.desktop".text = ''
-            [Desktop Entry]
-            Name=Space
-            Exec=true
-            Terminal=false
-            Hidden=true
-            Type=Application
-            Icon=/home/beatlink/.local/share/plasma-manager/separator-blank.png
-        '';
-        ".local/share/applications/separator2.desktop".text = ''
-            [Desktop Entry]
-            Name=Space
-            Exec=true
-            Terminal=false
-            Hidden=true
-            Type=Application
-            Icon=/home/beatlink/.local/share/plasma-manager/separator-blank.png
-        '';
-        ".local/share/applications/separator3.desktop".text = ''
-            [Desktop Entry]
-            Name=Space
-            Exec=true
-            Terminal=false
-            Hidden=true
-            Type=Application
-            Icon=/home/beatlink/.local/share/plasma-manager/separator-blank.png
-        '';
+    home.persistence."/Storage/Apps/System/Separators/" = {
+        files = [
+            ".local/share/icons/separator-black-horizontal.png"
+            ".local/share/icons/separator-black-vertical.png"
+            ".local/share/icons/separator-blank.png"
+            ".local/share/icons/separator-white-horizontal.png"
+            ".local/share/icons/separator-white-vertical.png"
+            ".local/share/applications/separator1.desktop"
+            ".local/share/applications/separator2.desktop"
+            ".local/share/applications/separator3.desktop"
+            ".local/share/applications/separator4.desktop"
+            ".local/share/applications/separator5.desktop"
+        ];
+        allowOther = true;
     };
     programs.plasma.panels = [
         {
@@ -74,13 +59,13 @@
                             # Trillium
                             # Money Manager
                             "applications:org.kde.dolphin.desktop"
-                            "applications:separator1.desktop"
+                            "file:///home/beatlink/.local/share/applications/separator1.desktop"
                             "applications:org.mozilla.Thunderbird.desktop"
                             "applications:whatsapp.desktop"
                             "applications:whatsapp-private.desktop"
                             "applications:im.riot.Riot.desktop"
                             "applications:com.discordapp.Discord.desktop"
-                            "applications:separator2.desktop"
+                            "file:///home/beatlink/.local/share/applications/separator2.desktop"
                             # Newsflash
                             "applications:org.gmusicbrowser.gmusicbrowser.desktop"
                             "applications:io.freetubeapp.FreeTube.desktop"
@@ -89,9 +74,10 @@
                             # Calibre
                             # LMMS
                             "applications:org.kde.gwenview.desktop"
-                            "applications:separator3.desktop"
+                            "file:///home/beatlink/.local/share/applications/separator3.desktop"
                             # Home Assistant
                             # Nextcloud
+                            "file:///home/beatlink/.local/share/applications/separator4.desktop"
                             "applications:org.kde.konsole.desktop"
                             "applications:com.vscodium.codium.desktop"
                             # Virt Manager
