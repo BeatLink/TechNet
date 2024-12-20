@@ -1,7 +1,5 @@
 { config, pkgs, ... }: 
 {
-    # services.flatpak.packages = [ "flathub:app/com.borgbase.Vorta//stable" ];
-    
     environment.systemPackages = with pkgs; [ syncthingtray ];
     home-manager.users.beatlink = { config, pkgs, ... }: {
         services.syncthing = {
@@ -79,21 +77,16 @@
                     };
                 };
             };
-
-
         };
-
-
-    
-            /*persistence."/Storage/Apps/System/Vorta" = {
-                directories = [
-                    ".var/app/com.borgbase.Vorta"
-                ];
-                allowOther = true;
-            };
-            file = {
-                ".config/autostart/com.borgbase.Vorta.desktop".source = config.lib.file.mkOutOfStoreSymlink "/var/lib/flatpak/exports/share/applications/com.borgbase.Vorta.desktop";
-            };*/
+        home.persistence."/Storage/Apps/TechNet/SyncThing" = {
+            directories = [
+                ".local/state/syncthing"
+            ];
+            files = [
+                ".config/syncthingtray.ini"
+            ];
+            allowOther = true;
+        };
     };
 }
 
