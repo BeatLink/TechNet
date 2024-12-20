@@ -25,6 +25,15 @@
             };
             file = {
                 ".config/autostart/plank.desktop".source = "${pkgs.plank}/share/applications/plank.desktop";       # Configures plank to autostart on login
+                ".config/plank/dock1/launchers/WhatsApp.dockitem".text = ''
+                    [PlankDockItemPreferences]
+                    Launcher=file:///home/beatlink/.local/share/applications/whatsapp.desktop
+                '';
+            
+                ".config/plank/dock1/launchers/WhatsApp (Private).dockitem".text = ''
+                    [PlankDockItemPreferences]
+                    Launcher=file:///home/beatlink/.local/share/applications/whatsapp-private.desktop
+                '';
             };
         };
         dconf.enable = true;                                    # Enables dconf which stores plank settings
