@@ -1,6 +1,6 @@
 { config, lib, pkgs, ... }:
 {
-    environment.systemPackages = with pkgs; [ nixd ];
+    environment.systemPackages = with pkgs; [ nixd nixpkgs-fmt ];
     services.flatpak = {
         packages = ["flathub:app/com.vscodium.codium//stable"];
         overrides."com.vscodium.codium" = {
