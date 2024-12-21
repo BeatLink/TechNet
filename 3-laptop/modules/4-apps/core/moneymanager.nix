@@ -13,6 +13,7 @@
             persistence."/Storage/Apps/Core/MoneyManager" = {
                 directories = [
                     ".var/app/org.moneymanagerex.MMEX"
+                    ".mmex"
                 ];
                 allowOther = true;
             };
