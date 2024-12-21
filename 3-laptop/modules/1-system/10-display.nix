@@ -1,7 +1,6 @@
 { config, lib, pkgs, ... }:
 {
     hardware.graphics.enable = true;
-    services.xserver.videoDrivers = ["modesetting"];
     hardware.nvidia = {
         modesetting.enable = true;
         powerManagement = {
