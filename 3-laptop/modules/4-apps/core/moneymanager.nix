@@ -2,7 +2,7 @@
 {
     services.flatpak = {
         packages = [ "flathub:app/org.moneymanagerex.MMEX//stable" ];
-        overrides."io.lmms.LMMS" = {
+        overrides."org.moneymanagerex.MMEX" = {
             filesystems = [
                 "/Storage/Files/Documents"
             ];
