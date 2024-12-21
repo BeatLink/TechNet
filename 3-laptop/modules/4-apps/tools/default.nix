@@ -1,6 +1,7 @@
 { config, lib, pkgs, ... }:
 {
     imports = [
+        ./clock.nix
         ./decoder.nix
         #./deluge.nix
         ./dupeguru.nix
