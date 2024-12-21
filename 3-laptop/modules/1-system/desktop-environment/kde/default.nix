@@ -7,7 +7,7 @@
 
     programs.kdeconnect.enable = true;
 
-    services.flatpak.packages = [ "flathub:app/org.gtk.Gtk3theme.Breeze//stable" ];
+    # services.flatpak.packages = [ "flathub:runtime/org.gtk.Gtk3theme.Breeze//stable" ];
 
     #org.gtk.Gtk3theme.Breeze
 
