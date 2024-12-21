@@ -40,7 +40,7 @@
             iputils
             sops
             pciutils
-            usbutils
+            usbutils 
         ];
     };
 
