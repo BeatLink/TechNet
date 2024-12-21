@@ -57,7 +57,7 @@
                             "applications:org.mozilla.firefox.desktop"
                             "applications:org.keepassxc.KeePassXC.desktop"
                             # Trillium
-                            # Money Manager
+                            "applications:org.moneymanagerex.MMEX.desktop"
                             "applications:org.kde.dolphin.desktop"
                             "file:///home/beatlink/.local/share/applications/separator1.desktop"
                             "applications:org.mozilla.Thunderbird.desktop"
