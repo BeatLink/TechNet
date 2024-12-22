@@ -5,7 +5,7 @@
         ./freetube.nix
         ./gmusicbrowser.nix
         ./lmms.nix
-        #./steam.nix
+        ./steam.nix
         ./stremio.nix
         ./vlc.nix
     ];
