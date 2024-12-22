@@ -1,16 +1,5 @@
 { config, lib, pkgs, ... }:
-let
-    keepassxc-ssh-prompt = pkgs.writeShellScript  "keepassxc-ssh-prompt.sh" ''
-        until ssh-add -l &> /dev/null
-        do
-            echo "Waiting for agent. Please unlock the database."
-            flatpak run org.keepassxc.KeePassXC &> /dev/null
-            sleep 1
-        done
-
-        /usr/bin/nc "$1" "$2"
-    '';
- in {
+{
     services.flatpak.packages = ["flathub:app/org.keepassxc.KeePassXC//stable"];
     home-manager.users.beatlink = { config, pkgs, ... }: {
         home = {
@@ -30,7 +19,4 @@ let
             };
         };
     };
-    programs.ssh.extraConfig = ''
-        ProxyCommand ${keepassxc-ssh-prompt} %h %p
-    '';
 }
