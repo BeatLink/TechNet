@@ -36,6 +36,7 @@
                     };
                 }
                 "org.kde.plasma.panelspacer"
+                # "com.gitlab.scias.plasmavantage" #TODO: Enable once packaged for nix
                 "martchus.syncthingplasmoid"
                 "org.kde.plasma.systemtray"
             ];
@@ -56,7 +57,7 @@
                         General.launchers = [
                             "applications:org.mozilla.firefox.desktop"
                             "applications:org.keepassxc.KeePassXC.desktop"
-                            # Trillium
+                            "applications:Trilium.desktop"
                             "applications:org.moneymanagerex.MMEX.desktop"
                             "applications:org.kde.dolphin.desktop"
                             "file:///home/beatlink/.local/share/applications/separator1.desktop"
@@ -70,7 +71,7 @@
                             "applications:org.gmusicbrowser.gmusicbrowser.desktop"
                             "applications:io.freetubeapp.FreeTube.desktop"
                             "applications:com.stremio.Stremio.desktop"
-                            # Steam
+                            "applications:com.valvesoftware.Steam"
                             # Calibre
                             # LMMS
                             "applications:org.kde.gwenview.desktop"
