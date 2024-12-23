@@ -1,15 +1,16 @@
 { config, lib, pkgs, ... }:
 {
-    services.flatpak.packages = ["flathub:app/com.github.zadam.trilium//stable"];
+   
+    environment.systemPackages = [(pkgs.callPackage ./trilium { })];
     home-manager.users.beatlink = { config, pkgs, ... }: {
         home = {
             persistence."/Storage/Apps/Core/Trilium" = {
                 directories = [
-                    ".var/app/com.github.zadam.trilium"
+                    ".local/share/trilium-data"
+                    ".config/TriliumNext Notes"
                 ];
                 allowOther = true;
             };
-            # file.".config/autostart/org.keepassxc.KeePassXC".source = config.lib.file.mkOutOfStoreSymlink "/var/lib/flatpak/app/org.keepassxc.KeePassXC/current/active/files/share/applications/org.keepassxc.KeePassXC.desktop";
         };
     };
 }
