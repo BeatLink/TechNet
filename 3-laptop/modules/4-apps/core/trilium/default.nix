@@ -12,6 +12,7 @@
   copyDesktopItems,
   wrapGAppsHook3,
   asar,
+  ...
 }:
 
 let
