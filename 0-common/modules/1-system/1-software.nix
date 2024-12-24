@@ -27,6 +27,8 @@
         dates = "02:00";
         randomizedDelaySec = "45min";
     };
+    systemd.extraConfig = "DefaultLimitNOFILE=65536";                  # Increase number of open files (Steam, syncthing, etc)
+
     environment = {
         defaultPackages = lib.mkForce [];
         systemPackages = with pkgs; [                                   # Set packages installed on system
