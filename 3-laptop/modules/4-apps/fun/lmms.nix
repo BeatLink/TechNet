@@ -7,7 +7,6 @@
         overrides."io.lmms.LMMS" = {
             filesystems = [
                 "/Storage/Files/Sounds"
-                "!home"
             ];
         };
     };
@@ -16,6 +15,9 @@
             persistence."/Storage/Apps/Fun/LMMS" = {
                 directories = [
                     ".var/app/io.lmms.LMMS"
+                ];
+                files = [
+                    ".lmmsrc.xml"
                 ];
                 allowOther = true;
             };
