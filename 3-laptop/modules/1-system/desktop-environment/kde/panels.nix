@@ -36,7 +36,7 @@
                     };
                 }
                 "org.kde.plasma.panelspacer"
-                # "com.gitlab.scias.plasmavantage" #TODO: Enable once packaged for nix
+                "com.gitlab.scias.plasmavantage" #TODO: Enable once packaged for nix
                 "martchus.syncthingplasmoid"
                 "org.kde.plasma.systemtray"
             ];
@@ -71,7 +71,7 @@
                             "applications:org.gmusicbrowser.gmusicbrowser.desktop"
                             "applications:io.freetubeapp.FreeTube.desktop"
                             "applications:com.stremio.Stremio.desktop"
-                            "applications:com.valvesoftware.Steam"
+                            "applications:com.valvesoftware.Steam.desktop"
                             # Calibre
                             # LMMS
                             "applications:org.kde.gwenview.desktop"
