@@ -1,11 +1,12 @@
 { config, lib, pkgs, ... }:
 {
-    environment.systemPackages = with pkgs; [ nixd nixpkgs-fmt ];
+    environment.systemPackages = with pkgs; [ nixd nixfmt-rfc-style ];
     services.flatpak = {
         packages = ["flathub:app/com.vscodium.codium//stable"];
         overrides."com.vscodium.codium" = {
             filesystems = [
                 "/home/beatlink/.config/git:ro"
+                "host"
             ];
         };
     };
