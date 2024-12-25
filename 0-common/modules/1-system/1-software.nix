@@ -18,16 +18,17 @@
     nixpkgs.config.allowUnfree = true;                                  # Allow unfree packages
     system.autoUpgrade = {
         enable = true;
-        allowReboot = true;
         flake = "github:BeatLink/TechNet";
+        operation = "switch";
         flags = [
             "--no-write-lock-file"
             "-L"
         ];
         dates = "02:00";
-        randomizedDelaySec = "45min";
+        randomizedDelaySec = "15min";
+        allowReboot = true;
+        persistent = true;
     };
-    systemd.extraConfig = "DefaultLimitNOFILE=65536";                   # Increase number of open files (Steam, syncthing, etc)
     environment = {
         defaultPackages = lib.mkForce [];
         systemPackages = with pkgs; [                                   # Set packages installed on system
@@ -44,4 +45,5 @@
             usbutils 
         ];
     };
+    systemd.extraConfig = "DefaultLimitNOFILE=65536";                   # Increase number of open files (Steam, syncthing, etc)
 }
