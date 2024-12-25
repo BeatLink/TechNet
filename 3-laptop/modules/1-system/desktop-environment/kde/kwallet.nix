@@ -1,7 +1,11 @@
+# KWallet #######################################################################################################################
+#
+# This module disables KWallet since we are using KeePassXC to store all credentials
+#
+#################################################################################################################################
 
 { config, lib, pkgs, ... }:
 {
-    # environment.systemPackages = with pkgs; [ dolphin ];
     home-manager.users.beatlink = { config, pkgs, ... }: {
         programs.plasma.configFile = {
             "kwalletrc" =  {
