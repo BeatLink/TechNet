@@ -42,4 +42,5 @@
             "udev.log_priority=3"
         ];*/
     };
+    services.fstrim.enable = true;
 }
