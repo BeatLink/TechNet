@@ -16,11 +16,14 @@
         kate
     ];
     imports = [                                                         # Import Other Modules
+        ./dolphin.nix
         ./hot-corners.nix
+        ./kde-connect.nix
         ./panels.nix
         ./power.nix
         ./screenlock.nix
         ./workspace.nix
+        
     ];
 
     # services.flatpak.packages = [ "flathub:runtime/org.gtk.Gtk3theme.Breeze//stable" ];
