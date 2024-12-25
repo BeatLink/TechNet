@@ -1,4 +1,10 @@
+# FastFetch ###############################################################################################################################
+#
+# A terminal based system info tool similar to neofetch                                                
+#
+###########################################################################################################################################
+
 { config, lib, pkgs, ... }:
 {
-    environment.systemPackages = with pkgs; [ fastfetch ];                          # Install fastfetch
+    environment.systemPackages = with pkgs; [ fastfetch ];
 }
