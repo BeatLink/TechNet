@@ -42,6 +42,33 @@
                             psk = "$TECHNET_WIFI_PASSWORD";
                         };
                     };
+                    "Digicel_5G_WiFi_5tDQ" = {
+                        connection = {
+                            id = "Digicel_5G_WiFi_5tDQ";
+                            permissions = "";
+                            type = "wifi";
+                        };
+                        ipv4 = {
+                            dns = "10.100.100.1";
+                            dns-search = "";
+                            method = "auto";
+                        };
+                        ipv6 = {
+                            addr-gen-mode = "stable-privacy";
+                            dns-search = "";
+                            method = "auto";
+                        };
+                        wifi = {
+                            mac-address-blacklist = "";
+                            mode = "infrastructure";
+                            ssid = "Digicel_5G_WiFi_5tDQ";
+                        };
+                        wifi-security = {
+                            auth-alg = "open";
+                            key-mgmt = "wpa-psk";
+                            psk = "$FAMILY_HOME_WIFI_PASSWORD";
+                        };
+                    };
                     "TechNet WireGuard" = {
                         connection = {
                             id = "TechNet Wireguard";
