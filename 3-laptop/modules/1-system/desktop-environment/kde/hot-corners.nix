@@ -1,11 +1,13 @@
 { config, lib, pkgs, ... }:
 {
-    programs.plasma.configFile.kwinrc =  {
-        Effect-overview.BorderActivate = 5;
-        Effect-windowview.BorderActivateAll = 3;
-        ElectricBorders.TopRight = "ShowDesktop";
-        Windows.ElectricBorderCooldown = 500;
-        Windows.ElectricBorderDelay = 0;
+    home-manager.users.beatlink = { config, pkgs, ... }: {
+        programs.plasma.configFile.kwinrc =  {
+            Effect-overview.BorderActivate = 5;
+            Effect-windowview.BorderActivateAll = 3;
+            ElectricBorders.TopRight = "ShowDesktop";
+            Windows.ElectricBorderCooldown = 500;
+            Windows.ElectricBorderDelay = 0;
+        };
     };
 }
 
