@@ -19,6 +19,7 @@
         ./dolphin.nix
         ./hot-corners.nix
         ./kde-connect.nix
+        ./kwallet.nix
         ./panels.nix
         ./power.nix
         ./screenlock.nix
