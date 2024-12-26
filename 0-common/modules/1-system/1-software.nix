@@ -42,7 +42,7 @@ in {
         preStart = ''
             wget --spider "${systemUpdateUptimeKumaURL.${config.networking.hostName}}?status=up&msg=System Upgrades Started&ping=";
         '';
-        serviceConfig.ExecStopPost =  ''
+        postStop =  ''
             if [ "$SERVICE_RESULT" == "success" ]; then
                 wget --spider "${systemUpdateUptimeKumaURL.${config.networking.hostName}}?status=up&msg=System Upgrades Completed Successfully&ping=";
             else
