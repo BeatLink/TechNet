@@ -5,9 +5,9 @@
 
 FLAKEDIR=$(cd "$(dirname "$0")/../../"; pwd);
 nixos-rebuild \
-    --flake "$FLAKEDIR"/#Ragnarok \
-    --build-host "beatlink@10.100.100.5" \
-    --target-host "beatlink@10.100.100.5" \
+    --flake "$FLAKEDIR"#Ragnarok \
+    --build-host "beatlink@ragnarok.technet" \
+    --target-host "beatlink@ragnarok.technet" \
     --use-remote-sudo  \
     --fast \
     switch
