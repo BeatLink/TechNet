@@ -8,7 +8,6 @@
 {
     networking = {
         hostName = "Ragnarok";                                                      # Sets the hostName
-        nameservers = [ "10.100.100.1" "8.8.8.8" "1.1.1.1" ];           # Sets up dns
         useNetworkd = true;                                                         # Use Systemd-Networkd
         firewall.trustedInterfaces = [ "wireguard0" ];
     };
@@ -40,13 +39,15 @@
             ];
         };
         networks = {                                                                # Sets up the Ethernet Network
-            "01-eth0" = {
-                matchConfig.Name = "eth0";
+            "01-end0" = {
+                matchConfig.Name = "end0";
+                dns = [ "10.100.100.1" ];                                           # Sets up dns
                 networkConfig.DHCP = "ipv4";
                 linkConfig.RequiredForOnline = "routable";
             };                                                                      # Sets up the Wireguard Network
             "01-wireguard" = {
                 matchConfig.Name = "wireguard0";
+                dns = [ "10.100.100.1" ];                                           # Sets up dns
                 address = ["10.100.100.5/24"];
             };
         };
