@@ -8,6 +8,7 @@
 {
     networking = {
         hostName = "Ragnarok";                                                      # Sets the hostName
+        nameservers = [ "10.100.100.1" "8.8.8.8" "1.1.1.1" ];           # Sets up dns
         useNetworkd = true;                                                         # Use Systemd-Networkd
         firewall.trustedInterfaces = [ "wireguard0" ];
     };
