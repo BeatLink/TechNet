@@ -5,7 +5,15 @@
 ###########################################################################################################################################
 
 { config, lib, pkgs, modulesPath, ... }: 
-{
+
+let 
+    systemUpdateUptimeKumaURL = {
+        Ragnarok = "https://uptime-kuma.heimdall.technet/api/push/sTgpl4hkEc";
+        Odin = "https://uptime-kuma.heimdall.technet/api/push/Iy9Tfr31nG";
+        Heimdall = "https://uptime-kuma.heimdall.technet/api/push/urMFRtdrYA"; 
+    };
+
+in {
     nix = {                                                             # Enables Flakes
         extraOptions = ''experimental-features = nix-command flakes'';
         settings.trusted-users = [ "root" "beatlink" ];                 # Allows me to remote update by sending the flake over ssh
@@ -28,6 +36,19 @@
         randomizedDelaySec = "15min";
         allowReboot = true;
         persistent = true;
+    };
+
+    systemd.services.nixos-upgrade =  {
+        preStart = ''
+            wget --spider "${systemUpdateUptimeKumaURL.${config.networking.hostName}}?status=up&msg=System Upgrades Started&ping=";
+        '';
+        serviceConfig.ExecStopPost =  ''
+            if [ "$SERVICE_RESULT" == "success" ]; then
+                wget --spider "${systemUpdateUptimeKumaURL.${config.networking.hostName}}?status=up&msg=System Upgrades Completed Successfully&ping=";
+            else
+                wget --spider "${systemUpdateUptimeKumaURL.${config.networking.hostName}}?status=down&msg=System Upgrades Failed&ping=";
+            fi        
+        '';
     };
     environment = {
         defaultPackages = lib.mkForce [];
