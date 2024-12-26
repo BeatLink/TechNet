@@ -40,13 +40,13 @@ in {
 
     systemd.services.nixos-upgrade =  {
         preStart = ''
-            ${pkgs.wget}/bin/wget --spider "${systemUpdateUptimeKumaURL.${config.networking.hostName}}?status=up&msg=System Upgrades Started&ping=";
+            ${pkgs.wget}/bin/wget --spider --no-check-certificate "${systemUpdateUptimeKumaURL.${config.networking.hostName}}?status=up&msg=System Upgrades Started&ping=";
         '';
         postStop =  ''
             if [ "$SERVICE_RESULT" == "success" ]; then
-                ${pkgs.wget}/bin/wget --spider "${systemUpdateUptimeKumaURL.${config.networking.hostName}}?status=up&msg=System Upgrades Completed Successfully&ping=";
+                ${pkgs.wget}/bin/wget --spider --no-check-certificate "${systemUpdateUptimeKumaURL.${config.networking.hostName}}?status=up&msg=System Upgrades Completed Successfully&ping=";
             else
-                ${pkgs.wget}/bin/wget --spider "${systemUpdateUptimeKumaURL.${config.networking.hostName}}?status=down&msg=System Upgrades Failed&ping=";
+                ${pkgs.wget}/bin/wget --spider --no-check-certificate "${systemUpdateUptimeKumaURL.${config.networking.hostName}}?status=down&msg=System Upgrades Failed&ping=";
             fi        
         '';
     };
