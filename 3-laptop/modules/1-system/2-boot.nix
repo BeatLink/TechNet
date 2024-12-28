@@ -17,8 +17,7 @@
         initrd = {
             supportedFilesystems = [ "zfs" ];                           # Needed for impermanence
             systemd.enable = true;
-            verbose = false;
-    
+            #verbose = false;
         };
         /*plymouth = {
             enable = true;
