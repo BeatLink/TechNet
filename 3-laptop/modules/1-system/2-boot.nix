@@ -7,16 +7,7 @@
 { config, lib, pkgs, ... }:
 {
     boot = {
-        supportedFilesystems = [ "zfs" ];                               # Needed for impermanence
-        loader = {
-            systemd-boot.enable = true;                                 # Use Systemd-Boot to manage booting
-            grub.enable = false;                                        # Disable Grub since we're using Systemd-Boot
-            efi.canTouchEfiVariables = true;                            # Allows setting boot order, UEFI settings, etc
-            timeout = 0;
-        };
         initrd = {
-            supportedFilesystems = [ "zfs" ];                           # Needed for impermanence
-            systemd.enable = true;
             #verbose = false;
         };
         /*plymouth = {
