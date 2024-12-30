@@ -8,7 +8,9 @@
 
 { config, lib, pkgs, ... }:
 {  
-
+    imports = [
+        ./nemo
+    ];
     services = {
         displayManager.logToFile = false;
         displayManager.logToJournal = false;
