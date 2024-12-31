@@ -1,5 +1,12 @@
 { config, lib, pkgs, ... }:
 {
+    boot = {
+        initrd = {
+            kernelModules = ["nvidia"];
+            systemd.strip = false;
+        };
+        extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];
+    };
     hardware = {
         graphics = {
             enable = true;

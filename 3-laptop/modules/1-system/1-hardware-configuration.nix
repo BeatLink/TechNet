@@ -16,14 +16,14 @@
                 "ideapad_laptop"
                 "kvm-amd"
             ];
-            kernelModules = ["nvidia"];
             supportedFilesystems = [ "zfs" ];                           # Needed for impermanence
             systemd.enable = true;
         };
-        supportedFilesystems = [ "zfs" ];                               # Needed for impermanence
-        kernelParams = ["amd_pstate=active"];
+        kernelParams = [
+            "amd_pstate=active"
+        ];
         kernelModules = [];
-        extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];
+        supportedFilesystems = [ "zfs" ];                               # Needed for impermanence
         loader = {
             systemd-boot.enable = true;                                 # Use Systemd-Boot to manage booting
             grub.enable = false;                                        # Disable Grub since we're using Systemd-Boot
