@@ -12,11 +12,11 @@
                 whenLaptopLidClosed = "sleep"; 
                 dimDisplay = {
                     enable = true;
-                    idleTimeout = 240;
+                    idleTimeout = 300;
                 };
                 turnOffDisplay = {
-                    idleTimeout = 300;
-                    idleTimeoutWhenLocked = 60;
+                    idleTimeout = 600;
+                    idleTimeoutWhenLocked = 600;
                 };
                 inhibitLidActionWhenExternalMonitorConnected = true;
                 displayBrightness = 100;
@@ -26,17 +26,17 @@
                 powerButtonAction = "showLogoutScreen";
                 autoSuspend = {
                     action = "sleep";
-                    idleTimeout = 120;
+                    idleTimeout = 600;
                 };
                 whenSleepingEnter = "standby";
                 whenLaptopLidClosed = "sleep";
                 dimDisplay = {
                     enable = true;
-                    idleTimeout = 60;
+                    idleTimeout = 120;
                 };
-            turnOffDisplay = {
-                    idleTimeout = 90;
-                    idleTimeoutWhenLocked = 30;
+                turnOffDisplay = {
+                    idleTimeout = 240;
+                    idleTimeoutWhenLocked = 240;
                 };
                 inhibitLidActionWhenExternalMonitorConnected = true;
                 displayBrightness = 100;
@@ -46,17 +46,17 @@
                 powerButtonAction = "showLogoutScreen";
                 autoSuspend = {
                     action = "sleep";
-                    idleTimeout = 60;
+                    idleTimeout = 240;
                 };
                 whenSleepingEnter = "standby";
                 whenLaptopLidClosed = "sleep";
                 dimDisplay = {
                     enable = true;
-                    idleTimeout = 30;
+                    idleTimeout = 60;
                 };
                 turnOffDisplay = {
-                    idleTimeout = 45;
-                    idleTimeoutWhenLocked = 30;
+                    idleTimeout = 120;
+                    idleTimeoutWhenLocked = 120;
                 };    
                 inhibitLidActionWhenExternalMonitorConnected = true;
                 displayBrightness = 10;
