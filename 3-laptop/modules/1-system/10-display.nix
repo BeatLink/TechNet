@@ -3,19 +3,22 @@
     hardware = {
         graphics = {
             enable = true;
-            enable32Bit = true;
         };
         nvidia = {
             modesetting.enable = true;
-            open = false;
+            powerManagement = {
+                enable = true;
+                finegrained = true;
+            };
+            open = true;
             nvidiaSettings = true;
-            package = config.boot.kernelPackages.nvidiaPackages.beta;
+            package = config.boot.kernelPackages.nvidiaPackages.stable;
             prime = {
-                #offload = {
-                #    enable = true;
-                #    enableOffloadCmd = true;
-                #};
-                sync.enable = true;
+                offload = {
+                    enable = true;
+                    enableOffloadCmd = true;
+                };
+                #sync.enable = true;
                 amdgpuBusId = "PCI:6:0:0";
                 nvidiaBusId = "PCI:1:0:0";
             };
