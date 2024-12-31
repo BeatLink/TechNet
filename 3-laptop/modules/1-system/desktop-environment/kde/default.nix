@@ -9,6 +9,15 @@
     };
     home-manager.users.beatlink = { config, pkgs, ... }: {              # Enable Plasma Manager
         programs.plasma.enable = true;
+        home = {
+            persistence."/Storage/Apps/System/KDE" = {
+                directories = [ ];
+                files = [
+                    ".config/kwinoutputconfig.json"
+                ];
+                allowOther = true;
+            };
+        };
     };
     environment.plasma6.excludePackages = with pkgs.kdePackages; [      # Exclude Default Packages
         elisa
