@@ -6,7 +6,7 @@
             timeout = 2;
             passwordRequired = true;
             passwordRequiredDelay = 1;
-            lockOnResume = true;
+            lockOnResume = false;
             lockOnStartup = false;
             appearance = {
                 alwaysShowClock = false;
