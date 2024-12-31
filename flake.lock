@@ -153,6 +153,22 @@
         "type": "github"
       }
     },
+    "nixos-hardware": {
+      "locked": {
+        "lastModified": 1735388221,
+        "narHash": "sha256-e5IOgjQf0SZcFCEV/gMGrsI0gCJyqOKShBQU0iiM3Kg=",
+        "owner": "NixOS",
+        "repo": "nixos-hardware",
+        "rev": "7c674c6734f61157e321db595dbfcd8523e04e19",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "master",
+        "repo": "nixos-hardware",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1731755305,
@@ -231,6 +247,7 @@
         "flatpaks": "flatpaks",
         "home-manager": "home-manager_2",
         "impermanence": "impermanence",
+        "nixos-hardware": "nixos-hardware",
         "nixpkgs": "nixpkgs_3",
         "plasma-manager": "plasma-manager",
         "sops-nix": "sops-nix"

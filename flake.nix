@@ -32,8 +32,11 @@
         flatpaks = {
             url = "github:GermanBread/declarative-flatpak";
         };
+        nixos-hardware = {
+            url = "github:NixOS/nixos-hardware/master";
+        };
     };
-    outputs = { self, nixpkgs, disko, impermanence, sops-nix, arion, home-manager, plasma-manager, flatpaks, ... }: rec {
+    outputs = { self, nixpkgs, disko, impermanence, sops-nix, arion, home-manager, plasma-manager, flatpaks, nixos-hardware, ... }: rec {
         nixosConfigurations = {
             Ragnarok = nixpkgs.lib.nixosSystem {
                 system = "aarch64-linux";
@@ -69,6 +72,7 @@
                     home-manager.nixosModules.home-manager
                     {home-manager.sharedModules = [ plasma-manager.homeManagerModules.plasma-manager ];}
                     flatpaks.nixosModules.declarative-flatpak
+                    nixos-hardware.nixosModules.lenovo-ideapad-15ach6
                     ./0-common
                     ./3-laptop
                 ];
