@@ -5,7 +5,6 @@
             kernelModules = ["amdgpu"];
             systemd.strip = false;
         };
-        extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];
     };
     hardware = {
         graphics = {
