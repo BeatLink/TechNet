@@ -15,7 +15,7 @@
             lt = "tree -a";
         };
         sessionVariables = {
-            NIX_AUTO_RUN_INTERACTIVE=true
+            NIX_AUTO_RUN_INTERACTIVE = true;
         };
     };
     home-manager.users.beatlink = { config, pkgs, ... }: {
