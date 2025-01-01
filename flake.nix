@@ -38,7 +38,7 @@
         nixos-hardware = {
             url = "github:NixOS/nixos-hardware/master";
         };
-        inputs.flake-programs-sqlite =  {
+        flake-programs-sqlite =  {
             url = "github:wamserma/flake-programs-sqlite";
             inputs.nixpkgs.follows = "nixpkgs";
         };
