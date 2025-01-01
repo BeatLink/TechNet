@@ -6,7 +6,7 @@
   fetchzip,
   makeBinaryWrapper,
   # use specific electron since it has to load a compiled module
-  electron_31,
+  pkgs-unstable-small,
   autoPatchelfHook,
   makeDesktopItem,
   copyDesktopItems,
@@ -77,36 +77,36 @@ let
     '';
 
     installPhase = ''
-      runHook preInstall
-      mkdir -p $out/bin
-      mkdir -p $out/share/trilium
-      mkdir -p $out/share/icons/hicolor/512x512/apps
+        runHook preInstall
+        mkdir -p $out/bin
+        mkdir -p $out/share/trilium
+        mkdir -p $out/share/icons/hicolor/512x512/apps
 
-      cp -r ./* $out/share/trilium
-      rm $out/share/trilium/{*.so*,trilium,chrome_crashpad_handler,chrome-sandbox}
+        cp -r ./* $out/share/trilium
+        rm $out/share/trilium/{*.so*,trilium,chrome_crashpad_handler,chrome-sandbox}
 
-      # Rebuild the ASAR archive, hardcoding the resourcesPath
-      tmp=$(mktemp -d)
-      asar extract $out/share/trilium/resources/app.asar $tmp
-      rm $out/share/trilium/resources/app.asar
+        # Rebuild the ASAR archive, hardcoding the resourcesPath
+        tmp=$(mktemp -d)
+        asar extract $out/share/trilium/resources/app.asar $tmp
+        rm $out/share/trilium/resources/app.asar
 
-      for f in "src/services/utils.ts" "dist/src/services/utils.js"; do
-        substituteInPlace $tmp/$f \
-          --replace-fail "process.resourcesPath" "'$out/share/trilium/resources'"
-      done
-      autoPatchelf $tmp
-      cp $tmp/src/public/icon.png $out/share/icons/hicolor/512x512/apps/trilium.png
+        for f in "src/services/utils.ts" "dist/src/services/utils.js"; do
+          substituteInPlace $tmp/$f \
+            --replace-fail "process.resourcesPath" "'$out/share/trilium/resources'"
+        done
+        autoPatchelf $tmp
+        cp $tmp/src/public/icon.png $out/share/icons/hicolor/512x512/apps/trilium.png
 
-      asar pack $tmp/ $out/share/trilium/resources/app.asar
-      rm -rf $tmp
+        asar pack $tmp/ $out/share/trilium/resources/app.asar
+        rm -rf $tmp
 
-      makeWrapper ${lib.getExe electron_31} $out/bin/trilium \
-        "''${gappsWrapperArgs[@]}" \
-        --set-default ELECTRON_IS_DEV 0 \
-        --add-flags $out/share/trilium/resources/app.asar
+        makeWrapper ${lib.getExe pkgs-unstable-small.electron_31} $out/bin/trilium \
+          "''${gappsWrapperArgs[@]}" \
+          --set-default ELECTRON_IS_DEV 0 \
+          --add-flags $out/share/trilium/resources/app.asar
 
-      runHook postInstall
-    '';
+        runHook postInstall
+      '';
 
     dontStrip = true;
     dontWrapGApps = true;
