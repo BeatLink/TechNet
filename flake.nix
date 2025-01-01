@@ -5,6 +5,9 @@
         nixpkgs = {
             url = "github:NixOS/nixpkgs/nixos-unstable";
         };
+        nixpkgs-unstable-small = {
+            url = "github:NixOS/nixpkgs/nixos-unstable-small";
+        };
         disko = {
             url = "github:nix-community/disko";
             inputs.nixpkgs.follows = "nixpkgs";
@@ -35,8 +38,12 @@
         nixos-hardware = {
             url = "github:NixOS/nixos-hardware/master";
         };
+        inputs.flake-programs-sqlite =  {
+            url = "github:wamserma/flake-programs-sqlite";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
     };
-    outputs = { self, nixpkgs, disko, impermanence, sops-nix, arion, home-manager, plasma-manager, flatpaks, nixos-hardware, ... }: rec {
+    outputs = { self, nixpkgs, nixpkgs-unstable-small, disko, impermanence, sops-nix, arion, home-manager, plasma-manager, flatpaks, nixos-hardware, flake-programs-sqlite, ... }: rec {
         nixosConfigurations = {
             Ragnarok = nixpkgs.lib.nixosSystem {
                 system = "aarch64-linux";
@@ -66,6 +73,7 @@
             Odin = nixpkgs.lib.nixosSystem {
                 system = "x86_64-linux";
                 modules = [
+                    
                     disko.nixosModules.disko
                     impermanence.nixosModules.impermanence
                     sops-nix.nixosModules.sops
@@ -73,10 +81,11 @@
                     {home-manager.sharedModules = [ plasma-manager.homeManagerModules.plasma-manager ];}
                     flatpaks.nixosModules.declarative-flatpak
                     nixos-hardware.nixosModules.lenovo-ideapad-15ach6
+                    flake-programs-sqlite.nixosModules.programs-sqlite
                     ./0-common
                     ./3-laptop
                 ];
-                specialArgs = { inherit impermanence; };
+                specialArgs = { inherit impermanence; pkgs-unstable-small = nixpkgs-unstable-small.legacyPackages."x86_64-linux"; };
             };
         };
         images.Ragnarok = nixosConfigurations.Ragnarok.config.system.build.sdImage;
