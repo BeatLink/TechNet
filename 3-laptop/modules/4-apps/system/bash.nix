@@ -1,8 +1,11 @@
 { config, pkgs, ... }: 
 {
+    environment.systemPackages = with pkgs; [ comma ];
     programs.bash = {
         shellAliases = {
             upgrade = "cd /Storage/TechNet && sudo nixos-rebuild --flake .# switch";
+            purge = "sudo nix-collect-garbage -d";
+
             heimdall = "ssh heimdall.technet";
             odin = "ssh odin.technet";
             ragnarok = "ssh ragnarok.technet";
@@ -10,6 +13,9 @@
             l = "ls";
             la = "ls -la";
             lt = "tree -a";
+        };
+        sessionVariables = {
+            NIX_AUTO_RUN_INTERACTIVE=true
         };
     };
     home-manager.users.beatlink = { config, pkgs, ... }: {
