@@ -18,7 +18,7 @@
     home-manager.users.beatlink = { config, pkgs, ... }: {
         programs.bash.sessionVariables = {
             NIX_AUTO_RUN_INTERACTIVE = "true";
-            NIX_AUTO_RUN = "true"
+            NIX_AUTO_RUN = "true";
         };
 
         home = {
