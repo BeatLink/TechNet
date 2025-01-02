@@ -12,7 +12,10 @@ let
         Odin = "https://uptime-kuma.heimdall.technet/api/push/Iy9Tfr31nG";
         Heimdall = "https://uptime-kuma.heimdall.technet/api/push/urMFRtdrYA"; 
     };
-
+    base = "/etc/nixpkgs/channels";
+    nixpkgsPath = "${base}/nixpkgs";
+    nixpkgs2105Path = "${base}/nixpkgs2105";
+    nixpkgs2111Path = "${base}/nixpkgs2111";
 in {
     nix = {                                                             # Enables Flakes
         extraOptions = ''experimental-features = nix-command flakes'';
@@ -22,8 +25,15 @@ in {
             dates = "weekly";
             options = "--delete-older-than 7d";
         };
+        nixPath = [                                                     # Configures nix to use nixpkgs from flakes, fixes pesky errors in nix-shell, https://discourse.nixos.org/t/do-flakes-also-set-the-system-channel/19798/2
+            "nixpkgs=${nixpkgsPath}"
+            "nixpkgs2105=${nixpkgs2105Path}"
+            "nixpkgs2111=${nixpkgs2111Path}"
+            "/nix/var/nix/profiles/per-user/root/channels"
+        ];
     };
     nixpkgs.config.allowUnfree = true;                                  # Allow unfree packages
+    
     system.autoUpgrade = {
         enable = true;
         flake = "github:BeatLink/TechNet";
