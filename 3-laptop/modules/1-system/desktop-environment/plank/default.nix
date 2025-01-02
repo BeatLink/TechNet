@@ -34,6 +34,11 @@
                     [PlankDockItemPreferences]
                     Launcher=file:///home/beatlink/.local/share/applications/whatsapp-private.desktop
                 '';
+
+                ".config/plank/dock1/launchers/com.calibre_ebook.calibre.dockitem".text = ''
+                    [PlankDockItemPreferences]
+                    Launcher=file:///var/lib/flatpak/exports/share/applications/com.calibre_ebook.calibre.desktop
+                '';
             };
         };
         dconf.enable = true;                                    # Enables dconf which stores plank settings
