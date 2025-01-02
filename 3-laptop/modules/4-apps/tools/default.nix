@@ -2,6 +2,7 @@
 {
     imports = [
         ./clock.nix
+        ./czkawka.nix
         ./decoder.nix
         #./deluge.nix
         ./dupeguru.nix
