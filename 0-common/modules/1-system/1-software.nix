@@ -12,7 +12,10 @@ let
         Odin = "https://uptime-kuma.heimdall.technet/api/push/Iy9Tfr31nG";
         Heimdall = "https://uptime-kuma.heimdall.technet/api/push/urMFRtdrYA"; 
     };
-
+    base = "/etc/nixpkgs/channels";
+    nixpkgsPath = "${base}/nixpkgs";
+    nixpkgs2105Path = "${base}/nixpkgs2105";
+    nixpkgs2111Path = "${base}/nixpkgs2111";
 in {
     nix = {                                                             # Enables Flakes
         extraOptions = ''experimental-features = nix-command flakes'';
