@@ -1,6 +1,8 @@
 { config, lib, pkgs, ... }:
 {
-    boot = {
+
+    hardware.nvidia.open = false;                               # Fixes bug with suspend 
+    /*boot = {
         initrd = {
             kernelModules = ["amdgpu" "nvidia"];                 # Load AMD GPU drivers to show external monitor during initrd
             systemd.strip = false;
@@ -27,5 +29,5 @@
             };
         };
     };
-    services.xserver.videoDrivers = ["nvidia" "amdgpu"];
+    services.xserver.videoDrivers = ["nvidia" "amdgpu"];*/
 }

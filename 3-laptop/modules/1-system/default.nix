@@ -14,7 +14,7 @@
         ./7-software.nix
         ./8-networking.nix
         ./9-ssh.nix
-        #./10-display.nix
+        ./10-display.nix
         ./11-sound.nix
         ./12-printing.nix
         ./13-fuse.nix
