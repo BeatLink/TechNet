@@ -22,7 +22,7 @@
     home-manager.users.beatlink = { config, pkgs, ... }: {
         programs.bash =  {
             historyControl = ["ignoreboth"];
-            historyFile = ".local/share/bash/history"
+            historyFile = ".local/share/bash/history";
         };
         home = {
             persistence."/Storage/Apps/System/Bash" = {
