@@ -73,8 +73,8 @@
                                 "applications:io.freetubeapp.FreeTube.desktop"
                                 "applications:com.stremio.Stremio.desktop"
                                 "applications:com.valvesoftware.Steam.desktop"
-                                # Calibre
-                                # LMMS
+                                "applications:calibre-gui.desktop"
+                                "applications:io.lmms.LMMS.desktop"
                                 "applications:org.kde.gwenview.desktop"
                                 "file:///home/beatlink/.local/share/applications/separator3.desktop"
                                 # Home Assistant
@@ -82,7 +82,7 @@
                                 "file:///home/beatlink/.local/share/applications/separator4.desktop"
                                 "applications:org.kde.konsole.desktop"
                                 "applications:com.vscodium.codium.desktop"
-                                # Virt Manager
+                                "applications:virt-manager.desktop"
                             ];
                         };
                     }
