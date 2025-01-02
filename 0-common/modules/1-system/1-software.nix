@@ -22,8 +22,15 @@ in {
             dates = "weekly";
             options = "--delete-older-than 7d";
         };
+        nixPath = [                                                     # Configures nix to use nixpkgs from flakes, fixes pesky errors in nix-shell, https://discourse.nixos.org/t/do-flakes-also-set-the-system-channel/19798/2
+            "nixpkgs=${nixpkgsPath}"
+            "nixpkgs2105=${nixpkgs2105Path}"
+            "nixpkgs2111=${nixpkgs2111Path}"
+            "/nix/var/nix/profiles/per-user/root/channels"
+        ];
     };
     nixpkgs.config.allowUnfree = true;                                  # Allow unfree packages
+    
     system.autoUpgrade = {
         enable = true;
         flake = "github:BeatLink/TechNet";
