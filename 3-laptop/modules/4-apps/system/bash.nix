@@ -1,6 +1,9 @@
 { config, pkgs, ... }: 
 {
-    environment.systemPackages = with pkgs; [ comma ];
+    environment.sessionVariables = {
+        NIX_AUTO_RUN_INTERACTIVE = "true";
+        NIX_AUTO_RUN = "true";
+    };
     programs.bash = {
         shellAliases = {
             upgrade = "cd /Storage/TechNet && sudo nixos-rebuild --flake .# switch";
@@ -14,15 +17,17 @@
             la = "ls -la";
             lt = "tree -a";
         };
-        shellInit = ''
-            export NIX_AUTO_RUN_INTERACTIVE=true
-            NIX_AUTO_RUN=true;
-        '';
+        completion.enable = true;
     };
     home-manager.users.beatlink = { config, pkgs, ... }: {
+        programs.bash =  {
+            historyControl = ["ignoreboth"];
+            historyFile = ".local/share/bash/history"
+        };
         home = {
             persistence."/Storage/Apps/System/Bash" = {
                 directories = [
+                    ".local/share/bash"
                 ];
                 allowOther = true;
             };
