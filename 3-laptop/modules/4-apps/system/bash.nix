@@ -14,13 +14,12 @@
             la = "ls -la";
             lt = "tree -a";
         };
+        shellInit = ''
+            export NIX_AUTO_RUN_INTERACTIVE=true
+            NIX_AUTO_RUN=true;
+        '';
     };
     home-manager.users.beatlink = { config, pkgs, ... }: {
-        programs.bash.sessionVariables = {
-            NIX_AUTO_RUN_INTERACTIVE = "true";
-            NIX_AUTO_RUN = "true";
-        };
-
         home = {
             persistence."/Storage/Apps/System/Bash" = {
                 directories = [
