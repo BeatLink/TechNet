@@ -23,6 +23,7 @@
             "amd_pstate=active"
         ];
         kernel.sysctl."kernel.sysrq" = 1;
+        kernelPackages = pkgs.linuxPackages_latest;
         kernelModules = [];
         supportedFilesystems = [ "zfs" ];                               # Needed for impermanence
         loader = {
