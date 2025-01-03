@@ -1,33 +1,29 @@
 { config, lib, pkgs, ... }:
 {
-
-    hardware.nvidia.open = false;                               # Fixes bug with suspend 
-    /*boot = {
-        initrd = {
-            kernelModules = ["amdgpu" "nvidia"];                 # Load AMD GPU drivers to show external monitor during initrd
-            systemd.strip = false;
-        };
-        extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];
-    };
     hardware = {
         graphics = {
             enable = true;
+            enable32Bit = true;
         };
         nvidia = {
             modesetting.enable = true;
+            powerManagement = {
+                enable = true;
+                finegrained = true;
+            };
             open = true;
             nvidiaSettings = true;
-            package = config.boot.kernelPackages.nvidiaPackages.stable;
+            package = config.boot.kernelPackages.nvidiaPackages.beta;
             prime = {
-                #offload = {
-                #    enable = true;
-                #    enableOffloadCmd = true;
-                #};
-                sync.enable = true;
                 amdgpuBusId = "PCI:6:0:0";
                 nvidiaBusId = "PCI:1:0:0";
-            };
+                offload = {
+                    enable = true;
+                    enableOffloadCmd = true;
+                };
+            };    
         };
+        amdgpu.initrd.enable = true;                           # Enables Graphics in Initrd, Allows External Monitor to load for Password Entry
     };
-    services.xserver.videoDrivers = ["nvidia" "amdgpu"];*/
+	services.xserver.videoDrivers = [ "amdgpu" "nvidia" ];
 }
