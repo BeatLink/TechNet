@@ -35,15 +35,12 @@
         flatpaks = {
             url = "github:GermanBread/declarative-flatpak";
         };
-        nixos-hardware = {
-            url = "github:NixOS/nixos-hardware/master";
-        };
         flake-programs-sqlite =  {
             url = "github:wamserma/flake-programs-sqlite";
             inputs.nixpkgs.follows = "nixpkgs";
         };
     };
-    outputs = inputs @ { self, nixpkgs, nixpkgs-unstable-small, disko, impermanence, sops-nix, arion, home-manager, plasma-manager, flatpaks, nixos-hardware, flake-programs-sqlite, ... }: rec {
+    outputs = inputs @ { self, nixpkgs, nixpkgs-unstable-small, disko, impermanence, sops-nix, arion, home-manager, plasma-manager, flatpaks, flake-programs-sqlite, ... }: rec {
         nixosConfigurations = {
             Ragnarok = nixpkgs.lib.nixosSystem {
                 system = "aarch64-linux";
@@ -80,7 +77,6 @@
                     home-manager.nixosModules.home-manager
                     {home-manager.sharedModules = [ plasma-manager.homeManagerModules.plasma-manager ];}
                     flatpaks.nixosModules.declarative-flatpak
-                    nixos-hardware.nixosModules.lenovo-ideapad-15ach6
                     flake-programs-sqlite.nixosModules.programs-sqlite
                     ./0-common
                     ./3-laptop
