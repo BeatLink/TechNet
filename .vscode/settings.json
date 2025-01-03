@@ -4,19 +4,23 @@
         "editor.tabSize": 4
     },
     "cSpell.words": [
+        "arion",
         "avahi",
         "dconf",
         "disko",
         "dockitem",
         "fastfetch",
         "flathub",
+        "flatpaks",
         "gvariant",
         "libinput",
         "nemo",
         "neofetch",
+        "nixos",
         "nixpkgs",
         "pkgs",
         "virt",
+        "wamserma",
         "warpinator",
         "xsession"
     ]
