@@ -1,7 +1,7 @@
-{ config, lib, pkgs, pkgs-unstable-small, ... }:
+{ config, lib, pkgs, ... }:
 {
    
-    environment.systemPackages = [(pkgs.callPackage ./trilium { pkgs-unstable-small = pkgs-unstable-small; })];
+    environment.systemPackages = [(pkgs.callPackage ./trilium { })];
     home-manager.users.beatlink = { config, pkgs, ... }: {
         home = {
             persistence."/Storage/Apps/Core/Trilium" = {
