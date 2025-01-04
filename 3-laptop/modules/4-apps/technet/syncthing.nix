@@ -4,7 +4,7 @@
     home-manager.users.beatlink = { config, pkgs, ... }: {
         services.syncthing = {
             enable = true;
-            tray.enable = true;
+            tray.enable = false;
             settings = {
                 devices = {
                     Heimdall = {
