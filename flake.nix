@@ -3,10 +3,7 @@
 
     inputs = {
         nixpkgs = {
-            url = "github:NixOS/nixpkgs/nixos-unstable";
-        };
-        nixpkgs-unstable-small = {
-            url = "github:NixOS/nixpkgs/nixos-unstable-small";
+            url = "github:NixOS/nixpkgs/nixos-24.11";
         };
         disko = {
             url = "github:nix-community/disko";
@@ -40,7 +37,7 @@
             inputs.nixpkgs.follows = "nixpkgs";
         };
     };
-    outputs = inputs @ { self, nixpkgs, nixpkgs-unstable-small, disko, impermanence, sops-nix, arion, home-manager, plasma-manager, flatpaks, flake-programs-sqlite, ... }: rec {
+    outputs = inputs @ { self, nixpkgs, disko, impermanence, sops-nix, arion, home-manager, plasma-manager, flatpaks, flake-programs-sqlite, ... }: rec {
         nixosConfigurations = {
             Ragnarok = nixpkgs.lib.nixosSystem {
                 system = "aarch64-linux";
@@ -81,7 +78,7 @@
                     ./0-common
                     ./3-laptop
                 ];
-                specialArgs = { inherit impermanence; inherit inputs; pkgs-unstable-small = nixpkgs-unstable-small.legacyPackages."x86_64-linux"; };
+                specialArgs = { inherit impermanence; inherit inputs; };
             };
         };
         images.Ragnarok = nixosConfigurations.Ragnarok.config.system.build.sdImage;
