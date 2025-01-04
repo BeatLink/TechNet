@@ -6,7 +6,7 @@
   fetchzip,
   makeBinaryWrapper,
   # use specific electron since it has to load a compiled module
-  pkgs-unstable-small,
+  electron_31,
   autoPatchelfHook,
   makeDesktopItem,
   copyDesktopItems,
@@ -100,7 +100,7 @@ let
         asar pack $tmp/ $out/share/trilium/resources/app.asar
         rm -rf $tmp
 
-        makeWrapper ${lib.getExe pkgs-unstable-small.electron_31} $out/bin/trilium \
+        makeWrapper ${lib.getExe electron_31} $out/bin/trilium \
           "''${gappsWrapperArgs[@]}" \
           --set-default ELECTRON_IS_DEV 0 \
           --add-flags $out/share/trilium/resources/app.asar
