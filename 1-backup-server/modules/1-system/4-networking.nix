@@ -12,7 +12,7 @@
         firewall.trustedInterfaces = [ "wireguard0" ];
     };
     sops.secrets.wireguard_private_key = {
-        sopsFile = ../../secrets/secrets.yaml;
+        sopsFile = ../../secrets.yaml;
         group = config.users.users.systemd-network.group;
         mode = "0640";
         reloadUnits = [ "systemd-networkd.service" ];

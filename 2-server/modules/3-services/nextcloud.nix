@@ -13,7 +13,7 @@
 
 { config, lib, pkgs, modulesPath, ... }: 
 {
-    sops.secrets.nextcloud_env.sopsFile = ../../secrets/secrets.yaml;
+    sops.secrets.nextcloud_env.sopsFile = ../../secrets.yaml;
     virtualisation.arion = {
         backend = "docker";
         projects.nextcloud = {
