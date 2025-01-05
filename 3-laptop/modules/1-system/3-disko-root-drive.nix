@@ -95,6 +95,8 @@
             };
         };
     };
+    boot.supportedFilesystems = [ "zfs" ];                           # Needed for impermanence
+    boot.initrd.supportedFilesystems = [ "zfs" ];                               # Needed for impermanence
     fileSystems = {
         "/".neededForBoot = true;
         "/boot".neededForBoot = true;

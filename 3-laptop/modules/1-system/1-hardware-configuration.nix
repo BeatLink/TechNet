@@ -1,38 +1,23 @@
 { config, lib, pkgs, ... }:
 {
     hardware = {
-        cpu.amd.updateMicrocode = true;
-        enableRedistributableFirmware = true;
+        cpu.amd.updateMicrocode = true;                                 # Updates the CPU Microcode
+        enableRedistributableFirmware = true;                           # Enable firmware with a license allowing redistribution.
     };
     boot = {
         initrd = {
             availableKernelModules = [ 
-                "nvme" 
-                "xhci_pci" 
-                "uas" 
-                "usbhid" 
-                "sd_mod"
-                "mt7921e"
-                "ideapad_laptop"
-                "kvm-amd"
+                "nvme"                                                  # For NVMe Storage Drives
+                "xhci_pci"                                              # For USB 3 and PCI Devices
+                "usbhid"                                                # For USB Devices
+                "mt7921e"                                               # Wi-Fi Drivers
+                "ideapad_laptop"                                        # Lenovo Drivers (Function Keys, Battery Management, etc)
+                "kvm-amd"                                               # Virtualization for VMs
             ];
-            supportedFilesystems = [ "zfs" ];                           # Needed for impermanence
-            systemd.enable = true;
         };
         kernelParams = [
-            "amd_pstate=active"
+            "amd_pstate=active"                                         # Enables Power Management for AMD CPUs
         ];
-        kernel.sysctl."kernel.sysrq" = 1;
-        kernelPackages = pkgs.linuxPackages_latest;
-        kernelModules = [];
-        supportedFilesystems = [ "zfs" ];                               # Needed for impermanence
-        loader = {
-            systemd-boot.enable = true;                                 # Use Systemd-Boot to manage booting
-            grub.enable = false;                                        # Disable Grub since we're using Systemd-Boot
-            efi.canTouchEfiVariables = true;                            # Allows setting boot order, UEFI settings, etc
-            timeout = 0;
-        };
-
     };
-    nixpkgs.hostPlatform = "x86_64-linux";
+    nixpkgs.hostPlatform = "x86_64-linux";                              # This laptop has a 64 bit architecture
 }
