@@ -7,5 +7,4 @@
     security.pki.certificateFiles = [ 
         config.sops.secrets.technet_certificate.path
     ]
-
 }
