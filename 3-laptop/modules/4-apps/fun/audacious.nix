@@ -5,6 +5,7 @@
         home = {
             persistence."/Storage/Apps/Fun/Audacious" = {
                 directories = [
+                    ".config/audacious"
                 ];
                 allowOther = true;
             };
