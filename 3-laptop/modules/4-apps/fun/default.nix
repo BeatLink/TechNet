@@ -1,6 +1,7 @@
 { config, lib, pkgs, ... }:
 {
     imports = [
+        ./audacious.nix
         ./calibre.nix
         ./freetube.nix
         ./gmusicbrowser.nix
