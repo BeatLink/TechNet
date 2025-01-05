@@ -5,9 +5,9 @@
 { config, lib, pkgs, ... }:
 {
     imports = [              
-        ./kde
+        #./kde
         #./budgie
-        #./cinnamon
-        #./plank
+        ./cinnamon
+        ./plank
     ];
 }
