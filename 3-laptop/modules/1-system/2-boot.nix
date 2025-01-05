@@ -7,9 +7,21 @@
 { config, lib, pkgs, ... }:
 {
     boot = {
+        kernelModules = [];
+        kernelPackages = pkgs.linuxPackages_latest;
+        kernel.sysctl."kernel.sysrq" = 1;
         initrd = {
+            systemd.enable = true;
+
             #verbose = false;
         };
+        loader = {
+            systemd-boot.enable = true;                                 # Use Systemd-Boot to manage booting
+            grub.enable = false;                                        # Disable Grub since we're using Systemd-Boot
+            efi.canTouchEfiVariables = true;                            # Allows setting boot order, UEFI settings, etc
+            timeout = 0;
+        };
+
         /*plymouth = {
             enable = true;
             theme = "double";
