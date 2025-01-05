@@ -4,6 +4,7 @@
         ./bash.nix
         ./dconf-editor.nix
         ./fonts.nix
+        ./variety.nix
         ./vorta.nix
     ];
 }
