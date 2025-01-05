@@ -1,7 +1,7 @@
 { config, lib, pkgs, modulesPath, ... }: 
 {
     sops.secrets.esphome_password = {
-        sopsFile = ../../secrets/secrets.yaml;
+        sopsFile = ../../secrets.yaml;
     };
     virtualisation.arion.projects.esphome = {
         serviceName = "esphome";

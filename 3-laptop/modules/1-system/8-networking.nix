@@ -6,7 +6,7 @@
 ######################################################################################################################################
 { config, lib, pkgs, ... }:
 {
-    sops.secrets.networkmanager_env_file.sopsFile = ../../secrets/secrets.yaml;
+    sops.secrets.networkmanager_env_file.sopsFile = ../../secrets.yaml;
     networking = {
         hostName = "Odin";                                              # Sets hostname
         hostId = "ee42298c";
