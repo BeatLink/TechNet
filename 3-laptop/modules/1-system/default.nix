@@ -6,10 +6,10 @@
 {
     imports = [                                   
         ./1-hardware-configuration.nix
-        #./2-boot.nix
+        ./2-boot.nix
         ./3-disko-root-drive.nix
-        ./4-impermanence.nix
-        ./5-disko-data-drive.nix
+        ./4-disko-data-drive.nix
+        ./5-impermanence.nix
         ./6-sops.nix
         ./7-software.nix
         ./8-networking.nix
