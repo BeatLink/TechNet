@@ -26,4 +26,5 @@
             };
         };
     };
+    nix.settings.trusted-users = ["beatlink"];
 }
