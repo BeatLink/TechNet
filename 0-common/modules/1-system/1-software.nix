@@ -15,7 +15,7 @@ let
 in {
     nix = {                                                             # Enables Flakes
         extraOptions = ''experimental-features = nix-command flakes'';
-        settings.trusted-users = [ "root" "beatlink" ];                 # Allows me to remote update by sending the flake over ssh
+        settings.trusted-users = [ "root" ];                 # Allows me to remote update by sending the flake over ssh
         gc = {
             automatic = true;
             dates = "weekly";

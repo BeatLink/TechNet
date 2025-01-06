@@ -13,5 +13,7 @@
     imports = [                                       
         ./1-system
         ./2-users
+        ./3-services
+        ./4-apps
     ];
 }
