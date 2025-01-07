@@ -16,13 +16,13 @@
         plymouth = {
             enable = true;
             #font = "${pkgs.noto-fonts}/share/fonts/truetype/DejaVuSans.ttf";
-            theme = "breeze";
-            /*themePackages = with pkgs; [
+            theme = "spinner_alt";
+            themePackages = with pkgs; [
                 # By default we would install all themes
                 (adi1090x-plymouth-themes.override {
-                selected_themes = [ "double" ];
+                selected_themes = [ "spinner_alt" ];
             })
-            ];*/
+            ];
         };
         # Enable "Silent Boot"
         consoleLogLevel = 0;
@@ -36,5 +36,4 @@
             "udev.log_priority=3"
         ];
     };
-    services.fstrim.enable = true;
 }
