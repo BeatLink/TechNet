@@ -46,6 +46,7 @@
                     ports = [
                       "53:53/tcp"
                       "53:53/udp"
+                      "82:80"
                     ];
                     networks = [
                         "nginx-proxy-manager_public"
