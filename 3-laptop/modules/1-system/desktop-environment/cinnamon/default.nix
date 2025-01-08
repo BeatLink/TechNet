@@ -11,7 +11,7 @@
     imports = [
         ./nemo
         ./blueman
-        ./fonts
+        ./fonts.nix
     ];
     services = {
         displayManager.logToFile = false;
