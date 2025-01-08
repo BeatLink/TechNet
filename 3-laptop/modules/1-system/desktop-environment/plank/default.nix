@@ -11,20 +11,47 @@
 
 { config, lib, pkgs, ... }:
 {
-    environment.systemPackages = [ pkgs.plank ];                # Installs Plank from nixpkgs
-    programs.fuse.userAllowOther = true;
     home-manager.users.beatlink = { config, pkgs, ... }: {
+        packages = [ pkgs.plank ];                                        # Installs Plank from nixpkgs
         home = {
             persistence."/Storage/Apps/System/Plank" = {
                 directories = [
-                    ".cache/plank"
                     ".config/plank"
                     ".local/share/plank"
+                ];
+                files = [
+                    ".local/share/icons/separator-black-horizontal.png"
+                    ".local/share/icons/separator-black-vertical.png"
+                    ".local/share/icons/separator-blank.png"
+                    ".local/share/icons/separator-white-horizontal.png"
+                    ".local/share/icons/separator-white-vertical.png"
+                    ".local/share/applications/separator1.desktop"
+                    ".local/share/applications/separator2.desktop"
+                    ".local/share/applications/separator3.desktop"
+                    ".local/share/applications/separator4.desktop"
+                    ".local/share/applications/separator5.desktop"
                 ];
                 allowOther = true;
             };
             file = {
                 ".config/autostart/plank.desktop".source = "${pkgs.plank}/share/applications/plank.desktop";       # Configures plank to autostart on login
+
+                ".config/plank/dock1/launchers/firefox.dockitem".text = ''
+                    [PlankDockItemPreferences]
+                    Launcher=file:///var/lib/flatpak/exports/share/applications/org.mozilla.firefox.desktop
+                '';
+
+                ".config/plank/dock1/launchers/keepassxc.dockitem".text = ''
+                    [PlankDockItemPreferences]
+                    Launcher=file:///var/lib/flatpak/exports/share/applications/org.keepassxc.KeePassXC.desktop
+               '';
+
+                ".config/plank/dock1/launchers/trilium.dockitem".text = ''
+                    [PlankDockItemPreferences]
+                    Launcher=file:///run/booted-system/sw/share/applications/Trilium.desktop
+               '';
+
+
                 ".config/plank/dock1/launchers/WhatsApp.dockitem".text = ''
                     [PlankDockItemPreferences]
                     Launcher=file:///home/beatlink/.local/share/applications/whatsapp.desktop
@@ -41,8 +68,56 @@
                 '';
             };
         };
-        dconf.enable = true;                                    # Enables dconf which stores plank settings
-        imports = [./2-dconf-settings.nix];                     # Imports the dconf settings
-
+        dconf = {
+            enable = true;                                      # Enables dconf which stores plank settings
+            settings = {
+                "net/launchpad/plank/docks/dock1" = {
+                    alignment = "center";
+                    auto-pinning = true;
+                    current-workspace-only = false;
+                    dock-items = [ 
+                        "firefox.dockitem"
+                        "keepassxc.dockitem"
+                        "trilium.dockitem"
+                        "nemo.dockitem"
+                        "separator-380c7a99-902c-4742-8cff-e3342b3bf48f.dockitem"
+                        "org.mozilla.Thunderbird.dockitem" "WhatsApp.dockitem"
+                        "WhatsApp.dockitem"
+                        "WhatsApp (Private).dockitem"
+                        "im.riot.Riot.dockitem"
+                        "com.discordapp.Discord.dockitem"
+                        "separator-6c01701d-2e87-4009-86d6-62a88c7bd088.dockitem"
+                        "io.gitlab.news_flash.NewsFlash.dockitem"
+                        "org.gmusicbrowser.gmusicbrowser.dockitem"
+                        "io.freetubeapp.FreeTube.dockitem" "com.stremio.Stremio.dockitem"
+                        "steam.dockitem"
+                        "com.calibre_ebook.calibre.dockitem"
+                        "org.kde.gwenview.dockitem" "io.lmms.LMMS.dockitem"
+                        "separator-3ff87b4f-0ae5-48c7-8276-5b52b7361b3a.dockitem"
+                        "home-assistant.dockitem"
+                        "nextcloud.dockitem"
+                        "org.gnome.Terminal.dockitem"
+                        "com.vscodium.codium.dockitem"
+                        "virt-manager.dockitem"
+                    ];
+                    hide-delay = 200;
+                    hide-mode = "dodge-active";
+                    icon-size = 48;
+                    items-alignment = "center";
+                    lock-items = true;
+                    monitor = "";
+                    offset = 0;
+                    pinned-only = false;
+                    position = "bottom";
+                    pressure-reveal = false;
+                    show-dock-item = false;
+                    theme = "Gtk+";
+                    tooltips-enabled = true;
+                    unhide-delay = 100;
+                    zoom-enabled = true;
+                    zoom-percent = 175;
+                };
+            };
+        };
     };
 }
