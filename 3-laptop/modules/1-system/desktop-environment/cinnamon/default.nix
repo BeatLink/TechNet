@@ -10,6 +10,8 @@
 {  
     imports = [
         ./nemo
+        ./blueman
+        ./fonts
     ];
     services = {
         displayManager.logToFile = false;
@@ -18,10 +20,6 @@
             enable = true;                                                          # Enables X11 Server
             displayManager.lightdm.enable = true;                                   # Enables LightDM Login Manager
             desktopManager.cinnamon.enable = true;                                  # Enables Cinnamon
-            xkb = {                                                                 # Sets the Keyboard Layout
-                layout = "us";
-                variant = "";
-            };
             enableCtrlAltBackspace = true;                                          # Enables CTRL+ALT+Backspace for restarting X11
         };
         libinput.enable = true;                                                     # Enables Touchpad Functionality
@@ -29,7 +27,7 @@
             "flathub:runtime/org.gtk.Gtk3theme.Mint-Y//3.22"
         ];
     };
-    programs.dconf.enable = true;
+    programs.dconf.enable = true;                                                   # Enable Dconf
     environment.cinnamon.excludePackages = with pkgs; [
         onboard
         gnome-calendar
@@ -39,7 +37,8 @@
     home-manager.users.beatlink = {
         dconf.enable = true;                                                        # Enables dconf for Cinnamon setting Management
         imports = [                                                                 # Imports Cinnamon Dconf Settings
-            ./2-dconf-settings.nix
+            ./2-cinnamon-dconf-settings.nix
+            ./fonts.nix
         ];
         xsession =  {
             scriptPath = ".local/share/X11/xsession";
