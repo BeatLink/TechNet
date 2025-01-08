@@ -94,12 +94,12 @@ with lib.hm.gvariant;
 
     "org/cinnamon/desktop/background" = {
       picture-options = "zoom";
-      picture-uri = "file:///home/beatlink/.config/variety/wallpaper/wallpaper-auto-rotated-ce8933df703e360804412e1432009a52.jpg";
+      picture-uri = "file:///Storage/Files/Pictures/Wallpapers/variety-copied-wallpaper-51eb60077e19e9bbe67eb52c9218c5f6.jpg";
     };
 
     "org/cinnamon/desktop/background/slideshow" = {
       delay = 15;
-      image-source = "xml:///usr/share/cinnamon-background-properties/linuxmint-una.xml";
+      image-source = "directory:///Storage/Files/Pictures";
       slideshow-enabled = false;
     };
 
