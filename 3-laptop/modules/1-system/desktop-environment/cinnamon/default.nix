@@ -11,7 +11,6 @@
     imports = [
         ./nemo
         ./blueman
-        ./fonts.nix
     ];
     services = {
         displayManager.logToFile = false;
@@ -37,7 +36,7 @@
     home-manager.users.beatlink = {
         dconf.enable = true;                                                        # Enables dconf for Cinnamon setting Management
         imports = [                                                                 # Imports Cinnamon Dconf Settings
-            ./2-cinnamon-dconf-settings.nix
+            ./2-dconf-settings.nix
             ./fonts.nix
         ];
         xsession =  {
