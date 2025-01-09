@@ -21,7 +21,6 @@
         ./13-fuse.nix
         ./14-home-folders.nix
         ./desktop-environment
-        ./bluetooth.nix
 
     ];
 }

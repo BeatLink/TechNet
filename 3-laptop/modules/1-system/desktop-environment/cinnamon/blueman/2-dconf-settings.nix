@@ -14,7 +14,7 @@ with lib.hm.gvariant;
       services = [ (mkTuple [ "/org/bluez/hci0/dev_41_42_DC_6D_EB_20" "00000000-0000-0000-0000-000000000000" ]) ];
     };
 
-    "org/blueman/plugins/recentconns" = {
+    /*"org/blueman/plugins/recentconns" = {
       max-items = 10;
       recent-connections = [ {
         adapter = "30:03:C8:00:01:7A";
@@ -25,7 +25,7 @@ with lib.hm.gvariant;
         uuid = "00000000-0000-0000-0000-000000000000";
         time = "1736203641.3961515";
       } ];
-    };
+    };*/
 
     "org/blueman/plugins/standarditems" = {
       toggle-manager-onclick = true;
