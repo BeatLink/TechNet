@@ -8,12 +8,15 @@
 
 { config, lib, pkgs, ... }:
 {  
+    hardware.bluetooth = {
+        enable = true;                                                      # enables support for Bluetooth
+        powerOnBoot = true;                                                 # powers up the default Bluetooth controller on boot
+    };
     programs.dconf.enable = true;
     services.blueman.enable = true;
-    services.blueman-applet.enable = true;
     home-manager.users.beatlink = {
-        dconf.enable = true;                                                        # Enables dconf for Cinnamon setting Management
-        imports = [                                                                 # Imports Cinnamon Dconf Settings
+        dconf.enable = true;                                                # Enables dconf for Cinnamon setting Management
+        imports = [                                                         # Imports Cinnamon Dconf Settings
             ./2-dconf-settings.nix
         ];
     };
