@@ -13,11 +13,6 @@
                 Type=Application
                 Categories=Network
             '';
-
-            ".config/plank/dock1/launchers/nextcloud.dockitem".text = ''
-                [PlankDockItemPreferences]
-                Launcher=file:///home/beatlink/.local/share/applications/nextcloud.desktop
-            '';
         };
     };
 }
