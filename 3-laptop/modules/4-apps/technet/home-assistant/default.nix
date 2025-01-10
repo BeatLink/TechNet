@@ -15,12 +15,6 @@
                 Categories=Network
                 Type=Application
             '';
-
-            ".config/plank/dock1/launchers/home-assistant.dockitem".text = ''
-                [PlankDockItemPreferences]
-                Launcher=file:///home/beatlink/.local/share/applications/home-assistant.desktop
-            '';
-
         };
     };
 }
