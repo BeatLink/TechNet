@@ -17,9 +17,10 @@
         ./9-ssh.nix
         ./10-display.nix
         ./11-sound.nix
-        ./12-printing.nix
-        ./13-fuse.nix
-        ./14-home-folders.nix
+        ./12-bluetooth.nix
+        ./13-printing.nix
+        ./14-fuse.nix
+        ./15-home-folders.nix
         ./desktop-environment
 
     ];
