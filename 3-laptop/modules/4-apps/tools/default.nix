@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 {
     imports = [
-        ./clock.nix
+        #./clock.nix
         ./czkawka.nix
         ./decoder.nix
         #./deluge.nix

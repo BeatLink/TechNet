@@ -21,12 +21,6 @@
                 ];
                 allowOther = true;
             };
-            file = {
-                ".config/plank/dock1/launchers/io.lmms.LMMS.dockitem".text = ''
-                    [PlankDockItemPreferences]
-                    Launcher=file:///var/lib/flatpak/exports/share/applications/io.lmms.LMMS.desktop
-                '';
-            };
         };
     };
 }
