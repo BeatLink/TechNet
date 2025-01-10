@@ -10,12 +10,6 @@
                 ];
                 allowOther = true;
             };
-            file = {
-                ".config/plank/dock1/launchers/com.stremio.Stremio.dockitem".text = ''
-                    [PlankDockItemPreferences]
-                    Launcher=file:///var/lib/flatpak/exports/share/applications/com.stremio.Stremio.desktop
-                '';
-            };
         };
     };
 }
