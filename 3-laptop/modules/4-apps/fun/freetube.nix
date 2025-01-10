@@ -9,12 +9,6 @@
                 ];
                 allowOther = true;
             };
-            file = {
-                ".config/plank/dock1/launchers/io.freetubeapp.FreeTube.dockitem".text = ''
-                    [PlankDockItemPreferences]
-                    Launcher=file:///var/lib/flatpak/exports/share/applications/io.freetubeapp.FreeTube.desktop
-                '';
-            };
         };
     };
 }
