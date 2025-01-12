@@ -282,10 +282,5 @@ with lib.hm.gvariant;
       unmaximize-enabled = true;
       unplug-file = "/Storage/Files/Sounds/Interface Sounds/Orwell 2/system_connection_lost_notification-sharedassets1.assets-124.wav";
     };
-
-    "org/cinnamon/theme" = {
-      name = "Mint-Y-Dark-Aqua";
-    };
-
   };
 }
