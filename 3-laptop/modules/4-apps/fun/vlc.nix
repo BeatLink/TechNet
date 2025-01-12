@@ -1,12 +1,16 @@
 
 { config, pkgs, ... }: 
 {
-    services.flatpak.packages = ["flathub:app/org.videolan.VLC//stable"];
     home-manager.users.beatlink = { config, pkgs, ... }: {
         home = {
+            packages = with pkgs; [
+                vlc
+            ];
             persistence."/Storage/Apps/Fun/VLC" = {
                 directories = [
-                    ".var/app/org.videolan.VLC"
+                    ".cache/vlc"
+                    ".config/vlc"
+                    ".local/share/vlc"
                 ];
                 allowOther = true;
             };
