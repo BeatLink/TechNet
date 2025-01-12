@@ -36,6 +36,7 @@
             ./2-dconf-settings.nix
             ./fonts.nix
             ./night-light.nix
+            ./themes.nix
         ];
         xsession =  {
             scriptPath = ".local/share/X11/xsession";
