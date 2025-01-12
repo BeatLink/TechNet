@@ -9,6 +9,9 @@
 # X-GNOME-Autostart-Delay=0
 ###########################################################################################################################################
 
+
+with lib.hm.gvariant;
+
 { config, lib, pkgs, ... }:
 {
     environment.systemPackages = [ pkgs.nemo-with-extensions ];                # Installs Plank from nixpkgs
@@ -41,7 +44,22 @@
                 '';
             };
         };
-        dconf.enable = true;                                    # Enables dconf which stores plank settings
-        imports = [./2-dconf-settings.nix];                     # Imports the dconf settings
+        dconf = {
+            enable = true;                                    # Enables dconf which stores plank settings
+            settings = {
+                "org/nemo/preferences" = {
+                    last-server-connect-method = 0;
+                    show-hidden-files = true;
+                };
+
+                "org/nemo/window-state" = {
+                    maximized = true;
+                    sidebar-bookmark-breakpoint = 12;
+                    sidebar-width = 373;
+                    start-with-sidebar = true;
+                };
+
+            };
+        };
     };
 }
