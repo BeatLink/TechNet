@@ -8,10 +8,7 @@
 
 { config, lib, pkgs, ... }:
 {  
-    imports = [
-        ./nemo
-        ./blueman
-    ];
+
     services = {
         displayManager.logToFile = false;
         displayManager.logToJournal = false;
