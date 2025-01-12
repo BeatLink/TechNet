@@ -10,9 +10,11 @@
 ###########################################################################################################################################
 
 
-with lib.hm.gvariant;
 
 { config, lib, pkgs, ... }:
+
+with lib.hm.gvariant;
+
 {
     environment.systemPackages = [ pkgs.nemo-with-extensions ];                # Installs Plank from nixpkgs
     programs.fuse.userAllowOther = true;
