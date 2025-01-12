@@ -1,8 +1,10 @@
 { config, lib, pkgs, ... }:
 {
-    services.flatpak.packages = ["flathub:app/org.keepassxc.KeePassXC//stable"];
     home-manager.users.beatlink = { config, pkgs, ... }: {
         home = {
+            packages = with pkgs; [
+                keepassxc
+            ];
             persistence."/Storage/Apps/Core/KeePassXC" = {
                 directories = [
                     ".var/app/org.keepassxc.KeePassXC"
