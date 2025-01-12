@@ -14,7 +14,7 @@ let
 
     plankItems = {
         "01-firefox" =  "file:///var/lib/flatpak/exports/share/applications/org.mozilla.firefox.desktop";
-        "02-keepassxc" = "file:///var/lib/flatpak/exports/share/applications/org.keepassxc.KeePassXC.desktop";
+        "02-keepassxc" = "file://${pkgs.keepassxc}/share/applications/org.keepassxc.KeePassXC.desktop";
         "03-trilium" = "file:///run/booted-system/sw/share/applications/Trilium.desktop";
         "04-nemo" = "file:///run/booted-system/sw/share/applications/nemo.desktop";
         "05-separator1" = "file:///home/beatlink/.local/share/applications/separator1.desktop";
