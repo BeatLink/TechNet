@@ -21,5 +21,9 @@ with lib.hm.gvariant;
         "org/gnome/desktop/wm/preferences" = {
             "titlebar-font" = "Noto Sans 12";
         };
+        "org/nemo/desktop" = {
+            "font" = "Noto Sans Regular 12";
+        };
+
     };
 }
