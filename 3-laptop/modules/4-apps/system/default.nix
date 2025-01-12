@@ -6,5 +6,7 @@
         ./fonts.nix
         ./variety.nix
         ./vorta.nix
+        ./nemo
+        ./blueman
     ];
 }
