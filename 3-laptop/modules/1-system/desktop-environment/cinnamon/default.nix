@@ -38,6 +38,7 @@
         imports = [                                                                 # Imports Cinnamon Dconf Settings
             ./2-dconf-settings.nix
             ./fonts.nix
+            ./night-light.nix
         ];
         xsession =  {
             scriptPath = ".local/share/X11/xsession";
