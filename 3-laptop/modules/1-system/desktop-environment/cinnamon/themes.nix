@@ -7,5 +7,5 @@ with lib.hm.gvariant;
         "org/cinnamon/theme" = {
             name = "Mint-Y-Dark-Aqua";
         };
-    }
+    };
 }
