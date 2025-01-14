@@ -11,7 +11,7 @@
         settings = {
             services = {
                 mealie.service = {
-                    image = "ghcr.io/mealie-recipes/mealie:v1.3.2";
+                    image = "ghcr.io/mealie-recipes/mealie:v2.4.2";
                     container_name = "mealie";
                     restart = "always";
                     depends_on = [
