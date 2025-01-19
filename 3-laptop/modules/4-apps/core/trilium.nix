@@ -1,7 +1,7 @@
 { config, lib, pkgs, ... }:
 {
    
-    environment.systemPackages = [(pkgs.callPackage ./trilium { })];
+    environment.systemPackages = [ pkgs.trilium-next-desktop ];
     home-manager.users.beatlink = { config, pkgs, ... }: {
         home = {
             persistence."/Storage/Apps/Core/Trilium" = {
