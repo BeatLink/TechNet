@@ -23,7 +23,6 @@ Ragnarok is a single board computer based backup server installed offsite to bac
 ### Notes
 - Rock64 may not function with direct connection to certain monitors. Utilize a Xtech HDMI to VGA adapter to bypass this
 - SD card images are built within the Nix Flake. 
-- Do not upgrade from NixOS-23.11. A regression will prevent booting on the Rock64
 
 ### Installation
 Run [./scripts/install.sh](./scripts/install.sh) from this folder
