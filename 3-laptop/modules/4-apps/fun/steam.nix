@@ -6,7 +6,13 @@
         dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
         localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
     };
-    environment.systemPackages = with pkgs; [mangohud protonup-qt lutris heroic];
+
+    environment.systemPackages = with pkgs; [
+        mangohud
+        protonup-qt
+        lutris
+        heroic
+    ];
 
     home-manager.users.beatlink = { config, pkgs, ... }: {
         home = {
