@@ -16,6 +16,7 @@
 with lib.hm.gvariant;
 
 {
+    
     environment.systemPackages = [ pkgs.nemo-with-extensions ];                # Installs Plank from nixpkgs
     programs.fuse.userAllowOther = true;
     home-manager.users.beatlink = { config, pkgs, ... }: {
