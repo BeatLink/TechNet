@@ -1,26 +1,18 @@
 { config, pkgs, ... }: 
 {
-
-    services.flatpak = {
-        preSwitchCommand = ''flatpak override --persist="." io.lmms.LMMS'';
-        packages = ["flathub:app/io.lmms.LMMS//stable"];
-        overrides."io.lmms.LMMS" = {
-            filesystems = [
-                "/Storage/Files/Sounds"
+    environment.persistence."/Storage/Apps/Fun/LMMS" = {
+        enable = true;
+        hideMounts = true;
+        users.beatlink = {
+            files = [
+                ".lmmsrc.xml"
             ];
         };
     };
+
     home-manager.users.beatlink = { config, pkgs, ... }: {
         home = {
-            persistence."/Storage/Apps/Fun/LMMS" = {
-                directories = [
-                    ".var/app/io.lmms.LMMS"
-                ];
-                files = [
-                    ".lmmsrc.xml"
-                ];
-                allowOther = true;
-            };
+            packages = with pkgs; [ lmms ];
         };
     };
 }
