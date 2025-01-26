@@ -1,14 +1,11 @@
-{ config, lib, pkgs, ... }:
 {
-    services.flatpak.packages = [
-        "flathub:app/org.mozilla.firefox//stable"
-        "flathub:runtime/org.freedesktop.Platform.ffmpeg-full//23.08"
-    ];
-    home-manager.users.beatlink = { config, pkgs, ... }: {
+    home-manager.users.beatlink = { config, lib, pkgs, ... }: {
         home = {
+            packages = with pkgs; [ firefox ];
             persistence."/Storage/Apps/Core/Firefox" = {
-                directories = [ 
-                    ".var/app/org.mozilla.firefox"
+                directories = [
+                    ".cache/mozilla/firefox"
+                    ".mozilla"
                 ];
                 allowOther = true;
             };
