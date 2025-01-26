@@ -1,4 +1,3 @@
-{ config, pkgs, ... }: 
 {
 
     services.flatpak.packages = ["flathub:app/com.stremio.Stremio//stable"];

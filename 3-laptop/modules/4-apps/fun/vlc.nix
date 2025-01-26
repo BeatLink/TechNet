@@ -1,11 +1,7 @@
-
-{ config, pkgs, ... }: 
 {
     home-manager.users.beatlink = { config, pkgs, ... }: {
         home = {
-            packages = with pkgs; [
-                vlc
-            ];
+            packages = with pkgs; [ vlc ];
             persistence."/Storage/Apps/Fun/VLC" = {
                 directories = [
                     ".cache/vlc"
