@@ -6,6 +6,7 @@
         ./freetube.nix
         ./gmusicbrowser.nix
         ./lmms.nix
+        ./lutris.nix
         ./newsflash.nix
         ./steam.nix
         ./stremio.nix
