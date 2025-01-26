@@ -8,7 +8,6 @@
 {
     boot = {
         kernelModules = [];
-        kernelPackages = pkgs.linuxPackages_latest;
         kernel.sysctl."kernel.sysrq" = 1;
         initrd = {
             systemd.enable = true;
