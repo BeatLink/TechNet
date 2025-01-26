@@ -1,6 +1,6 @@
 {
     imports = [
         ./ckan.nix
-        ./saubraten.nix
+        ./sauerbraten.nix
     ];
 }
