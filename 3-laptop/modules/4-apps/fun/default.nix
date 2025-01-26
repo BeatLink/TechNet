@@ -11,5 +11,6 @@
         ./steam.nix
         ./stremio.nix
         ./vlc.nix
+        ./games
     ];
 }
