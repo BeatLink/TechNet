@@ -1,10 +1,7 @@
-{ config, lib, pkgs, ... }:
 {
-    home-manager.users.beatlink = { config, pkgs, ... }: {
+    home-manager.users.beatlink = { config, lib, pkgs, ... }: {
         home = {
-            packages = with pkgs; [
-                keepassxc
-            ];
+            packages = with pkgs; [ keepassxc ];
             persistence."/Storage/Apps/Core/KeePassXC" = {
                 directories = [
                     ".config/keepassxc"
