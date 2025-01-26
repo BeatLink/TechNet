@@ -24,7 +24,7 @@ let
         "09-riot" = "file:///var/lib/flatpak/exports/share/applications/im.riot.Riot.desktop";
         "10-discord" = "file:///var/lib/flatpak/exports/share/applications/com.discordapp.Discord.desktop";
         "11-separator2" = "file:///home/beatlink/.local/share/applications/separator2.desktop";
-        "12-newsflash" = "file:///${pkgs.freshrss}/share/applications/io.gitlab.news_flash.NewsFlash.desktop";
+        "12-newsflash" = "file:///${pkgs.newsflash}/share/applications/io.gitlab.news_flash.NewsFlash.desktop";
         "13-gmusicbrowser" = "file:///var/lib/flatpak/exports/share/applications/org.gmusicbrowser.gmusicbrowser.desktop";
         "14-freetube" = "file:///var/lib/flatpak/exports/share/applications/io.freetubeapp.FreeTube.desktop";
         "15-stremio" = "file:///var/lib/flatpak/exports/share/applications/com.stremio.Stremio.desktop";
