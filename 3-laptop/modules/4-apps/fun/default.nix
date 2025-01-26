@@ -8,6 +8,7 @@
         ./lmms.nix
         ./lutris.nix
         ./newsflash.nix
+        ./picard.nix
         ./steam.nix
         ./stremio.nix
         ./vlc.nix
