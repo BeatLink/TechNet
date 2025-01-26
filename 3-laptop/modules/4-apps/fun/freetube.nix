@@ -1,11 +1,11 @@
 { config, pkgs, ... }: 
 {
-    services.flatpak.packages = ["flathub:app/io.freetubeapp.FreeTube//stable"];
     home-manager.users.beatlink = { config, pkgs, ... }: {
         home = {
+            packages = with pkgs; [ freetube ];
             persistence."/Storage/Apps/Fun/FreeTube" = {
                 directories = [
-                    ".var/app/io.freetubeapp.FreeTube"
+                    ".config/FreeTube"
                 ];
                 allowOther = true;
             };
