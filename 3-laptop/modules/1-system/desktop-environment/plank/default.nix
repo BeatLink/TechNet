@@ -28,7 +28,8 @@ let
         "13-gmusicbrowser" = "file:///var/lib/flatpak/exports/share/applications/org.gmusicbrowser.gmusicbrowser.desktop";
         "14-freetube" = "file:///var/lib/flatpak/exports/share/applications/io.freetubeapp.FreeTube.desktop";
         "15-stremio" = "file:///var/lib/flatpak/exports/share/applications/com.stremio.Stremio.desktop";
-        "16-steam" = "file:///run/booted-system/sw/share/applications/steam.desktop";
+        "16-lutris" = "file://${pkgs.lutris}/share/applications/lutris.desktop";
+        "16-steam" = "file://${pkgs.steam}/share/applications/steam.desktop";
         "17-calibre" = "file:///var/lib/flatpak/exports/share/applications/com.calibre_ebook.calibre.desktop";
         "18-io.lmms.LMMS" = "file:///var/lib/flatpak/exports/share/applications/io.lmms.LMMS.desktop";
         "19-pix" = "file:///run/booted-system/sw/share/applications/pix.desktop";
