@@ -1,11 +1,14 @@
 {
 
-    services.flatpak.packages = ["flathub:app/com.stremio.Stremio//stable"];
     home-manager.users.beatlink = { config, pkgs, ... }: {
         home = {
+            packages = with pkgs; [ stremio ];
             persistence."/Storage/Apps/Fun/Stremio" = {
                 directories = [
-                    ".var/app/com.stremio.Stremio"
+                    ".cache/Smart Code ltd"
+                    ".config/Smart Code ltd"
+                    ".local/share/Smart Code ltd"
+                    ".stremio-server"
                 ];
                 allowOther = true;
             };
