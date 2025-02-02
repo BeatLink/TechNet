@@ -6,7 +6,7 @@
             persistence."/Storage/Apps/Fun/Lutris" = {
                 directories = [
                     ".cache/lutris"
-                    ".config/"
+                    ".config/lutris"
                     ".local/share/lutris"
                 ];
                 allowOther = true;

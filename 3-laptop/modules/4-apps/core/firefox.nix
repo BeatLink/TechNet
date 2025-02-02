@@ -1,5 +1,5 @@
 {
-    home-manager.users.beatlink = { config, lib, pkgs, ... }: {
+    home-manager.users.beatlink = { pkgs, ... }: {
         home = {
             packages = with pkgs; [ firefox ];
             persistence."/Storage/Apps/Core/Firefox" = {
