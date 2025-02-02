@@ -1,6 +1,5 @@
-{ config, pkgs, ... }: 
 {
-    home-manager.users.beatlink = { config, pkgs, ... }: {
+    home-manager.users.beatlink = { pkgs, ... }: {
         home = {
             packages = with pkgs; [ element-desktop ];
             persistence."/Storage/Apps/Comms/Element" = {

@@ -2,7 +2,7 @@
     nixpkgs.config.permittedInsecurePackages = [
         "electron-31.7.7"
     ];
-    home-manager.users.beatlink = { config, pkgs, ... }: {
+    home-manager.users.beatlink = { pkgs, ... }: {
         nixpkgs.config.permittedInsecurePackages = [
             "electron-31.7.7"
         ];
