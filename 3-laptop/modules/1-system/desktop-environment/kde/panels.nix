@@ -65,7 +65,6 @@
                                 "applications:whatsapp.desktop"
                                 "applications:whatsapp-private.desktop"
                                 "applications:im.riot.Riot.desktop"
-                                "applications:com.discordapp.Discord.desktop"
                                 "file:///home/beatlink/.local/share/applications/separator2.desktop"
                                 # Newsflash
                                 "applications:org.gmusicbrowser.gmusicbrowser.desktop"
