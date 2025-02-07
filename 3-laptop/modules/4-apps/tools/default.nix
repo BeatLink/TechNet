@@ -8,6 +8,7 @@
         ./deluge.nix
         ./drawio.nix
         ./dupeguru.nix
+        ./inkscape.nix
         ./libreoffice.nix
         ./virt-manager.nix
     ];
