@@ -7,7 +7,6 @@
         ./deluge.nix
         ./drawio.nix
         ./dupeguru.nix
-        ./guake.nix
         ./gallery-dl.nix
         ./inkscape.nix
         ./libreoffice.nix
@@ -20,6 +19,7 @@
         ./xed.nix
         ./xviewer.nix
         ./alarm-clock-applet
+        ./guake
         ./pix
     ];
 }
