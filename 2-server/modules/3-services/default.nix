@@ -10,6 +10,7 @@
         ./deluge.nix
         ./esphome.nix
         ./freshrss.nix
+        ./gallery-dl.nix
         ./glances.nix
         ./home-assistant.nix
         ./homepage.nix
