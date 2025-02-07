@@ -1,12 +1,12 @@
-{ config, lib, pkgs, ... }:
 {
     imports = [
         #./clock.nix
-        ./cheese.nix
         ./calculator.nix
+        ./cheese.nix
         ./czkawka.nix
         ./decoder.nix
         ./deluge.nix
+        ./drawio.nix
         ./dupeguru.nix
         ./libreoffice.nix
         ./virt-manager.nix
