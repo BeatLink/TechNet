@@ -11,5 +11,6 @@
         ./inkscape.nix
         ./libreoffice.nix
         ./virt-manager.nix
+        ./pix
     ];
 }
