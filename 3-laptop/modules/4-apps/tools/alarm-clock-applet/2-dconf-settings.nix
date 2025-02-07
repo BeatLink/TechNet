@@ -6,61 +6,44 @@ with lib.hm.gvariant;
 {
   dconf.settings = {
     "io/github/alarm-clock-applet" = {
-      alarms = [ (mkUint32 0) 1 2 3 ];
+      alarms = [ (mkUint32 0) 4 1 ];
       gconf-migrated = true;
-      show-label = true;
+      show-label = false;
     };
 
     "io/github/alarm-clock-applet/alarm-0" = {
       active = true;
       command = "rhythmbox-client --play";
-      message = "Go to Bed";
+      message = "Wind Down";
       notify-type = "sound";
       repeat = [ "sun" "mon" "tue" "wed" "thu" "fri" "sat" ];
-      sound-file = "file:///media/beatlink/Storage/Files/Music/60/Soundtracks/Jack%20Wall%20-%20Vigil.ogg";
-      sound-repeat = true;
-      time = mkInt64 81900;
-      timestamp = mkInt64 1738986300;
+      sound-file = "file:///Storage/Files/Sounds/Interface%20Sounds/Amazon/Amazon%20Fire%20Phone%20Startup%20(Extracted%20with%20Boot%20Animation).m4a";
+      sound-repeat = false;
+      time = mkInt64 78300;
+      timestamp = mkInt64 1738982700;
       type = "clock";
     };
 
     "io/github/alarm-clock-applet/alarm-1" = {
       active = true;
-      command = "/media/beatlink/Storage/Apps/Tools/brightness-scripts/brightness-min.sh";
-      message = "Brightness Min";
-      notify-type = "command";
+      command = "audacious --play";
+      message = "Wake Up";
       repeat = [ "sun" "mon" "tue" "wed" "thu" "fri" "sat" ];
-      sound-file = "file:///usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga";
-      sound-repeat = true;
-      time = mkInt64 79200;
-      timestamp = mkInt64 1738983600;
-      type = "clock";
-    };
-
-    "io/github/alarm-clock-applet/alarm-2" = {
-      active = true;
-      command = "/media/beatlink/Storage/Apps/Tools/brightness-scripts/brightness-half.sh";
-      message = "Brightness Half";
-      notify-type = "command";
-      repeat = [ "sun" "mon" "tue" "wed" "thu" "fri" "sat" ];
-      sound-file = "file:///usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga";
-      sound-repeat = true;
-      time = mkInt64 64800;
-      timestamp = mkInt64 1738969200;
-      type = "clock";
-    };
-
-    "io/github/alarm-clock-applet/alarm-3" = {
-      active = true;
-      command = "/media/beatlink/Storage/Apps/Tools/brightness-scripts/brightness-max.sh";
-      message = "Brightness Max";
-      notify-type = "command";
-      repeat = [ "sun" "mon" "tue" "wed" "thu" "fri" "sat" ];
-      sound-file = "file:///usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga";
-      sound-repeat = true;
+      sound-file = "file:///Storage/Files/Sounds/Interface%20Sounds/Amazon/Amazon%20Fire%20Phone%20Startup%20(Extracted%20with%20Boot%20Animation).m4a";
+      sound-repeat = false;
       time = mkInt64 21600;
       timestamp = mkInt64 1739012400;
-      type = "clock";
+    };
+
+    "io/github/alarm-clock-applet/alarm-4" = {
+      active = true;
+      command = "audacious --play";
+      message = "Sleep";
+      repeat = [ "sun" "mon" "tue" "wed" "thu" "fri" "sat" ];
+      sound-file = "file:///Storage/Files/Sounds/Interface%20Sounds/Amazon/Amazon%20Fire%20Phone%20Startup%20(Extracted%20with%20Boot%20Animation).m4a";
+      sound-repeat = false;
+      time = mkInt64 79200;
+      timestamp = mkInt64 1738983600;
     };
 
   };
