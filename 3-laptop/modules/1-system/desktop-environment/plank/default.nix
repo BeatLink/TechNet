@@ -29,15 +29,15 @@ let
         "15-stremio" = "file:///${pkgs.stremio}/share/applications/com.stremio.Stremio.desktop";
         "16-lutris" = "file://${pkgs.lutris}/share/applications/net.lutris.Lutris.desktop";
         "16-steam" = "file://${pkgs.steam}/share/applications/steam.desktop";
-        "17-calibre" = "file:///var/lib/flatpak/exports/share/applications/com.calibre_ebook.calibre.desktop";
-        "18-io.lmms.LMMS" = "file:///var/lib/flatpak/exports/share/applications/io.lmms.LMMS.desktop";
-        "19-pix" = "file:///run/booted-system/sw/share/applications/pix.desktop";
+        "17-calibre" = "file://${pkgs.calibre}/share/applications/calibre-gui.desktop";
+        "18-io.lmms.LMMS" = "file://${pkgs.lmms}/share/applications/lmms.desktop";
+        "19-pix" = "file://${pkgs.pix}/share/applications/pix.desktop";
         "20-separator3" = "file:///home/beatlink/.local/share/applications/separator3.desktop";
         "21-home-assistant" = "file:///home/beatlink/.local/share/applications/home-assistant.desktop";
         "22-nextcloud" = "file:///home/beatlink/.local/share/applications/nextcloud.desktop";
         "23-separator4" = "file:///home/beatlink/.local/share/applications/separator4.desktop";
         "24-terminal" = "file:///run/booted-system/sw/share/applications/org.gnome.Terminal.desktop";
-        "25-vscodium" = "file:///var/lib/flatpak/exports/share/applications/com.vscodium.codium.desktop";
+        "25-vscodium" = "file://${pkgs.vscodium}/share/applications/codium.desktop";
         "26-virt-manager" = "file:///run/booted-system/sw/share/applications/virt-manager.desktop";                   
         "27-separator5" = "file:///home/beatlink/.local/share/applications/separator5.desktop";
     };
@@ -51,7 +51,7 @@ let
 
 in {
     services.bamf.enable = true;                                                # Allows plank to know running applications
-    home-manager.users.beatlink = { config, pkgs, ... }: {
+    home-manager.users.beatlink = { pkgs, ... }: {
         home = {
             packages = [ pkgs.plank ];                                          # Installs Plank from nixpkgs
             persistence = {
