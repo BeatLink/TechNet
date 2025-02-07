@@ -1,5 +1,4 @@
 {
-    programs.fuse.userAllowOther = true;
     home-manager.users.beatlink = { pkgs, ... }: {
         home = {
             packages = with pkgs; [ nixd nixfmt-rfc-style vscodium ];
