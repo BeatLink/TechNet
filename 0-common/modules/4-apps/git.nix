@@ -1,5 +1,7 @@
-{ config, lib, pkgs, ... }:
 {
+    programs.git = {
+        enable = true;                                                          # For downloading git repos;
+    };
     home-manager.users.beatlink.programs.git = {
         enable = true;
         userEmail = "github@beatlink.simplelogin.com";

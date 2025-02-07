@@ -64,7 +64,6 @@ in {
             wget                                                        # For downloading stuff
             htop                                                        # For checking the system status
             ncdu                                                        # For checking disk usage
-            git                                                         # For downloading git repos
             nano
             tree                                                        # For editing config files
             curl
