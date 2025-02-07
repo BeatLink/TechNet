@@ -1,5 +1,6 @@
 {
     imports = [
+        ./alarm-clock-applet.nix
         ./calculator.nix
         ./cheese.nix
         ./czkawka.nix
@@ -12,7 +13,6 @@
         ./screenshot.nix
         ./simple-scan.nix
         ./virt-manager.nix
-        ./clocks
         ./pix
     ];
 }
