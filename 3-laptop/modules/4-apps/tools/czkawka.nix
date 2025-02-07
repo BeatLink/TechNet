@@ -1,8 +1,7 @@
-{ config, pkgs, ... }: 
 {
-    environment.systemPackages = with pkgs; [ czkawka ];
-    home-manager.users.beatlink = { config, pkgs, ... }: {
+    home-manager.users.beatlink = { pkgs, ... }: {
         home = {
+            packages = with pkgs; [ czkawka ];
             persistence."/Storage/Apps/Tools/Czkawka" = {
                 directories = [
                     ".cache/czkawka"
