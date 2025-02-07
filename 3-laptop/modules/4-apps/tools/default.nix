@@ -10,6 +10,7 @@
         ./dupeguru.nix
         ./inkscape.nix
         ./libreoffice.nix
+        ./simple-scan.nix
         ./virt-manager.nix
         ./pix
     ];
