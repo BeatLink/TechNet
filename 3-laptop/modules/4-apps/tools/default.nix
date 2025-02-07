@@ -7,6 +7,7 @@
         ./deluge.nix
         ./drawio.nix
         ./dupeguru.nix
+        ./guake.nix
         ./gallery-dl.nix
         ./inkscape.nix
         ./libreoffice.nix
@@ -16,6 +17,8 @@
         ./ventoy.nix
         ./video-downloader.nix
         ./virt-manager.nix
+        ./xed.nix
+        ./xviewer.nix
         ./alarm-clock-applet
         ./pix
     ];
