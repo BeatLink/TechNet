@@ -1,4 +1,13 @@
-{ config, lib, pkgs, ... }:
 {
-    environment.systemPackages = with pkgs; [ dupeguru ];
+    home-manager.users.beatlink = { pkgs, ... }: {
+        home = {
+            packages = with pkgs; [ dupeguru ];
+            persistence."/Storage/Apps/Tools/Dupeguru" = {
+                directories = [
+                ];
+                allowOther = true;
+            };
+        };
+    };
 }
+
