@@ -62,7 +62,6 @@ in {
         defaultPackages = lib.mkForce [];
         systemPackages = with pkgs; [                                   # Set packages installed on system
             wget                                                        # For downloading stuff
-            htop                                                        # For checking the system status
             ncdu                                                        # For checking disk usage
             nano
             tree                                                        # For editing config files
