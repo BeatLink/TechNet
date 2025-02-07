@@ -7,6 +7,9 @@
                 allowOther = true;
             };
         };
+        imports = [                                                                 # Imports Pix Dconf Settings
+            ./2-dconf-settings.nix
+        ];
     };
 }
 
