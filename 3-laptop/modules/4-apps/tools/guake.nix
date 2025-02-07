@@ -1,10 +1,9 @@
 {
     home-manager.users.beatlink = { pkgs, ... }: {
         home = {
-            packages = with pkgs; [ xed-editor ];
-            persistence."/Storage/Apps/Tools/Xed" = {
+            packages = with pkgs; [ guake ];
+            persistence."/Storage/Apps/Tools/Guake" = {
                 directories = [
-                    ".config/xed"
                 ];
                 allowOther = true;
             };
