@@ -24,10 +24,9 @@
             url = "github:nix-community/home-manager";
             inputs.nixpkgs.follows = "nixpkgs";
         };
-        plasma-manager = {
-            url = "github:nix-community/plasma-manager";
+        xdg-autostart = {
+            url = "github:Zocker1999NET/home-manager-xdg-autostart";
             inputs.nixpkgs.follows = "nixpkgs";
-            inputs.home-manager.follows = "home-manager";
         };
         flatpaks = {
             url = "github:GermanBread/declarative-flatpak";
@@ -37,7 +36,19 @@
             inputs.nixpkgs.follows = "nixpkgs";
         };
     };
-    outputs = inputs @ { self, nixpkgs, disko, impermanence, sops-nix, arion, home-manager, plasma-manager, flatpaks, flake-programs-sqlite, ... }: rec {
+    outputs = inputs @ { 
+            self, 
+            nixpkgs, 
+            disko, 
+            impermanence, 
+            sops-nix, 
+            arion, 
+            home-manager, 
+            xdg-autostart,
+            flatpaks, 
+            flake-programs-sqlite, 
+            ... 
+        }: rec {
         nixosConfigurations = {
             Ragnarok = nixpkgs.lib.nixosSystem {
                 system = "aarch64-linux";
@@ -67,12 +78,11 @@
             Odin = nixpkgs.lib.nixosSystem {
                 system = "x86_64-linux";
                 modules = [
-                    
                     disko.nixosModules.disko
                     impermanence.nixosModules.impermanence
                     sops-nix.nixosModules.sops
                     home-manager.nixosModules.home-manager
-                    {home-manager.sharedModules = [ plasma-manager.homeManagerModules.plasma-manager ];}
+                    {home-manager.sharedModules = [ xdg-autostart.homeManagerModules.xdg-autostart ];}
                     flatpaks.nixosModules.declarative-flatpak
                     flake-programs-sqlite.nixosModules.programs-sqlite
                     ./0-common
