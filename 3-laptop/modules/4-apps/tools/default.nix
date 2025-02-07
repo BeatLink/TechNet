@@ -1,6 +1,5 @@
 {
     imports = [
-        ./alarm-clock-applet.nix
         ./calculator.nix
         ./cheese.nix
         ./czkawka.nix
@@ -12,7 +11,9 @@
         ./libreoffice.nix
         ./screenshot.nix
         ./simple-scan.nix
+        ./universal-android-debloater.nix
         ./virt-manager.nix
+        ./alarm-clock-applet
         ./pix
     ];
 }
