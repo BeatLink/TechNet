@@ -3,6 +3,7 @@
         #./clock.nix
         ./calculator.nix
         ./cheese.nix
+        ./clocks.nix
         ./czkawka.nix
         ./decoder.nix
         ./deluge.nix
