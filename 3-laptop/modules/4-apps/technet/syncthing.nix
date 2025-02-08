@@ -1,10 +1,18 @@
-{ config, pkgs, ... }: 
 {
-    environment.systemPackages = with pkgs; [ syncthingtray ];
-    home-manager.users.beatlink = { config, pkgs, ... }: {
+    home-manager.users.beatlink = { pkgs, ... }: {
+        home.packages = with pkgs; [ syncthingtray-minimal ];
+        systemd.user.targets.tray = {
+            Unit = {
+                Description = "Home Manager System Tray";
+                Requires = [ "graphical-session-pre.target" ];
+            };
+        };
         services.syncthing = {
             enable = true;
-            tray.enable = false;
+            tray = {
+                enable = true;
+                command = "syncthingtray --wait";
+            };
             settings = {
                 devices = {
                     Heimdall = {
@@ -78,14 +86,20 @@
                 };
             };
         };
-        home.persistence."/Storage/Apps/TechNet/SyncThing" = {
-            directories = [
-                ".local/state/syncthing"
-            ];
-            files = [
-                ".config/syncthingtray.ini"
-            ];
-            allowOther = true;
+        home = {
+            persistence."/Storage/Apps/TechNet/SyncThing" = {
+                directories = [
+                    ".local/state/syncthing"
+                ];
+                files = [
+                    ".config/syncthingtray.ini"
+                ];
+                allowOther = true;
+            };
+            file = {
+                ".config/autostart/syncthingtray.desktop".source = "${pkgs.syncthingtray-minimal}/share/applications/syncthingtray.desktop";
+            };
+
         };
     };
 }
