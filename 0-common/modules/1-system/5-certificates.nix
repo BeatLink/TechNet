@@ -1,7 +1,10 @@
+# Certificates ############################################################################################################################
+#
+# # Add TechNet Certificate Heimdall Services and Websites
+#
+###########################################################################################################################################
 
-{ config, lib, pkgs, modulesPath, ... }: 
 {
-    # Add TechNet Certificate for Websites
     security.pki.certificates = [ 
         ''
             -----BEGIN CERTIFICATE-----

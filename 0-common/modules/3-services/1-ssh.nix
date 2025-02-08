@@ -9,12 +9,11 @@
 #   - Enable SSH in initrd for drive decryption
 #   - Set initrd ssh authentication to my client key
 #   - Set the initrd login command to the ask password agent
-#   - Add Heimdall's initrd and main ssh public keys for identification
-#   - Add configuration to login as root when accessing heimdall initrd and my user when accessing heimdall's main ssh
+#   - Add initrd and main ssh public keys for identification
+#   - Add configuration to login as root when accessing initrd and my user when accessing main ssh
 #
 ###########################################################################################################################################
 
-{ config, lib, pkgs, modulesPath, ... }: 
 {
     services.openssh = {
         enable = true;

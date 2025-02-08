@@ -1,15 +1,15 @@
-# Common Configurations ###################################################################################################################
-#
-# This imports common configurations used by all devices in the TechNet
+# Module Imports ##########################################################################################################################
 #
 ###########################################################################################################################################
 
-{ config, lib, pkgs, modulesPath, ... }: 
 {
     imports = [                                       
         ./1-software.nix
-        ./2-networking.nix
-        ./3-locale.nix
-        ./4-certificates.nix
+        ./2-fs-watcher-limit.nix
+        ./3-earlyoom.nix
+        ./4-locale.nix
+        ./5-certificates.nix
+        ./6-firewall.nix
+        ./7-fail2ban.nix
     ];
 }

@@ -4,14 +4,12 @@
 #
 ###########################################################################################################################################
 
-{ config, lib, pkgs, modulesPath, ... }: 
 {
+    users.mutableUsers = false;                                                 # Have users be managed by NixOS Config File
+    security.sudo.wheelNeedsPassword = false;                                   # Removes the need for entering passwords for sudo
+    home-manager.backupFileExtension = "hmbackup";                              # Sets the Home Manager Backup File Extension
     imports = [                                       
-        ./beatlink
+        ./1-root.nix
+        ./2-beatlink.nix
     ];
-    users = {
-        mutableUsers = false;                                           # Have users be managed by NixOS Config File
-        users.root.hashedPassword = "!";                                # Disables Root Account
-    };
-    security.sudo.wheelNeedsPassword = false;                           # Removes the need for entering passwords for sudo
-}
+ }
