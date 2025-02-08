@@ -29,7 +29,7 @@ with lib.hm.gvariant;
       scroll-output = true;
       search-engine = 1;
       set-window-title = true;
-      start-at-login = true;
+      start-at-login = false;
       start-fullscreen = true;
       tab-close-buttons = true;
       tab-ontop = true;
@@ -45,6 +45,10 @@ with lib.hm.gvariant;
       window-tabbar = true;
       window-valignment = 0;
       window-width = 100;
+    };
+
+    "org/guake/keybindings/global" = {
+      show-hide = "Calculator";
     };
 
     "org/guake/style/background" = {
