@@ -8,9 +8,8 @@
                 allowOther = true;
             };
             file = {
-                ".config/autostart/guake.desktop".source = "${pkgs.keepassxc}/share/applications/guake.desktop";
+                ".config/autostart/guake.desktop".source = "${pkgs.guake}/share/applications/guake.desktop";
             };
-
         };
         imports = [                                                                 # Imports Pix Dconf Settings
             ./2-dconf-settings.nix
