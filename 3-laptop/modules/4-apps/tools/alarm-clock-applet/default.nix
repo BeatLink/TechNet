@@ -1,3 +1,4 @@
+{lib, ...}: 
 {
     home-manager.users.beatlink = { pkgs, ... }: {
         home = {
@@ -5,8 +6,12 @@
             persistence."/Storage/Apps/Tools/Alarm-Clock-Applet" = {
                 allowOther = true;
             };
-            file = {
-                ".config/autostart/alarm-clock-applet.desktop".source = "${pkgs.alarm-clock-applet}/share/applications/alarm-clock-applet.desktop";
+        };
+        xdg.autoStart.desktopItems = {
+            alarm-clock-applet = pkgs.makeDesktopItem {
+                name = "alarm-clock-applet";
+                desktopName = "alarm-clock-applet";
+                exec = "alarm-clock-applet --hidden";
             };
         };
         imports = [ ./2-dconf-settings.nix ];
