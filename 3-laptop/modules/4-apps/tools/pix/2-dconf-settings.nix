@@ -43,7 +43,7 @@ with lib.hm.gvariant;
 
     "org/x/pix/gstreamer-tools" = {
       screenshot-location = "file:///Storage/Files/Pictures";
-      use-hardware-acceleration = true;
+      use-hardware-acceleration = false;
     };
 
     "org/x/pix/image-print" = {
