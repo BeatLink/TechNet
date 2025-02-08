@@ -1,9 +1,9 @@
 # EarlyOom ################################################################################################################################
 #
-# Prevents Out Of Memory Conditions by killing the largest process if memory drops below 10% free
+# Prevents Out Of Memory Conditions by killing the largest process if memory drops below 2% free
 #
 ###########################################################################################################################################
-{ config, lib, pkgs, modulesPath, ... }: 
+
 {
     services.earlyoom = {
         enable = true;

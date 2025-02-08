@@ -3,8 +3,7 @@
 # Enables Avahi for LAN access via hostname.local
 #
 ###########################################################################################################################################
-    
-{ config, lib, pkgs, modulesPath, ... }: 
+
 {
     services.avahi = {
         enable = true;

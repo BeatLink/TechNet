@@ -1,38 +1,26 @@
-# Software ################################################################################################################################
+# Software ##########################################################################################################################################
 #
-# Enables flakes, allows unfree packages, enables auto upgrades and install default software                                                
+# Configures Software in NixOS
+#   - Enables Flakes
+#   - Enables Automatic System Upgrades
+#   - Enables Garbage Collection
+#   - Enables Unfree Packages
+#   - Removes default Apps
 #
-###########################################################################################################################################
+#####################################################################################################################################################
 
-{ inputs, config, lib, pkgs, modulesPath, ... }: 
+{ pkgs, config, lib, inputs, ... }: 
+{
 
-let 
-    systemUpdateUptimeKumaURL = {
-        Ragnarok = "https://uptime-kuma.heimdall.technet/api/push/sTgpl4hkEc";
-        Odin = "https://uptime-kuma.heimdall.technet/api/push/Iy9Tfr31nG";
-        Heimdall = "https://uptime-kuma.heimdall.technet/api/push/urMFRtdrYA"; 
+    # Enable Flakes #################################################################################################################################
+    nix = {
+        extraOptions = ''experimental-features = nix-command flakes'';          # Enables Flakes
+        registry.nixpkgs.flake = inputs.nixpkgs;
+        nixPath = [ "nixpkgs=${inputs.nixpkgs.outPath}" ];                      # Configures nix to use nixpkgs from flakes, fixes pesky errors in nix-shell
     };
-in {
-    nix = {                                                             # Enables Flakes
-        extraOptions = ''experimental-features = nix-command flakes'';
-        settings.trusted-users = [ "root" ];                 # Allows me to remote update by sending the flake over ssh
-        gc = {
-            automatic = true;
-            dates = "weekly";
-            options = "--delete-older-than 7d";
-        };
-        registry = {
-            nixpkgs = {
-                flake = inputs.nixpkgs;
-            };
-        };
-        nixPath = [                                                     # Configures nix to use nixpkgs from flakes, fixes pesky errors in nix-shell
-            "nixpkgs=${inputs.nixpkgs.outPath}"
-        ];
-    };
-    nixpkgs.config.allowUnfree = true;                                  # Allow unfree packages
-    
-    system.autoUpgrade = {
+
+    # Enables Automatic Upgrades ####################################################################################################################
+    system.autoUpgrade = {                                                      # Configures Automatic Upgrades at 2AM from my GitHub flake. 
         enable = true;
         flake = "github:BeatLink/TechNet";
         operation = "switch";
@@ -44,33 +32,38 @@ in {
         randomizedDelaySec = "15min";
         allowReboot = true;
         persistent = true;
-    };
-
-    systemd.services.nixos-upgrade =  {
+    };    
+    systemd.services.nixos-upgrade =  let                                       # Sends status updates to Uptime Kuma on Heimdall
+        BaseURL = "https://uptime-kuma.heimdall.technet/api/push/";
+        Keys = {
+            Ragnarok = "sTgpl4hkEc";
+            Odin = "Iy9Tfr31nG";
+            Heimdall = "urMFRtdrYA"; 
+        };
+        FullURL = "${BaseURL}${Keys.${config.networking.hostName}}";
+    in {
         preStart = ''
-            ${pkgs.wget}/bin/wget --spider --no-check-certificate "${systemUpdateUptimeKumaURL.${config.networking.hostName}}?status=up&msg=System Upgrades Started&ping=";
+            ${pkgs.wget}/bin/wget --spider --no-check-certificate "${FullURL}?status=up&msg=System Upgrades Started&ping=";
         '';
         postStop =  ''
             if [ "$SERVICE_RESULT" == "success" ]; then
-                ${pkgs.wget}/bin/wget --spider --no-check-certificate "${systemUpdateUptimeKumaURL.${config.networking.hostName}}?status=up&msg=System Upgrades Completed Successfully&ping=";
+                ${pkgs.wget}/bin/wget --spider --no-check-certificate "${FullURL}?status=up&msg=System Upgrades Completed Successfully&ping=";
             else
-                ${pkgs.wget}/bin/wget --spider --no-check-certificate "${systemUpdateUptimeKumaURL.${config.networking.hostName}}?status=down&msg=System Upgrades Failed&ping=";
+                ${pkgs.wget}/bin/wget --spider --no-check-certificate "${FullURL}?status=down&msg=System Upgrades Failed&ping=";
             fi        
         '';
     };
-    environment = {
-        defaultPackages = lib.mkForce [];
-        systemPackages = with pkgs; [                                   # Set packages installed on system
-            wget                                                        # For downloading stuff
-            ncdu                                                        # For checking disk usage
-            nano
-            tree                                                        # For editing config files
-            curl
-            iputils
-            sops
-            pciutils
-            usbutils 
-        ];
+
+    # Enable Garbage Collection #####################################################################################################################
+    nix.gc = {
+        automatic = true;
+        dates = "weekly";
+        options = "--delete-older-than 7d";
     };
-    systemd.extraConfig = "DefaultLimitNOFILE=65536";                   # Increase number of open files (Steam, syncthing, etc)
+
+    # Enables Unfree Packages #######################################################################################################################
+    nixpkgs.config.allowUnfree = true;
+
+    # Removes Default Packages ######################################################################################################################
+    environment.defaultPackages = lib.mkForce [];
 }
