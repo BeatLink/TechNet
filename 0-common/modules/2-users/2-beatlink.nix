@@ -8,7 +8,7 @@
 {
     # Setup Linux User Account ######################################################################################################################
     sops.secrets.beatlink_hashed_password = {
-        sopsFile = ../../../secrets.yaml;
+        sopsFile = ../../secrets.yaml;
         neededForUsers = true;
     };
     users = {
