@@ -26,7 +26,6 @@
         };
         xdg-autostart = {
             url = "github:Zocker1999NET/home-manager-xdg-autostart";
-            inputs.nixpkgs.follows = "nixpkgs";
         };
         flatpaks = {
             url = "github:GermanBread/declarative-flatpak";
