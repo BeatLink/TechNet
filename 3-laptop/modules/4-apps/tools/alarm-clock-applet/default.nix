@@ -1,4 +1,3 @@
-{lib, ...}: 
 {
     home-manager.users.beatlink = { pkgs, ... }: {
         home = {
