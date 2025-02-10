@@ -14,7 +14,7 @@ with lib.hm.gvariant;
       properties-visible = false;
       reuse-active-window = true;
       sidebar-sections = [ "GthFileProperties:expanded" "GthFileComment:expanded" "GthFileDetails:expanded" "GthImageHistogram:expanded" ];
-      sidebar-visible = true;
+      sidebar-visible = false;
       sort-inverse = false;
       sort-type = "file::mtime";
       startup-current-file = "";
