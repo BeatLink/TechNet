@@ -1,8 +1,4 @@
 # Generated via dconf2nix: https://github.com/gvolpe/dconf2nix
-{ lib, ... }:
-
-with lib.hm.gvariant;
-
 {
   dconf.settings = {
     "org/guake/general" = {
@@ -30,7 +26,7 @@ with lib.hm.gvariant;
       search-engine = 1;
       set-window-title = true;
       start-at-login = false;
-      start-fullscreen = true;
+      start-fullscreen = false;
       tab-close-buttons = true;
       tab-ontop = true;
       use-audible-bell = true;
