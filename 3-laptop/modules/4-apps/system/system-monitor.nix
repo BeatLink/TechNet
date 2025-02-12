@@ -1,0 +1,2 @@
+#stacer
+#gnome system monitor
