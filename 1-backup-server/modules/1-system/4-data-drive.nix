@@ -1,10 +1,9 @@
-# Backup Drive ############################################################################################################################
+# Data Drive ############################################################################################################################
 #
-# Configures settings for mounting the Backup Drive
+# Configures settings for mounting the Data Drive for backups
 #
 ###########################################################################################################################################
 
-{ config, lib, pkgs, ... }: 
 {
     systemd.tmpfiles.settings."Backup-Drive" = {                      # Sets the mount point permissions
         "/Storage" = {
