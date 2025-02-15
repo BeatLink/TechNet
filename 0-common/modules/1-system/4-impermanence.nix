@@ -13,7 +13,7 @@
 #
 #######################################################################################################################################
 
-{ config, lib, pkgs, modulesPath, ... }: {
+{ pkgs, ... }: {
 
     # Impermanent Filesystem Rollback 
     boot.initrd.systemd.services.rollback = {
