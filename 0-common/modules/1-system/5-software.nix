@@ -21,7 +21,7 @@
 
     # Enables Automatic Upgrades ####################################################################################################################
     system.autoUpgrade = {                                                      # Configures Automatic Upgrades at 2AM from my GitHub flake. 
-        enable = true;
+        enable = false;
         flake = "github:BeatLink/TechNet";
         operation = "switch";
         flags = [
