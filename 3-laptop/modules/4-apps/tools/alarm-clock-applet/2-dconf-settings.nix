@@ -19,8 +19,8 @@ with lib.hm.gvariant;
       repeat = [ "sun" "mon" "tue" "wed" "thu" "fri" "sat" ];
       sound-file = "file:///Storage/Files/Sounds/Interface%20Sounds/Amazon/Amazon%20Fire%20Phone%20Startup%20(Extracted%20with%20Boot%20Animation).m4a";
       sound-repeat = false;
-      time = mkInt64 78300;
-      timestamp = mkInt64 1738982700;
+      time = mkInt64 81900;
+      timestamp = mkInt64 1739504700;
       type = "clock";
     };
 
@@ -32,7 +32,8 @@ with lib.hm.gvariant;
       sound-file = "file:///Storage/Files/Sounds/Interface%20Sounds/Amazon/Amazon%20Fire%20Phone%20Startup%20(Extracted%20with%20Boot%20Animation).m4a";
       sound-repeat = false;
       time = mkInt64 21600;
-      timestamp = mkInt64 1739012400;
+      timestamp = mkInt64 1739444400;
+      type = "clock";
     };
 
     "io/github/alarm-clock-applet/alarm-4" = {
@@ -42,8 +43,8 @@ with lib.hm.gvariant;
       repeat = [ "sun" "mon" "tue" "wed" "thu" "fri" "sat" ];
       sound-file = "file:///Storage/Files/Sounds/Interface%20Sounds/Amazon/Amazon%20Fire%20Phone%20Startup%20(Extracted%20with%20Boot%20Animation).m4a";
       sound-repeat = false;
-      time = mkInt64 79200;
-      timestamp = mkInt64 1738983600;
+      time = mkInt64 82800;
+      timestamp = mkInt64 1739505600;
     };
 
   };
