@@ -7,6 +7,8 @@ echo "----------------------------------------- Data Drive Format Script -------
 echo
 echo "This script format and prepare the data drive to store the backup files and other stateful information."
 echo "This data drive will consist of a ZFS data storage pool on a GPT partition table"
+echo
+echo "DANGER: To prevent clashes with existing pools and mountpoints, this script MUST be run from the device in question"
 echo 
 echo "DANGER: The selected drive will be erased and formatted in its entirety. Double check to ensure that there is no important information on the drive"
 echo 
@@ -28,10 +30,10 @@ sudo sgdisk --new=1:0:0 --typecode=1:BF00 $DATA_DRIVE && sudo partprobe
 DATA_PARTITION=${DATA_DRIVE}1
 
 # Remove any old pools
-sudo zpool destroy ragnarok-data-pool
+sudo zpool destroy data-pool
 
 # Creating ZFS Pool
-sudo zpool create -f -d -m none -o feature@zstd_compress=enabled -o ashift=12 -o autotrim=on ragnarok-data-pool $DATA_PARTITION
+sudo zpool create -f -d -m none -o feature@zstd_compress=enabled -o ashift=12 -o autotrim=on data-pool $DATA_PARTITION
 
 sudo zpool upgrade -a
 
@@ -45,4 +47,4 @@ sudo zfs create \
     -o relatime=on \
     -o com.sun:auto-snapshot=true \
     -o mountpoint=/Storage \
-    ragnarok-data-pool/storage
+    data-pool/storage
