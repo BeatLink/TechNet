@@ -1,7 +1,7 @@
 # Borgmatic ###########################################################################################################################
 # This handles backing up my server's docker files to my laptop and to my backup server
 #######################################################################################################################################
-{ config, lib, pkgs, modulesPath, ... }: 
+{ config, ... }: 
 {
     sops.secrets.borg_repo_encryption_key.sopsFile = ../../secrets.yaml;
     sops.secrets.borg_repo_ssh_key.sopsFile = ../../secrets.yaml;
