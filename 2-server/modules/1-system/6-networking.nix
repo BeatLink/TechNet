@@ -10,11 +10,11 @@
 # This link helped a lot with getting this configuration working: https://flo-the.dev/posts/wireguard/
 #
 ######################################################################################################################################
-{ config, lib, pkgs, ... }:
+{ config, ... }:
 {
     networking = {
         hostName = "Heimdall";                                          # Sets hostname
-        nameservers = [ "127.0.0.1" "8.8.8.8" "1.1.1.1" ];                          # Sets up dns
+        nameservers = [ "127.0.0.1" "8.8.8.8" "1.1.1.1" ];              # Sets up dns
         firewall = {
             allowedUDPPorts = [ 51820 ];                                # Allows Wireguard on Firewall
             extraCommands = ''
