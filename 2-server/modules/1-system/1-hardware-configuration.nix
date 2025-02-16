@@ -1,4 +1,3 @@
-{ config, lib, pkgs, modulesPath, ... }:
 {
     boot = {
         initrd = {
@@ -16,5 +15,4 @@
         enableRedistributableFirmware = true;
     };
     nixpkgs.hostPlatform = "x86_64-linux";
-    services.fstrim.enable = true;
 }
