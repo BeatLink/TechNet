@@ -1,44 +1,70 @@
-#!/usr/bin/bash
+#!/usr/bin/env bash
+# https://mt-caret.github.io/blog/posts/2020-06-29-optin-state.html
 
-echo "Ragnarok Backup Server - SD Card Preparation Script"
+echo "--------------------------------------------------------- TechNet Installer -----------------------------------------------------------"
+echo
+echo "This scripts automatically installs NixOS to a device in the TechNet"
+echo
 
-if [ -z "$1" ]                                                  # Checks that the argument is specified
-  then
-    echo "Specify the path to the SD Card and relaunch. e.g. './install.sh /dev/sda/' ";
-    lsblk;
-    exit;
-fi
 
-set -x;                                                         # Prints the commands to console
+echo "---------------------------------------------------- Temporary Folder Creation -----------------------------------------------------"
+echo
+echo "A temporary folder will now be created to store keys and files to be copied into the final installation"
+echo 
 
-FLAKEDIR=$(cd "$(dirname "$0")/../../"; pwd);                   # Set the flake path
-WORKDIR="/tmp/ragnarok-workdir"                                 # Sets the Work Dir
-mkdir -p "$WORKDIR" && cd "$WORKDIR";                           # Create and enter Workdir
+temp=$(mktemp -d)
+cleanup() {
+  rm -rf "$temp"
+}
+trap cleanup EXIT
 
-nix build "$FLAKEDIR"#images.Ragnarok
 
-sudo umount "$1"*; sudo sfdisk --delete "$1"; sudo dd if=/dev/zero of=$1 bs=1M count=32 status=progress;  sudo partprobe "$1"; # Wipe the SD Card
-sudo dd if=$WORKDIR/result/sd-image/$(ls $WORKDIR/result/sd-image) of="$1" bs=512 status=progress && sync;  # Writes the image 
-sudo sfdisk --delete "$1" 1; sudo partprobe "$1"
+echo "---------------------------------------------------- SSH Host Key Copying ----------------------------------------------------------"
+echo
+echo "Press enter to launch the nano text editor. Once launched, paste the contents of the SSH ED25519 Host Key that the installed" 
+echo "environment will use to decrypt its SOPS credentials stored in this flake. This can be found in your KeePass Security database."
+echo 
+read -p "Press Enter to Continue"
+echo
 
-mkdir -p $WORKDIR/mnt && sudo mount "$1"2 $WORKDIR/mnt
-sudo mkdir -p "$WORKDIR/mnt/etc/ssh/" && sudo chmod -R 755 "$WORKDIR/mnt/etc/" 
+mkdir -p $temp/persistent/etc/ssh/
+chmod -Rvf 755 $temp
+nano "$temp/persistent/etc/ssh/ssh_host_ed25519_key"
+chmod -vf 600 "$temp/persistent/etc/ssh/ssh_host_ed25519_key"
 
-# Exports the SSH host ed25519 Key and sets permissions
-flatpak run --command="keepassxc-cli" \
-  org.keepassxc.KeePassXC \
-  attachment-export \
-  /Storage/Files/Documents/SecurityDatabase.kdbx \
-  "Backup Server SSH Login" \
-  ragnarok_ssh_host_ed25519_key \
-  $WORKDIR/ssh_host_ed25519_key
-sudo mv $WORKDIR/ssh_host_ed25519_key "$WORKDIR/mnt/etc/ssh/ssh_host_ed25519_key"
-sudo chmod 600 "$WORKDIR/mnt/etc/ssh/ssh_host_ed25519_key"
-sudo chown root:root "$WORKDIR/mnt/etc/ssh/ssh_host_ed25519_key"
+echo "---------------------------------------------------- InitRD SSH Host Key Copying ----------------------------------------------------------"
+echo
+echo "Press enter to launch the nano text editor. Once launched, paste the contents of the SSH ED25519 InitRD Host Key that the installed" 
+echo "environment will use to setup ssh in the initrd. This can be found in your KeePass Security database."
+echo 
+read -p "Press Enter to Continue"
+echo
 
-set +x;
+nano "$temp/persistent/etc/ssh/ssh_initrd_host_ed25519_key"
+chmod -vf 600 "$temp/persistent/etc/ssh/ssh_initrd_host_ed25519_key"
 
-echo ">> INSTALLATION COMPLETE - SD CARD READY <<"
-echo "Insert the SD card and boot. Note that it may take a couple of minutes for anything to be displayed."     
-echo "You may need to use a VGA to HDMI converter"
+echo "-------------------------------------------------- ZFS Decryption Key Copying ------------------------------------------------------"
+echo
+echo "Press enter to launch the nano text editor. Once launched, paste the contents of the passphrase that will be used by the installed" 
+echo "environment to decrypt its ZFS filesystems. This can be found in your KeePass Security database"
+echo 
+read -p "Press Enter to Continue"
+echo
 
+nano "/tmp/disk-1.key"
+
+echo "-------------------------------------------------------- Installation -----------------------------------------------------------"
+echo
+echo "The installation can now proceed. Enter the device name (eg Odin) and the ssh host (eg root@192.168.0.2) to begin the installation"
+echo
+read -p "Device: " hostname
+echo 
+read -p "SSH Host: " ssh_host
+echo
+
+nix run github:nix-community/nixos-anywhere -- \
+  --extra-files "$temp" \
+  --disk-encryption-keys /tmp/disk-1.key /tmp/disk-1.key \
+  --phases "kexec,disko,install" \
+  --no-substitute-on-destination \
+  --flake ../../#$hostname $ssh_host
