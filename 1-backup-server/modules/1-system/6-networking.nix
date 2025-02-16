@@ -17,7 +17,6 @@
         initrd = {
             availableKernelModules = [
                 "wireguard"                                             # Needed for wireguard in initrd for remote LUKS unlocking
-                "r8169"                                                 # Ethernet NIC driver
             ];
             secrets = {                                                 # Sops doesn't work in initrd so we use boot.initrd.secrets
                 "/wireguard_private_key" = config.sops.secrets.wireguard_private_key.path;
@@ -42,7 +41,7 @@
                 };
                 network = {
                     enable = true;
-                    netdevs."01-wireguard" = {                                                  # Adds the wireguard virtual network device
+                    netdevs."01-wireguard" = {
                         netdevConfig = {
                             Kind = "wireguard";
                             Name = "wireguard0";
@@ -50,7 +49,7 @@
                         wireguardConfig = {
                             PrivateKeyFile = /wireguard_private_key;
                             ListenPort = 51820;
-                        };        
+                        };
                         wireguardPeers = [
                             {
                                 # Server
@@ -61,17 +60,17 @@
                             }
                         ];
                     };
-                    networks = {                                                                # Sets up the Ethernet Network
+                    networks = {
                         "01-end0" = {
                             matchConfig.Name = "end0";
                             dns = [ "10.100.100.1" ];                                           # Sets up dns
                             networkConfig.DHCP = "ipv4";
                             linkConfig.RequiredForOnline = "routable";
-                        };                                                                      # Sets up the Wireguard Network
+                        };
                         "01-wireguard" = {
                             matchConfig.Name = "wireguard0";
-                            dns = [ "10.100.100.1" ];                                           # Sets up dns
                             address = ["10.100.100.5/24"];
+                            dns = [ "10.100.100.1"];
                         };
                     };
                 };
