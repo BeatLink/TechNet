@@ -41,7 +41,7 @@
                 "/persistent/etc/ssh/ssh_initrd_host_ed25519_key"
             ];
         };
-        systemd.users.root.shell = "/bin/systemd-tty-ask-password-agent";
+        systemd.users.root.shell = "/bin/bash";
     };
     programs.ssh = {
         knownHosts = {
