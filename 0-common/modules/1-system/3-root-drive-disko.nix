@@ -80,15 +80,6 @@
                         "com.sun:auto-snapshot" = "true";           # Generates snapshots to persist data
                     };
                 };
-                swap = {
-                    type = "zfs_volume";
-                    size = "20G";
-                    content = {
-                        type = "swap";
-                        discardPolicy = "both";
-                        resumeDevice = true; # resume from hiberation from this device
-                    };
-                };
                 home = {                                            # The dataset for the user profiles mounted at /home
                     type = "zfs_fs";
                     mountpoint = "/home";
