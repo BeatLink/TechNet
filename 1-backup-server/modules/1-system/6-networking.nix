@@ -10,6 +10,7 @@
         hostName = "Ragnarok";                                                      # Sets the hostName
         hostId = "bed2ee51";
         useNetworkd = true;                                                         # Use Systemd-Networkd
+        nameservers = [ "10.100.100.1" "8.8.8.8" "1.1.1.1" ];                       # Sets up dns
         firewall.trustedInterfaces = [ "wireguard0" ];
     };
     sops.secrets.wireguard_private_key.sopsFile = ../../secrets.yaml;
@@ -63,7 +64,6 @@
                     networks = {
                         "01-end0" = {
                             matchConfig.Name = "end0";
-                            dns = [ "10.100.100.1" ];                                           # Sets up dns
                             networkConfig.DHCP = "ipv4";
                             linkConfig.RequiredForOnline = "routable";
                         };
