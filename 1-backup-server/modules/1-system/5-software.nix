@@ -5,5 +5,5 @@
 ###########################################################################################################################################
 
 {
-    system.stateVersion = "23.11";                                                  # Sets the system state version
+    system.stateVersion = "25.05";                                                  # Sets the system state version
 }
