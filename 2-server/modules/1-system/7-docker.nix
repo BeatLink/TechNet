@@ -1,17 +1,21 @@
 # Docker ##############################################################################################################################
-# Almost all server services are provisioned with docker. These settings configure it. I may move to arion or nix containers at some point
+#
+# Almost all server services are provisioned with docker. These settings configure it.
+#
 #######################################################################################################################################
-{ config, lib, pkgs, modulesPath, ... }: 
+{ pkgs, ... }: 
 {
     environment.systemPackages = with pkgs; [                           # Set packages installed on system
         arion
         docker-client
     ];  
-    virtualisation.docker = {
-        enable = true;
-        liveRestore = false;                            # Solves hangs on shutdown
+    virtualisation = {
+        docker = {
+            enable = true;
+            liveRestore = false;                            # Solves hangs on shutdown
+        };
+        arion.backend = "docker";
     };
-    virtualisation.arion.backend = "docker";
     environment.persistence."/persistent".directories = ["/var/lib/docker"];
     networking.firewall = {
         allowedTCPPorts = [
