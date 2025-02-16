@@ -52,7 +52,7 @@
             Ragnarok = nixpkgs.lib.nixosSystem {
                 system = "aarch64-linux";
                 modules = [
-                    "${nixpkgs}/nixos/modules/installer/sd-card/sd-image.nix"
+                    disko.nixosModules.disko
                     impermanence.nixosModules.impermanence
                     sops-nix.nixosModules.sops
                     home-manager.nixosModules.home-manager
