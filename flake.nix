@@ -47,7 +47,7 @@
             flatpaks, 
             flake-programs-sqlite, 
             ... 
-        }: rec {
+        }:  {
         nixosConfigurations = {
             Ragnarok = nixpkgs.lib.nixosSystem {
                 system = "aarch64-linux";
@@ -90,6 +90,5 @@
                 specialArgs = { inherit impermanence; inherit inputs; };
             };
         };
-        images.Ragnarok = nixosConfigurations.Ragnarok.config.system.build.sdImage;
     };
 }
