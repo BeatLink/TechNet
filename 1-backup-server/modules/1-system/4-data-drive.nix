@@ -15,8 +15,9 @@
         };
     };
     fileSystems."/Storage" = {                                                      # Mounts the drive
-        device = "ragnarok-data-pool/storage";
+        device = "data-pool/storage";
         fsType = "zfs";
         options = ["zfsutil" "nofail" ];
+        neededForBoot = true;
     };
 }
