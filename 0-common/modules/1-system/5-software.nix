@@ -21,7 +21,7 @@
 
     # Enables Automatic Upgrades ####################################################################################################################
     system.autoUpgrade = {                                                      # Configures Automatic Upgrades at 2AM from my GitHub flake. 
-        enable = false;
+        enable = true;
         flake = "github:BeatLink/TechNet";
         operation = "switch";
         flags = [
@@ -30,7 +30,7 @@
         ];
         dates = "02:00";
         randomizedDelaySec = "15min";
-        allowReboot = true;
+        allowReboot = false;
         persistent = true;
     };    
     systemd.services.nixos-upgrade =  let                                       # Sends status updates to Uptime Kuma on Heimdall
