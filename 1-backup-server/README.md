@@ -19,13 +19,18 @@ Ragnarok is a single board computer based backup server installed offsite to bac
 - https://wiki.pine64.org/wiki/ROCK64
 - https://wiki.pine64.org/wiki/ROCK64_Software_Releases
 
+### Tow-Boot
+
+The bootloader for Ragnarok is U-Boot built using tow-boot. As this current SBC is not equipped with an SPI flash, the Tow-Boot shared disk image was installed to a 32 GB SD Card. This is to allow the device to boot any UEFI aarch64 ISO or drive without specific imaging and structures on an SD card. All of the required code can be found here: https://github.com/BeatLink/Tow-Boot/tree/rock64
+
+
 ## NixOS
 
 ### Notes
 
 - Rock64 may not function with direct connection to certain monitors. Utilize a Xtech HDMI to VGA adapter to bypass this
-
 - For Serial setup:
+
   - Connect the wires as follows
     - Black - GND
     - White - RXD
@@ -48,8 +53,10 @@ Ragnarok is a single board computer based backup server installed offsite to bac
    ```
 9. Run `ifconfig` to get the IP address
 10. Run the following to enable the temporary swap
+
 ```bash
   swapon /dev/<path-to-swap-partition>
   mount -o remount,size=10G,noatime /nix/.rw-store
 ```
+
 11. Run [./scripts/install.sh](./scripts/install.sh) from this folder
