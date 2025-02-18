@@ -4,19 +4,6 @@
 #
 ########################################################################################################################################
 
-{ config, lib, pkgs, ... }:
 {
-    boot = {
-        kernelModules = [];
-        kernel.sysctl."kernel.sysrq" = 1;
-        initrd = {
-            systemd.enable = true;
-        };
-        loader = {
-            systemd-boot.enable = true;                                 # Use Systemd-Boot to manage booting
-            grub.enable = false;                                        # Disable Grub since we're using Systemd-Boot
-            efi.canTouchEfiVariables = true;                            # Allows setting boot order, UEFI settings, etc
-            timeout = lib.mkDefault 5;
-        };
-    };
+    boot.loader.efi.canTouchEfiVariables = true;                            # Allows setting boot order, UEFI settings, etc
 }
