@@ -19,5 +19,4 @@
         enableRedistributableFirmware = true;                           # Enable firmware with a license allowing redistribution.
     };
     nixpkgs.hostPlatform = "x86_64-linux";                              # This laptop has a 64 bit architecture
-    services.fstrim.enable = true;
 }
