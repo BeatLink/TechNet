@@ -9,4 +9,9 @@
             "flathub-beta" = "https://dl.flathub.org/beta-repo/flathub-beta.flatpakrepo";
         };
     };
+    environment.persistence."/persistent" = {
+        directories = [
+            "/var/lib/flatpak"
+        ];
+    };
 }
