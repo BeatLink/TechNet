@@ -34,7 +34,14 @@ Loki is my smart watch and biometric monitor. It a PineTime watch running wasp-o
 
 I also maintain a tech kit containing computer repair tools and useful peripherals and accessories.
 
-## Network
+## Architecture
+
+### Filesystem
+
+All devices in the TechNet are configured with dedicated, encrypted ZFS root drives following the Erase Your Darlings paradigm with the impermanence module used for linking state. Additionally, all devices in the TechNet are configured with dedicated encrypted ZFS data drives for persisting state
+
+
+### Network
 
 All devices in the TechNet are linked by a WireGuard VPN that is not routable by the public internet
 
@@ -44,8 +51,3 @@ All devices in the TechNet are linked by a WireGuard VPN that is not routable by
 * Hela:         10.100.100.3
 * Thor:         10.100.100.4
 * Ragnarok:     10.100.100.5
-
-
-## Architecture
-
-* Data Storage: Impermanence
