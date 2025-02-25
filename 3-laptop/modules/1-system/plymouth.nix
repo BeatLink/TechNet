@@ -7,12 +7,7 @@
 { config, lib, pkgs, ... }:
 {
     boot = {
-        initrd = {
-            verbose = false;
-        };
-        loader = {
-            timeout = 0;
-        };
+        initrd.verbose = false;
         plymouth = {
             enable = true;
             #font = "${pkgs.noto-fonts}/share/fonts/truetype/DejaVuSans.ttf";
