@@ -68,6 +68,8 @@ Odin uses NixOS as its main operating system with software installed via FlatPak
 | Restore Factory Keys          | Ignore                |
 
 ## Boot
+| Setting                       | Value                 |
+| ---                           | ---                   |
 | USB Boot                      | Enabled               |
 | PXE Boot to LAN               | Disabled              |
 | IPv4 PXE First                | Enabled               |
