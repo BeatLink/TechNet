@@ -45,10 +45,32 @@
     };
     programs.ssh = {
         knownHosts = {
-            "heimdall-boot".publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJoZQ1rR5JCvRHw0PykObtYgoEIonLL/vaomPc3qscGF";
-            "heimdall".publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICBUbcOarWmNGo5LRtmpx8Tr7cW3nNO6UvfwMdv/qoMc";
+            "ragnarok-boot" = {
+                publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINtSfkBwSLxZxsjO/cvDpeY6j3DA95qOMsapWBAjv2hu";
+                hostNames = ["10.100.100.5" "ragnarok" "ragnarok-boot"];
+            };
+            "ragnarok" = {
+                publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIInjkzjQG+KUcN1roAomyDKJiJLaHbiKBd46GjSBTbi1";
+                hostNames = ["10.100.100.5" "ragnarok" "ragnarok-boot"];
+            };
+            "heimdall-boot" = {
+                publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJoZQ1rR5JCvRHw0PykObtYgoEIonLL/vaomPc3qscGF";
+                hostNames = ["192.168.0.2" "10.100.100.1" "heimdall" "heimdall-boot"];
+            };
+            "heimdall" = {
+                publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICBUbcOarWmNGo5LRtmpx8Tr7cW3nNO6UvfwMdv/qoMc";
+                hostNames = ["192.168.0.2" "10.100.100.1" "heimdall" "heimdall-boot"];
+            };
         };
         extraConfig = ''
+            Host ragnarok-boot
+                User root
+                HostName 10.100.100.5
+
+            Host ragnarok
+                User beatlink
+                HostName 10.100.100.5
+
             Host heimdall-boot
                 HostName 10.100.100.1
                 User root
