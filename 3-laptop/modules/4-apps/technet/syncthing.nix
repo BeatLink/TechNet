@@ -96,10 +96,6 @@
                 ];
                 allowOther = true;
             };
-            file = {
-                ".config/autostart/syncthingtray.desktop".source = "${pkgs.syncthingtray-minimal}/share/applications/syncthingtray.desktop";
-            };
-
         };
     };
 }
