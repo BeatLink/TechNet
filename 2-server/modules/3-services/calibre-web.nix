@@ -8,7 +8,7 @@
 #
 ###########################################################################################################################################
 
-{ config, lib, pkgs, modulesPath, ... }: 
+
 {
     virtualisation.arion.projects.calibre = {
         serviceName = "calibre";

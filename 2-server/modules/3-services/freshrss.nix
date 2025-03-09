@@ -3,7 +3,7 @@
 # FreshRSS is the RSS Feed Manager
 #
 ###########################################################################################################################################
-{ config, lib, pkgs, modulesPath, ... }: 
+
 {
     virtualisation.arion.projects.freshrss = {
         serviceName = "freshrss";

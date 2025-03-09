@@ -1,4 +1,4 @@
-{ config, lib, pkgs, modulesPath, ... }: 
+
 {
     virtualisation.arion.projects.homepage = {
         serviceName = "homepage";

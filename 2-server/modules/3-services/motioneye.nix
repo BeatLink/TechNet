@@ -3,7 +3,7 @@
 # MotionEye is a video recorder used with homeassistant for my security system. 
 #
 ###########################################################################################################################################
-{ config, lib, pkgs, modulesPath, ... }: 
+
 {
     virtualisation.arion.projects.motioneye = {
         serviceName = "motioneye";

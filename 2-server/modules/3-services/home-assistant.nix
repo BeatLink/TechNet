@@ -2,7 +2,7 @@
 # Home Assistant is the home automation server. It manages lighting and energy management, safety and security.
 ###########################################################################################################################################
 
-{ config, lib, pkgs, modulesPath, ... }: 
+
 {
     virtualisation.arion.projects.home-assistant = {
         serviceName = "home-assistant";

@@ -3,7 +3,7 @@
 # Glances is a dashboard and system monitor. 
 #
 ###########################################################################################################################################
-{ config, lib, pkgs, modulesPath, ... }: 
+
 {
     networking.firewall.allowedTCPPorts = [ 61208 ]; 
     virtualisation.arion.projects.glances = {

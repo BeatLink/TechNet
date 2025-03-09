@@ -11,7 +11,7 @@
 #
 ###########################################################################################################################################
 
-{ config, lib, pkgs, modulesPath, ... }: 
+{ config, ... }: 
 {
     sops.secrets.nextcloud_env.sopsFile = ../../secrets.yaml;
     virtualisation.arion = {

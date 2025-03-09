@@ -3,7 +3,7 @@
 # Mealie is my recipe and meal planning manager
 #
 ###########################################################################################################################################
-{ config, lib, pkgs, modulesPath, ... }: 
+{ config, ... }: 
 {
     sops.secrets.mealie_env.sopsFile = ../../secrets.yaml;
     virtualisation.arion.projects.mealie = {

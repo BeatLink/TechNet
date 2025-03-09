@@ -5,7 +5,7 @@
 # https://hub.docker.com/r/linuxserver/deluge
 #
 ###########################################################################################################################################
-{ config, lib, pkgs, modulesPath, ... }: 
+
 {
     virtualisation.arion.projects.deluge = {
         serviceName = "deluge";

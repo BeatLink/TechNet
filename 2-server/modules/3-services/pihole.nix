@@ -17,7 +17,7 @@
 #
 ###########################################################################################################################################
 
-{ config, lib, pkgs, modulesPath, ... }: 
+{ config, ... }: 
 {
     sops.secrets.pihole_env.sopsFile = ../../secrets.yaml;
     virtualisation.arion.projects.pihole = {

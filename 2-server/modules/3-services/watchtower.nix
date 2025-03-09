@@ -1,4 +1,4 @@
-{ config, lib, pkgs, modulesPath, ... }: 
+{ config, ... }: 
 {
     sops.secrets.watchtower_env.sopsFile = ../../secrets.yaml;
     virtualisation.arion.projects.watchtower = {
