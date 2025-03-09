@@ -4,7 +4,7 @@
 # connect to the internet via a secure relay through Heimdall. 
 #
 ######################################################################################################################################
-{ config, lib, pkgs, ... }:
+{ config, ... }:
 {
     sops.secrets.networkmanager_env_file.sopsFile = ../../secrets.yaml;
     networking = {
