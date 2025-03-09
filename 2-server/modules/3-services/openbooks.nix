@@ -2,7 +2,6 @@
 # OpenBooks is an eBook downloader
 ###########################################################################################################################################
 
-{ config, lib, pkgs, modulesPath, ... }: 
 {
     virtualisation.arion.projects.openbooks = {
         serviceName = "openbooks";

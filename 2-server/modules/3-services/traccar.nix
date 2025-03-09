@@ -1,4 +1,3 @@
-{ config, lib, pkgs, modulesPath, ... }: 
 {
     virtualisation.arion.projects.traccar = {
         serviceName = "traccar";

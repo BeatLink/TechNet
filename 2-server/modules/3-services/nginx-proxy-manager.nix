@@ -3,7 +3,7 @@
 # This is the reverse proxy for all my docker services.
 #
 ###########################################################################################################################################
-{ config, lib, pkgs, modulesPath, ... }: 
+
 {
     virtualisation.arion.projects.nginx-proxy-manager = {
         serviceName = "nginx-proxy-manager";
