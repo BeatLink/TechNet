@@ -67,4 +67,5 @@ nix run github:nix-community/nixos-anywhere -- \
   --disk-encryption-keys /tmp/disk-1.key /tmp/disk-1.key \
   --phases "kexec,disko,install" \
   --no-substitute-on-destination \
-  --flake ../../#$hostname $ssh_host
+  --flake ../../#$hostname \
+  $ssh_host
