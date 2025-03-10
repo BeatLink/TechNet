@@ -13,7 +13,6 @@
         ./glances.nix
         ./home-assistant.nix
         ./homepage.nix
-        ./mealie.nix
         ./motioneye.nix
         ./nextcloud.nix
         ./nginx-proxy-manager.nix
