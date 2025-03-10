@@ -9,5 +9,4 @@
             allowOther = true;
         };
     };
-
 }
