@@ -14,6 +14,7 @@
         
         dconf.settings."org/cinnamon/desktop/applications/terminal" = {
             "exec" = "guake";
+            "exec-args" = "";
         };
         imports = [                                                                 # Imports Pix Dconf Settings
             ./2-dconf-settings.nix
