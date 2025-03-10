@@ -6,7 +6,7 @@
 #
 ###########################################################################################################################################
 
-{ config, lib, pkgs, ... }:
+{ pkgs, ... }:
 {  
 
     services = {
@@ -33,7 +33,8 @@
     home-manager.users.beatlink = {
         dconf.enable = true;                                                        # Enables dconf for Cinnamon setting Management
         imports = [                                                                 # Imports Cinnamon Dconf Settings
-            ./2-dconf-settings.nix
+            ./dconf-settings.nix
+            ./default-applications.nix
             ./fonts.nix
             ./night-light.nix
             ./themes.nix
