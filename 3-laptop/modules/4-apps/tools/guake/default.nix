@@ -11,9 +11,14 @@
                 ".config/autostart/guake.desktop".source = "${pkgs.guake}/share/applications/guake.desktop";
             };
         };
+        
+        dconf.settings."org/cinnamon/desktop/applications/terminal" = {
+            "exec" = "guake";
+        };
         imports = [                                                                 # Imports Pix Dconf Settings
             ./2-dconf-settings.nix
         ];
+
     };
 }
 
