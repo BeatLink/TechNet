@@ -88,7 +88,7 @@ with lib.hm.gvariant;
     };
 
     "org/cinnamon/desktop/applications/terminal" = {
-      exec = "gnome-terminal";
+      exec = "guake";
       exec-arg = "--";
     };
 
