@@ -21,7 +21,7 @@ with lib.hm.gvariant;
       startup-location = "file:///Storage/Files/Pictures";
       statusbar-visible = true;
       use-startup-location = false;
-      viewer-sidebar = "properties";
+      viewer-sidebar = "hidden";
     };
 
     "org/x/pix/data-migration" = {
@@ -37,13 +37,16 @@ with lib.hm.gvariant;
     };
 
     "org/x/pix/general" = {
-      active-extensions = [ "resize_images" "image_print" "webalbums" "burn_disc" "search" "list_tools" "convert_format" "exiv2_tools" "edit_metadata" "find_duplicates" "rename_series" "photo_importer" "raw_files" "gstreamer_tools" "catalogs" "desktop_background" "change_date" "contact_sheet" "image_rotation" "selections" "bookmarks" "terminal" "file_manager" "comments" "red_eye_removal" "slideshow" ];
+      active-extensions = [ "resize_images" "image_print" "webalbums" "search" "list_tools" "convert_format" "exiv2_tools" "edit_metadata" "find_duplicates" "rename_series" "photo_importer" "raw_files" "gstreamer_tools" "catalogs" "desktop_background" "change_date" "contact_sheet" "image_rotation" "selections" "terminal" "file_manager" "comments" "red_eye_removal" "slideshow" ];
       store-metadata-in-files = true;
     };
 
     "org/x/pix/gstreamer-tools" = {
+      mute = false;
       screenshot-location = "file:///Storage/Files/Pictures";
       use-hardware-acceleration = false;
+      volume = 100;
+      zoom-to-fit = false;
     };
 
     "org/x/pix/image-print" = {
