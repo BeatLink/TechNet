@@ -1,9 +1,10 @@
 {
+    programs.gpaste.enable = true;
     home-manager.users.beatlink = {
-        programs.gpaste.enable = true;
         home = {
-            persistence."/Storage/Apps/Tools/Calculator" = {
+            persistence."/Storage/Apps/Tools/GPaste" = {
                 directories = [
+                    ".local/share/gpaste"
                 ];
                 allowOther = true;
             };
