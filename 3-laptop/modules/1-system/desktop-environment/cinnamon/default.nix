@@ -27,6 +27,7 @@
     environment.cinnamon.excludePackages = with pkgs; [
         onboard
         gnome-calendar
+        gnome-terminal
         warpinator
         xterm
     ];

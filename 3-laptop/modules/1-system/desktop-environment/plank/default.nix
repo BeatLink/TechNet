@@ -36,7 +36,7 @@ let
         "21-home-assistant" = "file:///home/beatlink/.local/share/applications/home-assistant.desktop";
         "22-nextcloud" = "file:///home/beatlink/.local/share/applications/nextcloud.desktop";
         "23-separator4" = "file:///home/beatlink/.local/share/applications/separator4.desktop";
-        "24-terminal" = "file:///run/booted-system/sw/share/applications/org.gnome.Terminal.desktop";
+        "24-guake" = "file://${pkgs.guake}/share/applications/guake.desktop";
         "25-vscodium" = "file://${pkgs.vscodium}/share/applications/codium.desktop";
         "26-virt-manager" = "file:///run/booted-system/sw/share/applications/virt-manager.desktop";                   
         "27-separator5" = "file:///home/beatlink/.local/share/applications/separator5.desktop";
