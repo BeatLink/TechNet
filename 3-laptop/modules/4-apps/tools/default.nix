@@ -8,6 +8,7 @@
         ./drawio.nix
         ./dupeguru.nix
         ./gallery-dl.nix
+        ./gpaste.nix
         ./inkscape.nix
         ./libreoffice.nix
         ./screenshot.nix
