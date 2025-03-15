@@ -48,7 +48,7 @@ with lib.hm.gvariant;
       window-refocus = true;
       window-tabbar = true;
       window-valignment = 0;
-      window-width = 43;
+      window-width = 100;
     };
 
     "org/guake/keybindings/global" = {
