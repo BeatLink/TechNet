@@ -41,14 +41,14 @@ with lib.hm.gvariant;
       use-popup = false;
       use-scrollbar = true;
       use-trayicon = true;
-      window-halignment = 0;
-      window-height = 100;
+      window-halignment = 1;
+      window-height = 52;
       window-losefocus = false;
       window-ontop = false;
       window-refocus = true;
       window-tabbar = true;
       window-valignment = 0;
-      window-width = 100;
+      window-width = 43;
     };
 
     "org/guake/keybindings/global" = {
@@ -56,6 +56,7 @@ with lib.hm.gvariant;
     };
 
     "org/guake/style" = {
+      cursor-blink-mode = 1;
       cursor-shape = 1;
     };
 
@@ -67,7 +68,8 @@ with lib.hm.gvariant;
       allow-bold = true;
       bold-is-bright = true;
       cell-height-scale = 1.0;
-      palette = "#000000000000:#ffff00000000:#00008887ffff:#ffff78780000:#8f8ff0f0a4a4:#52523c3c7979:#dcdc8a8adddd:#d9d9d9d9d9d9:#010128284949:#ffff84438443:#0000acacffff:#ffffbebe6f6f:#3333d1d17a7a:#68685555dede:#c0c06161cbcb:#f1f1f1f1f1f1:#000000000000:#ffffffffffff";
+      cell-width-scale = 1.0;
+      palette = "#000000000000:#ffff00000000:#0000acacffff:#ffffffff0000:#2c2cc6c63131:#ffff0000ffff:#0000ffffffff:#ffffffffffff:#000000000000:#ffff00000000:#0000acacffff:#ffffffff0000:#2c2cc6c63131:#ffff0000ffff:#0000ffffffff:#ffffffffffff:#ffffffffffff:#00001c3329d0";
       palette-name = "Custom";
     };
 
