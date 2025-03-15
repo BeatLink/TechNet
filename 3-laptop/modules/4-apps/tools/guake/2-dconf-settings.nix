@@ -11,7 +11,7 @@ with lib.hm.gvariant;
       display-tab-names = 0;
       fullscreen-hide-tabbar = false;
       gtk-use-system-default-theme = true;
-      hide-tabs-if-one-tab = false;
+      hide-tabs-if-one-tab = true;
       history-size = 1000;
       infinite-history = true;
       lazy-losefocus = false;
