@@ -43,6 +43,14 @@
             scriptPath = ".local/share/X11/xsession";
             initExtra =  "ERRFILE=$HOME/.local/share/X11/xsession-errors";
         };
+        home.persistence."/Storage/Apps/System/Cinnamon" = {                                # Loads persistent data for plank
+            directories = [
+                ".config/cinnamon"
+                ".config/cinnamon-session"
+                ".local/share/cinnamon"
+            ];
+            allowOther = true;
+        };
     };
  }
 
