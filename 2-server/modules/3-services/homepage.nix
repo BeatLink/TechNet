@@ -21,6 +21,9 @@
                     extra_hosts = [
                         "host.docker.internal:host-gateway"
                     ];
+                    environment = {
+                        "HOMEPAGE_ALLOWED_HOSTS" = "www.heimdall.technet,heimdall.technet";
+                    };
                 };
             };
             networks = {
