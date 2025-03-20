@@ -17,5 +17,15 @@
         gst-plugins-bad
         gst-plugins-ugly
         gst-libav
-    ]);
+    ]);    
+    home-manager.users.beatlink = { pkgs, ... }: {
+        home = {
+            packages = with pkgs; [ sox ];
+            persistence."/Storage/Apps/Tools/Sox" = {
+                directories = [
+                ];
+                allowOther = true;
+            };
+        };
+    };
 }
