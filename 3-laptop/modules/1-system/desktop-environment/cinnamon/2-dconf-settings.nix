@@ -13,9 +13,9 @@ with lib.hm.gvariant;
       enabled-applets = [ 
         "panel1:left:0:menu@cinnamon.org:172" 
         "panel1:left:1:places-bookmarks@dmo60.de:154" 
-        "panel1:center:0:calendar@cinnamon.org:120" 
+        "panel1:center:0:calendar@cinnamon.org:120"
         "panel1:center:1:cinnamon-timer@jake1164:149" 
-        "panel1:center:2:paneldo@beatlink:145" 
+        "panel1:center:2:trilium-tasks@beatlink:145" 
         "panel1:right:1:xapp-status@cinnamon.org:4" 
         "panel1:right:2:show-hide-applets@mohammad-sn:142" 
         "panel1:right:3:systray@cinnamon.org:143" 
