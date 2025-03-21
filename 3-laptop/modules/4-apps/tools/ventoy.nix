@@ -1,7 +1,7 @@
 {
     home-manager.users.beatlink = { pkgs, ... }: {
         home = {
-            packages =  [ (pkgs.ventoy-full.override { defaultGuiType = "gtk3"; }) ];
+            packages =  [ pkgs.ventoy-full-gtk ];
             persistence."/Storage/Apps/Tools/Ventoy" = {
                 directories = [
                 ];
