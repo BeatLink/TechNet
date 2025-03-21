@@ -61,6 +61,14 @@
                 publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICBUbcOarWmNGo5LRtmpx8Tr7cW3nNO6UvfwMdv/qoMc";
                 hostNames = ["192.168.0.2" "10.100.100.1" "heimdall" "heimdall-boot"];
             };
+            "odin-boot" = {
+                publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICRPO+0Y6QP2ifSA5uMXaIn+aIzUnQFdShRp7QdeSNhg";
+                hostNames = ["192.168.0.3" "10.100.100.2" "odin" "odin-boot"];
+            };
+            "odin" = {
+                publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINnDCoaEbXWh0rJshd2alkRQrGo+jsmKssXXMVbivl4p";
+                hostNames = ["192.168.0.3" "10.100.100.2" "odin" "odin-boot"];
+            };
         };
         extraConfig = ''
             Host ragnarok-boot
@@ -77,6 +85,14 @@
 
             Host heimdall
                 HostName 10.100.100.1
+                User beatlink
+
+            Host odin-boot
+                HostName 10.100.100.2
+                User root
+
+            Host odin
+                HostName 10.100.100.2
                 User beatlink
         '';
         startAgent = true;
