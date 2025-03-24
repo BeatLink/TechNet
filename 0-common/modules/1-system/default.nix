@@ -15,5 +15,6 @@
         ./9-certificates.nix
         ./10-firewall.nix
         ./11-fail2ban.nix
+        ./12-zram.nix
     ];
 }
