@@ -85,7 +85,7 @@
             uptime_kuma = {
                 push_url = "http://uptime-kuma.heimdall.technet/api/push/nDXOzelHhZ";
                 states = [
-                    "start"
+                    #"start"
                     "finish"
                     "fail"
                 ];
