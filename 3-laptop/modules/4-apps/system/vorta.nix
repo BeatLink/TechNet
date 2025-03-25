@@ -14,7 +14,6 @@
                             notify-send -a "Vorta" "Database Unlock Required" "Please unlock the KeePassXC database for server backups."; 
                             sleep 10; 
                         done 
-                        wget --spider "http://uptime-kuma.heimdall.technet/api/push/8ME1iuK3yx?status=up&msg=Backups Started&ping=";
                     ''
                 )
                 (
@@ -25,6 +24,17 @@
                             wget --spider "http://uptime-kuma.heimdall.technet/api/push/8ME1iuK3yx?status=up&msg=Backups Completed&ping="; 
                         else
                             wget --spider "http://uptime-kuma.heimdall.technet/api/push/8ME1iuK3yx?status=down&msg=Backups Failed&ping=";
+                        fi
+                    ''
+                )
+                (
+                    writeShellScriptBin
+                    "vorta-disk-postbackup.sh"
+                    ''
+                        if [ $returncode == 0 ]; then 
+                            wget --spider "http://uptime-kuma.heimdall.technet/api/push/DjyNX8HxK1?status=up&msg=Backups Completed&ping="; 
+                        else
+                            wget --spider "http://uptime-kuma.heimdall.technet/api/push/DjyNX8HxK1?status=down&msg=Backups Failed&ping=";
                         fi
                     ''
                 )
