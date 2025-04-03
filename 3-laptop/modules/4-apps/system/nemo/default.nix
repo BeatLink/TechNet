@@ -15,13 +15,11 @@
 
 
 {
-    
-    environment.systemPackages = [ pkgs.nemo-with-extensions ];                # Installs Plank from nixpkgs
     programs.fuse.userAllowOther = true;
     home-manager.users.beatlink = { pkgs, ... }:
     {
         home = {
-            packages = [(pkgs.callPackage ./nemo-preview.nix { })]; 
+            packages = [ pkgs.nemo-with-extensions  pkgs.nemo-preview ]; 
             persistence."/Storage/Apps/System/Nemo" = {
                 directories = [
                     ".config/nemo"
