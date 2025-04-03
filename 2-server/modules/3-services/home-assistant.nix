@@ -12,10 +12,6 @@
                     image = "ghcr.io/home-assistant/home-assistant:2025.3.2";
                     container_name = "home-assistant";
                     restart = "always";
-                    devices = [
-                        "/dev/video0:/dev/video0"
-                        "/dev/dri:/dev/dri"
-                    ];
                     volumes = [ 
                         "/Storage/Services/Homeassistant/config:/config"
                         "/Storage/Services/Homeassistant/media:/media"
