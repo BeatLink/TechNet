@@ -71,11 +71,11 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1744219642,
-        "narHash": "sha256-OwUyU6+LXrbwK2rJrh9dIVgAaVGGJQi1JQDkk6TtE/M=",
+        "lastModified": 1744352239,
+        "narHash": "sha256-lC+ccg50PMDtW6J77lmDO2EcnaO4mIKqVF4omeC0SRo=",
         "owner": "wamserma",
         "repo": "flake-programs-sqlite",
-        "rev": "35a11b7f0e836cbf536495a918b002f506866b6b",
+        "rev": "8e4334c7d48e02f7fb9a4c4bb209854076971cde",
         "type": "github"
       },
       "original": {
@@ -146,11 +146,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1744223888,
-        "narHash": "sha256-reYpe0J1J+wH34JFs7KKp0G5nP7+XSQ5z0ZLFJcfJr8=",
+        "lastModified": 1744343724,
+        "narHash": "sha256-DkiOZlkXbdf6f09pSulJPE0IaaJi1p7sqia/G2kqNKI=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "79461936709b12e17adb9c91dd02d1c66d577f09",
+        "rev": "f1ffd097e717a8d1b441577b8d23f9d2c96e0657",
         "type": "github"
       },
       "original": {
