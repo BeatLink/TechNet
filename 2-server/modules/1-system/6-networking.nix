@@ -96,6 +96,12 @@
                                 AllowedIPs = ["10.100.100.5/32"];
                                 PersistentKeepalive = 15;
                             }
+                            {
+                                # eNET Server
+                                PublicKey = "VGMPRz95JuRtQMTYV2ANAF7AuDZU/igJgZB8ZZSAUXI=";
+                                AllowedIPs = ["10.100.100.50/32"];
+                                PersistentKeepalive = 15;
+                            }
                         ];
                     };
                     networks = {
