@@ -102,6 +102,12 @@
                                 AllowedIPs = ["10.100.100.50/32"];
                                 PersistentKeepalive = 15;
                             }
+                            {
+                                #Work Laptop
+                                PublicKey = "1J9wofO7+gHgkNAOMl51K3WmMknle/2b0dGT8jVLdAo=";
+                                AllowedIPs = ["10.100.100.51/32"];
+                                PersistentKeepalive = 15;
+                            }
                         ];
                     };
                     networks = {
