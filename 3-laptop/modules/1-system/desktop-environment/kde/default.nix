@@ -36,6 +36,5 @@
         
     ];
 
-    # services.flatpak.packages = [ "flathub:runtime/org.gtk.Gtk3theme.Breeze//stable" ];
     #org.gtk.Gtk3theme.Breeze
 }
