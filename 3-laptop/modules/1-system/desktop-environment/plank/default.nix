@@ -31,15 +31,16 @@ let
         "16-steam" = "file://${pkgs.steam}/share/applications/steam.desktop";
         "17-calibre" = "file://${pkgs.calibre}/share/applications/calibre-gui.desktop";
         "18-io.lmms.LMMS" = "file://${pkgs.lmms}/share/applications/lmms.desktop";
-        "19-pix" = "file://${pkgs.pix}/share/applications/pix.desktop";
-        "20-separator3" = "file:///home/beatlink/.local/share/applications/separator3.desktop";
-        "21-home-assistant" = "file:///home/beatlink/.local/share/applications/home-assistant.desktop";
-        "22-nextcloud" = "file:///home/beatlink/.local/share/applications/nextcloud.desktop";
-        "23-separator4" = "file:///home/beatlink/.local/share/applications/separator4.desktop";
-        "24-guake" = "file://${pkgs.guake}/share/applications/guake.desktop";
-        "25-vscodium" = "file://${pkgs.vscodium}/share/applications/codium.desktop";
-        "26-virt-manager" = "file:///run/booted-system/sw/share/applications/virt-manager.desktop";                   
-        "27-separator5" = "file:///home/beatlink/.local/share/applications/separator5.desktop";
+        "19-timestretcher" = "file:///home/beatlink/.local/share/applications/TimeStretch.desktop";
+        "20-pix" = "file://${pkgs.pix}/share/applications/pix.desktop";
+        "21-separator3" = "file:///home/beatlink/.local/share/applications/separator3.desktop";
+        "22-home-assistant" = "file:///home/beatlink/.local/share/applications/home-assistant.desktop";
+        "23-nextcloud" = "file:///home/beatlink/.local/share/applications/nextcloud.desktop";
+        "24-separator4" = "file:///home/beatlink/.local/share/applications/separator4.desktop";
+        "25-guake" = "file://${pkgs.guake}/share/applications/guake.desktop";
+        "26-vscodium" = "file://${pkgs.vscodium}/share/applications/codium.desktop";
+        "27-virt-manager" = "file:///run/booted-system/sw/share/applications/virt-manager.desktop";                   
+        "28-separator5" = "file:///home/beatlink/.local/share/applications/separator5.desktop";
     };
 
     dockitemFiles = lib.attrsets.concatMapAttrs(name: value: {                  # Generates the dockitem files from the attrset above
