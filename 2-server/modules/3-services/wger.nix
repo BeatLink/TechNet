@@ -104,7 +104,6 @@
                     expose = [
                         "6379" 
                     ];
-                    mem_limit = "5gb";
                 };
                 celery_worker.service = {
                     image = "wger/server:latest";
