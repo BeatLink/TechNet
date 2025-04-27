@@ -23,5 +23,6 @@
         ./trilium.nix
         ./uptime-kuma.nix
         ./watchtower.nix
+        ./wger.nix
     ];
 }
