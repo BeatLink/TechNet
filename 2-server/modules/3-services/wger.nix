@@ -31,11 +31,14 @@
                         "/Storage/Services/Wger/static:/home/wger/static"
                         "/Storage/Services/Wger/media:/home/wger/media"
                     ];
+                    networks = [
+                        "wger"
+                    ];
                     expose = [
                         "8000" 
                     ];
                 };      
-                nginx.service = {
+                wger-nginx.service = {
                     image = "nginx:stable";
                     restart = "always";
                     depends_on = {
@@ -53,14 +56,15 @@
                     ];
                     volumes = [ 
                         "/Storage/Services/Wger/config/nginx.conf:/etc/nginx/conf.d/default.conf"
-                        "/Storage/Services/Wger/static:/home/wger/static:ro"
-                        "/Storage/Services/Wger/media:/home/wger/media:ro"
+                        "/Storage/Services/Wger/static:/wger/static:ro"
+                        "/Storage/Services/Wger/media:/wger/media:ro"
                     ];
                     expose = [
                         "80" 
                     ];
                     networks = [
                         "nginx-proxy-manager_public"
+                        "wger"
                     ];
                 };
                 db.service = {
@@ -78,6 +82,9 @@
                     ];
                     volumes = [ 
                         "/Storage/Services/Wger/postgres-data:/var/lib/postgresql/data/"
+                    ];
+                    networks = [
+                        "wger"
                     ];
                     expose = [
                         "5432" 
@@ -100,6 +107,9 @@
                     volumes = [ 
                         "/Storage/Services/Wger/config/redis.conf:/usr/local/etc/redis/redis.conf"
                         "/Storage/Services/Wger/redis-data:/data"
+                    ];
+                    networks = [
+                        "wger"
                     ];
                     expose = [
                         "6379" 
@@ -127,6 +137,10 @@
                     volumes = [ 
                         "/Storage/Services/Wger/media:/home/wger/media"
                     ];
+                    networks = [
+                        "wger"
+                    ];
+
                 };  
                 celery_beat.service = {
                     image = "wger/server:latest";
@@ -143,11 +157,18 @@
                     volumes = [ 
                         "/Storage/Services/Wger/celery-beat:/home/wger/beat/"
                     ];
+                    networks = [
+                        "wger"
+                    ];
+
                 }; 
             };
             networks = {
                 nginx-proxy-manager_public = {
                     external = true;
+                };
+                wger = {
+                    driver = "bridge";
                 };
             };
         };
