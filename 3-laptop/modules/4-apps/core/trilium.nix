@@ -13,10 +13,10 @@
                     ".local/share/trilium-data"
                     ".config/TriliumNext Notes"
                 ];
-                file = {
-                    ".config/autostart/trilium-next.desktop".source = "${pkgs.trilium-next-desktop}/share/applications/Trilium.desktop";
-                };
                 allowOther = true;
+            };
+            file = {
+                ".config/autostart/trilium-next.desktop".source = "${pkgs.trilium-next-desktop}/share/applications/Trilium.desktop";
             };
         };
     };
