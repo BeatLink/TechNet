@@ -7,6 +7,9 @@
                     base-directory = "/Storage/Files/Downloads/gallery-dl/";
                     archive = "/Storage/Apps/Tools/Gallery-DL/archives/{category}.sqlite3";
                     cookies = ["firefox"];
+                    twitter = {
+                        tweet-endpoint = "restid";
+                    };
                 };
             };
         };
