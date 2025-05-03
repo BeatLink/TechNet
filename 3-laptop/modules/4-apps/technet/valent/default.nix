@@ -4,6 +4,9 @@
         allowedUDPPortRanges = allowedTCPPortRanges;
     };
     home-manager.users.beatlink = { pkgs, ... }: {
+        imports = [                                                                 # Imports Pix Dconf Settings
+            ./2-dconf-settings.nix
+        ];
         services.kdeconnect = {
             enable = true;
             package = pkgs.valent;
