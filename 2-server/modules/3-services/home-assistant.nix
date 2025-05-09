@@ -9,7 +9,7 @@
         settings = {
             services = {
                 home-assistant.service = {
-                    image = "ghcr.io/home-assistant/home-assistant:2025.3.2";
+                    image = "ghcr.io/home-assistant/home-assistant:stable";
                     container_name = "home-assistant";
                     restart = "always";
                     volumes = [ 
