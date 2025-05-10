@@ -1,10 +1,42 @@
 {
-    # Enable cron service
-    services.cron = {
-        enable = true;
-        systemCronJobs = [
-            "0 0 * * * cd /Storage/Services/TraktTv-Backup/trakt-backup; ./trakt-backup.sh -u BingeWatcherSupreme"
-            "0 0 1 * * cd /Storage/Services/TraktTv-Backup/trakt-backup; ./trakt-auth.sh -u BingeWatcherSupreme"
-        ];
+    systemd.timers."trakttv-backup" = {
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+            OnCalendar = "daily";
+            Persistent = true; 
+            Unit = "trakttv-backup.service";
+        };
+    };
+
+    systemd.timers."trakttv-auth" = {
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+            OnCalendar = "monthly";
+            Persistent = true; 
+            Unit = "trakttv-auth.service";
+        };
+    };
+
+    systemd.services."trakttv-backup" = {
+        script = ''
+            set -eu
+            cd /Storage/Services/TraktTv-Backup/trakt-backup; ./trakt-backup.sh -u BingeWatcherSupreme
+        '';
+        serviceConfig = {
+            Type = "oneshot";
+            User = "root";
+        };
+    };
+
+    systemd.services."trakttv-auth" = {
+        script = ''
+            set -eu
+            cd /Storage/Services/TraktTv-Backup/trakt-backup; ./trakt-auth.sh -u BingeWatcherSupreme
+        '';
+        serviceConfig = {
+            Type = "oneshot";
+            User = "root";
+        };
     };
 }
+
