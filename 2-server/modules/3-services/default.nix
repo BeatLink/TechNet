@@ -20,6 +20,7 @@
         ./pihole.nix
         ./syncthing.nix
         ./traccar.nix
+        ./trakttv-backup.nix
         ./trilium.nix
         ./uptime-kuma.nix
         ./watchtower.nix
