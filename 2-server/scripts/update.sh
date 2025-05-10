@@ -4,7 +4,7 @@
 #
 nixos-rebuild \
     --flake ../../#Heimdall \
-    --target-host "beatlink@192.168.0.2" \
-    --build-host "beatlink@192.168.0.2" \
+    --target-host "beatlink@10.100.100.1" \
+    --build-host "beatlink@10.100.100.1" \
     --use-remote-sudo \
     switch 
