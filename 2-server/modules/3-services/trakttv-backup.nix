@@ -18,7 +18,7 @@
     };
 
     systemd.services."trakttv-backup" = {
-        path = [ pkgs.bash pkgs.gawk ];
+        path = [ pkgs.bash pkgs.gawk pkgs.curl pkgs.gnutar  ];
         script = ''
             cd /Storage/Services/TraktTv-Backup/trakt-backup; ${pkgs.bash}/bin/bash ./trakt-backup.sh -u BingeWatcherSupreme
         '';
@@ -29,7 +29,7 @@
     };
 
     systemd.services."trakttv-auth" = {
-        path = [ pkgs.bash pkgs.gawk ];
+        path = [ pkgs.bash pkgs.gawk pkgs.curl pkgs.gnutar  ];
         script = ''
             cd /Storage/Services/TraktTv-Backup/trakt-backup; ${pkgs.bash}/bin/bash ./trakt-auth.sh -u BingeWatcherSupreme
         '';
