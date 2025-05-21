@@ -1,4 +1,4 @@
-{
+{ pkgs, ... }: {
     systemd.timers."trakttv-backup" = {
         wantedBy = [ "timers.target" ];
         timerConfig = {
@@ -19,7 +19,7 @@
 
     systemd.services."trakttv-backup" = {
         script = ''
-            cd /Storage/Services/TraktTv-Backup/trakt-backup; ./trakt-backup.sh -u BingeWatcherSupreme
+            cd /Storage/Services/TraktTv-Backup/trakt-backup; ${pkgs.bash} ./trakt-backup.sh -u BingeWatcherSupreme
         '';
         serviceConfig = {
             Type = "oneshot";
@@ -29,7 +29,7 @@
 
     systemd.services."trakttv-auth" = {
         script = ''
-            cd /Storage/Services/TraktTv-Backup/trakt-backup; ./trakt-auth.sh -u BingeWatcherSupreme
+            cd /Storage/Services/TraktTv-Backup/trakt-backup; ${pkgs.bash} ./trakt-auth.sh -u BingeWatcherSupreme
         '';
         serviceConfig = {
             Type = "oneshot";
