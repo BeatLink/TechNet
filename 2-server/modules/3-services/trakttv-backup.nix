@@ -19,7 +19,6 @@
 
     systemd.services."trakttv-backup" = {
         script = ''
-            set -eu
             cd /Storage/Services/TraktTv-Backup/trakt-backup; ./trakt-backup.sh -u BingeWatcherSupreme
         '';
         serviceConfig = {
@@ -30,7 +29,6 @@
 
     systemd.services."trakttv-auth" = {
         script = ''
-            set -eu
             cd /Storage/Services/TraktTv-Backup/trakt-backup; ./trakt-auth.sh -u BingeWatcherSupreme
         '';
         serviceConfig = {
