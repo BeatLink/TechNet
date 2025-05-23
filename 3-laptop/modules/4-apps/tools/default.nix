@@ -17,6 +17,7 @@
         ./ventoy.nix
         ./video-downloader.nix
         ./virt-manager.nix
+        ./wmctrl.nix
         ./xed.nix
         ./xviewer.nix
         ./alarm-clock-applet
