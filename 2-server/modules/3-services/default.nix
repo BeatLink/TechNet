@@ -5,6 +5,7 @@
 {
     imports = [              
         ./blockurl.nix
+        ./borg.nix
         ./calibre-web.nix
         ./deluge.nix
         ./esphome.nix
