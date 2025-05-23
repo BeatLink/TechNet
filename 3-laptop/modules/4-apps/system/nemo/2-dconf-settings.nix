@@ -20,13 +20,13 @@ with lib.hm.gvariant;
       inherit-folder-viewer = true;
       last-server-connect-method = 0;
       show-hidden-files = true;
-      show-open-in-terminal-toolbar = false;
+      show-open-in-terminal-toolbar = true;
       tooltips-in-list-view = true;
     };
 
     "org/nemo/preferences/menu-config" = {
       background-menu-open-in-terminal = false;
-      selection-menu-open-in-terminal = false;
+      selection-menu-open-in-terminal = true;
     };
 
     "org/nemo/window-state" = {
