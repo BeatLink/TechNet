@@ -12,7 +12,7 @@
         imports = [                                                                 # Imports Pix Dconf Settings
             ./2-dconf-settings.nix
         ];
-        xdg.desktopEntries."com.gexperts.Tilix.desktop" = {
+        xdg.desktopEntries."com.gexperts.Tilix" = {
             name = "Tilix";
             genericName = "Terminal emulator";
             comment = "A tiling terminal for GNOME";
