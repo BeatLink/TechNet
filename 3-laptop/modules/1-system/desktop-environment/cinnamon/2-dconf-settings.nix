@@ -106,7 +106,7 @@ with lib.hm.gvariant;
 
     "org/cinnamon/desktop/applications/terminal" = {
       exec = "tilix";
-      exec-arg = "--";
+      exec-arg = " --focus-window --maximize";
     };
 
     "org/cinnamon/desktop/background" = {
