@@ -18,7 +18,18 @@
                 )
                 (
                     writeShellScriptBin
-                    "vorta-server-postbackup.sh"
+                    "vorta-heimdall-postbackup.sh"
+                    ''
+                        if [ $returncode == 0 ]; then 
+                            wget --spider "http://uptime-kuma.heimdall.technet/api/push/TOXLxZAYCN?status=up&msg=Backups Completed&ping="; 
+                        else
+                            wget --spider "http://uptime-kuma.heimdall.technet/api/push/TOXLxZAYCN?status=down&msg=Backups Failed&ping=";
+                        fi
+                    ''
+                )
+                (
+                    writeShellScriptBin
+                    "vorta-ragnarok-postbackup.sh"
                     ''
                         if [ $returncode == 0 ]; then 
                             wget --spider "http://uptime-kuma.heimdall.technet/api/push/8ME1iuK3yx?status=up&msg=Backups Completed&ping="; 
