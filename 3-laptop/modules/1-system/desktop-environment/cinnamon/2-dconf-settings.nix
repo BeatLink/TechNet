@@ -105,7 +105,7 @@ with lib.hm.gvariant;
     };
 
     "org/cinnamon/desktop/applications/terminal" = {
-      exec = "guake";
+      exec = "tilix";
       exec-arg = "--";
     };
 
