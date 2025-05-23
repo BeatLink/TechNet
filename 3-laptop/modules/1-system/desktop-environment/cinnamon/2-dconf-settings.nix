@@ -144,12 +144,13 @@ with lib.hm.gvariant;
     };
 
     "org/cinnamon/desktop/keybindings/media-keys" = {
+      calculator = [];
       home = [ "<Super>e" "XF86Explorer" "HomePage" ];
       next = [ "AudioNext" ];
       pause = [];
       play = [ "AudioPlay" ];
       screensaver = [ "<Control><Alt>l" "XF86ScreenSaver" "<Super>l" ];
-      terminal = [ "<Primary><Alt>t" "Pause" ];
+      terminal = [ "<Primary><Alt>t" "Calculator" ];
     };
 
     "org/cinnamon/desktop/media-handling" = {
