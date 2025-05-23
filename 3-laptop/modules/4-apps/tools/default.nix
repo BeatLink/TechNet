@@ -13,6 +13,7 @@
         ./libreoffice.nix
         ./screenshot.nix
         ./simple-scan.nix
+        ./tilix.nix
         ./universal-android-debloater.nix
         ./ventoy.nix
         ./video-downloader.nix
