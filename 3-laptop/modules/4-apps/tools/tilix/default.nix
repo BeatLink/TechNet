@@ -16,7 +16,7 @@
             name = "Tilix";
             genericName = "Terminal emulator";
             comment = "A tiling terminal for GNOME";
-            exec = "tilix --focus-window --maximize --action=app-new-session"; # this is the main fix and the rest is to conform with original
+            exec = "${pkgs.tilix}/bin/tilix --focus-window --maximize --action=app-new-session"; # this is the main fix and the rest is to conform with original
             terminal = false;
             type = "Application";
             startupNotify = true;
@@ -29,16 +29,16 @@
             actions = {
                 "new-window" = {
                     name = "New Window";
-                    exec = "tilix --action=app-new-window";
+                    exec = "${pkgs.tilix}/bin/tilix --action=app-new-window";
                 };
                 "new-session" = {
                     name = "New Session";
-                    exec = "tilix --action=app-new-session";
+                    exec = "${pkgs.tilix}/bin/tilix --action=app-new-session";
                 };
 
                 "preferences" = {
                     name = "Preferences";
-                    exec = "tilix --preferences";
+                    exec = "${pkgs.tilix}/bin/tilix --preferences";
                 };
 
             };
