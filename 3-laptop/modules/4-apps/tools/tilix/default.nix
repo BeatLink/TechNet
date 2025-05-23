@@ -27,14 +27,17 @@
                 DBusActivatable = "true";
             };
             actions = {
-                "New Window" = {
+                "new-window" = {
+                    name = "New Window";
                     exec = "tilix --action=app-new-window";
                 };
-                "New Session" = {
+                "new-session" = {
+                    name = "New Session";
                     exec = "tilix --action=app-new-session";
                 };
 
-                "Preferences" = {
+                "preferences" = {
+                    name = "Preferences";
                     exec = "tilix --preferences";
                 };
 
