@@ -106,7 +106,7 @@ with lib.hm.gvariant;
 
     "org/cinnamon/desktop/applications/terminal" = {
       exec = "tilix";
-      exec-arg = "--focus-window --maximize --action=app-new-session";
+      exec-arg = "";
     };
 
     "org/cinnamon/desktop/background" = {
@@ -144,11 +144,12 @@ with lib.hm.gvariant;
     };
 
     "org/cinnamon/desktop/keybindings/media-keys" = {
+      home = [ "<Super>e" "XF86Explorer" "HomePage" ];
       next = [ "AudioNext" ];
       pause = [];
       play = [ "AudioPlay" ];
       screensaver = [ "<Control><Alt>l" "XF86ScreenSaver" "<Super>l" ];
-      terminal = [ "<Primary><Alt>t" ];
+      terminal = [ "<Primary><Alt>t" "Pause" ];
     };
 
     "org/cinnamon/desktop/media-handling" = {

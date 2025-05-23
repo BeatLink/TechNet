@@ -11,7 +11,7 @@ with lib.hm.gvariant;
       copy-on-select = true;
       enable-wide-handle = false;
       focus-follow-mouse = false;
-      new-instance-mode = "focus-window";
+      new-instance-mode = "new-session";
       paste-advanced-default = true;
       prompt-on-close = true;
       prompt-on-new-session = false;

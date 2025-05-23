@@ -1,22 +1,24 @@
-{pkgs, ...}:{
+{pkgs, ...}:
+{
+
+    environment.systemPackages = with pkgs; [ tilix ];
     services.xserver.excludePackages = [ pkgs.xterm ];
     home-manager.users.beatlink = { pkgs, ... }: {
         home = {
-            packages = with pkgs; [ tilix ];
             persistence."/Storage/Apps/Tools/Tilix" = {
                 directories = [
                 ];
                 allowOther = true;
             };
         };
-        imports = [                                                                 # Imports Pix Dconf Settings
+        imports = [
             ./2-dconf-settings.nix
         ];
         xdg.desktopEntries."com.gexperts.Tilix" = {
             name = "Tilix";
             genericName = "Terminal emulator";
             comment = "A tiling terminal for GNOME";
-            exec = "${pkgs.tilix}/bin/tilix --focus-window --maximize --action=app-new-session"; # this is the main fix and the rest is to conform with original
+            exec = "${pkgs.tilix}/bin/tilix";
             terminal = false;
             type = "Application";
             startupNotify = true;
@@ -24,23 +26,22 @@
             categories = [ "System" "TerminalEmulator" "X-GNOME-Utilities" ];
             settings = {
                 Keywords = "shell;prompt;command;commandline;cmd;terminal;";
-                DBusActivatable = "true";
+                StartupWMClass = "Tilix";
+                # DBusActivatable intentionally removed
             };
             actions = {
-                "new-window" = {
-                    name = "New Window";
-                    exec = "${pkgs.tilix}/bin/tilix --action=app-new-window";
-                };
-                "new-session" = {
-                    name = "New Session";
-                    exec = "${pkgs.tilix}/bin/tilix --action=app-new-session";
-                };
-
-                "preferences" = {
-                    name = "Preferences";
-                    exec = "${pkgs.tilix}/bin/tilix --preferences";
-                };
-
+            "new-window" = {
+                name = "New Window";
+                exec = "${pkgs.tilix}/bin/tilix --action=app-new-window";
+            };
+            "new-session" = {
+                name = "New Session";
+                exec = "${pkgs.tilix}/bin/tilix --action=app-new-session";
+            };
+            "preferences" = {
+                name = "Preferences";
+                exec = "${pkgs.tilix}/bin/tilix --preferences";
+            };
             };
         };
     };
