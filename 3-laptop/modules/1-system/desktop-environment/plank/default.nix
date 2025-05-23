@@ -37,7 +37,7 @@ let
         "22-home-assistant" = "file:///home/beatlink/.local/share/applications/home-assistant.desktop";
         "23-nextcloud" = "file:///home/beatlink/.local/share/applications/nextcloud.desktop";
         "24-separator4" = "file:///home/beatlink/.local/share/applications/separator4.desktop";
-        "25-tilix" = "file://${pkgs.tilix}/share/applications/com.gexperts.Tilix.desktop";
+        "25-tilix" = "file:///home/beatlink/.nix-profile/share/applications/com.gexperts.Tilix.desktop";
         "26-vscodium" = "file://${pkgs.vscodium}/share/applications/codium.desktop";
         "27-virt-manager" = "file:///run/booted-system/sw/share/applications/virt-manager.desktop";                   
         "28-separator5" = "file:///home/beatlink/.local/share/applications/separator5.desktop";
