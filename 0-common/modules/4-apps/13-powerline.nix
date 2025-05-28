@@ -3,28 +3,38 @@
         programs.powerline-go = {
             enable = true;
             modules = [
-                "root"
+                "time"
                 "user"
                 "host"
                 "cwd"
-                "readonly"
-                "jobs"
-                "exit"
-                "git"
-                "docker"
-                "docker-context"
-                "venv"
+                "perms"
                 "ssh"
-                "dotenv"
-                "duration"
+                "git"
+                "venv"
                 "nix-shell"
-
-                "direnv"
-                #gcp, jobs, newline, perms, plenv, rbenv, root, rvm, shell-var, shenv, termtitle, vgo,
-            ];
-            modulesRight = [
-                "time"
+                "exit"
+                "jobs"
+                "root"
             ];
         };
     };   
+    home-manager.users.root = {
+        programs.powerline-go = {
+            enable = true;
+            modules = [
+                "time"
+                "user"
+                "host"
+                "cwd"
+                "perms"
+                "ssh"
+                "git"
+                "venv"
+                "nix-shell"
+                "exit"
+                "jobs"
+                "root"
+            ];
+        };
+    };
 }
