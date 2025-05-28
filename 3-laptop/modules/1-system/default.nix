@@ -17,6 +17,7 @@
         ./13-printing.nix
         ./14-fuse.nix
         ./15-home-folders.nix
+        ./plymouth.nix
         ./desktop-environment
 
     ];
