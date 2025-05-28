@@ -31,6 +31,10 @@
         warpinator
         xterm
     ];
+    imports = [
+        ./brightness.nix
+    ];
+
     home-manager.users.beatlink = {
         dconf.enable = true;                                                        # Enables dconf for Cinnamon setting Management
         imports = [                                                                 # Imports Cinnamon Dconf Settings
