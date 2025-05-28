@@ -1,6 +1,6 @@
-{ config, pkgs, ... }: 
+{ ... }: 
 {
-    home-manager.users.beatlink = { config, pkgs, ... }: {
+    home-manager.users.beatlink = { ... }: {
         home = {
             persistence."/Storage/Apps/System/Bash" = {
                 directories = [
