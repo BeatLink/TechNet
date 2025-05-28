@@ -12,5 +12,6 @@
         ./10-usbutils.nix
         ./11-pciutils.nix
         ./12-tree.nix
+        ./13-powerline.nix
     ];
 }
