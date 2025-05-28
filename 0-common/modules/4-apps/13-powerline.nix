@@ -3,25 +3,27 @@
         programs.powerline-go = {
             enable = true;
             modules = [
-                "cwd"
+                "root"
+                "user"
                 "host"
-                "time"
+                "cwd"
+                "readonly"
                 "jobs"
                 "exit"
-                "root"
-                "read-only"
                 "git"
                 "docker"
                 "docker-context"
                 "venv"
                 "ssh"
-                "dontenv"
+                "dotenv"
                 "duration"
                 "nix-shell"
-                "user"
 
                 "direnv"
                 #gcp, jobs, newline, perms, plenv, rbenv, root, rvm, shell-var, shenv, termtitle, vgo,
+            ];
+            modulesRight = [
+                "time"
             ];
         };
     };   
