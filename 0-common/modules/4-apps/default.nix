@@ -1,5 +1,6 @@
 {
     imports = [
+        ./0-bash.nix
         ./1-sops.nix
         ./2-nano.nix
         ./3-git.nix
