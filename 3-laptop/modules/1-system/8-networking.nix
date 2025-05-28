@@ -96,6 +96,33 @@
                             method = "ignore";
                         };
                     };
+                    "Thor Hotspot" = {
+                        connection = {
+                            id = "Thor Hotspot";
+                            permissions = "";
+                            type = "wifi";
+                        };
+                        ipv4 = {
+                            dns = "10.100.100.1";
+                            dns-search = "";
+                            method = "auto";
+                        };
+                        ipv6 = {
+                            addr-gen-mode = "stable-privacy";
+                            dns-search = "";
+                            method = "auto";
+                        };
+                        wifi = {
+                            mac-address-blacklist = "";
+                            mode = "infrastructure";
+                            ssid = "Thor";
+                        };
+                        wifi-security = {
+                            auth-alg = "open";
+                            key-mgmt = "wpa-psk";
+                            psk = "$THOR_WIFI_PASSWORD";
+                        };
+                    };
                 };
                 environmentFiles = [
                     config.sops.secrets.networkmanager_env_file.path
