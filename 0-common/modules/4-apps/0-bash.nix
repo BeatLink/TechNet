@@ -8,7 +8,7 @@
         programs.bash =  {
             enable = true;
             historyControl = ["ignoreboth"];
-            historyFile = ".local/share/bash/history";
+            historyFile = "/home/beatlink/.local/share/bash/history";
             shellAliases = {
                 upgrade = "cd /Storage/TechNet && sudo nixos-rebuild --flake .# switch";
                 purge = "sudo nix-collect-garbage -d";
