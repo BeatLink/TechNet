@@ -12,10 +12,15 @@
 ######################################################################################################################################
 { config, ... }:
 {
+    environment.etc."resolv.conf".text = ''
+        nameserver 127.0.0.1
+        nameserver 1.1.1.1
+        nameserver 8.8.8.8
+    '';                                                                 # Use local pihole with external dns as fallback. Dont use networking.nameservers
+
     networking = {
         hostName = "Heimdall";                                          # Sets hostname
         hostId = "e5aa3553";
-        nameservers = [ "8.8.8.8" "1.1.1.1" "127.0.0.1" ];              # Sets up dns
         firewall = {
             allowedUDPPorts = [ 51820 ];                                # Allows Wireguard on Firewall
             extraCommands = ''
