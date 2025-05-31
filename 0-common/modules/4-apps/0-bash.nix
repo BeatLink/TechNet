@@ -39,6 +39,7 @@
                 ragnarok = "ssh ragnarok.technet";
 
                 l = "ls";
+                ll = "ls -alF";
                 la = "ls -la";
                 lt = "tree -a";
             };            
