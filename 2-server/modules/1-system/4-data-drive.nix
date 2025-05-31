@@ -5,7 +5,7 @@
 # storage during boot
 #
 #######################################################################################################################################
-{
+/*{
 
     # Data Drive Mounting
     boot = {
@@ -30,4 +30,29 @@
         options = ["defaults" "nofail" "discard"];
     };
 
+}*/
+
+
+# Data Drive ############################################################################################################################
+#
+# Configures settings for mounting the Data Drive for backups
+#
+###########################################################################################################################################
+
+{
+    systemd.tmpfiles.settings."Storage" = {                      # Sets the mount point permissions
+        "/Storage" = {
+            d = {
+                user = "beatlink";
+                group = "beatlink";
+                mode = "1770";
+            };
+        };
+    };
+    fileSystems."/Storage" = {                                                      # Mounts the drive
+        device = "data-pool/storage";
+        fsType = "zfs";
+        options = ["zfsutil" "nofail" ];
+        neededForBoot = true;
+    };
 }
