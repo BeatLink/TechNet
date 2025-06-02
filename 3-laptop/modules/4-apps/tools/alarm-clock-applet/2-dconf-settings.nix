@@ -8,7 +8,7 @@ with lib.hm.gvariant;
     "io/github/alarm-clock-applet" = {
       alarms = [ (mkUint32 0) 4 1 ];
       gconf-migrated = true;
-      show-label = false;
+      show-label = true;
     };
 
     "io/github/alarm-clock-applet/alarm-0" = {
@@ -19,7 +19,7 @@ with lib.hm.gvariant;
       repeat = [ "sun" "mon" "tue" "wed" "thu" "fri" "sat" ];
       sound-file = "file:///Storage/Files/Sounds/Interface%20Sounds/Amazon/Amazon%20Fire%20Phone%20Startup%20(Extracted%20with%20Boot%20Animation).m4a";
       sound-repeat = false;
-      time = mkInt64 78300;
+      time = mkInt64 81000;
       type = "clock";
     };
 
@@ -41,7 +41,8 @@ with lib.hm.gvariant;
       repeat = [ "sun" "mon" "tue" "wed" "thu" "fri" "sat" ];
       sound-file = "file:///Storage/Files/Sounds/Interface%20Sounds/Amazon/Amazon%20Fire%20Phone%20Startup%20(Extracted%20with%20Boot%20Animation).m4a";
       sound-repeat = false;
-      time = mkInt64 79200;
+      time = mkInt64 81900;
+      type = "clock";
     };
 
   };
