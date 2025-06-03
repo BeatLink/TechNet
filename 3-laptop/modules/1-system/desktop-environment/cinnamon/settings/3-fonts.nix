@@ -20,6 +20,9 @@
         "org/nemo/desktop" = {
             "font" = "Noto Sans Regular 12";
         };
+        "org/cinnamon/settings-daemon/plugins/xsettings" = {
+            hinting = "full";
+        };
 
     };
 }
