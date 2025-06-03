@@ -43,6 +43,7 @@
             ./fonts.nix
             ./night-light.nix
             ./themes.nix
+            ./power.nix
             ./sounds.nix
         ];
         xsession =  {
