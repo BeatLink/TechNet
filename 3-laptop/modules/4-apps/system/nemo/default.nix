@@ -19,7 +19,13 @@
     home-manager.users.beatlink = { pkgs, ... }:
     {
         home = {
-            packages = [ pkgs.nemo-with-extensions  pkgs.nemo-preview ]; 
+            packages = [ 
+                pkgs.nemo-with-extensions 
+                pkgs.nemo-preview
+                pkgs.ffmpeg-full
+                pkgs.imagemagick
+                pkgs.gettext
+            ]; 
             persistence."/Storage/Apps/System/Nemo" = {
                 directories = [
                     ".config/nemo"
