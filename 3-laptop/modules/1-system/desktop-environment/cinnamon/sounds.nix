@@ -44,6 +44,8 @@ with lib.hm.gvariant;
         };
 
         "org/cinnamon/desktop/sound" = {
+            allow-amplified-volume = true;
+            maximum-volume = 150;
             volume-sound-enabled = true;
             volume-sound-file = "/Storage/Files/Sounds/Interface Sounds/Linux/Fresh and Clean/stereo/message-new-instant.ogg";
         };
