@@ -1,7 +1,3 @@
-{ lib, ... }:
-
-with lib.hm.gvariant;
-
 {
     dconf.settings = {
         "org/cinnamon/nemo/desktop" = {
