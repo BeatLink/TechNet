@@ -8,33 +8,14 @@ with lib.hm.gvariant;
     "org/cinnamon" = {
       alttab-switcher-delay = 100;
       alttab-switcher-style = "icons+preview";
-      desktop-effects-maximize = true;
       device-aliases = [ "/org/freedesktop/UPower/devices/battery_BAT1:=Internal Battery" "/org/freedesktop/UPower/devices/keyboard_hidpp_battery_0:= Wireless Keyboard" ];
-      enabled-applets = [ 
-        "panel1:left:0:menu@cinnamon.org:172" 
-        "panel1:left:1:places-bookmarks@dmo60.de:154" 
-        "panel1:center:0:calendar@cinnamon.org:120"
-        "panel1:center:1:cinnamon-timer@jake1164:149" 
-        "panel1:center:2:trilium-api@beatlink:145" 
-        "panel1:right:1:xapp-status@cinnamon.org:4" 
-        "panel1:right:2:show-hide-applets@mohammad-sn:142" 
-        "panel1:right:3:systray@cinnamon.org:143" 
-        "panel1:right:4:printers@cinnamon.org:134" 
-        "panel1:right:5:notifications@cinnamon.org:5" 
-        "panel1:right:6:gpaste-reloaded@feuerfuchs.eu:144"
-        "panel1:right:7:sound@cinnamon.org:11" 
-        "panel1:right:8:network@cinnamon.org:10" 
-        "panel1:right:9:inhibit@cinnamon.org:156" 
-        "panel1:right:10:power-profiles@rcalixte:147" 
-        "panel1:right:11:power@cinnamon.org:12" 
-      ];
+
       enabled-desklets = [];
       enabled-extensions = [ "transparent-panels@germanfr" ];
       hotcorner-layout = [ "expo:false:0" "desktop:true:100" "expo:true:100" "scale:true:100" ];
       lock-desklets = false;
       looking-glass-history = [ "glass.log" "global.segfault()" ];
-      next-applet-id = 173;
-      next-desklet-id = 9;
+
       no-adjacent-panel-barriers = true;
       panel-edit-mode = false;
       panel-launchers = [ "DEPRECATED" ];
@@ -47,7 +28,6 @@ with lib.hm.gvariant;
       panels-hide-delay = [ "1:0" "2:0" ];
       panels-show-delay = [ "1:0" "2:0" ];
       show-media-keys-osd = "small";
-      window-effect-speed = 0;
       workspace-expo-view-as-grid = true;
       workspace-osd-visible = true;
     };
@@ -57,40 +37,8 @@ with lib.hm.gvariant;
       quit-time-delay = 5;
     };
 
-    "org/cinnamon/desktop/a11y/applications" = {
-      screen-keyboard-enabled = true;
-      screen-magnifier-enabled = false;
-      screen-reader-enabled = false;
-    };
 
-    "org/cinnamon/desktop/a11y/keyboard" = {
-      bouncekeys-beep-reject = true;
-      bouncekeys-delay = 140;
-      bouncekeys-enable = false;
-      disable-timeout = 120;
-      enable = false;
-      feature-state-change-beep = false;
-      mousekeys-accel-time = 1200;
-      mousekeys-enable = false;
-      mousekeys-init-delay = 160;
-      mousekeys-max-speed = 500;
-      slowkeys-beep-accept = true;
-      slowkeys-beep-press = true;
-      slowkeys-beep-reject = false;
-      slowkeys-delay = 300;
-      slowkeys-enable = false;
-      stickykeys-enable = false;
-      stickykeys-modifier-beep = true;
-      stickykeys-two-key-off = true;
-      timeout-enable = false;
-      togglekeys-enable-beep = true;
-      togglekeys-enable-osd = true;
-      togglekeys-sound-on = "/usr/share/cinnamon/sounds/togglekeys-sound-on.ogg";
-    };
 
-    "org/cinnamon/desktop/a11y/magnifier" = {
-      mag-factor = 1.0;
-    };
 
     "org/cinnamon/desktop/a11y/mouse" = {
       dwell-click-enabled = false;
@@ -109,16 +57,9 @@ with lib.hm.gvariant;
       exec-arg = "";
     };
 
-    "org/cinnamon/desktop/background" = {
-      picture-options = "zoom";
-      picture-uri = "file:///Storage/Files/Pictures/Wallpapers/variety-copied-wallpaper-51eb60077e19e9bbe67eb52c9218c5f6.jpg";
-    };
 
-    "org/cinnamon/desktop/background/slideshow" = {
-      delay = 15;
-      image-source = "directory:///Storage/Files/Pictures";
-      slideshow-enabled = false;
-    };
+
+
 
     "org/cinnamon/desktop/interface" = {
       clock-show-date = true;
@@ -130,10 +71,7 @@ with lib.hm.gvariant;
       first-day-of-week = 0;
       font-name = "Noto Sans 12";
       gtk-overlay-scrollbars = true;
-      gtk-theme = "Mint-Y-Aqua";
-      gtk-theme-backup = "Mint-Y-Aqua";
-      icon-theme = "Mint-Y-Aqua";
-      icon-theme-backup = "Mint-Y-Aqua";
+
       scaling-factor = mkUint32 0;
       text-scaling-factor = 1.0;
       toolkit-accessibility = true;
@@ -194,12 +132,6 @@ with lib.hm.gvariant;
       idle-delay = mkUint32 1800;
     };
 
-    "org/cinnamon/desktop/sound" = {
-      event-sounds = false;
-      maximum-volume = 150;
-      volume-sound-file = "/usr/share/mint-artwork/sounds/volume.oga";
-    };
-
     "org/cinnamon/desktop/wm/preferences" = {
       action-scroll-titlebar = "none";
       audible-bell = false;
@@ -208,8 +140,6 @@ with lib.hm.gvariant;
       focus-new-windows = "smart";
       min-window-opacity = 30;
       num-workspaces = 1;
-      theme = "Mint-Y";
-      theme-backup = "Mint-Y";
       titlebar-font = "Noto Sans 12";
       visual-bell = false;
       workspace-names = [];
@@ -265,41 +195,13 @@ with lib.hm.gvariant;
       orientation-lock = true;
     };
 
-    "org/cinnamon/settings-daemon/plugins/power" = {
-      button-power = "nothing";
-      critical-battery-action = "nothing";
-      lid-close-ac-action = "blank";
-      lid-close-battery-action = "suspend";
-      sleep-display-ac = 900;
-      sleep-display-battery = 300;
-      sleep-inactive-ac-timeout = 3600;
-      sleep-inactive-battery-timeout = 600;
-    };
 
     "org/cinnamon/settings-daemon/plugins/xsettings" = {
       buttons-have-icons = true;
-      hinting = "full";
       menus-have-icons = true;
     };
 
-    "org/cinnamon/sounds" = {
-      close-enabled = true;
-      close-file = "/usr/share/mint-artwork/sounds/close.oga";
-      login-file = "/Storage/Files/Sounds/Interface Sounds/Steam/860895(1)/steamdeck_startup_v01_A_01-06 - Blip blip swirl whom.wav";
-      logout-file = "/usr/share/mint-artwork/sounds/logout.ogg";
-      map-enabled = true;
-      map-file = "/usr/share/mint-artwork/sounds/map.oga";
-      maximize-enabled = true;
-      maximize-file = "/usr/share/mint-artwork/sounds/maximize.oga";
-      minimize-enabled = true;
-      minimize-file = "/Storage/Files/Sounds/Interface Sounds/Orwell 2/system_datachunk_pickup-sharedassets1.assets-126.wav";
-      notification-enabled = true;
-      notification-file = "/Storage/Files/Sounds/Interface Sounds/Steam/860895(1)/deck_ui_achievement_toast.wav";
-      plug-file = "/Storage/Files/Sounds/Interface Sounds/Orwell 2/main_menu_create_profile-sharedassets1.assets-146.wav";
-      switch-file = "/usr/share/mint-artwork/sounds/switch.oga";
-      tile-file = "/Storage/Files/Sounds/Interface Sounds/Orwell 2/system_datachunk_pickup-sharedassets1.assets-126.wav";
-      unmaximize-enabled = true;
-      unplug-file = "/Storage/Files/Sounds/Interface Sounds/Orwell 2/system_connection_lost_notification-sharedassets1.assets-124.wav";
-    };
+
   };
+
 }

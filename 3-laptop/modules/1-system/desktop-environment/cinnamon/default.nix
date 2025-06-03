@@ -38,19 +38,26 @@
     home-manager.users.beatlink = {
         dconf.enable = true;                                                        # Enables dconf for Cinnamon setting Management
         imports = [                                                                 # Imports Cinnamon Dconf Settings
-            ./2-dconf-settings.nix
-            ./default-applications.nix
-            ./fonts.nix
-            ./night-light.nix
-            ./themes.nix
-            ./power.nix
-            ./sounds.nix
+            ./settings/1-backgrounds.nix
+            ./settings/2-effects.nix
+            ./settings/3-fonts.nix
+            ./settings/4-themes.nix
+            ./settings/5-accessibility.nix
+            ./settings/6-account.nix
+            ./settings/7-actions.nix
+            ./settings/8-applets.nix
+
+            ./settings/dconf-settings2.nix
+            ./settings/default-applications.nix
+            ./settings/night-light.nix
+            ./settings/power.nix
+            ./settings/sounds.nix
         ];
         xsession =  {
             scriptPath = ".local/share/X11/xsession";
             initExtra =  "ERRFILE=$HOME/.local/share/X11/xsession-errors";
         };
-        home.packages = with pkgs; [python3];
+        home.packages = with pkgs; [python3 gnumake];
         home.persistence."/Storage/Apps/System/Cinnamon" = {                                # Loads persistent data for plank
             directories = [
                 ".config/cinnamon"
