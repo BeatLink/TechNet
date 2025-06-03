@@ -28,7 +28,7 @@
             url = "github:Zocker1999NET/home-manager-xdg-autostart";
         };
         flatpaks = {
-            url = "github:GermanBread/declarative-flatpak";
+            flatpaks.url = "github:in-a-dil-emma/declarative-flatpaks/stable-v3";
         };
         flake-programs-sqlite =  {
             url = "github:wamserma/flake-programs-sqlite";
@@ -82,7 +82,7 @@
                     sops-nix.nixosModules.sops
                     home-manager.nixosModules.home-manager
                     {home-manager.sharedModules = [ xdg-autostart.homeManagerModules.xdg-autostart ];}
-                    flatpaks.nixosModules.declarative-flatpak
+                    flatpaks.nixosModule
                     flake-programs-sqlite.nixosModules.programs-sqlite
                     ./0-common
                     ./3-laptop
