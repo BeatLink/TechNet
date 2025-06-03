@@ -43,6 +43,7 @@
             ./fonts.nix
             ./night-light.nix
             ./themes.nix
+            ./sounds.nix
         ];
         xsession =  {
             scriptPath = ".local/share/X11/xsession";
