@@ -28,7 +28,7 @@
             url = "github:Zocker1999NET/home-manager-xdg-autostart";
         };
         flatpaks = {
-            url = "github:in-a-dil-emma/declarative-flatpaks/stable-v3";
+            url = "github:in-a-dil-emma/declarative-flatpaks";
         };
         flake-programs-sqlite =  {
             url = "github:wamserma/flake-programs-sqlite";
