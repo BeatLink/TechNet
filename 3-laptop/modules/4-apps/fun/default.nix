@@ -4,7 +4,7 @@
         ./calibre.nix
         ./ckan.nix
         ./freetube.nix
-        ./gmusicbrowser.nix
+        ./gmusicbrowser
         ./itch.nix
         ./lmms.nix
         ./lutris.nix
