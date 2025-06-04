@@ -1,14 +1,15 @@
 {
 
-    services.flatpak = {
-        packages = ["flathub:app/org.gmusicbrowser.gmusicbrowser//stable"];
-        overrides."org.gmusicbrowser.gmusicbrowser" = {
-            filesystems = [
-                "/Storage/Files/Music"
-            ];
-        };
-    };
+
     home-manager.users.beatlink = { config, pkgs, ... }: {
+        services.flatpak = {
+            packages = ["flathub:app/org.gmusicbrowser.gmusicbrowser//stable"];
+            overrides."org.gmusicbrowser.gmusicbrowser" = {
+                filesystems = [
+                    "/Storage/Files/Music"
+                ];
+            };
+        };
         home = {
             persistence."/Storage/Apps/Fun/Gmusicbrowser" = {
                 directories = [
