@@ -71,11 +71,11 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1748916088,
-        "narHash": "sha256-PjvVcHl9dNbQymVRx0w68djJ7kUdy6Ne3D6Tz19IK4w=",
+        "lastModified": 1749014418,
+        "narHash": "sha256-CADQ1WumCpE3N3wkd8WNWqPxOBfQ0GXBFCCcEVFZ3vI=",
         "owner": "wamserma",
         "repo": "flake-programs-sqlite",
-        "rev": "540ce0c783a8c43e1a731a93c5e25a5cb0c9daa7",
+        "rev": "c26f0a1cfce9733118600f50d2a32b6ca3e02d36",
         "type": "github"
       },
       "original": {
@@ -86,15 +86,16 @@
     },
     "flatpaks": {
       "locked": {
-        "lastModified": 1748869684,
-        "narHash": "sha256-q6vv9g0i3m7paHGMW3onO8cJEJ14NkO6sg64Q1Fy3vg=",
-        "owner": "GermanBread",
+        "lastModified": 1748869541,
+        "narHash": "sha256-TkH+duF/+En9wfi7cs+v37Cy536RIqtSpwzA6G7Qf7E=",
+        "owner": "in-a-dil-emma",
         "repo": "declarative-flatpak",
-        "rev": "9a9a3f15218e91246589c6e6177a33accaffe218",
+        "rev": "7da730958a48c7c5f53dd48509767851c88a4774",
         "type": "github"
       },
       "original": {
-        "owner": "GermanBread",
+        "owner": "in-a-dil-emma",
+        "ref": "stable-v3",
         "repo": "declarative-flatpak",
         "type": "github"
       }
@@ -122,11 +123,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1748925027,
-        "narHash": "sha256-BJ0qRIdvt5aeqm3zg/5if7b5rruG05zrSX3UpLqjDRk=",
+        "lastModified": 1748979197,
+        "narHash": "sha256-mKYwYcO9RmA2AcAFIXGDBOw5iv/fbjw6adWvMbnfIuk=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "cb809ec1ff15cf3237c6592af9bbc7e4d983e98c",
+        "rev": "34a13086148cbb3ae65a79f753eb451ce5cac3d3",
         "type": "github"
       },
       "original": {
@@ -152,11 +153,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1748693115,
-        "narHash": "sha256-StSrWhklmDuXT93yc3GrTlb0cKSS0agTAxMGjLKAsY8=",
+        "lastModified": 1748929857,
+        "narHash": "sha256-lcZQ8RhsmhsK8u7LIFsJhsLh/pzR9yZ8yqpTzyGdj+Q=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "910796cabe436259a29a72e8d3f5e180fc6dfacc",
+        "rev": "c2a03962b8e24e669fb37b7df10e7c79531ff1a4",
         "type": "github"
       },
       "original": {
