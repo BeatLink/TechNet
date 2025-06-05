@@ -36,20 +36,12 @@
     home-manager.users.beatlink = {
         dconf.enable = true;                                                        # Enables dconf for Cinnamon setting Management
         imports = [                                                                 # Imports Cinnamon Dconf Settings
-            ./settings/1-backgrounds.nix
-            ./settings/2-effects.nix
-            ./settings/3-fonts.nix
-            ./settings/4-themes.nix
-            ./settings/5-accessibility.nix
-            ./settings/6-account.nix
-            ./settings/7-actions.nix
-            ./settings/8-applets.nix
+            ./default-applications.nix
+            ./dconf/org.cinnamon.nix
+            ./dconf/org.gnome.desktop.nix
+            ./dconf/org.gtk.settings.nix
+            ./dconf/org.x.apps.nix
 
-            ./settings/dconf-settings2.nix
-            ./settings/default-applications.nix
-            ./settings/night-light.nix
-            ./settings/power.nix
-            ./settings/sounds.nix
         ];
         xsession =  {
             scriptPath = ".local/share/X11/xsession";
