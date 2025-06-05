@@ -7,6 +7,7 @@ with lib.hm.gvariant;
   dconf.settings = {
     "org/x/pix/browser" = {
       browser-sidebar-width = 285;
+      fast-file-type = true;
       fullscreen-sidebar = "hidden";
       fullscreen-thumbnails-visible = false;
       go-to-last-location = true;
