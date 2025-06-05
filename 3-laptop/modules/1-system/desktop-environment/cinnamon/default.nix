@@ -27,6 +27,7 @@
         gnome-terminal
         warpinator
         xterm
+        celluloid
     ];
     imports = [
         ./brightness.nix
