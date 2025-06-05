@@ -24,7 +24,7 @@ let
         "09-element" = "file://${pkgs.element-desktop}/share/applications/element-desktop.desktop";
         "11-separator2" = "file:///home/beatlink/.local/share/applications/separator2.desktop";
         "12-newsflash" = "file:///${pkgs.newsflash}/share/applications/io.gitlab.news_flash.NewsFlash.desktop";
-        "13-gmusicbrowser" = "file:///var/lib/flatpak/exports/share/applications/org.gmusicbrowser.gmusicbrowser.desktop";
+        "13-gmusicbrowser" = "file:///home/beatlink/.nix-profile/share/applications/gmusicbrowser.desktop";
         "14-freetube" = "file:///${pkgs.freetube}/share/applications/freetube.desktop";
         "15-stremio" = "file:///${pkgs.stremio}/share/applications/smartcode-stremio.desktop";
         "16-lutris" = "file://${pkgs.lutris}/share/applications/net.lutris.Lutris.desktop";

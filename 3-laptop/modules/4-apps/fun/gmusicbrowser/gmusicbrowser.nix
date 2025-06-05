@@ -31,13 +31,12 @@ in
 
 perlPackages.buildPerlPackage rec {
   pname = "gmusicbrowser";
-  # last stable release was v1.1.99.1 on 2020-11-19
-  version = "unstable-2022-03-02";
+  version = "60d4b6f";
   src = fetchFromGitHub {
     owner = "squentin";
     repo = "gmusicbrowser";
-    rev = "73089de1a70f537dc790056a50802617ab0a1725";
-    sha256 = "sha256-i0EZOUxxx1rCa0pKEGzcUDoYNG0al/+bujtkOtWzSAM=";
+    rev = "75c410d0dd71f116082aecd3b52af725f670521a";
+    sha256 = "sha256-nZ1/hRrzem5RTeXcGeogvn5PrZoz/U03ZEVPWeYn1Eo=";
   };
 
   postInstall = ''
