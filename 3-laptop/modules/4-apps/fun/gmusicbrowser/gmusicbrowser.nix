@@ -5,7 +5,6 @@
 , fetchFromGitHub
 , gettext
 , multimarkdown
-, gtk3
 , wrapGAppsHook
 , gst_all_1
 }:
@@ -29,7 +28,7 @@ let
   ];
 in
 
-perlPackages.buildPerlPackage rec {
+perlPackages.buildPerlPackage  {
   pname = "gmusicbrowser";
   version = "60d4b6f";
   src = fetchFromGitHub {
