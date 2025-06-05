@@ -4,9 +4,8 @@
 #
 #################################################################################################################################
 
-{ config, lib, pkgs, ... }:
 {
-    home-manager.users.beatlink = { config, pkgs, ... }: {
+    home-manager.users.beatlink = {
         programs.plasma.configFile = {
             "kwalletrc" =  {
                 "Wallet" =  {

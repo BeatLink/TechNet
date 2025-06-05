@@ -1,6 +1,5 @@
-{ config, lib, pkgs, ... }:
 {
-    home-manager.users.beatlink = { config, pkgs, ... }: {
+    home-manager.users.beatlink = {
         home.persistence."/Storage/Apps/System/Separators/" = {
             files = [
                 ".local/share/icons/separator-black-horizontal.png"
