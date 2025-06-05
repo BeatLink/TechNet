@@ -1,5 +1,5 @@
 {
-    home-manager.users.beatlink = { config, pkgs, ... }: {
+    home-manager.users.beatlink = { pkgs, ... }: {
         home = {
             packages = with pkgs; [ newsflash ];
             persistence."/Storage/Apps/Fun/NewsFlash" = {
