@@ -1,6 +1,5 @@
 {
     imports = [
-        ./audacious.nix
         ./calibre.nix
         ./ckan.nix
         ./freetube.nix
