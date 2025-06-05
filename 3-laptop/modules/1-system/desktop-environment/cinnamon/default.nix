@@ -19,9 +19,6 @@
             enableCtrlAltBackspace = true;                                          # Enables CTRL+ALT+Backspace for restarting X11
         };
         libinput.enable = true;                                                     # Enables Touchpad Functionality
-        flatpak.packages = [                                                        # Installs flatpak GTK theme for Cinnamon
-            "flathub:runtime/org.gtk.Gtk3theme.Mint-Y//3.22"
-        ];
     };
     programs.dconf.enable = true;                                                   # Enable Dconf
     environment.cinnamon.excludePackages = with pkgs; [

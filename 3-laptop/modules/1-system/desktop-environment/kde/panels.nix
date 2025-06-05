@@ -53,7 +53,6 @@
                     {
                         name = "org.kde.plasma.icontasks";
                         config = {
-                            # /var/lib/flatpak/exports/share/applications/
                             # /run/booted-system/sw/share/applications/
                             General.launchers = [
                                 "applications:org.mozilla.firefox.desktop"
