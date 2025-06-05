@@ -6,7 +6,10 @@ with lib.hm.gvariant;
 {
   dconf.settings = {
     "org/nemo/desktop" = {
+      desktop-layout = "false::false";
       font = "Noto Sans Regular 12";
+      show-orphaned-desktop-icons = false;
+      volumes-visible = false;
     };
 
     "org/nemo/list-view" = {
