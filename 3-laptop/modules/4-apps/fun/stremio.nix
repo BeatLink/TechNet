@@ -1,6 +1,6 @@
 {
 
-    home-manager.users.beatlink = { config, pkgs, ... }: {
+    home-manager.users.beatlink = { pkgs, ... }: {
         home = {
             packages = with pkgs; [ stremio ];
             persistence."/Storage/Apps/Fun/Stremio" = {
