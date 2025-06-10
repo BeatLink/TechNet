@@ -6,14 +6,21 @@ with lib.hm.gvariant;
 {
   dconf.settings = {
     "org/cinnamon" = {
-      alttab-switcher-style = "coverflow";
+      alttab-switcher-delay = 100;
+      alttab-switcher-style = "icons+preview";
+      desklet-snap-interval = 25;
+      desktop-effects-close = "traditional";
+      desktop-effects-map = "traditional";
+      desktop-effects-minimize = "traditional";
       device-aliases = [ "/org/freedesktop/UPower/devices/battery_BAT1:=Internal Battery" "/org/freedesktop/UPower/devices/keyboard_hidpp_battery_0:= Wireless Keyboard" ];
-      enabled-applets = [ "panel1:left:0:menu@cinnamon.org:172" "panel1:left:1:places-bookmarks@dmo60.de:154" "panel1:center:0:calendar@cinnamon.org:120" "panel1:center:1:cinnamon-timer@jake1164:149" "panel1:center:2:trilium-api@beatlink:145" "panel1:right:1:xapp-status@cinnamon.org:4" "panel1:right:2:show-hide-applets@mohammad-sn:142" "panel1:right:3:systray@cinnamon.org:143" "panel1:right:4:printers@cinnamon.org:134" "panel1:right:5:notifications@cinnamon.org:5" "panel1:right:6:gpaste-reloaded@feuerfuchs.eu:144" "panel1:right:7:sound@cinnamon.org:11" "panel1:right:8:network@cinnamon.org:10" "panel1:right:9:inhibit@cinnamon.org:156" "panel1:right:10:power-profiles@rcalixte:147" "panel1:right:11:power@cinnamon.org:12" ];
+      enabled-applets = [ "panel1:left:0:menu@cinnamon.org:172" "panel1:left:1:places-bookmarks@dmo60.de:154" "panel1:center:2:calendar@cinnamon.org:120" "panel1:center:3:cinnamon-timer@jake1164:149" "panel1:center:4:trilium-api@beatlink:145" "panel1:right:0:xapp-status@cinnamon.org:4" "panel1:right:4:show-hide-applets@mohammad-sn:142" "panel1:right:5:systray@cinnamon.org:143" "panel1:right:2:printers@cinnamon.org:134" "panel1:right:6:notifications@cinnamon.org:5" "panel1:right:3:gpaste-reloaded@feuerfuchs.eu:144" "panel1:right:7:sound@cinnamon.org:11" "panel1:right:8:network@cinnamon.org:10" "panel1:right:9:inhibit@cinnamon.org:156" "panel1:right:10:power-profiles@rcalixte:147" "panel1:right:11:power@cinnamon.org:12" "panel1:center:0:weather@mockturtl:0" ];
+      enabled-desklets = [];
       enabled-extensions = [ "transparent-panels@germanfr" ];
       hotcorner-layout = [ "expo:false:0" "desktop:true:100" "expo:true:100" "scale:true:100" ];
       panel-zone-icon-sizes = "[{\"panelId\":1,\"left\":16,\"center\":16,\"right\":16}]";
       panel-zone-symbolic-icon-sizes = "[{\"panelId\": 1, \"left\": 16, \"center\": 16, \"right\": 16}]";
-      panel-zone-text-sizes = "[{\"panelId\":1,\"left\":10,\"center\":10,\"right\":10}]";
+      panel-zone-text-sizes = "[{\"panelId\": 1, \"left\": 11.0, \"center\": 11.0, \"right\": 11.0}]";
+      panels-autohide = [ "1:false" "2:intel" ];
       panels-enabled = [ "1:0:top" ];
     };
 
@@ -29,28 +36,46 @@ with lib.hm.gvariant;
       togglekeys-sound-on = "/Storage/Files/Sounds/Interface Sounds/Linux/Fresh and Clean/stereo/button-toggle-on.ogg";
     };
 
+    "org/cinnamon/desktop/a11y/mouse" = {
+      dwell-click-enabled = false;
+      dwell-threshold = 10;
+      dwell-time = 1.2;
+      secondary-click-enabled = false;
+      secondary-click-time = 1.2;
+    };
+
+    "org/cinnamon/desktop/applications/calculator" = {
+      exec = "gnome-calculator";
+    };
+
     "org/cinnamon/desktop/applications/terminal" = {
       exec = "/nix/store/m1j5n3s44gaxkrqyhw245fg1kplmagba-tilix-1.9.6/bin/tilix";
       exec-arg = "";
     };
 
     "org/cinnamon/desktop/background/slideshow" = {
+      delay = 15;
       image-source = "directory:///Storage/Files/Pictures/Wallpapers";
+      slideshow-enabled = false;
     };
 
     "org/cinnamon/desktop/interface" = {
       clock-show-date = true;
       clock-show-seconds = true;
       clock-use-24h = false;
+      cursor-blink-time = 1200;
+      cursor-size = 24;
+      cursor-theme = "Bibata-Modern-Classic";
       first-day-of-week = 0;
       font-name = "Noto Sans 12";
+      gtk-overlay-scrollbars = true;
       gtk-theme = "Mint-Y-Aqua";
       gtk-theme-backup = "Mint-Y-Aqua";
       icon-theme = "Mint-Y-Aqua";
       icon-theme-backup = "Mint-Y-Aqua";
       scaling-factor = mkUint32 0;
       text-scaling-factor = 1.0;
-      toolkit-accessibility = false;
+      toolkit-accessibility = true;
     };
 
     "org/cinnamon/desktop/keybindings" = {
@@ -108,6 +133,7 @@ with lib.hm.gvariant;
       allow-media-control = false;
       date-format = " %A, %B %-e %Y";
       font-date = "Noto Sans 24";
+      font-message = "Noto Sans 14";
       font-time = "Noto Sans 64";
       lock-enabled = true;
       show-album-art = false;
@@ -129,9 +155,18 @@ with lib.hm.gvariant;
     };
 
     "org/cinnamon/desktop/wm/preferences" = {
-      action-middle-click-titlebar = "toggle-above";
+      action-scroll-titlebar = "none";
+      audible-bell = false;
+      button-layout = ":minimize,maximize,close";
+      focus-mode = "click";
+      focus-new-windows = "smart";
+      min-window-opacity = 30;
+      num-workspaces = 1;
+      theme = "Mint-Y";
       theme-backup = "Mint-Y";
       titlebar-font = "Noto Sans 12";
+      visual-bell = false;
+      workspace-names = [];
     };
 
     "org/cinnamon/gestures" = {
