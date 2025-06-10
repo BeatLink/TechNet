@@ -5,10 +5,7 @@
 # the file manually. 
 #
 ###########################################################################################################################################
-
-{ config, lib, pkgs, ... }:
 {  
-    
     programs.dconf.enable = true;
     services.blueman.enable = true;
     home-manager.users.beatlink = {
