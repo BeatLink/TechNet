@@ -104,7 +104,7 @@
                             {
                                 # eNET Server
                                 PublicKey = "VGMPRz95JuRtQMTYV2ANAF7AuDZU/igJgZB8ZZSAUXI=";
-                                AllowedIPs = ["10.100.100.50/32"];
+                                AllowedIPs = ["10.100.100.52/32"];
                                 PersistentKeepalive = 15;
                             }
                             {
