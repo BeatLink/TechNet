@@ -12,3 +12,11 @@
         };
     };
 }
+
+# sudo setfacl -m u:borg:--x /Storage
+# sudo setfacl -m u:borg:--x /Storage/Files
+# sudo setfacl -m u:borg:--x /Storage/Files/Backups
+# sudo setfacl -m u:borg:--x /Storage/Files/Backups/Laptop
+# sudo setfacl -R -m u:borg:rwX /Storage/Files/Backups/Laptop/Vorta
+# sudo setfacl -R -d -m u:borg:rwX /Storage/Files/Backups/Laptop/Vorta
+#
