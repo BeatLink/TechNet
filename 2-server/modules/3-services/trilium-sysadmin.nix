@@ -1,5 +1,5 @@
 {
-    virtualisation.arion.projects.trilium = {
+    virtualisation.arion.projects.trilium-sysadmin = {
         serviceName = "trilium-sysadmin";
         settings = {
             services = {
@@ -8,7 +8,7 @@
                     container_name = "trilium-sysadmin";
                     restart = "always";
                     volumes = [ 
-                        "/Storage/Services/TriliumSysadmin/data:/home/node/trilium-data"
+                        "/Storage/Services/Trilium-Sysadmin/data:/home/node/trilium-data"
                     ];
                     expose = [
                         "8080" 
