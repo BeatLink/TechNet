@@ -3,6 +3,7 @@
         NIX_AUTO_RUN_INTERACTIVE = "true";
         NIX_AUTO_RUN = "true";
     };
+    programs.command-not-found.enable = true;
 
     home-manager.users.beatlink = { ... }: {
         programs.command-not-found.enable = true;
