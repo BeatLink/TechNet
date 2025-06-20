@@ -5,6 +5,7 @@
     };
 
     home-manager.users.beatlink = { ... }: {
+        programs.command-not-found.enable = true;
         programs.bash =  {
             enable = true;
             historyControl = ["ignoreboth"];
