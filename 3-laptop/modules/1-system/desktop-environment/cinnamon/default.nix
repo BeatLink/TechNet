@@ -47,7 +47,9 @@
             scriptPath = ".local/share/X11/xsession";
             initExtra =  "ERRFILE=$HOME/.local/share/X11/xsession-errors";
         };
-        home.packages = with pkgs; [python310 gnumake];
+        home.packages = with pkgs; [
+            #python310 
+            gnumake];
         home.persistence."/Storage/Apps/System/Cinnamon" = {                                # Loads persistent data for plank
             directories = [
                 ".config/cinnamon"
