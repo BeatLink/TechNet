@@ -4,7 +4,7 @@
         settings = {
             services = {
                 trilium.service = {
-                    image = "triliumnext/notes:v0.95.0";
+                    image = "triliumnext/notes:v0.93.0";
                     container_name = "trilium";
                     restart = "always";
                     volumes = [ 
