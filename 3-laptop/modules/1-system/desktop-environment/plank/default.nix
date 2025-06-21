@@ -30,7 +30,7 @@ let
         "16-lutris" = "file://${pkgs.lutris}/share/applications/net.lutris.Lutris.desktop";
         "16-steam" = "file://${pkgs.steam}/share/applications/steam.desktop";
         "17-calibre" = "file://${pkgs.calibre}/share/applications/calibre-gui.desktop";
-        "18-io.lmms.LMMS" = "file://${pkgs.lmms}/share/applications/lmms.desktop";
+        #"18-io.lmms.LMMS" = "file://${pkgs.lmms}/share/applications/lmms.desktop";
         "19-timestretcher" = "file:///home/beatlink/.local/share/applications/TimeStretch.desktop";
         "20-pix" = "file://${pkgs.pix}/share/applications/pix.desktop";
         "21-separator3" = "file:///home/beatlink/.local/share/applications/separator3.desktop";
