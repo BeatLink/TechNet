@@ -7,6 +7,11 @@
                     image = "triliumnext/notes:v0.93.0";
                     container_name = "trilium";
                     restart = "always";
+                    environment = {
+                        "PUID" = "1000";
+                        "PGID" = "1000";
+                        "TZ" = "America/Jamaica";
+                    };
                     volumes = [ 
                         "/Storage/Services/Trilium/data:/home/node/trilium-data"
                     ];
