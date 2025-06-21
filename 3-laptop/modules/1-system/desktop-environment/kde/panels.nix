@@ -70,7 +70,7 @@
                                 "applications:com.stremio.Stremio.desktop"
                                 "applications:com.valvesoftware.Steam.desktop"
                                 "applications:calibre-gui.desktop"
-                                "applications:io.lmms.LMMS.desktop"
+                                #"applications:io.lmms.LMMS.desktop"
                                 "applications:org.kde.gwenview.desktop"
                                 "file:///home/beatlink/.local/share/applications/separator3.desktop"
                                 # Home Assistant
