@@ -2,7 +2,6 @@
 {
 
     environment.systemPackages = with pkgs; [ tilix ];
-    services.xserver.excludePackages = [ pkgs.xterm ];
     home-manager.users.beatlink = { pkgs, ... }: {
         home = {
             persistence."/Storage/Apps/Tools/Tilix" = {
