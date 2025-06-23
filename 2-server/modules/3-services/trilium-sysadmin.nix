@@ -3,7 +3,7 @@
         serviceName = "trilium-sysadmin";
         settings = {
             services = {
-                trilium.service = {
+                trilium-sysadmin.service = {
                     image = "triliumnext/notes:latest";
                     container_name = "trilium-sysadmin";
                     restart = "always";
