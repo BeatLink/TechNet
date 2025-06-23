@@ -40,5 +40,10 @@ sudo zfs create \
     -o mountpoint=/Storage \
     data-pool/storage
 
+# sudo zfs set aclmode=passthrough data-pool/storage
+# sudo zfs set aclinherit=passthrough data-pool/storage
+
+
+
 # Format and attach the mirror drive
 sudo zpool attach data-pool $DATA_DRIVE $MIRROR_DRIVE
