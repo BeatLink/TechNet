@@ -16,7 +16,7 @@
                         "/Storage/Services/Trilium/data:/home/node/trilium-data"
                     ];
                     expose = [
-                        "8080" 
+                        "8081" 
                     ];
                     networks = [
                         "nginx-proxy-manager_public"
