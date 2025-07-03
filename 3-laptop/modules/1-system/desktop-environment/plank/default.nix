@@ -21,6 +21,7 @@ let
         "06-thunderbird" = "file://${pkgs.thunderbird}/share/applications/thunderbird.desktop";
         "07-whatsapp" = "file:///home/beatlink/.local/share/applications/whatsapp.desktop";
         "08-whatsapp-private" = "file:///home/beatlink/.local/share/applications/whatsapp-private.desktop";
+        "09-discord" = "file://${pkgs.discord}/share/applications/discord.desktop";
         "09-element" = "file://${pkgs.element-desktop}/share/applications/element-desktop.desktop";
         "11-separator2" = "file:///home/beatlink/.local/share/applications/separator2.desktop";
         "12-newsflash" = "file:///${pkgs.newsflash}/share/applications/io.gitlab.news_flash.NewsFlash.desktop";
