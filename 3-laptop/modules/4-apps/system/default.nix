@@ -8,7 +8,8 @@
         ./system-monitor.nix
         ./variety.nix
         ./vorta.nix
-        ./nemo
         ./blueman
+        ./nemo
+        ./tilix
     ];
 }
