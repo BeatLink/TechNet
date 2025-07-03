@@ -9,5 +9,6 @@
         ./7-docker.nix
         ./8-borgmatic.nix
         ./9-utilities.nix
+        ./10-sound.nix
     ];
 }
