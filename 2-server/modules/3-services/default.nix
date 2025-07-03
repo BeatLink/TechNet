@@ -15,6 +15,7 @@
         ./home-assistant.nix
         ./homepage.nix
         ./motioneye.nix
+        ./mpd.nix
         ./nextcloud.nix
         ./nginx-proxy-manager.nix
         ./openbooks.nix
