@@ -30,6 +30,9 @@
                         "1900:1900"
                         "5353:5353"
                     ];
+                    extra_hosts = [
+                        "host.docker.internal:host-gateway"
+                    ];
                 };
             };
             networks = {
