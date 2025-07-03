@@ -4,7 +4,7 @@
             packages = with pkgs; [ discord ];
             persistence."/Storage/Apps/Comms/Discord" = {
                 directories = [
-                    ".config/Discord"
+                    ".config/discord"
                 ];
                 allowOther = true;
             };
