@@ -22,6 +22,5 @@
         ./xviewer.nix
         ./alarm-clock-applet
         ./pix
-        ./tilix
     ];
 }

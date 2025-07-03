@@ -1,7 +1,7 @@
-{pkgs-stable, ...}:
+{pkgs, ...}:
 {
-    environment.systemPackages = with pkgs-stable; [ tilix ];
-    home-manager.users.beatlink = { pkgs-stable, ... }: {
+    environment.systemPackages = with pkgs; [ tilix ];
+    home-manager.users.beatlink = { pkgs, ... }: {
         home = {
             persistence."/Storage/Apps/Tools/Tilix" = {
                 directories = [
@@ -16,7 +16,7 @@
             name = "Tilix";
             genericName = "Terminal emulator";
             comment = "A tiling terminal for GNOME";
-            exec = "${pkgs-stable.tilix}/bin/tilix";
+            exec = "${pkgs.tilix}/bin/tilix";
             terminal = false;
             type = "Application";
             startupNotify = true;
@@ -30,15 +30,15 @@
             actions = {
             "new-window" = {
                 name = "New Window";
-                exec = "${pkgs-stable.tilix}/bin/tilix --action=app-new-window";
+                exec = "${pkgs.tilix}/bin/tilix --action=app-new-window";
             };
             "new-session" = {
                 name = "New Session";
-                exec = "${pkgs-stable.tilix}/bin/tilix --action=app-new-session";
+                exec = "${pkgs.tilix}/bin/tilix --action=app-new-session";
             };
             "preferences" = {
                 name = "Preferences";
-                exec = "${pkgs-stable.tilix}/bin/tilix --preferences";
+                exec = "${pkgs.tilix}/bin/tilix --preferences";
             };
             };
         };
