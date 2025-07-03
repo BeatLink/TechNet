@@ -12,9 +12,6 @@
                     image = "ghcr.io/home-assistant/home-assistant:stable";
                     container_name = "home-assistant";
                     restart = "always";
-                    devices = [
-                        "/dev/snd/:/dev/snd"
-                    ];
                     volumes = [ 
                         "/Storage/Services/Homeassistant/config:/config"
                         "/Storage/Services/Homeassistant/media:/media"
