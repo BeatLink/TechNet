@@ -15,6 +15,15 @@
         allowedUDPPorts = [ 6600 ];
         allowedTCPPorts = [ 6600 ];
     };
+    systemd.tmpfiles.settings."MPD" = {                      # Sets the mount point permissions
+        "/Storage/Services/MPD/MusicFolder" = {
+            Z = {
+                user = "mpd";
+                group = "mpd";
+                mode = "0770";
+            };
+        };
+    };
     fileSystems =  {
         "/Storage/Services/MPD/MusicFolder/Music" = {
             depends = [ "/Storage" ];
