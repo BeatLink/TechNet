@@ -1,23 +1,23 @@
-{config, ...}: {
-    services.mpd = {
-        enable = true;
-        musicDirectory = "/Storage/Services/MPD/MusicFolder";
-        extraConfig = ''
-            audio_output {
-                type "pipewire"
-                name "PipeWire Output"
-            }
-        '';
-        network.listenAddress = "any";          # if you want to allow non-localhost connections
-        user = "beatlink";
-    };
-    systemd.services.mpd.environment = {
-        # https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/609
-        XDG_RUNTIME_DIR = "/run/user/${toString config.users.users.beatlink.uid}"; # User-id must match above user. MPD will look inside this directory for the PipeWire socket.
+{
+    home-manager.users.beatlink = {
+        services.mpd = {
+            enable = true;
+            musicDirectory = "/Storage/Services/MPD/Music";
+            dataDir = "/Storage/Services/MPD/Data";
+            extraConfig = ''
+                audio_output {
+                    type "pipewire"
+                    name "PipeWire Output"
+                }
+            '';
+            network = {
+                listenAddress = "any";          # if you want to allow non-localhost connections
+                port = 21280;
+            };
+        };
     };
     networking.firewall = {
-        allowedUDPPorts = [ 6600 ];
-        allowedTCPPorts = [ 6600 ];
+        allowedTCPPorts = [ 21280 ];
     };
     fileSystems =  {
         "/Storage/Services/MPD/MusicFolder/Music" = {
@@ -34,11 +34,3 @@
         };
     };
 }
-
-# sudo setfacl -m u:borg:--x /Storage
-# sudo setfacl -m u:borg:--x /Storage/Files
-# sudo setfacl -m u:borg:--x /Storage/Files/Backups
-# sudo setfacl -m u:borg:--x /Storage/Files/Backups/Laptop
-# sudo setfacl -R -m u:borg:rwX /Storage/Files/Backups/Laptop/Vorta
-# sudo setfacl -R -d -m u:mpd:rwX /Storage/Services/MPD
-#sudo setfacl -R -d -m u:mpd:rwX /Storage/Files/Music
