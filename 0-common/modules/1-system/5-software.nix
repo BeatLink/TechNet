@@ -28,8 +28,7 @@
             "--no-write-lock-file"
             "-L"
         ];
-        dates = "02:00";
-        randomizedDelaySec = "15min";
+        dates = "Sat 02:00";
         allowReboot = false;
         persistent = true;
     };    
