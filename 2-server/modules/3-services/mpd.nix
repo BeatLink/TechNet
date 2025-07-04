@@ -20,13 +20,13 @@
         allowedTCPPorts = [ 21280 ];
     };
     fileSystems =  {
-        "/Storage/Services/MPD/MusicFolder/Music" = {
+        "/Storage/Services/MPD/Music/Music" = {
             depends = [ "/Storage" ];
             device = "/Storage/Files/Music";
             fsType = "none";
             options = [ "bind" ];
         };
-        "/Storage/Services/MPD/MusicFolder/Sounds" = {
+        "/Storage/Services/MPD/Music/Sounds" = {
             depends = [ "/Storage" ];
             device = "/Storage/Files/Sounds";
             fsType = "none";
