@@ -1,7 +1,7 @@
 {
     services.mpd = {
         enable = true;
-        musicDirectory = "/Storage/Services/MPD/Music";
+        /*musicDirectory = "/Storage/Services/MPD/Music";*/
         dataDir = "/Storage/Services/MPD/Data";
         extraConfig = ''
             audio_output {
@@ -13,11 +13,10 @@
             listenAddress = "any";          # if you want to allow non-localhost connections
         };
     };
-    users.mpd.extraGroups = [ "beatlink" "audio" "pipewire"];
     networking.firewall = {
         allowedTCPPorts = [ 6600 ];
     };
-    fileSystems =  {
+    /*fileSystems =  {
         "/Storage/Services/MPD/Music/Music" = {
             depends = [ "/Storage" ];
             device = "/Storage/Files/Music";
@@ -30,5 +29,5 @@
             fsType = "none";
             options = [ "bind" ];
         };
-    };
+    };*/
 }
