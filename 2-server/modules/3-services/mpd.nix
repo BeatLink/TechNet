@@ -13,6 +13,7 @@
             listenAddress = "any";          # if you want to allow non-localhost connections
         };
     };
+    users.mpd.extraGroups = [ "beatlink" "audio" "pipewire"];
     networking.firewall = {
         allowedTCPPorts = [ 6600 ];
     };
