@@ -15,6 +15,8 @@
                     volumes = [ 
                         "/Storage/Services/Homeassistant/config:/config"
                         "/Storage/Services/Homeassistant/media:/media"
+                        "/Storage/Files/Music:/music"
+                        "/Storage/Files/Music:/sounds"
                     ];
                     environment = {
                         "TZ" = "America/Jamaica";
