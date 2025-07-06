@@ -31,3 +31,8 @@
         };
     };*/
 }
+
+# sudo setfacl -m u:mpd:rwx /
+# sudo setfacl -m u:mpd:rwx /Storage/
+# sudo setfacl -m u:mpd:rwx /Storage/Services
+# sudo setfacl -m u:mpd:rwx /Storage/Services/MPD
