@@ -1,5 +1,5 @@
-{
-    home-manager.users.beatlink = { config, ... }: {
+{ config, ... }: {
+    home-manager.users.beatlink = {
         services.mpd = {
             enable = true;
             musicDirectory = "/Storage/Services/MPD/Music";
