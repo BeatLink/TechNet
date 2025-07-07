@@ -8,7 +8,6 @@
             pulse.enable = true;
             jack.enable = true;
             wireplumber.enable = true;
-            systemWide = true;  # <- This is the system-wide toggle!
         };
     };
 }
