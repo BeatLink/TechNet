@@ -16,6 +16,11 @@
     networking.firewall = {
         allowedTCPPorts = [ 6600 ];
     };
+    users.users.mpd = {
+        isSystemUser = true;
+        extraGroups = [ "audio" ];
+    };
+
     /*fileSystems =  {
         "/Storage/Services/MPD/Music/Music" = {
             depends = [ "/Storage" ];
