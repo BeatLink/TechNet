@@ -14,9 +14,7 @@
     networking.firewall = {
         allowedTCPPorts = [ 6600 ];
     };
-    systemd.services.mpd.environment = {
-        XDG_RUNTIME_DIR = "/run/user/1000";
-    };
+    systemd.services.mpd.serviceConfig.SupplementaryGroups = [ "pipewire" ];
 }
 
 # sudo setfacl -m u:mpd:rwx /Storage/
