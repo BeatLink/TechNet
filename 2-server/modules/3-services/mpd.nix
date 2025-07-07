@@ -1,38 +1,21 @@
 {
     services.mpd = {
         enable = true;
-        /*musicDirectory = "/Storage/Services/MPD/Music";*/
         dataDir = "/Storage/Services/MPD/Data";
         extraConfig = ''
             audio_output {
                 type "pipewire"
-                name "PipeWire Output"
+                name "MPD PipeWire Output"
             }
         '';
-        network = {
-            listenAddress = "any";          # if you want to allow non-localhost connections
-        };
+        network.listenAddress = "any";          # if you want to allow non-localhost connections
     };
     networking.firewall = {
         allowedTCPPorts = [ 6600 ];
     };
-    /*fileSystems =  {
-        "/Storage/Services/MPD/Music/Music" = {
-            depends = [ "/Storage" ];
-            device = "/Storage/Files/Music";
-            fsType = "none";
-            options = [ "bind" ];
-        };
-        "/Storage/Services/MPD/Music/Sounds" = {
-            depends = [ "/Storage" ];
-            device = "/Storage/Files/Sounds";
-            fsType = "none";
-            options = [ "bind" ];
-        };
-    };*/
+    systemd.services.mpd.serviceConfig.SupplementaryGroups = [ "pipewire" ];
 }
 
-# sudo setfacl -m u:mpd:rwx /
 # sudo setfacl -m u:mpd:rwx /Storage/
 # sudo setfacl -m u:mpd:rwx /Storage/Services
 # sudo setfacl -m u:mpd:rwx /Storage/Services/MPD
