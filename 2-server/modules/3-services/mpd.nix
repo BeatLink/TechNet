@@ -2,7 +2,6 @@
     services.mpd = {
         enable = true;
         dataDir = "/Storage/Services/MPD/Data";
-        user = "beatlink";
         extraConfig = ''
             audio_output {
                 type "pipewire"
