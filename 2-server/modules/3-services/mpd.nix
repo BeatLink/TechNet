@@ -21,6 +21,10 @@
         extraGroups = [ "audio" ];
     };
 
+    systemd.services.mpd.environment = {
+        PULSE_SERVER = "unix:/run/pulse/native";
+    };
+
     /*fileSystems =  {
         "/Storage/Services/MPD/Music/Music" = {
             depends = [ "/Storage" ];
