@@ -5,8 +5,8 @@
         dataDir = "/Storage/Services/MPD/Data";
         extraConfig = ''
             audio_output {
-                type "pipewire"
-                name "PipeWire Output"
+                type "pulse"
+                name "MPD PulseAudio Output"
             }
         '';
         network = {
