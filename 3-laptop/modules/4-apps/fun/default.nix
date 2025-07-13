@@ -5,7 +5,7 @@
         ./freetube.nix
         ./gmusicbrowser
         ./itch.nix
-        #./lmms.nix
+       ./lmms.nix
         ./lutris.nix
         ./newsflash.nix
         ./picard.nix
