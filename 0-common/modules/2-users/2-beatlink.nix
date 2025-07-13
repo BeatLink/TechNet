@@ -1,12 +1,11 @@
-# BeatLink ##########################################################################################################################################
+# BeatLink
 # 
 # Configures my user account
 #
-#####################################################################################################################################################
 
 { config, impermanence, ... }:
 {
-    # Setup Linux User Account ######################################################################################################################
+    # Setup Linux User Account
     sops.secrets.beatlink_hashed_password = {
         sopsFile = ../../secrets.yaml;
         neededForUsers = true;
@@ -27,10 +26,10 @@
         };
     };
 
-    # Allow Nix Package Management ##################################################################################################################
+    # Allow Nix Package Management
     nix.settings.trusted-users = ["beatlink"];
 
-    # Setup Home Manager ############################################################################################################################
+    # Setup Home Manager
     home-manager.users.beatlink = {
         imports = [ impermanence.homeManagerModules.impermanence ];
         home = {

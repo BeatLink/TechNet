@@ -1,8 +1,7 @@
-# Data Drive ############################################################################################################################
+# Data Drive
 #
 # Configures settings for mounting the Data Drive for backups
 #
-###########################################################################################################################################
 
 {
     systemd.tmpfiles.settings."Backup-Drive" = {                      # Sets the mount point permissions
