@@ -1,4 +1,4 @@
-# SSH #####################################################################################################################################
+# SSH
 #
 # Configures SSH for remote access and file transfers
 #
@@ -12,7 +12,6 @@
 #   - Add initrd and main ssh public keys for identification
 #   - Add configuration to login as root when accessing initrd and my user when accessing main ssh
 #
-###########################################################################################################################################
 
 {
     services.openssh = {

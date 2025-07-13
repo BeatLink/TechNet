@@ -1,9 +1,9 @@
-# Networking ##########################################################################################################################
+# Networking
 #
 # Wireguard is a simple, high performance VPN that allows each device in the TechNet to securely connect with each other and to 
 # connect to the internet via a secure relay through Heimdall. 
 #
-######################################################################################################################################
+
 { config, ... }:
 {
     sops.secrets.networkmanager_env_file.sopsFile = ../../secrets.yaml;

@@ -1,4 +1,4 @@
-# Networking ##########################################################################################################################
+# Networking
 #
 # Wireguard is a simple, high performance VPN that allows each device in the TechNet to securely connect with each other and to 
 # connect to the internet via a secure relay through Heimdall. It also allows the server to be accessed during boot for remote decryption
@@ -9,7 +9,7 @@
 #
 # This link helped a lot with getting this configuration working: https://flo-the.dev/posts/wireguard/
 #
-######################################################################################################################################
+
 { config, ... }:
 {
     environment.etc."resolv.conf".text = ''

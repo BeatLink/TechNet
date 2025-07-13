@@ -1,9 +1,8 @@
-# Syncthing ###############################################################################################################################
+# Syncthing
 #
 # SyncThing is the main file synchronization system across all devices in the TechNet. By keeping files on multiple redundant devices it 
 # also acts as a first line backup mechanism
-# 
-###########################################################################################################################################
+#
 
 {
 

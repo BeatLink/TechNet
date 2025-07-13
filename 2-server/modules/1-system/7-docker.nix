@@ -1,8 +1,8 @@
-# Docker ##############################################################################################################################
+# Docker
 #
 # Almost all server services are provisioned with docker. These settings configure it.
 #
-#######################################################################################################################################
+
 { pkgs, ... }: 
 {
     environment.systemPackages = with pkgs; [                           # Set packages installed on system

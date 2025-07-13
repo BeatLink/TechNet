@@ -1,4 +1,4 @@
-# Software ##########################################################################################################################################
+# Software
 #
 # Configures Software in NixOS
 #   - Enables Flakes
@@ -7,19 +7,18 @@
 #   - Enables Unfree Packages
 #   - Removes default Apps
 #
-#####################################################################################################################################################
 
 { pkgs, config, lib, inputs, ... }: 
 {
 
-    # Enable Flakes #################################################################################################################################
+    # Enable Flakes
     nix = {
         extraOptions = ''experimental-features = nix-command flakes'';          # Enables Flakes
         registry.nixpkgs.flake = inputs.nixpkgs;
         nixPath = [ "nixpkgs=${inputs.nixpkgs.outPath}" ];                      # Configures nix to use nixpkgs from flakes, fixes pesky errors in nix-shell
     };
 
-    # Enables Automatic Upgrades ####################################################################################################################
+    # Enables Automatic Upgrades
     system.autoUpgrade = {                                                      # Configures Automatic Upgrades at 2AM from my GitHub flake. 
         enable = true;
         flake = "github:BeatLink/TechNet";
@@ -53,16 +52,16 @@
         '';
     };
 
-    # Enable Garbage Collection #####################################################################################################################
+    # Enable Garbage Collection
     nix.gc = {
         automatic = true;
         dates = "weekly";
         options = "--delete-older-than 7d";
     };
 
-    # Enables Unfree Packages #######################################################################################################################
+    # Enables Unfree Packages
     nixpkgs.config.allowUnfree = true;
 
-    # Removes Default Packages ######################################################################################################################
+    # Removes Default Packages
     environment.defaultPackages = lib.mkForce [];
 }

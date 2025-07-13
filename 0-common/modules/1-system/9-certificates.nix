@@ -1,8 +1,7 @@
-# Certificates ############################################################################################################################
+# Certificates
 #
-# # Add TechNet Certificate Heimdall Services and Websites
+# Add TechNet Certificate Heimdall Services and Websites
 #
-###########################################################################################################################################
 
 {
     security.pki.certificates = [ 

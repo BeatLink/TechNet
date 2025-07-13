@@ -1,10 +1,10 @@
-# Deluge ##################################################################################################################################
+# Deluge
 #
 # Deluge is the torrent management server. The torrent server allows for automatic 24/7 downloading and setting of content. 
 #
 # https://hub.docker.com/r/linuxserver/deluge
 #
-###########################################################################################################################################
+
 
 {
     virtualisation.arion.projects.deluge = {

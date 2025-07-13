@@ -1,6 +1,8 @@
-# Borgmatic ###########################################################################################################################
+# Borgmatic
+#
 # This handles backing up my server's docker files to my laptop and to my backup server
-#######################################################################################################################################
+#
+
 { config, ... }: 
 {
     sops.secrets.borg_repo_encryption_key.sopsFile = ../../secrets.yaml;
@@ -8,11 +10,11 @@
     services.borgmatic = {
         enable = true;
         settings = {
-            # Sources ---------------------------------------------------------------------------------------------------------------------
+            # Sources
             source_directories = [
                 "/Storage/Services"
             ];
-            # Excludes --------------------------------------------------------------------------------------------------------------------
+            # Excludes
             exclude_patterns = [
                 "/Storage/Files/Backups/Server"
             ];
@@ -22,7 +24,7 @@
                 ".thumbnails"
             ];
 
-            # Repositories ----------------------------------------------------------------------------------------------------------------
+            # Repositories
             repositories = [
                 {
                     label = "On Disk Backup";
@@ -36,19 +38,19 @@
             encryption_passcommand = "cat " + config.sops.secrets.borg_repo_encryption_key.path;
             ssh_command = "ssh -i " + config.sops.secrets.borg_repo_ssh_key.path;
 
-            # Backup Settings -------------------------------------------------------------------------------------------------------------
+            # Backup Settings
             compression = "lz4";
             archive_name_format = "backup-{now}";
             relocated_repo_access_is_ok = true;
 
-            # Retention -------------------------------------------------------------------------------------------------------------------
+            # Retention
             keep_hourly = 24;
             keep_daily = 7;
             keep_weekly = 4;
             keep_monthly = 12;
             keep_yearly = 3;
 
-            # Hooks -----------------------------------------------------------------------------------------------------------------------
+            # Hooks
             before_backup = [
                 "echo Starting a backup job."
                 "ping -q -c 1 10.100.100.5 > /dev/null || exit 75"
@@ -60,7 +62,7 @@
                 "echo Error while creating a backup."
             ];
 
-            # Consistency Checks ----------------------------------------------------------------------------------------------------------
+            # Consistency Checks
             checks = [
                 {
                     name = "repository";
@@ -81,7 +83,7 @@
             ];
             check_last = 3;
 
-            # Notifications ---------------------------------------------------------------------------------------------------------------
+            # Notifications
             uptime_kuma = {
                 push_url = "http://uptime-kuma.heimdall.technet/api/push/nDXOzelHhZ";
                 states = [

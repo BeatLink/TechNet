@@ -1,11 +1,10 @@
 
 
-# Disko Data Drive #########################################################################################################################
+# Disko Data Drive
 #
 # This section declaratively describes the filesystem structure for the data drive. It is optionally used by disko during installation to format and 
 # partition the data drive. It is also used during boot to find and mount the needed partitions
-# 
-###########################################################################################################################################
+#
 
 {
     disko.devices = {

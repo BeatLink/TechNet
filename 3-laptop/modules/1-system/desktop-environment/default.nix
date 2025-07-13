@@ -1,4 +1,4 @@
-# Desktop Environment #####################################################################################################################
+# Desktop Environment
 #
 # This file stores configuration settings on various desktop environments that can be used. 
 #
@@ -12,12 +12,7 @@
 # Budgie
 #   Pretty and the Raven sidebar is an interesting concept. Not as feature rich as cinnamon (no hot corners)
 # 
-###########################################################################################################################################
 
-
-
-
-{ config, lib, pkgs, ... }:
 {
     imports = [              
         #./kde

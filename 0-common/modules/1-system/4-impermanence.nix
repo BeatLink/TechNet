@@ -1,4 +1,4 @@
-# Impermanent Filesystem ################################################################################################################
+# Impermanent Filesystem
 # 
 # Odin follows an "Erase your Darlings" impermanent filesystem structure, powered by an encrypted ZFS filesystem and subvolumes.
 # Every boot the system performs a rollback of the ZFS root filesystem to a clean snapshot in order to prevent the buildup of state.
@@ -11,7 +11,6 @@
 # See https://mt-caret.github.io/blog/posts/2020-06-29-optin-state.html 
 # https://discourse.nixos.org/t/impermanence-vs-systemd-initrd-w-tpm-unlocking/25167/3
 #
-#######################################################################################################################################
 
 { pkgs, ... }: {
 
