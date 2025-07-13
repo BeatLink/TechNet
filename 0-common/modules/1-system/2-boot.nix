@@ -1,19 +1,13 @@
-# Boot Loader ##########################################################################################################################
+# Boot Loader
 #
 # This section manages misc boot settings
 #
-#######################################################################################################################################
 
 { lib, ... }: 
 {
     boot = {
-        # Enable Magic SysRq Keys ###################################################################################################################
-        kernel.sysctl."kernel.sysrq" = 1;
-
-        # Enable Systemd in init ####################################################################################################################
-        initrd.systemd.enable = true;
-
-        # Use Systemd-Boot as Bootloader ############################################################################################################
+        kernel.sysctl."kernel.sysrq" = 1;                               # Enable Magic SysRq Keys
+        initrd.systemd.enable = true;                                   # Enable Systemd in init
         loader = {
             systemd-boot.enable = true;                                 # Use Systemd-Boot to manage booting
             grub.enable = false;                                        # Disable Grub since we're using Systemd-Boot
