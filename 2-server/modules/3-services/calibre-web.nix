@@ -1,4 +1,4 @@
-# Calibre #################################################################################################################################
+# Calibre
 #
 # Calibre and Calibre Web are used for eBook viewing and management.
 #
@@ -6,7 +6,6 @@
 # https://github.com/janeczku/calibre-web
 # https://academy.pointtosource.com/containers/ebooks-calibre-readarr/
 #
-###########################################################################################################################################
 
 
 {

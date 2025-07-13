@@ -1,4 +1,4 @@
-# Pi-Hole #################################################################################################################################
+# Pi-Hole
 #
 # Pi-Hole acts as an ad-blocking system for the TechNet. More importantly, it also acts as the DNS server for all docker services and hosts
 # in the TechNet, allowing them to be accessed via the .technet domain
@@ -15,7 +15,6 @@
 #     - Thor - thor.technet
 #     - Ragnarok - ragnarok.technet
 #
-###########################################################################################################################################
 
 { config, ... }: 
 {
