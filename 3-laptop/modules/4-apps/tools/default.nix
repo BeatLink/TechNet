@@ -6,7 +6,7 @@
         ./decoder.nix
         ./deluge.nix
         ./drawio.nix
-        ./dupeguru.nix
+        #./dupeguru.nix
         ./gallery-dl.nix
         ./gpaste.nix
         ./inkscape.nix
