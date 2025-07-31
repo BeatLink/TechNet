@@ -8,17 +8,23 @@
 {  
     programs.dconf.enable = true;
     services.blueman.enable = true;
-    home-manager.users.beatlink = { pkgs, lib, ...}: {
-        dconf.enable = true;                                                # Enables dconf for Cinnamon setting Management
-        #imports = [                                                         # Imports Cinnamon Dconf Settings
-        #    ./2-dconf-settings.nix
-        #];
-        home.activation.bluemanDconfLoad = lib.hm.dag.entryAfter ["xdg.configFile"] ''
-            bluemanSettings=${builtins.toString (builtins.path {path = ./settings.dconf;})}
-            if [ -f "$bluemanSettings" ]; then
-                dconf load /org/blueman/ < "$bluemanSettings"
-            fi
-        '';
+    home-manager.users.beatlink = {pkgs, lib, ...}: {
+        home.packages = [pkgs.dconf];
+        dconf.enable = true;                                               # Enables dconf for Cinnamon setting Management
+        systemd.user.services.bluemanDconfLoad = {
+            Unit = {
+                Description = "Load Blueman dconf settings";
+            };
+            Service = {
+                ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.dconf}/bin/dconf load /org/blueman/ < ${./settings.dconf}'";
+                Type = "oneshot";
+                RemainOnExit = true;
+            };
+            Install = {
+                WantedBy = [ "default.target" ];
+            };
+        };
+    
     };
- }
+}
 
