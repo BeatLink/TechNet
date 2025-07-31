@@ -11,20 +11,10 @@
     home-manager.users.beatlink = {pkgs, lib, ...}: {
         home.packages = [pkgs.dconf];
         dconf.enable = true;                                               # Enables dconf for Cinnamon setting Management
-        systemd.user.services.bluemanDconfLoad = {
-            Unit = {
-                Description = "Load Blueman dconf settings";
-            };
-            Service = {
-                ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.dconf}/bin/dconf load /org/blueman/ < ${./settings.dconf}'";
-                Type = "oneshot";
-                RemainOnExit = true;
-            };
-            Install = {
-                WantedBy = [ "default.target" ];
-            };
+        dconfImports.blueman = {
+            source = ./settings.dconf;
+            path = "/org/blueman/";
         };
-    
     };
 }
 
