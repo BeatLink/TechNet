@@ -8,11 +8,17 @@
 {  
     programs.dconf.enable = true;
     services.blueman.enable = true;
-    home-manager.users.beatlink = {
+    home-manager.users.beatlink = { pkgs, lib, ...}: {
         dconf.enable = true;                                                # Enables dconf for Cinnamon setting Management
-        imports = [                                                         # Imports Cinnamon Dconf Settings
-            ./2-dconf-settings.nix
-        ];
+        #imports = [                                                         # Imports Cinnamon Dconf Settings
+        #    ./2-dconf-settings.nix
+        #];
+        home.activation.bluemanDconfLoad = lib.hm.dag.entryAfter ["xdg.configFile"] ''
+            bluemanSettings=${builtins.toString (builtins.path {path = ./settings.dconf;})}
+            if [ -f "$bluemanSettings" ]; then
+                dconf load /org/blueman/ < "$bluemanSettings"
+            fi
+        '';
     };
  }
 
