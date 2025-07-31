@@ -166,15 +166,17 @@ with lib.hm.gvariant;
       theme-backup = "Mint-Y";
       titlebar-font = "Noto Sans 12";
       visual-bell = false;
-      workspace-names = [];
     };
 
     "org/cinnamon/gestures" = {
       enabled = true;
+      swipe-down-2 = "PUSH_TILE_DOWN::end";
       swipe-down-3 = "MINIMIZE::::start";
       swipe-down-4 = "TOGGLE_EXPO::::start";
+      swipe-left-2 = "PUSH_TILE_LEFT::end";
       swipe-left-3 = "PUSH_TILE_LEFT::::start";
       swipe-left-4 = "WORKSPACE_PREVIOUS::::start";
+      swipe-right-2 = "PUSH_TILE_RIGHT::end";
       swipe-right-3 = "PUSH_TILE_RIGHT::::start";
       swipe-right-4 = "WORKSPACE_NEXT::::start";
       swipe-up-2 = "";

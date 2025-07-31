@@ -5,6 +5,10 @@ with lib.hm.gvariant;
 
 {
   dconf.settings = {
+    "org/gnome/desktop/a11y" = {
+      always-show-text-caret = false;
+    };
+
     "org/gnome/desktop/a11y/applications" = {
       screen-keyboard-enabled = false;
       screen-reader-enabled = false;
@@ -19,6 +23,7 @@ with lib.hm.gvariant;
     };
 
     "org/gnome/desktop/interface" = {
+      can-change-accels = false;
       clock-format = "12h";
       clock-show-date = true;
       clock-show-seconds = true;
@@ -50,7 +55,7 @@ with lib.hm.gvariant;
       toolbar-detachable = false;
       toolbar-icons-size = "large";
       toolbar-style = "both-horiz";
-      toolkit-accessibility = false;
+      toolkit-accessibility = true;
     };
 
     "org/gnome/desktop/peripherals/mouse" = {
@@ -64,7 +69,14 @@ with lib.hm.gvariant;
     };
 
     "org/gnome/desktop/privacy" = {
+      disable-camera = false;
+      disable-microphone = false;
+      disable-sound-output = false;
+      old-files-age = mkUint32 30;
       recent-files-max-age = 7;
+      remember-recent-files = true;
+      remove-old-temp-files = false;
+      remove-old-trash-files = false;
     };
 
     "org/gnome/desktop/sound" = {
@@ -75,16 +87,24 @@ with lib.hm.gvariant;
 
     "org/gnome/desktop/wm/preferences" = {
       action-double-click-titlebar = "toggle-maximize";
+      action-middle-click-titlebar = "lower";
+      action-right-click-titlebar = "menu";
       audible-bell = false;
+      auto-raise = false;
+      auto-raise-delay = 500;
       button-layout = ":minimize,maximize,close";
+      disable-workarounds = false;
       focus-mode = "click";
       focus-new-windows = "smart";
       mouse-button-modifier = "<Alt>";
-      num-workspaces = 4;
+      num-workspaces = 1;
+      raise-on-click = true;
+      resize-with-right-button = true;
       theme = "Mint-Y";
+      titlebar-font = "Noto Sans 12";
+      titlebar-uses-system-font = false;
       visual-bell = false;
       visual-bell-type = "fullscreen-flash";
-      workspace-names = [];
     };
 
   };
