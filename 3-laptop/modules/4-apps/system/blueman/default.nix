@@ -14,7 +14,7 @@
         #    ./2-dconf-settings.nix
         #];
         home.activation.bluemanDconfLoad = lib.hm.dag.entryAfter ["xdg.configFile"] ''
-            bluemanSettings=${builtins.toString (builtins.path {path = ./blueman/blueman-settings.dconf;})}
+            bluemanSettings=${builtins.toString (builtins.path {path = ./settings.dconf;})}
             if [ -f "$bluemanSettings" ]; then
                 dconf load /org/blueman/ < "$bluemanSettings"
             fi
