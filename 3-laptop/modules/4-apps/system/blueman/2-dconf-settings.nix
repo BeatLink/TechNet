@@ -21,7 +21,7 @@ with lib.hm.gvariant;
 
       recent-connections = [
         [
-          (mkDictionary {
+          (mkDictionaryEntry {
             "adapter" = "30:03:C8:00:01:7A";
             "address" = "83:BA:4A:3E:E1:42";
             "alias" = "KTE-007";
