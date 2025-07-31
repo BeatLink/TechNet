@@ -26,6 +26,12 @@
                 ];
                 allowOther = true;
             };
+            persistence."/Storage/Apps/System/Pipewire" = {
+                directories = [
+                    ".local/state/wireplumber"
+                ];
+                allowOther = true;
+            };
         };
     };
 }
