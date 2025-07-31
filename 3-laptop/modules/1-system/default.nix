@@ -22,4 +22,6 @@
         ./desktop-environment
 
     ];
+
+    home-manager.users.beatlink.imports = [./dconf.nix];
 }
