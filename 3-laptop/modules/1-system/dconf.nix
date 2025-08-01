@@ -23,23 +23,22 @@ in
     description = "Set of dconf import services to load at startup. Attribute name becomes the service name.";
   };
 
-  config = mkMerge (mapAttrsToList (name: item:
-    {
-      systemd.user.services."${name}" = {
-        Unit = {
-          Description = "Load dconf settings into ${item.path}";
-        };
-        Service = {
-          ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.dconf}/bin/dconf load ${item.path} < ${item.source}'";
-          Type = "oneshot";
-          RemainOnExit = true;
-        };
-        Install = {
-          WantedBy = [ "default.target" ];
-        };
+
+  config = {
+    systemd.user.services."LoadDconfSettings" = {
+      Unit = {
+        Description = "Load dconf settings";
       };
-    }
-  ) cfg) // {
+      Service = {
+        ExecStart = mapAttrsToList (name: value: "${pkgs.bash}/bin/bash -c '${pkgs.dconf}/bin/dconf load ${value.path} < ${value.source}'") cfg; 
+        Type = "oneshot";
+        RemainOnExit = true;
+      };
+      Install = {
+        WantedBy = [ "default.target" ];
+      };
+    };
+  
     # Ensure dconf is installed
     home.packages = [ pkgs.dconf ];
   };
