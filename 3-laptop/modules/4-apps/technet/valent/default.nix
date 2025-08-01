@@ -17,7 +17,7 @@
         };
         dconfImports.valent = {
             source = ./settings.dconf;
-            path = "/ca/andyholmes/valent";
+            path = "/ca/andyholmes/valent/";
         };        
     };
 }
