@@ -23,5 +23,7 @@
 
     ];
 
-    home-manager.users.beatlink.imports = [./dconf.nix];
+    home-manager.users.beatlink = {
+        imports = [./dconf.nix];
+    };
 }
