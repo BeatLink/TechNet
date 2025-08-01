@@ -18,6 +18,11 @@
             ];
             allowOther = true;
         };
+
+        /*dconfImports.blueman = {
+            source = ./settings.dconf;
+            path = "/org/blueman/";
+        };
         
         home.activation.valentCommands = lib.hm.dag.entryAfter ["writeBoundary"] ''
             echo "Generating and loading Valent runcommand settings into dconf..."
@@ -34,6 +39,6 @@
 
             # Clean up the temporary file
             rm valentDconfFile
-        '';
+        '';*/
     };
 }
