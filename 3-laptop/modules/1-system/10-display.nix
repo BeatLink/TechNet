@@ -25,7 +25,7 @@
         };
         amdgpu.initrd.enable = true;                           # Enables Graphics in Initrd, Allows External Monitor to load for Password Entry
     };
-	services.xserver.videoDrivers = [ "amdgpu" "nvidia" ];
+	services.xserver.videoDrivers = [ "modesetting" ];
     services.logind = {
         lidSwitch = "ignore";                                   # Override lid switch before login; Fixes system going to sleep on login page
         lidSwitchDocked = "ignore";
