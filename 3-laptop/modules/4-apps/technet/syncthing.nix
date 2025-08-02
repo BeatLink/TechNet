@@ -1,6 +1,3 @@
-# Add Sops key
-# Add unix socket for syncthing
-
 
 {config, ...}: {
     sops.secrets.syncthing_cert.sopsFile = ../../../secrets.yaml;
