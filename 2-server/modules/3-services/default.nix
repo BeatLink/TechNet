@@ -8,7 +8,6 @@
         ./blockurl.nix
         ./borg.nix
         ./calibre-web.nix
-        ./certbot.nix
         ./deluge.nix
         ./esphome.nix
         ./freshrss.nix
