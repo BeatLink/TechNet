@@ -4,6 +4,7 @@
     sops.secrets.syncthing_key.sopsFile = ../../../secrets.yaml;
     home-manager.users.beatlink = { pkgs, ... }: {
         home.packages = with pkgs; [ syncthingtray-minimal ];
+        systemd.user.services.syncthing.serviceConfig.SupplementaryGroups = ["keys"];
         systemd.user.targets.tray = {
             Unit = {
                 Description = "Home Manager System Tray";
