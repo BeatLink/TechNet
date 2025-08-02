@@ -13,6 +13,7 @@
                 enable = true;
                 command = "syncthingtray --wait";
             };
+            guiAddress = "https://odin.technet:8384";
             cert = "/Storage/Apps/TechNet/SyncThing/cert.pem";
             key = "/Storage/Apps/TechNet/SyncThing/key.pem";
             settings = {
