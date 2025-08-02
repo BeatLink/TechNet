@@ -40,9 +40,6 @@
         };
         FullURL = "${BaseURL}${Keys.${config.networking.hostName}}";
     in {
-        preStart = ''
-            ${pkgs.wget}/bin/wget --spider --no-check-certificate "${FullURL}?status=up&msg=System Upgrades Started&ping=";
-        '';
         postStop =  ''
             if [ "$SERVICE_RESULT" == "success" ]; then
                 ${pkgs.wget}/bin/wget --spider --no-check-certificate "${FullURL}?status=up&msg=System Upgrades Completed Successfully&ping=";
