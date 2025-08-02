@@ -13,6 +13,8 @@
                 enable = true;
                 command = "syncthingtray --wait";
             };
+            cert = "/Storage/Apps/TechNet/SyncThing/cert.pem";
+            key = "/Storage/Apps/TechNet/SyncThing/key.pem";
             settings = {
                 devices = {
                     Heimdall = {
