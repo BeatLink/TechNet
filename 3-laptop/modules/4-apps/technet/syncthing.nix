@@ -30,8 +30,6 @@
                         addresses = [
                             "tcp://192.168.0.2:22000"
                             "tcp://10.100.100.1:22000"
-                            "udp://192.168.0.2:22000"
-                            "udp://10.100.100.1:22000"
                         ];
                         id = "Q6AIAK4-4PFLB3Z-73QF54Y-EKQ2LC5-5FSVFRZ-RBGWFDI-KZQI45E-JBXXTQY";
                     };
@@ -39,8 +37,6 @@
                         addresses = [
                             "tcp://192.168.0.5:22000"
                             "tcp://10.100.100.4:22000"
-                            "udp://192.168.0.5:22000"
-                            "udp://10.100.100.4:22000"
                         ];
                         id = "IZOOSHB-MWRVHH7-HVEVB4P-UVR7NIU-UD4ZJBW-GBGY6EE-OOY2PLM-2IE32QT";
                     };
