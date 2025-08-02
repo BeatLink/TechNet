@@ -1,4 +1,10 @@
-{
+# Add Sops key
+# Add unix socket for syncthing
+
+
+{config, ...}: {
+    sops.secrets.syncthing_cert.sopsFile = ../../../secrets.yaml;
+    sops.secrets.syncthing_key.sopsFile = ../../../secrets.yaml;
     home-manager.users.beatlink = { pkgs, ... }: {
         home.packages = with pkgs; [ syncthingtray-minimal ];
         systemd.user.targets.tray = {
@@ -14,8 +20,8 @@
                 command = "syncthingtray --wait";
             };
             guiAddress = "odin.technet:8384";
-            cert = "/Storage/Apps/TechNet/SyncThing/cert.pem";
-            key = "/Storage/Apps/TechNet/SyncThing/key.pem";
+            cert = config.sops.secrets.syncthing_cert.path;
+            key = config.sops.secrets.syncthing_key.path;
             settings = {
                 devices = {
                     Heimdall = {
