@@ -22,7 +22,6 @@
                 enable = true;
                 command = "syncthingtray --wait";
             };
-            guiAddress = "odin.technet:8384";
             cert = config.sops.secrets.syncthing_cert.path;
             key = config.sops.secrets.syncthing_key.path;
             settings = {
