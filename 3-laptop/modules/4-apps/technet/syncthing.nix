@@ -1,10 +1,15 @@
 
 {config, ...}: {
-    sops.secrets.syncthing_cert.sopsFile = ../../../secrets.yaml;
-    sops.secrets.syncthing_key.sopsFile = ../../../secrets.yaml;
+    sops.secrets.syncthing_cert = {
+        sopsFile = ../../../secrets.yaml;
+        owner = "beatlink";
+    };
+    sops.secrets.syncthing_key = {
+        sopsFile = ../../../secrets.yaml;
+        owner = "beatlink";
+    };
     home-manager.users.beatlink = { pkgs, ... }: {
         home.packages = with pkgs; [ syncthingtray-minimal ];
-        systemd.user.services.syncthing.serviceConfig.SupplementaryGroups = ["keys"];
         systemd.user.targets.tray = {
             Unit = {
                 Description = "Home Manager System Tray";
