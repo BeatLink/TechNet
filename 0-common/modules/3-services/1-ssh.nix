@@ -46,11 +46,11 @@
         knownHosts = {
             "ragnarok-boot" = {
                 publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINtSfkBwSLxZxsjO/cvDpeY6j3DA95qOMsapWBAjv2hu";
-                hostNames = ["10.100.100.5" "ragnarok.technet" "ragnarok" "ragnarok-boot"];
+                hostNames = ["10.100.100.6" "10.100.100.5" "ragnarok.technet" "ragnarok" "ragnarok-boot"];
             };
             "ragnarok" = {
                 publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIInjkzjQG+KUcN1roAomyDKJiJLaHbiKBd46GjSBTbi1";
-                hostNames = ["10.100.100.5" "ragnarok.technet" "ragnarok" "ragnarok-boot"];
+                hostNames = ["10.100.100.6" "10.100.100.5" "ragnarok.technet" "ragnarok" "ragnarok-boot"];
             };
             "heimdall-boot" = {
                 publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJoZQ1rR5JCvRHw0PykObtYgoEIonLL/vaomPc3qscGF";
@@ -72,7 +72,7 @@
         extraConfig = ''
             Host ragnarok-boot
                 User root
-                HostName 10.100.100.5
+                HostName 10.100.100.6
 
             Host ragnarok
                 User beatlink
