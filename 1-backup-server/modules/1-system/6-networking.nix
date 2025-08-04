@@ -42,7 +42,6 @@
                 };
                 network = {
                     enable = true;
-                    flushBeforeStage2 = true;
                     netdevs."01-wireguard-initrd" = {
                         netdevConfig = {
                             Kind = "wireguard";
