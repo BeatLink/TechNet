@@ -11,8 +11,8 @@ nixos-rebuild \
     --flake "$FLAKEDIR"#Ragnarok \
     --build-host "beatlink@ragnarok" \
     --target-host "beatlink@ragnarok" \
-    --use-remote-sudo  \
-    --fast \
+    --sudo  \
+    --no-reexec \
     test
 
 
@@ -20,8 +20,8 @@ nixos-rebuild \
     --flake "$FLAKEDIR"#Ragnarok \
     --build-host "beatlink@ragnarok" \
     --target-host "beatlink@ragnarok" \
-    --use-remote-sudo  \
-    --fast \
+    --sudo  \
+    --no-reexec \
     switch
 
 #"beatlink@ragnarok.technet"
