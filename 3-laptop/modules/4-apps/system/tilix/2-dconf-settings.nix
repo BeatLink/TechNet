@@ -6,7 +6,7 @@ with lib.hm.gvariant;
 {
   dconf.settings = {
     "com/gexperts/Tilix" = {
-      close-with-last-session = false;
+      close-with-last-session = true;
       control-scroll-zoom = true;
       copy-on-select = true;
       enable-wide-handle = false;
@@ -25,8 +25,12 @@ with lib.hm.gvariant;
       theme-variant = "light";
       use-tabs = true;
       window-save-state = true;
-      window-state = 43908;
+      window-state = 43780;
       window-style = "normal";
+    };
+
+    "com/gexperts/Tilix/keybindings" = {
+      app-new-session = "Calculator";
     };
 
     "com/gexperts/Tilix/profiles/2b7c4080-0ddd-46c5-8f23-563fd3ba789d" = {
