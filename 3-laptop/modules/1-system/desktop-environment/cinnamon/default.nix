@@ -70,6 +70,7 @@
                     WantedBy = [ "default.target" ];
                 };
             };
+        };
     };
  }
 
