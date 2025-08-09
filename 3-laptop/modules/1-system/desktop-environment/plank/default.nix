@@ -79,9 +79,7 @@ in {
                     allowOther = true;
                 };
             };
-            file = {
-                ".config/autostart/plank.desktop".source = "${pkgs.plank}/share/applications/plank.desktop";       # Configures plank to autostart on login
-            } // dockitemFiles;
+            file = {} // dockitemFiles;
         };
         dconf = {
             enable = true;                                                      # Enables dconf which stores plank settings
@@ -110,17 +108,31 @@ in {
                 };
             };
         };
-        systemd.user.services."restart-plank" = {
-            Unit = {
-                Description = "Restart Plank";
-                After = "home-beatlink-.local-share-plank.mount";
+        systemd.user.services = {
+            "plank" = {
+                Unit = {
+                    Description = "Plank";
+                    After = "home-beatlink-.local-share-plank.mount";
+                };
+                Service = {
+                    ExecStart = "${pkgs.plank}/bin/plank"; 
+                };
+                Install = {
+                    WantedBy = [ "default.target" ];
+                };
             };
-            Service = {
-                ExecStart = "${pkgs.bash}/bin/bash -c 'pkill plank; ${pkgs.plank}/bin/plank'"; 
-                Type = "oneshot";
-            };
-            Install = {
-                WantedBy = [ "default.target" ];
+            "restart-plank" = {
+                Unit = {
+                    Description = "Restart Plank";
+                    After = "plank.service";
+                };
+                Service = {
+                    ExecStart = "systemctl --user restart plank.service"; 
+                    Type = "oneshot";
+                };
+                Install = {
+                    WantedBy = [ "default.target" ];
+                };
             };
         };
     };
