@@ -57,6 +57,19 @@
             ];
             allowOther = true;
         };
+        systemd.user.services = {
+            "cinnamon-spice-updater" = {
+                Unit = {
+                    Description = "Cinnamon Spice Updater";
+                    After = "home-beatlink-.local-share-cinnamon.mountt";
+                };
+                Service = {
+                    ExecStart = "${pkgs.cinnamon-common}/bin/cinnamon-spice-updater --update-all"; 
+                };
+                Install = {
+                    WantedBy = [ "default.target" ];
+                };
+            };
     };
  }
 
