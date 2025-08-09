@@ -14,6 +14,7 @@ with lib.hm.gvariant;
       new-instance-mode = "new-session";
       paste-advanced-default = true;
       prompt-on-close = true;
+      prompt-on-delete-profile = true;
       prompt-on-new-session = false;
       quake-height-percent = 25;
       quake-hide-lose-focus = true;
@@ -34,7 +35,7 @@ with lib.hm.gvariant;
     };
 
     "com/gexperts/Tilix/profiles" = {
-      list = [ "2b7c4080-0ddd-46c5-8f23-563fd3ba789d" "f2553d7c-01d9-423f-a443-25d23138288e" ];
+      list = [ "2b7c4080-0ddd-46c5-8f23-563fd3ba789d" "984461d8-5aa4-409a-97d5-3768f76022b8" ];
     };
 
     "com/gexperts/Tilix/profiles/2b7c4080-0ddd-46c5-8f23-563fd3ba789d" = {
@@ -55,7 +56,7 @@ with lib.hm.gvariant;
       highlight-colors-set = false;
       notify-silence-enabled = true;
       notify-silence-threshold = 30;
-      palette = [ "#000000000000" "#FFFF00000000" "#0000ACACFFFF" "#FFFFFFFF0000" "#2B2BC6C63030" "#FFFF0000FFFF" "#0000FFFFFFFF" "#FFFFFFFFFFFF" "#000000000000" "#A5A51D1D2D2D" "#1A1A5F5FB4B4" "#E6E661610000" "#000079790000" "#616135358383" "#000096969191" "#9A9A99999696" ];
+      palette = [ "#000000000000" "#FFFF00000000" "#0000ACACFFFF" "#FFFFFFFF0000" "#2B2BC6C63030" "#FFFF0000FFFF" "#0000FFFFFFFF" "#FFFFFFFFFFFF" "#000000000000" "#FFFF00000000" "#0000ACACFFFF" "#F9F9F0F06B6B" "#0000FFFF0000" "#FFFF0000FFFF" "#0000FFFFFFFF" "#FFFFFFFFFFFF" ];
       scrollback-unlimited = true;
       terminal-bell = "icon-sound";
       text-blink-mode = "focused";
@@ -64,7 +65,7 @@ with lib.hm.gvariant;
       visible-name = "Dark";
     };
 
-    "com/gexperts/Tilix/profiles/f2553d7c-01d9-423f-a443-25d23138288e" = {
+    "com/gexperts/Tilix/profiles/984461d8-5aa4-409a-97d5-3768f76022b8" = {
       allow-bold = true;
       automatic-switch = [];
       background-color = "#FFFFFFFFFFFF";
@@ -104,7 +105,7 @@ with lib.hm.gvariant;
       login-shell = false;
       notify-silence-enabled = true;
       notify-silence-threshold = 30;
-      palette = [ "#000000000000" "#FFFF00000000" "#0000ACACFFFF" "#FFFFFFFF0000" "#2B2BC6C63030" "#FFFF0000FFFF" "#0000FFFFFFFF" "#FFFFFFFFFFFF" "#000000000000" "#A5A51D1D2D2D" "#1A1A5F5FB4B4" "#E6E661610000" "#000079790000" "#616135358383" "#000096969191" "#9A9A99999696" ];
+      palette = [ "#000000000000" "#FFFF00000000" "#0000ACACFFFF" "#FFFFFFFF0000" "#2B2BC6C63030" "#FFFF0000FFFF" "#0000FFFFFFFF" "#FFFFFFFFFFFF" "#000000000000" "#FFFF00000000" "#0000ACACFFFF" "#F9F9F0F06B6B" "#0000FFFF0000" "#FFFF0000FFFF" "#0000FFFFFFFF" "#FFFFFFFFFFFF" ];
       rewrap-on-resize = true;
       scroll-on-keystroke = true;
       scroll-on-output = false;
