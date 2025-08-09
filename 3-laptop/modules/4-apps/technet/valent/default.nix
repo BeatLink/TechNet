@@ -4,9 +4,6 @@
         allowedUDPPortRanges = allowedTCPPortRanges;
     };
     home-manager.users.beatlink = { pkgs, ... }: {
-        services.kdeconnect = {
-            enable = true;
-        };
         home = {
             persistence."/Storage/Apps/TechNet/Valent" = {
                 directories = [
