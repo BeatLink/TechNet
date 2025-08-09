@@ -48,7 +48,7 @@
         };
         home.packages = with pkgs; [
             #python310 
-            gnumake];
+            gnumake gcc];
         home.persistence."/Storage/Apps/System/Cinnamon" = {                                # Loads persistent data for plank
             directories = [
                 ".config/cinnamon"
@@ -70,6 +70,7 @@
                     WantedBy = [ "default.target" ];
                 };
             };
+        };
     };
  }
 
