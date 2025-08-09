@@ -116,7 +116,7 @@ in {
                 After = "home-beatlink-.local-share-plank.mount";
             };
             Service = {
-                ExecStart = "${pkgs.bash}/bin/bash -c 'pkill plank && ${pkgs.plank}/bin/plank'"; 
+                ExecStart = "${pkgs.bash}/bin/bash -c 'pkill plank; ${pkgs.plank}/bin/plank'"; 
                 Type = "oneshot";
             };
             Install = {
