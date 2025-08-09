@@ -113,12 +113,10 @@ in {
         systemd.user.services."restart-plank" = {
             Unit = {
                 Description = "Restart Plank";
-                After = "home-manager-beatlink";
             };
             Service = {
                 ExecStart = "${pkgs.bash}/bin/bash -c 'pkill plank && ${pkgs.plank}/bin/plank'"; 
                 Type = "oneshot";
-                RemainOnExit = false;
             };
             Install = {
                 WantedBy = [ "default.target" ];
