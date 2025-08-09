@@ -6,14 +6,17 @@
     home-manager.users.beatlink = { pkgs, ... }: {
         services.kdeconnect = {
             enable = true;
-            package = pkgs.valent;
         };
-        home.persistence."/Storage/Apps/TechNet/Valent" = {
-            directories = [
-                ".cache/valent"
-                ".config/valent"
-            ];
-            allowOther = true;
+        home = {
+            persistence."/Storage/Apps/TechNet/Valent" = {
+                directories = [
+                    ".cache/valent"
+                    ".config/valent"
+                ];
+                allowOther = true;
+            };
+            file.".config/autostart/valent.desktop".source = "${pkgs.valent}/share/applications/ca.andyholmes.Valent.desktop";       # Configures plank to autostart on login
+
         };
         dconfImports.valent = {
             source = ./settings.dconf;
