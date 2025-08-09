@@ -114,7 +114,6 @@ with lib.hm.gvariant;
       shortcut = "disabled";
       show-scrollbar = true;
       terminal-bell = "icon-sound";
-      terminal-title = "${id}: ${title}";
       text-blink-mode = "focused";
       triggers = [];
       use-custom-command = false;
