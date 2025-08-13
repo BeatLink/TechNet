@@ -20,7 +20,7 @@
         libinput.enable = true;                                                     # Enables Touchpad Functionality
     };
     programs.dconf.enable = true;                                                   # Enable Dconf
-    environment.systemPackages = [ pkgs.gnome-themes-extra ];
+    environment.systemPackages = [ pkgs.gnome-themes-extra pkgs.libnotify pkgs.cinnamon-settings-daemon ];
     environment.cinnamon.excludePackages = with pkgs; [
         onboard
         gnome-calendar
