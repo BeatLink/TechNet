@@ -124,14 +124,15 @@ in {
             "restart-plank" = {
                 Unit = {
                     Description = "Restart Plank";
-                    After = "plank.service";
+                    After = "home-manager-beatlink.service.";
+                    BindsTo = "home-manager-beatlink.service";
                 };
                 Service = {
                     ExecStart = "systemctl --user restart plank.service"; 
                     Type = "oneshot";
                 };
                 Install = {
-                    WantedBy = [ "default.target" ];
+                    WantedBy = [ "home-manager-beatlink.service" ];
                 };
             };
         };
