@@ -124,7 +124,7 @@ in {
             "restart-plank" = {
                 Unit = {
                     Description = "Restart Plank";
-                    After = "home-manager-beatlink.service.";
+                    After = "home-manager-beatlink.service";
                     BindsTo = "home-manager-beatlink.service";
                 };
                 Service = {
