@@ -10,16 +10,17 @@ with lib.hm.gvariant;
       fast-file-type = true;
       fullscreen-sidebar = "hidden";
       fullscreen-thumbnails-visible = false;
-      go-to-last-location = true;
+      general-filter = "file::type::is_file";
+      go-to-last-location = false;
       maximized = true;
       properties-visible = false;
       reuse-active-window = true;
       sidebar-sections = [ "GthFileProperties:expanded" "GthFileComment:expanded" "GthFileDetails:expanded" "GthImageHistogram:expanded" ];
       sidebar-visible = true;
       sort-inverse = false;
-      sort-type = "file::mtime";
+      sort-type = "file::size";
       startup-current-file = "";
-      startup-location = "file:///Storage/Files/Pictures";
+      startup-location = "file:///Storage/Files/Videos";
       statusbar-visible = true;
       use-startup-location = false;
       viewer-sidebar = "hidden";
@@ -38,7 +39,7 @@ with lib.hm.gvariant;
     };
 
     "org/x/pix/general" = {
-      active-extensions = [ "resize_images" "image_print" "webalbums" "search" "list_tools" "convert_format" "exiv2_tools" "edit_metadata" "find_duplicates" "rename_series" "photo_importer" "raw_files" "gstreamer_tools" "catalogs" "desktop_background" "change_date" "contact_sheet" "image_rotation" "selections" "terminal" "file_manager" "comments" "red_eye_removal" "slideshow" ];
+      active-extensions = [ "resize_images" "image_print" "webalbums" "search" "list_tools" "convert_format" "exiv2_tools" "edit_metadata" "find_duplicates" "rename_series" "photo_importer" "raw_files" "gstreamer_tools" "catalogs" "desktop_background" "change_date" "contact_sheet" "image_rotation" "selections" "terminal" "file_manager" "red_eye_removal" "comments" "slideshow" ];
       store-metadata-in-files = true;
     };
 
