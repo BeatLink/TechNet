@@ -126,6 +126,7 @@ in {
                     Description = "Restart Plank";
                     After = "home-beatlink-.local-share-plank.mount";
                     BindsTo = "home-beatlink-.local-share-plank.mount";
+                    X-SwitchMethod = "restart";
                 };
                 Service = {
                     ExecStart = "systemctl --user restart plank.service"; 

@@ -40,5 +40,6 @@
                 EDITOR = "nano";
             };
         };
+        systemd.user.startServices = "sd-switch";
     };
 }
