@@ -52,6 +52,23 @@ let
     }) plankItems;
 
 in {
+    systemd.services = {
+        "restart-plank" = {
+            Unit = {
+                Description = "Restart Plank";
+                After = "home-manager-beatlink.service";
+                BindsTo = "home-manager-beatlink.service";
+            };
+            Service = {
+                ExecStart = "systemctl --user restart plank.service"; 
+                Type = "oneshot";
+            };
+            Install = {
+                WantedBy = [ "home-manager-beatlink.service" ];
+            };
+        };
+    };
+
     services.bamf.enable = true;                                                # Allows plank to know running applications
     home-manager.users.beatlink = { pkgs, ... }: {
         home = {
@@ -112,28 +129,13 @@ in {
             "plank" = {
                 Unit = {
                     Description = "Plank";
-                    After = "home-beatlink-.local-share-plank.mount";
+                    After = "graphical-session.target";
                 };
                 Service = {
                     ExecStart = "${pkgs.plank}/bin/plank"; 
                 };
                 Install = {
-                    WantedBy = [ "default.target" ];
-                };
-            };
-            "restart-plank" = {
-                Unit = {
-                    Description = "Restart Plank";
-                    After = "home-beatlink-.local-share-plank.mount";
-                    BindsTo = "home-beatlink-.local-share-plank.mount";
-                    X-SwitchMethod = "restart";
-                };
-                Service = {
-                    ExecStart = "systemctl --user restart plank.service"; 
-                    Type = "oneshot";
-                };
-                Install = {
-                    WantedBy = [ "home-beatlink-.local-share-plank.mount" ];
+                    WantedBy = [ "graphical-session.target" ];
                 };
             };
         };
