@@ -1,17 +1,20 @@
-{
-    systemd.services.set-brightness = {
-        description = "Set default screen brightness";
-        wantedBy = [ "multi-user.target" ];
-        after = [ "multi-user.target" ];
-        serviceConfig = {
-            Type = "oneshot";
-            ExecStart = ''
-            /run/current-system/sw/bin/bash -c 'echo 255 > /sys/class/backlight/amdgpu_bl1/brightness'
-            '';
+{pkgs, ...}: {
+    systemd.user.services.set-brightness = {
+        Unit = {
+            Description = "Set default screen brightness";
+            After = [ "multi-user.target" ];
         };
-        # You may need this if writing to /sys requires permissions
-        serviceConfig.ExecStartPre = [
-            "/run/current-system/sw/bin/chmod u+w /sys/class/backlight/amdgpu_bl1/brightness"
-        ];
+        Service = {
+            ExecStartPre = [
+                "${pkgs.coreutils-full}/bin/chmod u+w /sys/class/backlight/amdgpu_bl1/brightness"
+            ];
+            ExecStart = ''
+                ${pkgs.bash}/bin/bash -c 'echo 255 > /sys/class/backlight/amdgpu_bl1/brightness'
+            '';
+            Type = "oneshot";
+        };
+        Install = {
+            WantedBy = [ "multi-user.target" ];
+        };
     };
 }
