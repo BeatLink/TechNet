@@ -34,14 +34,11 @@
     ];
 
     home-manager.users.beatlink = {
-        dconf.enable = true;                                                        # Enables dconf for Cinnamon setting Management
+        dconf.enable = true;                                                  # Enables dconf for Cinnamon setting Management
         imports = [                                                                 # Imports Cinnamon Dconf Settings
             ./default-applications.nix
-            ./dconf/org.cinnamon.nix
-            ./dconf/org.gnome.desktop.nix
-            ./dconf/org.gtk.settings.nix
-            ./dconf/org.x.apps.nix
-
+            ./brightness.nix
+            ./dconf
         ];
         xsession =  {
             scriptPath = ".local/share/X11/xsession";
