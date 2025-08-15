@@ -1,8 +1,3 @@
-# Boot Loader
-#
-# This section manages misc boot settings
-#
-
 { pkgs, ... }:
 {
     boot = {

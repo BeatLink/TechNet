@@ -1,7 +1,6 @@
-{ config, pkgs, ... }: 
 {
         
-    home-manager.users.beatlink = { config, pkgs, ... }: {
+    home-manager.users.beatlink = {
         xdg.userDirs =  {
             enable = true;
             desktop = "/Storage/Files/Desktop";
