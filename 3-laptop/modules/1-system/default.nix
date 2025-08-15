@@ -18,8 +18,8 @@
         ./13-printing.nix
         ./14-fuse.nix
         ./15-home-folders.nix
-        ./dconf.nix
         ./plymouth.nix
+        ./dconf
         ./desktop-environment
 
     ];
