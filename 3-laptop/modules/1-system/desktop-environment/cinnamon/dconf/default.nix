@@ -14,7 +14,7 @@
         };
         org-x-apps = {
             source = ./org.x.apps.dconf;
-            path = "/org/x/apps";
+            path = "/org/x/apps/";
         };
     };
 }
