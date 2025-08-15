@@ -19,11 +19,8 @@
         ./14-fuse.nix
         ./15-home-folders.nix
         ./plymouth.nix
+        ./dconf
         ./desktop-environment
 
     ];
-
-    home-manager.users.beatlink = {
-        imports = [./dconf.nix];
-    };
 }
