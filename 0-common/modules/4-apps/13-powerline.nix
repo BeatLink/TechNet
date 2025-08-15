@@ -3,7 +3,6 @@
         programs.powerline-go = {
             enable = true;
             modules = [
-                "time"
                 "user"
                 "host"
                 "cwd"
@@ -22,7 +21,6 @@
         programs.powerline-go = {
             enable = true;
             modules = [
-                "time"
                 "user"
                 "host"
                 "cwd"
