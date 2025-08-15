@@ -3,10 +3,10 @@
 with lib;
 
 let
-    cfg = config.dconfImports;
+    cfg = config.home-manager.users.beatlink.dconfImports;
 in
 {
-    options.home-manager.users.beatlink.dconfImports = mkOption {
+    options.dconfImports = mkOption {
         type = types.attrsOf (types.submodule {
             options = {
                 source = mkOption {
