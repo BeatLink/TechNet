@@ -1,4 +1,3 @@
-{ config, lib, pkgs, modulesPath, ... }: 
 {  
     hardware.bluetooth = {
         enable = true;                                  # enables support for Bluetooth

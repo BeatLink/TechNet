@@ -1,8 +1,3 @@
-# Laptop Configuration
-#
-# TODO: Add Notes
-#
-
 {
     imports = [                                   
         ./1-hardware-configuration.nix
