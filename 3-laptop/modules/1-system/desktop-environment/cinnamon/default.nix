@@ -6,8 +6,7 @@
 #
 
 { pkgs, ... }:
-{  
-
+{ 
     services = {
         displayManager.logToFile = false;
         displayManager.logToJournal = false;
@@ -16,50 +15,53 @@
             displayManager.lightdm.enable = true;                                   # Enables LightDM Login Manager
             desktopManager.cinnamon.enable = true;                                  # Enables Cinnamon
             enableCtrlAltBackspace = true;                                          # Enables CTRL+ALT+Backspace for restarting X11
+            excludePackages = with pkgs; [ xterm ];
         };
         libinput.enable = true;                                                     # Enables Touchpad Functionality
     };
-    programs.dconf.enable = true;                                                   # Enable Dconf
-    environment.systemPackages = [ pkgs.gnome-themes-extra pkgs.libnotify pkgs.cinnamon-settings-daemon ];
+    environment.systemPackages = with pkgs; [ 
+        gnome-themes-extra 
+        libnotify 
+    ];
     environment.cinnamon.excludePackages = with pkgs; [
         onboard
         gnome-calendar
         gnome-terminal
         warpinator
-        xterm
         celluloid
     ];
-    imports = [
-        ./brightness.nix
-    ];
-
+    
     home-manager.users.beatlink = {
-        dconf.enable = true;                                                  # Enables dconf for Cinnamon setting Management
-        imports = [                                                                 # Imports Cinnamon Dconf Settings
-            ./default-applications.nix
-            ./brightness.nix
-            ./dconf
-        ];
+        imports = [ ./dconf ];                                                           # Imports Cinnamon Dconf Settings
         xsession =  {
             scriptPath = ".local/share/X11/xsession";
             initExtra =  "ERRFILE=$HOME/.local/share/X11/xsession-errors";
         };
-        home.packages = with pkgs; [
-            #python310 
-            gnumake gcc];
-        home.persistence."/Storage/Apps/System/Cinnamon" = {                                # Loads persistent data for plank
-            directories = [
-                ".config/cinnamon"
-                ".config/cinnamon-session"
-                ".local/share/cinnamon"
+        home = {
+            packages = with pkgs; [
+                #python310 
+                gnumake 
+                gcc
             ];
-            allowOther = true;
+            persistence."/Storage/Apps/System/Cinnamon" = {                                # Loads persistent data for plank
+                directories = [
+                    ".config/cinnamon"
+                    ".config/cinnamon-session"
+                    ".local/share/cinnamon"
+                ];
+                files = [
+                    ".config/X-Cinnamon-xdg-terminals.list"
+                    ".config/xdg-terminals.list"
+                    ".config/mimeapps.list"
+                ];
+                allowOther = true;
+            };
         };
         systemd.user.services = {
             "cinnamon-spice-updater" = {
                 Unit = {
                     Description = "Cinnamon Spice Updater";
-                    After = "home-beatlink-.local-share-cinnamon.mountt";
+                    After = "home-beatlink-.local-share-cinnamon.mount";
                 };
                 Service = {
                     ExecStart = "${pkgs.cinnamon-common}/bin/cinnamon-spice-updater --update-all"; 

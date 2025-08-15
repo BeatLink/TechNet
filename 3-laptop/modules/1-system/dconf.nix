@@ -25,6 +25,11 @@ in
 
 
   config = {
+    # Ensure dconf is installed
+    home.packages = [ pkgs.dconf ];
+    dconf.enable = true;  
+    programs.dconf.enable = true;
+
     systemd.user.services."LoadDconfSettings" = {
       Unit = {
         Description = "Load dconf settings";
@@ -38,8 +43,5 @@ in
         WantedBy = [ "default.target" ];
       };
     };
-  
-    # Ensure dconf is installed
-    home.packages = [ pkgs.dconf ];
   };
 }
