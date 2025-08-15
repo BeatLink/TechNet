@@ -6,7 +6,7 @@ let
     cfg = config.dconfImports;
 in
 {
-    options.dconfImports = mkOption {
+    options.home-manager.users.beatlink.dconfImports = mkOption {
         type = types.attrsOf (types.submodule {
             options = {
                 source = mkOption {
