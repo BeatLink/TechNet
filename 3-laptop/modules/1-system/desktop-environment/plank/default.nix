@@ -52,7 +52,7 @@ let
     }) plankItems;
 
 in {
-    systemd.services = {
+    /*systemd.services = {
         "restart-plank" = {
             Unit = {
                 Description = "Restart Plank";
@@ -67,7 +67,7 @@ in {
                 WantedBy = [ "home-manager-beatlink.service" ];
             };
         };
-    };
+    };*/
 
     services.bamf.enable = true;                                                # Allows plank to know running applications
     home-manager.users.beatlink = { pkgs, ... }: {
