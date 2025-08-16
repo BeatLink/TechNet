@@ -21,6 +21,7 @@
         ./nginx-proxy-manager.nix
         ./openbooks.nix
         ./pihole.nix
+        ./stremio-export.nix
         ./syncthing.nix
         ./traccar.nix
         ./trakttv-backup.nix
