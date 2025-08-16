@@ -3,6 +3,7 @@
         enable = true;
         dataDir = "/Storage/Services/MPD/Data";
         extraConfig = ''
+            save_volume "yes"
             audio_output {
                 type "pipewire"
                 name "MPD PipeWire Output"
@@ -22,7 +23,22 @@
             wants = [ "mpd.service" "network-online.target" ];
             serviceConfig = {
                 Type = "oneshot";
-                ExecStart = "${pkgs.mpc}/bin/mpc volume 50";
+                ExecStart = ''
+                    #!/bin/sh
+                    # Wait until MPD responds to mpc
+                    for i in $(seq 1 30); do
+                        if ${pkgs.mpc}/bin/mpc >/dev/null 2>&1; then
+                            break
+                        fi
+                            sleep 1
+                    done
+
+                    # Set volume to 50%
+                    ${pkgs.mpc}/bin/mpc volume 50
+
+                    # Persist volume so MPD remembers it
+                    ${pkgs.mpc}/bin/mpc save
+                '';
             };
             wantedBy = [ "multi-user.target" ];
         };
