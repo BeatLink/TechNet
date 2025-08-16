@@ -23,7 +23,6 @@
             serviceConfig = {
                 Type = "oneshot";
                 ExecStart = ''
-                    # Set volume to 50%
                     ${pkgs.mpc}/bin/mpc volume 50
                 '';
             };
