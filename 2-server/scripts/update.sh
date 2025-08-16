@@ -7,4 +7,5 @@ nixos-rebuild \
     --target-host "beatlink@192.168.0.2" \
     --build-host "beatlink@192.168.0.2" \
     --use-remote-sudo \
+    --ask-sudo-password \
     switch 
