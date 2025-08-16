@@ -21,6 +21,10 @@ panels-enabled=['1:0:top']
 quit-delay-toggle=true
 quit-time-delay=5
 
+[desktop/a11y/applications]
+screen-keyboard-enabled=false
+screen-reader-enabled=false
+
 [desktop/a11y/keyboard]
 togglekeys-enable-beep=true
 togglekeys-enable-osd=true
@@ -43,7 +47,7 @@ exec-arg=''
 
 [desktop/background]
 picture-options='zoom'
-picture-uri='file:///Storage/Files/Pictures/Wallpapers/variety-copied-wallpaper-347804da134f3313edffa9966dd1d3a9.jpg'
+picture-uri='file:///Storage/Files/Pictures/Wallpapers/variety-copied-wallpaper-5657dbcc90ae51ba5fd44746e02dc52e.jpg'
 
 [desktop/background/slideshow]
 delay=15
@@ -131,7 +135,7 @@ allow-amplified-volume=true
 event-sounds=false
 maximum-volume=150
 volume-sound-enabled=true
-volume-sound-file='/Storage/Files/Sounds/Interface Sounds/Linux/Fresh and Clean/stereo/message-new-instant.ogg'
+volume-sound-file='/Storage/Files/Sounds/Interface Sounds/Orwell/listener_new_mail-sharedassets1.assets-104.wav'
 
 [desktop/wm/preferences]
 action-scroll-titlebar='none'
@@ -148,12 +152,14 @@ visual-bell=false
 
 [gestures]
 enabled=true
+pinch-percent-threshold=uint32 40
 swipe-down-2='PUSH_TILE_DOWN::end'
 swipe-down-3='MINIMIZE::::start'
 swipe-down-4='TOGGLE_EXPO::::start'
 swipe-left-2='PUSH_TILE_LEFT::end'
 swipe-left-3='PUSH_TILE_LEFT::::start'
 swipe-left-4='WORKSPACE_PREVIOUS::::start'
+swipe-percent-threshold=uint32 60
 swipe-right-2='PUSH_TILE_RIGHT::end'
 swipe-right-3='PUSH_TILE_RIGHT::::start'
 swipe-right-4='WORKSPACE_NEXT::::start'
@@ -217,29 +223,29 @@ menus-have-icons=true
 
 [sounds]
 close-enabled=true
-close-file='/Storage/Files/Sounds/Interface Sounds/Linux/Fresh and Clean/stereo/service-logout.ogg'
+close-file='/Storage/Files/Sounds/Interface Sounds/Orwell/system_data_chunk_window_close-sharedassets1.assets-132.wav'
 login-enabled=true
-login-file='/Storage/Files/Sounds/Interface Sounds/Linux/Fresh and Clean/stereo/desktop-login.ogg'
+login-file='/Storage/Files/Sounds/Interface Sounds/Need to Know/CODEX/SignInOut/Zinger Login.ogg'
 logout-enabled=true
-logout-file='/Storage/Files/Sounds/Interface Sounds/Linux/Fresh and Clean/stereo/desktop-logout.ogg'
+logout-file='/Storage/Files/Sounds/Interface Sounds/Need to Know/CODEX/SignInOut/Fixed Logout_001.wav'
 map-enabled=true
-map-file='/Storage/Files/Sounds/Interface Sounds/Linux/Fresh and Clean/stereo/service-login.ogg'
+map-file='/Storage/Files/Sounds/Interface Sounds/Orwell/system_data_chunk_window_open-sharedassets1.assets-117.wav'
 maximize-enabled=true
-maximize-file='/Storage/Files/Sounds/Interface Sounds/Linux/Fresh and Clean/stereo/button-toggle-on.ogg'
+maximize-file='/Storage/Files/Sounds/Interface Sounds/Orwell/system_data_chunk_window_open-sharedassets1.assets-117.wav'
 minimize-enabled=true
-minimize-file='/Storage/Files/Sounds/Interface Sounds/Linux/Fresh and Clean/stereo/button-pressed.ogg'
+minimize-file='/Storage/Files/Sounds/Interface Sounds/Orwell/system_data_chunk_window_close-sharedassets1.assets-132.wav'
 notification-enabled=true
-notification-file='/Storage/Files/Sounds/Interface Sounds/Linux/Fresh and Clean/stereo/service-login.ogg'
+notification-file='/Storage/Files/Sounds/Interface Sounds/Orwell/reader_bookmark_new-sharedassets1.assets-103.wav'
 plug-enabled=true
-plug-file='/Storage/Files/Sounds/Interface Sounds/Linux/Fresh and Clean/stereo/service-login.ogg'
+plug-file='/Storage/Files/Sounds/Interface Sounds/Orwell/main_menu_create_profile-sharedassets1.assets-146.wav'
 switch-enabled=true
-switch-file='/Storage/Files/Sounds/Interface Sounds/Linux/Fresh and Clean/stereo/message-new-instant.ogg'
+switch-file='/Storage/Files/Sounds/Interface Sounds/Orwell/reader_bookmark_new-sharedassets1.assets-103.wav'
 tile-enabled=true
-tile-file='/Storage/Files/Sounds/Interface Sounds/Linux/Fresh and Clean/stereo/button-toggle-on.ogg'
+tile-file='/Storage/Files/Sounds/Interface Sounds/Orwell/system_datachunk_hover-sharedassets1.assets-93.wav'
 unmaximize-enabled=true
-unmaximize-file='/Storage/Files/Sounds/Interface Sounds/Linux/Fresh and Clean/stereo/button-toggle-off.ogg'
+unmaximize-file='/Storage/Files/Sounds/Interface Sounds/Orwell/system_data_chunk_window_close-sharedassets1.assets-132.wav'
 unplug-enabled=true
-unplug-file='/Storage/Files/Sounds/Interface Sounds/Linux/Fresh and Clean/stereo/service-logout.ogg'
+unplug-file='/Storage/Files/Sounds/Interface Sounds/Orwell/main_menu_delete_profile-sharedassets1.assets-154.wav'
 
 [theme]
 name='Mint-Y-Dark-Aqua'

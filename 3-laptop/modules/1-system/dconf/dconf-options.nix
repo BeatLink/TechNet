@@ -26,6 +26,7 @@ in
     config.systemd.user.services."LoadDconfSettings" = {
         Unit = {
             Description = "Load dconf settings";
+            After = "dconf.service";
         };
         Service = {
             ExecStart = mapAttrsToList (name: value: "${pkgs.bash}/bin/bash -c '${pkgs.dconf}/bin/dconf load ${value.path} < ${value.source}'") cfg; 
