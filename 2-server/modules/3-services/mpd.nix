@@ -3,7 +3,6 @@
         enable = true;
         dataDir = "/Storage/Services/MPD/Data";
         extraConfig = ''
-            save_volume "yes"
             audio_output {
                 type "pipewire"
                 name "MPD PipeWire Output"
