@@ -27,7 +27,7 @@
             "--no-write-lock-file"
             "-L"
         ];
-        dates = "Sat 02:00";
+        dates = "02:00";
         allowReboot = false;
         persistent = true;
     };    
