@@ -29,7 +29,6 @@ The bootloader for Ragnarok is U-Boot built using tow-boot. As my current SBC is
 2. Run `nix-build --arg src ./Tow-Boot -A pine64-rock64`
 3. Run `dd if=shared.disk-image.img of=/dev/XXX bs=1M oflag=direct,sync status=progress`
 
-
 ## NixOS
 
 ### Notes
@@ -41,7 +40,8 @@ The bootloader for Ragnarok is U-Boot built using tow-boot. As my current SBC is
     - Black - GND
     - White - RXD
     - Bown - TXD
-  - 
+  - Run `nix-shell -p minicom`
+  - Run `sudo  minicom -D /dev/ttyUSB0 -b 115200 --color=on`
 
 ### Installation
 
