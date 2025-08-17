@@ -10,7 +10,7 @@
         hostId = "bed2ee51";
         useNetworkd = true;                                                         # Use Systemd-Networkd
         nameservers = [ "10.100.100.1" "8.8.8.8" "1.1.1.1" ];                       # Sets up dns
-        firewall.trustedInterfaces = [ "wireguard0" "wireguard-initrd"];
+        firewall.trustedInterfaces = [ "wireguard0" "wg-initrd"];
     };
     sops.secrets.wireguard_private_key.sopsFile = ../../secrets.yaml;
     sops.secrets.wireguard_initrd_private_key.sopsFile = ../../secrets.yaml;
@@ -42,10 +42,10 @@
                 };
                 network = {
                     enable = true;
-                    netdevs."01-wireguard-initrd" = {
+                    netdevs."01-wg-initrd" = {
                         netdevConfig = {
                             Kind = "wireguard";
-                            Name = "wireguard-initrd";
+                            Name = "wg-initrd";
                         };
                         wireguardConfig = {
                             PrivateKeyFile = /wireguard_private_key;
@@ -67,8 +67,8 @@
                             networkConfig.DHCP = "ipv4";
                             linkConfig.RequiredForOnline = "routable";
                         };
-                        "01-wireguard-initrd" = {
-                            matchConfig.Name = "wireguard-initrd";
+                        "01-wg-initrd" = {
+                            matchConfig.Name = "wg-initrd";
                             address = ["10.100.100.6/24"];
                             dns = [ "10.100.100.1"];
                         };
