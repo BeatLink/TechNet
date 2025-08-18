@@ -102,12 +102,6 @@
                                 PersistentKeepalive = 15;
                             }
                             {
-                                # Backup Server Initrd
-                                PublicKey = "C6fi2RxH+BHRHSAAQZZRM9RBSSP1JnuX0bEv2zb/jU4=";
-                                AllowedIPs = ["10.100.100.6/32"];
-                                PersistentKeepalive = 15;
-                            }
-                            {
                                 # eNET Server
                                 PublicKey = "VGMPRz95JuRtQMTYV2ANAF7AuDZU/igJgZB8ZZSAUXI=";
                                 AllowedIPs = ["10.100.100.52/32"];
