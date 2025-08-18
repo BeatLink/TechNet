@@ -38,15 +38,121 @@
 
         systemd = {
             # The Wireguard privatekey must be owned by systemd-network to be used.
-            services.fix_wireguard_key_perms = {
-                description = "Set permissions for wireguard private key";
-                wantedBy = [ "initrd.target" ];
-                after = [ "initrd-nixos-copy-secrets.service" ];
-                before = [ "systemd-networkd.service" ];
-                unitConfig.DefaultDependencies = "no";
-                serviceConfig.Type = "oneshot";
-                script = '' chown systemd-network:systemd-network "${config.sops.secrets.wireguard_private_key.path}" '';
+            services = {
+                fix_wireguard_key_perms = {
+                    description = "Set permissions for wireguard private key";
+                    wantedBy = [ "initrd.target" ];
+                    after = [ "initrd-nixos-copy-secrets.service" ];
+                    before = [ "systemd-networkd.service" ];
+                    unitConfig.DefaultDependencies = "no";
+                    serviceConfig.Type = "oneshot";
+                    script = '' chown systemd-network:systemd-network "${config.sops.secrets.wireguard_private_key.path}" '';
+                };
+                networkd-check = {
+                    description = "Check network connectivity via Uptime Kuma push";
+                    serviceConfig = {
+                        Type = "oneshot";
+                        ExecStart = pkgs.writeShellScript "networkd-check" ''
+                            #!/usr/bin/env bash
+                            KUMA_URL="https://uptime-kuma.heimdall.technet/api/push/WCLW4SB6K8?status=up&msg=Network%2fCheck%2fSuccessful"
+
+                            # attempt the push; exit 0 if successful, 1 if failed
+                            if ${pkgs.curl}/bin/curl -fsS "$KUMA_URL" >/dev/null; then
+                                exit 0
+                            else
+                                exit 1
+                            fi
+                        '';
+                    };
+                    # If it fails enough times in 5 minutes → restart networkd
+                    # With 5-second interval, 60 consecutive failures = 5 minutes
+                    startLimitIntervalSec = 300;  # 5 minutes
+                    startLimitBurst = 60;         # 60 failures within 5 minutes
+                    unitConfig.OnFailure = "networkd-recover.service";
+                };
+
+                networkd-recover = {
+                    description = "Restart systemd-networkd and report recovery with downtime";
+                    startLimitIntervalSec = 0;
+                    startLimitBurst = 9999;
+                    serviceConfig = {
+                        Type = "oneshot";
+                        ExecStart = pkgs.writeShellScript "networkd-recover" ''
+                            #!/usr/bin/env bash
+                            KUMA_URL="https://uptime-kuma.heimdall.technet/api/push/WCLW4SB6K8"
+
+                            # each failure represents 5 seconds of downtime
+                            FAIL_COUNT="''${SYSTEMD_SERVICE_RESULT:-60}"
+                            INTERVAL_SEC=5
+                            DOWNTIME=$((FAIL_COUNT * INTERVAL_SEC))
+
+                            # restart networkd
+                            systemctl restart systemd-networkd
+
+                            # report recovery with downtime in seconds
+                            ${pkgs.curl}/bin/curl -fsS "''${KUMA_URL}?status=up&msg=Recovered%2fafter%2f''${DOWNTIME}%2fsec" >/dev/null
+                        '';
+                    };
+                };
+
+                networkd-failsafe = {
+                    description = "Reboot if Uptime Kuma push fails repeatedly for 12 hours";
+                    serviceConfig = {
+                        Type = "oneshot";
+                        ExecStart = pkgs.writeShellScript "networkd-failsafe" ''
+                            #!/usr/bin/env bash
+                            KUMA_URL="https://uptime-kuma.heimdall.technet/api/push/WCLW4SB6K8?status=up&msg=Network%2fFailsafe%2fCheck%2fSuccessful"
+
+                            # exit 0 on success, 1 on failure
+                            if ${pkgs.curl}/bin/curl -fsS "$KUMA_URL" >/dev/null; then
+                                exit 0
+                            else
+                                exit 1
+                            fi
+                        '';
+                    };
+                    # Systemd tracks failures
+                    startLimitIntervalSec = 43200; # 12 hours in seconds
+                    startLimitBurst = 12;          # must fail 12 times in 12 hours
+                    unitConfig.OnFailure = "networkd-failsafe-reboot.service";
+                };
+
+                networkd-failsafe-reboot = {
+                    description = "Reboot system after 12 consecutive Uptime Kuma failures";
+                    startLimitIntervalSec = 0;
+                    startLimitBurst = 9999;
+                    serviceConfig = {
+                        Type = "oneshot";
+                        ExecStart = "${pkgs.systemd}/bin/systemctl reboot";
+                    };
+                };
             };
+
+            timers = {
+                networkd-check = {
+                    description = "Run networkd-check every 5 seconds";
+                    wantedBy = [ "timers.target" ];
+                    startLimitIntervalSec = 0;
+                    startLimitBurst = 9999;
+                    timerConfig = {
+                        OnBootSec = "5s";
+                        OnUnitActiveSec = "5s";  # check every 5 seconds
+                        Unit = "networkd-check.service";
+                    };
+                };
+                networkd-failsafe = {
+                    description = "Run Uptime Kuma failsafe check every hour";
+                    wantedBy = [ "timers.target" ];
+                    startLimitIntervalSec = 0;
+                    startLimitBurst = 9999;
+                    timerConfig = {
+                        OnBootSec = "10min";
+                        OnUnitActiveSec = "1h"; # every hour
+                        Unit = "networkd-failsafe.service";
+                    };
+                };
+            };
+            storePaths = with pkgs; [curl];
 
             # Sets up systemd-networkd in initrd using the same configuration from the booted system's network stack
             network = config.systemd.network;
@@ -88,102 +194,11 @@
                 };
             };
         };
-
-        services = {
-            networkd-check = {
-                description = "Check network connectivity via Uptime Kuma push";
-                serviceConfig = {
-                    Type = "oneshot";
-                    ExecStart = pkgs.writeShellScript "networkd-check" ''
-                        #!/usr/bin/env bash
-                        KUMA_URL="https://uptime-kuma.heimdall.technet/api/push/WCLW4SB6K8?status=up&msg=Network%2fCheck%2fSuccessful"
-
-                        # attempt the push; exit 0 if successful, 1 if failed
-                        if ${pkgs.curl}/bin/curl -fsS "$KUMA_URL" >/dev/null; then
-                            exit 0
-                        else
-                            exit 1
-                        fi
-                    '';
-                };
-                # If it fails enough times in 5 minutes → restart networkd
-                # With 5-second interval, 60 consecutive failures = 5 minutes
-                startLimitIntervalSec = 300;  # 5 minutes
-                startLimitBurst = 60;         # 60 failures within 5 minutes
-                unitConfig.OnFailure = "networkd-recover.service";
-            };
-
-            networkd-recover = {
-                description = "Restart systemd-networkd and report recovery with downtime";
-                serviceConfig = {
-                    Type = "oneshot";
-                    ExecStart = pkgs.writeShellScript "networkd-recover" ''
-                        #!/usr/bin/env bash
-                        KUMA_URL="https://uptime-kuma.heimdall.technet/api/push/WCLW4SB6K8"
-
-                        # each failure represents 5 seconds of downtime
-                        FAIL_COUNT="''${SYSTEMD_SERVICE_RESULT:-60}"
-                        INTERVAL_SEC=5
-                        DOWNTIME=$((FAIL_COUNT * INTERVAL_SEC))
-
-                        # restart networkd
-                        systemctl restart systemd-networkd
-
-                        # report recovery with downtime in seconds
-                        ${pkgs.curl}/bin/curl -fsS "''${KUMA_URL}?status=up&msg=Recovered%2fafter%2f''${DOWNTIME}%2fsec" >/dev/null
-                    '';
-                };
-            };
-
-            networkd-failsafe = {
-                description = "Reboot if Uptime Kuma push fails repeatedly for 12 hours";
-                serviceConfig = {
-                    Type = "oneshot";
-                    ExecStart = pkgs.writeShellScript "networkd-failsafe" ''
-                        #!/usr/bin/env bash
-                        KUMA_URL="https://uptime-kuma.heimdall.technet/api/push/WCLW4SB6K8?status=up&msg=Network%2fFailsafe%2fCheck%2fSuccessful"
-
-                        # exit 0 on success, 1 on failure
-                        if ${pkgs.curl}/bin/curl -fsS "$KUMA_URL" >/dev/null; then
-                            exit 0
-                        else
-                            exit 1
-                        fi
-                    '';
-                };
-                # Systemd tracks failures
-                startLimitIntervalSec = 43200; # 12 hours in seconds
-                startLimitBurst = 12;          # must fail 12 times in 12 hours
-                unitConfig.OnFailure = "networkd-failsafe-reboot.service";
-            };
-
-            networkd-failsafe-reboot = {
-                description = "Reboot system after 12 consecutive Uptime Kuma failures";
-                serviceConfig = {
-                    Type = "oneshot";
-                    ExecStart = "${pkgs.systemd}/bin/systemctl reboot";
-                };
-            };
-        };
-        timers = {
-            networkd-check = {
-                description = "Run networkd-check every 5 seconds";
-                wantedBy = [ "timers.target" ];
-                timerConfig = {
-                    OnBootSec = "5s";
-                    OnUnitActiveSec = "5s";  # check every 5 seconds
-                    Unit = "networkd-check.service";
-                };
-            };
-            networkd-failsafe = {
-                description = "Run Uptime Kuma failsafe check every hour";
-                wantedBy = [ "timers.target" ];
-                timerConfig = {
-                    OnBootSec = "10min";
-                    OnUnitActiveSec = "1h"; # every hour
-                    Unit = "networkd-failsafe.service";
-                };
-            };
-        };
+        services.networkd-check = config.boot.initrd.systemd.services.networkd-check;
+        services.networkd-recover = config.boot.initrd.systemd.services.networkd-recover;
+        services.networkd-failsafe = config.boot.initrd.systemd.services.networkd-failsafe;
+        services.networkd-failsafe-reboot = config.boot.initrd.systemd.services.networkd-failsafe-reboot;
+        timers.networkd-check = config.boot.initrd.systemd.timers.networkd-check;
+        timers.networkd-failsafe = config.boot.initrd.systemd.timers.networkd-failsafe;
     };
 }
