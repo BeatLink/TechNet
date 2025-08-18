@@ -6,6 +6,6 @@ nixos-rebuild \
     --flake ../../#Heimdall \
     --target-host "beatlink@192.168.0.2" \
     --build-host "beatlink@192.168.0.2" \
-    --use-remote-sudo \
+    --sudo \
     --ask-sudo-password \
     switch 
