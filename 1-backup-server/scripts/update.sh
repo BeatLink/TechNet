@@ -9,8 +9,8 @@ FLAKEDIR=$(cd "$(dirname "$0")/../../"; pwd);
 
 nixos-rebuild \
     --flake "$FLAKEDIR"#Ragnarok \
-    --build-host "beatlink@192.168.0.52" \
-    --target-host "beatlink@192.168.0.52" \
+    --build-host "beatlink@ragnarok.technet" \
+    --target-host "beatlink@ragnarok.technet" \
     --no-reexec \
     --sudo  \
     --ask-sudo-password \
@@ -19,8 +19,8 @@ nixos-rebuild \
 
 nixos-rebuild \
     --flake "$FLAKEDIR"#Ragnarok \
-    --build-host "beatlink@192.168.0.52" \
-    --target-host "beatlink@192.168.0.52" \
+    --build-host "beatlink@ragnarok.technet" \
+    --target-host "beatlink@ragnarok.technet" \
     --no-reexec \
     --sudo  \
     --ask-sudo-password \
