@@ -3,7 +3,7 @@
 # This handles backing up my server's docker files to my laptop and to my backup server
 #
 
-{ config, ... }: 
+{ pkgs, config, ... }: 
 {
     sops.secrets.borg_repo_encryption_key.sopsFile = ../../secrets.yaml;
     sops.secrets.borg_repo_ssh_key.sopsFile = ../../secrets.yaml;
@@ -53,7 +53,7 @@
             # Hooks
             before_backup = [
                 "echo Starting a backup job."
-                "ping -q -c 1 10.100.100.5 > /dev/null || exit 75"
+                "${pkgs.iputils}/bin/ping -q -c 1 10.100.100.5 > /dev/null || exit 75"
             ];
             after_backup = [
                 "echo Backup created."
