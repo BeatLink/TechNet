@@ -51,15 +51,31 @@
             keep_yearly = 3;
 
             # Hooks
-            before_backup = [
-                "echo Starting a backup job."
-                "${pkgs.iputils}/bin/ping -q -c 1 10.100.100.5 > /dev/null || exit 75"
-            ];
-            after_backup = [
-                "echo Backup created."
-            ];
-            on_error = [
-                "echo Error while creating a backup."
+
+
+            commands = [
+                {
+                    before = "action";
+                    when = [ "create" ];
+                    run = [
+                        "echo 'Starting a backup job.'"
+                        "${pkgs.iputils}/bin/ping -q -c 1 10.100.100.5 > /dev/null || exit 75"
+                    ];
+                }
+                {
+                    after = "action";
+                    when = [ "create" ];
+                    states = [ "finish" ];
+                    run = [
+                        "echo 'Backup created.'"
+                    ];
+                }
+                {
+                    after = "error";
+                    run = [
+                        "echo 'Error occurred during a Borgmatic action.'"
+                    ];
+                }
             ];
 
             # Consistency Checks
