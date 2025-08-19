@@ -2,7 +2,6 @@
 #! nix-shell -i bash
 #! nix-shell -p bash gum
 
-
 gum style \
 	--foreground "#00ACFF" --border-foreground "#00ACFF" --border thick \
 	--align center --width 50 --margin "1 2" --padding "2 4" \
