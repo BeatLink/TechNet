@@ -2,22 +2,30 @@
 #! nix-shell -i bash
 #! nix-shell -p bash gum
 
-gum style \
-	--foreground "#00ACFF" --border-foreground "#00ACFF" --border thick \
-	--align center --width 50 --margin "1 2" --padding "2 4" \
-	'TechNet Updater' '' 'This scripts automatically updates the selected Host from this flake'
 
 
-gum style --foreground "#00ACFF" "Select the Host to Update"
+title(){
+  gum style --foreground "#00ACFF" --border-foreground "#00ACFF" --border thick --align center --width 200 --margin "1 2" --padding "2 4" "$@"
+}
+
+pr() {
+  gum style --foreground "#00ACFF" "$@"
+}
+
+
+title 'TechNet Updater' '' 'This scripts automatically updates the selected Host from this flake'
+
+
+pr "Select the Host to Update"
 HOST=$(gum choose "Ragnarok" "Heimdall" "Odin")
 HOST_LOWERCASE=${HOST,,}
-gum style --foreground "#00ACFF" "$HOST" ""
+pr "$HOST" ""
 
 
-gum style --foreground "#00ACFF" 'Do you wish to test the generation or switch?' 
+pr 'Do you wish to test the generation or switch?' 
 ACTION=$(gum choose "Test" "Switch")
 ACTION_LOWERCASE=${ACTION,,}
-gum style --foreground "#00ACFF" "$ACTION" ""
+pr "$ACTION" ""
 
 FLAKEDIR=$(cd "$(dirname "$0")"; pwd);
 PARAMS=(
@@ -31,6 +39,6 @@ PARAMS=(
 FINAL_COMMAND="nixos-rebuild ${PARAMS[@]} $ACTION_LOWERCASE"
 
 gum confirm && \
-    gum style --foreground "#00ACFF" "Beginning NixOS $ACTION..." "" && \
-    gum style --foreground "#00ACFF" "Running $FINAL_COMMAND" "" && \
+    pr "Beginning NixOS $ACTION..." "" && \
+    pr "Running $FINAL_COMMAND" "" && \
     bash -c "$FINAL_COMMAND"
