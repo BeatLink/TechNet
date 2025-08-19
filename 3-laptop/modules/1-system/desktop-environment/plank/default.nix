@@ -7,8 +7,13 @@
 # X-GNOME-Autostart-Delay=0
 #
 
-{
-    services.bamf.enable = true;                                                # Allows plank to know running applications
+{pkgs, ...}: {
+    services.bamf.enable = true;                                             # Allows plank to know running applications
+    system.userActivationScripts.restart-plank = {
+        text = ''
+            ${pkgs.systemd}/bin/systemctl --user stop plank.service
+        '';
+    };
     home-manager.users.beatlink = { config, lib, pkgs, ... }: 
     let 
 
@@ -124,28 +129,7 @@
                         ExecStart = "${pkgs.plank}/bin/plank"; 
                     };
                     Install.WantedBy = [ "graphical-session.target" ];
-                };
-                "restart-plank" = {
-                    Unit.Description = "Restart Plank";
-                    Service = {
-                        Type = "oneshot";
-                        ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.systemd}/bin/systemctl --user stop plank.service; ${pkgs.coreutils-full}/bin/sleep 5; ${pkgs.systemd}/bin/systemctl --user start plank.service'";
-                    };
-                };
-                "delay-restart-plank" = {
-                    Unit.Description = "Delay Restart Plank";
-                    Service = {
-                        Type = "oneshot";
-                        ExecStart = "${pkgs.coreutils-full}/bin/sleep 30";
-                        ExecStartPost = "${pkgs.bash}/bin/bash -c '${pkgs.systemd}/bin/systemctl --user start restart-plank.path;'";
-                    };
-                    Install.WantedBy = [ "graphical-session.target" ];
-                };
-                
-            };
-            paths.restart-plank = {
-                Unit.Description = "Watch Plank launchers folder and restart Plank when it changes";
-                Path.PathChanged = "%h/.config/plank/dock1/launchers";
+                };                
             };
         };
     };
