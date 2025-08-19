@@ -154,7 +154,7 @@
             };
 
             networkd-failsafe = {
-                description = "Reboot if Uptime Kuma push fails repeatedly for 12 hours";
+                description = "Reboot if Uptime Kuma push fails repeatedly for 6 hours";
                 serviceConfig = {
                     Type = "oneshot";
                     ExecStart = pkgs.writeShellScript "networkd-failsafe" ''
@@ -170,8 +170,8 @@
                     '';
                 };
                 # Systemd tracks failures
-                startLimitIntervalSec = 3600; # 1 hour in seconds
-                startLimitBurst = 2;          # must fail 1 times in 1 hours
+                startLimitIntervalSec = 21600; # 1 hour in seconds
+                startLimitBurst = 5;          # must fail 5 times in 6 hours
                 unitConfig.OnFailure = "networkd-failsafe-reboot.service";
             };
 
@@ -199,7 +199,7 @@
                 wantedBy = [ "timers.target" ];
                 timerConfig = {
                     OnBootSec = "10min";
-                    OnUnitActiveSec = "25m"; #every 25 minutes
+                    OnUnitActiveSec = "1h"; #every hour
                     Unit = "networkd-failsafe.service";
                 };
             };
