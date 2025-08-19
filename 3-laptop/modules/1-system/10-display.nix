@@ -1,6 +1,7 @@
 { config, ... }:
 {
     hardware = {
+        i2c.enable = true;      # Needed for Controlling External Monitor
         graphics = {
             enable = true;
             enable32Bit = true;
