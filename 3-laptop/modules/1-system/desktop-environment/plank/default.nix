@@ -54,7 +54,7 @@
                 };
             };
         };
-        dconfImports.blueman = {
+        dconfImports.plank = {
             source = ./settings.dconf;
             path = "/net/launchpad/plank/";
         };
