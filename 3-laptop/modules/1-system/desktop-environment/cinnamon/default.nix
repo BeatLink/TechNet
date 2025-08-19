@@ -22,6 +22,8 @@
     environment.systemPackages = with pkgs; [ 
         gnome-themes-extra 
         libnotify 
+        ddcutil 
+        i2c-tools
     ];
     environment.cinnamon.excludePackages = with pkgs; [
         onboard
