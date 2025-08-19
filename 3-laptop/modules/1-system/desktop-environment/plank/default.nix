@@ -22,8 +22,8 @@
 #   gmusicbrowser
 #   freetube
 #   stremio
-#   lutris
 #   steam
+#   lutris
 #   calibre
 #   LMMS
 #   timestretcher
@@ -53,10 +53,10 @@
                     allowOther = true;
                 };
             };
-            dconfImports.blueman = {
-                source = ./settings.dconf;
-                path = "/net/launchpad/plank/";
-            };
+        };
+        dconfImports.plank = {
+            source = ./settings.dconf;
+            path = "/net/launchpad/plank/";
         };
     };
 
