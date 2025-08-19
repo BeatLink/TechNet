@@ -171,7 +171,7 @@
                 };
                 # Systemd tracks failures
                 startLimitIntervalSec = 21600; # 1 hour in seconds
-                startLimitBurst = 5;          # must fail 5 times in 6 hours
+                startLimitBurst = 6;          # must fail 5 times in 6 hours
                 unitConfig.OnFailure = "networkd-failsafe-reboot.service";
             };
 
