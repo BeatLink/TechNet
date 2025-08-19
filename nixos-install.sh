@@ -2,7 +2,6 @@
 #! nix-shell -i bash
 #! nix-shell -p bash gum
 
-
 # https://mt-caret.github.io/blog/posts/2020-06-29-optin-state.html
 
 
@@ -28,7 +27,6 @@ title(){
 pr() {
   gum style --foreground "#00ACFF" "$@"
 }
-
 
 title 'TechNet Installer' '' 'This script automatically installs NixOS to a device in the TechNet'
 
@@ -60,7 +58,7 @@ chmod -vf 600 "$INSTALL_DIR/persistent/etc/ssh/ssh_host_ed25519_key"
 chmod -vf 600 "$INSTALL_DIR/persistent/etc/ssh/ssh_initrd_host_ed25519_key"
 pr "Done" ""
 
-FINAL_COMMAND="nix run github:nix-community/nixos-anywhere -- --extra-files \"$INSTALL_DIR\" --disk-encryption-keys \"$WORKDIR/encryption.key\" \"$WORKDIR/encryption.key\" --phases \"kexec,disko,install\" --no-substitute-on-destination --flake \".#$HOST\" \"$SSH_ADDRESS\""
+FINAL_COMMAND="nix run github:nix-community/nixos-anywhere -- --extra-files \"$INSTALL_DIR\" --disk-encryption-keys \"$WORKDIR/encryption.key\" \"$WORKDIR/encryption.key\" --phases \"kexec,disko,install\" --no-reboot --no-substitute-on-destination --flake \".#$HOST\" \"$SSH_ADDRESS\""
 
 title "Ready to Install!" "" "Final Command: $FINAL_COMMAND" "" "Work Folder Path: $WORKDIR" "" "The installation can now proceed. If you're satisfied with the changes, select Yes at the confirmation below"
 
