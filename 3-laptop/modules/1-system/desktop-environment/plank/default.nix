@@ -53,10 +53,10 @@
                     allowOther = true;
                 };
             };
-            dconfImports.blueman = {
-                source = ./settings.dconf;
-                path = "/net/launchpad/plank/";
-            };
+        };
+        dconfImports.blueman = {
+            source = ./settings.dconf;
+            path = "/net/launchpad/plank/";
         };
     };
 
