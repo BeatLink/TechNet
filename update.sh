@@ -3,9 +3,13 @@
 #! nix-shell -p bash gum
 
 
+# Add query for whether using remote system
+
+# Add query for whether to use local flake or github
+
 
 title(){
-  gum style --foreground "#00ACFF" --border-foreground "#00ACFF" --border thick --align center --width 200 --margin "1 2" --padding "2 4" "$@"
+  gum style --foreground "#00ACFF" --border-foreground "#00ACFF" --border thick --align center --width 150 --margin "1 0" --padding "1 2" "$@"
 }
 
 pr() {
@@ -37,8 +41,6 @@ PARAMS=(
     --ask-sudo-password
 )
 FINAL_COMMAND="nixos-rebuild ${PARAMS[@]} $ACTION_LOWERCASE"
+pr "Final Command: $FINAL_COMMAND" ""
 
-gum confirm && \
-    pr "Beginning NixOS $ACTION..." "" && \
-    pr "Running $FINAL_COMMAND" "" && \
-    bash -c "$FINAL_COMMAND"
+gum confirm "Begin NixOS $ACTION?" && bash -c "$FINAL_COMMAND"
