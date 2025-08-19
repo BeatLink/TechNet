@@ -1,0 +1,13 @@
+[docks/dock1]
+alignment='center'
+anchor-docklets=false
+dock-items=['firefox.dockitem', 'pix.dockitem', 'thunderbird.dockitem', 'separator.dockitem', 'smartcode-stremio.dockitem', 'vlc.dockitem', 'separator-1.dockitem']
+gap-size=0
+hide-delay=200
+hide-mode='dodge-active'
+lock-items=false
+pinned-only=false
+theme='Gtk+'
+tooltips-enabled=true
+zoom-enabled=true
+zoom-percent=175

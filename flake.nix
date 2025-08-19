@@ -30,6 +30,9 @@
         xdg-autostart = {
             url = "github:Zocker1999NET/home-manager-xdg-autostart";
         };
+        plank-reloaded = {
+            url = "github:BeatLink/plank-reloaded?dir=nix";
+        };
         flake-programs-sqlite =  {
             url = "github:wamserma/flake-programs-sqlite";
             inputs.nixpkgs.follows = "nixpkgs";
@@ -45,6 +48,7 @@
             arion, 
             home-manager, 
             xdg-autostart,
+            plank-reloaded,
             flake-programs-sqlite, 
             ... 
         }:  {
@@ -126,6 +130,7 @@
                             {
                                 home-manager.extraSpecialArgs = {
                                     inherit pkgs-stable;
+                                    inherit plank-reloaded;
                                 };
                             }
                         ];

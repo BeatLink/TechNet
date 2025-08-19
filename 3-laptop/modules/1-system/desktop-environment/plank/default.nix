@@ -40,7 +40,7 @@
 
 {
     services.bamf.enable = true;                                             # Allows plank to know running applications
-    home-manager.users.beatlink = { config, lib, pkgs, plank-reloaded, ... }: {
+    home-manager.users.beatlink = { pkgs, plank-reloaded, ... }: {
         home = {
             packages = [ plank-reloaded.packages.${pkgs.system}.plank-reloaded ];
             persistence = {
