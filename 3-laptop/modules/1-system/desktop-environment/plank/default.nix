@@ -136,7 +136,7 @@
                     Unit.Description = "Delay Restart Plank";
                     Service = {
                         Type = "oneshot";
-                        ExecStart = "${pkgs.coreutils-full}/bin/sleep 10";
+                        ExecStart = "${pkgs.coreutils-full}/bin/sleep 30";
                         ExecStartPost = "${pkgs.bash}/bin/bash -c '${pkgs.systemd}/bin/systemctl --user start restart-plank.path;'";
                     };
                     Install.WantedBy = [ "graphical-session.target" ];
