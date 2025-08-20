@@ -22,8 +22,8 @@
 #   gmusicbrowser
 #   freetube
 #   stremio
-#   lutris
 #   steam
+#   lutris
 #   calibre
 #   LMMS
 #   timestretcher
