@@ -8,7 +8,7 @@
 {  
     programs.dconf.enable = true;
     services.blueman.enable = true;
-    home-manager.users.beatlink = {pkgs, lib, ...}: {
+    home-manager.users.beatlink = {pkgs, ...}: {
         home.packages = [pkgs.dconf];
         dconf.enable = true;                                               # Enables dconf for Cinnamon setting Management
         dconfImports.blueman = {
