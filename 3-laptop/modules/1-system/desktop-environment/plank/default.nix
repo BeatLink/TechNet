@@ -58,8 +58,22 @@
             source = ./settings.dconf;
             path = "/net/launchpad/plank/";
         };
+        systemd.user.services.plank = {
+            Unit = {
+                Description = "Start Plank Dock on graphical login";
+                After = [ "dconf.service" "graphical-session.target" ];
+                Wants = [ "dconf.service" "graphical-session.target" ];
+            };
+            Service = {
+                ExecStart = "${plank-reloaded.packages.${pkgs.system}.plank-reloaded}/bin/plank";
+                Type = "simple";
+                Restart = "always";
+            };
+            Install = {
+                WantedBy = [ "default.target" ];
+            };
+        };
     };
-
 }
 
 /*
