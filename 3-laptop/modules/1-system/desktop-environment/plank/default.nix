@@ -4,7 +4,7 @@
 #
 # Launchers are grouped into categories seperated via separators.
 #
-
+#
 # Apps
 # 
 #   firefox
@@ -35,8 +35,6 @@
 #   tilix
 #   vscodium
 #   virt-manager
-
-
 
 {
     services.bamf.enable = true;                                             # Allows plank to know running applications
@@ -75,35 +73,3 @@
         };
     };
 }
-
-/*
-{pkgs, ...}: {
-            settings = {
-                "net/launchpad/plank/docks/dock1" = {
-                    alignment = "center";
-                    auto-pinning = true;
-                    current-workspace-only = false;
-                    dock-items = dockitemDconfNames;
-                    hide-delay = 200;
-                    hide-mode = "dodge-active";
-                    icon-size = 48;
-                    items-alignment = "center";
-                    lock-items = true;
-                    monitor = "";
-                    offset = 0;
-                    pinned-only = false;
-                    position = "bottom";
-                    pressure-reveal = false;
-                    show-dock-item = false;
-                    theme = "Gtk+";
-                    tooltips-enabled = true;
-                    unhide-delay = 100;
-                    zoom-enabled = true;
-                    zoom-percent = 175;
-                };
-            };
-        };
-        };
-    };
-}
-*/

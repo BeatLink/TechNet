@@ -1,13 +1,14 @@
 [docks/dock1]
 alignment='center'
-anchor-docklets=false
+anchor-docklets=true
 dock-items=['firefox.dockitem', 'org.keepassxc.KeePassXC.dockitem', 'Trilium.dockitem', 'nemo.dockitem', 'separator.dockitem', 'thunderbird.dockitem', 'whatsapp.dockitem', 'whatsapp-private.dockitem', 'discord.dockitem', 'element-desktop.dockitem', 'separator-3.dockitem', 'io.gitlab.news_flash.NewsFlash.dockitem', 'gmusicbrowser.dockitem', 'freetube.dockitem', 'smartcode-stremio.dockitem', 'steam.dockitem', 'net.lutris.Lutris.dockitem', 'calibre-gui.dockitem', 'lmms.dockitem', 'TimeStretch.dockitem', 'pix.dockitem', 'separator-1.dockitem', 'home-assistant.dockitem', 'nextcloud.dockitem', 'separator-2.dockitem', 'com.gexperts.Tilix.dockitem', 'codium.dockitem', 'virt-manager.dockitem', 'separator-4.dockitem']
 gap-size=0
 hide-delay=200
 hide-mode='dodge-active'
-lock-items=false
+lock-items=true
 pinned-only=false
 theme='Gtk+'
 tooltips-enabled=true
+unhide-delay=100
 zoom-enabled=true
 zoom-percent=175
