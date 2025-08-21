@@ -21,7 +21,7 @@ prepare_workspace() {
 prepare_workspace
 
 title(){
-  gum style --foreground "#00ACFF" --border-foreground "#00ACFF" --border thick --align center --width 200 --margin "1 0" --padding "1 2" "$@"
+  gum style --foreground "#00ACFF" --border-foreground "#00ACFF" --border thick --align center --width 150 --margin "1 0" --padding "1 2" "$@"
 }
 
 pr() {
@@ -60,7 +60,7 @@ pr "Done" ""
 
 FINAL_COMMAND="nix run github:nix-community/nixos-anywhere -- --extra-files \"$INSTALL_DIR\" --disk-encryption-keys \"$WORKDIR/encryption.key\" \"$WORKDIR/encryption.key\" --phases \"kexec,disko,install\" --no-reboot --no-substitute-on-destination --flake \".#$HOST\" \"$SSH_ADDRESS\""
 
-title "Ready to Install!" "" "Final Command: $FINAL_COMMAND" "" "Work Folder Path: $WORKDIR" "" "The installation can now proceed. If you're satisfied with the changes, select Yes at the confirmation below"
+title "Ready to Install!" "" "Final Command: $FINAL_COMMAND" "" "Work Folder Path: $WORKDIR" "" "The installation can now proceed."
 
-gum confirm && bash -c "$FINAL_COMMAND"
+gum confirm "Begin Installation?" && bash -c "$FINAL_COMMAND"
 
