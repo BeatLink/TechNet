@@ -3,7 +3,7 @@
 # Configures my user account
 #
 
-{ config, impermanence, ... }:
+{ config, inputs, ... }:
 {
     # Setup Linux User Account
     sops.secrets.beatlink_hashed_password = {
@@ -31,7 +31,7 @@
 
     # Setup Home Manager
     home-manager.users.beatlink = {
-        imports = [ impermanence.homeManagerModules.impermanence ];
+        imports = [ inputs.impermanence.homeManagerModules.impermanence ];
         home = {
             username = "beatlink";
             homeDirectory = "/home/beatlink";
