@@ -38,9 +38,12 @@
 
 {
     services.bamf.enable = true;                                             # Allows plank to know running applications
-    home-manager.users.beatlink = { pkgs, plank-reloaded, ... }: {
+    home-manager.users.beatlink = { pkgs, inputs, ... }: 
+    let 
+        plank-reloaded = inputs.plank-reloaded.defaultPackage.${pkgs.system};
+    in {
         home = {
-            packages = [ plank-reloaded.packages.${pkgs.system}.plank-reloaded ];
+            packages = [ plank-reloaded ];
             persistence = {
                 "/Storage/Apps/System/Plank" = {                                # Loads persistent data for plank
                     directories = [
@@ -63,7 +66,7 @@
                 Wants = [ "dconf.service" "graphical-session.target" ];
             };
             Service = {
-                ExecStart = "${plank-reloaded.packages.${pkgs.system}.plank-reloaded}/bin/plank";
+                ExecStart = "${plank-reloaded}/bin/plank";
                 Type = "simple";
                 Restart = "always";
             };
