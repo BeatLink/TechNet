@@ -1,4 +1,4 @@
-{ config, pkgs, ... }: 
+{ pkgs, ... }: 
 {
     programs = {
         steam = {
@@ -12,12 +12,10 @@
     };
 
     environment.systemPackages = with pkgs; [
-        mangohud
         protonup-qt
-        heroic
     ];
 
-    home-manager.users.beatlink = { config, pkgs, ... }: {
+    home-manager.users.beatlink = {
         home = {
             persistence."/Storage/Apps/Fun/Steam" = {
                 directories = [
