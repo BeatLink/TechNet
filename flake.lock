@@ -71,11 +71,11 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1755785797,
-        "narHash": "sha256-UHWaZ0RbTPpHeZDcigx6Gq2klkocD3vsrZ6vtHfLNI4=",
+        "lastModified": 1755857788,
+        "narHash": "sha256-qovNYCdg+UdAggJawdfIsIeytpf+sUMNM9nHGdVwkl4=",
         "owner": "wamserma",
         "repo": "flake-programs-sqlite",
-        "rev": "4dcf21ef2fe811e0dca2fb201d8170fbb233a9a6",
+        "rev": "9e7ddaaeaeeb96cbac8340e491832a0cdd1073fd",
         "type": "github"
       },
       "original": {
@@ -158,15 +158,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1755777773,
+        "lastModified": 1755807832,
         "narHash": "sha256-J3gksH+RoU//+cdjAEuStj2QWzshqs8LWO+B6D0qR6U=",
-        "owner": "BeatLink",
+        "owner": "zquestz",
         "repo": "plank-reloaded",
-        "rev": "efa5385dab8c864fac2ce2cc157b6bc389c78bdd",
+        "rev": "25230c2f096f35ffece1f63d2c75d7b097dcde2b",
         "type": "github"
       },
       "original": {
-        "owner": "BeatLink",
+        "owner": "zquestz",
         "repo": "plank-reloaded",
         "type": "github"
       }
