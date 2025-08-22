@@ -28,7 +28,7 @@
             url = "github:Zocker1999NET/home-manager-xdg-autostart";
         };
         plank-reloaded = {
-            url = "github:BeatLink/plank-reloaded";
+            url = "github:zquestz/plank-reloaded";
             inputs.nixpkgs.follows = "nixpkgs";
         };
         flake-programs-sqlite =  {
