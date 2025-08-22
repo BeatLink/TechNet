@@ -117,7 +117,8 @@
                         KUMA_URL="https://uptime-kuma.heimdall.technet/api/push/WCLW4SB6K8?status=up&msg=Network%2fCheck%2fSuccessful"
 
                         # attempt the push; exit 0 if successful, 1 if failed
-                        if ${pkgs.curl}/bin/curl -fsS "$KUMA_URL" >/dev/null; then
+                        if ping 10.100.100.1 -c5 >/dev/null; then
+                            ${pkgs.curl}/bin/curl -fsS "$KUMA_URL"
                             exit 0
                         else
                             exit 1
@@ -162,8 +163,10 @@
                         KUMA_URL="https://uptime-kuma.heimdall.technet/api/push/WCLW4SB6K8?status=up&msg=Network%2fFailsafe%2fCheck%2fSuccessful"
 
                         # exit 0 on success, 1 on failure
-                        if ${pkgs.curl}/bin/curl -fsS "$KUMA_URL" >/dev/null; then
+                        if ping 10.100.100.1 -c5 >/dev/null; then
+                             ${pkgs.curl}/bin/curl -fsS "$KUMA_URL"
                             exit 0
+
                         else
                             exit 1
                         fi
