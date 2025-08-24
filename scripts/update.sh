@@ -15,8 +15,35 @@ title() {
         --padding "1 2" "$@"
 }
 
+# Standard progress/info messages (blue)
 pr() {
-    gum style --foreground "#00ACFF" "$@"
+    local timestamp
+    timestamp=$(date +"[%H:%M:%S]")
+    gum style --foreground "#00ACFF" "$timestamp $*"
+}
+
+# Success messages (green)
+success() {
+    local timestamp
+    timestamp=$(date +"[%H:%M:%S]")
+    gum style --foreground "#00FF7F" "$timestamp $*"
+}
+
+# Error messages (red)
+fail() {
+    local timestamp
+    timestamp=$(date +"[%H:%M:%S]")
+    gum style --foreground "#FF4C4C" "$timestamp ❌ $*"
+}
+
+# Run a command and fail if it fails
+run_checked() {
+    local cmd="$*"
+    eval "$cmd"
+    if [[ $? -ne 0 ]]; then
+        fail "Command failed: $cmd"
+        exit 1
+    fi
 }
 
 choose() {
@@ -90,14 +117,14 @@ remove_generations() {
             echo "---- $host (user generations) ----"
             nix-env --list-generations
         else
-            sudo nix-env --profile /nix/var/nix/profiles/system --delete-generations old
-            nix-env --delete-generations old
+            run_checked "sudo nix-env --profile /nix/var/nix/profiles/system --delete-generations old"
+            run_checked "nix-env --delete-generations old"
         fi
     else
         if [[ "$dry_run" == "true" ]]; then
             ssh "$CURRENT_USER@$host.technet" "echo '---- $host (system generations) ----' && sudo nix-env --profile /nix/var/nix/profiles/system --list-generations && echo '---- $host (user generations) ----' && nix-env --list-generations"
         else
-            ssh "$CURRENT_USER@$host.technet" "sudo nix-env --profile /nix/var/nix/profiles/system --delete-generations old && nix-env --delete-generations old"
+            run_checked "ssh $CURRENT_USER@$host.technet 'sudo nix-env --profile /nix/var/nix/profiles/system --delete-generations old && nix-env --delete-generations old'"
         fi
     fi
 }
@@ -105,7 +132,7 @@ remove_generations() {
 # Nix Garbage Collection Function ----------------------------------------------------------
 nix_gc() {
     local host="$1"
-    ssh "$CURRENT_USER@$host.technet" nix-collect-garbage -d
+    run_checked "ssh $CURRENT_USER@$host.technet nix-collect-garbage -d"
 }
 
 # Main Script ------------------------------------------------------------------------------
@@ -130,38 +157,58 @@ case "$COMMAND" in
 3. Remove Old Generations
 4. nix-collect-garbage" || exit 1
 
-        nix flake update --flake "$FLAKE_DIR"
-        run_on_hosts "${HOST_LIST[*]}" nixos_rebuild
+        pr "🔄 Updating flake..."
+        run_checked nix flake update --flake "$FLAKE_DIR"
+
+        pr "⚙️  Running nixos-rebuild $NIXOS_REBUILD_ACTION..."
+        run_checked run_on_hosts "${HOST_LIST[*]}" nixos_rebuild
+
+        pr "🗑️  Removing old generations..."
         run_on_hosts "${HOST_LIST[*]}" remove_generations false
+
+        pr "🧹 Running garbage collection..."
         run_on_hosts "${HOST_LIST[*]}" nix_gc
+
+        success "✅ All tasks completed successfully!"
         ;;
 
     "Run Nix Flake Update")
-        nix flake update --flake "$FLAKE_DIR"
+        pr "🔄 Updating flake..."
+        run_checked nix flake update --flake "$FLAKE_DIR"
+        success "✅ Flake update completed!"
         ;;
 
     "Run Nixos Rebuild")
         HOST_LIST=($(get_hosts))
         NIXOS_REBUILD_ACTION=$(get_rebuild_action)
         gum confirm "Run nixos-rebuild $NIXOS_REBUILD_ACTION on ${HOST_LIST[*]}?" || exit 1
+        pr "⚙️  Running nixos-rebuild $NIXOS_REBUILD_ACTION..."
         run_on_hosts "${HOST_LIST[*]}" nixos_rebuild
+        success "✅ nixos-rebuild $NIXOS_REBUILD_ACTION completed!"
         ;;
 
     "Preview Old Generations")
         HOST_LIST=($(get_hosts))
+        pr "👀 Previewing old generations on ${HOST_LIST[*]}..."
         run_on_hosts "${HOST_LIST[*]}" remove_generations true
+        success "✅ Preview complete!"
         ;;
 
     "Remove Old Generations + GC")
         HOST_LIST=($(get_hosts))
         gum confirm "Remove old generations and run GC on ${HOST_LIST[*]}?" || exit 1
+        pr "🗑️  Removing old generations..."
         run_on_hosts "${HOST_LIST[*]}" remove_generations false
+        pr "🧹 Running garbage collection..."
         run_on_hosts "${HOST_LIST[*]}" nix_gc
+        success "✅ Old generations removed and GC completed!"
         ;;
 
     "Run Nix Garbage Collection")
         HOST_LIST=($(get_hosts))
         gum confirm "Run nix-collect-garbage on ${HOST_LIST[*]}?" || exit 1
+        pr "🧹 Running garbage collection..."
         run_on_hosts "${HOST_LIST[*]}" nix_gc
+        success "✅ Garbage collection completed!"
         ;;
 esac
