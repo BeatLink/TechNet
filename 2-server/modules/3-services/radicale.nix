@@ -41,7 +41,7 @@
                         healthcheck = {
                             test = [
                                 "CMD-SHELL"
-                                "curl -f http://localhost:5232/ || exit 1"
+                                "wget --spider --quiet --tries=1 http://localhost:5232/ || exit 1"
                             ];
                             interval = "30s";
                             retries = 3;
