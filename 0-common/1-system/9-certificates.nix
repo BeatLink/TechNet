@@ -4,7 +4,7 @@
 #
 
 {
-    security.pki.certificates = [ 
+    security.pki.certificates = [
         ''
             -----BEGIN CERTIFICATE-----
             MIIFnTCCA4WgAwIBAgIULYFIACM2Tzh0eCz80y9kMxijzicwDQYJKoZIhvcNAQEL
