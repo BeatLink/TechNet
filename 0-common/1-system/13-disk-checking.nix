@@ -112,7 +112,7 @@ in
             fi
 
             # Send simple GET request to Uptime Kuma
-            ${pkgs.curl}/bin/curl -s "${UPTIME_KUMA_URL}?status=${UK_STATUS}"
+            ${pkgs.curl}/bin/curl -s "$UPTIME_KUMA_URL?status=$UK_STATUS"
 
             echo "Report sent to Uptime Kuma. Status: $STATUS"
         '';
