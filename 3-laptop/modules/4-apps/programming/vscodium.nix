@@ -1,7 +1,7 @@
 {
     home-manager.users.beatlink = { pkgs, ... }: {
         home = {
-            packages = with pkgs; [ nixd nixfmt-rfc-style vscodium rnix-lsp];
+            packages = with pkgs; [ nixd nixfmt-rfc-style vscodium nil];
             persistence."/Storage/Apps/Programming/VsCodium" = {
                 directories = [
                     ".config/VSCodium"
