@@ -10,7 +10,7 @@
             inputs.nixpkgs.follows = "nixpkgs";
         };
         impermanence = {
-           url = "github:nix-community/impermanence";
+            url = "github:nix-community/impermanence";
         };
         sops-nix = {
             url = "github:Mic92/sops-nix";
@@ -31,71 +31,73 @@
             url = "github:zquestz/plank-reloaded";
             inputs.nixpkgs.follows = "nixpkgs";
         };
-        flake-programs-sqlite =  {
+        flake-programs-sqlite = {
             url = "github:wamserma/flake-programs-sqlite";
             inputs.nixpkgs.follows = "nixpkgs";
         };
     };
-    outputs = inputs @ {
-            nixpkgs, 
-            disko, 
-            impermanence, 
-            sops-nix, 
-            arion, 
-            home-manager, 
+    outputs =
+        inputs@{
+            nixpkgs,
+            disko,
+            impermanence,
+            sops-nix,
+            arion,
+            home-manager,
             xdg-autostart,
-            flake-programs-sqlite, 
-            ... 
-        }:  {
-        nixosConfigurations = {
-            Ragnarok = nixpkgs.lib.nixosSystem {
-                system = "aarch64-linux";
-                modules = [
-                    disko.nixosModules.disko
-                    impermanence.nixosModules.impermanence
-                    sops-nix.nixosModules.sops
-                    home-manager.nixosModules.home-manager
-                    ./0-common
-                    ./1-backup-server
-                    {
-                        home-manager.extraSpecialArgs = { inherit inputs; };
-                    }
-                ];
-                specialArgs = { inherit inputs; };
-            };
-            Heimdall = nixpkgs.lib.nixosSystem {
-                system = "x86_64-linux";
-                modules = [
-                    disko.nixosModules.disko
-                    impermanence.nixosModules.impermanence
-                    sops-nix.nixosModules.sops
-                    home-manager.nixosModules.home-manager
-                    arion.nixosModules.arion
-                    ./0-common
-                    ./2-server
-                    {
-                        home-manager.extraSpecialArgs = { inherit inputs; };
-                    }
-                ];
-                specialArgs = { inherit inputs; };
-            };
-            Odin = nixpkgs.lib.nixosSystem {
-                system = "x86_64-linux";
-                modules = [
-                    disko.nixosModules.disko
-                    impermanence.nixosModules.impermanence
-                    sops-nix.nixosModules.sops
-                    home-manager.nixosModules.home-manager
-                    { home-manager.sharedModules = [ xdg-autostart.homeManagerModules.xdg-autostart ]; }
-                    flake-programs-sqlite.nixosModules.programs-sqlite
-                    ./0-common
-                    ./3-laptop
-                    {
-                        home-manager.extraSpecialArgs = { inherit inputs; };
-                    }
-                ];
-                specialArgs = { inherit inputs; };
+            flake-programs-sqlite,
+            ...
+        }:
+        {
+            nixosConfigurations = {
+                Ragnarok = nixpkgs.lib.nixosSystem {
+                    system = "aarch64-linux";
+                    modules = [
+                        disko.nixosModules.disko
+                        impermanence.nixosModules.impermanence
+                        sops-nix.nixosModules.sops
+                        home-manager.nixosModules.home-manager
+                        ./0-common
+                        ./1-backup-server
+                        {
+                            home-manager.extraSpecialArgs = { inherit inputs; };
+                        }
+                    ];
+                    specialArgs = { inherit inputs; };
+                };
+                Heimdall = nixpkgs.lib.nixosSystem {
+                    system = "x86_64-linux";
+                    modules = [
+                        disko.nixosModules.disko
+                        impermanence.nixosModules.impermanence
+                        sops-nix.nixosModules.sops
+                        home-manager.nixosModules.home-manager
+                        arion.nixosModules.arion
+                        ./0-common
+                        ./2-server
+                        {
+                            home-manager.extraSpecialArgs = { inherit inputs; };
+                        }
+                    ];
+                    specialArgs = { inherit inputs; };
+                };
+                Odin = nixpkgs.lib.nixosSystem {
+                    system = "x86_64-linux";
+                    modules = [
+                        disko.nixosModules.disko
+                        impermanence.nixosModules.impermanence
+                        sops-nix.nixosModules.sops
+                        home-manager.nixosModules.home-manager
+                        { home-manager.sharedModules = [ xdg-autostart.homeManagerModules.xdg-autostart ]; }
+                        flake-programs-sqlite.nixosModules.programs-sqlite
+                        ./0-common
+                        ./3-laptop
+                        {
+                            home-manager.extraSpecialArgs = { inherit inputs; };
+                        }
+                    ];
+                    specialArgs = { inherit inputs; };
+                };
             };
         };
-    };
 }
