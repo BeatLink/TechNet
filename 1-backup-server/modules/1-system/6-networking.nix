@@ -109,7 +109,7 @@
         };
         services = {
             networkd-check = {
-                description = "Check network connectivity via Uptime Kuma push";
+                description = "Check network connectivity via pinging Heimdall";
                 serviceConfig = {
                     Type = "oneshot";
                     ExecStart = pkgs.writeShellScript "networkd-check" ''
@@ -128,7 +128,7 @@
             };
 
             networkd-recover = {
-                description = "Restart systemd-networkd if unable to reach server";
+                description = "Restart systemd-networkd if unable to reach Heimdall for 5 minutes";
                 serviceConfig = {
                     Type = "oneshot";
                     ExecStart = pkgs.writeShellScript "networkd-recover" ''
@@ -138,7 +138,7 @@
             };
 
             networkd-failsafe = {
-                description = "Reboot if Uptime Kuma push fails repeatedly for 6 hours";
+                description = "Check network connectivity by pinging heimdall (failsafe)";
                 serviceConfig = {
                     Type = "oneshot";
                     ExecStart = pkgs.writeShellScript "networkd-failsafe" ''
@@ -157,7 +157,7 @@
             };
 
             networkd-failsafe-reboot = {
-                description = "Reboot system if unable to reach server";
+                description = "Reboot system if unable to reach Heimdall for 6 hours";
                 serviceConfig = {
                     Type = "oneshot";
                     ExecStart = "${pkgs.systemd}/bin/systemctl reboot";
@@ -175,7 +175,7 @@
                 };
             };
             networkd-failsafe = {
-                description = "Run Uptime Kuma failsafe check every 30 seconds";
+                description = "Run networkd-failsafe-check every 30 seconds";
                 wantedBy = [ "timers.target" ];
                 timerConfig = {
                     OnBootSec = "30s";
