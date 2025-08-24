@@ -30,7 +30,7 @@
                         */
                         environment = {
                             "TZ" = "America/Jamaica";
-                            "RADICALE_CONFIG" = "/Storage/Services/Radicale/radicale.cfg";
+                            "RADICALE_CONFIG" = "/var/lib/radicale/radicale.cfg";
                         };
                         expose = [
                             "5232"
