@@ -45,21 +45,18 @@ in
       type = lib.types.path;
       default = "";
       description = "SSH private key used to fetch KeePassXC secrets from the remote host";
-      validate = path: if path == "" then "sshKey must be set if zfsUnlock.enable is true" else true;
     };
 
     remoteHost = lib.mkOption {
       type = lib.types.str;
       default = "";
       description = "Remote host where KeePassXC database resides";
-      validate = host: if host == "" then "remoteHost must be set if zfsUnlock.enable is true" else true;
     };
 
     remoteUser = lib.mkOption {
       type = lib.types.str;
       default = "";
       description = "Existing user on the remote system with access to KeePassXC database";
-      validate = user: if user == "" then "remoteUser must be set if zfsUnlock.enable is true" else true;
     };
 
     remoteDatabasePath = lib.mkOption {
