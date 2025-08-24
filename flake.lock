@@ -71,11 +71,11 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1755889410,
-        "narHash": "sha256-x1QdvjD6vxQwP0DCIJPQYKcJv1GI6vz/wLp7l19KeBE=",
+        "lastModified": 1755973016,
+        "narHash": "sha256-rbbx4fL+0IT1SpY+iaV/IQ03KyqBVNqBGIzcS6Xh+qI=",
         "owner": "wamserma",
         "repo": "flake-programs-sqlite",
-        "rev": "859847ab458821d7734806d2234835ab767995b8",
+        "rev": "93d305e0468d8b13a6bcdc9a14fee5ca44300480",
         "type": "github"
       },
       "original": {
