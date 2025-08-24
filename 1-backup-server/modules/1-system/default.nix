@@ -7,5 +7,6 @@
         ./5-software.nix
         ./6-networking.nix
         ./7-borg.nix
+        ./8-disk-checking.nix
     ];
 }
