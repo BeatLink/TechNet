@@ -44,7 +44,9 @@ in
             description = "Disk & ZFS Health Check";
             serviceConfig = {
                 Type = "oneshot";
-                ExecStart = ''${pkgs.bash}/bin/bash -e /etc/nixos/disk-zfs-health.sh'';
+                ExecStart = ''${pkgs.bash}/bin/bash /etc/nixos/disk-zfs-health.sh'';
+                StandardOutput = "journal";
+                StandardError  = "journal";
             };
             wantedBy = [ "multi-user.target" ];
         };
@@ -107,7 +109,7 @@ in
             check_zfs
 
             # Send simple GET request to Uptime Kuma
-            curl -s "$UPTIME_KUMA_URL"
+            ${pkgs.curl}/bin/curl -s "$UPTIME_KUMA_URL"
 
             echo "Report sent to Uptime Kuma. Status: $STATUS"
         '';
