@@ -15,28 +15,24 @@ title() {
         --padding "1 2" "$@"
 }
 
-# Standard progress/info messages (blue)
 pr() {
     local timestamp
     timestamp=$(date +"[%H:%M:%S]")
     gum style --foreground "#00ACFF" "$timestamp $*"
 }
 
-# Success messages (green)
 success() {
     local timestamp
     timestamp=$(date +"[%H:%M:%S]")
     gum style --foreground "#00FF7F" "$timestamp $*"
 }
 
-# Error messages (red)
 fail() {
     local timestamp
     timestamp=$(date +"[%H:%M:%S]")
     gum style --foreground "#FF4C4C" "$timestamp ❌ $*"
 }
 
-# Run a command and fail if it fails
 run_checked() {
     local cmd="$*"
     eval "$cmd"
@@ -73,12 +69,28 @@ get_rebuild_action() {
     echo "$action" | cut -d'-' -f1 | awk '{$1=$1;print}'
 }
 
+# Robust run_on_hosts supporting extra arguments ------------------------------------------
 run_on_hosts() {
-    local hosts=($1)
-    local func=$2
-    shift 2
+    local func=$1
+    shift
+    local hosts=()
+    local func_args=()
+
+    # Collect extra args before the special --hosts marker
+    while [[ "$#" -gt 0 ]]; do
+        if [[ "$1" == "--hosts" ]]; then
+            shift
+            break
+        fi
+        func_args+=("$1")
+        shift
+    done
+
+    # Remaining args are hosts
+    hosts=("$@")
+
     for host in "${hosts[@]}"; do
-        "$func" "$host" "$@"
+        "$func" "$host" "${func_args[@]}"
     done
 }
 
@@ -161,13 +173,13 @@ case "$COMMAND" in
         run_checked nix flake update --flake "$FLAKE_DIR"
 
         pr "⚙️  Running nixos-rebuild $NIXOS_REBUILD_ACTION..."
-        run_checked run_on_hosts "${HOST_LIST[*]}" nixos_rebuild
+        run_on_hosts nixos_rebuild --hosts "${HOST_LIST[@]}"
 
         pr "🗑️  Removing old generations..."
-        run_on_hosts "${HOST_LIST[*]}" remove_generations false
+        run_on_hosts remove_generations false --hosts "${HOST_LIST[@]}"
 
         pr "🧹 Running garbage collection..."
-        run_on_hosts "${HOST_LIST[*]}" nix_gc
+        run_on_hosts nix_gc --hosts "${HOST_LIST[@]}"
 
         success "✅ All tasks completed successfully!"
         ;;
@@ -183,14 +195,14 @@ case "$COMMAND" in
         NIXOS_REBUILD_ACTION=$(get_rebuild_action)
         gum confirm "Run nixos-rebuild $NIXOS_REBUILD_ACTION on ${HOST_LIST[*]}?" || exit 1
         pr "⚙️  Running nixos-rebuild $NIXOS_REBUILD_ACTION..."
-        run_on_hosts "${HOST_LIST[*]}" nixos_rebuild
+        run_on_hosts nixos_rebuild --hosts "${HOST_LIST[@]}"
         success "✅ nixos-rebuild $NIXOS_REBUILD_ACTION completed!"
         ;;
 
     "Preview Old Generations")
         HOST_LIST=($(get_hosts))
         pr "👀 Previewing old generations on ${HOST_LIST[*]}..."
-        run_on_hosts "${HOST_LIST[*]}" remove_generations true
+        run_on_hosts remove_generations true --hosts "${HOST_LIST[@]}"
         success "✅ Preview complete!"
         ;;
 
@@ -198,9 +210,9 @@ case "$COMMAND" in
         HOST_LIST=($(get_hosts))
         gum confirm "Remove old generations and run GC on ${HOST_LIST[*]}?" || exit 1
         pr "🗑️  Removing old generations..."
-        run_on_hosts "${HOST_LIST[*]}" remove_generations false
+        run_on_hosts remove_generations false --hosts "${HOST_LIST[@]}"
         pr "🧹 Running garbage collection..."
-        run_on_hosts "${HOST_LIST[*]}" nix_gc
+        run_on_hosts nix_gc --hosts "${HOST_LIST[@]}"
         success "✅ Old generations removed and GC completed!"
         ;;
 
@@ -208,7 +220,7 @@ case "$COMMAND" in
         HOST_LIST=($(get_hosts))
         gum confirm "Run nix-collect-garbage on ${HOST_LIST[*]}?" || exit 1
         pr "🧹 Running garbage collection..."
-        run_on_hosts "${HOST_LIST[*]}" nix_gc
+        run_on_hosts nix_gc --hosts "${HOST_LIST[@]}"
         success "✅ Garbage collection completed!"
         ;;
 esac
