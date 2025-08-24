@@ -19,7 +19,6 @@ in
             description = "Uptime Kuma push URL for disk and ZFS health reports";
         };
 
-        # New option: interval for the timer
         checkInterval = mkOption {
             type = types.str;
             default = "daily";
@@ -39,7 +38,6 @@ in
             util-linux
         ];
 
-        # Health check service
         systemd.services.disk-zfs-health = {
             description = "Disk & ZFS Health Check";
             serviceConfig = {
@@ -51,7 +49,6 @@ in
             wantedBy = [ "multi-user.target" ];
         };
 
-        # Health check timer
         systemd.timers.disk-zfs-health = {
             description = "Disk & ZFS Health Check Timer";
             timerConfig =
@@ -68,13 +65,11 @@ in
             wantedBy = [ "timers.target" ];
         };
 
-        # Deploy script
         environment.etc."nixos/disk-zfs-health.sh".text = ''
             #!${pkgs.bash}/bin/bash
-
             set -x
-            UPTIME_KUMA_URL="${cfg.uptimeKumaUrl}"
 
+            UPTIME_KUMA_URL="${cfg.uptimeKumaUrl}"
             STATUS="Up"
 
             check_smart() {
@@ -110,8 +105,14 @@ in
             echo -e "\nZFS Pools Status:"
             check_zfs
 
+            # Map STATUS to Uptime Kuma values
+            UK_STATUS="up"
+            if [ "$STATUS" = "Down" ]; then
+                UK_STATUS="down"
+            fi
+
             # Send simple GET request to Uptime Kuma
-            ${pkgs.curl}/bin/curl -s "$UPTIME_KUMA_URL"
+            ${pkgs.curl}/bin/curl -s "${UPTIME_KUMA_URL}?status=${UK_STATUS}"
 
             echo "Report sent to Uptime Kuma. Status: $STATUS"
         '';
