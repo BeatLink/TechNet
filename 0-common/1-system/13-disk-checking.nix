@@ -48,10 +48,11 @@ in
       description = "Disk & ZFS Health Check Timer";
       timerConfig = if builtins.match "^[0-9]+[smhd]?$" cfg.checkInterval != null then {
         OnUnitActiveSec = cfg.checkInterval;
+        Persistent = true;
       } else {
         OnCalendar = cfg.checkInterval;
+        Persistent = true;
       };
-      Persistent = true;
       wantedBy = [ "timers.target" ];
     };
 
