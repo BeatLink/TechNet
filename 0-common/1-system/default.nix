@@ -1,7 +1,7 @@
 # Module Imports
 
 {
-    imports = [                                       
+    imports = [
         ./1-hardware-configuration.nix
         ./2-boot.nix
         ./3-root-drive-disko.nix

@@ -46,7 +46,7 @@ in
                 Type = "oneshot";
                 ExecStart = ''${pkgs.bash}/bin/bash /etc/nixos/disk-zfs-health.sh'';
                 StandardOutput = "journal";
-                StandardError  = "journal";
+                StandardError = "journal";
             };
             wantedBy = [ "multi-user.target" ];
         };
@@ -71,6 +71,8 @@ in
         # Deploy script
         environment.etc."nixos/disk-zfs-health.sh".text = ''
             #!${pkgs.bash}/bin/bash
+
+            set -x
             UPTIME_KUMA_URL="${cfg.uptimeKumaUrl}"
 
             STATUS="Up"
