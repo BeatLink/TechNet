@@ -10,5 +10,6 @@
         ./8-borgmatic.nix
         ./9-utilities.nix
         ./10-sound.nix
+        ./11-disk-checking.nix
     ];
 }

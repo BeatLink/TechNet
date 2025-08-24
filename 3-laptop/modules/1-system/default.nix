@@ -1,5 +1,5 @@
 {
-    imports = [                                   
+    imports = [
         ./1-hardware-configuration.nix
         ./2-boot.nix
         ./3-root-drive-disko.nix
@@ -13,6 +13,7 @@
         ./13-printing.nix
         ./14-fuse.nix
         ./15-home-folders.nix
+        ./16-disk-checking.nix
         ./plymouth.nix
         ./dconf
         ./desktop-environment
