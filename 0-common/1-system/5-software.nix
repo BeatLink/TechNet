@@ -39,7 +39,8 @@
         persistent = true;
     };
     systemd.services.nixos-upgrade =
-        let # Sends status updates to Uptime Kuma on Heimdall
+        let
+            # Sends status updates to Uptime Kuma on Heimdall
             BaseURL = "https://uptime-kuma.heimdall.technet/api/push/";
             Keys = {
                 Ragnarok = "sTgpl4hkEc";
