@@ -78,6 +78,30 @@ nixos_rebuild() {
     bash -c "$final_cmd"
 }
 
+# Remove Old Generations Function ----------------------------------------------------------
+remove_generations() {
+    local host="$1"
+    local dry_run="$2"
+
+    if [[ "$CURRENT_HOST" == "$host" ]]; then
+        if [[ "$dry_run" == "true" ]]; then
+            echo "---- $host (system generations) ----"
+            sudo nix-env --profile /nix/var/nix/profiles/system --list-generations
+            echo "---- $host (user generations) ----"
+            nix-env --list-generations
+        else
+            sudo nix-env --profile /nix/var/nix/profiles/system --delete-generations old
+            nix-env --delete-generations old
+        fi
+    else
+        if [[ "$dry_run" == "true" ]]; then
+            ssh "$CURRENT_USER@$host.technet" "echo '---- $host (system generations) ----' && sudo nix-env --profile /nix/var/nix/profiles/system --list-generations && echo '---- $host (user generations) ----' && nix-env --list-generations"
+        else
+            ssh "$CURRENT_USER@$host.technet" "sudo nix-env --profile /nix/var/nix/profiles/system --delete-generations old && nix-env --delete-generations old"
+        fi
+    fi
+}
+
 # Nix Garbage Collection Function ----------------------------------------------------------
 nix_gc() {
     local host="$1"
@@ -91,6 +115,8 @@ COMMAND=$(choose "Select Command:" \
     "Run All Tasks" \
     "Run Nix Flake Update" \
     "Run Nixos Rebuild" \
+    "Preview Old Generations" \
+    "Remove Old Generations + GC" \
     "Run Nix Garbage Collection"
 )
 
@@ -101,15 +127,12 @@ case "$COMMAND" in
         gum confirm "Run the following tasks on ${HOST_LIST[*]}?
 1. Update Flake
 2. nixos-rebuild $NIXOS_REBUILD_ACTION
-3. nix-collect-garbage" || exit 1
+3. Remove Old Generations
+4. nix-collect-garbage" || exit 1
 
-        # Flake Update
         nix flake update --flake "$FLAKE_DIR"
-
-        # Nixos Rebuild
         run_on_hosts "${HOST_LIST[*]}" nixos_rebuild
-
-        # Nix Garbage Collection
+        run_on_hosts "${HOST_LIST[*]}" remove_generations false
         run_on_hosts "${HOST_LIST[*]}" nix_gc
         ;;
 
@@ -122,6 +145,18 @@ case "$COMMAND" in
         NIXOS_REBUILD_ACTION=$(get_rebuild_action)
         gum confirm "Run nixos-rebuild $NIXOS_REBUILD_ACTION on ${HOST_LIST[*]}?" || exit 1
         run_on_hosts "${HOST_LIST[*]}" nixos_rebuild
+        ;;
+
+    "Preview Old Generations")
+        HOST_LIST=($(get_hosts))
+        run_on_hosts "${HOST_LIST[*]}" remove_generations true
+        ;;
+
+    "Remove Old Generations + GC")
+        HOST_LIST=($(get_hosts))
+        gum confirm "Remove old generations and run GC on ${HOST_LIST[*]}?" || exit 1
+        run_on_hosts "${HOST_LIST[*]}" remove_generations false
+        run_on_hosts "${HOST_LIST[*]}" nix_gc
         ;;
 
     "Run Nix Garbage Collection")
