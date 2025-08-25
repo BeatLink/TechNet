@@ -7,8 +7,14 @@
     networking.firewall.allowedTCPPorts = [ 7654 ];
     environment.persistence."/persistent" = {
         directories = [
-            "/var/db/tang"
-            "/var/lib/private/tang"
+            {
+                directory = "/var/db/tang";
+                mode = "0700";
+            }
+            {
+                directory = "/var/lib/private/tang";
+                mode = "0700";
+            }
         ];
     };
 }
