@@ -24,17 +24,17 @@
             PermitRootLogin = "no";
         };
         hostKeys = [
-            { 
-                type = "ed25519"; 
-                path = "/persistent/etc/ssh/ssh_host_ed25519_key"; 
+            {
+                type = "ed25519";
+                path = "/persistent/etc/ssh/ssh_host_ed25519_key";
             }
         ];
     };
     boot.initrd = {
         network.ssh = {
             enable = true;
-            authorizedKeys = [ 
-                "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM4GfJHxZu55mhQPpL1MqLCrS4ws/1ZUodC/QicApyGF beatlink@technet" 
+            authorizedKeys = [
+                "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM4GfJHxZu55mhQPpL1MqLCrS4ws/1ZUodC/QicApyGF beatlink@technet"
             ];
             hostKeys = [
                 "/persistent/etc/ssh/ssh_initrd_host_ed25519_key"
@@ -46,27 +46,61 @@
         knownHosts = {
             "ragnarok-boot" = {
                 publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINtSfkBwSLxZxsjO/cvDpeY6j3DA95qOMsapWBAjv2hu";
-                hostNames = ["10.100.100.5" "ragnarok.technet" "ragnarok" "ragnarok-boot"];
+                hostNames = [
+                    "10.100.100.5"
+                    "ragnarok.technet"
+                    "ragnarok"
+                    "ragnarok-boot"
+                ];
             };
             "ragnarok" = {
                 publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIInjkzjQG+KUcN1roAomyDKJiJLaHbiKBd46GjSBTbi1";
-                hostNames = ["10.100.100.5" "ragnarok.technet" "ragnarok" "ragnarok-boot"];
+                hostNames = [
+                    "10.100.100.5"
+                    "ragnarok.technet"
+                    "ragnarok"
+                    "ragnarok-boot"
+                ];
             };
             "heimdall-boot" = {
                 publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJoZQ1rR5JCvRHw0PykObtYgoEIonLL/vaomPc3qscGF";
-                hostNames = ["192.168.0.2" "10.100.100.1"  "heimdall.technet" "heimdall" "heimdall-boot"];
+                hostNames = [
+                    "192.168.0.2"
+                    "10.100.100.1"
+                    "heimdall.technet"
+                    "heimdall"
+                    "heimdall-boot"
+                ];
             };
             "heimdall" = {
                 publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICBUbcOarWmNGo5LRtmpx8Tr7cW3nNO6UvfwMdv/qoMc";
-                hostNames = ["192.168.0.2" "10.100.100.1" "heimdall.technet" "heimdall" "heimdall-boot"];
+                hostNames = [
+                    "192.168.0.2"
+                    "10.100.100.1"
+                    "heimdall.technet"
+                    "heimdall"
+                    "heimdall-boot"
+                ];
             };
             "odin-boot" = {
                 publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICRPO+0Y6QP2ifSA5uMXaIn+aIzUnQFdShRp7QdeSNhg";
-                hostNames = ["192.168.0.3" "10.100.100.2" "odin.technet" "odin" "odin-boot"];
+                hostNames = [
+                    "192.168.0.3"
+                    "10.100.100.2"
+                    "odin.technet"
+                    "odin"
+                    "odin-boot"
+                ];
             };
             "odin" = {
                 publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINnDCoaEbXWh0rJshd2alkRQrGo+jsmKssXXMVbivl4p";
-                hostNames = ["192.168.0.3" "10.100.100.2" "odin.technet" "odin" "odin-boot"];
+                hostNames = [
+                    "192.168.0.3"
+                    "10.100.100.2"
+                    "odin.technet"
+                    "odin"
+                    "odin-boot"
+                ];
             };
         };
         extraConfig = ''
