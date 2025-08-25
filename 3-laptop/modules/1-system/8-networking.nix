@@ -131,6 +131,7 @@
         };
         firewall = {
             allowedUDPPorts = [ 51820 ];                                # Allows Wireguard on Firewall
+            trustedInterfaces = [ "wireguard0" "wlo1" ];
             checkReversePath = false; 
         };
     };
