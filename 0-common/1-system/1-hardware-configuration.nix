@@ -24,7 +24,7 @@
         services.fwupd-auto-update = {
             script = ''
                 ${pkgs.fwupd}/bin/fwupdmgr refresh --force
-                ${pkgs.fwupd}/bin/fwupdmgr update --no-reboot
+                ${pkgs.fwupd}/bin/fwupdmgr update
             '';
             serviceConfig = {
                 Type = "oneshot";
