@@ -17,12 +17,10 @@
         systemd.services.wait-for-network-delay = {
             description = "Delay after network-online before ZFS import";
             after = [
-                "systemd-networkd-wait-online@wireguard0.service"
-                "systemd-networkd-wait-online@end0.service"
+                "systemd-networkd-wait-online.service"
             ];
             requires = [
-                "systemd-networkd-wait-online@wireguard0.service"
-                "systemd-networkd-wait-online@end0.service"
+                "systemd-networkd-wait-online.service"
             ];
             before = [
                 "zfs-import-root-pool.service"
