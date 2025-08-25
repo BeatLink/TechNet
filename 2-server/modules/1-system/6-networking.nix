@@ -12,6 +12,11 @@
 
 { config, ... }:
 {
+    # Prevents conflicts with pihole
+    services.resolved.extraConfig = '' 
+        DNSStubListener=no
+    '';
+
     networking = {
         hostName = "Heimdall"; # Sets hostname
         hostId = "e5aa3553";
