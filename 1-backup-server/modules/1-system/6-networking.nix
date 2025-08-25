@@ -103,6 +103,7 @@
                     matchConfig.Name = "wg0";
                     address = ["10.100.100.5/24"];
                     dns = [ "10.100.100.1"];
+                    linkConfig.RequiredForOnline = "routable";
                 };
             };
         };
