@@ -13,7 +13,7 @@
 { config, ... }:
 {
     # Prevents conflicts with pihole
-    services.resolved.extraConfig = '' 
+    services.resolved.extraConfig = ''
         DNSStubListener=no
     '';
 
@@ -21,7 +21,7 @@
         hostName = "Heimdall"; # Sets hostname
         hostId = "e5aa3553";
         nameservers = [
-            "10.100.100.1"
+            "127.0.0.1"
             "8.8.8.8"
             "1.1.1.1"
         ];
