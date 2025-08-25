@@ -12,7 +12,7 @@
                 mode = "0700";
             }
             {
-                directory = "/var/lib/private/tang";
+                directory = "/var/lib/private";
                 mode = "0700";
             }
         ];
