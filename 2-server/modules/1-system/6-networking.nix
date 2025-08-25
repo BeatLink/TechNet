@@ -39,6 +39,8 @@
                 ip46tables -D FORWARD -i enp2s0f1 -o wireguard0 -j ACCEPT
                 ip46tables -D FORWARD -i wireguard0 -j ACCEPT
             '';
+            trustedInterfaces = [ "wireguard0" ];
+
         };
     };
     sops.secrets.wireguard_private_key.sopsFile = ../../secrets.yaml;
