@@ -14,28 +14,14 @@
             };
         };
 
-        systemd.services.wait-for-network-delay = {
-            description = "Delay after network-online before ZFS import";
-            after = [
-                "systemd-networkd-wait-online.service"
-            ];
-            requires = [
-                "systemd-networkd-wait-online.service"
-            ];
-            before = [
-                "zfs-import-root-pool.service"
-                "zfs-import-data-pool.service"
-            ];
-            wantedBy = [
-                "zfs-import-root-pool.service"
-                "zfs-import-data-pool.service"
-            ];
+        systemd.services = {
+            zfs-import-root-pool.preStart = ''
+                /bin/sleep 10
+            '';
 
-            serviceConfig = {
-                Type = "oneshot";
-                ExecStart = [ "/bin/sleep 10" ];
-
-            };
+            zfs-import-data-pool.preStart = ''
+                /bin/sleep 10
+            '';
         };
     };
 }
