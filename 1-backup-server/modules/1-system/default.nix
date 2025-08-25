@@ -8,6 +8,6 @@
         ./6-networking.nix
         ./7-borg.nix
         ./8-disk-checking.nix
-        ./9-zfs-unlock.nix
+        ./9-clevis.nix
     ];
 }
