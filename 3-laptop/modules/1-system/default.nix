@@ -14,6 +14,7 @@
         ./14-fuse.nix
         ./15-home-folders.nix
         ./16-disk-checking.nix
+        ./17-tang.nix
         ./plymouth.nix
         ./dconf
         ./desktop-environment
