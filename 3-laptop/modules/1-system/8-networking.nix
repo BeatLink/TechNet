@@ -1,14 +1,14 @@
 # Networking
 #
-# Wireguard is a simple, high performance VPN that allows each device in the TechNet to securely connect with each other and to 
-# connect to the internet via a secure relay through Heimdall. 
+# Wireguard is a simple, high performance VPN that allows each device in the TechNet to securely connect with each other and to
+# connect to the internet via a secure relay through Heimdall.
 #
 
 { config, ... }:
 {
     sops.secrets.networkmanager_env_file.sopsFile = ../../secrets.yaml;
     networking = {
-        hostName = "Odin";                                              # Sets hostname
+        hostName = "Odin"; # Sets hostname
         hostId = "ee42298c";
         networkmanager = {
             enable = true;
@@ -90,7 +90,7 @@
                         ipv4 = {
                             method = "manual";
                             dns-search = "";
-                            addresses = "10.100.100.2/24" ;
+                            addresses = "10.100.100.2/24";
                         };
                         ipv6 = {
                             method = "ignore";
@@ -130,15 +130,13 @@
             };
         };
         firewall = {
-            allowedUDPPorts = [ 51820 ];                                # Allows Wireguard on Firewall
-            trustedInterfaces = [ "wireguard0" "wlo1" ];
-            checkReversePath = false; 
+            allowedUDPPorts = [ 51820 ]; # Allows Wireguard on Firewall
+            # allowedTCPPorts = [ ... ];
+            trustedInterfaces = [
+                "wireguard0"
+                "wlo1"
+            ];
+            checkReversePath = false;
         };
     };
 }
-
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
