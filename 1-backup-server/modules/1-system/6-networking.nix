@@ -59,7 +59,6 @@
             # A failsafe to reboot the system if it is stuck in initrd after 10 minutes, hopefully it can fix any wireguard issues
             timers."initrd-reboot" = {
                 description = "Timer to reboot system after 10 minutes in initrd";
-                before = [ "systemd-networkd.service" ];
                 timerConfig = {
                     OnBootSec = "10min";
                     Unit = "initrd-reboot.service";
