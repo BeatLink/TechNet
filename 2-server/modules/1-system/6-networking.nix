@@ -128,7 +128,6 @@
                             networkConfig = {
                                 IPv4Forwarding = true;
                             };
-                            linkConfig.RequiredForOnline = "routable";
                         };
                     };
                 };

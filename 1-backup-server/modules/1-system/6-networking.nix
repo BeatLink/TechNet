@@ -16,10 +16,14 @@
         useNetworkd = true;
 
         # Sets up DNS. The server's Pi-Hole is the main DNS with Google and Cloudfare as backup
-        nameservers = [ "10.100.100.1" "8.8.8.8" "1.1.1.1" ];
-        
+        nameservers = [
+            "10.100.100.1"
+            "8.8.8.8"
+            "1.1.1.1"
+        ];
+
         # Sets the Wireguard interface as trusted in the firewall
-        firewall.trustedInterfaces = ["wg0"];
+        firewall.trustedInterfaces = [ "wg0" ];
     };
 
     # Loads the Wireguard private key from SOPS and sets the permissions to systemd-networkd
@@ -31,10 +35,11 @@
 
     boot.initrd = {
         # Needed for wireguard in initrd for remote LUKS unlocking
-        availableKernelModules = ["wireguard"];
-        
+        availableKernelModules = [ "wireguard" ];
+
         # Sops doesn't work in initrd so we use boot.initrd.secrets
-        secrets."${config.sops.secrets.wireguard_private_key.path}" = config.sops.secrets.wireguard_private_key.path;
+        secrets."${config.sops.secrets.wireguard_private_key.path}" =
+            config.sops.secrets.wireguard_private_key.path;
 
         systemd = {
             # The Wireguard privatekey must be owned by systemd-network to be used.
@@ -46,7 +51,7 @@
                     before = [ "systemd-networkd.service" ];
                     unitConfig.DefaultDependencies = "no";
                     serviceConfig.Type = "oneshot";
-                    script = '' chown systemd-network:systemd-network "${config.sops.secrets.wireguard_private_key.path}" '';
+                    script = ''chown systemd-network:systemd-network "${config.sops.secrets.wireguard_private_key.path}" '';
                 };
                 "initrd-reboot" = {
                     description = "Reboot system after 30 minutes in initrd";
@@ -87,7 +92,7 @@
                     {
                         # Server
                         PublicKey = "SLW2DFKk+Cf5K5KZl0OLYrEGyqTCqYHBKV2mTA3W2hQ=";
-                        AllowedIPs = ["10.100.100.0/24"];
+                        AllowedIPs = [ "10.100.100.0/24" ];
                         Endpoint = "72.252.37.234:51820";
                         PersistentKeepalive = 5;
                     }
@@ -101,9 +106,8 @@
                 };
                 "wg0" = {
                     matchConfig.Name = "wg0";
-                    address = ["10.100.100.5/24"];
-                    dns = [ "10.100.100.1"];
-                    linkConfig.RequiredForOnline = "routable";
+                    address = [ "10.100.100.5/24" ];
+                    dns = [ "10.100.100.1" ];
                 };
             };
         };
@@ -122,8 +126,8 @@
                 };
                 # If it fails enough times in 5 minutes → restart networkd
                 # With 30-second interval, 10 consecutive failures = 5 minutes
-                startLimitIntervalSec = 300;  # 5 minutes
-                startLimitBurst = 10;         # 10 failures within 5 minutes
+                startLimitIntervalSec = 300; # 5 minutes
+                startLimitBurst = 10; # 10 failures within 5 minutes
                 unitConfig.OnFailure = "networkd-recover.service";
             };
 
@@ -151,8 +155,8 @@
                 };
                 # If it fails enough times in 1 hours → reboot system
                 # With 30-second interval, 120 consecutive failures = 1 hour
-                startLimitIntervalSec = 3600;   # 1 hour in seconds
-                startLimitBurst = 120;          # must fail 120 times in 1 hour
+                startLimitIntervalSec = 3600; # 1 hour in seconds
+                startLimitBurst = 120; # must fail 120 times in 1 hour
                 unitConfig.OnFailure = "networkd-failsafe-reboot.service";
             };
 
@@ -170,7 +174,7 @@
                 wantedBy = [ "timers.target" ];
                 timerConfig = {
                     OnBootSec = "30s";
-                    OnUnitActiveSec = "30s";  # check every 30 seconds
+                    OnUnitActiveSec = "30s"; # check every 30 seconds
                     Unit = "networkd-check.service";
                 };
             };
