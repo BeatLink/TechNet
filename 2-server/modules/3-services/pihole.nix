@@ -7,16 +7,16 @@
 #
 # Links:
 #     - https://github.com/pi-hole/pi-hole/
-# 
-# Device List  
-#     - Heimdall - heimdall.technet  
+#
+# Device List
+#     - Heimdall - heimdall.technet
 #     - Odin - odin.technet
-#     - Hela - hela.technet  
+#     - Hela - hela.technet
 #     - Thor - thor.technet
 #     - Ragnarok - ragnarok.technet
 #
 
-{ config, ... }: 
+{ config, ... }:
 {
     sops.secrets.pihole_env.sopsFile = ../../secrets.yaml;
     virtualisation.arion.projects.pihole = {
@@ -27,7 +27,7 @@
                     image = "pihole/pihole:latest";
                     container_name = "pihole";
                     restart = "always";
-                    volumes = [ 
+                    volumes = [
                         "/Storage/Services/PiHole/etc-pihole:/etc/pihole"
                         "/Storage/Services/PiHole/etc-dnsmasq.d:/etc/dnsmasq.d"
                     ];
@@ -40,12 +40,12 @@
                         "FTLCONF_LOCAL_IPV4" = "10.100.100.1";
                     };
                     expose = [
-                        "80" 
+                        "80"
                     ];
                     ports = [
-                      "53:53/tcp"
-                      "53:53/udp"
-                      "82:80"
+                        "53:53/tcp"
+                        "53:53/udp"
+                        "82:80"
                     ];
                     networks = [
                         "nginx-proxy-manager_public"
