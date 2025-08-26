@@ -1,6 +1,6 @@
 # Syncthing
 #
-# SyncThing is the main file synchronization system across all devices in the TechNet. By keeping files on multiple redundant devices it 
+# SyncThing is the main file synchronization system across all devices in the TechNet. By keeping files on multiple redundant devices it
 # also acts as a first line backup mechanism
 #
 
@@ -15,7 +15,7 @@
                     container_name = "syncthing";
                     hostname = "Heimdall";
                     restart = "always";
-                    volumes = [ 
+                    volumes = [
                         "/Storage/Services/Syncthing:/var/syncthing"
                         "/Storage/Files:/Files"
                     ];
@@ -23,14 +23,16 @@
                         "PUID" = "1000";
                         "PGID" = "1000";
                         "APP_BASE_URL" = "syncthing.heimdall.technet";
+                        "GOGC" = "50";
+                        "GOMEMLIMIT" = "1000 MiB";
                     };
                     expose = [
-                        "8384" 
+                        "8384"
                     ];
                     ports = [
-                      "22000:22000/tcp"  # TCP file transfers
-                      "22000:22000/udp"  # QUIC file transfers
-                      "21027:21027/udp"  # Receive local discovery broadcasts
+                        "22000:22000/tcp" # TCP file transfers
+                        "22000:22000/udp" # QUIC file transfers
+                        "21027:21027/udp" # Receive local discovery broadcasts
                     ];
                     networks = [
                         "nginx-proxy-manager_public"
