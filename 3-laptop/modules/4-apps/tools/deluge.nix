@@ -10,7 +10,6 @@
                 ];
                 allowOther = true;
             };
-            file.".config/autostart/deluge.desktop".source = "${pkgs.deluge}/share/applications/deluge.desktop";
         };
     };
 }
