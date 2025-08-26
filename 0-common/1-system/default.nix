@@ -15,5 +15,6 @@
         ./11-fail2ban.nix
         ./12-zram.nix
         ./13-disk-checking.nix
+        ./14-disk-space-monitoring.nix
     ];
 }
