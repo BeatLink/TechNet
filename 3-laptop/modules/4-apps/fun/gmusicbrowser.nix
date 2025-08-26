@@ -1,6 +1,6 @@
 {
     home-manager.users.beatlink =
-        { config, pkgs, ... }:
+        { config, ... }:
         {
             programs.gmusicbrowser.enable = true;
             home = {
