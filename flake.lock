@@ -71,16 +71,34 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1756136848,
-        "narHash": "sha256-Pt54PJ0VrSYLZzhQ4e9gIkzoTF5ieCtP5AxR0Lqbb58=",
+        "lastModified": 1756153781,
+        "narHash": "sha256-aERoNBIIUs/3wzFOdn9FQVO67qWupXL0+7X/Comqkz0=",
         "owner": "wamserma",
         "repo": "flake-programs-sqlite",
-        "rev": "cee556d79569b798d1697d8a5d1459f03f9efee2",
+        "rev": "40b3ffb5b79dcf4a16f4d51168e0cc820f8c1b68",
         "type": "github"
       },
       "original": {
         "owner": "wamserma",
         "repo": "flake-programs-sqlite",
+        "type": "github"
+      }
+    },
+    "gmusicbrowser": {
+      "inputs": {
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1756178471,
+        "narHash": "sha256-I3BkOKDAq9QYoOY6w39I6sCTtDB7glTesSxWnVD01/g=",
+        "owner": "BeatLink",
+        "repo": "gmusicbrowser-nix-flake",
+        "rev": "799d2008b78f0dd97f7bbf7aed8eeec3b4b80aaf",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BeatLink",
+        "repo": "gmusicbrowser-nix-flake",
         "type": "github"
       }
     },
@@ -151,6 +169,22 @@
         "type": "github"
       }
     },
+    "nixpkgs_2": {
+      "locked": {
+        "lastModified": 1755615617,
+        "narHash": "sha256-HMwfAJBdrr8wXAkbGhtcby1zGFvs+StOp19xNsbqdOg=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "20075955deac2583bb12f07151c2df830ef346b4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "plank-reloaded": {
       "inputs": {
         "nixpkgs": [
@@ -176,9 +210,10 @@
         "arion": "arion",
         "disko": "disko",
         "flake-programs-sqlite": "flake-programs-sqlite",
+        "gmusicbrowser": "gmusicbrowser",
         "home-manager": "home-manager",
         "impermanence": "impermanence",
-        "nixpkgs": "nixpkgs",
+        "nixpkgs": "nixpkgs_2",
         "plank-reloaded": "plank-reloaded",
         "sops-nix": "sops-nix",
         "xdg-autostart": "xdg-autostart"

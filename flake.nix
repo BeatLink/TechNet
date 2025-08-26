@@ -35,6 +35,10 @@
             url = "github:wamserma/flake-programs-sqlite";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        gmusicbrowser = {
+            url = "github:BeatLink/gmusicbrowser-nix-flake";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
     };
     outputs =
         inputs@{
@@ -46,6 +50,7 @@
             home-manager,
             xdg-autostart,
             flake-programs-sqlite,
+            gmusicbrowser,
             ...
         }:
         {
@@ -88,7 +93,12 @@
                         impermanence.nixosModules.impermanence
                         sops-nix.nixosModules.sops
                         home-manager.nixosModules.home-manager
-                        { home-manager.sharedModules = [ xdg-autostart.homeManagerModules.xdg-autostart ]; }
+                        {
+                            home-manager.sharedModules = [
+                                xdg-autostart.homeManagerModules.xdg-autostart
+                                gmusicbrowser.homeManagerModules.gmusicbrowser
+                            ];
+                        }
                         flake-programs-sqlite.nixosModules.programs-sqlite
                         ./0-common
                         ./3-laptop
