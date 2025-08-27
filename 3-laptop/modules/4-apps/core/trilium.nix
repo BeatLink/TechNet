@@ -7,16 +7,16 @@
             "electron-31.7.7"
         ];
         home = {
-            packages = with pkgs; [ trilium-next-desktop ];
+            packages = with pkgs; [ trilium-desktop ];
             persistence."/Storage/Apps/Core/Trilium" = {
                 directories = [
                     ".local/share/trilium-data"
-                    ".config/TriliumNext Notes"
+                    ".config/Trilium Notes"
                 ];
                 allowOther = true;
             };
             file = {
-                ".config/autostart/trilium-next.desktop".source = "${pkgs.trilium-next-desktop}/share/applications/Trilium.desktop";
+                ".config/autostart/trilium-next.desktop".source = "${pkgs.trilium-desktop}/share/applications/Trilium.desktop";
             };
         };
     };
