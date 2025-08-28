@@ -77,7 +77,7 @@ in
                               # Extract capacity usage from zpool list
                               percentage=$(${pkgs.zfs}/bin/zpool list -H -o name,capacity | ${pkgs.gawk}/bin/awk -v p="$pool" '$1==p {print $2}')
                               number="''${percentage%\%*}"
-                              message="Used space on zpool $pool is $number% (threshold $threshold%)"
+                              message="$(date '+%Y-%m-%d %H:%M:%S') Used space on zpool $pool is $number% (threshold $threshold%)"
 
                               if [ "$number" -lt "$threshold" ]; then
                                 service_status="up"
