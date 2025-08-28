@@ -13,17 +13,22 @@
 { config, ... }:
 {
     # Prevents conflicts with pihole
-    services.resolved.extraConfig = ''
-        DNSStubListener=no
-    '';
+    services.resolved = {
+        enable = true;
+        extraConfig = ''
+            DNSStubListener=no
+        '';
+        fallbackDns = [
+            "8.8.8.8"
+            "1.1.1.1"
+        ];
+    };
 
     networking = {
         hostName = "Heimdall"; # Sets hostname
         hostId = "e5aa3553";
         nameservers = [
             "127.0.0.1"
-            "8.8.8.8"
-            "1.1.1.1"
         ];
         useNetworkd = true;
         firewall = {
