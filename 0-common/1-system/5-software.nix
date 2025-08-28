@@ -52,9 +52,9 @@
         {
             postStop = ''
                 if [ "$SERVICE_RESULT" == "success" ]; then
-                    ${pkgs.wget}/bin/wget --spider --no-check-certificate "${FullURL}?status=up&msg=System Upgrades Completed Successfully&ping=";
+                    ${pkgs.wget}/bin/wget --spider --no-check-certificate "${FullURL}?status=up&msg=$(date '+%Y-%m-%d %H:%M:%S') System Upgrades Successful&ping=";
                 else
-                    ${pkgs.wget}/bin/wget --spider --no-check-certificate "${FullURL}?status=down&msg=System Upgrades Failed&ping=";
+                    ${pkgs.wget}/bin/wget --spider --no-check-certificate "${FullURL}?status=down&msg=$(date '+%Y-%m-%d %H:%M:%S') System Upgrades Failed&ping=";
                 fi        
             '';
         };
