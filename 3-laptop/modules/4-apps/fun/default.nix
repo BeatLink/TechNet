@@ -5,12 +5,12 @@
         ./freetube.nix
         ./gmusicbrowser.nix
         ./itch.nix
-        ./lmms.nix
+        #./lmms.nix
         ./lutris.nix
         ./newsflash.nix
         ./picard.nix
         ./steam.nix
-        ./stremio.nix
+        #./stremio.nix
         ./vlc.nix
         ./timestretch
     ];
