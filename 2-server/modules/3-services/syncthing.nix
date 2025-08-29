@@ -23,8 +23,6 @@
                         "PUID" = "1000";
                         "PGID" = "1000";
                         "APP_BASE_URL" = "syncthing.heimdall.technet";
-                        "GOGC" = "50";
-                        "GOMEMLIMIT" = "1000 MiB";
                     };
                     expose = [
                         "8384"
