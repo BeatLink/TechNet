@@ -27,6 +27,11 @@ screen-keyboard-enabled=false
 screen-reader-enabled=false
 
 [desktop/a11y/keyboard]
+bouncekeys-delay=300
+mousekeys-accel-time=300
+mousekeys-init-delay=300
+mousekeys-max-speed=10
+slowkeys-delay=300
 togglekeys-enable-beep=true
 togglekeys-enable-osd=true
 togglekeys-sound-off='/Storage/Files/Sounds/Interface Sounds/Orwell/system_new_commentary-sharedassets1.assets-156.wav'
@@ -48,7 +53,7 @@ exec-arg=''
 
 [desktop/background]
 picture-options='zoom'
-picture-uri='file:///Storage/Files/Pictures/Wallpapers/variety-copied-wallpaper-4a6de5666e32bc0ae1813e1dcee01974.jpg'
+picture-uri='file:///Storage/Files/Pictures/Wallpapers/variety-copied-wallpaper-26a67d3e841c7098efb909cbf1e0ec10.jpg'
 
 [desktop/background/slideshow]
 delay=15
@@ -98,7 +103,7 @@ remove-old=true
 delay=uint32 500
 numlock-state=false
 repeat=true
-repeat-interval=uint32 20
+repeat-interval=uint32 19
 
 [desktop/peripherals/mouse]
 double-click=400
@@ -139,6 +144,7 @@ volume-sound-enabled=true
 volume-sound-file='/Storage/Files/Sounds/Interface Sounds/Orwell/listener_new_mail-sharedassets1.assets-104.wav'
 
 [desktop/wm/preferences]
+action-middle-click-titlebar='minimize'
 action-scroll-titlebar='none'
 audible-bell=false
 button-layout=':minimize,maximize,close'
