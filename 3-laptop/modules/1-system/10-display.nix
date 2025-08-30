@@ -28,9 +28,9 @@
     };
 	services = {
         xserver.videoDrivers = [ "modesetting" "nvidia" ];
-        logind.settings = {
-            HandleLidSwitch = "ignore";                                   # Override lid switch before login; Fixes system going to sleep on login page
-            HandleLidSwitchDocked = "ignore";
+        logind = {
+            lidSwitch = "ignore";                                   # Override lid switch before login; Fixes system going to sleep on login page
+            lidSwitchDocked = "ignore";
         };
     };
     systemd.services.set-brightness = {
