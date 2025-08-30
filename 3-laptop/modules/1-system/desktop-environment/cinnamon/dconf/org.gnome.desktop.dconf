@@ -79,7 +79,7 @@ theme-name='LinuxMint'
 
 [wm/preferences]
 action-double-click-titlebar='toggle-maximize'
-action-middle-click-titlebar='lower'
+action-middle-click-titlebar='minimize'
 action-right-click-titlebar='menu'
 audible-bell=false
 auto-raise=false
