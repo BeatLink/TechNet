@@ -25,7 +25,7 @@ with lib.hm.gvariant;
 
     "io/github/alarm-clock-applet/alarm-1" = {
       active = true;
-      command = "audacious --play";
+      command = "sox";
       message = "Wake Up";
       repeat = [ "sun" "mon" "tue" "wed" "thu" "fri" "sat" ];
       sound-file = "file:///Storage/Files/Sounds/Interface%20Sounds/Amazon/Amazon%20Fire%20Phone%20Startup%20(Extracted%20with%20Boot%20Animation).m4a";
@@ -36,7 +36,7 @@ with lib.hm.gvariant;
 
     "io/github/alarm-clock-applet/alarm-4" = {
       active = true;
-      command = "audacious --play";
+      command = "sox";
       message = "Sleep";
       repeat = [ "sun" "mon" "tue" "wed" "thu" "fri" "sat" ];
       sound-file = "file:///Storage/Files/Sounds/Interface%20Sounds/Amazon/Amazon%20Fire%20Phone%20Startup%20(Extracted%20with%20Boot%20Animation).m4a";
