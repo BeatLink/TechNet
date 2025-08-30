@@ -29,8 +29,8 @@ screen-reader-enabled=false
 [desktop/a11y/keyboard]
 togglekeys-enable-beep=true
 togglekeys-enable-osd=true
-togglekeys-sound-off='/Storage/Files/Sounds/Interface Sounds/Linux/Fresh and Clean/stereo/button-toggle-off.ogg'
-togglekeys-sound-on='/Storage/Files/Sounds/Interface Sounds/Linux/Fresh and Clean/stereo/button-toggle-on.ogg'
+togglekeys-sound-off='/Storage/Files/Sounds/Interface Sounds/Orwell/system_new_commentary-sharedassets1.assets-156.wav'
+togglekeys-sound-on='/Storage/Files/Sounds/Interface Sounds/Orwell/system_new_commentary-sharedassets1.assets-156.wav'
 
 [desktop/a11y/mouse]
 dwell-click-enabled=false
