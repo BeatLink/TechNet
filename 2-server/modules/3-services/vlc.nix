@@ -29,7 +29,7 @@
             ExecStart = ''
                 ${pkgs.vlc}/bin/vlc \
                   -I telnet \
-                  --telnet-password="$VLC_TELNET_PASSWORD" \
+                  --telnet-password "$VLC_TELNET_PASSWORD" \
                   --no-video \
                   --aout pipewire
             '';
