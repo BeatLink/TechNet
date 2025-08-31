@@ -27,9 +27,9 @@
             EnvironmentFile = config.sops.secrets.vlc_env.path;
 
             ExecStart = ''
-                ${pkgs.vlc}/bin/cvlc \
-                  --intf telnet \
-                  --telnet-password "$VLC_TELNET_PASSWORD" \
+                ${pkgs.vlc}/bin/vlc \
+                  -I telnet \
+                  --telnet-password="$VLC_TELNET_PASSWORD" \
                   --no-video \
                   --aout pipewire
             '';
