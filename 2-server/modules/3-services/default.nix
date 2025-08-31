@@ -16,7 +16,6 @@
         ./home-assistant.nix
         ./homepage.nix
         ./motioneye.nix
-        ./mpd.nix
         ./nginx-proxy-manager.nix
         ./openbooks.nix
         ./pihole.nix
