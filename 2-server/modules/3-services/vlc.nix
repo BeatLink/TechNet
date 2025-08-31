@@ -25,13 +25,13 @@
             EnvironmentFile = config.sops.secrets.vlc_env.path;
 
             ExecStart = ''
-                ${pkgs.vlc}/bin/cvlc \
-                  --intf rc \
-                  --rc-host 127.0.0.1:4212 \
-                  --rc-password "$VLC_RC_PASSWORD" \
+                ${pkgs.vlc}/bin/vlc \
+                  --intf telnet \
+                  --telnet-host 127.0.0.1 \
+                  --telnet-port 4212 \
+                  --telnet-password "$VLC_TELNET_PASSWORD" \
                   --no-video \
-                  --aout pipewire \
-                  --loop
+                  --aout pipewire
             '';
             Restart = "always";
         };
