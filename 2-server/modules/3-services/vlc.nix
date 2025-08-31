@@ -25,7 +25,7 @@
             EnvironmentFile = config.sops.secrets.vlc_env.path;
 
             ExecStart = ''
-                ${pkgs.vlc}/bin/vlc \
+                ${pkgs.vlc}/bin/cvlc \
                   --intf telnet \
                   --telnet-host 127.0.0.1 \
                   --telnet-port 4212 \
