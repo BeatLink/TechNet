@@ -13,11 +13,9 @@
     systemd.sockets.tangd = {
         wants = [
             "network-online.target"
-            "NetworkManager.service"
         ];
         after = [
             "network-online.target"
-            "NetworkManager.service"
         ];
     };
     networking.firewall.allowedTCPPorts = [ 7654 ];
