@@ -1,9 +1,11 @@
 { pkgs, config, ... }:
 
 {
+    networking.firewall = {
+        allowedTCPPorts = [ 4212 ];
+    };
     sops.secrets.vlc_env.sopsFile = ../../secrets.yaml;
-
-    systemd.services.cvlc = {
+    systemd.services.vlc = {
         description = "Headless VLC Media Player with PipeWire and RC password from sops-nix";
         after = [
             "network.target"
@@ -25,13 +27,11 @@
             EnvironmentFile = config.sops.secrets.vlc_env.path;
 
             ExecStart = ''
-                ${pkgs.vlc}/bin/cvlc \
-                  --intf rc \
-                  --rc-host 127.0.0.1:4212 \
-                  --rc-password "$VLC_RC_PASSWORD" \
+                ${pkgs.vlc}/bin/vlc \
+                  -I telnet \
+                  --telnet-password "$VLC_TELNET_PASSWORD" \
                   --no-video \
-                  --aout pipewire \
-                  --loop
+                  --aout pipewire
             '';
             Restart = "always";
         };
