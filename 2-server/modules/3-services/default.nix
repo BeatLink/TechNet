@@ -28,6 +28,7 @@
         ./trilium.nix
         ./trilium-sysadmin.nix
         ./uptime-kuma.nix
+        ./vlc.nix
         ./watchtower.nix
     ];
 }
