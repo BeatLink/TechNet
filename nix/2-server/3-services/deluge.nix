@@ -1,10 +1,9 @@
 # Deluge
 #
-# Deluge is the torrent management server. The torrent server allows for automatic 24/7 downloading and setting of content. 
+# Deluge is the torrent management server. The torrent server allows for automatic 24/7 downloading and setting of content.
 #
 # https://hub.docker.com/r/linuxserver/deluge
 #
-
 
 {
     virtualisation.arion.projects.deluge = {
@@ -20,7 +19,7 @@
                         "PGID" = "1000";
                         "TZ" = "America/Jamaica";
                     };
-                    volumes = [ 
+                    volumes = [
                         "/Storage/Services/Deluge/config:/config"
                         "/Storage/Files/Downloads:/downloads"
                     ];
