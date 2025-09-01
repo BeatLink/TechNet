@@ -16,7 +16,7 @@ creation_rules:
       - age:
         - *user_beatlink
         - *host_ragnarok
-  - path_regex: 2-server/secrets.(yaml|json|env|ini)$
+  - path_regex: secrets/2-server.(yaml|json|env|ini)$
     key_groups:
       - age:
         - *user_beatlink

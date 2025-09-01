@@ -1,10 +1,14 @@
-{ pkgs, config, ... }:
-
+{
+    pkgs,
+    config,
+    inputs,
+    ...
+}:
 {
     networking.firewall = {
         allowedTCPPorts = [ 4212 ];
     };
-    sops.secrets.vlc_env.sopsFile = ../../secrets.yaml;
+    sops.secrets.vlc_env.sopsFile = "${inputs.self}/secrets/2-server.yaml";
     systemd.services.vlc = {
         description = "Headless VLC Media Player with PipeWire and RC password from sops-nix";
         after = [

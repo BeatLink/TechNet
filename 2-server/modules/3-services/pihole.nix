@@ -16,9 +16,9 @@
 #     - Ragnarok - ragnarok.technet
 #
 
-{ config, ... }:
+{ config, inputs, ... }:
 {
-    sops.secrets.pihole_env.sopsFile = ../../secrets.yaml;
+    sops.secrets.pihole_env.sopsFile = "${inputs.self}/secrets/2-server.yaml";
     virtualisation.arion.projects.pihole = {
         serviceName = "pihole";
         settings = {

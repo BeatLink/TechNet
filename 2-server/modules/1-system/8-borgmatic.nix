@@ -3,10 +3,10 @@
 # This handles backing up my server's docker files to my laptop and to my backup server
 #
 
-{ pkgs, config, ... }: 
+{ pkgs, config, inputs, ... }: 
 {
-    sops.secrets.borg_repo_encryption_key.sopsFile = ../../secrets.yaml;
-    sops.secrets.borg_repo_ssh_key.sopsFile = ../../secrets.yaml;
+    sops.secrets.borg_repo_encryption_key.sopsFile = "${inputs.self}/secrets/2-server.yaml";
+    sops.secrets.borg_repo_ssh_key.sopsFile = "${inputs.self}/secrets/2-server.yaml";
     services.borgmatic = {
         enable = true;
         settings = {

@@ -10,7 +10,7 @@
 # This link helped a lot with getting this configuration working: https://flo-the.dev/posts/wireguard/
 #
 
-{ config, ... }:
+{ config, inputs, ... }:
 {
     # Prevents conflicts with pihole
     services.resolved = {
@@ -48,7 +48,7 @@
 
         };
     };
-    sops.secrets.wireguard_private_key.sopsFile = ../../secrets.yaml;
+    sops.secrets.wireguard_private_key.sopsFile = "${inputs.self}/secrets/2-server.yaml";
     boot = {
         kernel.sysctl."net.ipv4.conf.all.forwarding" = true; # Enables routing between peers for wireguard
         initrd = {
