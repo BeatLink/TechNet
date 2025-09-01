@@ -21,7 +21,7 @@ creation_rules:
       - age:
         - *user_beatlink
         - *host_heimdall
-  - path_regex: 3-laptop/secrets.(yaml|json|env|ini)$
+  - path_regex: secrets/3-laptop.(yaml|json|env|ini)$
     key_groups:
       - age:
         - *user_beatlink
