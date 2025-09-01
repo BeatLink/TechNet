@@ -63,8 +63,8 @@
                         impermanence.nixosModules.impermanence
                         sops-nix.nixosModules.sops
                         home-manager.nixosModules.home-manager
-                        ./0-common
-                        ./1-backup-server
+                        ./nix/0-common
+                        ./nix/1-backup-server
                         {
                             home-manager.extraSpecialArgs = { inherit inputs; };
                         }
@@ -79,8 +79,8 @@
                         sops-nix.nixosModules.sops
                         home-manager.nixosModules.home-manager
                         arion.nixosModules.arion
-                        ./0-common
-                        ./2-server
+                        ./nix/0-common
+                        ./nix/2-server
                         {
                             home-manager.extraSpecialArgs = { inherit inputs; };
                         }
@@ -101,8 +101,8 @@
                             ];
                         }
                         flake-programs-sqlite.nixosModules.programs-sqlite
-                        ./0-common
-                        ./3-laptop
+                        ./nix/0-common
+                        ./nix/3-laptop
                         {
                             home-manager.extraSpecialArgs = { inherit inputs; };
                         }
