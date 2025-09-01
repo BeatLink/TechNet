@@ -1,7 +1,7 @@
-
+{ inputs, ... }:
 {
     sops.secrets.esphome_password = {
-        sopsFile = ../../secrets.yaml;
+        sopsFile = "${inputs.self}/secrets/2-server.yaml";
     };
     virtualisation.arion.projects.esphome = {
         serviceName = "esphome";
@@ -12,19 +12,19 @@
                     container_name = "esphome";
                     restart = "always";
                     privileged = true;
-                    volumes = [ 
+                    volumes = [
                         "/Storage/Services/ESPHome/config:/config"
                         "/etc/localtime:/etc/localtime:ro"
                     ];
                     environment = {
                         "USERNAME" = "beatlink";
-                        # The ESPHome Docker doesnt have an option for loading the password from a file. 
+                        # The ESPHome Docker doesnt have an option for loading the password from a file.
                         # This method wont keep the password outside of the store but at least it should be safe for github
                         #"PASSWORD" = (builtins.readFile config.sops.secrets.esphome_password.path);
                         "ESPHOME_DASHBOARD_USE_PING" = "true";
                     };
                     expose = [
-                        "80" 
+                        "80"
                     ];
                     networks = [
                         "nginx-proxy-manager_public"

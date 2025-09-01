@@ -9,7 +9,6 @@
 #
 
 {
-    # sops.secrets.radicale_env.sopsFile = ../../secrets.yaml;
     virtualisation.arion = {
         backend = "docker";
         projects.radicale = {
@@ -23,11 +22,6 @@
                         volumes = [
                             "/Storage/Services/Radicale/data:/var/lib/radicale"
                         ];
-                        /*
-                          env_file = [
-                              config.sops.secrets.nextcloud_env.path
-                          ];
-                        */
                         environment = {
                             "TZ" = "America/Jamaica";
                             "RADICALE_CONFIG" = "/var/lib/radicale/radicale.cfg";
