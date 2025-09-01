@@ -42,6 +42,7 @@
     };
     outputs =
         inputs@{
+            self,
             nixpkgs,
             disko,
             impermanence,
