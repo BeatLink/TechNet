@@ -4,9 +4,9 @@
 # connect to the internet via a secure relay through Heimdall.
 #
 
-{ config, ... }:
+{ config, inputs, ... }:
 {
-    sops.secrets.networkmanager_env_file.sopsFile = ../../secrets.yaml;
+    sops.secrets.networkmanager_env_file.sopsFile = "${inputs.self}/secrets/3-laptop.yaml";
     networking = {
         hostName = "Odin"; # Sets hostname
         hostId = "ee42298c";
