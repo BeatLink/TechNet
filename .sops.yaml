@@ -4,7 +4,7 @@ keys:
   - &host_heimdall age1yggjnkvxm45ssrlwx56pcps43gzglrvfnqdmv8hxcqsqcuj68v7qdj25sg
   - &host_odin age19lxeg27tf95vs67jjh6e68ukf0d9hjyj5q4pcprzrvpwnnt6j3fsvjh4rd
 creation_rules:
-  - path_regex: 0-common/secrets.(yaml|json|env|ini)$
+  - path_regex: secrets/common.(yaml|json|env|ini)$
     key_groups:
       - age:
         - *user_beatlink
