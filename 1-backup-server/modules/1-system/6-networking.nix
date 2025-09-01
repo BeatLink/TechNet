@@ -3,7 +3,7 @@
 # This file configures wireguard and networking settings
 #
 
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 {
     networking = {
         # Sets the hostName
@@ -28,7 +28,7 @@
 
     # Loads the Wireguard private key from SOPS and sets the permissions to systemd-networkd
     sops.secrets.wireguard_private_key = {
-        sopsFile = ../../secrets.yaml;
+        sopsFile = "${inputs.self}/secrets/1-backup-server.yaml";
         owner = "systemd-network";
         group = "systemd-network";
     };
