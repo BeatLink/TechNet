@@ -10,7 +10,12 @@
 # This link helped a lot with getting this configuration working: https://flo-the.dev/posts/wireguard/
 #
 
-{ config, inputs, ... }:
+{
+    config,
+    inputs,
+    pkgs,
+    ...
+}:
 {
     # Prevents conflicts with pihole
     services.resolved = {
@@ -61,94 +66,193 @@
                 "/wireguard_private_key" = config.sops.secrets.wireguard_private_key.path;
             };
             systemd = {
-                services.fix_wireguard_key_perms = {
-                    # The Wireguard privatekey must be owned by systemd-network to be used.
-                    description = "Set permissions for wireguard private key";
-                    wantedBy = [
-                        "initrd.target"
-                    ];
-                    after = [
-                        "initrd-nixos-copy-secrets.service"
-                    ];
-                    before = [
-                        "systemd-networkd.service"
-                    ];
-                    unitConfig.DefaultDependencies = "no";
-                    serviceConfig.Type = "oneshot";
-                    script = ''
-                        chown systemd-network:systemd-network /wireguard_private_key
-                    '';
+                services = {
+                    fix_wireguard_key_perms = {
+                        # The Wireguard privatekey must be owned by systemd-network to be used.
+                        description = "Set permissions for wireguard private key";
+                        wantedBy = [
+                            "initrd.target"
+                        ];
+                        after = [
+                            "initrd-nixos-copy-secrets.service"
+                        ];
+                        before = [
+                            "systemd-networkd.service"
+                        ];
+                        unitConfig.DefaultDependencies = "no";
+                        serviceConfig.Type = "oneshot";
+                        script = ''
+                            chown systemd-network:systemd-network /wireguard_private_key
+                        '';
+                    };
+                    "initrd-reboot" = {
+                        description = "Reboot system after 10 minutes in initrd";
+                        serviceConfig = {
+                            Type = "oneshot";
+                            ExecStart = "systemctl reboot";
+                        };
+                    };
                 };
+                # A failsafe to reboot the system if it is stuck in initrd after 10 minutes, hopefully it can fix any wireguard issues
+                timers."initrd-reboot" = {
+                    description = "Timer to reboot system after 10 minutes in initrd";
+                    timerConfig = {
+                        OnBootSec = "10min";
+                        Unit = "initrd-reboot.service";
+                    };
+                    wantedBy = [ "timers.target" ];
+                };
+                # Sets up systemd-networkd in initrd using the same configuration from the booted system's network stack
                 network = config.systemd.network;
             };
         };
     };
-    systemd.network = {
-        enable = true;
-        netdevs."01-wireguard" = {
-            netdevConfig = {
-                Kind = "wireguard";
-                Name = "wireguard0";
-            };
-            wireguardConfig = {
-                PrivateKeyFile = /wireguard_private_key;
-                ListenPort = 51820;
-            };
-            wireguardPeers = [
-                {
-                    # Laptop
-                    PublicKey = "WlTdwgmdSvXTGjB+kaOkZEV9vyOk/fKELv3IkRdJOAE=";
-                    AllowedIPs = [ "10.100.100.2/32" ];
-                    PersistentKeepalive = 15;
-                }
-                {
-                    # Tablet
-                    PublicKey = "rvOxr8WYaQRMHI8Ic0Td6mBOTwkI9U842AHkLrZDDkQ=";
-                    AllowedIPs = [ "10.100.100.3/32" ];
-                    PersistentKeepalive = 15;
-                }
-                {
-                    # Phone
-                    PublicKey = "/TCFjby/XxSkAQxuWcL5Kv5ggOlYJtloyU+z1I8wGWs=";
-                    AllowedIPs = [ "10.100.100.4/32" ];
-                    PersistentKeepalive = 15;
-                }
-                {
-                    # Backup Server
-                    PublicKey = "rntfoR0iPjL90MhrwIFOVI0hSoZ8hHj8A512Q4+1hk4=";
-                    AllowedIPs = [ "10.100.100.5/32" ];
-                    PersistentKeepalive = 15;
-                }
-                {
-                    # eNET Server
-                    PublicKey = "VGMPRz95JuRtQMTYV2ANAF7AuDZU/igJgZB8ZZSAUXI=";
-                    AllowedIPs = [ "10.100.100.52/32" ];
-                    PersistentKeepalive = 15;
-                }
-                {
-                    #Work Laptop
-                    PublicKey = "1J9wofO7+gHgkNAOMl51K3WmMknle/2b0dGT8jVLdAo=";
-                    AllowedIPs = [ "10.100.100.51/32" ];
-                    PersistentKeepalive = 15;
-                }
-            ];
-        };
-        networks = {
-            "01-enp2s0f1" = {
-                matchConfig.Name = "enp2s0f1";
-                address = [ "192.168.0.2/24" ];
-                gateway = [ "192.168.0.1" ];
-                linkConfig.RequiredForOnline = "routable";
-            };
-            "01-wireguard" = {
-                matchConfig.Name = "wireguard0";
-                address = [ "10.100.100.1/24" ];
-                networkConfig = {
-                    IPv4Forwarding = true;
+    systemd = {
+        network = {
+            enable = true;
+            netdevs."01-wireguard" = {
+                netdevConfig = {
+                    Kind = "wireguard";
+                    Name = "wireguard0";
                 };
-                linkConfig.RequiredForOnline = "routable";
+                wireguardConfig = {
+                    PrivateKeyFile = /wireguard_private_key;
+                    ListenPort = 51820;
+                };
+                wireguardPeers = [
+                    {
+                        # Laptop
+                        PublicKey = "WlTdwgmdSvXTGjB+kaOkZEV9vyOk/fKELv3IkRdJOAE=";
+                        AllowedIPs = [ "10.100.100.2/32" ];
+                        PersistentKeepalive = 15;
+                    }
+                    {
+                        # Tablet
+                        PublicKey = "rvOxr8WYaQRMHI8Ic0Td6mBOTwkI9U842AHkLrZDDkQ=";
+                        AllowedIPs = [ "10.100.100.3/32" ];
+                        PersistentKeepalive = 15;
+                    }
+                    {
+                        # Phone
+                        PublicKey = "/TCFjby/XxSkAQxuWcL5Kv5ggOlYJtloyU+z1I8wGWs=";
+                        AllowedIPs = [ "10.100.100.4/32" ];
+                        PersistentKeepalive = 15;
+                    }
+                    {
+                        # Backup Server
+                        PublicKey = "rntfoR0iPjL90MhrwIFOVI0hSoZ8hHj8A512Q4+1hk4=";
+                        AllowedIPs = [ "10.100.100.5/32" ];
+                        PersistentKeepalive = 15;
+                    }
+                    {
+                        # eNET Server
+                        PublicKey = "VGMPRz95JuRtQMTYV2ANAF7AuDZU/igJgZB8ZZSAUXI=";
+                        AllowedIPs = [ "10.100.100.52/32" ];
+                        PersistentKeepalive = 15;
+                    }
+                    {
+                        #Work Laptop
+                        PublicKey = "1J9wofO7+gHgkNAOMl51K3WmMknle/2b0dGT8jVLdAo=";
+                        AllowedIPs = [ "10.100.100.51/32" ];
+                        PersistentKeepalive = 15;
+                    }
+                ];
+            };
+            networks = {
+                "01-enp2s0f1" = {
+                    matchConfig.Name = "enp2s0f1";
+                    address = [ "192.168.0.2/24" ];
+                    gateway = [ "192.168.0.1" ];
+                    linkConfig.RequiredForOnline = "routable";
+                };
+                "01-wireguard" = {
+                    matchConfig.Name = "wireguard0";
+                    address = [ "10.100.100.1/24" ];
+                    networkConfig = {
+                        IPv4Forwarding = true;
+                    };
+                    linkConfig.RequiredForOnline = "routable";
+                };
             };
         };
+        services = {
+            networkd-check = {
+                description = "Check network connectivity via pinging Heimdall";
+                serviceConfig = {
+                    Type = "oneshot";
+                    ExecStart = pkgs.writeShellScript "networkd-check" ''
+                        if ${pkgs.iputils}/bin/ping 10.100.100.5 -c5 >/dev/null; then
+                            exit 0
+                        else
+                            exit 1
+                        fi
+                    '';
+                };
+                # If it fails enough times in 5 minutes → restart networkd
+                # With 30-second interval, 10 consecutive failures = 5 minutes
+                startLimitIntervalSec = 300; # 5 minutes
+                startLimitBurst = 10; # 10 failures within 5 minutes
+                unitConfig.OnFailure = "networkd-recover.service";
+            };
+
+            networkd-recover = {
+                description = "Restart systemd-networkd if unable to reach Heimdall for 5 minutes";
+                serviceConfig = {
+                    Type = "oneshot";
+                    ExecStart = pkgs.writeShellScript "networkd-recover" ''
+                        ${pkgs.systemd}/bin/systemctl restart systemd-networkd
+                    '';
+                };
+            };
+
+            networkd-failsafe = {
+                description = "Check network connectivity by pinging heimdall (failsafe)";
+                serviceConfig = {
+                    Type = "oneshot";
+                    ExecStart = pkgs.writeShellScript "networkd-failsafe" ''
+                        if ${pkgs.iputils}/bin/ping 10.100.100.5 -c5 >/dev/null; then
+                            exit 0
+                        else
+                            exit 1
+                        fi
+                    '';
+                };
+                # If it fails enough times in 1 hours → reboot system
+                # With 30-second interval, 120 consecutive failures = 1 hour
+                startLimitIntervalSec = 3600; # 1 hour in seconds
+                startLimitBurst = 120; # must fail 120 times in 1 hour
+                unitConfig.OnFailure = "networkd-failsafe-reboot.service";
+            };
+
+            networkd-failsafe-reboot = {
+                description = "Reboot system if unable to reach Heimdall for 6 hours";
+                serviceConfig = {
+                    Type = "oneshot";
+                    ExecStart = "${pkgs.systemd}/bin/systemctl reboot";
+                };
+            };
+        };
+        timers = {
+            networkd-check = {
+                description = "Run networkd-check every 30 seconds";
+                wantedBy = [ "timers.target" ];
+                timerConfig = {
+                    OnBootSec = "30s";
+                    OnUnitActiveSec = "30s"; # check every 30 seconds
+                    Unit = "networkd-check.service";
+                };
+            };
+            networkd-failsafe = {
+                description = "Run networkd-failsafe-check every 30 seconds";
+                wantedBy = [ "timers.target" ];
+                timerConfig = {
+                    OnBootSec = "30s";
+                    OnUnitActiveSec = "30s"; # check every 30 seconds
+                    Unit = "networkd-failsafe.service";
+                };
+            };
+        };
+
     };
 
 }
