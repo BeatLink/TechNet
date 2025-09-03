@@ -102,18 +102,20 @@
                         PersistentKeepalive = 5;
                     }
                 ];
+                unitConfig = {
+                    After = [ "sys-subsystem-net-devices-end0.device" ];
+                    Wants = [ "sys-subsystem-net-devices-end0.device" ];
+                };
             };
             networks = {
                 "end0" = {
                     matchConfig.Name = "end0";
-                    address = [ "192.168.100.2/24" ];
-                    gateway = [ "192.168.100.1" ];
+                    networkConfig.DHCP = "ipv4";
                     linkConfig.RequiredForOnline = "routable";
                 };
                 "wg0" = {
                     matchConfig.Name = "wg0";
                     address = [ "10.100.100.5/24" ];
-                    dns = [ "10.100.100.1" ];
                 };
             };
         };
