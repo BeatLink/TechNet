@@ -3,7 +3,12 @@
 # This file configures wireguard and networking settings
 #
 
-{ config, pkgs, inputs, ... }:
+{
+    config,
+    pkgs,
+    inputs,
+    ...
+}:
 {
     networking = {
         # Sets the hostName
@@ -101,7 +106,8 @@
             networks = {
                 "end0" = {
                     matchConfig.Name = "end0";
-                    networkConfig.DHCP = "ipv4";
+                    address = [ "192.168.2.2/24" ];
+                    gateway = [ "192.168.2.1" ];
                     linkConfig.RequiredForOnline = "routable";
                 };
                 "wg0" = {
