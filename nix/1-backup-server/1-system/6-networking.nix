@@ -106,8 +106,8 @@
             networks = {
                 "end0" = {
                     matchConfig.Name = "end0";
-                    address = [ "192.168.2.2/24" ];
-                    gateway = [ "192.168.2.1" ];
+                    address = [ "192.168.100.2/24" ];
+                    gateway = [ "192.168.100.1" ];
                     linkConfig.RequiredForOnline = "routable";
                 };
                 "wg0" = {
