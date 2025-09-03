@@ -102,10 +102,6 @@
                         PersistentKeepalive = 5;
                     }
                 ];
-                unitConfig = {
-                    After = [ "sys-subsystem-net-devices-end0.device" ];
-                    Wants = [ "sys-subsystem-net-devices-end0.device" ];
-                };
             };
             networks = {
                 "end0" = {
@@ -116,6 +112,7 @@
                 "wg0" = {
                     matchConfig.Name = "wg0";
                     address = [ "10.100.100.5/24" ];
+                    dns = [ "10.100.100.1" ];
                 };
             };
         };
