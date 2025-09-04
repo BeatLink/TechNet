@@ -224,13 +224,6 @@
                 unitConfig.OnFailure = "networkd-failsafe-reboot.service";
             };
 
-            networkd-failsafe-reboot = {
-                description = "Reboot system if unable to reach Heimdall for 6 hours";
-                serviceConfig = {
-                    Type = "oneshot";
-                    ExecStart = "${pkgs.systemd}/bin/systemctl reboot";
-                };
-            };
         };
         timers = {
             networkd-check = {
@@ -240,15 +233,6 @@
                     OnBootSec = "30s";
                     OnUnitActiveSec = "30s"; # check every 30 seconds
                     Unit = "networkd-check.service";
-                };
-            };
-            networkd-failsafe = {
-                description = "Run networkd-failsafe-check every 30 seconds";
-                wantedBy = [ "timers.target" ];
-                timerConfig = {
-                    OnBootSec = "30s";
-                    OnUnitActiveSec = "30s"; # check every 30 seconds
-                    Unit = "networkd-failsafe.service";
                 };
             };
         };
