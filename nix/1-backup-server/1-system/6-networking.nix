@@ -99,7 +99,7 @@
                         PublicKey = "SLW2DFKk+Cf5K5KZl0OLYrEGyqTCqYHBKV2mTA3W2hQ=";
                         AllowedIPs = [ "10.100.100.0/24" ];
                         Endpoint = "72.252.37.234:51820";
-                        PersistentKeepalive = 5;
+                        PersistentKeepalive = 25;
                     }
                 ];
             };
@@ -158,15 +158,15 @@
                         fi
                     '';
                 };
-                # If it fails enough times in 1 hours → reboot system
-                # With 30-second interval, 120 consecutive failures = 1 hour
-                startLimitIntervalSec = 3600; # 1 hour in seconds
-                startLimitBurst = 120; # must fail 120 times in 1 hour
+                # If it fails enough times in 10 minutes → reboot system
+                # With 1 minute interval, 10 consecutive failures = 10 minutes
+                startLimitIntervalSec = 600; # 10 minutes in seconds
+                startLimitBurst = 10;
                 unitConfig.OnFailure = "networkd-failsafe-reboot.service";
             };
 
             networkd-failsafe-reboot = {
-                description = "Reboot system if unable to reach Heimdall for 6 hours";
+                description = "Failsafe Reboot - Unable to reach Heimdall";
                 serviceConfig = {
                     Type = "oneshot";
                     ExecStart = "${pkgs.systemd}/bin/systemctl reboot";
@@ -179,16 +179,16 @@
                 wantedBy = [ "timers.target" ];
                 timerConfig = {
                     OnBootSec = "30s";
-                    OnUnitActiveSec = "30s"; # check every 30 seconds
+                    OnUnitActiveSec = "30s";
                     Unit = "networkd-check.service";
                 };
             };
             networkd-failsafe = {
-                description = "Run networkd-failsafe-check every 30 seconds";
+                description = "Run networkd-failsafe-check every 60 seconds";
                 wantedBy = [ "timers.target" ];
                 timerConfig = {
-                    OnBootSec = "30s";
-                    OnUnitActiveSec = "30s"; # check every 30 seconds
+                    OnBootSec = "60s";
+                    OnUnitActiveSec = "60s";
                     Unit = "networkd-failsafe.service";
                 };
             };
