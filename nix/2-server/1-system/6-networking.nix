@@ -13,7 +13,6 @@
 {
     config,
     inputs,
-    pkgs,
     ...
 }:
 {
@@ -63,7 +62,8 @@
             ];
             secrets = {
                 # Sops doesn't work in initrd so we use boot.initrd.secrets
-                "/wireguard_private_key" = config.sops.secrets.wireguard_private_key.path;
+                "${config.sops.secrets.wireguard_private_key.path}" =
+                    config.sops.secrets.wireguard_private_key.path;
             };
             systemd = {
                 services = {
@@ -116,7 +116,7 @@
                     Name = "wireguard0";
                 };
                 wireguardConfig = {
-                    PrivateKeyFile = /wireguard_private_key;
+                    PrivateKeyFile = config.sops.secrets.wireguard_private_key.path;
                     ListenPort = 51820;
                 };
                 wireguardPeers = [
@@ -171,72 +171,9 @@
                     networkConfig = {
                         IPv4Forwarding = true;
                     };
-                    linkConfig.RequiredForOnline = "routable";
                 };
             };
         };
-        services = {
-            networkd-check = {
-                description = "Check network connectivity via pinging Heimdall";
-                serviceConfig = {
-                    Type = "oneshot";
-                    ExecStart = pkgs.writeShellScript "networkd-check" ''
-                        if ${pkgs.iputils}/bin/ping 10.100.100.5 -c5 >/dev/null; then
-                            exit 0
-                        else
-                            exit 1
-                        fi
-                    '';
-                };
-                # If it fails enough times in 5 minutes → restart networkd
-                # With 30-second interval, 10 consecutive failures = 5 minutes
-                startLimitIntervalSec = 300; # 5 minutes
-                startLimitBurst = 10; # 10 failures within 5 minutes
-                unitConfig.OnFailure = "networkd-recover.service";
-            };
-
-            networkd-recover = {
-                description = "Restart systemd-networkd if unable to reach Heimdall for 5 minutes";
-                serviceConfig = {
-                    Type = "oneshot";
-                    ExecStart = pkgs.writeShellScript "networkd-recover" ''
-                        ${pkgs.systemd}/bin/systemctl restart systemd-networkd
-                    '';
-                };
-            };
-
-            networkd-failsafe = {
-                description = "Check network connectivity by pinging heimdall (failsafe)";
-                serviceConfig = {
-                    Type = "oneshot";
-                    ExecStart = pkgs.writeShellScript "networkd-failsafe" ''
-                        if ${pkgs.iputils}/bin/ping 10.100.100.5 -c5 >/dev/null; then
-                            exit 0
-                        else
-                            exit 1
-                        fi
-                    '';
-                };
-                # If it fails enough times in 1 hours → reboot system
-                # With 30-second interval, 120 consecutive failures = 1 hour
-                startLimitIntervalSec = 3600; # 1 hour in seconds
-                startLimitBurst = 120; # must fail 120 times in 1 hour
-                unitConfig.OnFailure = "networkd-failsafe-reboot.service";
-            };
-
-        };
-        timers = {
-            networkd-check = {
-                description = "Run networkd-check every 30 seconds";
-                wantedBy = [ "timers.target" ];
-                timerConfig = {
-                    OnBootSec = "30s";
-                    OnUnitActiveSec = "30s"; # check every 30 seconds
-                    Unit = "networkd-check.service";
-                };
-            };
-        };
-
     };
 
 }
