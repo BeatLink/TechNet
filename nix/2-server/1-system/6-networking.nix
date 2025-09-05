@@ -124,37 +124,37 @@
                         # Laptop
                         PublicKey = "WlTdwgmdSvXTGjB+kaOkZEV9vyOk/fKELv3IkRdJOAE=";
                         AllowedIPs = [ "10.100.100.2/32" ];
-                        PersistentKeepalive = 15;
+                        PersistentKeepalive = 25;
                     }
                     {
                         # Tablet
                         PublicKey = "rvOxr8WYaQRMHI8Ic0Td6mBOTwkI9U842AHkLrZDDkQ=";
                         AllowedIPs = [ "10.100.100.3/32" ];
-                        PersistentKeepalive = 15;
+                        PersistentKeepalive = 25;
                     }
                     {
                         # Phone
                         PublicKey = "/TCFjby/XxSkAQxuWcL5Kv5ggOlYJtloyU+z1I8wGWs=";
                         AllowedIPs = [ "10.100.100.4/32" ];
-                        PersistentKeepalive = 15;
+                        PersistentKeepalive = 25;
                     }
                     {
                         # Backup Server
                         PublicKey = "rntfoR0iPjL90MhrwIFOVI0hSoZ8hHj8A512Q4+1hk4=";
                         AllowedIPs = [ "10.100.100.5/32" ];
-                        PersistentKeepalive = 15;
+                        PersistentKeepalive = 25;
                     }
                     {
                         # eNET Server
                         PublicKey = "VGMPRz95JuRtQMTYV2ANAF7AuDZU/igJgZB8ZZSAUXI=";
                         AllowedIPs = [ "10.100.100.52/32" ];
-                        PersistentKeepalive = 15;
+                        PersistentKeepalive = 25;
                     }
                     {
                         #Work Laptop
                         PublicKey = "1J9wofO7+gHgkNAOMl51K3WmMknle/2b0dGT8jVLdAo=";
                         AllowedIPs = [ "10.100.100.51/32" ];
-                        PersistentKeepalive = 15;
+                        PersistentKeepalive = 25;
                     }
                 ];
             };
