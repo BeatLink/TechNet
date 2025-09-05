@@ -82,7 +82,7 @@
                         unitConfig.DefaultDependencies = "no";
                         serviceConfig.Type = "oneshot";
                         script = ''
-                            chown systemd-network:systemd-network /wireguard_private_key
+                            chown systemd-network:systemd-network ${config.sops.secrets.wireguard_private_key.path}
                         '';
                     };
                     "initrd-reboot" = {
