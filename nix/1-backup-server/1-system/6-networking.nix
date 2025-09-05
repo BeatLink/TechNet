@@ -59,7 +59,7 @@
                     script = ''chown systemd-network:systemd-network "${config.sops.secrets.wireguard_private_key.path}" '';
                 };
                 "initrd-reboot" = {
-                    description = "Reboot system after 30 minutes in initrd";
+                    description = "Reboot system after 10 minutes in initrd";
                     serviceConfig = {
                         Type = "oneshot";
                         ExecStart = "systemctl reboot";
