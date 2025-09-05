@@ -3,11 +3,9 @@
         enable = true;
         ipAddressAllow = [
             "10.100.100.0/24"
-            "192.168.0.0/24"
         ];
         listenStream = [
             "10.100.100.2:7654"
-            "192.168.0.3:7654"
         ];
     };
     systemd.sockets.tangd = {
