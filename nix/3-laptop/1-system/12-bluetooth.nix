@@ -12,5 +12,5 @@
             };
         };
     };
-    environment.persistence."/persistent".directories = ["/var/lib/bluetooth"];
+    environment.persistence."/Storage/Apps/System/Bluetooth/".directories = ["/var/lib/bluetooth"];
 }
