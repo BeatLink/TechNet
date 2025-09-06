@@ -17,14 +17,14 @@
         ];
     };
     networking.firewall.allowedTCPPorts = [ 7654 ];
-    environment.persistence."/persistent" = {
+    environment.persistence."/Storage/Apps/System/Tang" = {
         directories = [
             {
                 directory = "/var/db/tang";
                 mode = "0700";
             }
             {
-                directory = "/var/lib/private";
+                directory = "/var/lib/private/tang";
                 mode = "0700";
             }
         ];
