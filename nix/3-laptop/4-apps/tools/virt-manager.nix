@@ -8,6 +8,7 @@
     virtualisation.libvirtd.enable = true;
     programs.virt-manager.enable = true;
     environment.persistence."/Storage/Apps/System/Virt-Manager/system" = {
+        allowOther = true;
         directories = [
             "/etc/libvirt"
             "/var/lib/libvirt/"
