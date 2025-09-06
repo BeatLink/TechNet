@@ -1,10 +1,4 @@
 {
-    config,
-    lib,
-    pkgs,
-    ...
-}:
-{
     virtualisation.libvirtd.enable = true;
     programs.virt-manager.enable = true;
     environment.persistence."/Storage/Apps/System/Virt-Manager/system" = {
