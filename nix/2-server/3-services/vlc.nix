@@ -14,12 +14,10 @@
         after = [
             "network.target"
             "pipewire.service"
-            "pipewire-pulse.service"
         ];
         wants = [
             "network.target"
             "pipewire.service"
-            "pipewire-pulse.service"
         ];
 
         serviceConfig = {
