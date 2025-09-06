@@ -7,8 +7,8 @@
     pkg-config,
     gtk3,
     mpv,
+    xorg,
     libxkbcommon,
-    libxkbcommon-x11,
     libappindicator,
     libcef,
     makeWrapper,
@@ -74,7 +74,6 @@ rustPlatform.buildRustPackage (finalAttrs: {
         mpv
         libcef
         libxkbcommon
-        libxkbcommon-x11
     ];
 
     nativeBuildInputs = [
@@ -105,7 +104,8 @@ rustPlatform.buildRustPackage (finalAttrs: {
 
         wrapProgram $out/bin/stremio \
            --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ libappindicator ]} \
-           --prefix PATH : ${lib.makeBinPath [ nodejs ]}'';
+           --prefix PATH : ${lib.makeBinPath [ nodejs ]} \
+           --set LC_NUMERIC "C"'';
 
     env.CEF_PATH = cef-path;
 
