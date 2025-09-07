@@ -23,12 +23,6 @@
                     gst-libav
                 ]
             );
-    environment.systemPackages = with pkgs; [
-        gst_plugins_good
-        gst_plugins_bad
-        gst_plugins_ugly
-        gst_libav
-    ];
 
     home-manager.users.beatlink =
         { pkgs, ... }:
