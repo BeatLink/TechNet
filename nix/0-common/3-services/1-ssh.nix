@@ -22,6 +22,7 @@
             KbdInteractiveAuthentication = false;
             challengeResponseAuthentication = false;
             PermitRootLogin = "no";
+            PerSourcePenalties = "no";
         };
         hostKeys = [
             {
@@ -104,7 +105,7 @@
             };
         };
         extraConfig = ''
-            PerSourcePenalties no
+
             Host ragnarok-boot
                 User root
                 HostName 10.100.100.5
