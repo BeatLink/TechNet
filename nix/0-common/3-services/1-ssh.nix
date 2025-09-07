@@ -104,6 +104,7 @@
             };
         };
         extraConfig = ''
+            PerSourcePenalties no
             Host ragnarok-boot
                 User root
                 HostName 10.100.100.5
