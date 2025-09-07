@@ -3,19 +3,11 @@
         enable = true;
         ipAddressAllow = [
             "10.100.100.0/24"
+            "192.168.0.0/24"
         ];
         listenStream = [
-            "10.100.100.2:7654"
+            "0.0.0.0:7654"
         ];
-    };
-    systemd.services."tangd@" = {
-        after = [ "network-online.target" ];
-        wants = [ "network-online.target" ];
-        serviceConfig = {
-            Restart = "always";
-            RestartSec = "1s";
-            StartLimitIntervalSec = 0;
-        };
     };
     networking.firewall.allowedTCPPorts = [ 7654 ];
     environment.persistence."/Storage/Apps/System/Tang" = {
