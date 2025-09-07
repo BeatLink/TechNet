@@ -23,6 +23,7 @@
                     gst-libav
                 ]
             );
+
     home-manager.users.beatlink =
         { pkgs, ... }:
         {
