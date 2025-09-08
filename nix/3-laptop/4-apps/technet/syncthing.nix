@@ -11,7 +11,10 @@
     home-manager.users.beatlink =
         { pkgs, ... }:
         {
-            home.packages = with pkgs; [ syncthingtray-minimal ];
+            home.packages = with pkgs; [
+                syncthingtray-minimal
+                xorg.libxcb
+            ];
             systemd.user.targets.tray = {
                 Unit = {
                     Description = "Home Manager System Tray";
