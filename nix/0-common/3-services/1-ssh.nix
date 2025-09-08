@@ -23,7 +23,6 @@
             challengeResponseAuthentication = false;
             PermitRootLogin = "no";
             PerSourcePenalties = "no";
-            StrictModes = false;
         };
         hostKeys = [
             {
