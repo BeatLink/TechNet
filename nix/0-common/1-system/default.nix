@@ -9,5 +9,6 @@
         ./5-software
         ./6-networking
         ./7-security
+        ./8-locale
     ];
 }
