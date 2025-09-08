@@ -1,12 +1,7 @@
-# Disko
+# Disko #########################################################################################################################################
 #
-# This section declaratively describes the filesystem structure. It is used by disko during installation to format and partition the
-# installation drive. It is also used during boot to find and mount the needed partitions
-#
-# The disk partition structure follows the "Erase your Darlings" philosophy whereby the root filesystem is erased at every boot and rebuilt
-# from the contents of the Nix store and this configuration flake
-#
-# Disk partition generated with help from https://ethan.roo.ke/notes/nix-on-kimsufi/
+# Disko is used to declaratively describe the filesystem structure. It is used by nixos-anywhere during installation to format and partition the root
+# drive. It is also used to mount the filesystems at boot.
 #
 
 {
@@ -100,15 +95,5 @@
             };
         };
     };
-    boot = {
-        supportedFilesystems = [ "zfs" ]; # Needed for impermanence
-        initrd.supportedFilesystems = [ "zfs" ]; # Needed for impermanence
-    };
-    fileSystems = {
-        "/".neededForBoot = true;
-        "/boot".neededForBoot = true;
-        "/nix".neededForBoot = true;
-        "/persistent".neededForBoot = true;
-        "/home".neededForBoot = true;
-    };
+
 }

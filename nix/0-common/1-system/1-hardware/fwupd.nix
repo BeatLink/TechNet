@@ -1,17 +1,7 @@
-{ pkgs, modulesPath, ... }:
+# Enable Fwupd for automatic firmware updates ################################################################################################
+{ pkgs, ... }:
 {
-    imports = [
-        (modulesPath + "/installer/scan/not-detected.nix")
-    ];
-    services = {
-        fstrim.enable = true;
-        zfs = {
-            autoScrub.enable = true;
-            trim.enable = true;
-        };
-        fwupd.enable = true;
-    };
-
+    services.fwupd.enable = true;
     systemd = {
         timers.fwupd-auto-update = {
             wantedBy = [ "timers.target" ];
@@ -30,5 +20,4 @@
             };
         };
     };
-
 }
