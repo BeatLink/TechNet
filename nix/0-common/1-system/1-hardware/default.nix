@@ -1,5 +1,5 @@
 {
     imports = [
-        ./fwupdate.nix
+        ./1-fwupd.nix
     ];
 }
