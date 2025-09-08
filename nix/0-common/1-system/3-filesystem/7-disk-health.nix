@@ -1,3 +1,5 @@
+# Disk Health Monitoring  ##########################################################################################################################################
+#
 {
     config,
     pkgs,
@@ -11,6 +13,7 @@ let
     cfg = config.services.diskZfsHealth;
 in
 {
+
     options.services.diskZfsHealth = {
         enable = mkEnableOption "Enable Disk & ZFS Health Checks";
 
@@ -117,4 +120,5 @@ in
             echo "Report sent to Uptime Kuma. Status: $STATUS"
         '';
     };
+
 }
