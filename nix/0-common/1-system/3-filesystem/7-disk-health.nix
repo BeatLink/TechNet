@@ -55,41 +55,48 @@ in
                             message="Disk and ZFS health OK"
 
                             check_smart() {
-                              local disk="$1"
-                              local result
-                              result=$(${pkgs.smartmontools}/bin/smartctl -H "$disk" 2>/dev/null | grep -iE "PASSED|FAILED" || true)
-                              if echo "$result" | grep -iq "fail"; then
-                                status="down"
-                                message="SMART failure on $disk: $result"
-                              fi
+                              	local disk="$1"
+                              	local transport
+                              	transport=$(lsblk -no TRAN "$disk" 2>/dev/null || echo "")
+
+                              	if [[ "$transport" == "usb" ]]; then
+                                	result=$(${pkgs.smartmontools}/bin/smartctl -H -d sat "$disk" 2>/dev/null || true)
+                              	else
+                                	result=$(${pkgs.smartmontools}/bin/smartctl -H "$disk" 2>/dev/null || true)
+                              	fi
+
+                              	if echo "$result" | grep -iq "FAIL"; then
+                                	status="down"
+                                	message="SMART failure on $disk: $result"
+                              	fi
                             }
 
                             check_zfs() {
-                              if [ -x "${pkgs.zfs}/bin/zpool" ]; then
-                                while read -r line; do
-                                  if echo "$line" | grep -Eiq "DEGRADED|FAULTED|OFFLINE|UNAVAIL"; then
-                                    status="down"
-                                    message="ZFS pool issue: $line"
-                                  fi
-                                done < <(${pkgs.zfs}/bin/zpool status)
-                              fi
+                              	if [ -x "${pkgs.zfs}/bin/zpool" ]; then
+                                	while read -r line; do
+                                  		if echo "$line" | grep -Eiq "DEGRADED|FAULTED|OFFLINE|UNAVAIL"; then
+                                    		status="down"
+                                    		message="ZFS pool issue: $line"
+                                  		fi
+                                	done < <(${pkgs.zfs}/bin/zpool status)
+                              	fi
                             }
 
                             disks=$(${pkgs.util-linux}/bin/lsblk -dn -o NAME,TYPE | ${pkgs.gawk}/bin/awk '$2=="disk"{print "/dev/"$1}')
 
                             for d in $disks; do
-                              check_smart "$d"
+                              	check_smart "$d"
                             done
 
                             check_zfs
 
                             ${pkgs.curl}/bin/curl \
-                              --get \
-                              --data-urlencode "status=$status" \
-                              --data-urlencode "msg=$message" \
-                              --silent \
-                              "$push_url" \
-                              > /dev/null
+                              	--get \
+                              	--data-urlencode "status=$status" \
+                              	--data-urlencode "msg=$message" \
+                              	--silent \
+                              	"$push_url" \
+                              	> /dev/null
                         '';
                     in
                     script;
