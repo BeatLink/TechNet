@@ -115,7 +115,7 @@ in
             fi
 
             # Send simple GET request to Uptime Kuma
-            ${pkgs.curl}/bin/curl -s "$UPTIME_KUMA_URL?status=$UK_STATUS&msg=$(date '+%Y-%m-%d %H:%M:%S') Disk Check Complete"
+            ${pkgs.curl}/bin/curl -s "$UPTIME_KUMA_URL?status=$UK_STATUS&msg=Disk Check Complete"
 
             echo "Report sent to Uptime Kuma. Status: $STATUS"
         '';
