@@ -35,7 +35,7 @@
                         healthcheck = {
                             test = [
                                 "CMD-SHELL"
-                                "wget --spider --quiet --tries=1 http://localhost:5232/ || exit 1"
+                                "wget --spider --quiet --tries=1 http://127.0.0.1:5232/.well-known/carddav || exit 1"
                             ];
                             interval = "30s";
                             retries = 3;
