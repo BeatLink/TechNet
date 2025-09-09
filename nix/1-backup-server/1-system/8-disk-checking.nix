@@ -1,7 +1,8 @@
 {
-    services.diskZfsHealth = {
+    services.disk-health-monitor = {
         enable = true;
-        uptimeKumaUrl = "https://uptime-kuma.heimdall.technet/api/push/xOTI1XHvNN";
-        checkInterval = "daily";
+        baseUrl = "https://uptime-kuma.heimdall.technet/api/push";
+        endpoint = "xOTI1XHvNN";
+        interval = "1h";
     };
 }
