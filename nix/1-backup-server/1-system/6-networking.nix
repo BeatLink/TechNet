@@ -117,79 +117,53 @@
             };
         };
         services = {
-            networkd-check = {
-                description = "Check network connectivity via pinging Heimdall";
+            networkd-monitor = {
+                description = "Monitor network connectivity and take recovery actions";
                 serviceConfig = {
                     Type = "oneshot";
-                    ExecStart = pkgs.writeShellScript "networkd-check" ''
-                        if ${pkgs.iputils}/bin/ping 10.100.100.1 -c5 >/dev/null; then
-                            exit 0
+                    ExecStart = pkgs.writeShellScript "networkd-monitor" ''
+                        STATE_FILE="/run/networkd-monitor.failures"
+                        MAX_RESTARTS=10   # ~5 minutes at 30s interval
+                        MAX_REBOOTS=20    # ~10 minutes at 30s interval
+
+                        mkdir -p /run
+                        failures=0
+                        if [ -f "$STATE_FILE" ]; then
+                          failures=$(cat "$STATE_FILE")
+                        fi
+
+                        if ${pkgs.iputils}/bin/ping -c5 -W2 10.100.100.1 >/dev/null; then
+                          echo 0 > "$STATE_FILE"
+                          echo "networkd-monitor: Heimdall reachable, reset counter."
+                          exit 0
                         else
-                            exit 1
+                          failures=$((failures + 1))
+                          echo $failures > "$STATE_FILE"
+                          echo "networkd-monitor: Heimdall unreachable (failure $failures)."
+                        fi
+
+                        if [ "$failures" -eq "$MAX_RESTARTS" ]; then
+                          echo "networkd-monitor: Restarting systemd-networkd..."
+                          ${pkgs.systemd}/bin/systemctl restart systemd-networkd
+                        fi
+
+                        if [ "$failures" -ge "$MAX_REBOOTS" ]; then
+                          echo "networkd-monitor: Rebooting system..."
+                          ${pkgs.systemd}/bin/systemctl reboot
                         fi
                     '';
-                };
-                # If it fails enough times in 5 minutes → restart networkd
-                # With 30-second interval, 10 consecutive failures = 5 minutes
-                startLimitIntervalSec = 300; # 5 minutes
-                startLimitBurst = 10; # 10 failures within 5 minutes
-                unitConfig.OnFailure = "networkd-recover.service";
-            };
-
-            networkd-recover = {
-                description = "Restart systemd-networkd if unable to reach Heimdall for 5 minutes";
-                serviceConfig = {
-                    Type = "oneshot";
-                    ExecStart = pkgs.writeShellScript "networkd-recover" ''
-                        ${pkgs.systemd}/bin/systemctl restart systemd-networkd
-                    '';
-                };
-            };
-
-            networkd-failsafe = {
-                description = "Check network connectivity by pinging heimdall (failsafe)";
-                serviceConfig = {
-                    Type = "oneshot";
-                    ExecStart = pkgs.writeShellScript "networkd-failsafe" ''
-                        if ${pkgs.iputils}/bin/ping 10.100.100.1 -c5 >/dev/null; then
-                            exit 0
-                        else
-                            exit 1
-                        fi
-                    '';
-                };
-                # If it fails enough times in 10 minutes → reboot system
-                # With 1 minute interval, 10 consecutive failures = 10 minutes
-                startLimitIntervalSec = 600; # 10 minutes in seconds
-                startLimitBurst = 10;
-                unitConfig.OnFailure = "networkd-failsafe-reboot.service";
-            };
-
-            networkd-failsafe-reboot = {
-                description = "Failsafe Reboot - Unable to reach Heimdall";
-                serviceConfig = {
-                    Type = "oneshot";
-                    ExecStart = "${pkgs.systemd}/bin/systemctl reboot";
                 };
             };
         };
         timers = {
-            networkd-check = {
-                description = "Run networkd-check every 30 seconds";
+            networkd-monitor = {
+                description = "Run networkd-monitor every 30 seconds";
                 wantedBy = [ "timers.target" ];
                 timerConfig = {
                     OnBootSec = "30s";
                     OnUnitActiveSec = "30s";
-                    Unit = "networkd-check.service";
-                };
-            };
-            networkd-failsafe = {
-                description = "Run networkd-failsafe-check every 60 seconds";
-                wantedBy = [ "timers.target" ];
-                timerConfig = {
-                    OnBootSec = "60s";
-                    OnUnitActiveSec = "60s";
-                    Unit = "networkd-failsafe.service";
+                    Unit = "networkd-monitor.service";
+                    Persistent = true;
                 };
             };
         };
