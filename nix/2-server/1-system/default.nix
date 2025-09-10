@@ -13,5 +13,6 @@
         ./11-disk-checking.nix
         ./12-disk-usage-monitoring.nix
         ./13-clevis.nix
+        ./14-device-online.nix
     ];
 }
