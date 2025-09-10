@@ -22,8 +22,6 @@
                     ''
                         if [ $returncode == 0 ]; then 
                             wget --spider "http://uptime-kuma.heimdall.technet/api/push/TOXLxZAYCN?status=up&msg=Backups Completed&ping="; 
-                        else
-                            wget --spider "http://uptime-kuma.heimdall.technet/api/push/TOXLxZAYCN?status=down&msg=Backups Failed&ping=";
                         fi
                     ''
                 )
@@ -33,8 +31,6 @@
                     ''
                         if [ $returncode == 0 ]; then 
                             wget --spider "http://uptime-kuma.heimdall.technet/api/push/8ME1iuK3yx?status=up&msg=Backups Completed&ping="; 
-                        else
-                            wget --spider "http://uptime-kuma.heimdall.technet/api/push/8ME1iuK3yx?status=down&msg=Backups Failed&ping=";
                         fi
                     ''
                 )
@@ -44,8 +40,6 @@
                     ''
                         if [ $returncode == 0 ]; then 
                             wget --spider "http://uptime-kuma.heimdall.technet/api/push/DjyNX8HxK1?status=up&msg=Backups Completed&ping="; 
-                        else
-                            wget --spider "http://uptime-kuma.heimdall.technet/api/push/DjyNX8HxK1?status=down&msg=Backups Failed&ping=";
                         fi
                     ''
                 )
