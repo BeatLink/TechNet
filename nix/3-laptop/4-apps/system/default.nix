@@ -1,11 +1,10 @@
 {
     imports = [
-        ./baobab.nix
         ./bash.nix
         ./dconf-editor.nix
         ./fonts.nix
         ./gparted.nix
-        ./system-monitor.nix
+        ./mission-center.nix
         ./variety.nix
         ./vorta.nix
         ./blueman
