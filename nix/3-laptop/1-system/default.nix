@@ -17,6 +17,7 @@
         ./17-disk-usage-monitoring.nix
         ./18-tang.nix
         ./19-codecs.nix
+        ./20-device-online.nix
         ./plymouth.nix
         ./dconf
         ./desktop-environment
