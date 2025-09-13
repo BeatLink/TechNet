@@ -145,6 +145,12 @@
                         PersistentKeepalive = 25;
                     }
                     {
+                        # Ragnarok Switch
+                        PublicKey = "oKg4d4atr/kVlXgfoKWqNPE/mGMo+uRhjJE4wPSUF2Q=";
+                        AllowedIPs = [ "10.100.100.10/32" ];
+                        PersistentKeepalive = 25;
+                    }
+                    {
                         # eNET Server
                         PublicKey = "VGMPRz95JuRtQMTYV2ANAF7AuDZU/igJgZB8ZZSAUXI=";
                         AllowedIPs = [ "10.100.100.52/32" ];
