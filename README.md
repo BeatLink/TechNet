@@ -44,13 +44,27 @@ All devices in the TechNet are configured with dedicated, encrypted ZFS root dri
 
 All devices in the TechNet are linked by a WireGuard VPN that is not routable by the public internet
 
-* IP Subnet:    10.100.100.0/24
-* Heimdall:     10.100.100.1
-* Odin:         10.100.100.2
-* Hela:         10.100.100.3
-* Thor:         10.100.100.4
-* Ragnarok:     10.100.100.5
-* Socket Ragnarok: 10.100.100.10
+
+| Host                    | Local IP Address    | Wireguard       |
+| ----------------------- | ------------------- | --------------- |
+| IP Subnet               | 192.168.0.0/24      | 10.100.100.0/24 |
+| Heimdall                | 192.168.0.2         | 10.100.100.1    |
+| Odin                    | 192.168.0.3         | 10.100.100.2    |
+| Hela                    | 192.168.0.4         | 10.100.100.3    |
+| Thor                    | 192.168.0.5         | 10.100.100.4    |
+| Ragnarok                | DHCP (Family Wi-Fi) | 10.100.100.5    |
+| Light - Bedroom         | 192.168.0.10        | 10.100.100.10   |
+| Light - Kitchen         | 192.168.0.11        | 10.100.100.11   |
+| Light - Bathroom        | 192.168.0.12        | 10.100.100.12   |
+| Light - Bedroom Desk    | 192.168.0.13        | 10.100.100.13   |
+| Light - Outside         | 192.168.0.14        | 10.100.100.14   |
+| Light - Spare Bulb      | 192.168.0.15        | 10.100.100.15   |
+| IR - Fan                | 192.168.0.16        | 10.100.100.16   |
+| Socket - Fan            | 192.168.0.17        | 10.100.100.17   |
+| Socket - Ragnarok       | DHCP (Family Wi-Fi) | 10.100.100.18   |
+| Sensor - Bathroom Light | 192.168.0.19        | 10.100.100.19   |
+| Sensor - Bedroom        | 192.168.0.20        | 10.100.100.20   |
+
 
 ## Apps
 
