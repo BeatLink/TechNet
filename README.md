@@ -1,31 +1,38 @@
 # TechNet
 
-The TechNet is my personal network of computing devices, all connected via a WireGuard VPN network. 
+The TechNet is my personal network of computing devices, all connected via a WireGuard VPN network.
 
 [![Bump flake.lock](https://github.com/BeatLink/TechNet/actions/workflows/main.yml/badge.svg)](https://github.com/BeatLink/TechNet/actions/workflows/main.yml)
 
 ## Index
 
 ### Ragnarok
+
 Ragnarok is the backup server for the TechNet. It is setup at my family's home as an offsite backup. It is powered by a Rock64 Single Board Computer
 
 ### Heimdall
+
 Heimdall is my home server and acts as the hub of the TechNet. It is powered by a headless Acer Laptop
 
 ### Odin
+
 Odin is my laptop and primary workstation. It is a Lenovo Ideapad Gaming 3
 
 ### Hela
+
 Hela is my tablet and is used mainly for media consumption, viewing recipes and controlling HomeAssistant. It is a Samsung Galaxy A8
 
 ### Thor
-Thor is my smartphone and mobile command center. It is mainly used for communications and computing while mobile. 
+
+Thor is my smartphone and mobile command center. It is mainly used for communications and computing while mobile.
 
 ### Loki
+
 Loki is my smart watch and biometric monitor. It a PineTime watch running wasp-os
 
 ### Tech Kit
-I also maintain a tech kit containing computer repair tools and useful peripherals and accessories. 
+
+I also maintain a tech kit containing computer repair tools and useful peripherals and accessories.
 
 ## Architecture
 
@@ -37,13 +44,27 @@ All devices in the TechNet are configured with dedicated, encrypted ZFS root dri
 
 All devices in the TechNet are linked by a WireGuard VPN that is not routable by the public internet
 
-* IP Subnet:    10.100.100.0/24
-* Heimdall:     10.100.100.1 
-* Odin:         10.100.100.2
-* Hela:         10.100.100.3
-* Thor:         10.100.100.4
-* Ragnarok:     10.100.100.5
-* Socket Ragnarok: 10.100.100.10
+
+| Host                    | Local IP Address    | Wireguard       |
+| ----------------------- | ------------------- | --------------- |
+| IP Subnet               | 192.168.0.0/24      | 10.100.100.0/24 |
+| Heimdall                | 192.168.0.2         | 10.100.100.1    |
+| Odin                    | 192.168.0.3         | 10.100.100.2    |
+| Hela                    | 192.168.0.4         | 10.100.100.3    |
+| Thor                    | 192.168.0.5         | 10.100.100.4    |
+| Ragnarok                | DHCP (Family Wi-Fi) | 10.100.100.5    |
+| Light - Bedroom         | 192.168.0.10        | 10.100.100.10   |
+| Light - Kitchen         | 192.168.0.11        | 10.100.100.11   |
+| Light - Bathroom        | 192.168.0.12        | 10.100.100.12   |
+| Light - Bedroom Desk    | 192.168.0.13        | 10.100.100.13   |
+| Light - Outside         | 192.168.0.14        | 10.100.100.14   |
+| Light - Spare Bulb      | 192.168.0.15        | 10.100.100.15   |
+| IR - Fan                | 192.168.0.16        | 10.100.100.16   |
+| Socket - Fan            | 192.168.0.17        | 10.100.100.17   |
+| Socket - Ragnarok       | DHCP (Family Wi-Fi) | 10.100.100.18   |
+| Sensor - Bathroom Light | 192.168.0.19        | 10.100.100.19   |
+| Sensor - Bedroom        | 192.168.0.20        | 10.100.100.20   |
+
 
 ## Apps
 
