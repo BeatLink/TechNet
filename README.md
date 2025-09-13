@@ -50,21 +50,22 @@ All devices in the TechNet are linked by a WireGuard VPN that is not routable by
 * Hela:         10.100.100.3
 * Thor:         10.100.100.4
 * Ragnarok:     10.100.100.5
-
+* Socket Ragnarok: 10.100.100.10
 
 ## Apps
-
 
 ### Comms
 
 #### Contacts
+
 Contacts are managed by the Radicale server on Heimdall. DavX5 is used to sync them with the contacts and phone apps on Thor. They are managed on Odin using Thunderbird.
 
 #### SMS
-SMS are managed on Android using the messaging app. Valent can be used to connect to Thor to send SMS messages. 
+
+SMS are managed on Android using the messaging app. Valent can be used to connect to Thor to send SMS messages.
 
 #### WhatsApp
-WhatsApp is used to connect with friends and family. The main app is installed on Thor and the web app is used on Odin. Desktop files are created to access WhatsApp Web from plank reloaded.
 
+WhatsApp is used to connect with friends and family. The main app is installed on Thor and the web app is used on Odin. Desktop files are created to access WhatsApp Web from plank reloaded.
 
 ### Core
