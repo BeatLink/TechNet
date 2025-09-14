@@ -20,6 +20,10 @@
                 directory = "/var/lib/private/tang";
                 mode = "0700";
             }
+            {
+                directory = "/run/tang";
+                mode = "0700";
+            }
         ];
     };
 }
