@@ -145,6 +145,12 @@
                         PersistentKeepalive = 25;
                     }
                     {
+                        # Bedroom Light
+                        PublicKey = "9LaDCzP+4z/RtsvsnfpjZXit/jO/uXX5WkfVoTg6jk8=";
+                        AllowedIPs = [ "10.100.100.10/32" ];
+                        PersistentKeepalive = 25;
+                    }
+                    {
                         # Ragnarok Switch
                         PublicKey = "oKg4d4atr/kVlXgfoKWqNPE/mGMo+uRhjJE4wPSUF2Q=";
                         AllowedIPs = [ "10.100.100.18/32" ];
