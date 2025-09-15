@@ -37,7 +37,7 @@
                 "com.sun:auto-snapshot" = "false";                  # Prevents autosnapshots in general (will be enabled for specific datasets later)
                 encryption = "aes-256-gcm";
                 keyformat = "passphrase";
-                keylocation = "file:///tmp/disk-1.key";
+                keylocation = "file:///tmp/encryption.key";
 
             };  
             postCreateHook = ''
