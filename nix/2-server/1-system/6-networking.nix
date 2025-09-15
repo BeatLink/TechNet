@@ -151,6 +151,12 @@
                         PersistentKeepalive = 25;
                     }
                     {
+                        # Kitchen Light
+                        PublicKey = "VyrLnuEuy91wfmB/HKkNwWd4IgfNqAQJgRJMARsTsn4=";
+                        AllowedIPs = [ "10.100.100.11/32" ];
+                        PersistentKeepalive = 25;
+                    }
+                    {
                         # Ragnarok Switch
                         PublicKey = "oKg4d4atr/kVlXgfoKWqNPE/mGMo+uRhjJE4wPSUF2Q=";
                         AllowedIPs = [ "10.100.100.18/32" ];
