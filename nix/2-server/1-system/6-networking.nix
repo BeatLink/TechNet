@@ -199,6 +199,18 @@
                         PersistentKeepalive = 25;
                     }
                     {
+                        # Bathroom Light Sensor
+                        PublicKey = "YUUKohrU/e0qzl9kM+HxB7A+fey7dnOq7e+sbjdoYDk=";
+                        AllowedIPs = [ "10.100.100.19/32" ];
+                        PersistentKeepalive = 25;
+                    }
+                    {
+                        # Bedroom Light Sensor
+                        PublicKey = "M2lsrnSfXEYydot27rsoNhHE3c6Mkq2rL6OfzGBjNwI=";
+                        AllowedIPs = [ "10.100.100.20/32" ];
+                        PersistentKeepalive = 25;
+                    }
+                    {
                         # eNET Server
                         PublicKey = "VGMPRz95JuRtQMTYV2ANAF7AuDZU/igJgZB8ZZSAUXI=";
                         AllowedIPs = [ "10.100.100.52/32" ];
