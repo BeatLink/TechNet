@@ -14,7 +14,7 @@
         ./screenshot.nix
         ./simple-scan.nix
         ./universal-android-debloater.nix
-        ./ventoy.nix
+        #./ventoy.nix
         ./video-downloader.nix
         ./virt-manager.nix
         ./wmctrl.nix
