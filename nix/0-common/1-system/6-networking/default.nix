@@ -6,6 +6,5 @@
 {
     imports = [
         ./1-firewall.nix
-        ./2-avahi.nix
     ];
 }
