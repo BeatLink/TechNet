@@ -51,6 +51,7 @@
             };
             postCreateHook = ''
                 zfs set keylocation="prompt" "root-pool";             # use this to read the key during boot
+                zpool upgrade -a                                      # Enables all zfs features
             '';
             datasets = {
                 root = {
