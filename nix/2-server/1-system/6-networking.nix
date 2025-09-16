@@ -157,9 +157,57 @@
                         PersistentKeepalive = 25;
                     }
                     {
-                        # Ragnarok Switch
+                        # Bathroom Light
+                        PublicKey = "pI+KOi59lfvgQ8PmtynyK7xuLb6uO0/4wBCsNwUCIT0=";
+                        AllowedIPs = [ "10.100.100.12/32" ];
+                        PersistentKeepalive = 25;
+                    }
+                    {
+                        # Bedroom Desk Light
+                        PublicKey = "91uAfJkcMhoSomuhbySJAIT7JaisG2un7DdYJRFDZ24=";
+                        AllowedIPs = [ "10.100.100.13/32" ];
+                        PersistentKeepalive = 25;
+                    }
+                    {
+                        # Outside Light
+                        PublicKey = "YshQyFj6/TWY6BhJzJ1LDwEOWelnkVH34fqxbvvqsAE=";
+                        AllowedIPs = [ "10.100.100.14/32" ];
+                        PersistentKeepalive = 25;
+                    }
+                    {
+                        # Spare Bulb
+                        PublicKey = "DpDA12iZrKftLcstYevFFzUkT+h77ZjUXhXHQ8CHG18=";
+                        AllowedIPs = [ "10.100.100.15/32" ];
+                        PersistentKeepalive = 25;
+                    }
+                    {
+                        # Fan IR
+                        PublicKey = "Vu/SGB9mvrlVO2BsWrGVH8x548MBMZmQ+nTWnLtowns=";
+                        AllowedIPs = [ "10.100.100.16/32" ];
+                        PersistentKeepalive = 25;
+                    }
+                    {
+                        # Fan Socket
+                        PublicKey = "R/KQHjZWDt+zDhCZMPiuVUQlbtaEKaL8LThzsOZbYSc=";
+                        AllowedIPs = [ "10.100.100.17/32" ];
+                        PersistentKeepalive = 25;
+                    }
+                    {
+                        # Ragnarok Socket
                         PublicKey = "oKg4d4atr/kVlXgfoKWqNPE/mGMo+uRhjJE4wPSUF2Q=";
                         AllowedIPs = [ "10.100.100.18/32" ];
+                        PersistentKeepalive = 25;
+                    }
+                    {
+                        # Bathroom Light Sensor
+                        PublicKey = "YUUKohrU/e0qzl9kM+HxB7A+fey7dnOq7e+sbjdoYDk=";
+                        AllowedIPs = [ "10.100.100.19/32" ];
+                        PersistentKeepalive = 25;
+                    }
+                    {
+                        # Bedroom Light Sensor
+                        PublicKey = "M2lsrnSfXEYydot27rsoNhHE3c6Mkq2rL6OfzGBjNwI=";
+                        AllowedIPs = [ "10.100.100.20/32" ];
                         PersistentKeepalive = 25;
                     }
                     {
