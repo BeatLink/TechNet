@@ -157,6 +157,30 @@
                         PersistentKeepalive = 25;
                     }
                     {
+                        # Bathroom Light
+                        PublicKey = "pI+KOi59lfvgQ8PmtynyK7xuLb6uO0/4wBCsNwUCIT0=";
+                        AllowedIPs = [ "10.100.100.12/32" ];
+                        PersistentKeepalive = 25;
+                    }
+                    {
+                        # Bedroom Desk Light
+                        PublicKey = "91uAfJkcMhoSomuhbySJAIT7JaisG2un7DdYJRFDZ24=";
+                        AllowedIPs = [ "10.100.100.13/32" ];
+                        PersistentKeepalive = 25;
+                    }
+                    {
+                        # Outside Light
+                        PublicKey = "YshQyFj6/TWY6BhJzJ1LDwEOWelnkVH34fqxbvvqsAE=";
+                        AllowedIPs = [ "10.100.100.14/32" ];
+                        PersistentKeepalive = 25;
+                    }
+                    {
+                        # Spare Bulb
+                        PublicKey = "DpDA12iZrKftLcstYevFFzUkT+h77ZjUXhXHQ8CHG18=";
+                        AllowedIPs = [ "10.100.100.15/32" ];
+                        PersistentKeepalive = 25;
+                    }
+                    {
                         # Ragnarok Switch
                         PublicKey = "oKg4d4atr/kVlXgfoKWqNPE/mGMo+uRhjJE4wPSUF2Q=";
                         AllowedIPs = [ "10.100.100.18/32" ];
