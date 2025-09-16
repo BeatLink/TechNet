@@ -181,7 +181,19 @@
                         PersistentKeepalive = 25;
                     }
                     {
-                        # Ragnarok Switch
+                        # Fan IR
+                        PublicKey = "Vu/SGB9mvrlVO2BsWrGVH8x548MBMZmQ+nTWnLtowns=";
+                        AllowedIPs = [ "10.100.100.16/32" ];
+                        PersistentKeepalive = 25;
+                    }
+                    {
+                        # Fan Socket
+                        PublicKey = "R/KQHjZWDt+zDhCZMPiuVUQlbtaEKaL8LThzsOZbYSc=";
+                        AllowedIPs = [ "10.100.100.17/32" ];
+                        PersistentKeepalive = 25;
+                    }
+                    {
+                        # Ragnarok Socket
                         PublicKey = "oKg4d4atr/kVlXgfoKWqNPE/mGMo+uRhjJE4wPSUF2Q=";
                         AllowedIPs = [ "10.100.100.18/32" ];
                         PersistentKeepalive = 25;
