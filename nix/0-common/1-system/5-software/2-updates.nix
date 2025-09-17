@@ -10,7 +10,7 @@
             "--no-write-lock-file"
             "-L"
         ];
-        dates = "02:00";
+        dates = "07:00";
         allowReboot = false;
         persistent = true;
     };
