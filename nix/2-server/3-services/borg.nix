@@ -11,7 +11,6 @@
             ];
             path = "/Storage/Files/Backups/Laptop/Vorta";
             group = "beatlink";
-            user = "beatlink";
         };
     };
 }
