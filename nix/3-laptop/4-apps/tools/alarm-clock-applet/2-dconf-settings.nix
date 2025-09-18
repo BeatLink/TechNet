@@ -19,7 +19,8 @@ with lib.hm.gvariant;
       repeat = [ "sun" "mon" "tue" "wed" "thu" "fri" "sat" ];
       sound-file = "file:///Storage/Files/Sounds/Interface%20Sounds/Amazon/Amazon%20Fire%20Phone%20Startup%20(Extracted%20with%20Boot%20Animation).m4a";
       sound-repeat = false;
-      time = mkInt64 81000;
+      time = mkInt64 78300;
+      timestamp = mkInt64 1758163500;
       type = "clock";
     };
 
@@ -30,7 +31,8 @@ with lib.hm.gvariant;
       repeat = [ "sun" "mon" "tue" "wed" "thu" "fri" "sat" ];
       sound-file = "file:///Storage/Files/Sounds/Interface%20Sounds/Amazon/Amazon%20Fire%20Phone%20Startup%20(Extracted%20with%20Boot%20Animation).m4a";
       sound-repeat = false;
-      time = mkInt64 21600;
+      time = mkInt64 18000;
+      timestamp = mkInt64 1758189600;
       type = "clock";
     };
 
@@ -41,7 +43,8 @@ with lib.hm.gvariant;
       repeat = [ "sun" "mon" "tue" "wed" "thu" "fri" "sat" ];
       sound-file = "file:///Storage/Files/Sounds/Interface%20Sounds/Amazon/Amazon%20Fire%20Phone%20Startup%20(Extracted%20with%20Boot%20Animation).m4a";
       sound-repeat = false;
-      time = mkInt64 81900;
+      time = mkInt64 78900;
+      timestamp = mkInt64 1758164100;
       type = "clock";
     };
 
