@@ -105,6 +105,7 @@ rustPlatform.buildRustPackage (finalAttrs: {
         wrapProgram $out/bin/stremio \
            --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ libappindicator ]} \
            --prefix PATH : ${lib.makeBinPath [ nodejs ]} \
+           --prefix LD_LIBRARY_PATH : ${lib.makeLibraryPath [ libappindicator libxkbcommon ]} \
            --set LC_NUMERIC "C"'';
 
     env.CEF_PATH = cef-path;
