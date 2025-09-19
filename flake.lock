@@ -155,21 +155,6 @@
         "type": "github"
       }
     },
-    "nixos-plymouth": {
-      "locked": {
-        "lastModified": 1758443978,
-        "narHash": "sha256-LVKmm2Y20B8olj+uEAd8OklVEQOflLz44LCZYLH3v2U=",
-        "owner": "BeatLink",
-        "repo": "nixos-plymouth",
-        "rev": "2786093b847c17fa0a6a108b5c8b7ad968598aee",
-        "type": "github"
-      },
-      "original": {
-        "owner": "BeatLink",
-        "repo": "nixos-plymouth",
-        "type": "github"
-      }
-    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1758277210,
@@ -214,7 +199,6 @@
         "gmusicbrowser": "gmusicbrowser",
         "home-manager": "home-manager",
         "impermanence": "impermanence",
-        "nixos-plymouth": "nixos-plymouth",
         "nixpkgs": "nixpkgs",
         "plank-reloaded": "plank-reloaded",
         "sops-nix": "sops-nix",
