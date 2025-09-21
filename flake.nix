@@ -39,6 +39,8 @@
             url = "github:BeatLink/gmusicbrowser-nix-flake";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        nixos-plymouth.url = "github:BeatLink/nixos-plymouth";
+
     };
     outputs =
         inputs@{
@@ -52,6 +54,7 @@
             xdg-autostart,
             flake-programs-sqlite,
             gmusicbrowser,
+            nixos-plymouth,
             ...
         }:
         {
@@ -94,6 +97,7 @@
                         impermanence.nixosModules.impermanence
                         sops-nix.nixosModules.sops
                         home-manager.nixosModules.home-manager
+                        nixos-plymouth.nixosModules.default
                         {
                             home-manager.sharedModules = [
                                 xdg-autostart.homeManagerModules.xdg-autostart
