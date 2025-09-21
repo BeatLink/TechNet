@@ -1,18 +1,6 @@
-{ pkgs, ... }:
 {
     boot = {
         initrd.verbose = false;
-        plymouth = {
-            enable = true;
-            #font = "${pkgs.noto-fonts}/share/fonts/truetype/DejaVuSans.ttf";
-            theme = "spinner_alt";
-            themePackages = with pkgs; [
-                # By default we would install all themes
-                (adi1090x-plymouth-themes.override {
-                selected_themes = [ "spinner_alt" ];
-            })
-            ];
-        };
         # Enable "Silent Boot"
         consoleLogLevel = 0;
         kernelParams = [
