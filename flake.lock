@@ -71,11 +71,11 @@
         "utils": "utils"
       },
       "locked": {
-        "lastModified": 1758411733,
-        "narHash": "sha256-BKGIEyqyAWLWLfdErRTQGtczSoRUKal319W1Hw5L8IE=",
+        "lastModified": 1758465738,
+        "narHash": "sha256-l6hYn/RclY2UC+8CjUKUatslNZcG0dtxNQelX7UtlHU=",
         "owner": "wamserma",
         "repo": "flake-programs-sqlite",
-        "rev": "3c1b447f89c5fdeadc21ff7a4e9abee46b80465d",
+        "rev": "51c290f08c053292af82c483c029aa17127ca873",
         "type": "github"
       },
       "original": {
@@ -127,11 +127,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1758375677,
-        "narHash": "sha256-BLtD+6qWz7fQjPk2wpwyXQLGI0E30Ikgf2ppn2nVadI=",
+        "lastModified": 1758464306,
+        "narHash": "sha256-i56XRXqjwJRdVYmpzVUQ0ktqBBHqNzQHQMQvFRF/acQ=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "edc7468e12be92e926847cb02418e649b02b59dd",
+        "rev": "939e91e1cff1f99736c5b02529658218ed819a2a",
         "type": "github"
       },
       "original": {
@@ -157,11 +157,11 @@
     },
     "nixos-plymouth": {
       "locked": {
-        "lastModified": 1758443978,
-        "narHash": "sha256-LVKmm2Y20B8olj+uEAd8OklVEQOflLz44LCZYLH3v2U=",
+        "lastModified": 1758475553,
+        "narHash": "sha256-PCgWUy8VjqJn8ZfBVUlQbW9ch3mCyhfhfuJJaA9KHkY=",
         "owner": "BeatLink",
         "repo": "nixos-plymouth",
-        "rev": "2786093b847c17fa0a6a108b5c8b7ad968598aee",
+        "rev": "ee526b835f88f58e4a74d9488283752e8906a6be",
         "type": "github"
       },
       "original": {
