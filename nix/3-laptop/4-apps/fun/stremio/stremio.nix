@@ -7,7 +7,6 @@
     pkg-config,
     gtk3,
     mpv,
-    xorg,
     libxkbcommon,
     libappindicator,
     libcef,
