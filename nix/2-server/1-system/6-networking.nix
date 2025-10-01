@@ -133,15 +133,21 @@
                         PersistentKeepalive = 25;
                     }
                     {
+                        # PinePhone
+                        PublicKey = "3HLX2V7Z1+40bXbetzOt/K8BX7/65my77j0SlwIBDXo=";
+                        AllowedIPs = [ "10.100.100.4/32" ];
+                        PersistentKeepalive = 25;
+                    }
+                    {
                         # Phone
                         PublicKey = "/TCFjby/XxSkAQxuWcL5Kv5ggOlYJtloyU+z1I8wGWs=";
-                        AllowedIPs = [ "10.100.100.4/32" ];
+                        AllowedIPs = [ "10.100.100.5/32" ];
                         PersistentKeepalive = 25;
                     }
                     {
                         # Backup Server
                         PublicKey = "rntfoR0iPjL90MhrwIFOVI0hSoZ8hHj8A512Q4+1hk4=";
-                        AllowedIPs = [ "10.100.100.5/32" ];
+                        AllowedIPs = [ "10.100.100.6/32" ];
                         PersistentKeepalive = 25;
                     }
                     {
