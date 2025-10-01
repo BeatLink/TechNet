@@ -3,7 +3,7 @@
     services.xserver.desktopManager.phosh = {
         enable = true;
         user = "beatlink";
-        group = "users";
+        group = "beatlink";
         phocConfig.xwayland = "immediate";
     };
     # unpatched gnome-initial-setup is partially broken in small screens
