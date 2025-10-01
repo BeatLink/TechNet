@@ -31,7 +31,7 @@ pr() {
 title 'TechNet Installer' '' 'This script automatically installs NixOS to a device in the TechNet'
 
 pr "Select the Host to Install"
-HOST=$(gum choose "Ragnarok" "Heimdall" "Odin")
+HOST=$(gum choose "Ragnarok" "Heimdall" "Odin" "Thor")
 HOST_LOWERCASE=${HOST,,}
 pr "$HOST" ""
 
