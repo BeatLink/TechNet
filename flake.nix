@@ -113,6 +113,20 @@
                     ];
                     specialArgs = { inherit inputs; };
                 };
+                Thor = nixpkgs.lib.nixosSystem {
+                    system = "aarch64-linux";
+                    modules = [
+                        disko.nixosModules.disko
+                        impermanence.nixosModules.impermanence
+                        sops-nix.nixosModules.sops
+                        home-manager.nixosModules.home-manager
+                        ./nix/0-common
+                        ./nix/5-phone
+                        {
+                            home-manager.extraSpecialArgs = { inherit inputs; };
+                        }
+                    ];
+                };
             };
         };
 }
