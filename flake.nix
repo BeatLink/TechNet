@@ -40,6 +40,10 @@
             inputs.nixpkgs.follows = "nixpkgs";
         };
         nixos-plymouth.url = "github:BeatLink/nixos-plymouth";
+        mobile-nixos = {
+            url = "github:NixOS/mobile-nixos";
+            flake = false;
+        };
 
     };
     outputs =
@@ -55,6 +59,7 @@
             flake-programs-sqlite,
             gmusicbrowser,
             nixos-plymouth,
+            mobile-nixos,
             ...
         }:
         {
@@ -127,6 +132,15 @@
                         }
                     ];
                 };
+                Thor-disk-image =
+                    (import "${mobile-nixos}/lib/eval-with-configuration.nix" {
+                        configuration = [
+                            (import ./nix/0-common)
+                            (import ./nix/5-phone)
+                        ];
+                        device = "pine64-pinephone";
+                        pkgs = nixpkgs.legacyPackages."aarch64-linux";
+                    }).outputs.disk-image;
             };
         };
 }
