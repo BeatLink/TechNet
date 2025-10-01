@@ -1,7 +1,11 @@
 { pkgs, lib, ... }:
 {
-    services.xserver.desktopManager.phosh.enable = true;
-
+    services.xserver.desktopManager.phosh = {
+        enable = true;
+        user = "beatlink";
+        group = "users";
+        phocConfig.xwayland = "immediate";
+    };
     # unpatched gnome-initial-setup is partially broken in small screens
     #services.gnome.gnome-initial-setup.enable = false;
 
@@ -13,7 +17,6 @@
         git
         gnome-terminal
         pipes
-        terminal
         wget
     ];
 
