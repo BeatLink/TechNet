@@ -1,12 +1,14 @@
 # Data Drive
-# 
-# This module manages the mounting of the data drive that stores user files, docker databases and other information. 
-# The data drive consists of 2 1TB Hard Drives configured for encrypted ZFS RAID 1. These settings decrypt and mount that 
+#
+# This module manages the mounting of the data drive that stores user files, docker databases and other information.
+# The data drive consists of 2 1TB Hard Drives configured for encrypted ZFS RAID 1. These settings decrypt and mount that
 # storage during boot
 #
 
+{ config, ... }:
 {
-    systemd.tmpfiles.settings."Storage" = {                      # Sets the mount point permissions
+    systemd.tmpfiles.settings."Storage" = {
+        # Sets the mount point permissions
         "/Storage" = {
             d = {
                 user = "beatlink";
@@ -15,10 +17,14 @@
             };
         };
     };
-    fileSystems."/Storage" = {                                                      # Mounts the drive
-        device = "data-pool/storage";
+    fileSystems."/Storage" = {
+        # Mounts the drive
+        device = "data-pool-${config.networking.hostName}/storage";
         fsType = "zfs";
-        options = ["zfsutil" "nofail" ];
+        options = [
+            "zfsutil"
+            "nofail"
+        ];
         neededForBoot = true;
     };
 }

@@ -3,7 +3,7 @@
 # Disko is used to declaratively describe the filesystem structure. It is used by nixos-anywhere during installation to format and partition the root
 # drive. It is also used to mount the filesystems at boot.
 #
-
+{ config, ... }:
 {
     disko.devices = {
         disk.root-drive = {
@@ -26,13 +26,13 @@
                         size = "100%";
                         content = {
                             type = "zfs";
-                            pool = "root-pool";
+                            pool = "root-pool-${config.networking.hostName}";
                         };
                     };
                 };
             };
         };
-        zpool.root-pool = {
+        zpool."root-pool-${config.networking.hostName}" = {
             # Creates a pool for managing zfs datasets
             type = "zpool";
             options = {
@@ -50,7 +50,7 @@
 
             };
             postCreateHook = ''
-                zfs set keylocation="prompt" "root-pool";             # use this to read the key during boot
+                zfs set keylocation="prompt" "root-pool-${config.networking.hostName}";             # use this to read the key during boot
                 zpool upgrade -a                                      # Enables all zfs features
             '';
             datasets = {
@@ -60,7 +60,7 @@
                     mountpoint = "/";
                     options.mountpoint = "legacy"; # This manages the mountpoint manually using typical tools (mount, fstab, etc)
                     postCreateHook = ''
-                        zfs snapshot root-pool/root@blank             # This takes a snapshot of the blank pool. Every boot, the system will rollback to this snapshot
+                        zfs snapshot root-pool-${config.networking.hostName}/root@blank             # This takes a snapshot of the blank pool. Every boot, the system will rollback to this snapshot
                     '';
                 };
                 nix = {
@@ -90,7 +90,7 @@
                         "com.sun:auto-snapshot" = "true"; # Generates snapshots to persist data
                     };
                     postCreateHook = ''
-                        zfs snapshot root-pool/home@blank             # This takes a snapshot of the blank pool. Every boot, the system will rollback to this snapshot
+                        zfs snapshot root-pool-${config.networking.hostName}/home@blank             # This takes a snapshot of the blank pool. Every boot, the system will rollback to this snapshot
                     '';
                 };
             };
