@@ -131,16 +131,8 @@
                             home-manager.extraSpecialArgs = { inherit inputs; };
                         }
                     ];
+                    specialArgs = { inherit inputs; };
                 };
-                Thor-disk-image =
-                    (import "${mobile-nixos}/lib/eval-with-configuration.nix" {
-                        configuration = [
-                            (import ./nix/0-common)
-                            (import ./nix/5-phone)
-                        ];
-                        device = "pine64-pinephone";
-                        pkgs = nixpkgs.legacyPackages."aarch64-linux";
-                    }).outputs.disk-image;
             };
         };
 }
