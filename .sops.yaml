@@ -9,8 +9,8 @@ creation_rules:
     key_groups:
       - age:
         - *user_beatlink
-        - *host_heimdall
         - *host_ragnarok
+        - *host_heimdall
         - *host_odin
         - *host_thor
   - path_regex: secrets/1-backup-server.(yaml|json|env|ini)$
