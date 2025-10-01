@@ -22,6 +22,7 @@
                 Ragnarok = "sTgpl4hkEc";
                 Odin = "Iy9Tfr31nG";
                 Heimdall = "urMFRtdrYA";
+                Thor = "jvrkzUvvrB";
             };
             FullURL = "${BaseURL}${Keys.${config.networking.hostName}}";
         in
