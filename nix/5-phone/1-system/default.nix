@@ -3,5 +3,6 @@
         ./1-hardware-configuration.nix
         ./3-root-drive-disko.nix
         ./5-software.nix
+        ./6-networking.nix
     ];
 }
