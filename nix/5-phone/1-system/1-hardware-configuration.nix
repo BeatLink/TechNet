@@ -5,5 +5,5 @@
     hardware = {
         enableRedistributableFirmware = true;
     };
-    boot.kernelModules = [ "rtl8723bs-firmware" ];
+    boot.kernelModules = [ "r8723bs" ];
 }
