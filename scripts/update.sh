@@ -6,7 +6,7 @@
 FLAKE_DIR=$(cd "$(dirname "$0")/../"; pwd)
 CURRENT_HOST=$(hostname)
 CURRENT_USER=$(whoami)
-HOSTS=("Odin" "Heimdall" "Ragnarok")
+HOSTS=("Odin" "Heimdall" "Ragnarok" "Thor")
 
 # Helper Functions -------------------------------------------------------------------------
 title() {
