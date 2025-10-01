@@ -1,4 +1,5 @@
-{
+{pkgs, ...}:{
     nixpkgs.hostPlatform = "aarch64-linux";
-    #mobile.boot.stage-1.enable = false;
+    hardware.firmware = with pkgs; [ linux-firmware ];
+    boot.kernelModules = [ "rtw8723cs" ];
 }
