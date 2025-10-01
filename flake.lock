@@ -155,6 +155,22 @@
         "type": "github"
       }
     },
+    "mobile-nixos": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1759261417,
+        "narHash": "sha256-TjuoBb8+isL3KTdGgtYh90XPyeUMFbgNAOG9l23CB3A=",
+        "owner": "NixOS",
+        "repo": "mobile-nixos",
+        "rev": "e6f6d527bf6abf94dd52fbba3143a720cef96431",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "mobile-nixos",
+        "type": "github"
+      }
+    },
     "nixos-plymouth": {
       "locked": {
         "lastModified": 1758476321,
@@ -214,6 +230,7 @@
         "gmusicbrowser": "gmusicbrowser",
         "home-manager": "home-manager",
         "impermanence": "impermanence",
+        "mobile-nixos": "mobile-nixos",
         "nixos-plymouth": "nixos-plymouth",
         "nixpkgs": "nixpkgs",
         "plank-reloaded": "plank-reloaded",
