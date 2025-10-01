@@ -3,6 +3,7 @@ keys:
   - &host_ragnarok age18a3msuyfem87qzknt6s64z086lt5lptf7fnqsp3wkt27wrl57fas80c86k
   - &host_heimdall age1yggjnkvxm45ssrlwx56pcps43gzglrvfnqdmv8hxcqsqcuj68v7qdj25sg
   - &host_odin age19lxeg27tf95vs67jjh6e68ukf0d9hjyj5q4pcprzrvpwnnt6j3fsvjh4rd
+  - &host_thor age1pcsyypcrls76syx5zl6szzw9tmnz602jn9fcxm6d8tc3yld2492qkudxhp
 creation_rules:
   - path_regex: secrets/0-common.(yaml|json|env|ini)$
     key_groups:
@@ -11,6 +12,7 @@ creation_rules:
         - *host_heimdall
         - *host_ragnarok
         - *host_odin
+        - *host_thor
   - path_regex: secrets/1-backup-server.(yaml|json|env|ini)$
     key_groups:
       - age:
@@ -26,3 +28,8 @@ creation_rules:
       - age:
         - *user_beatlink
         - *host_odin
+  - path_regex: secrets/4-phone.(yaml|json|env|ini)$
+    key_groups:
+      - age:
+        - *user_beatlink
+        - *host_thor
