@@ -15,8 +15,8 @@
                     volumes = [ 
                         "/Storage/Services/Trilium-Sysadmin/data:/home/node/trilium-data"
                     ];
-                    expose = [
-                        "8080" 
+                    ports = [
+                        "8080:8080" 
                     ];
                     networks = [
                         "nginx-proxy-manager_public"
