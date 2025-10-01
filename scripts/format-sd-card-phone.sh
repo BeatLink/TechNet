@@ -63,6 +63,15 @@ pr "TowBoot Version: $TOWBOOT_VERSION"
 # Prints executed commands
 set -x;
 
+# Prepare Workdir
+WORKDIR=$(mktemp -d)
+cleanup() {
+rm -rf "$WORKDIR"
+}
+trap cleanup EXIT
+cd $WORKDIR
+
+
 # Formatting Data Drive...
 sudo sgdisk --zap-all $DATA_DRIVE && sudo partprobe
 
@@ -88,7 +97,7 @@ sudo sgdisk --new=2:0:0 --typecode=1:BF00 $DATA_DRIVE && sudo partprobe
 DATA_PARTITION=${DATA_DRIVE}2
 
 # Unmount pools
-sudo zpool export data-pool-thor
+sudo zpool destroy data-pool-thor
 
 # Creating ZFS Pool
 sudo zpool create -f -d -m none -o feature@zstd_compress=enabled -o ashift=12 -o autotrim=on data-pool-thor $DATA_PARTITION
