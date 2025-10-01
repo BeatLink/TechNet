@@ -5,6 +5,6 @@
 
 {
     imports = [
-        "./1-system"
+        ./1-system
     ];
 }
