@@ -6,5 +6,6 @@
 {
     imports = [
         ./1-system
+        ./2-apps
     ];
 }
