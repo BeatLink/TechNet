@@ -3,7 +3,7 @@
 # Configures my user account
 #
 
-{ config, inputs, ... }:
+{ config, inputs, lib, ... }:
 {
     # Setup Linux User Account
     sops.secrets.beatlink_hashed_password = {
@@ -16,7 +16,7 @@
             "beatlink" = {                                                      # Creates my account
                 isNormalUser = true;                                            # Real (non service) user
                 description = "BeatLink";                                       # Sets the name of the user
-                hashedPasswordFile = config.sops.secrets.beatlink_hashed_password.path;    # Sets my password using sops
+                hashedPasswordFile = lib.mkDefault config.sops.secrets.beatlink_hashed_password.path;    # Sets my password using sops
                 group = "beatlink";                                             # Adds me to my group
                 extraGroups = [ "networkmanager" "wheel" "libvirtd" "borg" "audio" "pipewire" "i2c"];    # Allows management of the network, using sudo, virt-manager, and accessing borg repos
                 openssh.authorizedKeys.keys = [                                 # Sets the SSH key for the user
