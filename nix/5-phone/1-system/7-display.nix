@@ -20,6 +20,7 @@
                     outputs = {
                         eDP-1 = {
                             scale = 2;
+                            rotate = "90";
                             # optional: you can override resolution if needed
                             # mode = "720x1440";
                         };
