@@ -7,5 +7,6 @@
         ./6-networking.nix
         ./7-display.nix
         ./8-sensors.nix
+        ./9-modem.nix
     ];
 }
