@@ -13,6 +13,7 @@
 #     - Odin - odin.technet
 #     - Hela - hela.technet
 #     - Thor - thor.technet
+#     - ThorX - thorx.technet
 #     - Ragnarok - ragnarok.technet
 #
 
