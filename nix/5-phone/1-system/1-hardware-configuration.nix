@@ -5,5 +5,8 @@
     hardware = {
         enableRedistributableFirmware = true;
     };
-    boot.kernelModules = [ "r8723bs" ];
+    boot.kernelModules = [
+        "rtw88_8723cs" # Wifi Card
+        "ax88179_178a" # USB Hub
+    ];
 }
