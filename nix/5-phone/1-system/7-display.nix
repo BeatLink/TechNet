@@ -1,10 +1,16 @@
 { pkgs, lib, ... }:
 {
     services = {
-        displayManager.logToFile = false;
-        displayManager.logToJournal = false;
+        displayManager = {
+            enable = true;
+            autoLogin = {
+                enable = true;
+                user = "beatlink";
+            };
+            defaultSession = "phosh";
+        };
         xserver = {
-            enable = true; # Enables X11 Server
+            enable = true;
             desktopManager.phosh = {
                 enable = true;
                 user = "beatlink";
@@ -23,18 +29,15 @@
             };
         };
     };
- # unpatched gnome-initial-setup is partially broken in small screens
+    # unpatched gnome-initial-setup is partially broken in small screens
     #services.gnome.gnome-initial-setup.enable = false;
 
-    #programs.phosh.enable = true;
     #environment.gnome.excludePackages = with pkgs.gnome3; [
 
     #];
     environment.systemPackages = with pkgs; [
-        git
         gnome-terminal
         pipes
-        wget
         phosh-mobile-settings
     ];
 
