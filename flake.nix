@@ -125,9 +125,6 @@
                         impermanence.nixosModules.impermanence
                         sops-nix.nixosModules.sops
                         home-manager.nixosModules.home-manager
-                        (import "${mobile-nixos}/lib/configuration.nix" {
-                            device = "pine64-pinephone";
-                        })
                         ./nix/0-common
                         ./nix/5-phone
                         {
