@@ -17,6 +17,7 @@
                 heimdall = "ssh heimdall.technet";
                 odin = "ssh odin.technet";
                 ragnarok = "ssh ragnarok.technet";
+                thor = "ssh thor.technet";
 
                 l = "ls";
                 la = "ls -la";
