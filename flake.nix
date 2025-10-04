@@ -5,6 +5,10 @@
         nixpkgs = {
             url = "github:NixOS/nixpkgs/nixos-unstable";
         };
+        nix-index-database = {
+            url = "github:nix-community/nix-index-database";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
         disko = {
             url = "github:nix-community/disko";
             inputs.nixpkgs.follows = "nixpkgs";
@@ -31,10 +35,6 @@
             url = "github:zquestz/plank-reloaded";
             inputs.nixpkgs.follows = "nixpkgs";
         };
-        flake-programs-sqlite = {
-            url = "github:wamserma/flake-programs-sqlite";
-            inputs.nixpkgs.follows = "nixpkgs";
-        };
         gmusicbrowser = {
             url = "github:BeatLink/gmusicbrowser-nix-flake";
             inputs.nixpkgs.follows = "nixpkgs";
@@ -50,13 +50,13 @@
         inputs@{
             self,
             nixpkgs,
+            nix-index-database,
             disko,
             impermanence,
             sops-nix,
             arion,
             home-manager,
             xdg-autostart,
-            flake-programs-sqlite,
             gmusicbrowser,
             nixos-plymouth,
             mobile-nixos,
@@ -67,6 +67,7 @@
                 Ragnarok = nixpkgs.lib.nixosSystem {
                     system = "aarch64-linux";
                     modules = [
+                        nix-index-database.nixosModules.nix-index
                         disko.nixosModules.disko
                         impermanence.nixosModules.impermanence
                         sops-nix.nixosModules.sops
@@ -82,6 +83,7 @@
                 Heimdall = nixpkgs.lib.nixosSystem {
                     system = "x86_64-linux";
                     modules = [
+                        nix-index-database.nixosModules.nix-index
                         disko.nixosModules.disko
                         impermanence.nixosModules.impermanence
                         sops-nix.nixosModules.sops
@@ -98,6 +100,7 @@
                 Odin = nixpkgs.lib.nixosSystem {
                     system = "x86_64-linux";
                     modules = [
+                        nix-index-database.nixosModules.nix-index
                         disko.nixosModules.disko
                         impermanence.nixosModules.impermanence
                         sops-nix.nixosModules.sops
@@ -109,7 +112,6 @@
                                 gmusicbrowser.homeManagerModules.gmusicbrowser
                             ];
                         }
-                        flake-programs-sqlite.nixosModules.programs-sqlite
                         ./nix/0-common
                         ./nix/3-laptop
                         {
@@ -121,6 +123,7 @@
                 Thor = nixpkgs.lib.nixosSystem {
                     system = "aarch64-linux";
                     modules = [
+                        nix-index-database.nixosModules.nix-index
                         disko.nixosModules.disko
                         impermanence.nixosModules.impermanence
                         sops-nix.nixosModules.sops
