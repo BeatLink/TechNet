@@ -44,7 +44,6 @@ All devices in the TechNet are configured with dedicated, encrypted ZFS root dri
 
 All devices in the TechNet are linked by a WireGuard VPN that is not routable by the public internet
 
-
 | Host                    | Local IP Address    | Wireguard       |
 | ----------------------- | ------------------- | --------------- |
 | IP Subnet               | 192.168.0.0/24      | 10.100.100.0/24 |
@@ -52,7 +51,7 @@ All devices in the TechNet are linked by a WireGuard VPN that is not routable by
 | Odin                    | 192.168.0.3         | 10.100.100.2    |
 | Hela                    | 192.168.0.4         | 10.100.100.3    |
 | Thor                    | 192.168.0.5         | 10.100.100.4    |
-| Ragnarok                | DHCP (Family Wi-Fi) | 10.100.100.5    |
+| Ragnarok                | DHCP (Family Wi-Fi) | 10.100.100.6    |
 | Light - Bedroom         | 192.168.0.10        | 10.100.100.10   |
 | Light - Kitchen         | 192.168.0.11        | 10.100.100.11   |
 | Light - Bathroom        | 192.168.0.12        | 10.100.100.12   |
@@ -64,7 +63,6 @@ All devices in the TechNet are linked by a WireGuard VPN that is not routable by
 | Socket - Ragnarok       | DHCP (Family Wi-Fi) | 10.100.100.18   |
 | Sensor - Bathroom Light | 192.168.0.19        | 10.100.100.19   |
 | Sensor - Bedroom        | 192.168.0.20        | 10.100.100.20   |
-
 
 ## Apps
 

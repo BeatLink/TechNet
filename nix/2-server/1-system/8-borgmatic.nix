@@ -32,7 +32,7 @@
                 }
                 {
                     label = "Backup Server";
-                    path = "ssh://borg@10.100.100.5/Storage/Backups/Server/Borgmatic";
+                    path = "ssh://borg@10.100.100.6/Storage/Backups/Server/Borgmatic";
                 }
             ];
             encryption_passcommand = "cat " + config.sops.secrets.borg_repo_encryption_key.path;
@@ -59,7 +59,7 @@
                     when = [ "create" ];
                     run = [
                         "echo 'Starting a backup job.'"
-                        "${pkgs.iputils}/bin/ping -q -c 1 10.100.100.5 > /dev/null || exit 75"
+                        "${pkgs.iputils}/bin/ping -q -c 1 10.100.100.6 > /dev/null || exit 75"
                     ];
                 }
                 {
