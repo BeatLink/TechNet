@@ -1,15 +1,11 @@
 {
     inputs,
-    config,
     pkgs,
     ...
 }:
 {
-
-    #nix.nixPath = [ "mobile-nixos=${inputs.mobile-nixos}" ];
-
     #imports = [
-    #    (import "/lib/configuration.nix" { device = "pine64-pinephone" })
+    #    (import "${inputs.mobile-nixos}/lib/configuration.nix" { device = "pine64-pinephone"; })
     #];
 
     nixpkgs.hostPlatform = "aarch64-linux";
@@ -22,7 +18,7 @@
     environment.systemPackages = [
         pkgs.firefox
         pkgs.thunderbird
-        (pkgs.callPackage "${inputs.mobile-nixos}/devices/pine64-pinephone/firmware" { })
+        
     ];
 
     boot.kernelModules = [
