@@ -1,4 +1,3 @@
-{ pkgs, ... }:
 {
     nixpkgs.config.permittedInsecurePackages = [ # needed until new stremio frontend is stable
         "qtwebengine-5.15.19"
