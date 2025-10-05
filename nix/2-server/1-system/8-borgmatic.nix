@@ -50,9 +50,6 @@
             keep_monthly = 12;
             keep_yearly = 3;
 
-            # Hooks
-
-
             commands = [
                 {
                     before = "action";
