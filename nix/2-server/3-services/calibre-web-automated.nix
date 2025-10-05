@@ -21,6 +21,7 @@
                     };
                     volumes = [ 
                         "/Storage/Services/Calibre-Web/config:/config"
+                        "/Storage/Services/Calibre-Web/Uploads:/cwa-book-ingest"
                         "/Storage/Files/eBooks/Calibre/Library:/calibre-library"
                     ];
                     expose = [
