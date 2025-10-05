@@ -1,21 +1,18 @@
-# Calibre
+# Calibre Web Automated
 #
-# Calibre and Calibre Web are used for eBook viewing and management.
+# Used for eBook viewing and management.
 #
-# https://hub.docker.com/r/linuxserver/calibre-web
-# https://github.com/janeczku/calibre-web
-# https://academy.pointtosource.com/containers/ebooks-calibre-readarr/
-#
-
+# https://github.com/crocodilestick/Calibre-Web-Automated
+# 
 
 {
-    virtualisation.arion.projects.calibre = {
-        serviceName = "calibre";
+    virtualisation.arion.projects.calibre-web-automated = {
+        serviceName = "calibre-web-automated";
         settings = {
             services = {
                 calibre-web.service = {
-                    image = "linuxserver/calibre-web:latest";
-                    container_name = "calibre-web";
+                    image = "crocodilestick/calibre-web-automated:latest";
+                    container_name = "calibre-web-automated";
                     restart = "always";
                     environment = {
                         "PUID" = "1000";
@@ -24,7 +21,7 @@
                     };
                     volumes = [ 
                         "/Storage/Services/Calibre-Web/config:/config"
-                        "/Storage/Files/eBooks/Calibre/Library:/Calibre_Library"
+                        "/Storage/Files/eBooks/Calibre/Library:/calibre-library"
                     ];
                     expose = [
                         "8083"
