@@ -7,7 +7,7 @@
     imports = [
         ./blockurl.nix
         ./borg.nix
-        ./calibre-web.nix
+        ./calibre-web-automated.nix
         ./deluge.nix
         ./esphome.nix
         ./freshrss.nix
