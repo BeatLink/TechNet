@@ -1,5 +1,5 @@
 # Enables Automatic Upgrades ####################################################################################################################
-{ pkgs, config, ... }:
+{ pkgs, config, lib, ... }:
 {
     system.autoUpgrade = {
         # Configures Automatic Upgrades at 2AM from my GitHub flake.
@@ -10,7 +10,7 @@
             "--no-write-lock-file"
             "-L"
         ];
-        dates = "07:00";
+        dates = lib.mkDefault "20:00";
         allowReboot = false;
         persistent = true;
     };
