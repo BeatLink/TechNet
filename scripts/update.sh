@@ -106,7 +106,6 @@ nixos_rebuild() {
         params=(--flake "$FLAKE_DIR#$host")
     else
         params=(--flake "$FLAKE_DIR#$host" \
-                --build-host "$CURRENT_USER@$host_lower.technet" \
                 --target-host "$CURRENT_USER@$host_lower.technet" \
                 --no-reexec \
                 --sudo \
