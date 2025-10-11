@@ -1,6 +1,26 @@
+{ pkgs, ... }:
 {
+
     services.boinc = {
         enable = true;
-        dataDir = "/Storage/Apps/Tools/BOINC";
+        extraEnvPackages = [
+            pkgs.virtualbox
+            pkgs.docker
+        ];
+    };
+    environment.persistence."/Storage/Apps/Tools/BOINC".directories = [ "/var/lib/boinc" ];
+    home-manager.users.beatlink = {
+        home = {
+            persistence."/Storage/Apps/Tools/BOINC-Manager" = {
+                directories = [
+                    ".local/share/boincmgr"
+                    ".cache/boincmgr"
+                ];
+                files = [
+                    ".BOINC Manager"
+                ];
+                allowOther = true;
+            };
+        };
     };
 }
