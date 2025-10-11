@@ -3,7 +3,12 @@
 # This handles backing up my server's docker files to my laptop and to my backup server
 #
 
-{ pkgs, config, inputs, ... }: 
+{
+    pkgs,
+    config,
+    inputs,
+    ...
+}:
 {
     sops.secrets.borg_repo_encryption_key.sopsFile = "${inputs.self}/secrets/2-server.yaml";
     sops.secrets.borg_repo_ssh_key.sopsFile = "${inputs.self}/secrets/2-server.yaml";
@@ -32,7 +37,7 @@
                 }
                 {
                     label = "Backup Server";
-                    path = "ssh://borg@10.100.100.6/Storage/Backups/Server/Borgmatic";
+                    path = "ssh://borg@ragnarok.technet/Storage/Backups/Server/Borgmatic";
                 }
             ];
             encryption_passcommand = "cat " + config.sops.secrets.borg_repo_encryption_key.path;
@@ -92,7 +97,7 @@
                 {
                     name = "extract";
                     frequency = "always";
-                } 
+                }
             ];
             check_last = 3;
 
