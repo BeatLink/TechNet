@@ -6,6 +6,7 @@
 {
     imports = [
         ./blockurl.nix
+        ./boinc.nix
         ./borg.nix
         ./calibre-web-automated.nix
         ./deluge.nix
