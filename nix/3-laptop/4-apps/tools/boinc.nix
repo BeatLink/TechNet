@@ -4,7 +4,6 @@
     services.boinc = {
         enable = true;
         extraEnvPackages = [
-            pkgs.virtualbox
             pkgs.docker
         ];
     };
