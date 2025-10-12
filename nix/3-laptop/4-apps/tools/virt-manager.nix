@@ -1,7 +1,7 @@
 {
     virtualisation.libvirtd.enable = true;
     programs.virt-manager.enable = true;
-    environment.persistence."/Storage/Apps/System/Virt-Manager/system" = {
+    environment.persistence."/Storage/System/LibVirt" = {
         directories = [
 
             {
@@ -20,7 +20,7 @@
         ];
     };
     home-manager.users.beatlink = {
-        home.persistence."/Storage/Apps/System/Virt-Manager/user" = {
+        home.persistence."/Storage/Apps/System/Virt-Manager" = {
             allowOther = true;
             directories = [
                 ".config/virt-manager"

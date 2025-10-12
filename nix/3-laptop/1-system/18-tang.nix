@@ -10,7 +10,7 @@
         ];
     };
     networking.firewall.allowedTCPPorts = [ 7654 ];
-    environment.persistence."/Storage/Apps/System/Tang" = {
+    environment.persistence."/Storage/System/Tang" = {
         directories = [
             {
                 directory = "/var/db/tang";
