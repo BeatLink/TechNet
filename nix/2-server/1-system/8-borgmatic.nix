@@ -88,18 +88,17 @@
                 }
                 {
                     name = "archives";
-                    frequency = "always";
+                    frequency = "2 weeks";
                 }
                 {
                     name = "data";
-                    frequency = "always";
+                    frequency = "2 weeks";
                 }
                 {
                     name = "extract";
-                    frequency = "always";
+                    frequency = "2 weeks";
                 }
             ];
-            check_last = 3;
 
             # Notifications
             uptime_kuma = {
