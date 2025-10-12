@@ -8,6 +8,7 @@
         ./variety.nix
         ./vorta.nix
         ./blueman
+        ./borgmatic
         ./nemo
         ./tilix
     ];
