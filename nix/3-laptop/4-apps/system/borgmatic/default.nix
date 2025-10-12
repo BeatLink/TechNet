@@ -35,7 +35,7 @@
                 }
                 {
                     label = "Heimdall Backup";
-                    path = "ssh://borg@heimdall.technet/Storage/Backups/Laptop/Borgmatic";
+                    path = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Borgmatic";
                 }
                 {
                     label = "Ragnarok Backup";
