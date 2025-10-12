@@ -3,8 +3,20 @@
     programs.virt-manager.enable = true;
     environment.persistence."/Storage/Apps/System/Virt-Manager/system" = {
         directories = [
-            "/etc/libvirt"
-            "/var/lib/libvirt/"
+
+            {
+                directory = "/etc/libvirt";
+                user = "root";
+                group = "root";
+                mode = "u=rwx,g=rwx,o=";
+            }
+
+            {
+                directory = "/var/lib/libvirt/";
+                user = "root";
+                group = "root";
+                mode = "u=rwx,g=rwx,o=";
+            }
         ];
     };
     home-manager.users.beatlink = {
