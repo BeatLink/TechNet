@@ -23,6 +23,7 @@
                         "8080"
                     ];
                     networks = [
+                        "miniflux"
                         "nginx-proxy-manager_public"
                     ];
                     dns = [
@@ -45,6 +46,9 @@
                     volumes = [
                         "/Storage/Services/Miniflux/miniflux-db:/var/lib/postgresql/data"
                     ];
+                    networks = [
+                        "miniflux"
+                    ];
                     healthcheck = {
                         test = [
                             "CMD"
@@ -60,6 +64,9 @@
             networks = {
                 nginx-proxy-manager_public = {
                     external = true;
+                };
+                miniflux = {
+                    driver = "bridge";
                 };
             };
         };
