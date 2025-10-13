@@ -1,6 +1,11 @@
 { inputs, config, ... }:
 {
-    sops.secrets.freshrss_password.sopsFile = "${inputs.self}/secrets/2-server.yaml";
+    sops.secrets.freshrss_password = {
+        sopsFile = "${inputs.self}/secrets/2-server.yaml";
+        owner = "freshrss";
+        group = "freshrss";
+    };
+
     sops.secrets.https_certificate = {
         sopsFile = "${inputs.self}/secrets/2-server.yaml";
         owner = "nginx";
