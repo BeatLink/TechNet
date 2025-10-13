@@ -91,14 +91,17 @@
                 }
                 {
                     name = "archives";
-                    frequency = "2 weeks";
-                }
-                {
-                    name = "data";
-                    frequency = "2 weeks";
+                    frequency = "always";
                 }
                 {
                     name = "extract";
+                    frequency = "1 day";
+                }
+                {
+                    name = "spot";
+                    count_tolerance_percentage = 10;
+                    data_sample_percentage = 10;
+                    data_tolerance_percentage = 0.5;
                     frequency = "2 weeks";
                 }
             ];
