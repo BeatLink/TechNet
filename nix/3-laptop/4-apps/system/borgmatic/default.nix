@@ -63,8 +63,8 @@
                     when = [ "create" ];
                     run = [
                         "echo 'Starting a backup job.'"
-                        "${pkgs.iputils}/bin/ping -q -c heimdall.technet > /dev/null || exit 75"
-                        "${pkgs.iputils}/bin/ping -q -c 1 ragnarok.technet > /dev/null || exit 75"
+                        "${pkgs.iputils}/bin/ping -q -c 1 'heimdall.technet' > /dev/null || exit 75"
+                        "${pkgs.iputils}/bin/ping -q -c 1 'ragnarok.technet' > /dev/null || exit 75"
                     ];
                 }
                 {
@@ -105,7 +105,7 @@
 
             # Notifications
             uptime_kuma = {
-                push_url = "https://uptime-kuma.heimdall.technet/api/push/f7xCy2APBy";
+                push_url = "http://uptime-kuma.heimdall.technet/api/push/f7xCy2APBy";
                 states = [
                     #"start"
                     "finish"
