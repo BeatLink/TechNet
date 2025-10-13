@@ -96,6 +96,10 @@
                     frequency = "1 day";
                 }
                 {
+                    name = "data";
+                    frequency = "1 month";
+                }
+                {
                     name = "spot";
                     count_tolerance_percentage = 10;
                     data_sample_percentage = 10;
