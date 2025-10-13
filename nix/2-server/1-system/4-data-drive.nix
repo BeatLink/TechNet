@@ -13,7 +13,7 @@
             d = {
                 user = "beatlink";
                 group = "beatlink";
-                mode = "1770";
+                mode = "1777";
             };
         };
     };
