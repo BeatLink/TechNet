@@ -29,7 +29,7 @@
                         "1.1.1.1"
                     ];
                     depends_on = {
-                        db = {
+                        miniflux-db = {
                             condition = "service_healthy";
                         };
                     };
