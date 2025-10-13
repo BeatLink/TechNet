@@ -19,6 +19,7 @@
         ./miniflux.nix
         ./motioneye.nix
         ./nginx-proxy-manager.nix
+        ./nginx.nix
         ./openbooks.nix
         ./pihole.nix
         ./radicale.nix
