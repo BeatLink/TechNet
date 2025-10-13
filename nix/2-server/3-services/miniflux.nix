@@ -11,6 +11,7 @@
             services = {
                 miniflux.service = {
                     image = "miniflux/miniflux:latest";
+                    container_name = "miniflux";
                     restart = "always";
                     env_file = [
                         config.sops.secrets.miniflux_env.path
@@ -36,6 +37,7 @@
                 };
                 miniflux-db.service = {
                     image = "postgres:17-alpine";
+                    container_name = "miniflux-db";
                     restart = "always";
                     env_file = [
                         config.sops.secrets.miniflux_env.path
