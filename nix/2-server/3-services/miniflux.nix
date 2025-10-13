@@ -11,6 +11,7 @@
             services = {
                 miniflux.service = {
                     image = "miniflux/miniflux:latest";
+                    container_name = "miniflux";
                     restart = "always";
                     env_file = [
                         config.sops.secrets.miniflux_env.path
@@ -22,6 +23,7 @@
                         "8080"
                     ];
                     networks = [
+                        "miniflux"
                         "nginx-proxy-manager_public"
                     ];
                     dns = [
@@ -29,19 +31,23 @@
                         "1.1.1.1"
                     ];
                     depends_on = {
-                        db = {
+                        miniflux-db = {
                             condition = "service_healthy";
                         };
                     };
                 };
                 miniflux-db.service = {
                     image = "postgres:17-alpine";
+                    container_name = "miniflux-db";
                     restart = "always";
                     env_file = [
                         config.sops.secrets.miniflux_env.path
                     ];
                     volumes = [
                         "/Storage/Services/Miniflux/miniflux-db:/var/lib/postgresql/data"
+                    ];
+                    networks = [
+                        "miniflux"
                     ];
                     healthcheck = {
                         test = [
@@ -58,6 +64,9 @@
             networks = {
                 nginx-proxy-manager_public = {
                     external = true;
+                };
+                miniflux = {
+                    driver = "bridge";
                 };
             };
         };
