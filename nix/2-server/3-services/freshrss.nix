@@ -1,9 +1,16 @@
 { inputs, config, ... }:
 {
     sops.secrets.freshrss_password.sopsFile = "${inputs.self}/secrets/2-server.yaml";
-    sops.secrets.https_certificate.sopsFile = "${inputs.self}/secrets/2-server.yaml";
-    sops.secrets.https_certificate_key.sopsFile = "${inputs.self}/secrets/2-server.yaml";
-
+    sops.secrets.https_certificate = {
+        sopsFile = "${inputs.self}/secrets/2-server.yaml";
+        owner = "nginx";
+        group = "nginx";
+    };
+    sops.secrets.https_certificate_key = {
+        sopsFile = "${inputs.self}/secrets/2-server.yaml";
+        owner = "nginx";
+        group = "nginx";
+    };
     services = {
         freshrss = {
             enable = true;
