@@ -11,12 +11,14 @@ enabled-desklets=@as []
 enabled-extensions=['transparent-panels@germanfr']
 hotcorner-layout=['expo:false:0', 'desktop:true:100', 'expo:true:100', 'scale:true:100']
 next-applet-id=9
+no-adjacent-panel-barriers=true
 panel-edit-mode=false
-panel-zone-icon-sizes='[{"panelId":1,"left":16,"center":16,"right":16}]'
+panel-zone-icon-sizes='[{"panelId": 1, "left": 16, "center": 16, "right": 16}]'
 panel-zone-symbolic-icon-sizes='[{"panelId": 1, "left": 16, "center": 16, "right": 16}]'
-panel-zone-text-sizes='[{"panelId": 1, "left": 11.0, "center": 11.0, "right": 11.0}]'
+panel-zone-text-sizes='[{"panelId": 1, "left": 12.0, "center": 12.0, "right": 12.0}]'
 panels-autohide=['1:false', '2:intel']
 panels-enabled=['1:0:top']
+panels-height=['1:48']
 
 [cinnamon-session]
 quit-delay-toggle=true
@@ -53,7 +55,7 @@ exec-arg=''
 
 [desktop/background]
 picture-options='zoom'
-picture-uri='file:///Storage/Files/Pictures/Wallpapers/variety-copied-wallpaper-c4f1af621bc592c48c635e4bb6c20522.jpg'
+picture-uri='file:///Storage/Files/Pictures/Wallpapers/variety-copied-wallpaper-09e9cdf4b5e0156483f249d8392e1fc3.jpg'
 
 [desktop/background/slideshow]
 delay=15
