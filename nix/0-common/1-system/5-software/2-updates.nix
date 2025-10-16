@@ -10,7 +10,7 @@
             "--no-write-lock-file"
             "-L"
         ];
-        dates = lib.mkDefault "20:00";
+        dates = lib.mkDefault "04:00";
         allowReboot = false;
         persistent = true;
     };
