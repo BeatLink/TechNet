@@ -140,6 +140,7 @@
                           failures=$((failures + 1))
                           echo $failures > "$STATE_FILE"
                           echo "networkd-monitor: Heimdall unreachable (failure $failures)."
+                          sudo networkctl reconfigure wg0
                         fi
 
                         if [ "$failures" -eq "$MAX_RESTARTS" ]; then
