@@ -6,25 +6,10 @@ The TechNet is my personal network of computing devices, all connected via a Wir
 
 ## Index
 
-### Ragnarok
+### Hardware
 
-Ragnarok is the backup server for the TechNet. It is setup at my family's home as an offsite backup. It is powered by a Rock64 Single Board Computer
-
-### Heimdall
-
-Heimdall is my home server and acts as the hub of the TechNet. It is powered by a headless Acer Laptop
-
-### Odin
-
-Odin is my laptop and primary workstation. It is a Lenovo Ideapad Gaming 3
-
-### Hela
-
-Hela is my tablet and is used mainly for media consumption, viewing recipes and controlling HomeAssistant. It is a Samsung Galaxy A8
-
-### Thor
-
-Thor is my smartphone and mobile command center. It is mainly used for communications and computing while mobile.
+* [1. Backup Server](docs/Hardware/1.%20Backup%20Server/README.md)
+* [2. Server](docs/Hardware/2.%20Server/README.md)
 
 ### Loki
 
@@ -63,21 +48,3 @@ All devices in the TechNet are linked by a WireGuard VPN that is not routable by
 | Socket - Ragnarok       | DHCP (Family Wi-Fi) | 10.100.100.18   |
 | Sensor - Bathroom Light | 192.168.0.19        | 10.100.100.19   |
 | Sensor - Bedroom        | 192.168.0.20        | 10.100.100.20   |
-
-## Apps
-
-### Comms
-
-#### Contacts
-
-Contacts are managed by the Radicale server on Heimdall. DavX5 is used to sync them with the contacts and phone apps on Thor. They are managed on Odin using Thunderbird.
-
-#### SMS
-
-SMS are managed on Android using the messaging app. Valent can be used to connect to Thor to send SMS messages.
-
-#### WhatsApp
-
-WhatsApp is used to connect with friends and family. The main app is installed on Thor and the web app is used on Odin. Desktop files are created to access WhatsApp Web from plank reloaded.
-
-### Core
