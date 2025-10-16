@@ -55,7 +55,7 @@ exec-arg=''
 
 [desktop/background]
 picture-options='zoom'
-picture-uri='file:///Storage/Files/Pictures/Wallpapers/variety-copied-wallpaper-f9e9f9febc242e8cf3b0a18e40bb97f2.jpg'
+picture-uri='file:///Storage/Files/Pictures/Wallpapers/variety-copied-wallpaper-543fee8b958e299f6c2605da943892f7.jpg'
 
 [desktop/background/slideshow]
 delay=15
@@ -125,7 +125,9 @@ remember-recent-files=true
 
 [desktop/screensaver]
 allow-media-control=false
-date-format=' %A, %B %-e %Y'
+ask-for-away-message=true
+date-format=' %A, %B %e %Y'
+default-message=''
 font-date='Noto Sans 24'
 font-message='Noto Sans 14'
 font-time='Noto Sans 64'
@@ -136,7 +138,7 @@ time-format='%I:%M:%S %p'
 use-custom-format=true
 
 [desktop/session]
-idle-delay=uint32 1800
+idle-delay=uint32 300
 
 [desktop/sound]
 allow-amplified-volume=true
@@ -221,10 +223,10 @@ idle-brightness=5
 lid-close-ac-action='blank'
 lid-close-battery-action='suspend'
 lock-on-suspend=true
-sleep-display-ac=900
-sleep-display-battery=300
-sleep-inactive-ac-timeout=1800
-sleep-inactive-battery-timeout=600
+sleep-display-ac=1800
+sleep-display-battery=600
+sleep-inactive-ac-timeout=3600
+sleep-inactive-battery-timeout=1800
 
 [settings-daemon/plugins/xsettings]
 buttons-have-icons=true
