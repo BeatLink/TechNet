@@ -5,7 +5,7 @@ desklet-snap-interval=25
 desktop-effects-close='traditional'
 desktop-effects-map='traditional'
 desktop-effects-minimize='traditional'
-device-aliases=['/org/freedesktop/UPower/devices/battery_BAT1:=Internal Battery', '/org/freedesktop/UPower/devices/keyboard_hidpp_battery_0:= Wireless Keyboard', '/org/freedesktop/UPower/devices/battery_hidpp_battery_0:=Keyboard and Mouse', '/org/freedesktop/UPower/devices/headset_dev_A5_C6_AB_2E_47_31:=Headphones']
+device-aliases=['/org/freedesktop/UPower/devices/battery_BAT1:=Internal Battery', '/org/freedesktop/UPower/devices/keyboard_hidpp_battery_0:= Wireless Keyboard', '/org/freedesktop/UPower/devices/battery_hidpp_battery_0:=Keyboard and Mouse', '/org/freedesktop/UPower/devices/headset_dev_A5_C6_AB_2E_47_31:=Headphones', '/org/freedesktop/UPower/devices/headset_dev_83_BA_4A_3E_E1_42:=']
 enabled-applets=['panel1:left:0:menu@cinnamon.org:172', 'panel1:center:1:calendar@cinnamon.org:120', 'panel1:center:2:cinnamon-timer@jake1164:149', 'panel1:center:4:trilium-api@beatlink:145', 'panel1:right:2:xapp-status@cinnamon.org:4', 'panel1:right:5:show-hide-applets@mohammad-sn:142', 'panel1:right:6:systray@cinnamon.org:143', 'panel1:right:3:printers@cinnamon.org:134', 'panel1:right:7:notifications@cinnamon.org:5', 'panel1:right:4:gpaste-reloaded@feuerfuchs.eu:144', 'panel1:right:8:sound@cinnamon.org:11', 'panel1:right:9:network@cinnamon.org:10', 'panel1:right:12:inhibit@cinnamon.org:156', 'panel1:right:11:power-profiles@rcalixte:147', 'panel1:right:15:power@cinnamon.org:12', 'panel1:center:0:weather@mockturtl:0', 'panel1:right:13:auto-dark-light@gihaume:3', 'panel1:right:14:ddcci-monitor-control@andr35:5', 'panel1:center:3:trilium-api@beatlink:7', 'panel1:left:2:Direct@claudiux:8']
 enabled-desklets=@as []
 enabled-extensions=['transparent-panels@germanfr']
@@ -55,7 +55,7 @@ exec-arg=''
 
 [desktop/background]
 picture-options='zoom'
-picture-uri='file:///Storage/Files/Pictures/Wallpapers/variety-copied-wallpaper-09e9cdf4b5e0156483f249d8392e1fc3.jpg'
+picture-uri='file:///Storage/Files/Pictures/Wallpapers/variety-copied-wallpaper-f9e9f9febc242e8cf3b0a18e40bb97f2.jpg'
 
 [desktop/background/slideshow]
 delay=15
@@ -217,12 +217,13 @@ night-light-temperature=uint32 2700
 [settings-daemon/plugins/power]
 button-power='interactive'
 critical-battery-action='suspend'
+idle-brightness=5
 lid-close-ac-action='blank'
 lid-close-battery-action='suspend'
 lock-on-suspend=true
 sleep-display-ac=900
 sleep-display-battery=300
-sleep-inactive-ac-timeout=3600
+sleep-inactive-ac-timeout=1800
 sleep-inactive-battery-timeout=600
 
 [settings-daemon/plugins/xsettings]
