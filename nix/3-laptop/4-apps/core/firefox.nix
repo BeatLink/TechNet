@@ -5,7 +5,7 @@
             persistence."/Storage/Apps/Core/Firefox" = {
                 directories = [
                     ".cache/mozilla/firefox"
-                    ".mozilla"
+                    ".mozilla/firefox"
                 ];
                 allowOther = true;
             };
