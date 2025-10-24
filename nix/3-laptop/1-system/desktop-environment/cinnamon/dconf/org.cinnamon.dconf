@@ -50,7 +50,7 @@ secondary-click-time=1.2
 exec='gnome-calculator'
 
 [desktop/applications/terminal]
-exec='/nix/store/m1j5n3s44gaxkrqyhw245fg1kplmagba-tilix-1.9.6/bin/tilix'
+exec='/run/current-system/sw/bin/tilix'
 exec-arg=''
 
 [desktop/background]
