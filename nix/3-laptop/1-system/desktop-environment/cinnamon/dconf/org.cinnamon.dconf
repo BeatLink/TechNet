@@ -55,7 +55,7 @@ exec-arg=''
 
 [desktop/background]
 picture-options='zoom'
-picture-uri='file:///Storage/Files/Pictures/Wallpapers/variety-copied-wallpaper-543fee8b958e299f6c2605da943892f7.jpg'
+picture-uri='file:///Storage/Files/Pictures/Wallpapers/variety-copied-wallpaper-07e8f6d699d6d26ec17747b65f43b601.jpg'
 
 [desktop/background/slideshow]
 delay=15
@@ -66,7 +66,7 @@ slideshow-enabled=false
 clock-show-date=true
 clock-show-seconds=true
 clock-use-24h=false
-cursor-blink-time=1200
+cursor-blink-time=720
 cursor-size=24
 cursor-theme='Bibata-Modern-Classic'
 first-day-of-week=0
@@ -81,7 +81,13 @@ text-scaling-factor=1.0
 toolkit-accessibility=true
 
 [desktop/keybindings]
+custom-list=['custom0']
 looking-glass-keybinding=@as []
+
+[desktop/keybindings/custom-keybindings/custom0]
+binding=['<Primary><Alt>x']
+command='xkill'
+name='Xkill'
 
 [desktop/keybindings/media-keys]
 calculator=@as []
@@ -102,7 +108,7 @@ notification-duration=5
 remove-old=true
 
 [desktop/peripherals/keyboard]
-delay=uint32 500
+delay=uint32 570
 numlock-state=false
 repeat=true
 repeat-interval=uint32 19
