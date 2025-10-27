@@ -11,5 +11,6 @@
         ./borgmatic
         ./nemo
         ./tilix
+        ./waydroid
     ];
 }
