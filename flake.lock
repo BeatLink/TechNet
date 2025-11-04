@@ -70,11 +70,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1756178471,
-        "narHash": "sha256-I3BkOKDAq9QYoOY6w39I6sCTtDB7glTesSxWnVD01/g=",
+        "lastModified": 1762221901,
+        "narHash": "sha256-AjVpLswF3NEpCbUl5KEegkESGVLU5dN4xHCJEgLJO+I=",
         "owner": "BeatLink",
         "repo": "gmusicbrowser-nix-flake",
-        "rev": "799d2008b78f0dd97f7bbf7aed8eeec3b4b80aaf",
+        "rev": "de9f9ad0ba4dd4fdd1c9cc76526e04a990a26acd",
         "type": "github"
       },
       "original": {
@@ -106,11 +106,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1762146130,
-        "narHash": "sha256-/XOEA0a61fZ45i/BpaSsyLNNbw/yKwjMbkB/IWSGLzU=",
+        "lastModified": 1762228452,
+        "narHash": "sha256-Y5950vzoyJ8+u4U6dlI/2VEbf3JQnIJsmRWWWcsgpRg=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "b5ed4afc2277339bdf0e9edf59befff7350cf075",
+        "rev": "aa6936bb637e46a49cf1292486200ba41dd4bcf7",
         "type": "github"
       },
       "original": {
@@ -187,16 +187,32 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1761907660,
-        "narHash": "sha256-kJ8lIZsiPOmbkJypG+B5sReDXSD1KGu2VEPNqhRa/ew=",
+        "lastModified": 1762111121,
+        "narHash": "sha256-4vhDuZ7OZaZmKKrnDpxLZZpGIJvAeMtK6FKLJYUtAdw=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "2fb006b87f04c4d3bdf08cfdbc7fab9c13d94a15",
+        "rev": "b3d51a0365f6695e7dd5cdf3e180604530ed33b4",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
         "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs-stable": {
+      "locked": {
+        "lastModified": 1761999846,
+        "narHash": "sha256-IYlYnp4O4dzEpL77BD/lj5NnJy2J8qbHkNSFiPBCbqo=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "3de8f8d73e35724bf9abef41f1bdbedda1e14a31",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-25.05",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -208,11 +224,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1762138503,
-        "narHash": "sha256-xVaO+O1+cHnVM2pdX2tcN51gZdI+f6qEoGAyegCqp3I=",
+        "lastModified": 1762227240,
+        "narHash": "sha256-Ngbi8fcrO3ua4YDfrblVj1vag7TwIAoNJTVLSw+9N10=",
         "owner": "zquestz",
         "repo": "plank-reloaded",
-        "rev": "538cd97e339afab56ef3057b85993ad6d6851506",
+        "rev": "d56d614a79ea0b3832f25b9940838192b63c65af",
         "type": "github"
       },
       "original": {
@@ -232,6 +248,7 @@
         "nix-index-database": "nix-index-database",
         "nixos-plymouth": "nixos-plymouth",
         "nixpkgs": "nixpkgs",
+        "nixpkgs-stable": "nixpkgs-stable",
         "plank-reloaded": "plank-reloaded",
         "sops-nix": "sops-nix",
         "xdg-autostart": "xdg-autostart"
