@@ -1,9 +1,12 @@
+{ pkgs-stable, ... }:
 {
-    home-manager.users.beatlink = { config, pkgs, ... }: {
-        home = {
-            packages =  with pkgs; [ lmms ];
+    environment.systemPackages = [ pkgs-stable.lmms ];
+    home-manager.users.beatlink =
+        { config, pkgs, ... }:
+        {
+            home = {
+            };
         };
-    };
 
     # Nixos Impermanence is used instead of Home Manager impermanence as the latter does not allow bind mounts, only symlinks
     # LMMS does NOT like symlinks for its configuration file apparently.

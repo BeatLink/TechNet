@@ -5,6 +5,9 @@
         nixpkgs = {
             url = "github:NixOS/nixpkgs/nixos-unstable";
         };
+        nixpkgs-stable = {
+            url = "github:NixOS/nixpkgs/nixos-25.05";
+        };
         nix-index-database = {
             url = "github:nix-community/nix-index-database";
             inputs.nixpkgs.follows = "nixpkgs";
@@ -50,6 +53,7 @@
         inputs@{
             self,
             nixpkgs,
+            nixpkgs-stable,
             nix-index-database,
             disko,
             impermanence,
@@ -99,6 +103,7 @@
                 };
                 Odin = nixpkgs.lib.nixosSystem {
                     system = "x86_64-linux";
+
                     modules = [
                         nix-index-database.nixosModules.nix-index
                         disko.nixosModules.disko
@@ -118,7 +123,17 @@
                             home-manager.extraSpecialArgs = { inherit inputs; };
                         }
                     ];
-                    specialArgs = { inherit inputs; };
+                    specialArgs =
+                        let
+                            system = "x86_64-linux";
+                        in
+                        {
+                            pkgs-stable = import nixpkgs-stable {
+                                inherit system;
+                                config.allowUnfree = true;
+                            };
+                            inherit inputs;
+                        };
                 };
                 Thor = nixpkgs.lib.nixosSystem {
                     system = "aarch64-linux";
