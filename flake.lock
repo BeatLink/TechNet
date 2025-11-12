@@ -224,11 +224,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1762227240,
-        "narHash": "sha256-Ngbi8fcrO3ua4YDfrblVj1vag7TwIAoNJTVLSw+9N10=",
+        "lastModified": 1762910628,
+        "narHash": "sha256-Tamjlu4GLU9maxoFqZV+1ncl5MB/UVR15nITvU4g1zw=",
         "owner": "zquestz",
         "repo": "plank-reloaded",
-        "rev": "d56d614a79ea0b3832f25b9940838192b63c65af",
+        "rev": "009cfe7abc07b9e77b628c68ca6d4d89e14e97b6",
         "type": "github"
       },
       "original": {
