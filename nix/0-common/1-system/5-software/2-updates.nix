@@ -10,8 +10,8 @@
             "--no-write-lock-file"
             "-L"
         ];
-        dates = lib.mkDefault "04:00";
-        allowReboot = false;
+        dates = lib.mkDefault "18:00";
+        allowReboot = true;
         persistent = true;
     };
     systemd.services.nixos-upgrade =
