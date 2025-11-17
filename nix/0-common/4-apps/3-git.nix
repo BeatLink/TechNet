@@ -1,19 +1,19 @@
 # Git
 #
-# Version Control System                                                
+# Version Control System
 #
 
 { pkgs, ... }:
 {
     home-manager.users.beatlink.programs.git = {
         enable = true;
-        userEmail = "git@beatlink.simplelogin.com";
-        userName = "BeatLink";
-        package = pkgs.gitFull;
-        extraConfig = {
+        settings = {
+            userEmail = "git@beatlink.simplelogin.com";
+            userName = "BeatLink";
             core = {
                 autocrlf = "input";
             };
         };
+        package = pkgs.gitFull;
     };
 }
