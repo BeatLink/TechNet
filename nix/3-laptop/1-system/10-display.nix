@@ -1,7 +1,7 @@
 { config, ... }:
 {
     hardware = {
-        i2c.enable = true;      # Needed for Controlling External Monitor
+        i2c.enable = true; # Needed for Controlling External Monitor
         graphics = {
             enable = true;
             enable32Bit = true;
@@ -22,14 +22,17 @@
                     enable = true;
                     enableOffloadCmd = true;
                 };
-            };    
+            };
         };
-        amdgpu.initrd.enable = true;                           # Enables Graphics in Initrd, Allows External Monitor to load for Password Entry
+        amdgpu.initrd.enable = true; # Enables Graphics in Initrd, Allows External Monitor to load for Password Entry
     };
-	services = {
-        xserver.videoDrivers = [ "modesetting" "nvidia" ];
+    services = {
+        xserver.videoDrivers = [
+            "amdgpu"
+            "nvidia"
+        ];
         logind.settings.Login = {
-            HandleLidSwitch = "ignore";                                   # Override lid switch before login; Fixes system going to sleep on login page
+            HandleLidSwitch = "ignore"; # Override lid switch before login; Fixes system going to sleep on login page
             HandleLidSwitchDocked = "ignore";
         };
     };
@@ -40,7 +43,7 @@
         serviceConfig = {
             Type = "oneshot";
             ExecStart = ''
-            /run/current-system/sw/bin/bash -c 'echo 255 > /sys/class/backlight/amdgpu_bl1/brightness'
+                /run/current-system/sw/bin/bash -c 'echo 255 > /sys/class/backlight/amdgpu_bl1/brightness'
             '';
         };
         # You may need this if writing to /sys requires permissions
