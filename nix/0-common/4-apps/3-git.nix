@@ -8,8 +8,10 @@
     home-manager.users.beatlink.programs.git = {
         enable = true;
         settings = {
-            userEmail = "git@beatlink.simplelogin.com";
-            userName = "BeatLink";
+            user = {
+                email = "git@beatlink.simplelogin.com";
+                name = "BeatLink";
+            };
             core = {
                 autocrlf = "input";
             };
