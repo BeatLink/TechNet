@@ -21,7 +21,7 @@
                     writeShellScriptBin
                     "vorta-heimdall-postbackup.sh"
                     ''
-                        if [ $returncode -eq 0 ]; then 
+                        if [ "$returncode" -eq 0 ]; then 
                             wget --spider "http://uptime-kuma.heimdall.technet/api/push/TOXLxZAYCN?status=up&msg=Backups Completed&ping="; 
                         fi
                     ''
