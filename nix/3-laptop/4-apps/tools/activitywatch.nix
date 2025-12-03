@@ -8,6 +8,7 @@
                 directories = [
                     ".cache/activitywatch"
                     ".config/activitywatch"
+                    ".local/share/activitywatch"
                 ];
                 allowOther = true;
             };
