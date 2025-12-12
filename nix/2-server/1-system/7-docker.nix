@@ -41,6 +41,7 @@
                 "prune"
                 "-f"
                 "-a"
+                "--volumes"
             ];
         };
         # Make sure Docker is running before we prune
