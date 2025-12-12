@@ -14,6 +14,13 @@
         docker = {
             enable = true;
             liveRestore = false; # Solves hangs on shutdown
+            autoPrune = {
+                enable = true;
+                flags = [
+                    "--all"
+                    "--volumes"
+                ];
+            };
         };
         arion.backend = "docker";
     };
@@ -31,11 +38,4 @@
         ];
     };
     users.extraGroups.docker.members = [ "beatlink" ];
-    autoPrune = {
-        enable = true;
-        flags = [
-            "--all"
-            "--volumes"
-        ];
-    };
 }
