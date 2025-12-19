@@ -12,6 +12,7 @@
         kernelModules = [ "kvm-amd" ]; # Virtualization for VMs
         kernelParams = [
             "amd_pstate=active" # Enables Power Management for AMD CPUs
+            "pcie_aspm=off"
         ];
     };
     hardware = {
