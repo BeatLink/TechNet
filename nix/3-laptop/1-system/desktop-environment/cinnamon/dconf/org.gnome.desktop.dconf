@@ -15,8 +15,8 @@ secondary-click-time=1.2
 [input-sources]
 current=uint32 0
 show-all-sources=false
-sources=@a(ss) []
-xkb-options=@as []
+sources=[('xkb', 'us')]
+xkb-options=['terminate:ctrl_alt_bksp']
 
 [interface]
 can-change-accels=false
