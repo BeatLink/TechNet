@@ -14,8 +14,8 @@
                     hostname = "freshrss";
                     restart = "always";
                     volumes = [
-                        "/Storage/Services/FreshRSS/data:/data"
-                        "/Storage/Services/FreshRSS/extensions:/extensions"
+                        "/Storage/Services/FreshRSS/data:/var/www/FreshRSS/data"
+                        "/Storage/Services/FreshRSS/extensions:/var/www/FreshRSS/data"
                     ];
 
                     environment = {
@@ -40,7 +40,8 @@
                         "nginx-proxy-manager_public"
                     ];
                     dns = [
-                        "pihole"
+                        "8.8.8.8"
+                        "1.1.1.1"
                     ];
                 };
             };
