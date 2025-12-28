@@ -33,7 +33,6 @@
                         ];
                         timeout = "10s";
                         start_period = "60s";
-                        start_interval = "11s";
                         interval = "75s";
                         retries = 3;
                     };
