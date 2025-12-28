@@ -37,6 +37,7 @@
                     ];
                     capabilities = {
                         SYS_NICE = true;
+                        SYS_TIME = true;
                     };
                     environment = {
                         "TZ" = "America/Jamaica";
