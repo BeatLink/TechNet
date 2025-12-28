@@ -9,6 +9,7 @@
         # Set packages installed on system
         arion
         docker-client
+        lazydocker
     ];
     virtualisation = {
         docker = {

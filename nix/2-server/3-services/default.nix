@@ -15,7 +15,6 @@
         ./glances.nix
         ./home-assistant.nix
         ./homepage.nix
-        ./miniflux.nix
         ./motioneye.nix
         ./nginx-proxy-manager.nix
         ./nginx.nix
@@ -30,6 +29,5 @@
         ./trilium-sysadmin.nix
         ./uptime-kuma.nix
         ./vlc.nix
-        ./watchtower.nix
     ];
 }
