@@ -15,7 +15,9 @@
 
                     environment = {
                         TZ = "America/Jamaica";
-                        WUD_TRIGGER_DOCKER_Docker_PRUNE = "true";
+                        WUD_TRIGGER_DOCKER_Local_PRUNE = "true";
+                        WUD_AUTH_BASIC_BEATLINK_USER = "beatlink";
+                        WUD_AUTH_BASIC_JOHN_HASH = "beatlink:$$apr1$$3qiufh2y$$lf3lOZHYcWh1A.D.3wCgj/";
                     };
                     healthcheck = {                        
                         test = [
