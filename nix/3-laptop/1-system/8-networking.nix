@@ -42,6 +42,32 @@
                             psk = "$TECHNET_WIFI_PASSWORD";
                         };
                     };
+                    "TechNet Wi-Fi (No DNS)" = {
+                        connection = {
+                            id = "TechNet Wi-Fi";
+                            permissions = "";
+                            type = "wifi";
+                        };
+                        ipv4 = {
+                            dns-search = "";
+                            method = "auto";
+                        };
+                        ipv6 = {
+                            addr-gen-mode = "stable-privacy";
+                            dns-search = "";
+                            method = "auto";
+                        };
+                        wifi = {
+                            mac-address-blacklist = "";
+                            mode = "infrastructure";
+                            ssid = "TechNet Wi-Fi";
+                        };
+                        wifi-security = {
+                            auth-alg = "open";
+                            key-mgmt = "wpa-psk";
+                            psk = "$TECHNET_WIFI_PASSWORD";
+                        };
+                    };
                     "Digicel_5G_WiFi_5tDQ" = {
                         connection = {
                             id = "Digicel_5G_WiFi_5tDQ";

@@ -42,15 +42,14 @@
                     environment = {
                         "TZ" = "America/Jamaica";
                         "WEB_PORT" = "80";
-                        "FTLCONF_LOCAL_IPV4" = "10.100.100.1";
                     };
                     expose = [
                         "80"
                     ];
                     ports = [
-                        "10.100.100.1:53:53/tcp"
-                        "10.100.100.1:53:53/udp"
-                        "82:80"
+                        "53:53/tcp"
+                        "53:53/udp"
+                        "82:443/tcp"
                     ];
                     networks = [
                         "nginx-proxy-manager_public"
