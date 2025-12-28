@@ -9,13 +9,13 @@
         settings = {
             services = {
                 freshrss.service = {
-                    image = "freshrss/freshrss:latest";
+                    image = "freshrss/freshrss:alpine";
                     container_name = "freshrss";
                     hostname = "freshrss";
                     restart = "always";
                     volumes = [
-                        "/Storage/Services/FreshRSS/data:/data"
-                        "/Storage/Services/FreshRSS/extensions:/extensions"
+                        "/Storage/Services/FreshRSS/data:/var/www/FreshRSS/data"
+                        "/Storage/Services/FreshRSS/extensions:/var/www/FreshRSS/data"
                     ];
 
                     environment = {
@@ -38,6 +38,10 @@
                     ];
                     networks = [
                         "nginx-proxy-manager_public"
+                    ];
+                    dns = [
+                        "8.8.8.8"
+                        "1.1.1.1"
                     ];
                 };
             };
