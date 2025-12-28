@@ -1,34 +1,60 @@
-{ inputs, config, ... }:
+{ inputs, ... }:
 {
+
     sops.secrets.freshrss_password = {
         sopsFile = "${inputs.self}/secrets/2-server.yaml";
-        owner = "freshrss";
-        group = "freshrss";
     };
+    virtualisation.arion.projects.freshrss = {
+        serviceName = "freshrss";
+        settings = {
+            services = {
+                freshrss.service = {
+                    image = "freshrss/freshrss:latest";
+                    container_name = "freshrss";
+                    hostname = "freshrss";
+                    restart = "always";
+                    logging = {
+                        options = {
+                            max-size = "10m";
+                        };
+                    };
+                    volumes = [
+                        "/Storage/Services/FreshRSS/data:/data"
+                        "/Storage/Services/FreshRSS/extensions:/extensions"
+                    ];
 
-    sops.secrets.https_certificate = {
-        sopsFile = "${inputs.self}/secrets/2-server.yaml";
-        owner = "nginx";
-        group = "nginx";
-    };
-    sops.secrets.https_certificate_key = {
-        sopsFile = "${inputs.self}/secrets/2-server.yaml";
-        owner = "nginx";
-        group = "nginx";
-    };
-    services = {
-        freshrss = {
-            enable = true;
-            baseUrl = "https://freshrss.heimdall.technet";
-            dataDir = "/Storage/Services/FreshRSS/data";
-            defaultUser = "beatlink";
-            passwordFile = config.sops.secrets.freshrss_password.path;
-        };
-        nginx.virtualHosts.freshrss = {
-            serverName = "freshrss.heimdall.technet";
-            addSSL = true;
-            sslCertificate = config.sops.secrets.https_certificate.path;
-            sslCertificateKey = config.sops.secrets.https_certificate_key.path;
+                    environment = {
+                        TZ = "America/Jamaica";
+                        CRON_MIN = "3,33";
+                        TRUSTED_PROXY = [
+                            "172.16.0.1/12"
+                            "192.168.0.1/16"
+                        ];
+                    };
+                    healthcheck = {
+                        test = [
+                            "CMD"
+                            "cli/health.php"
+                        ];
+                        timeout = "10s";
+                        start_period = "60s";
+                        start_interval = "11s";
+                        interval = "75s";
+                        retries = 3;
+                    };
+                    expose = [
+                        "80"
+                    ];
+                    networks = [
+                        "nginx-proxy-manager_public"
+                    ];
+                };
+            };
+            networks = {
+                nginx-proxy-manager_public = {
+                    external = true;
+                };
+            };
         };
     };
 }
