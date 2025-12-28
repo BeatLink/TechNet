@@ -35,6 +35,9 @@
                     env_file = [
                         config.sops.secrets.pihole_env.path
                     ];
+                    capabilities = {
+                        SYS_NICE = true;
+                    };
                     environment = {
                         "TZ" = "America/Jamaica";
                         "WEB_PORT" = "80";
