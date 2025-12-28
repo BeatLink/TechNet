@@ -15,7 +15,7 @@
                     restart = "always";
                     volumes = [
                         "/Storage/Services/FreshRSS/data:/var/www/FreshRSS/data"
-                        "/Storage/Services/FreshRSS/extensions:/var/www/FreshRSS/data"
+                        "/Storage/Services/FreshRSS/extensions:/var/www/FreshRSS/extensions"
                     ];
 
                     environment = {
