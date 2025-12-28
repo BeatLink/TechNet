@@ -35,6 +35,10 @@
                     env_file = [
                         config.sops.secrets.pihole_env.path
                     ];
+                    capabilities = {
+                        SYS_NICE = true;
+                        SYS_TIME = true;
+                    };
                     environment = {
                         "TZ" = "America/Jamaica";
                         "WEB_PORT" = "80";
@@ -44,8 +48,8 @@
                         "80"
                     ];
                     ports = [
-                        "53:53/tcp"
-                        "53:53/udp"
+                        "10.100.100.1:53:53/tcp"
+                        "10.100.100.1:53:53/udp"
                         "82:80"
                     ];
                     networks = [
