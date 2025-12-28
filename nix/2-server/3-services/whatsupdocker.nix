@@ -15,11 +15,12 @@
 
                     environment = {
                         TZ = "America/Jamaica";
+                        WUD_TRIGGER_DOCKER_Docker_PRUNE = "true";
                     };
                     healthcheck = {                        
                         test = [
                             "CMD-SHELL"
-                            "curl --fail http://localhost:${WUD_SERVER_PORT:-3000}/health || exit 1"
+                            "curl --fail http://localhost:\${WUD_SERVER_PORT:-3000}/health || exit 1"
                         ];
                         timeout = "10s";
                         start_period = "10s";
