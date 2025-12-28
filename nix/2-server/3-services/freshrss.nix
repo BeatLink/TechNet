@@ -40,8 +40,7 @@
                         "nginx-proxy-manager_public"
                     ];
                     dns = [
-                        "8.8.8.8"
-                        "8.8.4.4"
+                        "pihole"
                     ];
                 };
             };
