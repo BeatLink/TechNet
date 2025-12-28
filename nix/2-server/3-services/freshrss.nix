@@ -13,11 +13,6 @@
                     container_name = "freshrss";
                     hostname = "freshrss";
                     restart = "always";
-                    logging = {
-                        options = {
-                            max-size = "10m";
-                        };
-                    };
                     volumes = [
                         "/Storage/Services/FreshRSS/data:/data"
                         "/Storage/Services/FreshRSS/extensions:/extensions"
