@@ -9,7 +9,7 @@
         settings = {
             services = {
                 freshrss.service = {
-                    image = "freshrss/freshrss:latest";
+                    image = "freshrss/freshrss:alpine";
                     container_name = "freshrss";
                     hostname = "freshrss";
                     restart = "always";
