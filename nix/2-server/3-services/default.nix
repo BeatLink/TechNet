@@ -29,5 +29,6 @@
         ./trilium-sysadmin.nix
         ./uptime-kuma.nix
         ./vlc.nix
+        ./whatsupdocker.nix
     ];
 }
