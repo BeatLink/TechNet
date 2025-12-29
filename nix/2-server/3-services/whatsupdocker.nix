@@ -1,5 +1,9 @@
-{ inputs, ... }:
+{ inputs, config, ... }:
 {
+    sops.secrets.whatsupdocker_env = {
+        sopsFile = "${inputs.self}/secrets/2-server.yaml";
+        restartUnits = [ "whatsupdocker.service" ];
+    };
     virtualisation.arion.projects.whatsupdocker = {
         serviceName = "whatsupdocker";
         settings = {
@@ -12,14 +16,14 @@
                         "/var/run/docker.sock:/var/run/docker.sock"
                         "/Storage/Services/WhatsUpDocker/store:/store"
                     ];
-
+                    env_file = [
+                        config.sops.secrets.whatsupdocker_env.path
+                    ];
                     environment = {
                         TZ = "America/Jamaica";
                         WUD_TRIGGER_DOCKER_Local_PRUNE = "true";
-                        WUD_AUTH_BASIC_BEATLINK_USER = "beatlink";
-                        WUD_AUTH_BASIC_JOHN_HASH = "beatlink:$$apr1$$3qiufh2y$$lf3lOZHYcWh1A.D.3wCgj/";
                     };
-                    healthcheck = {                        
+                    healthcheck = {
                         test = [
                             "CMD-SHELL"
                             "curl --fail http://localhost:\${WUD_SERVER_PORT:-3000}/health || exit 1"
@@ -45,4 +49,3 @@
         };
     };
 }
-
