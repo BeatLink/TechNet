@@ -6,7 +6,7 @@
                 enable = true;
             };
             home = {
-                packages = with pkgs; [ jetbrains.pycharm-community ];
+                packages = with pkgs; [ jetbrains.pycharm-oss ];
                 persistence."/Storage/Apps/Programming/PyCharm" = {
                     directories = [
                         ".cache/JetBrains"
