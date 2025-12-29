@@ -32,7 +32,7 @@
                     "audio"
                     "pipewire"
                     "i2c"
-                    "video"
+                    # "video"
                ]; # Allows management of the network, using sudo, virt-manager, and accessing borg repos
                 openssh.authorizedKeys.keys = [
                     # Sets the SSH key for the user
