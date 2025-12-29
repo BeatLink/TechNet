@@ -40,7 +40,7 @@
     services.bamf.enable = true;                                             # Allows plank to know running applications
     home-manager.users.beatlink = { pkgs, inputs, ... }: 
     let 
-        plank-reloaded = inputs.plank-reloaded.defaultPackage.${pkgs.system};
+        plank-reloaded = inputs.plank-reloaded.defaultPackage.${pkgs.stdenv.hostPlatform.system};
     in {
         home = {
             packages = [ plank-reloaded ];
