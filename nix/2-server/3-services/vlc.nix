@@ -8,7 +8,7 @@
     networking.firewall = {
         allowedTCPPorts = [
             4212
-            4213
+            # 4213
         ];
     };
     sops.secrets.vlc_env.sopsFile = "${inputs.self}/secrets/2-server.yaml";
