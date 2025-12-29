@@ -21,7 +21,7 @@
                     ];
                     environment = {
                         TZ = "America/Jamaica";
-                        WUD_TRIGGER_DOCKER_Local_PRUNE = "true";
+                        #WUD_TRIGGER_DOCKER_Local_PRUNE = "true";
                     };
                     healthcheck = {
                         test = [
