@@ -2,7 +2,7 @@
 {
     imports = [     
         ./home-assistant
-        ./nextcloud.nix
+        ./scrcpy.nix
         ./syncthing.nix
         ./valent
     ];
