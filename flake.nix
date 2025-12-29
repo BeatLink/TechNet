@@ -69,8 +69,10 @@
         {
             nixosConfigurations = {
                 Ragnarok = nixpkgs.lib.nixosSystem {
-                    system = "aarch64-linux";
+                    specialArgs = { inherit inputs; };
                     modules = [
+                        { nixpkgs.hostPlatform = "aarch64-linux"; }
+                        { home-manager.extraSpecialArgs = { inherit inputs; }; }
                         nix-index-database.nixosModules.nix-index
                         disko.nixosModules.disko
                         impermanence.nixosModules.impermanence
@@ -78,15 +80,13 @@
                         home-manager.nixosModules.home-manager
                         ./nix/0-common
                         ./nix/1-backup-server
-                        {
-                            home-manager.extraSpecialArgs = { inherit inputs; };
-                        }
                     ];
-                    specialArgs = { inherit inputs; };
                 };
                 Heimdall = nixpkgs.lib.nixosSystem {
-                    system = "x86_64-linux";
+                    specialArgs = { inherit inputs; };
                     modules = [
+                        { nixpkgs.hostPlatform = "x86_64-linux"; }
+                        { home-manager.extraSpecialArgs = { inherit inputs; }; }
                         nix-index-database.nixosModules.nix-index
                         disko.nixosModules.disko
                         impermanence.nixosModules.impermanence
@@ -95,49 +95,36 @@
                         arion.nixosModules.arion
                         ./nix/0-common
                         ./nix/2-server
-                        {
-                            home-manager.extraSpecialArgs = { inherit inputs; };
-                        }
                     ];
-                    specialArgs = { inherit inputs; };
                 };
                 Odin = nixpkgs.lib.nixosSystem {
-                    system = "x86_64-linux";
-
+                    specialArgs = { inherit inputs; };
                     modules = [
+                        { nixpkgs.hostPlatform = "x86_64-linux"; }
+                        {
+                            home-manager = {
+                                extraSpecialArgs = { inherit inputs; };
+                                sharedModules = [
+                                    xdg-autostart.homeManagerModules.xdg-autostart
+                                    gmusicbrowser.homeManagerModules.gmusicbrowser
+                                ];
+                            };
+                        }
                         nix-index-database.nixosModules.nix-index
                         disko.nixosModules.disko
                         impermanence.nixosModules.impermanence
                         sops-nix.nixosModules.sops
                         home-manager.nixosModules.home-manager
                         nixos-plymouth.nixosModules.default
-                        {
-                            home-manager.sharedModules = [
-                                xdg-autostart.homeManagerModules.xdg-autostart
-                                gmusicbrowser.homeManagerModules.gmusicbrowser
-                            ];
-                        }
                         ./nix/0-common
                         ./nix/3-laptop
-                        {
-                            home-manager.extraSpecialArgs = { inherit inputs; };
-                        }
                     ];
-                    specialArgs =
-                        let
-                            system = "x86_64-linux";
-                        in
-                        {
-                            pkgs-stable = import nixpkgs-stable {
-                                inherit system;
-                                config.allowUnfree = true;
-                            };
-                            inherit inputs;
-                        };
                 };
                 Thor = nixpkgs.lib.nixosSystem {
-                    system = "aarch64-linux";
+                    specialArgs = { inherit inputs; };
                     modules = [
+                        { nixpkgs.hostPlatform = "aarch64-linux"; }
+                        { home-manager.extraSpecialArgs = { inherit inputs; }; }
                         nix-index-database.nixosModules.nix-index
                         disko.nixosModules.disko
                         impermanence.nixosModules.impermanence
@@ -145,11 +132,7 @@
                         home-manager.nixosModules.home-manager
                         ./nix/0-common
                         ./nix/5-phone
-                        {
-                            home-manager.extraSpecialArgs = { inherit inputs; };
-                        }
                     ];
-                    specialArgs = { inherit inputs; };
                 };
             };
         };
