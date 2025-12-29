@@ -43,7 +43,7 @@
             };
             wantedBy = [ "multi-user.target" ];
         };
-        vlc-video = {
+        /*vlc-video = {
             description = "Converts USB Webcam Stream to RSTP for Home Security";
             after = [
                 "network.target"
@@ -70,15 +70,16 @@
                     ${pkgs.vlc}/bin/cvlc \
                     v4l2:///dev/video0:width=1280:height=720:fps=30 \
                     :input-slave=pulse:// \
+                    --avcodec-hw=vaapi \
                     --sout "#transcode{vcodec=h264,acodec=mp4a,ab=128,samplerate=48000}:rtp{sdp=rtsp://10.100.100.1:4213/webcam}" \
                     --no-sout-all \
-                    --sout-keep
-                    --rtsp-user="$VLC_RTSP_USER" \
-                    --rtsp-pwd="$VLC_RTSP_PASS"
+                    --sout-keep \
+                    --sout-rtsp-user "$VLC_RTSP_USER" \
+                    --sout-rtsp-pwd "$VLC_RTSP_PASS"
                 '';
                 Restart = "always";
             };
             wantedBy = [ "multi-user.target" ];
-        };
+        };*/
     };
 }
