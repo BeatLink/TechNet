@@ -4,7 +4,7 @@
         settings = {
             services = {
                 uptime-kuma.service = {
-                    image = "louislam/uptime-kuma:2";
+                    image = "louislam/uptime-kuma:1";
                     container_name = "uptime-kuma";
                     restart = "always";
                     volumes = [ 

@@ -32,7 +32,7 @@
         hostName = "Heimdall"; # Sets hostname
         hostId = "e5aa3553";
         nameservers = [
-            "127.0.0.1"
+            "10.100.100.1"
         ];
         useNetworkd = true;
         firewall = {
