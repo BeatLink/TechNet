@@ -15,7 +15,7 @@
         ./glances.nix
         ./home-assistant.nix
         ./homepage.nix
-        ./motioneye.nix
+        #./motioneye.nix
         ./nginx-proxy-manager.nix
         ./nginx.nix
         ./openbooks.nix
