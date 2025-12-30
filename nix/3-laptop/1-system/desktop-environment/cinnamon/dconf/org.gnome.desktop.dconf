@@ -26,7 +26,7 @@ clock-show-seconds=true
 cursor-blink=true
 cursor-blink-time=720
 cursor-blink-timeout=10
-cursor-size=24
+cursor-size=5
 cursor-theme='Bibata-Modern-Classic'
 document-font-name='Noto Sans 12'
 enable-animations=true
@@ -58,7 +58,7 @@ accel-profile='default'
 double-click=400
 drag-threshold=8
 left-handed=false
-middle-click-emulation=false
+middle-click-emulation=true
 natural-scroll=false
 speed=0.0
 

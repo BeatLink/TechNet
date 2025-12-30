@@ -16,7 +16,6 @@
                         Comment=
                         Terminal=false
                         PrefersNonDefaultGPU=false
-                        Icon=phone
                         Categories=Network
                         Type=Application
                     '';

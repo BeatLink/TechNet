@@ -6,12 +6,12 @@ desktop-effects-close='traditional'
 desktop-effects-map='traditional'
 desktop-effects-minimize='traditional'
 device-aliases=['/org/freedesktop/UPower/devices/battery_BAT1:=Internal Battery', '/org/freedesktop/UPower/devices/keyboard_hidpp_battery_0:= Wireless Keyboard', '/org/freedesktop/UPower/devices/battery_hidpp_battery_0:=Keyboard and Mouse', '/org/freedesktop/UPower/devices/headset_dev_A5_C6_AB_2E_47_31:=Headphones', '/org/freedesktop/UPower/devices/headset_dev_83_BA_4A_3E_E1_42:=']
-enabled-applets=['panel1:left:0:menu@cinnamon.org:172', 'panel1:center:1:calendar@cinnamon.org:120', 'panel1:center:2:cinnamon-timer@jake1164:149', 'panel1:center:4:trilium-api@beatlink:145', 'panel1:right:0:xapp-status@cinnamon.org:4', 'panel1:right:3:show-hide-applets@mohammad-sn:142', 'panel1:right:4:systray@cinnamon.org:143', 'panel1:right:1:printers@cinnamon.org:134', 'panel1:right:5:notifications@cinnamon.org:5', 'panel1:right:2:gpaste-reloaded@feuerfuchs.eu:144', 'panel1:right:6:sound@cinnamon.org:11', 'panel1:right:7:network@cinnamon.org:10', 'panel1:right:11:inhibit@cinnamon.org:156', 'panel1:right:12:power-profiles@rcalixte:147', 'panel1:right:13:power@cinnamon.org:12', 'panel1:center:0:weather@mockturtl:0', 'panel1:right:9:ddcci-monitor-control@andr35:5', 'panel1:center:3:trilium-api@beatlink:7', 'panel1:left:2:Direct@claudiux:8', 'panel1:right:10:nightlight@cinnamon.org:9']
+enabled-applets=['panel1:left:0:menu@cinnamon.org:172', 'panel1:center:1:calendar@cinnamon.org:120', 'panel1:center:3:cinnamon-timer@jake1164:149', 'panel1:center:5:trilium-api@beatlink:145', 'panel1:right:3:xapp-status@cinnamon.org:4', 'panel1:right:6:show-hide-applets@mohammad-sn:142', 'panel1:right:7:systray@cinnamon.org:143', 'panel1:right:4:printers@cinnamon.org:134', 'panel1:right:8:notifications@cinnamon.org:5', 'panel1:right:5:gpaste-reloaded@feuerfuchs.eu:144', 'panel1:right:9:sound@cinnamon.org:11', 'panel1:right:10:network@cinnamon.org:10', 'panel1:right:14:inhibit@cinnamon.org:156', 'panel1:right:15:power-profiles@rcalixte:147', 'panel1:right:16:power@cinnamon.org:12', 'panel1:center:0:weather@mockturtl:0', 'panel1:right:12:ddcci-monitor-control@andr35:5', 'panel1:center:4:trilium-api@beatlink:7', 'panel1:left:1:Direct@claudiux:8', 'panel1:right:13:nightlight@cinnamon.org:9']
 enabled-desklets=@as []
 enabled-extensions=['transparent-panels@germanfr']
 favorite-apps=@as []
 hotcorner-layout=['expo:false:0', 'desktop:true:100', 'expo:true:100', 'scale:true:100']
-next-applet-id=10
+next-applet-id=13
 no-adjacent-panel-barriers=true
 panel-edit-mode=false
 panel-zone-icon-sizes='[{"panelId": 1, "left": 16, "center": 16, "right": 16}]'
@@ -56,7 +56,7 @@ exec-arg=''
 
 [desktop/background]
 picture-options='zoom'
-picture-uri='file:///Storage/Files/Pictures/Wallpapers/variety-copied-wallpaper-44882565196aeed48f689045e02737ba.jpg'
+picture-uri='file:///Storage/Files/Pictures/Wallpapers/variety-copied-wallpaper-ce8dd951bc152a898e06a5d9c172cfc2.jpg'
 
 [desktop/background/slideshow]
 delay=15
@@ -71,7 +71,7 @@ clock-show-date=true
 clock-show-seconds=true
 clock-use-24h=false
 cursor-blink-time=720
-cursor-size=24
+cursor-size=5
 cursor-theme='Bibata-Modern-Classic'
 first-day-of-week=0
 font-name='Noto Sans 12'
@@ -104,10 +104,13 @@ terminal=['<Primary><Alt>t', 'Calculator']
 
 [desktop/media-handling]
 autorun-never=false
+autorun-x-content-ignore=@as []
+autorun-x-content-open-folder=@as []
+autorun-x-content-start-app=@as []
 
 [desktop/notifications]
 display-notifications=true
-fullscreen-notifications=true
+fullscreen-notifications=false
 notification-duration=5
 remove-old=true
 
@@ -118,12 +121,15 @@ repeat=true
 repeat-interval=uint32 19
 
 [desktop/peripherals/mouse]
+accel-profile='default'
 double-click=400
 drag-threshold=8
+locate-pointer=false
+middle-click-emulation=true
 speed=0.0
 
 [desktop/peripherals/touchpad]
-click-method='default'
+click-method='fingers'
 disable-while-typing=true
 send-events='enabled'
 speed=0.0
@@ -171,6 +177,7 @@ theme='Mint-Y'
 theme-backup='Mint-Y'
 titlebar-font='Noto Sans 12'
 visual-bell=false
+workspace-names=@as []
 
 [gestures]
 enabled=true
