@@ -8,13 +8,27 @@
 { pkgs, ... }:
 {
     services = {
-        displayManager.logToFile = false;
-        displayManager.logToJournal = false;
+        displayManager = {
+            logToFile = false;
+            logToJournal = false;
+        };
         xserver = {
             enable = true; # Enables X11 Server
             displayManager.lightdm = {
                 enable = true; # Enables LightDM Login Manager
                 greeters.gtk = {
+                    cursorTheme = {
+                        name = "Bibata-Modern-Classic";
+                        package = pkgs.bibata-cursors;
+                    };
+                    iconTheme = {
+                        name = "Mint-Y-Aqua";
+                        package = pkgs.mint-y-icons;
+                    };
+                    theme = {
+                        name = "Mint-Y-Aqua";
+                        package = pkgs.mint-themes;
+                    };
                     clock-format = "%H:%M:%S`";
                     indicators = [
                         "~host"
