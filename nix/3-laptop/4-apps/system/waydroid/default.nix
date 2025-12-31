@@ -12,11 +12,18 @@
         };
     };
     home-manager.users.beatlink = {
-        home.persistence."/Storage/Apps/System/Waydroid/user" = {
-            directories = [
-                ".local/share/waydroid"
-            ];
-            allowOther = true;
+        home = {
+            file = {
+                ".local/share/applications/waydroid.desktop".source = ./waydroid.desktop;
+                ".local/share/waydroid/waydroid.sh" = {
+                    executable = true;
+                    source = ./waydroid.sh;
+                };
+            };
+            persistence."/Storage/Apps/System/Waydroid/user" = {
+                directories = [ ".local/share/waydroid" ];
+                allowOther = true;
+            };
         };
     };
 }
