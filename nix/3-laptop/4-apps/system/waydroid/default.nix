@@ -1,11 +1,15 @@
+# Enable WayDroid
 { pkgs, ... }:
 {
     virtualisation.waydroid.enable = true;
+
     environment = {
-        systemPackages = with pkgs; [
-            weston # Waydroid requirement
-        ];
-        persistence."/Storage/System/WayDroid/system".directories = [ "/var/lib/waydroid" ];
+        systemPackages = with pkgs; [ weston ];
+        persistence."/Storage/System/WayDroid/system" = {
+            hideMounts = true;
+            directories = [ "/var/lib/waydroid" ];
+            files = [ ];
+        };
     };
     home-manager.users.beatlink = {
         home.persistence."/Storage/Apps/System/Waydroid/user" = {
