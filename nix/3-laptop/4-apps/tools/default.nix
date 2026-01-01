@@ -21,7 +21,6 @@
         ./wmctrl.nix
         ./xed.nix
         ./xviewer.nix
-        ./alarm-clock-applet
         ./pix
     ];
 }
