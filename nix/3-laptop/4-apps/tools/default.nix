@@ -1,6 +1,5 @@
 {
     imports = [
-        ./activitywatch.nix
         ./calculator.nix
         ./cheese.nix
         ./czkawka.nix
