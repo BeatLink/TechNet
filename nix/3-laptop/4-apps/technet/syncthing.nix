@@ -41,10 +41,9 @@
                         };
                         Thor = {
                             addresses = [
-                                "tcp://192.168.0.5:22000"
-                                "tcp://10.100.100.4:22000"
+                                "tcp://10.100.100.5:22000"
                             ];
-                            id = "IZOOSHB-MWRVHH7-HVEVB4P-UVR7NIU-UD4ZJBW-GBGY6EE-OOY2PLM-2IE32QT";
+                            id = "VKFKSE5-HAZJGT6-XAT4WG5-MXGCGRE-7XSUVQT-3LLOKOG-4CXV3RA-X2423Q5";
                             numConnections = 8;
                         };
                     };

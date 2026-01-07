@@ -11,8 +11,5 @@
         ./borgmatic
         ./nemo
         ./tilix
-        ./adb
-        ./waydroid
-        #./scrcpy
     ];
 }
