@@ -3,12 +3,10 @@
         ./calculator.nix
         ./cheese.nix
         ./czkawka.nix
-        ./decoder.nix
         ./deluge.nix
         ./drawio.nix
         ./dupeguru.nix
         ./gallery-dl.nix
-        ./gpaste.nix
         ./inkscape.nix
         ./libreoffice.nix
         ./screenshot.nix
