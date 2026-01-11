@@ -1,15 +1,22 @@
 {
-    nixpkgs.config.permittedInsecurePackages = [ # needed until new stremio frontend is stable
+    nixpkgs.config.permittedInsecurePackages = [
+        # needed until new stremio frontend is stable
         "qtwebengine-5.15.19"
     ];
     home-manager.users.beatlink =
-        { pkgs, ... }:
+        { inputs, ... }:
+        let
+            pkgs-stable = import inputs.nixpkgs-stable {
+                system = "x86_64-linux";
+                config.allowUnfree = true;
+                #config.permittedInsecurePackages = [
+                #    "qtwebengine-5.15.19"
+                #];
+            };
+        in
         {
-            nixpkgs.config.permittedInsecurePackages = [
-                "qtwebengine-5.15.19"
-            ];
             home = {
-                packages = [ pkgs.stremio ]; # (pkgs.callPackage ./stremio.nix {}) ];
+                packages = [ pkgs-stable.stremio ]; # (pkgs.callPackage ./stremio.nix {}) ];
                 persistence."/Storage/Apps/Fun/Stremio" = {
                     directories = [
                         ".cache/Smart Code ltd"

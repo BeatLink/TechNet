@@ -12,6 +12,7 @@ enabled-extensions=['transparent-panels@germanfr']
 favorite-apps=@as []
 hotcorner-layout=['expo:false:0', 'desktop:true:100', 'expo:true:100', 'scale:true:100']
 next-applet-id=13
+next-desklet-id=1
 no-adjacent-panel-barriers=true
 panel-edit-mode=false
 panel-zone-icon-sizes='[{"panelId": 1, "left": 16, "center": 16, "right": 16}]'
@@ -56,7 +57,7 @@ exec-arg=''
 
 [desktop/background]
 picture-options='zoom'
-picture-uri='file:///Storage/Files/Pictures/Wallpapers/variety-copied-wallpaper-ce8dd951bc152a898e06a5d9c172cfc2.jpg'
+picture-uri='file:///Storage/Files/Pictures/Wallpapers/variety-copied-wallpaper-c755cf9e1e5c8741d6e6e8850b4b68a6.jpg'
 
 [desktop/background/slideshow]
 delay=15
@@ -85,7 +86,7 @@ text-scaling-factor=1.0
 toolkit-accessibility=true
 
 [desktop/keybindings]
-custom-list=['custom0']
+custom-list=['custom0', 'custom1', '__dummy__']
 looking-glass-keybinding=@as []
 
 [desktop/keybindings/custom-keybindings/custom0]
@@ -93,9 +94,15 @@ binding=['<Primary><Alt>x']
 command='xkill'
 name='Xkill'
 
+[desktop/keybindings/custom-keybindings/custom1]
+binding=['HomePage']
+command='trilium'
+name='Trilium'
+
 [desktop/keybindings/media-keys]
 calculator=@as []
-home=['<Super>e', 'XF86Explorer', 'HomePage']
+home=['<Super>e', 'XF86Explorer']
+media=['XF86AudioMedia']
 next=['AudioNext']
 pause=@as []
 play=['AudioPlay']
