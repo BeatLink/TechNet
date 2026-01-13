@@ -6,7 +6,7 @@
                 ".local/share/applications/whatsapp.desktop"
                 ".local/share/icons/whatsapp.png"
             ];
-            allowOther = true;
+
         };
     };
 }

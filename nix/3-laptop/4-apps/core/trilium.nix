@@ -16,7 +16,7 @@
                         ".local/share/trilium-data"
                         ".config/Trilium Notes"
                     ];
-                    allowOther = true;
+
                 };
                 file = {
                     ".config/autostart/trilium-next.desktop".source =

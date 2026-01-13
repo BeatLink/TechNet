@@ -8,7 +8,7 @@
                     directories = [
                         ".config/sqlitebrowser"
                     ];
-                    allowOther = true;
+
                 };
             };
         };

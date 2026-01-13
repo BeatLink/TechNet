@@ -24,7 +24,7 @@
                         ".local/share/Smart Code ltd"
                         ".stremio-server"
                     ];
-                    allowOther = true;
+
                 };
             };
         };

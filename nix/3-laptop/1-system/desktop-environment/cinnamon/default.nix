@@ -86,7 +86,7 @@
                     ".config/xdg-terminals.list"
                     ".config/mimeapps.list"
                 ];
-                allowOther = true;
+
             };
         };
         systemd.user.services = {

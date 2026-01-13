@@ -131,7 +131,7 @@
                     files = [
                         ".config/syncthingtray.ini"
                     ];
-                    allowOther = true;
+
                 };
             };
         };

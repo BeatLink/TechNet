@@ -14,7 +14,7 @@
                         ".cache/keepassxc"
                         ".mozilla/native-messaging-hosts"
                     ];
-                    allowOther = true;
+
                 };
                 file = {
                     ".config/autostart/org.keepassxc.KeePassXC.desktop".source =

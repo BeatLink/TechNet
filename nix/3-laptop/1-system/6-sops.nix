@@ -9,8 +9,7 @@
             files = [
                 ".config/sops/age/keys.txt"
             ];
-            allowOther = true;
+
         };
     };
 }
-

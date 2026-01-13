@@ -16,7 +16,7 @@
                         ".local/share/JetBrains"
                         ".local/share/virtualenv"
                     ];
-                    allowOther = true;
+
                 };
             };
         };

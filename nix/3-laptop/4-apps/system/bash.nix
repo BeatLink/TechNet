@@ -1,13 +1,15 @@
-{ ... }: 
+{ ... }:
 {
-    home-manager.users.beatlink = { ... }: {
-        home = {
-            persistence."/Storage/Apps/System/Bash" = {
-                directories = [
-                    ".local/share/bash"
-                ];
-                allowOther = true;
+    home-manager.users.beatlink =
+        { ... }:
+        {
+            home = {
+                persistence."/Storage/Apps/System/Bash" = {
+                    directories = [
+                        ".local/share/bash"
+                    ];
+
+                };
             };
         };
-    };
 }

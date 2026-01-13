@@ -7,7 +7,7 @@
                 persistence."/Storage/Apps/Programming/PacketTracer" = {
                     directories = [
                     ];
-                    allowOther = true;
+
                 };
             };
         };

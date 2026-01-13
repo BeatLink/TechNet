@@ -21,7 +21,7 @@
     };
     home-manager.users.beatlink = {
         home.persistence."/Storage/Apps/System/Virt-Manager" = {
-            allowOther = true;
+
             directories = [
                 ".config/virt-manager"
                 ".local/share/virt-manager"
