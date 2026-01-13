@@ -47,7 +47,6 @@
 
     # Setup Home Manager
     home-manager.users.beatlink = {
-        imports = [ inputs.impermanence.homeManagerModules.impermanence ];
         home = {
             username = "beatlink";
             homeDirectory = "/home/beatlink";
