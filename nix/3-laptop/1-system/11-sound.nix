@@ -32,13 +32,13 @@
                 persistence = {
                     "/Storage/Apps/Tools/Sox" = {
                         directories = [ ];
-                        allowOther = true;
+
                     };
                     "/Storage/Apps/System/Pipewire" = {
                         directories = [
                             ".local/state/wireplumber"
                         ];
-                        allowOther = true;
+
                     };
                 };
             };

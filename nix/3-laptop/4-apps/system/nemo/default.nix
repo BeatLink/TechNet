@@ -1,5 +1,5 @@
 # Nemo
-# 
+#
 # This dock is used for quickly launching applications.
 #
 # Settings are stored via Dconf but are exported using the 1-export-dconf-settings.sh script in this folder
@@ -11,44 +11,46 @@
 
 {
     programs.fuse.userAllowOther = true;
-    home-manager.users.beatlink = { pkgs, ... }:
-    {
-        home = {
-            packages = [ 
-                pkgs.nemo-with-extensions 
-                pkgs.nemo-preview
-                pkgs.ffmpeg-full
-                pkgs.imagemagick
-                pkgs.gettext
-            ]; 
-            persistence."/Storage/Apps/System/Nemo" = {
-                directories = [
-                    ".config/nemo"
-                    ".local/share/nemo"
+    home-manager.users.beatlink =
+        { pkgs, ... }:
+        {
+            home = {
+                packages = [
+                    pkgs.nemo-with-extensions
+                    pkgs.nemo-preview
+                    pkgs.ffmpeg-full
+                    pkgs.imagemagick
+                    pkgs.gettext
                 ];
-                allowOther = true;
+                persistence."/Storage/Apps/System/Nemo" = {
+                    directories = [
+                        ".config/nemo"
+                        ".local/share/nemo"
+                    ];
+
+                };
+                file = {
+                    ".config/gtk-3.0/bookmarks".text = ''
+                        file:///Storage/Files/Documents Documents
+                        file:///Storage/Files/Downloads Downloads
+                        file:///Storage/Files/eBooks eBooks
+                        file:///Storage/Files/Games Games
+                        file:///Storage/Files/Music Music
+                        file:///Storage/Files/Pictures Pictures
+                        file:///Storage/Files/Projects Projects
+                        file:///Storage/Files/Sounds Sounds
+                        file:///Storage/Files/Videos Videos
+                        file:///Storage/Files/VMs VMs
+                        file:///Storage/Files/Backups Backups
+                        file:///Storage Storage
+                        sftp://beatlink@heimdall.technet/Storage Heimdall
+                        sftp://beatlink@ragnarok.technet/Storage Ragnarok
+                    '';
+                };
             };
-            file =  {
-                ".config/gtk-3.0/bookmarks".text = ''
-                    file:///Storage/Files/Documents Documents
-                    file:///Storage/Files/Downloads Downloads
-                    file:///Storage/Files/eBooks eBooks
-                    file:///Storage/Files/Games Games
-                    file:///Storage/Files/Music Music
-                    file:///Storage/Files/Pictures Pictures
-                    file:///Storage/Files/Projects Projects
-                    file:///Storage/Files/Sounds Sounds
-                    file:///Storage/Files/Videos Videos
-                    file:///Storage/Files/VMs VMs
-                    file:///Storage/Files/Backups Backups
-                    file:///Storage Storage
-                    sftp://beatlink@heimdall.technet/Storage Heimdall
-                    sftp://beatlink@ragnarok.technet/Storage Ragnarok
-                '';
-            };
+            imports = [
+                # Imports Pix Dconf Settings
+                ./2-dconf-settings.nix
+            ];
         };
-        imports = [                                                                 # Imports Pix Dconf Settings
-            ./2-dconf-settings.nix
-        ];
-    };
 }

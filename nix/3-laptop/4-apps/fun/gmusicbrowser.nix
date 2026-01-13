@@ -8,7 +8,7 @@
                     directories = [
                         ".config/gmusicbrowser"
                     ];
-                    allowOther = true;
+
                 };
                 file = {
                     ".config/autostart/org.gmusicbrowser.gmusicbrowser.desktop".source =

@@ -13,7 +13,7 @@
             persistence = {
                 "/Storage/Apps/System/Codecs" = {
                     directories = [ ".cache/thumbnails/" ];
-                    allowOther = true;
+
                 };
             };
         };

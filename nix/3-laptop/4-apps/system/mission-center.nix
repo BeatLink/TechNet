@@ -12,7 +12,7 @@
                         ".config/MissionCenter"
                         ".local/share/MissionCenter"
                     ];
-                    allowOther = true;
+
                 };
             };
         };

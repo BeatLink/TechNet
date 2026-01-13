@@ -13,7 +13,7 @@
                 ".local/share/applications/separator4.desktop"
                 ".local/share/applications/separator5.desktop"
             ];
-            allowOther = true;
+
         };
         programs.plasma.panels = [
             {
@@ -36,7 +36,7 @@
                         };
                     }
                     "org.kde.plasma.panelspacer"
-                    "com.gitlab.scias.plasmavantage" #TODO: Enable once packaged for nix
+                    "com.gitlab.scias.plasmavantage" # TODO: Enable once packaged for nix
                     "martchus.syncthingplasmoid"
                     "org.kde.plasma.systemtray"
                 ];

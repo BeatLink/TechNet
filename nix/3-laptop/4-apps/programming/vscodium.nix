@@ -16,7 +16,7 @@
                         ".vscode-oss"
                     ];
                     files = [ ".config/npmrc" ];
-                    allowOther = true;
+
                 };
             };
         };

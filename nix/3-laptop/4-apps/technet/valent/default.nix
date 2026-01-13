@@ -18,7 +18,7 @@
                         ".cache/valent"
                         ".config/valent"
                     ];
-                    allowOther = true;
+
                 };
                 file.".config/autostart/valent.desktop".source =
                     "${pkgs.valent}/share/applications/ca.andyholmes.Valent.desktop"; # Configures plank to autostart on login

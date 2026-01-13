@@ -1,4 +1,4 @@
-{ pkgs, ... }: 
+{ pkgs, ... }:
 {
     programs = {
         steam = {
@@ -21,7 +21,7 @@
                 directories = [
                     ".local/share/Steam"
                 ];
-                allowOther = true;
+
             };
         };
     };
