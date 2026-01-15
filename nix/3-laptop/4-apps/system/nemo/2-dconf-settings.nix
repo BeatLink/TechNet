@@ -15,6 +15,7 @@ with lib.hm.gvariant;
     "org/nemo/list-view" = {
       default-column-order = [ "name" "size" "type" "date_modified" "date_created_with_time" "date_accessed" "date_created" "detailed_type" "owner" "group" "where" "mime_type" "date_modified_with_time" "octal_permissions" "permissions" ];
       default-visible-columns = [ "name" "size" "type" "date_modified" ];
+      enable-folder-expansion = true;
     };
 
     "org/nemo/plugins" = {
