@@ -12,10 +12,13 @@
                 };
             };
 
+            dconfImports = {
+                org-x-pix = {
+                    source = ./2-dconf-settings.ini;
+                    path = "/org/x/pix/";
+                };
+            };
+
             dconf.enable = true; # Enables dconf for Pix Setting Management
-            imports = [
-                # Imports Pix Dconf Settings
-                ./2-dconf-settings.nix
-            ];
         };
 }
