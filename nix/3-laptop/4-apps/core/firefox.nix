@@ -7,7 +7,8 @@
                 persistence."/Storage/Apps/Core/Firefox" = {
                     directories = [
                         ".cache/mozilla/firefox"
-                        ".mozilla/firefox"
+                        ".config/mozilla/firefox"
+                        ".local/share/mozilla/firefox"
                     ];
 
                 };
