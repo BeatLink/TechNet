@@ -18,6 +18,7 @@
         ./wmctrl.nix
         ./xed.nix
         ./xviewer.nix
+        ./file-roller.nix
         ./pix
     ];
 }
