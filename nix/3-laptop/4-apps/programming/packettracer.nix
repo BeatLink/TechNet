@@ -10,7 +10,7 @@
             ];
             home = {
 
-                packages = with pkgs; [ (pkgs-unstable.ciscoPacketTracer8.override { packetTracerSource = /path/to/packettracer.deb; }) ];
+                packages = with pkgs; [ ciscoPacketTracer8 ];
                 persistence."/Storage/Apps/Programming/PacketTracer" = {
                     directories = [
                     ];
