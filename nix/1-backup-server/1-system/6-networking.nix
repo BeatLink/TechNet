@@ -98,7 +98,7 @@
                         # Server
                         PublicKey = "SLW2DFKk+Cf5K5KZl0OLYrEGyqTCqYHBKV2mTA3W2hQ=";
                         AllowedIPs = [ "10.100.100.0/24" ];
-                        Endpoint = "72.252.37.234:51820";
+                        Endpoint = "72.252.111.124:51820";
                         PersistentKeepalive = 25;
                     }
                 ];

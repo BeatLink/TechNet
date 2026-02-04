@@ -1,0 +1,8 @@
+{
+    # PROMETHEUS
+
+    # GRAFANA
+
+    # LOKI
+
+}
