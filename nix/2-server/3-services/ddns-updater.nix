@@ -19,7 +19,7 @@
                         "PUBLICIPV6_HTTP_PROVIDERS" = "all";
                         "PUBLICIP_DNS_PROVIDERS" = "all";
                         "PUBLICIP_DNS_TIMEOUT" = "3s";
-                        "HTTP_TIMEOUT" = "10s"
+                        "HTTP_TIMEOUT" = "10s";
 
                         # Backup
                         "BACKUP_PERIOD" = "24h";
