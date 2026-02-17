@@ -7,5 +7,5 @@
             PERIOD = "5m";
         };
     };
-    environment.persistence."/Storage/System/DDNS/data".directories = [ "/var/lib/ddns-updater" ];
+    environment.persistence."/Storage/System/DDNS/data".directories = [ "/var/lib/private/ddns-updater" ];
 }
