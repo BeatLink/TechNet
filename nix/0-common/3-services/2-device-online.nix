@@ -27,10 +27,10 @@ in
     };
 
     systemd.timers.device-online = {
-      description = "Run device-online every 5 minutes";
+      description = "Run device-online every 1 minute";
       wantedBy = [ "timers.target" ];
       timerConfig = {
-        OnCalendar = "*:0/5";
+        OnCalendar = "*:0/1";
         Persistent = true;
       };
     };
