@@ -11,6 +11,23 @@
                         "/Storage/Services/DDNS/data:/updater/data"
                     ];
                     environment = {
+                        "PERIOD" = "5m";
+                        "UPDATE_COOLDOWN_PERIOD" = "5m";
+                        "PUBLICIP_FETCHERS" = "all";
+                        "PUBLICIP_HTTP_PROVIDERS" = "all";
+                        "PUBLICIPV4_HTTP_PROVIDERS" = "all";
+                        "PUBLICIPV6_HTTP_PROVIDERS" = "all";
+                        "PUBLICIP_DNS_PROVIDERS" = "all";
+                        "PUBLICIP_DNS_TIMEOUT" = "3s";
+                        "HTTP_TIMEOUT" = "10s"
+
+                        # Backup
+                        "BACKUP_PERIOD" = "24h";
+                        "BACKUP_DIRECTORY" = "/updater/data";
+
+                        # Other
+                        "LOG_LEVEL" = "info";
+                        "LOG_CALLER" = "short";
                     };
                     expose = [
                         "8000"
