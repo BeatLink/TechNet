@@ -3,8 +3,9 @@
         enable = true;
         environment = {
             SERVER_ENABLED="no";
-            CONFIG_FILEPATH = "/Storage/Apps/System/DDNS/config.json";
+            CONFIG_FILEPATH = "/Storage/Services/DDNS/config.json";
             PERIOD = "5m";
         };
     };
+    environment.persistence."/Storage/System/DDNS/data".directories = [ "/var/lib/ddns-updater" ];
 }
