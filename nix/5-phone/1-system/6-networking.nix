@@ -84,7 +84,7 @@
                             private-key = "$WIREGUARD_PRIVATE_KEY";
                         };
                         "wireguard-peer.SLW2DFKk+Cf5K5KZl0OLYrEGyqTCqYHBKV2mTA3W2hQ=" = {
-                            endpoint = "72.252.111.124:51820";
+                            endpoint = "bltechnet.mooo.com:51820";
                             persistent-keepalive = 25;
                             allowed-ips = "0.0.0.0/0";
                         };

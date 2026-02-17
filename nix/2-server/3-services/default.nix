@@ -8,6 +8,7 @@
         ./blockurl.nix
         ./borg.nix
         ./calibre-web-automated.nix
+        ./ddns-updater.nix
         ./deluge.nix
         ./esphome.nix
         ./freshrss.nix
