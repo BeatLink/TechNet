@@ -3,34 +3,32 @@
 let
     logFile = "/var/log/ddns-update.log";
     urlFile = "/etc/ddns-url";
+
+    ddnsScript = pkgs.writeShellScriptBin "ddns-update" ''
+        set -euo pipefail
+
+        URL="$(cat ${urlFile})"
+        TIMESTAMP="$(${pkgs.coreutils}/bin/date --iso-8601=seconds)"
+
+        EXIT_CODE=0
+        RESPONSE="$(${pkgs.curl}/bin/curl \
+          --fail \
+          --show-error \
+          --silent \
+          "$URL" 2>&1)" || EXIT_CODE=$?
+
+        echo "[$TIMESTAMP] Exit: $EXIT_CODE Response: $RESPONSE" >> ${logFile}
+        exit "$EXIT_CODE"
+    '';
 in
 {
-    ############################################
-    # DDNS Service
-    ############################################
-
     systemd.services.ddns-update = {
         description = "Dynamic DNS Update";
         serviceConfig = {
             Type = "oneshot";
-
-            ExecStart = ''
-                ${pkgs.bash}/bin/bash -c '
-                  URL="$(cat ${urlFile})"
-                  TIMESTAMP="$(${pkgs.coreutils}/bin/date --iso-8601=seconds)"
-                  RESPONSE="$(${pkgs.curl}/bin/curl \
-                    --fail \
-                    --show-error \
-                    --silent \
-                    "$URL" 2>&1)"
-                  EXIT_CODE=$?
-
-                  echo "[$TIMESTAMP] Exit: $EXIT_CODE Response: $RESPONSE" >> ${logFile}
-                  exit $EXIT_CODE
-                '
-            '';
-
+            ExecStart = "${ddnsScript}/bin/ddns-update";
             User = "root";
+            ReadWritePaths = [ "${logFile}" ];
 
             # Hardening
             ProtectSystem = "strict";
