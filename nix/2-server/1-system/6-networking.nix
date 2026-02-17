@@ -19,13 +19,13 @@
     # Prevents conflicts with pihole
     services.resolved = {
         enable = true;
-        extraConfig = ''
-            DNSStubListener=no
-        '';
-        fallbackDns = [
-            "8.8.8.8"
-            "1.1.1.1"
-        ];
+        settings.Resolve = {
+            DNSStubListener = false;
+            fallbackDns = [
+                "8.8.8.8"
+                "1.1.1.1"
+            ];
+        };
     };
 
     networking = {
