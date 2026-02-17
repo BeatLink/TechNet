@@ -58,22 +58,6 @@
                     serviceConfig.Type = "oneshot";
                     script = ''chown systemd-network:systemd-network "${config.sops.secrets.wireguard_private_key.path}" '';
                 };
-                "initrd-reboot" = {
-                    description = "Reboot system after 10 minutes in initrd";
-                    serviceConfig = {
-                        Type = "oneshot";
-                        ExecStart = "systemctl reboot";
-                    };
-                };
-            };
-            # A failsafe to reboot the system if it is stuck in initrd after 10 minutes, hopefully it can fix any wireguard issues
-            timers."initrd-reboot" = {
-                description = "Timer to reboot system after 10 minutes in initrd";
-                timerConfig = {
-                    OnBootSec = "10min";
-                    Unit = "initrd-reboot.service";
-                };
-                wantedBy = [ "timers.target" ];
             };
 
             # Sets up systemd-networkd in initrd using the same configuration from the booted system's network stack
@@ -116,58 +100,5 @@
                 };
             };
         };
-        services = {
-            networkd-monitor = {
-                description = "Monitor network connectivity and take recovery actions";
-                serviceConfig = {
-                    Type = "oneshot";
-                    ExecStart = pkgs.writeShellScript "networkd-monitor" ''
-                        STATE_FILE="/run/networkd-monitor.failures"
-                        MAX_RESTARTS=10   # ~5 minutes at 30s interval
-                        MAX_REBOOTS=20    # ~10 minutes at 30s interval
-
-                        mkdir -p /run
-                        failures=0
-                        if [ -f "$STATE_FILE" ]; then
-                          failures=$(cat "$STATE_FILE")
-                        fi
-
-                        if ${pkgs.iputils}/bin/ping -c5 -W2 10.100.100.1 >/dev/null; then
-                          echo 0 > "$STATE_FILE"
-                          echo "networkd-monitor: Heimdall reachable, reset counter."
-                          exit 0
-                        else
-                          failures=$((failures + 1))
-                          echo $failures > "$STATE_FILE"
-                          echo "networkd-monitor: Heimdall unreachable (failure $failures)."
-                          sudo networkctl reconfigure wg0
-                        fi
-
-                        if [ "$failures" -eq "$MAX_RESTARTS" ]; then
-                          echo "networkd-monitor: Restarting systemd-networkd..."
-                          ${pkgs.systemd}/bin/systemctl restart systemd-networkd
-                        fi
-
-                        if [ "$failures" -ge "$MAX_REBOOTS" ]; then
-                          echo "networkd-monitor: Rebooting system..."
-                          ${pkgs.systemd}/bin/systemctl reboot
-                        fi
-                    '';
-                };
-            };
-        };
-        timers = {
-            networkd-monitor = {
-                description = "Run networkd-monitor every 30 seconds";
-                wantedBy = [ "timers.target" ];
-                timerConfig = {
-                    OnBootSec = "30s";
-                    OnUnitActiveSec = "30s";
-                    Unit = "networkd-monitor.service";
-                    Persistent = true;
-                };
-            };
-        };
-
     };
 }
