@@ -1,47 +1,69 @@
+{ config, pkgs, ... }:
+
+let
+    logFile = "/var/log/ddns-update.log";
+    urlFile = "/etc/ddns-url";
+in
 {
-    virtualisation.arion.projects.ddns-updater = {
-        serviceName = "ddns-updater";
-        settings = {
-            services = {
-                ddns-updater.service = {
-                    image = "ghcr.io/qdm12/ddns-updater";
-                    container_name = "ddns-updater";
-                    restart = "always";
-                    volumes = [
-                        "/Storage/Services/DDNS/data:/updater/data"
-                    ];
-                    environment = {
-                        "PERIOD" = "5m";
-                        "UPDATE_COOLDOWN_PERIOD" = "5m";
-                        "PUBLICIP_FETCHERS" = "all";
-                        "PUBLICIP_HTTP_PROVIDERS" = "all";
-                        "PUBLICIPV4_HTTP_PROVIDERS" = "all";
-                        "PUBLICIPV6_HTTP_PROVIDERS" = "all";
-                        "PUBLICIP_DNS_PROVIDERS" = "all";
-                        "PUBLICIP_DNS_TIMEOUT" = "3s";
-                        "HTTP_TIMEOUT" = "10s";
+    ############################################
+    # DDNS Service
+    ############################################
 
-                        # Backup
-                        "BACKUP_PERIOD" = "24h";
-                        "BACKUP_DIRECTORY" = "/updater/data";
+    systemd.services.ddns-update = {
+        description = "Dynamic DNS Update";
+        serviceConfig = {
+            Type = "oneshot";
 
-                        # Other
-                        "LOG_LEVEL" = "info";
-                        "LOG_CALLER" = "short";
-                    };
-                    expose = [
-                        "8000"
-                    ];
-                    networks = [
-                        "nginx-proxy-manager_public"
-                    ];
-                };
-            };
-            networks = {
-                nginx-proxy-manager_public = {
-                    external = true;
-                };
-            };
+            ExecStart = ''
+                ${pkgs.bash}/bin/bash -c '
+                  URL="$(cat ${urlFile})"
+                  TIMESTAMP="$(${pkgs.coreutils}/bin/date --iso-8601=seconds)"
+                  RESPONSE="$(${pkgs.curl}/bin/curl \
+                    --fail \
+                    --show-error \
+                    --silent \
+                    "$URL" 2>&1)"
+                  EXIT_CODE=$?
+
+                  echo "[$TIMESTAMP] Exit: $EXIT_CODE Response: $RESPONSE" >> ${logFile}
+                  exit $EXIT_CODE
+                '
+            '';
+
+            User = "root";
+
+            # Hardening
+            ProtectSystem = "strict";
+            ProtectHome = true;
+            PrivateTmp = true;
+            NoNewPrivileges = true;
+            ProtectKernelTunables = true;
+            ProtectControlGroups = true;
         };
+    };
+
+    ############################################
+    # Timer (every 6 hours)
+    ############################################
+
+    systemd.timers.ddns-update = {
+        description = "Run Dynamic DNS update every 6 hours";
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+            OnBootSec = "5min";
+            OnUnitActiveSec = "6h";
+            Unit = "ddns-update.service";
+        };
+    };
+
+    ############################################
+    # Impermanence persistence
+    ############################################
+
+    environment.persistence."/Storage/Services/DDNS" = {
+        files = [
+            urlFile
+            logFile
+        ];
     };
 }
