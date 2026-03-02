@@ -1,6 +1,6 @@
 {
     home-manager.users.beatlink =
-        { config, pkgs, ... }:
+        { pkgs, ... }:
         {
             home = {
                 packages = with pkgs; [ xca ];
