@@ -4,7 +4,7 @@
         settings = {
             services = {
                 trilium.service = {
-                    image = "triliumnext/notes:latest";
+                    image = "triliumnext/trilium:latest";
                     container_name = "trilium";
                     restart = "always";
                     environment = {
@@ -12,11 +12,11 @@
                         "PGID" = "1000";
                         "TZ" = "America/Jamaica";
                     };
-                    volumes = [ 
+                    volumes = [
                         "/Storage/Services/Trilium/data:/home/node/trilium-data"
                     ];
                     expose = [
-                        "8081" 
+                        "8081"
                     ];
                     networks = [
                         "nginx-proxy-manager_public"
