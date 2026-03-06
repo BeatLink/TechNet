@@ -10,7 +10,7 @@
         ./newsflash.nix
         ./picard.nix
         ./steam.nix
-        ./stremio
+        ./stremio.nix
         ./vlc.nix
         ./timestretch
     ];
