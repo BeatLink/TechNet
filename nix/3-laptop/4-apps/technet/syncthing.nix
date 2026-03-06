@@ -13,7 +13,7 @@
         {
             home.packages = with pkgs; [
                 syncthingtray-minimal
-                xorg.libxcb
+                libxcb
             ];
             systemd.user.targets.tray = {
                 Unit = {
