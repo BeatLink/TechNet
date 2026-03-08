@@ -1,16 +1,12 @@
 {
-    nixpkgs.config.permittedInsecurePackages = [
-        "electron-31.7.7"
-    ];
     home-manager.users.beatlink =
-        { pkgs, ... }:
+        { inputs, pkgs, ... }:
+        let
+            trilium = inputs.trilium-notes.defaultPackage.${pkgs.stdenv.hostPlatform.system};
+        in
         {
-            nixpkgs.config.permittedInsecurePackages = [
-                "electron-31.7.7"
-            ];
-
             home = {
-                packages = with pkgs; [ trilium-desktop ];
+                packages = [ trilium ];
                 persistence."/Storage/Apps/Core/Trilium" = {
                     directories = [
                         ".local/share/trilium-data"
