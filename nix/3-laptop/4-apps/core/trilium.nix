@@ -2,7 +2,7 @@
     home-manager.users.beatlink =
         { inputs, pkgs, ... }:
         let
-            trilium = inputs.trilium-notes.defaultPackage.${pkgs.stdenv.hostPlatform.system};
+            trilium = inputs.trilium-notes.packages.${pkgs.stdenv.hostPlatform.system}.desktop;
         in
         {
             home = {
@@ -16,7 +16,7 @@
                 };
                 file = {
                     ".config/autostart/trilium-next.desktop".source =
-                        "${pkgs.trilium-desktop}/share/applications/Trilium.desktop";
+                        "${trilium}/share/applications/Trilium.desktop";
                 };
             };
         };
