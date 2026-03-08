@@ -5,7 +5,7 @@
         ./czkawka.nix
         ./deluge.nix
         ./drawio.nix
-        ./dupeguru.nix
+        #./dupeguru.nix
         ./gallery-dl.nix
         ./inkscape.nix
         ./libreoffice.nix
