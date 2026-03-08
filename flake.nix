@@ -42,6 +42,10 @@
             url = "github:BeatLink/gmusicbrowser-nix-flake";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        trilium-notes = {
+            url = "github:TriliumNext/Trilium";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
         nixos-plymouth.url = "github:BeatLink/nixos-plymouth";
         mobile-nixos = {
             url = "github:NixOS/mobile-nixos";
