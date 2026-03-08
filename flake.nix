@@ -43,7 +43,7 @@
             inputs.nixpkgs.follows = "nixpkgs";
         };
         trilium-notes = {
-            url = "github:TriliumNext/Trilium";
+            url = "github:BeatLink/Trilium";
             inputs.nixpkgs.follows = "nixpkgs";
         };
         nixos-plymouth.url = "github:BeatLink/nixos-plymouth";
