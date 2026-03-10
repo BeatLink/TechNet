@@ -16,7 +16,7 @@
                 };
                 file = {
                     ".config/autostart/trilium-next.desktop".source =
-                        "${trilium}/share/applications/Trilium.desktop";
+                        "${trilium}/share/applications/Trilium Notes.desktop";
                 };
             };
         };
