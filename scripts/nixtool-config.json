@@ -1,0 +1,10 @@
+{
+    "flake_path": "/Storage/Files/Projects/TechNet/TechNet", 
+    "user": "beatlink",
+    "hosts": {
+        "Ragnarok": "ragnarok.technet",
+        "Heimdall": "heimdall.technet",
+        "Odin": "odin.technet",
+        "Thor": "thor.technet"
+    }
+}
