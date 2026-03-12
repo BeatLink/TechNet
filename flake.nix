@@ -51,6 +51,9 @@
             url = "github:NixOS/mobile-nixos";
             flake = false;
         };
+        vantage = {
+            url = "github:BeatLink/vantage-nix";
+        };
 
     };
     outputs =
@@ -68,6 +71,7 @@
             gmusicbrowser,
             nixos-plymouth,
             mobile-nixos,
+            vantage,
             ...
         }:
         {

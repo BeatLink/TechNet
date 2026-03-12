@@ -5,6 +5,7 @@
         ./fonts.nix
         ./gparted.nix
         ./mission-center.nix
+        ./vantage.nix
         ./variety.nix
         ./vorta.nix
         ./blueman
