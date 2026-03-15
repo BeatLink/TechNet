@@ -23,6 +23,7 @@
                     environment = {
                         TZ = "America/Jamaica";
                         DD_AUTH_BASIC_ADMIN_USER = "admin";
+                        DD_WATCHER_LOCAL_CRON = "*/5 * * * *";
                     };
                     healthcheck = {
                         test = [
@@ -37,6 +38,10 @@
                     expose = [
                         "3000"
                     ];
+                    dns = [
+                        "1.1.1.1"
+                        "8.8.8.8"
+                    ]; # <-- add this
                     networks = [
                         "nginx-proxy-manager_public"
                     ];
