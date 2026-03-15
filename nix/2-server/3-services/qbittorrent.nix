@@ -1,33 +1,34 @@
-# Deluge
+# Qbittorrent
 #
-# Deluge is the torrent management server. The torrent server allows for automatic 24/7 downloading and setting of content.
+# Qbittorrent is the torrent management server. The torrent server allows for automatic 24/7 downloading and setting of content.
 #
-# https://hub.docker.com/r/linuxserver/deluge
+# https://hub.docker.com/r/linuxserver/qbittorrent
 #
 
 {
-    virtualisation.arion.projects.deluge = {
-        serviceName = "deluge";
+    virtualisation.arion.projects.qbittorrent = {
+        serviceName = "qbittorrent";
         settings = {
             services = {
-                deluge.service = {
-                    image = "linuxserver/deluge:latest";
-                    container_name = "deluge";
+                qbittorrent.service = {
+                    image = "lscr.io/linuxserver/qbittorrent:latest";
+                    container_name = "qbittorrent";
                     restart = "always";
                     environment = {
                         "PUID" = "1000";
                         "PGID" = "1000";
+                        "WEBUI_PORT" = "8080";
+                        "TORRENTING_PORT" = "6881";
                         "TZ" = "America/Jamaica";
                     };
                     volumes = [
-                        "/Storage/Services/Deluge/config:/config"
+                        "/Storage/Services/Qbittorrent/config:/config"
                         "/Storage/Files/Downloads:/downloads"
                     ];
                     expose = [
-                        "8112"
+                        "8080"
                     ];
                     ports = [
-                        "58846:58846"
                         "6881:6881"
                         "6881:6881/udp"
                     ];

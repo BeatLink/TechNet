@@ -9,7 +9,6 @@
         ./borg.nix
         ./calibre-web-automated.nix
         ./ddns-updater.nix
-        ./deluge.nix
         ./esphome.nix
         ./freshrss.nix
         ./gallery-dl.nix
@@ -21,6 +20,7 @@
         ./nginx.nix
         ./openbooks.nix
         ./pihole.nix
+        ./qbittorrent.nix
         ./radicale.nix
         ./stremio-export.nix
         ./syncthing.nix
