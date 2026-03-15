@@ -15,6 +15,7 @@
                     restart = "always";
                     volumes = [
                         "/var/run/docker.sock:/var/run/docker.sock"
+                        "/Storage/Services/DryDock/store:/store"
                     ];
                     env_file = [
                         config.sops.secrets.drydock_env.path

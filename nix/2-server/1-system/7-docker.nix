@@ -22,6 +22,12 @@
                     "--volumes"
                 ];
             };
+            # Override the default Docker daemon configuration
+            daemon.settings = {
+                # Set default shm size to 2GB (in bytes)
+                # Default is 64MB (67108864 bytes)
+                "default-shm-size" = "2g";
+            };
         };
         arion.backend = "docker";
     };
