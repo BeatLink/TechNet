@@ -23,6 +23,7 @@
                     environment = {
                         TZ = "America/Jamaica";
                         DD_AUTH_BASIC_ADMIN_USER = "admin";
+                        DD_WATCHER_LOCAL_CRON = "*/5 * * * *";
                     };
                     healthcheck = {
                         test = [
