@@ -1,32 +1,32 @@
 { inputs, config, ... }:
 {
-    sops.secrets.whatsupdocker_env = {
+    sops.secrets.drydock_env = {
         sopsFile = "${inputs.self}/secrets/2-server.yaml";
-        restartUnits = [ "whatsupdocker.service" ];
+        restartUnits = [ "drydock.service" ];
     };
-    virtualisation.arion.projects.whatsupdocker = {
-        serviceName = "whatsupdocker";
+    virtualisation.arion.projects.drydock = {
+        serviceName = "drydock";
         settings = {
             services = {
                 freshrss.service = {
-                    image = "getwud/wud";
-                    container_name = "whatsupdocker";
+                    image = "codeswhat/drydock:latest";
+                    container_name = "drydock";
+                    hostname = "drydock";
                     restart = "always";
                     volumes = [
                         "/var/run/docker.sock:/var/run/docker.sock"
-                        "/Storage/Services/WhatsUpDocker/store:/store"
                     ];
                     env_file = [
-                        config.sops.secrets.whatsupdocker_env.path
+                        config.sops.secrets.drydock_env.path
                     ];
                     environment = {
                         TZ = "America/Jamaica";
-                        #WUD_TRIGGER_DOCKER_Local_PRUNE = "true";
+                        DD_AUTH_BASIC_ADMIN_USER = "admin";
                     };
                     healthcheck = {
                         test = [
                             "CMD-SHELL"
-                            "curl --fail http://localhost:\${WUD_SERVER_PORT:-3000}/health || exit 1"
+                            "curl --fail http://localhost:3000 || exit 1"
                         ];
                         timeout = "10s";
                         start_period = "10s";
