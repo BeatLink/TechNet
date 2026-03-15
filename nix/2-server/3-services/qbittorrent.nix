@@ -13,6 +13,7 @@
                 qbittorrent.service = {
                     image = "lscr.io/linuxserver/qbittorrent:latest";
                     container_name = "qbittorrent";
+                    hostname = "qbittorrent";
                     restart = "always";
                     environment = {
                         "PUID" = "1000";
