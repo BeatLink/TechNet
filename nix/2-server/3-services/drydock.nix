@@ -38,10 +38,6 @@
                     expose = [
                         "3000"
                     ];
-                    dns = [
-                        "1.1.1.1"
-                        "8.8.8.8"
-                    ]; # <-- add this
                     networks = [
                         "nginx-proxy-manager_public"
                     ];
