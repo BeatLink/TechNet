@@ -1,9 +1,16 @@
 {
     services.uptime-kuma = {
         enable = true;
-        port = 3001;
-        dataDir = "/Storage/Services/Uptime-Kuma";
+        settings.HOST = "10.100.100.1";
     };
+    systemd.services.uptime-kuma.serviceConfig = {
+        SupplementaryGroups = [ "docker" ];
+    };
+    environment.persistence."/Storage/Services/Uptime-Kuma".directories = [
+        {
+            directory = "/var/lib/private/uptime-kuma";
+            mode = "0700";
+        }
+    ];
     networking.firewall.allowedTCPPorts = [ 3001 ];
-    users.users.uptime-kuma.extraGroups = [ "docker" ];
 }
