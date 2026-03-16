@@ -5,7 +5,10 @@
     };
     networking.firewall.allowedTCPPorts = [ 3001 ];
     environment.persistence."/Storage/Services/Uptime-Kuma".directories = [
-        "/var/lib/private/uptime-kuma"
+        {
+            directory = "/var/lib/private/uptime-kuma";
+            mode = "0700";
+        }
     ];
 
     #users.users.uptime-kuma = {
