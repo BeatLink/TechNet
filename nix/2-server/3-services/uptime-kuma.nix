@@ -7,5 +7,8 @@
         };
     };
     networking.firewall.allowedTCPPorts = [ 3001 ];
-    users.users.uptime-kuma.extraGroups = [ "docker" ];
+    users.users.uptime-kuma = {
+        group = "uptime-kuma";
+        extraGroups = [ "docker" ];
+    };
 }
