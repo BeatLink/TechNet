@@ -52,7 +52,7 @@
             flake = false;
         };
         vantage = {
-            url = "github:BeatLink/vantage-nix";
+            url = "github:nabilksabu/vantage-nix";
         };
 
     };
