@@ -9,6 +9,7 @@
                         ".cache/Smart Code ltd"
                         ".config/Smart Code ltd"
                         ".local/share/Smart Code ltd"
+                        ".local/share/stremio"
                         ".stremio-server"
                     ];
 
