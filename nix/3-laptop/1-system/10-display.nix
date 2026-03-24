@@ -29,7 +29,7 @@
     };
     services = {
         xserver.videoDrivers = [
-            "amdgpu"
+            "modesetting"
             "nvidia"
         ];
         logind.settings.Login = {
@@ -44,12 +44,8 @@
         serviceConfig = {
             Type = "oneshot";
             ExecStart = ''
-                /run/current-system/sw/bin/bash -c 'echo 255 > /sys/class/backlight/amdgpu_bl1/brightness'
+                brightnessctl set 100%
             '';
         };
-        # You may need this if writing to /sys requires permissions
-        serviceConfig.ExecStartPre = [
-            "/run/current-system/sw/bin/chmod u+w /sys/class/backlight/amdgpu_bl1/brightness"
-        ];
     };
 }
