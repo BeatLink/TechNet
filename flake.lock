@@ -418,15 +418,15 @@
         "nixpkgs": "nixpkgs_3"
       },
       "locked": {
-        "lastModified": 1773275016,
+        "lastModified": 1774234490,
         "narHash": "sha256-gqtEF30S9WlihQu7lhprC68g6cpNJbEzO8yl6Kh4Z0o=",
-        "owner": "BeatLink",
+        "owner": "nabilksabu",
         "repo": "vantage-nix",
-        "rev": "86a7220a4ab38ca674a3322cf2c50e71bc623b0c",
+        "rev": "a3e4d168e16de5f7bfe887eeab45e67db41fd139",
         "type": "github"
       },
       "original": {
-        "owner": "BeatLink",
+        "owner": "nabilksabu",
         "repo": "vantage-nix",
         "type": "github"
       }
