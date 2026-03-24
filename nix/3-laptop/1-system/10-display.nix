@@ -44,7 +44,7 @@
         serviceConfig = {
             Type = "oneshot";
             ExecStart = ''
-                brightnessctl set 100%
+                /run/current-system/sw/bin/brightnessctl set 100%
             '';
         };
     };
