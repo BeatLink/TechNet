@@ -53,6 +53,7 @@
         libnotify
         ddcutil
         i2c-tools
+        brightnessctl
     ];
     environment.cinnamon.excludePackages = with pkgs; [
         onboard
