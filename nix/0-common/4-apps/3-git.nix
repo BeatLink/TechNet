@@ -16,6 +16,7 @@
                 autocrlf = "input";
             };
         };
+        signing.format = null;
         package = pkgs.gitFull;
     };
 }
