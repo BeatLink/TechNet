@@ -28,7 +28,7 @@ pr() {
   gum style --foreground "#00ACFF" "$@"
 }
 
-title 'TechNet Installer' '' 'This script automatically installs NixOS to a device in the TechNet'
+title '' '' ''
 
 pr "Select the Host to Install"
 HOST=$(gum choose "Ragnarok" "Heimdall" "Odin" "Thor")
