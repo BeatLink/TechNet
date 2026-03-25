@@ -20,13 +20,30 @@
                     ];
 
                 };
-                file.".config/autostart/valent.desktop".source =
-                    "${pkgs.valent}/share/applications/ca.andyholmes.Valent.desktop"; # Configures plank to autostart on login
 
             };
             dconfImports.valent = {
                 source = ./settings.dconf;
                 path = "/ca/andyholmes/valent/";
+            };
+            systemd.user.services.valent = {
+                Unit = {
+                    Description = "Valent - KDE Connect Implementation";
+                    After = [ "graphical-session.target" ];
+                    PartOf = [ "graphical-session.target" ];
+                };
+
+                Service = {
+                    Type = "dbus";
+                    BusName = "ca.andyholmes.Valent";
+                    ExecStart = "${pkgs.valent}/bin/valent --gapplication-service";
+                    Restart = "on-failure";
+                    RestartSec = 5;
+                };
+
+                Install = {
+                    WantedBy = [ "graphical-session.target" ];
+                };
             };
         };
 }
