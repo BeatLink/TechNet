@@ -8,7 +8,8 @@
         enable = true;
         extraArgs = [ 
             "--webserver"
-            "--config /Storage/Services/Glances/glances.conf" 
+            "--config"
+            "/Storage/Services/Glances/glances.conf" 
         ];
     };
 }
