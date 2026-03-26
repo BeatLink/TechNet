@@ -1,4 +1,5 @@
 # Persistence Subvolume Mounting ################################################################################################################
+{ lib, ... }:
 {
     environment.persistence."/persistent" = {
         hideMounts = true;
@@ -14,5 +15,11 @@
                 };
             }
         ];
+    };
+
+    systemd.services."systemd-tmpfiles-resetup" = {
+        serviceConfig = {
+            RemainAfterExit = lib.mkForce false;
+        };
     };
 }
