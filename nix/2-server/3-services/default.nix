@@ -21,7 +21,7 @@
         ./nginx-vhosts.nix
         ./nginx.nix
         ./openbooks.nix
-        ./pihole.nix
+        ./pi-hole.nix
         ./qbittorrent.nix
         ./radicale.nix
         ./stremio-export.nix

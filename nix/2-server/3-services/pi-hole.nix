@@ -20,7 +20,7 @@
 { config, inputs, ... }:
 {
     # Credentials ------------------------------------------------------------------------------------------------------------------------------
-    #sops.secrets.pihole_env.sopsFile = "${inputs.self}/secrets/2-server.yaml";
+    sops.secrets.pihole_env.sopsFile = "${inputs.self}/secrets/2-server.yaml";
 
     services = {
 
@@ -28,7 +28,12 @@
         pihole-web = {
             enable = true;
             hostName = "127.0.0.1";
-            ports = [ "9018s" ];
+            ports = [ "9018" ];
+        };
+
+        nginx-vhosts.pi-hole = {
+            domain = "pi-hole.heimdall.technet";
+            port = 9018;
         };
 
         # Pi-Hole --------------------------------------------------------------------------------------------------------------------------------
@@ -106,11 +111,6 @@
                         local = "true";
                     };
                 };
-
-                webserver = {
-                    domain = "heimdall.technet";
-                };
-
             };
             stateDirectory = "/Storage/Services/PiHole/state";
             logDirectory = "/Storage/Services/PiHole/logs";
@@ -130,7 +130,7 @@
         piholeHostname = "127.0.0.1";
         piholePort = 9018;
         protocol = "http";
-        apiTokenFile = "/run/secrets/pihole-api-token";
+        #apiTokenFile = "/run/secrets/pihole-api-token";
     };
 
     virtualisation.arion.projects.pihole = {
