@@ -1,33 +1,13 @@
 {
-    virtualisation.arion.projects.trilium = {
-        serviceName = "trilium";
-        settings = {
-            services = {
-                trilium.service = {
-                    image = "triliumnext/trilium:latest";
-                    container_name = "trilium";
-                    restart = "always";
-                    environment = {
-                        "PUID" = "1000";
-                        "PGID" = "1000";
-                        "TZ" = "America/Jamaica";
-                    };
-                    volumes = [
-                        "/Storage/Services/Trilium/data:/home/node/trilium-data"
-                    ];
-                    expose = [
-                        "8081"
-                    ];
-                    networks = [
-                        "nginx-proxy-manager_public"
-                    ];
-                };
-            };
-            networks = {
-                nginx-proxy-manager_public = {
-                    external = true;
-                };
-            };
-        };
+    services.trilium-server = {
+        enable = true;
+        instanceName = "Heimdall";
+        port = 8080;
+        dataDir = "/Storage/Services/Trilium/data";
+    };
+
+    nginx-vhosts.trilium = {
+        domain = "trilium.heimdall.technet";
+        port = 8080;
     };
 }
