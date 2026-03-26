@@ -61,5 +61,10 @@ in
             }
             // svc.extraConfig
         ) cfg;
+
+        services.pihole-ftl.settings.dns.cnameRecords = lib.mapAttrsToList (
+            name: svc: "${svc.domain},heimdall.technet"
+        ) cfg;
+
     };
 }
