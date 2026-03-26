@@ -56,9 +56,6 @@ in
                     proxyPass = "http://127.0.0.1:${toString svc.port}";
                     proxyWebsockets = true;
                     recommendedProxySettings = true;
-                    extraConfig = ''
-                        proxy_set_header Host "${svc.domain}";
-                    '';
 
                 };
             }
