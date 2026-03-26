@@ -10,18 +10,33 @@
 {
     services.prometheus = {
         enable = true;
-        globalConfig.scrape_interval = "10s"; # "1m"
+        globalConfig = {
+            scrape_interval = "60s"; # "1m"
+            scrape_timeout = "30s";
+        };
         scrapeConfigs = [
             {
                 job_name = "heimdall-node";
                 static_configs = [
                     {
-                        targets = [ "localhost:${toString config.services.prometheus.exporters.node.port}" ];
+                        targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.node.port}" ];
+                    }
+                ];
+            }
+            {
+                job_name = "heimdall-pihole";
+                static_configs = [
+                    {
+                        targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.pihole.port}" ];
                     }
                 ];
             }
         ];
 
+    };
+    nginx-vhosts.prometheus = {
+        domain = "prometheus.heimdall.technet";
+        port = 9090;
     };
 
 }
