@@ -7,10 +7,10 @@
 }:
 
 let
-    cfg = config.nginx-vhost;
+    cfg = config.nginx-vhosts;
 in
 {
-    options.myServices = lib.mkOption {
+    options.nginx-vhosts = lib.mkOption {
         type = lib.types.attrsOf (
             lib.types.submodule {
                 options = {
@@ -34,10 +34,17 @@ in
         description = "Managed virtual hosts";
     };
 
-    sops.secrets.https_certificate.sopsFile = "${inputs.self}/secrets/2-server.yaml";
-    sops.secrets.https_certificate_key.sopsFile = "${inputs.self}/secrets/2-server.yaml";
-
     config = lib.mkIf (cfg != { }) {
+        sops.secrets.https_certificate = {
+            sopsFile = "${inputs.self}/secrets/2-server.yaml";
+            owner = "nginx";
+            group = "nginx";
+        };
+        sops.secrets.https_certificate_key = {
+            sopsFile = "${inputs.self}/secrets/2-server.yaml";
+            owner = "nginx";
+            group = "nginx";
+        };
         services.nginx.virtualHosts = lib.mapAttrs (
             name: svc:
             {
