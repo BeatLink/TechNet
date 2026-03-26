@@ -19,13 +19,19 @@
 
 { config, inputs, ... }:
 {
+    # Credentials ------------------------------------------------------------------------------------------------------------------------------
+    #sops.secrets.pihole_env.sopsFile = "${inputs.self}/secrets/2-server.yaml";
 
     services = {
+
+        # Pi-Hole Web ---------------------------------------------------------------------------------------------------------------------------
         pihole-web = {
             enable = true;
-            hostName = "heimdall.technet";
-            ports = [ "82s" ];
+            hostName = "127.0.0.1";
+            ports = [ "9018s" ];
         };
+
+        # Pi-Hole --------------------------------------------------------------------------------------------------------------------------------
         pihole-ftl = {
             enable = true;
             lists = [
@@ -73,12 +79,13 @@
                         "blockurl.heimdall.technet,heimdall.technet"
                         "calibre-web.heimdall.technet,heimdall.technet"
                         "glances.heimdall.technet,heimdall.technet"
-                        "homeassistant.heimdall.technet,heimdall.technet"
+                        "home-assistant.heimdall.technet,heimdall.technet"
                         "openbooks.heimdall.technet,heimdall.technet"
                         "pihole.heimdall.technet,heimdall.technet"
                         "syncthing.heimdall.technet,heimdall.technet"
                         "traccar.heimdall.technet,heimdall.technet"
                         "www.heimdall.technet,heimdall.technet"
+                        "grafana.heimdall.technet,heimdall.technet"
                         "motioneye.heimdall.technet,heimdall.technet"
                         "heimdall,heimdall.technet"
                         "odin,odin.technet"
@@ -115,7 +122,17 @@
         "f /etc/pihole/versions 0644 pihole pihole - -"
     ];
 
-    sops.secrets.pihole_env.sopsFile = "${inputs.self}/secrets/2-server.yaml";
+    # Pi-Hole Prometheus -----------------------------------------------------------------------------------------------------------------------
+    services.prometheus.exporters.pihole = {
+        enable = true;
+        listenAddress = "127.0.0.1";
+        port = 9019;
+        piholeHostname = "127.0.0.1";
+        piholePort = 9018;
+        protocol = "http";
+        apiTokenFile = "/run/secrets/pihole-api-token";
+    };
+
     virtualisation.arion.projects.pihole = {
         serviceName = "pihole2";
         settings = {
@@ -143,7 +160,7 @@
                         "80"
                     ];
                     ports = [
-                        "127.0.0.1:9986:53/tcp"
+                        "127.0.0.1:9998:53/tcp"
                         "127.0.0.1:9986:53/udp"
                         "192.168.0.2:9986:53/tcp"
                         "192.168.0.2:9986:53/udp"
