@@ -5,6 +5,7 @@
 {
     services.grafana = {
         enable = true;
+        dataDir = "/Storage/Services/Grafana/data";
         settings = {
             security.secret_key = "SW2YcwTIb9zpOOhoPsMm";
             server = {
