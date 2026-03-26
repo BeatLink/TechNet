@@ -22,6 +22,11 @@
     # Credentials ------------------------------------------------------------------------------------------------------------------------------
     sops.secrets.pihole_env.sopsFile = "${inputs.self}/secrets/2-server.yaml";
 
+    nginx-vhosts.pi-hole = {
+        domain = "pi-hole.heimdall.technet";
+        port = 9018;
+    };
+
     services = {
 
         # Pi-Hole Web ---------------------------------------------------------------------------------------------------------------------------
@@ -29,11 +34,6 @@
             enable = true;
             hostName = "127.0.0.1";
             ports = [ "9018" ];
-        };
-
-        nginx-vhosts.pi-hole = {
-            domain = "pi-hole.heimdall.technet";
-            port = 9018;
         };
 
         # Pi-Hole --------------------------------------------------------------------------------------------------------------------------------
@@ -81,30 +81,31 @@
                         "10.100.100.20 sensor-bedroom.technet"
                     ];
                     cnameRecords = [
-                        "blockurl.heimdall.technet,heimdall.technet"
-                        "calibre-web.heimdall.technet,heimdall.technet"
-                        "glances.heimdall.technet,heimdall.technet"
-                        "home-assistant.heimdall.technet,heimdall.technet"
-                        "openbooks.heimdall.technet,heimdall.technet"
-                        "pihole.heimdall.technet,heimdall.technet"
-                        "syncthing.heimdall.technet,heimdall.technet"
-                        "traccar.heimdall.technet,heimdall.technet"
-                        "www.heimdall.technet,heimdall.technet"
-                        "grafana.heimdall.technet,heimdall.technet"
-                        "motioneye.heimdall.technet,heimdall.technet"
+                        "ragnarok,ragnarok.technet"
                         "heimdall,heimdall.technet"
                         "odin,odin.technet"
                         "thor,thor.technet"
                         "hela,hela.technet"
-                        "esphome.heimdall.technet,heimdall.technet"
-                        "trilium.heimdall.technet,heimdall.technet"
-                        "uptime-kuma.heimdall.technet,heimdall.technet"
-                        "ragnarok,ragnarok.technet"
-                        "trilium-sysadmin.heimdall.technet,heimdall.technet"
-                        "radicale.heimdall.technet,heimdall.technet"
-                        "freshrss.heimdall.technet,heimdall.technet"
-                        "qbittorrent.heimdall.technet,heimdall.technet"
+                        "blockurl.heimdall.technet,heimdall.technet"
+                        "calibre-web.heimdall.technet,heimdall.technet"
                         "drydock.heimdall.technet,heimdall.technet"
+                        "esphome.heimdall.technet,heimdall.technet"
+                        "freshrss.heimdall.technet,heimdall.technet"
+                        "glances.heimdall.technet,heimdall.technet"
+                        "grafana.heimdall.technet,heimdall.technet"
+                        "home-assistant.heimdall.technet,heimdall.technet"
+                        "homepage.heimdall.technet,heimdall.technet"
+                        "motioneye.heimdall.technet,heimdall.technet"
+                        "openbooks.heimdall.technet,heimdall.technet"
+                        "pi-hole.heimdall.technet,heimdall.technet"
+                        "qbittorrent.heimdall.technet,heimdall.technet"
+                        "radicale.heimdall.technet,heimdall.technet"
+                        "syncthing.heimdall.technet,heimdall.technet"
+                        "traccar.heimdall.technet,heimdall.technet"
+                        "trilium.heimdall.technet,heimdall.technet"
+                        "trilium-sysadmin.heimdall.technet,heimdall.technet"
+                        "uptime-kuma.heimdall.technet,heimdall.technet"
+                        "www.heimdall.technet,heimdall.technet"
                     ];
                     domain = {
                         name = "technet";
@@ -130,7 +131,12 @@
         piholeHostname = "127.0.0.1";
         piholePort = 9018;
         protocol = "http";
-        #apiTokenFile = "/run/secrets/pihole-api-token";
+    };
+
+    systemd.services.prometheus-pihole-exporter = {
+        serviceConfig = {
+            EnvironmentFile = config.sops.secrets.pihole_env.path;
+        };
     };
 
     virtualisation.arion.projects.pihole = {
