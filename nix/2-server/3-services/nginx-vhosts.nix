@@ -49,12 +49,17 @@ in
             name: svc:
             {
                 serverName = svc.domain;
-                forceSSL = true;
+                addSSL = true;
                 sslCertificate = config.sops.secrets."https_certificate".path;
                 sslCertificateKey = config.sops.secrets."https_certificate_key".path;
                 locations."/" = {
-                    proxyPass = "http://localhost:${toString svc.port}";
+                    proxyPass = "http://127.0.0.1:${toString svc.port}";
                     proxyWebsockets = true;
+                    recommendedProxySettings = true;
+                    extraConfig = ''
+                        proxy_set_header Host "${svc.domain}";
+                    '';
+
                 };
             }
             // svc.extraConfig
