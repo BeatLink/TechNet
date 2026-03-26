@@ -16,15 +16,24 @@
         };
         scrapeConfigs = [
             {
-                job_name = "heimdall-node";
+                job_name = "node";
                 static_configs = [
                     {
-                        targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.node.port}" ];
+                        labels.host = "Ragnarok";
+                        targets = [ "ragnarok.technet:${toString config.services.prometheus.exporters.node.port}" ];
+                    }
+                    {
+                        labels.host = "Heimdall";
+                        targets = [ "heimdall.technet:${toString config.services.prometheus.exporters.node.port}" ];
+                    }
+                    {
+                        labels.host = "Odin";
+                        targets = [ "odin.technet:${toString config.services.prometheus.exporters.node.port}" ];
                     }
                 ];
             }
             {
-                job_name = "heimdall-pihole";
+                job_name = "pihole";
                 static_configs = [
                     {
                         targets = [ "127.0.0.1:${toString config.services.prometheus.exporters.pihole.port}" ];
@@ -34,6 +43,8 @@
         ];
 
     };
+    environment.persistence."/Storage/Services/Prometheus".directories = [ "/var/lib/prometheus2" ];
+
     nginx-vhosts.prometheus = {
         domain = "prometheus.heimdall.technet";
         port = 9090;
