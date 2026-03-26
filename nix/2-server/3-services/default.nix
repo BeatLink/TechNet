@@ -18,6 +18,7 @@
         ./homepage.nix
         ./motioneye.nix
         ./nginx-proxy-manager.nix
+        ./nginx-vhosts.nix
         ./nginx.nix
         ./openbooks.nix
         ./pihole.nix
