@@ -1,7 +1,7 @@
 {
     services.nginx = {
         enable = true;
-        defaultHTTPListenPort = 9090;
-        defaultSSLListenPort = 9091;
+        defaultHTTPListenPort = 80;
+        defaultSSLListenPort = 443;
     };
 }

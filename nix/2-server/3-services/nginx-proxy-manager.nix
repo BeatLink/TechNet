@@ -22,9 +22,9 @@
                         "/Storage/Services/Nginx-Proxy-Manager/letsencrypt:/etc/letsencrypt"
                     ];
                     ports = [
-                        "80:80"
-                        "443:443"
-                        "81:81"
+                        "9800:80"
+                        "9801:443"
+                        "9802:81"
                     ];
                     networks = [
                         "public"
