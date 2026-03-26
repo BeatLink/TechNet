@@ -10,11 +10,11 @@
                     image = "beatlink/blockurl:latest";
                     container_name = "blockurl";
                     restart = "always";
-                    volumes = [ 
+                    volumes = [
                         "/Storage/Services/BlockURL/database:/app/database"
                     ];
-                    expose = [
-                        "80" 
+                    ports = [
+                        "9000:80"
                     ];
                     networks = [
                         "nginx-proxy-manager_public"
@@ -27,5 +27,9 @@
                 };
             };
         };
+    };
+    nginx-vhosts.blockurl = {
+        domain = "blockurl.heimdall.technet";
+        port = 9000;
     };
 }
