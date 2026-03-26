@@ -7,5 +7,6 @@
     imports = [
         ./1-ssh.nix
         ./2-device-online.nix
+        ./prometheus.nix
     ];
 }
