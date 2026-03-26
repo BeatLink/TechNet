@@ -14,7 +14,7 @@
                         "/Storage/Services/BlockURL/database:/app/database"
                     ];
                     ports = [
-                        "9000:80"
+                        "9001:80"
                     ];
                     networks = [
                         "nginx-proxy-manager_public"
@@ -30,6 +30,6 @@
     };
     nginx-vhosts.blockurl = {
         domain = "blockurl.heimdall.technet";
-        port = 9000;
+        port = 9001;
     };
 }
