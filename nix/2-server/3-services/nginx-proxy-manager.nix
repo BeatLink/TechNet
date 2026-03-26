@@ -17,7 +17,7 @@
                         "X_FRAME_OPTIONS" = "sameorigin";
                         "ENABLE_DNSMASQ" = "true";
                     };
-                    volumes = [ 
+                    volumes = [
                         "/Storage/Services/Nginx-Proxy-Manager/data:/data"
                         "/Storage/Services/Nginx-Proxy-Manager/letsencrypt:/etc/letsencrypt"
                     ];
