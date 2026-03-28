@@ -1,9 +1,15 @@
 {
     home-manager.users.beatlink =
-        { pkgs, ... }:
+        { inputs, pkgs, ... }:
+        let
+            pkgs-stremio = import inputs.stremio-fix {
+                system = pkgs.system;
+                config.allowUnfree = true;
+            };
+        in
         {
             home = {
-                packages = [ pkgs.stremio-linux-shell ];
+                packages = [ pkgs-stremio.stremio-linux-shell ];
                 persistence."/Storage/Apps/Fun/Stremio" = {
                     directories = [
                         ".cache/Smart Code ltd"
