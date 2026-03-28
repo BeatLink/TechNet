@@ -40,6 +40,27 @@
                     }
                 ];
             }
+
+            {
+                job_name = "esphome";
+                scrape_interval = "300s";
+                scrape_timeout = "60s";
+                static_configs = [
+                    {
+                        targets = [
+                            "light-bedroom-desk.technet"
+                            "light-kitchen.technet"
+                            "light-bathroom.technet"
+                            "light-bedroom.technet"
+                            "light-outside.technet"
+                            "socket-fan.technet"
+                            "socket-ragnarok.technet"
+                            "sensor-bedroom.technet"
+                            "sensor-bathroom.technet"
+                        ];
+                    }
+                ];
+            }
         ];
 
     };
