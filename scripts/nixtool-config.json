@@ -2,9 +2,9 @@
     "flake_path": "/Storage/Files/Projects/TechNet/TechNet", 
     "user": "beatlink",
     "hosts": {
-        "Ragnarok": "ragnarok.technet",
-        "Heimdall": "heimdall.technet",
         "Odin": "odin.technet",
+        "Heimdall": "192.168.0.2",
+        "Ragnarok": "ragnarok.technet",
         "Thor": "thor.technet"
     }
 }
