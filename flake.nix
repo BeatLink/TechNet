@@ -8,6 +8,9 @@
         nixpkgs-stable = {
             url = "github:NixOS/nixpkgs/nixos-25.05";
         };
+        stremio-fix = {
+            url = "github:NixOS/nixpkgs/pull/503035/head";
+        };
         nix-index-database = {
             url = "github:nix-community/nix-index-database";
             inputs.nixpkgs.follows = "nixpkgs";
@@ -61,6 +64,7 @@
             self,
             nixpkgs,
             nixpkgs-stable,
+            stremio-fix,
             nix-index-database,
             disko,
             impermanence,
