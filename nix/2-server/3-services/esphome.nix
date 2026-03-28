@@ -23,8 +23,8 @@
                         #"PASSWORD" = (builtins.readFile config.sops.secrets.esphome_password.path);
                         "ESPHOME_DASHBOARD_USE_PING" = "true";
                     };
-                    expose = [
-                        "80"
+                    ports = [
+                        "6052:6052"
                     ];
                     networks = [
                         "nginx-proxy-manager_public"
@@ -37,5 +37,10 @@
                 };
             };
         };
+    };
+
+    nginx-vhosts.esphome = {
+        domain = "esphome.heimdall.technet";
+        port = 6052;
     };
 }
