@@ -126,6 +126,7 @@ class CommandRunner(Widget):
         }
     """
 
+    can_focus = True
     command_queue = []
     final_returncode = 0
     
@@ -164,6 +165,10 @@ class CommandRunner(Widget):
                     yield self.start_button
 
 
+    def on_focus(self, event: Focus):
+        self.start_button.focus()
+
+
     def load_command_queue(self, command_queue):
         # Clear UI
         self.label.update(f"Ready To Start")
@@ -186,6 +191,7 @@ class CommandRunner(Widget):
     @on(Button.Pressed, "#start")
     def start(self, event: Button.Pressed):
         self.run_command()
+        self.return_button.focus()
 
     @work(exclusive=True)
     async def run_command(self):
@@ -215,7 +221,7 @@ class CommandRunner(Widget):
                 self.logview.write(f"\n>>> Command failed with return code {process.returncode} <<<")
 
         # When process is finished show the end message        
-        if self.final_returncode == 0:
+        if int(self.final_returncode) == 0:
             self.message.update(f"All commands succeeded!")
             self.message.add_class("success")
         else:
