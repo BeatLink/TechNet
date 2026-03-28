@@ -26,8 +26,8 @@
                             "TZ" = "America/Jamaica";
                             "RADICALE_CONFIG" = "/var/lib/radicale/radicale.cfg";
                         };
-                        expose = [
-                            "5232"
+                        ports = [
+                            "5232:5232"
                         ];
                         networks = [
                             "nginx-proxy-manager_public"
@@ -50,5 +50,9 @@
                 };
             };
         };
+    };
+    nginx-vhosts.radicale = {
+        domain = "radicale.heimdall.technet";
+        port = 5232;
     };
 }
