@@ -9,7 +9,7 @@
         ./borg.nix
         ./calibre-web-automated.nix
         ./ddns-updater.nix
-        ./esphome.nix
+        ./esphome
         ./freshrss.nix
         ./gallery-dl.nix
         ./glances.nix

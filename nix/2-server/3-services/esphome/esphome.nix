@@ -7,9 +7,6 @@
 
 let
     inherit (lib)
-        literalExpression
-        maintainers
-        mkEnableOption
         mkIf
         mkOption
         types
@@ -24,70 +21,29 @@ let
             "--address ${cfg.address} --port ${toString cfg.port}";
 in
 {
-    meta.maintainers = with maintainers; [ oddlama ];
 
     options.services.esphome = {
-        enable = mkEnableOption "esphome, for making custom firmwares for ESP32/ESP8266";
+        user = mkOption {
+            type = types.str;
+            default = "esphome";
+            description = "User account under which esphome runs.";
+        };
+
+        group = mkOption {
+            type = types.str;
+            default = "esphome";
+            description = "Group under which esphome runs.";
+        };
 
         stateDir = mkOption {
             type = types.path;
-            default = "/var/lib/esphome/";
+            default = "/var/lib/esphome";
             description = "the folder used to store all esphome data.";
         };
-        
-        package = lib.mkPackageOption pkgs "esphome" { };
 
-        enableUnixSocket = mkOption {
-            type = types.bool;
-            default = false;
-            description = "Listen on a unix socket `/run/esphome/esphome.sock` instead of the TCP port.";
-        };
-
-        address = mkOption {
-            type = types.str;
-            default = "localhost";
-            description = "esphome address";
-        };
-
-        port = mkOption {
-            type = types.port;
-            default = 6052;
-            description = "esphome port";
-        };
-
-        openFirewall = mkOption {
-            default = false;
-            type = types.bool;
-            description = "Whether to open the firewall for the specified port.";
-        };
-
-        allowedDevices = mkOption {
-            default = [
-                "char-ttyS"
-                "char-ttyUSB"
-            ];
-            example = [
-                "/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0"
-            ];
-            description = ''
-                A list of device nodes to which {command}`esphome` has access to.
-                Refer to DeviceAllow in {manpage}`systemd.resource-control(5)` for more information.
-                Beware that if a device is referred to by an absolute path instead of a device category,
-                it will only allow devices that already are plugged in when the service is started.
-            '';
-            type = types.listOf types.str;
-        };
-
-        usePing = mkOption {
-            default = false;
-            type = types.bool;
-            description = "Use ping to check online status of devices instead of mDNS";
-        };
     };
 
     config = mkIf cfg.enable {
-
-        networking.firewall.allowedTCPPorts = mkIf (cfg.openFirewall && !cfg.enableUnixSocket) [ cfg.port ];
 
         users = {
             users = mkIf (cfg.user == "esphome") {
@@ -99,66 +55,25 @@ in
             groups = mkIf (cfg.group == "esphome") { esphome = { }; };
         };
 
-        systemd.services.esphome = {
-            description = "ESPHome dashboard";
-            after = [ "network.target" ];
-            wantedBy = [ "multi-user.target" ];
-            path = [ cfg.package ];
+        systemd.tmpfiles.rules = [
+            "d ${cfg.stateDir} 0750 ${cfg.user} ${cfg.group} -"
+        ];
 
+        systemd.services.esphome = {
             environment = {
                 # platformio fails to determine the home directory when using DynamicUser
-                PLATFORMIO_CORE_DIR = "${cfg.stateDir}/.platformio";
-            }
-            // lib.optionalAttrs cfg.usePing { ESPHOME_DASHBOARD_USE_PING = "true"; };
-
+                PLATFORMIO_CORE_DIR = lib.mkForce "${cfg.stateDir}/.platformio";
+                PYTHONPATH = "${pkgs.esphome}/lib/python3.13/site-packages:${pkgs.python3Packages.makePythonPath pkgs.esphome.dependencies}";
+            };
             serviceConfig = {
-                ExecStart = "${cfg.package}/bin/esphome dashboard ${esphomeParams} ${cfg.stateDir}";
+                ExecStart = lib.mkForce "${cfg.package}/bin/esphome dashboard ${esphomeParams} ${cfg.stateDir}";
                 User = cfg.user;
                 Group = cfg.group;
-                WorkingDirectory = cfg.stateDir;
-                StateDirectory = cfg.stateDir;
-                StateDirectoryMode = "0750";
-                Restart = "on-failure";
-                RuntimeDirectory = mkIf cfg.enableUnixSocket "esphome";
-                RuntimeDirectoryMode = "0750";
+                DynamicUser = lib.mkForce false;
+                WorkingDirectory = lib.mkForce cfg.stateDir;
+                StateDirectory = lib.mkForce "";
+                StateDirectoryMode = lib.mkForce "";
                 ReadWritePaths = [ cfg.stateDir ];
-
-                # Hardening
-                CapabilityBoundingSet = "";
-                LockPersonality = true;
-                MemoryDenyWriteExecute = true;
-                DevicePolicy = "closed";
-                DeviceAllow = map (d: "${d} rw") cfg.allowedDevices;
-                SupplementaryGroups = [ "dialout" ];
-                #NoNewPrivileges = true; # Implied by DynamicUser
-                #PrivateUsers = true;
-                #PrivateTmp = true; # Implied by DynamicUser
-                ProtectClock = true;
-                ProtectControlGroups = true;
-                ProtectHome = true;
-                ProtectHostname = false; # breaks bwrap
-                ProtectKernelLogs = false; # breaks bwrap
-                ProtectKernelModules = true;
-                ProtectKernelTunables = false; # breaks bwrap
-                ProtectProc = "invisible";
-                ProcSubset = "all"; # Using "pid" breaks bwrap
-                ProtectSystem = "strict";
-                #RemoveIPC = true; # Implied by DynamicUser
-                RestrictAddressFamilies = [
-                    "AF_INET"
-                    "AF_INET6"
-                    "AF_NETLINK"
-                    "AF_UNIX"
-                ];
-                RestrictNamespaces = false; # Required by platformio for chroot
-                RestrictRealtime = true;
-                #RestrictSUIDSGID = true; # Implied by DynamicUser
-                SystemCallArchitectures = "native";
-                SystemCallFilter = [
-                    "@system-service"
-                    "@mount" # Required by platformio for chroot
-                ];
-                UMask = "0077";
             };
         };
     };
