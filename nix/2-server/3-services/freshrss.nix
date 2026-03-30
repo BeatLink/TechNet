@@ -40,8 +40,8 @@
                         interval = "75s";
                         retries = 3;
                     };
-                    expose = [
-                        "80"
+                    ports = [
+                        "9060:80"
                     ];
                     networks = [
                         "nginx-proxy-manager_public"
@@ -54,5 +54,9 @@
                 };
             };
         };
+    };
+    nginx-vhosts.freshrss = {
+        domain = "freshrss.heimdall.technet";
+        port = 9060;
     };
 }
