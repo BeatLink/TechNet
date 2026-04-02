@@ -20,5 +20,6 @@
         ./xviewer.nix
         ./fileroller
         ./pix
+        ./timekpr.nix
     ];
 }
