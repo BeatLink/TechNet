@@ -7,30 +7,88 @@
         enable = true;
         dataDir = "/Storage/Services/Loki/data";
         configuration = {
-            server.http_listen_address = "127.0.0.1";
             auth_enabled = false;
-            /*
-              schema_config = {
-                  configs = [
-                      {
-                          from = "2023-01-05";
-                          index = {
-                              period = "24h";
-                              prefix = "index_";
-                          };
-                          object_store = "gcs";
-                          schema = "v13";
-                          store = "tsdb";
-                      }
-                  ];
-              };
-              storage_config = {
-                  tsdb_shipper = {
-                      active_index_directory = "/Storage/Services/Loki/data/tsdb-index";
-                      cache_location = "/Storage/Services/Loki/data/tsdb-cache";
-                  };
-              };
+            server = {
+                http_listen_port = 3100;
+                grpc_listen_port = 9096;
+                log_level = "info";
+            };
 
+            common = {
+                instance_addr = "127.0.0.1";
+                path_prefix = "/Storage/Services/Loki/data";
+                replication_factor = 1;
+                ring.kvstore.store = "inmemory";
+            };
+
+            schema_config = {
+                configs = [
+                    {
+                        from = "2024-01-01";
+                        object_store = "filesystem";
+                        store = "tsdb";
+                        schema = "v13";
+                        index = {
+                            prefix = "index_";
+                            period = "24h";
+                        };
+                    }
+                ];
+            };
+
+            storage_config = {
+                tsdb_shipper = {
+                    active_index_directory = "/Storage/Services/Loki/data/tsdb-index";
+                    cache_location = "/Storage/Services/Loki/data/tsdb-cache";
+                    cache_ttl = "24h";
+                };
+                filesystem = {
+                    directory = "/Storage/Services/Loki/data/chunks";
+                };
+            };
+
+            compactor = {
+                working_directory = "/Storage/Services/Loki/data/compactor";
+                compaction_interval = "10m";
+                retention_enabled = true;
+                retention_delete_delay = "2h";
+                retention_delete_worker_count = 150;
+                delete_request_store = "filesystem";
+            };
+
+            limits_config = {
+                retention_period = "744h"; # 31 days
+                reject_old_samples = true;
+                reject_old_samples_max_age = "168h"; # 7 days
+                ingestion_rate_mb = 16;
+                ingestion_burst_size_mb = 32;
+                per_stream_rate_limit = "3MB";
+                per_stream_rate_limit_burst = "15MB";
+            };
+
+            query_range = {
+                results_cache = {
+                    cache = {
+                        embedded_cache = {
+                            enabled = true;
+                            max_size_mb = 100;
+                        };
+                    };
+                };
+            };
+
+            ruler = {
+                storage = {
+                    type = "local";
+                    local.directory = "/Storage/Services/Loki/data/rules";
+                };
+                rule_path = "/Storage/Services/Loki/data/rules-temp";
+                alertmanager_url = "http://localhost:9093";
+                ring.kvstore.store = "inmemory";
+                enable_api = true;
+            };
+
+            /*
               query_scheduler = {
                   max_outstanding_requests_per_tenant = 32768;
               };
