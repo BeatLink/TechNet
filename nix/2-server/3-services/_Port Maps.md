@@ -1,6 +1,7 @@
 # Port Maps
 
-* BlockURL - 9000
+* Prometheus Node Exporter - 9000
+* BlockURL - 9001
 * Borg - 9001
 * Calibre Web - 9002
 * DDNS Updater - 9003
