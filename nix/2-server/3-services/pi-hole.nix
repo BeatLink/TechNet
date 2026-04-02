@@ -91,7 +91,6 @@
                         "motioneye.heimdall.technet,heimdall.technet"
                         "openbooks.heimdall.technet,heimdall.technet"
                         "syncthing.heimdall.technet,heimdall.technet"
-                        "traccar.heimdall.technet,heimdall.technet"
                         "trilium-sysadmin.heimdall.technet,heimdall.technet"
                     ];
                     domain = {
