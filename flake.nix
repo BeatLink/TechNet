@@ -45,6 +45,7 @@
             url = "github:BeatLink/gmusicbrowser-nix-flake";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        blockurl.url = "github:BeatLink/BlockURL?dir=sync-server";
         trilium-notes = {
             url = "github:BeatLink/Trilium";
             inputs.nixpkgs.follows = "nixpkgs";
@@ -74,6 +75,7 @@
             xdg-autostart,
             gmusicbrowser,
             nixos-plymouth,
+            blockurl,
             mobile-nixos,
             vantage,
             ...
@@ -105,6 +107,7 @@
                         sops-nix.nixosModules.sops
                         home-manager.nixosModules.home-manager
                         arion.nixosModules.arion
+                        blockurl.nixosModules.blockurl
                         ./nix/0-common
                         ./nix/2-server
                     ];
