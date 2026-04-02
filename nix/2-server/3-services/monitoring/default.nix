@@ -1,7 +1,8 @@
 {
     imports = [
+        #./alloy.nix
         ./grafana.nix
-        #./loki.nix
+        ./loki.nix
         ./prometheus.nix
     ];
 }
