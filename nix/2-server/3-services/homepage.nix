@@ -1,38 +1,4 @@
 {
-
-    services.homepage-dashboard = {
-        enable = true;
-        allowedHosts = "homepage.heimdall.technet,127.0.0.1:9011";
-        listenPort = 9011;
-        bookmarks = [
-            {
-                Social = [
-                    {
-                        Reddit = [
-                            {
-                                abbr = "RE";
-                                href = "https://reddit.com/";
-                            }
-                        ];
-                    }
-                ];
-            }
-            {
-                Entertainment = [
-                    {
-                        YouTube = [
-                            {
-                                abbr = "YT";
-                                href = "https://youtube.com/";
-                            }
-                        ];
-
-                    }
-                ];
-            }
-        ];
-    };
-
     nginx-vhosts.homepage = {
         domain = "homepage.heimdall.technet";
         port = 9011;
@@ -49,8 +15,8 @@
                         "/Storage/Services/Homepage/config:/app/config"
                         "/var/run/docker.sock:/var/run/docker.sock"
                     ];
-                    expose = [
-                        "3000"
+                    ports = [
+                        "9011:3000"
                     ];
                     networks = [
                         "nginx-proxy-manager_public"
@@ -59,7 +25,7 @@
                         "host.docker.internal:host-gateway"
                     ];
                     environment = {
-                        "HOMEPAGE_ALLOWED_HOSTS" = "www.heimdall.technet,heimdall.technet";
+                        "HOMEPAGE_ALLOWED_HOSTS" = "www.heimdall.technet,heimdall.technet,homepage.heimdall.technet";
                     };
                 };
             };
