@@ -16,23 +16,6 @@
         };
         scrapeConfigs = [
             {
-                job_name = "node";
-                static_configs = [
-                    {
-                        labels.hostname = "Ragnarok";
-                        targets = [ "ragnarok.technet:${toString config.services.prometheus.exporters.node.port}" ];
-                    }
-                    {
-                        labels.hostname = "Heimdall";
-                        targets = [ "heimdall.technet:${toString config.services.prometheus.exporters.node.port}" ];
-                    }
-                    {
-                        labels.hostname = "Odin";
-                        targets = [ "odin.technet:${toString config.services.prometheus.exporters.node.port}" ];
-                    }
-                ];
-            }
-            {
                 job_name = "pihole";
                 static_configs = [
                     {
