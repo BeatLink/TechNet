@@ -23,7 +23,16 @@
             // ----------------------------------------------------------------
 
             prometheus.exporter.unix "node" {
-              // Expose standard host metrics (CPU, memory, disk, network)
+                // Expose standard host metrics (CPU, memory, disk, network)
+                enable_collectors = [
+                    "ethtool",
+                    "softirqs",
+                    "systemd",
+                    "tcpstat",
+                    "wifi",
+                    "zfs",
+                ]
+                disable_collectors = ["mdadm"]
             }
 
             prometheus.scrape "node" {
@@ -47,20 +56,15 @@
             // Ship metrics to Prometheus (or Mimir) via remote_write
             prometheus.remote_write "mimir" {
               endpoint {
-                url = "http://heimdall.technet:9090/api/v1/write"
-
-                // Uncomment and set if your Prometheus requires auth:
-                // basic_auth {
-                //   username = "alloy"
-                //   password = env("PROMETHEUS_PASSWORD")
-                // }
+                url = "http://prometheus.heimdall.technet/api/v1/write"
+                queue_config {
+                    capacity = 10000
+                    max_samples_per_send = 2000
+                    batch_send_deadline = "5s"
+                }
               }
 
-              queue_config {
-                capacity             = 10000
-                max_samples_per_send = 2000
-                batch_send_deadline  = "5s"
-              }
+
             }
 
             // ----------------------------------------------------------------
@@ -201,29 +205,5 @@
 
     # Open ports if Alloy receives OTLP from remote services
     # networking.firewall.allowedTCPPorts = [ 4317 4318 12345 ];
-
-    services.prometheus.exporters.node = {
-        enable = true;
-        port = 9000;
-        # For the list of available collectors, run, depending on your install:
-        # - Flake-based: nix run
-        # - Classic: nix-shell -p prometheus-node-exporter --run "node_exporter --help"
-        enabledCollectors = [
-            "ethtool"
-            "softirqs"
-            "systemd"
-            "tcpstat"
-            "wifi"
-            "zfs"
-        ];
-        # You can pass extra options to the exporter using `extraFlags`, e.g.
-        # to configure collectors or disable those enabled by default.
-        # Enabling a collector is also possible using "--collector.[name]",
-        # but is otherwise equivalent to using `enabledCollectors` above.
-        extraFlags = [
-            "--collector.ntp.protocol-version=4"
-            "--no-collector.mdadm"
-        ];
-    };
 
 }
