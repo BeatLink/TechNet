@@ -5,66 +5,79 @@
 
 {
     services.home-assistant = {
-        # opt-out from declarative configuration management
+        enable = true;
         config = null;
         lovelaceConfig = null;
-        # configure the path to your config directory
-        configDir = "/etc/home-assistant";
-        # specify list of components required by your configuration
+        configDir = "/Storage/Services/Home-Assistant/config";
         extraComponents = [
             "esphome"
             "met"
             "radio_browser"
+            "ssdp"
+            "stream"
+            "mobile_app"
+            "dhcp"
+            "go2rtc"
+            "open_meteo"
+            "vlc_telnet"
+            "uptime_kuma"
+            "motioneye"
+            "traccar"
         ];
     };
 
-    virtualisation.arion.projects.home-assistant = {
-        serviceName = "home-assistant";
-        settings = {
-            services = {
-                home-assistant.service = {
-                    image = "ghcr.io/home-assistant/home-assistant:stable";
-                    container_name = "home-assistant";
-                    restart = "always";
-                    volumes = [
-                        "/Storage/Services/Homeassistant/config:/config"
-                        "/Storage/Services/Homeassistant/media:/media"
-                        "/Storage/Files/Music:/music"
-                        "/Storage/Files/Sounds:/sounds"
-                    ];
-                    environment = {
-                        "TZ" = "America/Jamaica";
-                    };
-                    expose = [
-                    ];
-                    networks = [
-                        "nginx-proxy-manager_public"
-                    ];
-                    ports = [
-                        "8124:8123"
-                        "9171:9170"
-                        "1901:1900"
-                        "5354:5353"
-                    ];
-                    extra_hosts = [
-                        "host.docker.internal:host-gateway"
-                    ];
-                };
-            };
-            networks = {
-                nginx-proxy-manager_public = {
-                    external = true;
-                };
-            };
-        };
-    };
-    nginx-vhosts.home-assistant-new = {
-        domain = "home-assistant-new.heimdall.technet";
-        port = 8123;
-    };
+    /*
+      virtualisation.arion.projects.home-assistant = {
+          serviceName = "home-assistant-old";
+          settings = {
+              services = {
+                  home-assistant.service = {
+                      image = "ghcr.io/home-assistant/home-assistant:stable";
+                      container_name = "home-assistant-old";
+                      restart = "always";
+                      volumes = [
+                          "/Storage/Services/Homeassistant/config:/config"
+                          "/Storage/Services/Homeassistant/media:/media"
+                          "/Storage/Files/Music:/music"
+                          "/Storage/Files/Sounds:/sounds"
+                      ];
+                      environment = {
+                          "TZ" = "America/Jamaica";
+                      };
+                      expose = [
+                      ];
+                      networks = [
+                          "nginx-proxy-manager_public"
+                      ];
+                      ports = [
+                          "8124:8123"
+                          "9171:9170"
+                          "1901:1900"
+                          "5354:5353"
+                      ];
+                      extra_hosts = [
+                          "host.docker.internal:host-gateway"
+                      ];
+                  };
+              };
+              networks = {
+                  nginx-proxy-manager_public = {
+                      external = true;
+                  };
+              };
+          };
+      };
+    */
 
     nginx-vhosts.home-assistant = {
         domain = "home-assistant.heimdall.technet";
-        port = 8124;
+        port = 8123;
     };
+
+    /*
+      nginx-vhosts.home-assistant = {
+          domain = "home-assistant.heimdall.technet";
+          port = 8124;
+      };
+    */
 }
