@@ -4,6 +4,20 @@
 #
 
 {
+    services.home-assistant = {
+        # opt-out from declarative configuration management
+        config = null;
+        lovelaceConfig = null;
+        # configure the path to your config directory
+        configDir = "/etc/home-assistant";
+        # specify list of components required by your configuration
+        extraComponents = [
+            "esphome"
+            "met"
+            "radio_browser"
+        ];
+    };
+
     virtualisation.arion.projects.home-assistant = {
         serviceName = "home-assistant";
         settings = {
@@ -27,10 +41,10 @@
                         "nginx-proxy-manager_public"
                     ];
                     ports = [
-                        "8123:8123"
-                        "9170:9170"
-                        "1900:1900"
-                        "5353:5353"
+                        "8124:8123"
+                        "9171:9170"
+                        "1901:1900"
+                        "5354:5353"
                     ];
                     extra_hosts = [
                         "host.docker.internal:host-gateway"
@@ -44,8 +58,13 @@
             };
         };
     };
+    nginx-vhosts.home-assistant-new = {
+        domain = "home-assistant-new.heimdall.technet";
+        port = 8123;
+    };
+
     nginx-vhosts.home-assistant = {
         domain = "home-assistant.heimdall.technet";
-        port = 8123;
+        port = 8124;
     };
 }
