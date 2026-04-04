@@ -29,11 +29,11 @@
       },
       "locked": {
         "dir": "sync-server",
-        "lastModified": 1775076573,
-        "narHash": "sha256-y8bULbKf9jQ7MGXxwoSbD9DwhsfFOlM5V+ey1JuqBMA=",
+        "lastModified": 1775231375,
+        "narHash": "sha256-nEkhAgD6F3JWMgBY+UAuUjrEN0ZQEkIHrOYG/y2AZzI=",
         "owner": "BeatLink",
         "repo": "BlockURL",
-        "rev": "ce909cf346b763206b2a54df311236da6a8576d5",
+        "rev": "0b24e39d211705b7c9b3923af2e6f1d1f90bdd44",
         "type": "github"
       },
       "original": {
@@ -163,11 +163,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1775143651,
-        "narHash": "sha256-S0RqAyDPMTcv9vASMaE8eY1QexFysAOdnxUxFHIPOyE=",
+        "lastModified": 1775268934,
+        "narHash": "sha256-Sa5tW5kYPJornQEkFVD43F/0d4/WP+/GLTNktTFe2qU=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "d166a078541982a76f14d3e06e9665fa5c9ed85e",
+        "rev": "9dc93220c1c9a410ef6277d6dc55c571d9e592d0",
         "type": "github"
       },
       "original": {
