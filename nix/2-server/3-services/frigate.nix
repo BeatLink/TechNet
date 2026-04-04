@@ -103,6 +103,8 @@
         };
     };
 
-    # Open Frigate web UI port on local network
-    networking.firewall.allowedTCPPorts = [ 5000 ];
+    nginx-vhosts.frigate = {
+        domain = "frigate.heimdall.technet";
+        port = 8124;
+    };
 }
