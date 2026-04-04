@@ -195,6 +195,7 @@ class CommandRunner(Widget):
 
     @work(exclusive=True)
     async def run_command(self):
+        self.final_returncode = 0
         self.start_button.add_class("invisible")
         self.message.remove_class("invisible")
         for index, command in enumerate(self.command_queue):
@@ -214,8 +215,8 @@ class CommandRunner(Widget):
                     break
                 self.logview.write(line.decode().rstrip())
             await process.wait()
-            self.final_returncode += process.returncode
-            if process.returncode == 0:
+            self.final_returncode += int(process.returncode)
+            if int(process.returncode) == 0:
                 self.logview.write(f"\n>>> Command succeeded with return code {process.returncode} <<")
             else:
                 self.logview.write(f"\n>>> Command failed with return code {process.returncode} <<<")
