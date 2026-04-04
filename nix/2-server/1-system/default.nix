@@ -12,5 +12,6 @@
         ./10-sound.nix
         ./13-clevis.nix
         ./14-device-online.nix
+        ./display.nix
     ];
 }
