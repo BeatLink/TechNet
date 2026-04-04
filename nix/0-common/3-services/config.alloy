@@ -149,9 +149,9 @@ loki.process "add_labels" {
 loki.write "heimdall" {
     endpoint {
         url = "http://heimdall.technet:3100/loki/api/v1/push"
-        external_labels = {
-            collector = "alloy",
-        }
+    }
+    external_labels = {
+        collector = "alloy",
     }
 }
 
