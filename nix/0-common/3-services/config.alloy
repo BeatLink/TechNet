@@ -39,6 +39,13 @@ prometheus.scrape "local_services" {
     scrape_interval = "60s"
 }
 
+prometheus.scrape "processes" {
+    targets         = prometheus.exporter.process.processes.targets
+    forward_to      = [prometheus.remote_write.heimdall.receiver]
+    scrape_interval = "60s"
+    scrape_timeout  = "10s"
+}
+
 prometheus.scrape "alloy_self" {
     // Alloy self-monitoring — expose its own metrics to Prometheus
     targets    = [{ "__address__" = "localhost:12345" }]
