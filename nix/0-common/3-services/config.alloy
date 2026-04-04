@@ -130,7 +130,7 @@ loki.process "add_labels" {
     }
     stage.match {
         // Parse log lines that look like JSON
-        selector = "{}"
+        selector = "{transport=\"stdout\"}"
         stage.json {
             expressions = {
                 level   = "level",
