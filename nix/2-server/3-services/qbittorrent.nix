@@ -12,12 +12,8 @@
         torrentingPort = 6881;
     };
     networking.firewall = {
-        allowedTCPPorts = [
-            6881
-        ];
-        allowedUDPPorts = [
-            6881
-        ];
+        allowedTCPPorts = [ 6881 ];
+        allowedUDPPorts = [ 6881 ];
     };
     nginx-vhosts.qbittorrent = {
         domain = "qbittorrent.heimdall.technet";
