@@ -12,9 +12,7 @@
         ./esphome
         ./freshrss.nix
         ./gallery-dl.nix
-        ./glances.nix
         ./home-assistant.nix
-        ./homepage.nix
         ./motioneye.nix
         ./nginx-proxy-manager.nix
         ./nginx-vhosts.nix
