@@ -87,7 +87,6 @@
                         "thor,thor.technet"
                         "hela,hela.technet"
                         "calibre-web.heimdall.technet,heimdall.technet"
-                        "drydock.heimdall.technet,heimdall.technet"
                         "motioneye.heimdall.technet,heimdall.technet"
                         "openbooks.heimdall.technet,heimdall.technet"
                         "syncthing.heimdall.technet,heimdall.technet"
