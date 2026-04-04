@@ -102,22 +102,22 @@
             stateDirectory = "/Storage/Services/PiHole/state";
             logDirectory = "/Storage/Services/PiHole/logs";
         };
+
+        # Pi-Hole Prometheus -----------------------------------------------------------------------------------------------------------------------
+        prometheus.exporters.pihole = {
+            enable = true;
+            listenAddress = "127.0.0.1";
+            port = 9019;
+            piholeHostname = "127.0.0.1";
+            piholePort = 9018;
+            protocol = "http";
+        };
     };
 
     systemd.tmpfiles.rules = [
         # Type Path Mode User Group Age Argument
         "f /etc/pihole/versions 0644 pihole pihole - -"
     ];
-
-    # Pi-Hole Prometheus -----------------------------------------------------------------------------------------------------------------------
-    services.prometheus.exporters.pihole = {
-        enable = true;
-        listenAddress = "127.0.0.1";
-        port = 9019;
-        piholeHostname = "127.0.0.1";
-        piholePort = 9018;
-        protocol = "http";
-    };
 
     systemd.services.prometheus-pihole-exporter = {
         serviceConfig = {
