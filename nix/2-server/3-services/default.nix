@@ -11,9 +11,9 @@
         ./ddns-updater.nix
         ./esphome
         ./freshrss.nix
+        ./frigate.nix
         ./gallery-dl.nix
         ./home-assistant.nix
-        ./motioneye.nix
         ./nginx-proxy-manager.nix
         ./nginx-vhosts.nix
         ./nginx.nix
