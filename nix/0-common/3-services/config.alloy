@@ -1,0 +1,151 @@
+// ----------------------------------------------------------------
+// Prometheus metrics — scrape local node_exporter and ship to Loki
+// ----------------------------------------------------------------
+
+// Expose standard host metrics (CPU, memory, disk, network)
+prometheus.exporter.unix "node" {
+    enable_collectors = [
+        "ethtool",
+        "softirqs",
+        "systemd",
+        "tcpstat",
+        "wifi",
+        "zfs",
+    ]
+    disable_collectors = ["mdadm"]
+}
+
+prometheus.exporter.process "processes" {
+    matcher {
+        name = "{{.Comm}}"
+        cmdline = [".+"]
+    }
+}
+
+prometheus.scrape "node" {
+    targets    = prometheus.exporter.unix.node.targets
+    forward_to = [prometheus.remote_write.heimdall.receiver]
+    scrape_interval = "60s"
+    scrape_timeout  = "10s"
+}
+
+prometheus.scrape "local_services" {
+    // Scrape any local Prometheus-compatible services
+    targets = [
+        { "__address__" = "localhost:3100", "job" = "loki"       },
+        { "__address__" = "localhost:9093", "job" = "alertmanager" },
+    ]
+    forward_to      = [prometheus.remote_write.heimdall.receiver]
+    scrape_interval = "60s"
+}
+
+prometheus.scrape "alloy_self" {
+    // Alloy self-monitoring — expose its own metrics to Prometheus
+    targets    = [{ "__address__" = "localhost:12345" }]
+    forward_to = [prometheus.remote_write.heimdall.receiver]
+    job_name   = "alloy"
+}
+
+prometheus.remote_write "heimdall" {
+    // Ship metrics to Prometheus (or heimdall) via remote_write
+    endpoint {
+        url = "http://prometheus.heimdall.technet/api/v1/write"
+        queue_config {
+            capacity = 10000
+            max_samples_per_send = 2000
+            batch_send_deadline = "5s"
+        }
+    }
+}
+
+// ----------------------------------------------------------------
+// Log collection — tail systemd journal and ship to Loki
+// ----------------------------------------------------------------
+
+local.file_match "extra_logs" {
+    // Tail additional log files (e.g. nginx, custom apps)
+    path_targets = [
+        { "__path__" = "/var/log/nginx/*.log", "job" = "nginx" },
+        { "__path__" = "/var/log/myapp/*.log", "job" = "myapp" },
+    ]
+    sync_period = "10s"
+}
+
+loki.source.file "extra_logs" {
+    targets    = local.file_match.extra_logs.targets
+    forward_to = [loki.process.add_labels.receiver]
+}
+
+loki.source.journal "systemd" {
+    max_age       = "12h"
+    forward_to    = [loki.process.add_labels.receiver]
+    relabel_rules = loki.relabel.journal.rules
+}
+
+loki.relabel "journal" {
+    // Relabel systemd journal fields into useful Loki labels
+    forward_to = []
+    rule {
+        source_labels = ["__journal__systemd_unit"]
+        target_label  = "unit"
+    }
+    rule {
+        source_labels = ["__journal__hostname"]
+        target_label  = "host"
+    }
+    rule {
+        source_labels = ["__journal_priority_keyword"]
+        target_label  = "level"
+    }
+    rule {
+        source_labels = ["__journal_priority"]
+        target_label  = "level_number"
+    }
+    rule {
+        source_labels = ["__journal__transport"]
+        target_label  = "transport"
+    }
+}
+
+loki.process "add_labels" {
+    // Add static labels and drop noisy low-value log lines
+    forward_to = [loki.write.heimdall.receiver]
+    stage.static_labels {
+        values = {
+            env  = "production",
+            node = env("HOSTNAME"),
+        }
+    }
+    stage.match {
+        // Drop debug-level logs to reduce volume
+        selector = "{level=\"debug\"}"
+        action   = "drop"
+    }
+    stage.match {
+        // Parse log lines that look like JSON
+        selector = "{}"
+        stage.json {
+            expressions = {
+                level   = "level",
+                message = "msg",
+            }
+        }
+        stage.labels {
+            values = {
+                level = "",
+            }
+        }
+    }
+}
+
+// Write logs to local Loki instance
+loki.write "heimdall" {
+    endpoint {
+        url = "http://heimdall.technet:3100/loki/api/v1/push"
+        external_labels = {
+            collector = "alloy",
+        }
+    }
+}
+
+
