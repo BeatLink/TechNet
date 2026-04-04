@@ -16,11 +16,11 @@
 
         systemd.services = {
             "zfs-import-root-pool-${config.networking.hostName}".preStart = ''
-                /bin/sleep 30
+                /bin/sleep 10
             '';
 
             "zfs-import-data-pool-${config.networking.hostName}".preStart = ''
-                /bin/sleep 30
+                /bin/sleep 10
             '';
         };
     };
