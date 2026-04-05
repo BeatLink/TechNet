@@ -16,19 +16,21 @@
     };
 
     # Make sure iGPU drivers are available for VAAPI decode
-    hardware.opengl = {
+    hardware.graphics = {
         enable = true;
         extraPackages = with pkgs; [
             intel-media-driver
-            vaapiIntel
-            vaapiVdpau
+            intel-vaapi-driver
+            libva-vdpau-driver
             libvdpau-va-gl
         ];
     };
 
     services.frigate = {
         enable = true;
+        hostname = "frigate.heimdall.technet";
         settings = {
+            database.path = "/Storage/Services/Frigate/data/frigate.db";
             mqtt.enabled = false;
             detectors.cpu1 = {
                 type = "cpu";
@@ -103,8 +105,12 @@
         };
     };
 
-    nginx-vhosts.frigate = {
+    systemd.tmpfiles.rules = [
+        "d /Storage/Services/Frigate/data 0750 frigate frigate -"
+    ];
+
+    /*nginx-vhosts.frigateweb = {
         domain = "frigate.heimdall.technet";
-        port = 8124;
-    };
+        port = 5000;
+    };*/
 }
