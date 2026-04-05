@@ -6,6 +6,7 @@
                 port = "9280";
                 url = "traccar.heimdall.technet";
             };
+            protocols.enable = "";
         };
     };
     environment.persistence."/Storage/Services/Traccar".directories = [ "/var/lib/private/traccar" ];
