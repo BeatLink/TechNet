@@ -28,7 +28,7 @@
 
     services.frigate = {
         enable = true;
-        hostname = "frigate.heimdall.technet";
+        hostname = "frigate";
         settings = {
             database.path = "/Storage/Services/Frigate/data/frigate.db";
             mqtt.enabled = false;
@@ -109,8 +109,14 @@
         "d /Storage/Services/Frigate/data 0750 frigate frigate -"
     ];
 
-    /*nginx-vhosts.frigateweb = {
+    services.nginx.virtualHosts.frigate.listen = [
+        {
+            addr = "127.0.0.1";
+            port = 9310;
+        }
+    ];
+    nginx-vhosts."frigate-web" = {
         domain = "frigate.heimdall.technet";
-        port = 5000;
-    };*/
+        port = 9310;
+    };
 }
