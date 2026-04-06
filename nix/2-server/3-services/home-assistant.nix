@@ -32,7 +32,6 @@
                     "--deselect=tests/test_integration_services.py::test_review_summarize_service_no_integration"
                 ];
             }))
-            mqtt
 
         ];
         customLovelaceModules = with pkgs.home-assistant-custom-lovelace-modules; [
