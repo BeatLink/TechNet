@@ -3,6 +3,7 @@
 # Home Assistant is the home automation server. It manages lighting and energy management, safety and security.
 #
 
+{ pkgs, ... }:
 {
     services.home-assistant = {
         enable = true;
@@ -24,6 +25,24 @@
             "motioneye"
             "traccar"
         ];
+        customComponents = with pkgs.home-assistant-custom-components; [
+            (pkgs.home-assistant-custom-components.frigate.overrideAttrs (old: {
+                pytestFlagsArray = (old.pytestFlagsArray or [ ]) ++ [
+                    "--deselect=tests/test_integration_services.py::test_review_summarize_service_version_check"
+                    "--deselect=tests/test_integration_services.py::test_review_summarize_service_no_integration"
+                ];
+            }))
+            mqtt
+
+        ];
+        customLovelaceModules = with pkgs.home-assistant-custom-lovelace-modules; [
+            mushroom
+            horizon-card
+            advanced-camera-card
+            mini-graph-card
+            mini-media-player
+        ];
+
     };
 
     /*
