@@ -7,6 +7,7 @@
         gst_all_1.gst-libav
         ffmpegthumbnailer # Core video thumbnailer
         ffmpeg # Needed to decode most video formats
+        ffmpeg-full
     ];
     home-manager.users.beatlink = {
         home = {
