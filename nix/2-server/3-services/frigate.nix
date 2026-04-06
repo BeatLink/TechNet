@@ -1,5 +1,17 @@
-{ lib, pkgs, ... }:
 {
+    inputs,
+    lib,
+    pkgs,
+    config,
+    ...
+}:
+{
+    sops.secrets."frigate_env" = {
+        sopsFile = "${inputs.self}/secrets/2-server.yaml";
+        owner = "frigate";
+        group = "frigate";
+    };
+
     services = {
         go2rtc = {
             enable = true;
@@ -103,6 +115,7 @@
         frigate = {
             path = [ pkgs.ffmpeg-full ];
             serviceConfig = {
+                EnvironmentFile = config.sops.secrets."frigate_env".path;
                 AmbientCapabilities = "CAP_PERFMON";
                 SupplementaryGroups = [
                     "video"

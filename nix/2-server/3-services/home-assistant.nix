@@ -19,6 +19,7 @@
             "mobile_app"
             "dhcp"
             "go2rtc"
+            "mqtt"
             "open_meteo"
             "vlc_telnet"
             "uptime_kuma"
