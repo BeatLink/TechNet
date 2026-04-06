@@ -1,120 +1,138 @@
-# frigate.nix - import this in your configuration.nix
-# Add to imports: [ ./frigate.nix ]
-
-{ pkgs, ... }:
-
+{ lib, pkgs, ... }:
 {
-    # Fix for frigate using ffmpeg-headless which is missing some filters
-    systemd.services.frigate.path = [ pkgs.ffmpeg-full ];
-
-    # Give frigate access to the camera and GPU
-    systemd.services.frigate.serviceConfig = {
-        SupplementaryGroups = [
-            "video"
-            "render"
-        ];
-    };
-
-    # Make sure iGPU drivers are available for VAAPI decode
-    hardware.graphics = {
-        enable = true;
-        extraPackages = with pkgs; [
-            intel-media-driver
-            intel-vaapi-driver
-            libva-vdpau-driver
-            libvdpau-va-gl
-        ];
-    };
-
-    services.frigate = {
-        enable = true;
-        hostname = "frigate";
-        settings = {
-            database.path = "/Storage/Services/Frigate/data/frigate.db";
-            mqtt.enabled = false;
-            detectors.cpu1 = {
-                type = "cpu";
-                num_threads = 3;
-            };
-            ffmpeg.hwaccel_args = "preset-vaapi";
-            record = {
-                enabled = true;
-                retain = {
-                    days = 0;
-                    mode = "motion";
+    services = {
+        go2rtc = {
+            enable = true;
+            settings = {
+                api.listen = ":1984";
+                ffmpeg.bin = lib.getExe pkgs.ffmpeg-full;
+                log = {
+                    level = "trace";
                 };
-                events = {
-                    pre_capture = 5;
-                    post_capture = 10;
+                streams = {
+                    webcam = "exec:${pkgs.ffmpeg}/bin/ffmpeg -f v4l2 -input_format mjpeg -video_size 1280x720 -framerate 30 -i /dev/video0 -c:v libx264 -preset ultrafast -tune zerolatency -pix_fmt yuv420p -an -f rtsp {output}";
+                };
+            };
+        };
+        frigate = {
+            enable = true;
+            hostname = "frigate";
+            checkConfig = false;
+            settings = {
+                database.path = "/Storage/Services/Frigate/data/frigate.db";
+                mqtt.enabled = false;
+                detectors.ov = {
+                    type = "openvino";
+                    device = "GPU";
+                };
+                model = {
+                    width = "300";
+                    height = "300";
+                    input_tensor = "nhwc";
+                    input_pixel_format = "bgr";
+                    path = "/Storage/Services/Frigate/ssdlite_mobilenet_v2.xml";
+                    labelmap_path = "/Storage/Services/Frigate/coco_91cl_bkgr.txt";
+                };
+                record = {
+                    enabled = true;
                     retain = {
-                        default = 14;
-                        mode = "active_objects";
-                        objects.person = 14;
+                        days = 0;
+                        mode = "motion";
+                    };
+                    events = {
+                        pre_capture = 5;
+                        post_capture = 10;
+                        retain = {
+                            default = 14;
+                            mode = "active_objects";
+                            objects.person = 14;
+                        };
                     };
                 };
-            };
-            motion = {
-                threshold = 25;
-                contour_area = 10;
-                improve_contrast = true;
-            };
-            objects = {
-                track = [ "person" ];
-                filters.person.min_score = 0.6;
-            };
-            cameras.apartment = {
-                ffmpeg = {
-                    inputs = [
-                        {
-                            path = "/dev/video0";
-                            roles = [
-                                "detect"
-                                "record"
-                            ];
-                        }
-                    ];
-                    input_args = [
-                        "-f"
-                        "v4l2"
-                        "-input_format"
-                        "mjpeg"
-                        "-video_size"
-                        "1280x720"
-                        "-framerate"
-                        "30"
-                    ];
+                motion = {
+                    threshold = 25;
+                    contour_area = 100;
+                    improve_contrast = true;
                 };
-                detect = {
-                    enabled = true;
-                    width = 1280;
-                    height = 720;
-                    fps = 5;
+                objects = {
+                    track = [ "person" ];
+                    filters.person.min_score = 0.6;
                 };
-                record.enabled = true;
-                snapshots = {
-                    enabled = true;
-                    timestamp = true;
-                    bounding_box = true;
-                    retain.default = 14;
-                };
+                cameras.apartment = {
+                    ffmpeg = {
+                        inputs = [
+                            {
+                                path = "rtsp://127.0.0.1:8554/webcam";
+                                roles = [
+                                    "detect"
+                                    "record"
+                                ];
+                            }
+                        ];
+                    };
+                    detect = {
+                        enabled = true;
+                        width = 1280;
+                        height = 720;
+                        fps = 5;
+                    };
+                    record.enabled = true;
+                    snapshots = {
+                        enabled = true;
+                        timestamp = true;
+                        bounding_box = true;
+                        retain.default = 14;
+                    };
 
-                # Optional — mask out areas that cause false triggers
-                # e.g. a window with moving trees or a flickering light
-                # motion.mask = [ "0,0,1280,150" ];  # Mask top strip of frame
+                    # Optional — mask out areas that cause false triggers
+                    # e.g. a window with moving trees or a flickering light
+                    # motion.mask = [ "0,0,1280,150" ];  # Mask top strip of frame
+                };
             };
+        };
+        nginx.virtualHosts.frigate.listen = [
+            {
+                addr = "127.0.0.1";
+                port = 9310;
+            }
+        ];
+    };
+
+    # Fix for frigate using ffmpeg-headless which is missing some filters
+    systemd.services = {
+        frigate = {
+            path = [ pkgs.ffmpeg-full ];
+            serviceConfig = {
+                AmbientCapabilities = "CAP_PERFMON";
+                SupplementaryGroups = [
+                    "video"
+                    "render"
+                ];
+            };
+        };
+        go2rtc.serviceConfig = {
+            DynamicUser = lib.mkForce false;
+            User = "go2rtc";
+            Group = "go2rtc";
+
         };
     };
 
-    systemd.tmpfiles.rules = [
-        "d /Storage/Services/Frigate/data 0750 frigate frigate -"
-    ];
+    # Grant the video group to the wrapper
 
-    services.nginx.virtualHosts.frigate.listen = [
-        {
-            addr = "127.0.0.1";
-            port = 9310;
-        }
-    ];
+    users = {
+        users.go2rtc = {
+            isSystemUser = true;
+            group = "go2rtc";
+            extraGroups = [
+                "video"
+                "render"
+            ];
+        };
+        groups.go2rtc = { };
+    };
+    environment.persistence."/Storage/Services/Frigate".directories = [ "/var/lib/frigate" ];
+
     nginx-vhosts."frigate-web" = {
         domain = "frigate.heimdall.technet";
         port = 9310;
