@@ -14,6 +14,7 @@
         ./frigate.nix
         ./gallery-dl.nix
         ./home-assistant.nix
+        ./mosquitto.nix
         ./nginx-proxy-manager.nix
         ./nginx-vhosts.nix
         ./nginx.nix
