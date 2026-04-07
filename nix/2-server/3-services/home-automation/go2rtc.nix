@@ -32,4 +32,9 @@
         };
         groups.go2rtc = { };
     };
+
+    nginx-vhosts."go2rtc" = {
+        domain = "go2rtc.heimdall.technet";
+        port = 1984;
+    };
 }
