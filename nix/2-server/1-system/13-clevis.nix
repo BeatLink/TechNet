@@ -1,7 +1,7 @@
 { config, inputs, ... }:
 {
     sops.secrets.clevis_key = {
-        sopsFile = "${inputs.self}/secrets/2-server.yaml";
+        sopsFile = "${inputs.self}/secrets/2-server/clevis.yaml";
     };
 
     boot.initrd = {
