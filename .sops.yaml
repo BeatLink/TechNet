@@ -33,22 +33,22 @@ creation_rules:
           - age:
                 - *user_beatlink
                 - *host_thor
-    - path_regex: secrets/hosts/1-backup-server/.*\.(yaml|json|env|ini)$
+    - path_regex: secrets/1-backup-server/.*\.(yaml|json|env|ini)$
       key_groups:
           - age:
                 - *user_beatlink
                 - *host_ragnarok
-    - path_regex: secrets/hosts/2-server/.*\.(yaml|json|env|ini)$
+    - path_regex: secrets/2-server/.*\.(yaml|json|env|ini)$
       key_groups:
           - age:
                 - *user_beatlink
                 - *host_heimdall
-    - path_regex: secrets/hosts/3-laptop/.*\.(yaml|json|env|ini)$
+    - path_regex: secrets/3-laptop/.*\.(yaml|json|env|ini)$
       key_groups:
           - age:
                 - *user_beatlink
                 - *host_odin
-    - path_regex: secrets/hosts/4-phone/.*\.(yaml|json|env|ini)$
+    - path_regex: secrets/4-phone/.*\.(yaml|json|env|ini)$
       key_groups:
           - age:
                 - *user_beatlink
