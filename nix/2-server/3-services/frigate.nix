@@ -7,7 +7,7 @@
 }:
 {
     sops.secrets."frigate_env" = {
-        sopsFile = "${inputs.self}/secrets/2-server.yaml";
+        sopsFile = "${inputs.self}/secrets/2-server/frigate.yaml";
         owner = "frigate";
         group = "frigate";
     };
