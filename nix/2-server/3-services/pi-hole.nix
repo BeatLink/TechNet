@@ -20,7 +20,7 @@
 { config, inputs, ... }:
 {
     # Credentials ------------------------------------------------------------------------------------------------------------------------------
-    sops.secrets.pihole_env.sopsFile = "${inputs.self}/secrets/2-server.yaml";
+    sops.secrets.pihole_env.sopsFile = "${inputs.self}/secrets/2-server/pi-hole.yaml";
 
     nginx-vhosts.pi-hole = {
         domain = "pi-hole.heimdall.technet";
