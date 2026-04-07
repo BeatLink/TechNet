@@ -32,7 +32,12 @@
             checkConfig = false;
             settings = {
                 database.path = "/Storage/Services/Frigate/data/frigate.db";
-                mqtt.enabled = false;
+                mqtt = {
+                    enabled = true;
+                    host = "127.0.0.1";
+                    user = "frigate";
+                    password = "{FRIGATE_MQTT_PASSWORD}";
+                };
                 detectors.ov = {
                     type = "openvino";
                     device = "GPU";
