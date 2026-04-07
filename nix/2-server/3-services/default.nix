@@ -25,7 +25,6 @@
         ./trakttv-backup.nix
         ./trilium.nix
         ./trilium-sysadmin.nix
-        ./uptime-kuma.nix
         ./vlc.nix
         ./home-automation
         ./monitoring
