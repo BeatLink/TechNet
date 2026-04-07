@@ -12,7 +12,7 @@
     #           ),
 
     sops.secrets.freshrss_password = {
-        sopsFile = "${inputs.self}/secrets/2-server.yaml";
+        sopsFile = "${inputs.self}/secrets/2-server/freshrss.yaml";
         owner = "freshrss";
         group = "freshrss";
     };
