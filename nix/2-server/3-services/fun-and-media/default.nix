@@ -4,6 +4,7 @@
         ./freshrss.nix
         ./gallery-dl.nix
         ./openbooks.nix
+        ./qbittorrent.nix
         ./vlc.nix
     ];
 }
