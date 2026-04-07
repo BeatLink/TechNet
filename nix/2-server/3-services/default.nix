@@ -9,11 +9,8 @@
         ./borg.nix
         ./calibre-web-automated.nix
         ./ddns-updater.nix
-        ./esphome
         ./freshrss.nix
-        ./frigate.nix
         ./gallery-dl.nix
-        ./home-assistant.nix
         ./mosquitto.nix
         ./nginx-proxy-manager.nix
         ./nginx-vhosts.nix
@@ -30,6 +27,7 @@
         ./trilium-sysadmin.nix
         ./uptime-kuma.nix
         ./vlc.nix
+        ./home-automation
         ./monitoring
     ];
 }
