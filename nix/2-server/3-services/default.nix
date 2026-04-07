@@ -7,15 +7,14 @@
     imports = [
         ./blockurl.nix
         ./borg.nix
-        ./calibre-web-automated.nix
+
         ./ddns-updater.nix
-        ./freshrss.nix
-        ./gallery-dl.nix
+
+
         ./mosquitto.nix
         ./nginx-proxy-manager.nix
         ./nginx-vhosts.nix
         ./nginx.nix
-        ./openbooks.nix
         ./pi-hole.nix
         ./qbittorrent.nix
         ./radicale.nix
@@ -25,7 +24,6 @@
         ./trakttv-backup.nix
         ./trilium.nix
         ./trilium-sysadmin.nix
-        ./vlc.nix
         ./home-automation
         ./monitoring
     ];
