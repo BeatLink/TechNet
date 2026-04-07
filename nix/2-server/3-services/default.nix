@@ -5,9 +5,8 @@
 
 {
     imports = [
-        ./mosquitto.nix
-        ./qbittorrent.nix
-        ./traccar.nix
+
+
         ./backups
         ./fun-and-media
         ./home-automation
