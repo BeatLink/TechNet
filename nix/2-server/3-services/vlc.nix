@@ -10,7 +10,7 @@
             4212
         ];
     };
-    sops.secrets.vlc_env.sopsFile = "${inputs.self}/secrets/2-server.yaml";
+    sops.secrets.vlc_env.sopsFile = "${inputs.self}/secrets/2-server/vlc.yaml";
     systemd.services = {
         vlc-audio = {
             description = "Headless VLC Media Player for Playing Audio from Home Assistant";
