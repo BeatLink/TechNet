@@ -19,7 +19,7 @@
     };
 
     # Configure authentiation ------------------------------------------------------------------------------------------------------------------
-    sops.secrets.esphome_env.sopsFile = "${inputs.self}/secrets/2-server.yaml";
+    sops.secrets.esphome_env.sopsFile = "${inputs.self}/secrets/2-server/esphome.yaml";
     systemd.services.esphome.serviceConfig = {
         EnvironmentFile = config.sops.secrets.esphome_env.path;
     };
