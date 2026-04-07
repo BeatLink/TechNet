@@ -5,22 +5,14 @@
 
 {
     imports = [
-        ./backups
-        ./blockurl.nix
-
-        ./fun-and-media
-
-
         ./mosquitto.nix
-
         ./qbittorrent.nix
-        ./radicale.nix
-
-        ./syncthing.nix
         ./traccar.nix
-        ./trilium.nix
-        ./trilium-sysadmin.nix
+        ./backups
+        ./fun-and-media
         ./home-automation
         ./monitoring
+        ./networking
+        ./personal-info-and-files
     ];
 }
