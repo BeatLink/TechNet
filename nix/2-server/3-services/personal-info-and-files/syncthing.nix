@@ -24,10 +24,8 @@
                         "PGID" = "1000";
                         "APP_BASE_URL" = "syncthing.heimdall.technet";
                     };
-                    expose = [
-                        "8384"
-                    ];
                     ports = [
+                        "8384:8384"
                         "22000:22000/tcp" # TCP file transfers
                         "22000:22000/udp" # QUIC file transfers
                         "21027:21027/udp" # Receive local discovery broadcasts
@@ -44,4 +42,9 @@
             };
         };
     };
+    nginx-vhosts.syncthing = {
+        domain = "syncthing.heimdall.technet";
+        port = 8384;
+    };
+
 }
