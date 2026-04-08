@@ -74,14 +74,14 @@
                         ];
                     };
                     detect = {
-                        enabled = false;
+                        enabled = true;
                         width = 1280;
                         height = 720;
                         fps = 5;
                     };
-                    record.enabled = false;
+                    record.enabled = true;
                     snapshots = {
-                        enabled = false;
+                        enabled = true;
                         timestamp = true;
                         bounding_box = true;
                         retain.default = 14;
