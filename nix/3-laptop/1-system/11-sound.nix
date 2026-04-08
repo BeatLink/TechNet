@@ -17,6 +17,7 @@
             (
                 with pkgs.gst_all_1;
                 [
+                    gstreamer
                     gst-plugins-good
                     gst-plugins-bad
                     gst-plugins-ugly
