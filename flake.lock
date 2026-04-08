@@ -481,7 +481,6 @@
         "nixpkgs-stable": "nixpkgs-stable",
         "plank-reloaded": "plank-reloaded",
         "sops-nix": "sops-nix",
-        "stremio-fix": "stremio-fix",
         "trilium-notes": "trilium-notes",
         "vantage": "vantage",
         "xdg-autostart": "xdg-autostart"
@@ -504,22 +503,6 @@
       "original": {
         "owner": "Mic92",
         "repo": "sops-nix",
-        "type": "github"
-      }
-    },
-    "stremio-fix": {
-      "locked": {
-        "lastModified": 1774356004,
-        "narHash": "sha256-Lkj8xJDxhr2PlMVC+szcL1csL2fuV7QYcyTcp2aFE0Q=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "e81555bfa9ec909d6ea55874bfd3b73b88e6a6c9",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "pull/503035/head",
-        "repo": "nixpkgs",
         "type": "github"
       }
     },
