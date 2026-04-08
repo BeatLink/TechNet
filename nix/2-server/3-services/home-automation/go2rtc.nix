@@ -1,5 +1,10 @@
-{ lib, pkgs, ... }:
 {
+    lib,
+    pkgs,
+    ...
+}:
+{
+
     services.go2rtc = {
         enable = true;
         settings = {
@@ -15,11 +20,16 @@
     };
 
     # Setup Users ------------------------------------------------------------------------------------------------------------------------------
-    systemd.services.go2rtc.serviceConfig = {
-        DynamicUser = lib.mkForce false;
-        User = "go2rtc";
-        Group = "go2rtc";
+    systemd.services.go2rtc = {
+        preStart = ''
+            ${pkgs.v4l-utils}/bin/v4l2-ctl -d /dev/video0 --set-fmt-video=width=1280,height=720,pixelformat=MJPG --set-parm=30
+        '';
+        serviceConfig = {
+            DynamicUser = lib.mkForce false;
+            User = "go2rtc";
+            Group = "go2rtc";
 
+        };
     };
     users = {
         users.go2rtc = {
