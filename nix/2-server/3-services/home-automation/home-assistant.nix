@@ -8,6 +8,12 @@
     services.home-assistant = {
         enable = true;
         config = null;
+        
+        #{
+        #    "automation ui" = "!include automations.yaml";
+        #    "scene ui" = "!include scenes.yaml";
+        #    "script ui" = "!include scripts.yaml";
+        #};
         lovelaceConfig = null;
         configDir = "/Storage/Services/Home-Assistant/config";
         extraComponents = [
