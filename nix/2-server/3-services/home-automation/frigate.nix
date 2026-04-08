@@ -62,6 +62,7 @@
                     filters.person.min_score = 0.6;
                 };
                 cameras.apartment = {
+                    enabled = false;
                     ffmpeg = {
                         inputs = [
                             {
