@@ -23,6 +23,7 @@
                     host = "127.0.0.1";
                     user = "frigate";
                     password = "{FRIGATE_MQTT_PASSWORD}";
+                    stats_interval = "60";
                 };
                 detectors.ov = {
                     type = "openvino";
