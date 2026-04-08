@@ -33,6 +33,14 @@ creation_rules:
           - age:
                 - *user_beatlink
                 - *host_thor
+    - path_regex: secrets/0-common/.*\.(yaml|json|env|ini)$
+      key_groups:
+          - age:
+                - *user_beatlink
+                - *host_ragnarok
+                - *host_heimdall
+                - *host_odin
+                - *host_thor
     - path_regex: secrets/1-backup-server/.*\.(yaml|json|env|ini)$
       key_groups:
           - age:
