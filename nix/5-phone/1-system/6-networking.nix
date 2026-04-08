@@ -6,7 +6,7 @@
 
 { config, inputs, ... }:
 {
-    sops.secrets.networkmanager_env_file.sopsFile = "${inputs.self}/secrets/4-phone.yaml";
+    sops.secrets.networkmanager_env_file.sopsFile = "${inputs.self}/secrets/4-phone/networkmanager.yaml";
     networking = {
         hostName = "Thor"; # Sets the hostName
         hostId = "aef23b78"; # Sets the Host ID for ZFS
