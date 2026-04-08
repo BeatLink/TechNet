@@ -1,11 +1,11 @@
 { config, inputs, ... }:
 {
     sops.secrets.syncthing_cert = {
-        sopsFile = "${inputs.self}/secrets/3-laptop.yaml";
+        sopsFile = "${inputs.self}/secrets/3-laptop/syncthing.yaml";
         owner = "beatlink";
     };
     sops.secrets.syncthing_key = {
-        sopsFile = "${inputs.self}/secrets/3-laptop.yaml";
+        sopsFile = "${inputs.self}/secrets/3-laptop/syncthing.yaml";
         owner = "beatlink";
     };
     home-manager.users.beatlink =

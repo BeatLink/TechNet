@@ -10,8 +10,8 @@
     ...
 }:
 {
-    sops.secrets.borg_repo_encryption_key.sopsFile = "${inputs.self}/secrets/3-laptop.yaml";
-    sops.secrets.borg_repo_ssh_key.sopsFile = "${inputs.self}/secrets/3-laptop.yaml";
+    sops.secrets.borg_repo_encryption_key.sopsFile = "${inputs.self}/secrets/3-laptop/borgmatic.yaml";
+    sops.secrets.borg_repo_ssh_key.sopsFile = "${inputs.self}/secrets/3-laptop/borgmatic.yaml";
     services.borgmatic = {
         enable = true;
         settings = {

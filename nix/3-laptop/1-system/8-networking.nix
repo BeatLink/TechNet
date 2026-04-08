@@ -6,7 +6,7 @@
 
 { config, inputs, ... }:
 {
-    sops.secrets.networkmanager_env_file.sopsFile = "${inputs.self}/secrets/3-laptop.yaml";
+    sops.secrets.networkmanager_env_file.sopsFile = "${inputs.self}/secrets/3-laptop/networkmanager.yaml";
     networking = {
         hostName = "Odin"; # Sets hostname
         hostId = "ee42298c";
