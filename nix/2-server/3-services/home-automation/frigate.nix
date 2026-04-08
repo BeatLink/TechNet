@@ -79,7 +79,12 @@
                         height = 720;
                         fps = 5;
                     };
-                    record.enabled = true;
+                    record = {
+                        enabled = true;
+                        width = 1280;
+                        height = 720;
+                        fps = 30;
+                    };
                     snapshots = {
                         enabled = true;
                         timestamp = true;
