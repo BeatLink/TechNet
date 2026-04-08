@@ -62,7 +62,6 @@
                     filters.person.min_score = 0.6;
                 };
                 cameras.apartment = {
-                    enabled = false;
                     ffmpeg = {
                         inputs = [
                             {
@@ -75,14 +74,14 @@
                         ];
                     };
                     detect = {
-                        enabled = true;
+                        enabled = false;
                         width = 1280;
                         height = 720;
                         fps = 5;
                     };
-                    record.enabled = true;
+                    record.enabled = false;
                     snapshots = {
-                        enabled = true;
+                        enabled = false;
                         timestamp = true;
                         bounding_box = true;
                         retain.default = 14;
