@@ -23,6 +23,7 @@
                     host = "127.0.0.1";
                     user = "frigate";
                     password = "{FRIGATE_MQTT_PASSWORD}";
+                    stats_interval = "60";
                 };
                 detectors.ov = {
                     type = "openvino";
@@ -79,12 +80,7 @@
                         height = 720;
                         fps = 5;
                     };
-                    record = {
-                        enabled = true;
-                        width = 1280;
-                        height = 720;
-                        fps = 30;
-                    };
+                    record.enabled = true;
                     snapshots = {
                         enabled = true;
                         timestamp = true;
