@@ -37,11 +37,6 @@
             80 # Nginx Services
             81 # Nginx Web Admin
             443 # Nginx Services (HTTPS)
-            53 # Pihole DNS
-            82 # Pihole Web Admin
-        ];
-        allowedUDPPorts = [
-            53 # Pihole DNS
         ];
     };
     users.extraGroups.docker.members = [ "beatlink" ];
