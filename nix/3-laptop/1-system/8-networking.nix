@@ -103,13 +103,14 @@
                             psk = "$FAMILY_HOME_WIFI_PASSWORD";
                         };
                     };
-                    "TechNet WireGuard" = {
+                    "TechNet WireGuard (Full Tunnel)" = {
                         connection = {
-                            id = "TechNet Wireguard";
+                            id = "TechNet Wireguard (Full Tunnel)";
                             type = "wireguard";
                             permissions = "";
                             interface-name = "wireguard0";
                             autoconnect = "yes";
+                            autoconnect-priority = "50"; # higher than any other connection
                         };
                         wireguard = {
                             listen-port = "51820";
@@ -120,6 +121,34 @@
                             endpoint = "bltechnet.mooo.com:51820";
                             persistent-keepalive = 25;
                             allowed-ips = "0.0.0.0/0";
+                        };
+                        ipv4 = {
+                            method = "manual";
+                            dns-search = "";
+                            addresses = "10.100.100.2/24";
+                        };
+                        ipv6 = {
+                            method = "ignore";
+                        };
+                    };
+                    "TechNet WireGuard (Split Tunnel)" = {
+                        connection = {
+                            id = "TechNet Wireguard (Split Tunnel)";
+                            type = "wireguard";
+                            permissions = "";
+                            interface-name = "wireguard0";
+                            autoconnect = "yes";
+                            autoconnect-priority = "100"; # higher than any other connection
+                        };
+                        wireguard = {
+                            listen-port = "51820";
+                            peer-routes = "yes";
+                            private-key = "$WIREGUARD_PRIVATE_KEY";
+                        };
+                        "wireguard-peer.SLW2DFKk+Cf5K5KZl0OLYrEGyqTCqYHBKV2mTA3W2hQ=" = {
+                            endpoint = "bltechnet.mooo.com:51820";
+                            persistent-keepalive = 25;
+                            allowed-ips = "10.100.100.1/24";
                         };
                         ipv4 = {
                             method = "manual";
