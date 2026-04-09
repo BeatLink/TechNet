@@ -52,7 +52,11 @@
 
         };
     };
-    sops.secrets.wireguard_private_key.sopsFile = "${inputs.self}/secrets/2-server/wireguard.yaml";
+    sops.secrets.wireguard_private_key = {
+        sopsFile = "${inputs.self}/secrets/2-server/wireguard.yaml";
+        owner = "systemd-network";
+        group = "systemd-network";
+    };
     boot = {
         kernel.sysctl."net.ipv4.conf.all.forwarding" = true; # Enables routing between peers for wireguard
         initrd = {
