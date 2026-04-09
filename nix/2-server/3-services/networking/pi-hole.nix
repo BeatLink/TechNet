@@ -60,7 +60,6 @@
                         "8.8.4.4"
                         "1.1.1.1"
                         "1.0.0.1"
-
                     ];
                     hosts = [
                         "10.100.100.1  heimdall.technet"
@@ -69,30 +68,15 @@
                         "10.100.100.4  thor.technet"
                         "10.100.100.5  thorx.technet"
                         "10.100.100.6  ragnarok.technet"
-                        "10.100.100.10 light-bedroom.technet"
-                        "10.100.100.11 light-kitchen.technet"
-                        "10.100.100.12 light-bathroom.technet"
-                        "10.100.100.13 light-bedroom-desk.technet"
-                        "10.100.100.14 light-outside.technet"
-                        "10.100.100.16 ir-fan.technet"
-                        "10.100.100.17 socket-fan.technet"
-                        "10.100.100.18 socket-ragnarok.technet"
-                        "10.100.100.19 sensor-bathroom.technet"
-                        "10.100.100.20 sensor-bedroom.technet"
+                        "192.168.0.2 bltechnet.mooo.com"
                     ];
                     cnameRecords = [
-                        "ragnarok,ragnarok.technet"
-                        "heimdall,heimdall.technet"
-                        "odin,odin.technet"
-                        "thor,thor.technet"
-                        "hela,hela.technet"
                         "calibre-web.heimdall.technet,heimdall.technet"
                         "openbooks.heimdall.technet,heimdall.technet"
                         "trilium-sysadmin.heimdall.technet,heimdall.technet"
-                        "bltechnet.mooo.com,heimdall.technet"
                     ];
                     domain = {
-                        name = "technet";
+                        name = "lan";
                         local = "true";
                     };
                 };
