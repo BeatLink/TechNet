@@ -24,10 +24,5 @@
         domain = "grafana.heimdall.technet";
         port = 3000;
     };
-    services.nginx.virtualHosts.grafana.serverAliases = [
-        "heimdall.technet"
-        "www.heimdall.technet"
-        "heimdall"
-    ];
 
 }
