@@ -89,6 +89,7 @@
                         "calibre-web.heimdall.technet,heimdall.technet"
                         "openbooks.heimdall.technet,heimdall.technet"
                         "trilium-sysadmin.heimdall.technet,heimdall.technet"
+                        "bltechnet.mooo.com,heimdall.technet"
                     ];
                     domain = {
                         name = "technet";
@@ -96,14 +97,14 @@
                     };
                 };
                 dhcp = {
-                    active = "true";
+                    active = true;
                     start = "192.168.0.10";
                     end = "192.168.0.250";
                     router = "192.168.0.1";
                     netmask = "255.255.255.0";
                     leaseTime = "1d";
-                    rapidCommit = "true";
-                    logging = "true";
+                    rapidCommit = true;
+                    logging = true;
                 };
             };
             stateDirectory = "/Storage/Services/PiHole/state";
