@@ -39,16 +39,16 @@
         # Pi-Hole --------------------------------------------------------------------------------------------------------------------------------
         pihole-ftl = {
             enable = true;
+            openFirewallDNS = true;
+            openFirewallDHCP = true;
             lists = [
                 {
                     url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts";
-                    type = "block";
                     enabled = true;
                     description = "default blocklist";
                 }
                 {
                     url = "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/pro.txt";
-                    type = "block";
                     enabled = true;
                     description = "hagezi blocklist";
                 }
@@ -94,6 +94,16 @@
                         name = "technet";
                         local = "true";
                     };
+                };
+                dhcp = {
+                    active = "true";
+                    start = "192.168.0.10";
+                    end = "192.168.0.250";
+                    router = "192.168.0.1";
+                    netmask = "255.255.255.0";
+                    leaseTime = "1d";
+                    rapidCommit = "true";
+                    logging = "true";
                 };
             };
             stateDirectory = "/Storage/Services/PiHole/state";
