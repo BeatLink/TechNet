@@ -20,16 +20,8 @@
                             id = "TechNet Wi-Fi";
                             permissions = "";
                             type = "wifi";
-                        };
-                        ipv4 = {
-                            dns = "10.100.100.1";
-                            dns-search = "";
-                            method = "auto";
-                        };
-                        ipv6 = {
-                            addr-gen-mode = "stable-privacy";
-                            dns-search = "";
-                            method = "auto";
+                            autoconnect = "yes";
+                            autoconnect-priority = "100"; # higher than any other connection
                         };
                         wifi = {
                             mac-address-blacklist = "";
@@ -40,22 +32,26 @@
                             auth-alg = "open";
                             key-mgmt = "wpa-psk";
                             psk = "$TECHNET_WIFI_PASSWORD";
+                        };
+                        # Must be manually config to allow accessing heimdall during boot when pi-hole isnt available
+                        ipv4 = {
+                            method = "manual";
+                            addresses = "192.168.0.3/24";
+                            gateway = "192.168.0.1";
+                            dns = "192.168.0.2";
+                            dns-search = "technet";
+                        };
+                        ipv6 = {
+                            method = "disabled";
                         };
                     };
                     "TechNet Wi-Fi (No DNS)" = {
                         connection = {
-                            id = "TechNet Wi-Fi";
+                            id = "TechNet Wi-Fi (No DNS)";
                             permissions = "";
                             type = "wifi";
-                        };
-                        ipv4 = {
-                            dns-search = "";
-                            method = "auto";
-                        };
-                        ipv6 = {
-                            addr-gen-mode = "stable-privacy";
-                            dns-search = "";
-                            method = "auto";
+                            autoconnect = "yes";
+                            autoconnect-priority = "50"; # higher than any other connection
                         };
                         wifi = {
                             mac-address-blacklist = "";
@@ -66,6 +62,16 @@
                             auth-alg = "open";
                             key-mgmt = "wpa-psk";
                             psk = "$TECHNET_WIFI_PASSWORD";
+                        };
+                        ipv4 = {
+                            method = "manual";
+                            addresses = "192.168.0.3/24";
+                            gateway = "192.168.0.1";
+                            dns = "8.8.8.8";
+                            dns-search = "technet";
+                        };
+                        ipv6 = {
+                            method = "disabled";
                         };
                     };
                     "Digicel_5G_WiFi_5tDQ" = {
@@ -73,6 +79,8 @@
                             id = "Digicel_5G_WiFi_5tDQ";
                             permissions = "";
                             type = "wifi";
+                            autoconnect = "yes";
+                            autoconnect-priority = "50"; # higher than any other connection
                         };
                         ipv4 = {
                             dns = "10.100.100.1";
@@ -127,6 +135,8 @@
                             id = "Thor Hotspot";
                             permissions = "";
                             type = "wifi";
+                            autoconnect = "yes";
+                            autoconnect-priority = "25"; # higher than any other connection
                         };
                         ipv4 = {
                             dns = "10.100.100.1";
