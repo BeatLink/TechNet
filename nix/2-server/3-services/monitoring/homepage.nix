@@ -2,8 +2,6 @@
 {
     sops.secrets.homepage_env = {
         sopsFile = "${inputs.self}/secrets/2-server/homepage.yaml";
-        owner = "homepage-dashboard";
-        group = "homepage-dashboard";
     };
     services.homepage-dashboard = {
         enable = true;
