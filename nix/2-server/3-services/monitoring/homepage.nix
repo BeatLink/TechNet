@@ -15,7 +15,6 @@
             useEqualHeights = true;
             columns = 4;
             disableCollapse = "true";
-            target = "_self";
             hideVersion = true;
             disableUpdateCheck = true;
             layout = [
