@@ -10,9 +10,13 @@
         environmentFiles = [ config.sops.secrets.homepage_env.path ];
         settings = {
             title = "TechNet";
+            headerStyle = "boxed";
             fullWidth = true;
             useEqualHeights = true;
             columns = 4;
+            disableCollapse = "true";
+            hideVersion = true;
+            disableUpdateCheck = true;
             layout = [
                 { "Personal" = { }; }
                 { "Comms" = { }; }
@@ -32,21 +36,39 @@
             {
                 greeting = {
                     text_size = "xl";
-                    text = "Heimdall";
+                    text = "TechNet";
                 };
             }
             {
                 resources = {
+                    label = "System";
                     cpu = true;
-                    disk = "/";
                     memory = true;
+                    network = true;
+                    cputemp = true;
+                    tempmin = 0;
+                    tempmax = 100;
+                    units = "metric";
+                    refresh = 3000;
+                };
+            }
+            {
+                resources = {
+                    label = "Storage";
+                    disk = [
+                        "/"
+                        "/boot"
+                        "/Storage"
+                    ];
+                    diskUnits = "bytes";
+                    refresh = 3000;
                 };
             }
             {
                 datetime = {
                     text_size = "xl";
                     format = {
-                        dateStyle = "long";
+                        dateStyle = "short";
                         timeStyle = "short";
                     };
                 };
@@ -233,15 +255,6 @@
                             statusStyle = "dot";
                         };
                     }
-                    {
-                        "QBittorrent" = {
-                            icon = "qbittorrent.png";
-                            href = "https://qbittorrent.heimdall.technet";
-                            description = "Torrent Manager";
-                            siteMonitor = "https://qbittorrent.heimdall.technet";
-                            statusStyle = "dot";
-                        };
-                    }
                 ];
             }
             {
@@ -258,9 +271,9 @@
                     {
                         "Pi-Hole" = {
                             icon = "pi-hole.png";
-                            href = "https://pi-hole.heimdall.technet/admin";
+                            href = "https://pi-hole.heimdall.technet";
                             description = "Ad Blocking and DNS Server";
-                            siteMonitor = "https://pi-hole.heimdall.technet/admin";
+                            siteMonitor = "https://pi-hole.heimdall.technet";
                             statusStyle = "dot";
                         };
                     }
@@ -270,6 +283,15 @@
                             href = "https://syncthing.heimdall.technet";
                             description = "File Synchronization";
                             siteMonitor = "https://syncthing.heimdall.technet";
+                            statusStyle = "dot";
+                        };
+                    }
+                    {
+                        "QBittorrent" = {
+                            icon = "qbittorrent.png";
+                            href = "https://qbittorrent.heimdall.technet";
+                            description = "Torrent Manager";
+                            siteMonitor = "https://qbittorrent.heimdall.technet";
                             statusStyle = "dot";
                         };
                     }
