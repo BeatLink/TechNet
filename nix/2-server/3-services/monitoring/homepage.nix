@@ -1,12 +1,17 @@
-{ inputs, ... }:
+{ inputs, config, ... }:
 {
     sops.secrets.homepage_env = {
         sopsFile = "${inputs.self}/secrets/2-server/homepage.yaml";
+        owner = "homepage-dashboard";
+        group = "homepage-dashboard";
     };
     services.homepage-dashboard = {
         enable = true;
         allowedHosts = "homepage.heimdall.technet,www.heimdall.technet,heimdall.technet";
         listenPort = 9610;
+        environmentFiles = [
+            config.sops.secrets.homepage_env.path
+        ];
         widgets = [
             {
                 resources = {
@@ -52,10 +57,27 @@
                             icon = "home-assistant.png";
                             description = "Home Automation Manager";
                             href = "https://home-assistant.heimdall.technet";
+                            siteMonitor = "https://home-assistant.heimdall.technet";
+                            statusStyle = "dot";
                             widget = {
                                 type = "homeassistant";
-                                url = "https://home-assistant.heimdall.technet";
-                                key = "$HOMEASSISTANT_KEY";
+                                url = "http://home-assistant.heimdall.technet";
+                                key = "{{HOMEPAGE_VAR_HOMEASSISTANT_KEY}}";
+                            };
+                        };
+                    }
+                    {
+                        "ESPHome" = {
+                            icon = "esphome.png";
+                            description = "IoT Management Dashboard";
+                            href = "https://esphome.heimdall.technet";
+                            siteMonitor = "https://esphome.heimdall.technet";
+                            statusStyle = "dot";
+                            widget = {
+                                type = "esphome";
+                                url = "http://esphome.heimdall.technet";
+                                username = "{{HOMEPAGE_VAR_ESPHOME_USER}}";
+                                password = "{{HOMEPAGE_VAR_ESPHOME_PASS}}";
                             };
                         };
                     }
