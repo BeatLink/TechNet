@@ -29,8 +29,10 @@
                             psk = "$TECHNET_WIFI_PASSWORD";
                         };
                         ipv4 = {
-                            method = "auto";
-                            dns = "10.100.100.1";
+                            method = "manual";
+                            addresses = "192.168.0.3/24";
+                            gateway = "192.168.0.1";
+                            dns = "192.168.0.2";
                         };
                         ipv6 = {
                             method = "disabled";
@@ -50,7 +52,10 @@
                             psk = "$TECHNET_WIFI_PASSWORD";
                         };
                         ipv4 = {
-                            method = "auto";
+                            method = "manual";
+                            addresses = "192.168.0.3/24";
+                            gateway = "192.168.0.1";
+                            dns = "8.8.8.8";
                         };
                         ipv6 = {
                             method = "disabled";
