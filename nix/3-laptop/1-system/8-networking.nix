@@ -15,31 +15,22 @@
             wifi.powersave = true;
             ensureProfiles = {
                 profiles = {
-                    "TechNet Wi-Fi" = {
+                    "TechNet Wi-Fi (Pi-Hole)" = {
                         connection = {
-                            id = "TechNet Wi-Fi";
-                            permissions = "";
+                            id = "TechNet Wi-Fi (Pi-Hole)";
                             type = "wifi";
-                            autoconnect = "yes";
-                            autoconnect-priority = "100"; # higher than any other connection
+                            autoconnect-priority = "100";
                         };
                         wifi = {
-                            mac-address-blacklist = "";
-                            mode = "infrastructure";
                             ssid = "TechNet Wi-Fi";
                         };
                         wifi-security = {
-                            auth-alg = "open";
                             key-mgmt = "wpa-psk";
                             psk = "$TECHNET_WIFI_PASSWORD";
                         };
-                        # Must be manually config to allow accessing heimdall during boot when pi-hole isnt available
                         ipv4 = {
-                            method = "manual";
-                            addresses = "192.168.0.3/24";
-                            gateway = "192.168.0.1";
-                            dns = "192.168.0.2";
-                            dns-search = "technet";
+                            method = "auto";
+                            dns = "10.100.100.1";
                         };
                         ipv6 = {
                             method = "disabled";
@@ -48,27 +39,18 @@
                     "TechNet Wi-Fi (No DNS)" = {
                         connection = {
                             id = "TechNet Wi-Fi (No DNS)";
-                            permissions = "";
                             type = "wifi";
-                            autoconnect = "yes";
-                            autoconnect-priority = "50"; # higher than any other connection
+                            autoconnect = "no";
                         };
                         wifi = {
-                            mac-address-blacklist = "";
-                            mode = "infrastructure";
                             ssid = "TechNet Wi-Fi";
                         };
                         wifi-security = {
-                            auth-alg = "open";
                             key-mgmt = "wpa-psk";
                             psk = "$TECHNET_WIFI_PASSWORD";
                         };
                         ipv4 = {
-                            method = "manual";
-                            addresses = "192.168.0.3/24";
-                            gateway = "192.168.0.1";
-                            dns = "8.8.8.8";
-                            dns-search = "technet";
+                            method = "auto";
                         };
                         ipv6 = {
                             method = "disabled";
@@ -77,44 +59,31 @@
                     "Digicel_5G_WiFi_5tDQ" = {
                         connection = {
                             id = "Digicel_5G_WiFi_5tDQ";
-                            permissions = "";
                             type = "wifi";
-                            autoconnect = "yes";
-                            autoconnect-priority = "50"; # higher than any other connection
+                            autoconnect-priority = "100";
                         };
                         ipv4 = {
                             dns = "10.100.100.1";
-                            dns-search = "";
                             method = "auto";
                         };
                         ipv6 = {
-                            addr-gen-mode = "stable-privacy";
-                            dns-search = "";
-                            method = "auto";
+                            method = "disabled";
                         };
                         wifi = {
-                            mac-address-blacklist = "";
-                            mode = "infrastructure";
                             ssid = "Digicel_5G_WiFi_5tDQ";
                         };
                         wifi-security = {
-                            auth-alg = "open";
                             key-mgmt = "wpa-psk";
                             psk = "$FAMILY_HOME_WIFI_PASSWORD";
                         };
                     };
-                    "TechNet WireGuard (Full Tunnel)" = {
+                    "TechNet WireGuard" = {
                         connection = {
-                            id = "TechNet Wireguard (Full Tunnel)";
+                            id = "TechNet Wireguard";
                             type = "wireguard";
-                            permissions = "";
                             interface-name = "wireguard0";
-                            autoconnect = "yes";
-                            autoconnect-priority = "50"; # higher than any other connection
                         };
                         wireguard = {
-                            listen-port = "51820";
-                            peer-routes = "yes";
                             private-key = "$WIREGUARD_PRIVATE_KEY";
                         };
                         "wireguard-peer.SLW2DFKk+Cf5K5KZl0OLYrEGyqTCqYHBKV2mTA3W2hQ=" = {
@@ -124,35 +93,6 @@
                         };
                         ipv4 = {
                             method = "manual";
-                            dns-search = "";
-                            addresses = "10.100.100.2/24";
-                        };
-                        ipv6 = {
-                            method = "ignore";
-                        };
-                    };
-                    "TechNet WireGuard (Split Tunnel)" = {
-                        connection = {
-                            id = "TechNet Wireguard (Split Tunnel)";
-                            type = "wireguard";
-                            permissions = "";
-                            interface-name = "wireguard0";
-                            autoconnect = "yes";
-                            autoconnect-priority = "100"; # higher than any other connection
-                        };
-                        wireguard = {
-                            listen-port = "51820";
-                            peer-routes = "yes";
-                            private-key = "$WIREGUARD_PRIVATE_KEY";
-                        };
-                        "wireguard-peer.SLW2DFKk+Cf5K5KZl0OLYrEGyqTCqYHBKV2mTA3W2hQ=" = {
-                            endpoint = "bltechnet.mooo.com:51820";
-                            persistent-keepalive = 25;
-                            allowed-ips = "10.100.100.1/24";
-                        };
-                        ipv4 = {
-                            method = "manual";
-                            dns-search = "";
                             addresses = "10.100.100.2/24";
                         };
                         ipv6 = {
@@ -162,28 +102,20 @@
                     "Thor Hotspot" = {
                         connection = {
                             id = "Thor Hotspot";
-                            permissions = "";
                             type = "wifi";
-                            autoconnect = "yes";
-                            autoconnect-priority = "25"; # higher than any other connection
+                            autoconnect-priority = "50";
                         };
                         ipv4 = {
                             dns = "10.100.100.1";
-                            dns-search = "";
                             method = "auto";
                         };
                         ipv6 = {
-                            addr-gen-mode = "stable-privacy";
-                            dns-search = "";
-                            method = "auto";
+                            method = "disabled";
                         };
                         wifi = {
-                            mac-address-blacklist = "";
-                            mode = "infrastructure";
                             ssid = "Thor";
                         };
                         wifi-security = {
-                            auth-alg = "open";
                             key-mgmt = "wpa-psk";
                             psk = "$THOR_WIFI_PASSWORD";
                         };
