@@ -1,0 +1,7 @@
+--- a/nixos/modules/services/networking/pihole-ftl-setup-script.nix
++++ b/nixos/modules/services/networking/pihole-ftl-setup-script.nix
+@@ -1 +1 @@
+-local result=$(PostFTLData "lists" "$payload")
++local type=$(echo "$payload" | ${pkgs.jq}/bin/jq -r '.type')
++local payload_without_type=$(echo "$payload" | ${pkgs.jq}/bin/jq 'del(.type)')
++local result=$(PostFTLData "lists?type=${type}" "$payload_without_type")

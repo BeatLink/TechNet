@@ -52,6 +52,21 @@
                     enabled = true;
                     description = "hagezi blocklist";
                 }
+                {
+                    url = "https://raw.githubusercontent.com/PolishFiltersTeam/KADhosts/master/KADhosts.txt";
+                    enabled = true;
+                    description = "KADhosts - Polish malware/spam domains";
+                }
+                {
+                    url = "https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.Spam/hosts";
+                    enabled = true;
+                    description = "FadeMind - spam hosts";
+                }
+                {
+                    url = "https://v.firebog.net/hosts/static/w3kbl.txt";
+                    enabled = true;
+                    description = "Firebog - suspicious domains";
+                }
             ];
             settings = {
                 dns = {
@@ -102,6 +117,14 @@
             protocol = "http";
         };
     };
+
+    nixpkgs.overlays = [
+        (final: prev: {
+            pihole-ftl = prev.pihole-ftl.overrideAttrs (old: {
+                patches = (old.patches or [ ]) ++ [ ./pihole-ftl-lists-fix.patch ];
+            });
+        })
+    ];
 
     systemd.tmpfiles.rules = [
         # Type Path Mode User Group Age Argument
