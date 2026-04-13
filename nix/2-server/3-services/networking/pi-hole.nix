@@ -56,10 +56,7 @@
             settings = {
                 dns = {
                     upstreams = [
-                        "8.8.8.8"
-                        "8.8.4.4"
-                        "1.1.1.1"
-                        "1.0.0.1"
+                        "127.0.0.1#5335"
                     ];
                     hosts = [
                         "10.100.100.1  heimdall.technet"
@@ -79,6 +76,16 @@
                         name = "lan";
                         local = "true";
                     };
+                };
+                dhcp = {
+                    active = true;
+                    start = "192.168.0.10";
+                    end = "192.168.0.254";
+                    router = "192.168.0.1";
+                    netmask = "255.255.255.0";
+                    leaseTime = "1d";
+                    rapidCommit = true;
+                    logging = true;
                 };
             };
             stateDirectory = "/Storage/Services/PiHole/state";
@@ -105,6 +112,11 @@
         serviceConfig = {
             EnvironmentFile = config.sops.secrets.pihole_env.path;
         };
+    };
+
+    systemd.services.pihole = {
+        after = [ "unbound.service" ];
+        requires = [ "unbound.service" ];
     };
 
     virtualisation.arion.projects.pihole = {
