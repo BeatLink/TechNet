@@ -80,16 +80,6 @@
                         local = "true";
                     };
                 };
-                dhcp = {
-                    active = true;
-                    start = "192.168.0.10";
-                    end = "192.168.0.250";
-                    router = "192.168.0.1";
-                    netmask = "255.255.255.0";
-                    leaseTime = "1d";
-                    rapidCommit = true;
-                    logging = true;
-                };
             };
             stateDirectory = "/Storage/Services/PiHole/state";
             logDirectory = "/Storage/Services/PiHole/logs";
