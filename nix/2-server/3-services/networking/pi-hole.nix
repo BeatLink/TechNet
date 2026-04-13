@@ -17,8 +17,65 @@
 #     - Ragnarok - ragnarok.technet
 #
 
-{ config, inputs, ... }:
 {
+    config,
+    inputs,
+    pkgs,
+    ...
+}:
+let
+    db = "${config.services.pihole-ftl.stateDirectory}/gravity.db";
+    lists = [
+        {
+            url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts";
+            comment = "default blocklist";
+        }
+        {
+            url = "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/pro.txt";
+            comment = "hagezi blocklist";
+        }
+        {
+            url = "https://raw.githubusercontent.com/PolishFiltersTeam/KADhosts/master/KADhosts.txt";
+            comment = "KADhosts";
+        }
+        {
+            url = "https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.Spam/hosts";
+            comment = "FadeMind spam";
+        }
+        {
+            url = "https://v.firebog.net/hosts/static/w3kbl.txt";
+            comment = "Firebog suspicious";
+        }
+    ];
+
+    addListsScript = pkgs.writeShellScript "pihole-add-lists" ''
+        set -euo pipefail
+
+        ${pkgs.lib.concatMapStrings (list: ''
+            echo "Adding list: ${list.url}"
+            ${pkgs.sqlite}/bin/sqlite3 "${db}" \
+              "INSERT OR IGNORE INTO adlist (address, enabled, comment) \
+               VALUES ('${list.url}', 1, '${list.comment}');"
+        '') lists}
+
+        echo "Updating gravity..."
+        ${pkgs.pihole}/bin/pihole updateGravity
+    '';
+in
+{
+
+    systemd.services.pihole-add-lists = {
+        description = "Add Pi-hole blocklists via API";
+        after = [ "pihole-ftl.service" ];
+        wantedBy = [ "pihole-ftl.service" ];
+        serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = addListsScript;
+            User = "pihole";
+        };
+    };
+
     # Credentials ------------------------------------------------------------------------------------------------------------------------------
     sops.secrets.pihole_env.sopsFile = "${inputs.self}/secrets/2-server/pi-hole.yaml";
 
@@ -41,33 +98,35 @@
             enable = true;
             openFirewallDNS = true;
             openFirewallDHCP = true;
-            lists = [
-                {
-                    url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts";
-                    enabled = true;
-                    description = "default blocklist";
-                }
-                {
-                    url = "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/pro.txt";
-                    enabled = true;
-                    description = "hagezi blocklist";
-                }
-                {
-                    url = "https://raw.githubusercontent.com/PolishFiltersTeam/KADhosts/master/KADhosts.txt";
-                    enabled = true;
-                    description = "KADhosts - Polish malware/spam domains";
-                }
-                {
-                    url = "https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.Spam/hosts";
-                    enabled = true;
-                    description = "FadeMind - spam hosts";
-                }
-                {
-                    url = "https://v.firebog.net/hosts/static/w3kbl.txt";
-                    enabled = true;
-                    description = "Firebog - suspicious domains";
-                }
-            ];
+            /*
+              lists = [
+                  {
+                      url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts";
+                      enabled = true;
+                      description = "default blocklist";
+                  }
+                  {
+                      url = "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/pro.txt";
+                      enabled = true;
+                      description = "hagezi blocklist";
+                  }
+                  {
+                      url = "https://raw.githubusercontent.com/PolishFiltersTeam/KADhosts/master/KADhosts.txt";
+                      enabled = true;
+                      description = "KADhosts - Polish malware/spam domains";
+                  }
+                  {
+                      url = "https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.Spam/hosts";
+                      enabled = true;
+                      description = "FadeMind - spam hosts";
+                  }
+                  {
+                      url = "https://v.firebog.net/hosts/static/w3kbl.txt";
+                      enabled = true;
+                      description = "Firebog - suspicious domains";
+                  }
+              ];
+            */
             settings = {
                 dns = {
                     upstreams = [
@@ -90,6 +149,10 @@
                     domain = {
                         name = "lan";
                         local = "true";
+                    };
+                    rateLimit = {
+                        count = 10000;
+                        interval = 60;
                     };
                 };
                 dhcp = {
@@ -118,13 +181,15 @@
         };
     };
 
-    nixpkgs.overlays = [
-        (final: prev: {
-            pihole-ftl = prev.pihole-ftl.overrideAttrs (old: {
-                patches = (old.patches or [ ]) ++ [ ./pihole-ftl-lists-fix.patch ];
-            });
-        })
-    ];
+    /*
+      nixpkgs.overlays = [
+          (final: prev: {
+              pihole-ftl = prev.pihole-ftl.overrideAttrs (old: {
+                  patches = (old.patches or [ ]) ++ [ ./pihole-ftl-lists-fix.patch ];
+              });
+          })
+      ];
+    */
 
     systemd.tmpfiles.rules = [
         # Type Path Mode User Group Age Argument
