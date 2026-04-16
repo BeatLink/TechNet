@@ -71,15 +71,4 @@
             Persistent = true;
         };
     };
-
-    environment.persistence."/Storage/Services/Unbound" = {
-        directories = [
-            {
-                directory = "/Storage/Services/Unbound";
-                user = "unbound";
-                group = "unbound";
-                mode = "0750";
-            }
-        ];
-    };
 }
