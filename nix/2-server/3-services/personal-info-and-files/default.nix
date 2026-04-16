@@ -4,6 +4,5 @@
         ./radicale.nix
         ./syncthing.nix
         ./trilium.nix
-        ./trilium-sysadmin.nix
     ];
 }
