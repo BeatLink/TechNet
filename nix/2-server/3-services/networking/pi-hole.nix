@@ -161,7 +161,7 @@ in
                     end = "192.168.0.254";
                     router = "192.168.0.1";
                     netmask = "255.255.255.0";
-                    leaseTime = "1d";
+                    leaseTime = "1w";
                     rapidCommit = true;
                     logging = true;
                 };
@@ -180,16 +180,6 @@ in
             protocol = "http";
         };
     };
-
-    /*
-      nixpkgs.overlays = [
-          (final: prev: {
-              pihole-ftl = prev.pihole-ftl.overrideAttrs (old: {
-                  patches = (old.patches or [ ]) ++ [ ./pihole-ftl-lists-fix.patch ];
-              });
-          })
-      ];
-    */
 
     systemd.tmpfiles.rules = [
         # Type Path Mode User Group Age Argument
