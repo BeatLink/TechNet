@@ -1,6 +1,6 @@
 #!/usr/bin/env nix-shell
 #! nix-shell -i python
-#! nix-shell -p python313 python3Packages.textual
+#! nix-shell -p python313 python3Packages.textual nh
 
 """
 An App to show the current time.
@@ -424,6 +424,7 @@ class NixOSManager(App):
                 "nixos-rebuild "
                 "--sudo "
                 "--no-reexec "
+                "--show-trace "
                 f"--flake {self.config['flake_path']}#{hostname} "
                 f"--target-host {self.config['user']}@{self.config['hosts'][hostname]} "
                 f"{self.rebuild_action}"
