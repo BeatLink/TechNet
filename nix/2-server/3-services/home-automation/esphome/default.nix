@@ -4,19 +4,15 @@
     ...
 }:
 {
-
-    imports = [
-        ./esphome.nix
-    ];
-
     # Enable the service -----------------------------------------------------------------------------------------------------------------------
     services.esphome = {
         enable = true;
         port = 6052;
         address = "localhost";
         usePing = true;
-        stateDir = "/Storage/Services/ESPHome";
     };
+
+    environment.persistence."/Storage/Services/ESPHome".directories = [ "/var/lib/esphome" ];
 
     # Configure authentiation ------------------------------------------------------------------------------------------------------------------
     sops.secrets.esphome_env.sopsFile = "${inputs.self}/secrets/2-server/esphome.yaml";
