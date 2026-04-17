@@ -13,15 +13,29 @@
         sopsFile = "${inputs.self}/secrets/2-server/syncthing.yaml";
         owner = "beatlink";
     };
+    sops.secrets.syncthing_gui_password = {
+        sopsFile = "${inputs.self}/secrets/2-server/syncthing.yaml";
+        owner = "beatlink";
+    };
     services.syncthing = {
         enable = true;
         openDefaultPorts = true;
         cert = config.sops.secrets.syncthing_cert.path;
         key = config.sops.secrets.syncthing_key.path;
+        user = "beatlink";
+        group = "beatlink";
         databaseDir = "/Storage/Services/Syncthing/Database";
         dataDir = "/Storage/Services/Syncthing/Data";
         configDir = "/Storage/Services/Syncthing/Config";
+        guiPasswordFile = config.sops.secrets.syncthing_gui_password.path;
         settings = {
+            options = {
+                urAccepted = -1;
+            };
+            gui = {
+                user = "beatlink";
+                insecureSkipHostcheck = true;
+            };
             devices = {
                 Odin = {
                     addresses = [
@@ -112,43 +126,6 @@
                         "Thor"
                     ];
                     type = "sendreceive";
-                };
-            };
-        };
-    };
-
-    virtualisation.arion.projects.syncthing = {
-        serviceName = "syncthing2";
-        settings = {
-            services = {
-                syncthing.service = {
-                    image = "syncthing/syncthing:latest";
-                    container_name = "syncthing";
-                    hostname = "Heimdall";
-                    restart = "always";
-                    volumes = [
-                        "/Storage/Services/Syncthing:/var/syncthing"
-                        "/Storage/Files:/Files"
-                    ];
-                    environment = {
-                        "PUID" = "1000";
-                        "PGID" = "1000";
-                        "APP_BASE_URL" = "syncthing.heimdall.technet";
-                    };
-                    ports = [
-                        "8382:8384"
-                        #"22000:22000/tcp" # TCP file transfers
-                        #"22000:22000/udp" # QUIC file transfers
-                        #"21027:21027/udp" # Receive local discovery broadcasts
-                    ];
-                    networks = [
-                        "nginx-proxy-manager_public"
-                    ];
-                };
-            };
-            networks = {
-                nginx-proxy-manager_public = {
-                    external = true;
                 };
             };
         };
