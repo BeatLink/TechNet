@@ -98,7 +98,6 @@
                             id = "xjtvv-cyqwv";
                             devices = [
                                 "Heimdall"
-                                "Thor"
                             ];
                             type = "sendreceive";
                         };
