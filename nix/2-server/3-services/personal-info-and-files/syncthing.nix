@@ -105,7 +105,6 @@
                     id = "xjtvv-cyqwv";
                     devices = [
                         "Odin"
-                        "Thor"
                     ];
                     type = "sendreceive";
                 };
