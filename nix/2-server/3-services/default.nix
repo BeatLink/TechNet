@@ -1,8 +1,3 @@
-# Home Server Configuration
-#
-# TODO: Add Notes
-#
-
 {
     imports = [
         ./backups
