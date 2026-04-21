@@ -6,7 +6,7 @@
             SERVER_ENABLED = "yes";
             CONFIG_FILEPATH = "/Storage/Services/DDNS/config.json";
             PERIOD = "5m";
-            LISTENING_ADDRESS = "9420";
+            LISTENING_ADDRESS = "127.0.0.1:9420";
         };
     };
     nginx-vhosts.ddns = {
