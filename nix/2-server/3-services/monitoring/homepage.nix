@@ -278,6 +278,15 @@
                         };
                     }
                     {
+                        "DDNS" = {
+                            icon = "ddns-updater.png";
+                            href = "https://ddns.heimdall.technet";
+                            description = "Dynamic DNS Updater";
+                            siteMonitor = "https://ddns.heimdall.technet";
+                            statusStyle = "dot";
+                        };
+                    }
+                    {
                         "Syncthing" = {
                             icon = "syncthing.png";
                             href = "https://syncthing.heimdall.technet";
