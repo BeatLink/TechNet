@@ -126,6 +126,15 @@
                             statusStyle = "dot";
                         };
                     }
+                    {
+                        "Ollama" = {
+                            icon = "ollama.png";
+                            href = "https://ollama.heimdall.technet";
+                            description = "Self Hosted AI";
+                            siteMonitor = "https://ollama.heimdall.technet";
+                            statusStyle = "dot";
+                        };
+                    }
                 ];
             }
             {
