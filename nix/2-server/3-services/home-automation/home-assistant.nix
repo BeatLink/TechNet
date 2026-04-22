@@ -8,7 +8,6 @@
     services.home-assistant = {
         enable = true;
         config = null;
-        
         #{
         #    "automation ui" = "!include automations.yaml";
         #    "scene ui" = "!include scenes.yaml";
@@ -100,10 +99,14 @@
         port = 8123;
     };
 
-    /*
-      nginx-vhosts.home-assistant = {
-          domain = "home-assistant.heimdall.technet";
-          port = 8124;
-      };
-    */
+    security.polkit.extraConfig = ''
+        polkit.addRule(function(action, subject) {
+          var allowedUnits = ["go2rtc.service", "frigate.service"];
+          if (action.id == "org.freedesktop.systemd1.manage-units" &&
+              allowedUnits.indexOf(action.lookup("unit")) !== -1 &&
+              subject.user == "hass") {
+            return polkit.Result.YES;
+          }
+        });
+    '';
 }
