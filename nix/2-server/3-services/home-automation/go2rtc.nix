@@ -8,13 +8,13 @@
     services.go2rtc = {
         enable = true;
         settings = {
-            api.listen = ":1984";
+            api.listen = "127.0.0.1:1984";
             ffmpeg.bin = lib.getExe pkgs.ffmpeg-full;
             log = {
                 level = "trace";
             };
             streams = {
-                webcam = "exec:${pkgs.ffmpeg}/bin/ffmpeg -f v4l2 -input_format mjpeg -video_size 1280x720 -framerate 30 -i /dev/video0 -c:v libx264 -preset ultrafast -tune zerolatency -pix_fmt yuv420p -an -f rtsp {output}";
+                webcam = "v4l2:device?video=/dev/video0&input_format=mjpeg&video_size=1280x720&framerate=30";
             };
         };
     };
