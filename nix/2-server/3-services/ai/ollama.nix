@@ -3,6 +3,8 @@
     services.ollama = {
         enable = true;
         package = pkgs.ollama-vulkan;
+        user = "ollama";
+        group = "ollama";
         home = "/Storage/Services/Ollama/data";
         loadModels = [
             "dolphin3"
