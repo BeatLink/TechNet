@@ -31,6 +31,7 @@
             "uptime_kuma"
             "motioneye"
             "traccar"
+            "command_line"
         ];
         customComponents = with pkgs.home-assistant-custom-components; [
             (pkgs.home-assistant-custom-components.frigate.overrideAttrs (old: {
