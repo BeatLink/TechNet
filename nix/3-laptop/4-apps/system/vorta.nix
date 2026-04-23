@@ -7,7 +7,7 @@
                 packages = with pkgs; [
                     libnotify
                     vorta
-                    (writeShellScriptBin "vorta-server-prebackup.sh" ''
+                    /*(writeShellScriptBin "vorta-server-prebackup.sh" ''
                         #!/usr/bin/env bash
                         until ssh-add -l &> /dev/null 
                         do 
@@ -29,7 +29,7 @@
                         if [ $returncode == 0 ]; then 
                             wget --spider "http://uptime-kuma.heimdall.technet/api/push/DjyNX8HxK1?status=up&msg=Backups Completed&ping="; 
                         fi
-                    '')
+                    '')*/
                 ];
                 persistence."/Storage/Apps/System/Vorta" = {
                     directories = [
