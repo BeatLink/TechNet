@@ -3,7 +3,7 @@
         ./calibre-web-automated.nix
         ./freshrss.nix
         ./gallery-dl.nix
-        ./openbooks.nix
+        ./openbooks
         ./qbittorrent.nix
         ./vlc.nix
     ];
