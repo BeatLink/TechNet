@@ -113,7 +113,6 @@ in
                     ];
                     cnameRecords = [
                         "calibre-web.heimdall.technet,heimdall.technet"
-                        "openbooks.heimdall.technet,heimdall.technet"
                         "trilium-sysadmin.heimdall.technet,heimdall.technet"
                     ];
                     domain = {
