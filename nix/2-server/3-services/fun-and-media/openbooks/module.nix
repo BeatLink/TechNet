@@ -27,12 +27,6 @@ in
       description = "Root state directory for openbooks. Used as the service working directory and user home.";
     };
 
-    host = lib.mkOption {
-      type = lib.types.str;
-      default = "127.0.0.1";
-      description = "Address on which the openbooks web interface listens. Use \"0.0.0.0\" to listen on all interfaces.";
-    };
-
     port = lib.mkOption {
       type = lib.types.port;
       default = 8080;
@@ -120,7 +114,6 @@ in
           [
             "${lib.getExe cfg.package}"
             "server"
-            "--address" cfg.host
             "--port" (toString cfg.port)
             "--basepath" cfg.basePath
             "--name" cfg.ircNick

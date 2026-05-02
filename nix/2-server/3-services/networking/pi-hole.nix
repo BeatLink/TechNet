@@ -130,8 +130,8 @@ in
                     end = "192.168.0.254";
                     router = "192.168.0.1";
                     netmask = "255.255.255.0";
-                    leaseTime = "1w";
-                    rapidCommit = true;
+                    leaseTime = "1d";
+                    rapidCommit = false;
                     logging = true;
                 };
             };
