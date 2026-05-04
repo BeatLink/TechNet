@@ -8,6 +8,7 @@
         dataDir = "/Storage/Services/Loki/data";
         configuration = {
             auth_enabled = false;
+            analytics.reporting_enabled = false;
             server = {
                 http_listen_port = 3100;
                 grpc_listen_port = 9096;
@@ -99,19 +100,28 @@
             */
         };
         /*
-          settings = {
-              security.secret_key = "SW2YcwTIb9zpOOhoPsMm";
-              server = {
-                  http_addr = "127.0.0.1";
-                  http_port = 3000;
-                  domain = "grafana.heimdall.technet";
-                  root_url = "https://grafana.heimdall.technet/";
-                  serve_from_sub_path = false;
-                  enforce_domain = false;
-                  enable_gzip = true;
-              };
-              analytics.reporting_enabled = false;
-          };
+                    settings = {
+                        security.secret_key = "SW2YcwTIb9zpOOhoPsMm";
+                        server = {
+                            http_addr = "127.0.0.1";
+                            http_port = 3000;
+                            domain = "grafana.heimdall.technet";
+                            root_url = "https://grafana.heimdall.technet/";
+                            serve_from_sub_path = false;
+                            enforce_domain = false;
+                            enable_gzip = true;
+                        };
+                    };
+                      # Prometheus scrape config for Loki's own metrics (optional)
+            services.prometheus.scrapeConfigs = lib.mkIf config.services.prometheus.enable [
+              {
+                job_name = "loki";
+                static_configs = [
+                  { targets = [ "localhost:3100" ]; }
+                ];
+              }
+            ];
+          }
         */
     };
     nginx-vhosts.loki = {
