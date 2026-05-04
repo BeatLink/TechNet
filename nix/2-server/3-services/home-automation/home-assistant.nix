@@ -51,48 +51,10 @@
 
     };
 
-    /*
-      virtualisation.arion.projects.home-assistant = {
-          serviceName = "home-assistant-old";
-          settings = {
-              services = {
-                  home-assistant.service = {
-                      image = "ghcr.io/home-assistant/home-assistant:stable";
-                      container_name = "home-assistant-old";
-                      restart = "always";
-                      volumes = [
-                          "/Storage/Services/Homeassistant/config:/config"
-                          "/Storage/Services/Homeassistant/media:/media"
-                          "/Storage/Files/Music:/music"
-                          "/Storage/Files/Sounds:/sounds"
-                      ];
-                      environment = {
-                          "TZ" = "America/Jamaica";
-                      };
-                      expose = [
-                      ];
-                      networks = [
-                          "nginx-proxy-manager_public"
-                      ];
-                      ports = [
-                          "8124:8123"
-                          "9171:9170"
-                          "1901:1900"
-                          "5354:5353"
-                      ];
-                      extra_hosts = [
-                          "host.docker.internal:host-gateway"
-                      ];
-                  };
-              };
-              networks = {
-                  nginx-proxy-manager_public = {
-                      external = true;
-                  };
-              };
-          };
-      };
-    */
+    systemd.tmpfiles.rules = [
+        "a+ /Storage/Files/Music - - - - u:hass:rx"
+        "a+ /Storage/Files/Sounds - - - - u:hass:rx"
+    ];
 
     nginx-vhosts.home-assistant = {
         domain = "home-assistant.heimdall.technet";
