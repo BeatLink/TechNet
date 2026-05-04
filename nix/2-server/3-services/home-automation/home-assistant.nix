@@ -31,6 +31,7 @@
             "motioneye"
             "traccar"
             "command_line"
+            "wyoming"
         ];
         customComponents = with pkgs.home-assistant-custom-components; [
             (pkgs.home-assistant-custom-components.frigate.overrideAttrs (old: {

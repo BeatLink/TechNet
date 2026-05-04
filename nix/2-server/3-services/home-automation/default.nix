@@ -5,6 +5,7 @@
         ./home-assistant.nix
         ./mosquitto.nix
         ./traccar.nix
+        ./wyoming.nix
         ./esphome
 
     ];
