@@ -11,9 +11,14 @@
         };
         faster-whisper.servers."whisper" = {
             enable = true;
-            model = "medium-int8"; # good balance of speed vs accuracy
+            model = "distil-large-v3"; # good balance of speed vs accuracy
             language = "en";
             uri = "tcp://0.0.0.0:10300";
+            device = "cpu";
+            extraArgs = [
+                "--cpu-threads"
+                "2"
+            ];
         };
     };
     environment.persistence."/Storage/Services/Wyoming".directories = [
