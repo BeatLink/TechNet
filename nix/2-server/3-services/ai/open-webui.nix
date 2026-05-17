@@ -5,7 +5,7 @@
     };
 
     environment.persistence."/Storage/Services/Open-WebUI/data".directories = [
-        "/var/lib/open-webui"
+        "/var/lib/private/open-webui"
     ];
 
     nginx-vhosts.open-webui = {
