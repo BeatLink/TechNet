@@ -1,15 +1,15 @@
 {
     services.open-webui = {
         enable = true;
-        port = 9552;
+        port = 9770;
     };
 
-    environment.persistence."/Storage/Services/Ollama/open-webui".directories = [
+    environment.persistence."/Storage/Services/Open-WebUI/data".directories = [
         "/var/lib/open-webui"
     ];
 
     nginx-vhosts.open-webui = {
-        domain = "open-webui.heimdall.technet";
-        port = 9552;
+        domain = "ai.heimdall.technet";
+        port = 9770;
     };
 }
