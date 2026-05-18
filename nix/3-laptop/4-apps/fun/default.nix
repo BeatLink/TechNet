@@ -6,7 +6,7 @@
         ./gmusicbrowser.nix
         ./itch.nix
         ./lmms.nix
-        ./lutris.nix
+        #./lutris.nix
         ./newsflash.nix
         ./picard.nix
         ./steam.nix
