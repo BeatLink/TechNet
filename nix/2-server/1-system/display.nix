@@ -1,8 +1,5 @@
 { pkgs, ... }:
 {
-    # Blanks the screen when idle
-    boot.kernelParams = [ "consoleblank=60" ];
-
     # Needed for Webcam
     environment.systemPackages = with pkgs; [
         gst_all_1.gst-plugins-good
