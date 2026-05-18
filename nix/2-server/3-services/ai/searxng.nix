@@ -21,7 +21,7 @@
             };
         };
     };
-    nginx-vhosts.open-webui = {
+    nginx-vhosts.searxng = {
         domain = "searxng.heimdall.technet";
         port = 8295;
     };
