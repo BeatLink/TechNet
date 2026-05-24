@@ -47,23 +47,23 @@
             lists = [
                 {
                     url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts";
-                    comment = "default blocklist";
+                    description = "default blocklist";
                 }
                 {
                     url = "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/pro.txt";
-                    comment = "hagezi blocklist";
+                    description = "hagezi blocklist";
                 }
                 {
                     url = "https://raw.githubusercontent.com/PolishFiltersTeam/KADhosts/master/KADhosts.txt";
-                    comment = "KADhosts";
+                    description = "KADhosts";
                 }
                 {
                     url = "https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.Spam/hosts";
-                    comment = "FadeMind spam";
+                    description = "FadeMind spam";
                 }
                 {
                     url = "https://v.firebog.net/hosts/static/w3kbl.txt";
-                    comment = "Firebog suspicious";
+                    description = "Firebog suspicious";
                 }
             ];
             settings = {
