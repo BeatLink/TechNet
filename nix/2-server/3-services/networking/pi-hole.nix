@@ -19,61 +19,9 @@
 {
     config,
     inputs,
-    pkgs,
     ...
 }:
-let
-    db = "${config.services.pihole-ftl.stateDirectory}/gravity.db";
-    lists = [
-        {
-            url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts";
-            comment = "default blocklist";
-        }
-        {
-            url = "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/pro.txt";
-            comment = "hagezi blocklist";
-        }
-        {
-            url = "https://raw.githubusercontent.com/PolishFiltersTeam/KADhosts/master/KADhosts.txt";
-            comment = "KADhosts";
-        }
-        {
-            url = "https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.Spam/hosts";
-            comment = "FadeMind spam";
-        }
-        {
-            url = "https://v.firebog.net/hosts/static/w3kbl.txt";
-            comment = "Firebog suspicious";
-        }
-    ];
-
-    addListsScript = pkgs.writeShellScript "pihole-add-lists" ''
-        set -euo pipefail
-
-        ${pkgs.lib.concatMapStrings (list: ''
-            echo "Adding list: ${list.url}"
-            ${pkgs.sqlite}/bin/sqlite3 "${db}" \
-              "INSERT OR IGNORE INTO adlist (address, enabled, comment) \
-               VALUES ('${list.url}', 1, '${list.comment}');"
-        '') lists}
-
-        echo "Updating gravity..."
-        ${pkgs.pihole}/bin/pihole updateGravity
-    '';
-in
 {
-
-    systemd.services.pihole-add-lists = {
-        description = "Add Pi-hole blocklists via API";
-        after = [ "pihole-ftl.service" ];
-        wantedBy = [ "pihole-ftl.service" ];
-        serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            ExecStart = addListsScript;
-            User = "pihole";
-        };
-    };
 
     # Credentials ------------------------------------------------------------------------------------------------------------------------------
     sops.secrets.pihole_env.sopsFile = "${inputs.self}/secrets/2-server/pi-hole.yaml";
@@ -84,7 +32,6 @@ in
     };
 
     services = {
-
         # Pi-Hole Web ---------------------------------------------------------------------------------------------------------------------------
         pihole-web = {
             enable = true;
@@ -97,6 +44,28 @@ in
             enable = true;
             openFirewallDNS = true;
             openFirewallDHCP = true;
+            lists = [
+                {
+                    url = "https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts";
+                    comment = "default blocklist";
+                }
+                {
+                    url = "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/pro.txt";
+                    comment = "hagezi blocklist";
+                }
+                {
+                    url = "https://raw.githubusercontent.com/PolishFiltersTeam/KADhosts/master/KADhosts.txt";
+                    comment = "KADhosts";
+                }
+                {
+                    url = "https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.Spam/hosts";
+                    comment = "FadeMind spam";
+                }
+                {
+                    url = "https://v.firebog.net/hosts/static/w3kbl.txt";
+                    comment = "Firebog suspicious";
+                }
+            ];
             settings = {
                 dns = {
                     upstreams = [
