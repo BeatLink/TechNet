@@ -1,7 +1,7 @@
 {
     imports = [
-        ./ollama.nix
-        ./open-webui.nix
-        ./searxng.nix
+        #./ollama.nix
+        #./open-webui.nix
+        #./searxng.nix
     ];
 }
