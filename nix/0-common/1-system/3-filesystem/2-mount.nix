@@ -3,6 +3,8 @@
     boot = {
         supportedFilesystems = [ "zfs" ];
         initrd.supportedFilesystems = [ "zfs" ];
+        zfs.forceImportRoot = false;
+
     };
     fileSystems = {
         "/".neededForBoot = true;
