@@ -57,5 +57,7 @@
             };
         };
         systemd.user.startServices = "sd-switch";
+        xdg.userDirs.setSessionVariables = false;
+ 
     };
 }
