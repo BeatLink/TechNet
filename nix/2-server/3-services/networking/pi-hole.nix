@@ -78,6 +78,7 @@
                         "10.100.100.4  thor.technet"
                         "10.100.100.5  thorx.technet"
                         "10.100.100.6  ragnarok.technet"
+                        "10.100.100.18 socket-ragnarok.technet"
                         "192.168.0.2 bltechnet.mooo.com"
                     ];
                     cnameRecords = [
