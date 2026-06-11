@@ -1,7 +1,7 @@
 { ... }:
 {
     imports = [
-        ./ollama.nix
+        #./ollama.nix
         ./home-assistant
         ./syncthing.nix
         ./valent
