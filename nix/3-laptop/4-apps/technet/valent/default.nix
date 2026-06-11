@@ -22,10 +22,6 @@
                 };
 
             };
-            dconfImports.valent = {
-                source = ./settings.dconf;
-                path = "/ca/andyholmes/valent/";
-            };
             systemd.user.services.valent = {
                 Unit = {
                     Description = "Valent - KDE Connect Implementation";

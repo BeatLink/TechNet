@@ -58,10 +58,6 @@
                     };
                 };
             };
-            dconfImports.plank = {
-                source = ./settings.dconf;
-                path = "/net/launchpad/plank/";
-            };
             systemd.user.services.plank = {
                 Unit = {
                     Description = "Start Plank Dock on graphical login";
