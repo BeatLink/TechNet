@@ -1,0 +1,8 @@
+{
+    "dconf_exports": [
+        "/org/cinnamon/",
+        "/org/gnome/desktop/",
+        "/org/gtk/settings/",
+        "/org/x/apps/"
+    ]
+}
