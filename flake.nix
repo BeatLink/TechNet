@@ -55,7 +55,9 @@
         vantage = {
             url = "github:nabilksabu/vantage-nix";
         };
-
+        app-separators = {
+            url = "github:/BeatLink/Plank-Separator";
+        };
     };
     outputs =
         inputs@{
@@ -74,6 +76,7 @@
             blockurl,
             mobile-nixos,
             vantage,
+            app-separators,
             ...
         }:
         {
