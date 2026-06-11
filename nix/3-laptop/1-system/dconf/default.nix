@@ -7,5 +7,6 @@
         imports = [
             ./dconf-options.nix
         ];
+        dconfImports.enable = true;
     };
 }
