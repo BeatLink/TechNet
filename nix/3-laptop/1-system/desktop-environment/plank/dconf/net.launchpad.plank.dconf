@@ -7,6 +7,7 @@ hide-delay=200
 hide-mode='dodge-active'
 lock-items=true
 pinned-only=false
+position='left'
 theme='Gtk+'
 tooltips-enabled=true
 unhide-delay=100

@@ -11,9 +11,6 @@
 
                 };
             };
-            imports = [
-                ./2-dconf-settings.nix
-            ];
             xdg.desktopEntries."com.gexperts.Tilix" = {
                 name = "Tilix";
                 genericName = "Terminal emulator";
