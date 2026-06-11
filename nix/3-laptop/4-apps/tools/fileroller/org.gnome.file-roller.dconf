@@ -1,12 +1,21 @@
 [dialogs/extract]
+height=800
 recreate-folders=true
 skip-newer=false
+width=1000
 
 [dialogs/new]
 default-extension='.tar.gz'
 encrypt-header=false
 expand-options=true
 volume-size=0
+
+[file-selector]
+show-hidden=false
+sidebar-size=300
+sort-method='name'
+sort-type='ascending'
+window-size=(-1, -1)
 
 [listing]
 list-mode='as-folder'

@@ -26,5 +26,3 @@ local-allow=true
 
 [device/69c9729cad7c43729fc5374c15613a5d/plugin/share]
 download-folder='/Storage/Files/Downloads'
-
-

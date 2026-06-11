@@ -32,6 +32,7 @@ COMMANDS_TITLE = "Select a command"
 COMMANDS_DICT = {
     "Run All Tasks": "run_all",
     "Run Nix Flake Update": "flake_update",
+    "Export Dconf JSON Configs": "export_dconf",
     "Run Nixos Rebuild": "rebuild",
     "Preview Old Generations": "preview_generations",
     "Remove Old Generations & GC": "purge_generations_gc",
@@ -392,6 +393,8 @@ class NixOSManager(App):
         self.command = selected.value
         if self.command == "flake_update":
             self.prepare_command_queue()
+        elif self.command == "export_dconf":
+            self.prepare_command_queue()
         elif self.command == "rebuild" or self.command == "run_all":
             self.content_switcher.current = "rebuild-menu"
             self.rebuild_menu.focus()
@@ -418,6 +421,44 @@ class NixOSManager(App):
                         self.command_queue.append(command(key))
             else:
                 self.command_queue.append(command(self.host["hostname"]))
+
+        def build_dconf_commands():
+            flake_root = pathlib.Path(self.config['flake_path'])
+            found_configs = list(flake_root.rglob("dconf-settings.json"))
+            
+            if not found_configs:
+                self.command_queue.append("echo 'No localized dconf-settings.json targets found in the repo.'")
+                return
+
+            for config_path in found_configs:
+                try:
+                    data = json.loads(config_path.read_text())
+                    exports = data.get("dconf_exports", [])
+                    
+                    if not isinstance(exports, list):
+                        self.command_queue.append(f"echo 'Error: \"exports\" key must be a list in {config_path.name}'")
+                        continue
+
+                    for dconf_path in exports:
+                        #dconf_path = item.get("dconf_path")
+                        output_name = f"{dconf_path.strip("/").replace("/", ".")}.dconf"
+                        
+                        if dconf_path and output_name:
+                            # Establish output destination relative to where this specific JSON file lives
+                            target_dir = config_path.parent
+                            relative_output = target_dir / output_name
+                            
+                            # Calculate path relative to the executing flake directory context
+                            execution_path = relative_output.relative_to(flake_root)
+                            
+                            # Generate sequential processing task
+                            self.command_queue.append(f"dconf dump {dconf_path} > ./{execution_path}")
+                        else:
+                            self.command_queue.append(f"echo 'Warning: Missing dconf_path or output_file_name in {config_path.name}'")
+                            
+                except Exception as e:
+                    self.command_queue.append(f"echo 'Error processing module target at {config_path.name}: {str(e)}'")
+
 
         def build_command(hostname):
             return (
@@ -467,6 +508,8 @@ class NixOSManager(App):
                 add_commands_for_hosts(gc_command)
             case "flake_update":
                 self.command_queue.append("nix flake update --refresh")
+            case "export_dconf":                 # Triggers the dynamic scanner block
+                build_dconf_commands()
             case "rebuild":
                 add_commands_for_hosts(build_command)
             case "preview_generations":
