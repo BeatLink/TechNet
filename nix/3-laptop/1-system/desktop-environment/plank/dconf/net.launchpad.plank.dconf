@@ -1,11 +1,11 @@
 [docks/dock1]
 alignment='center'
 anchor-docklets=true
-dock-items=['org.keepassxc.KeePassXC.dockitem', 'nemo.dockitem', 'separator.dockitem', 'thunderbird.dockitem', 'whatsapp.dockitem', 'whatsapp-private.dockitem', 'discord.dockitem', 'separator-1.dockitem', 'io.gitlab.news_flash.NewsFlash.dockitem', 'gmusicbrowser.dockitem', 'freetube.dockitem', 'steam.dockitem', 'TimeStretch.dockitem', 'pix.dockitem', 'vlc.dockitem', 'separator-2.dockitem', 'com.gexperts.Tilix.dockitem', 'codium.dockitem']
+dock-items=@as []
 gap-size=0
 hide-delay=200
 hide-mode='dodge-active'
-lock-items=false
+lock-items=true
 pinned-only=false
 position='left'
 theme='Gtk+'
