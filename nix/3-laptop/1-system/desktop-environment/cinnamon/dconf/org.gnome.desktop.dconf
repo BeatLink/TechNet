@@ -51,7 +51,7 @@ text-scaling-factor=1.0
 toolbar-detachable=false
 toolbar-icons-size='large'
 toolbar-style='both-horiz'
-toolkit-accessibility=true
+toolkit-accessibility=false
 
 [peripherals/mouse]
 accel-profile='default'
