@@ -64,7 +64,6 @@
     ];
 
     home-manager.users.beatlink = {
-        imports = [ ./dconf ]; # Imports Cinnamon Dconf Settings
         xsession = {
             scriptPath = ".local/share/X11/xsession";
             initExtra = "ERRFILE=$HOME/.local/share/X11/xsession-errors";
