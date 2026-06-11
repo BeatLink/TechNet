@@ -11,7 +11,7 @@ enabled-desklets=@as []
 enabled-extensions=['transparent-panels@germanfr', 'centered-cinnamon-dock@mostlynick3']
 favorite-apps=@as []
 hotcorner-layout=['expo:false:0', 'desktop:true:100', 'expo:true:100', 'scale:true:100']
-next-applet-id=42
+next-applet-id=43
 next-desklet-id=1
 no-adjacent-panel-barriers=true
 panel-edit-mode=false
@@ -60,7 +60,7 @@ exec-arg=''
 
 [desktop/background]
 picture-options='zoom'
-picture-uri='file:///Storage/Files/Pictures/Wallpapers/variety-copied-wallpaper-b087211cf0a72a91bfe049dacd6263c1.jpg'
+picture-uri='file:///Storage/Files/Pictures/Wallpapers/variety-copied-wallpaper-6b5aac71aba9d752169b256d46340c8f.jpg'
 
 [desktop/background/slideshow]
 delay=15
