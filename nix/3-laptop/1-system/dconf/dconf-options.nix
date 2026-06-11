@@ -69,7 +69,7 @@ in
                 After = [ "dconf.service" ];
             };
             Service = {
-                ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.dconf}/bin/dconf reset -f ${configData.targetPath} && ${pkgs.dconf}/bin/dconf load ${configData.targetPath} < ${configData.sourceFile}'";
+                ExecStart = "${pkgs.dconf}/bin/dconf load ${configData.targetPath} < ${configData.sourceFile}'";
                 Type = "oneshot";
                 RemainOnExit = true;
             };
