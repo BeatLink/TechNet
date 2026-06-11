@@ -2,7 +2,7 @@
     config,
     lib,
     pkgs,
-    self,
+    inputs,
     ...
 }:
 
@@ -10,7 +10,7 @@ with lib;
 
 let
     cfg = config.dconfImports;
-    flakeRoot = self.outPath;
+    flakeRoot = inputs.self.outPath;
     allFilesDeep =
         dir:
         let
@@ -18,9 +18,9 @@ let
             files = mapAttrsToList (
                 name: type:
                 let
-                    path = "${toString dir}/${name}";
+                    path = dir + "/${name}";
                 in
-                if type == "directory" then allFilesDeep (/. + path) else path
+                if type == "directory" then allFilesDeep path else path
             ) contents;
         in
         flatten files;
