@@ -46,7 +46,7 @@ let
                         name = safeServiceName;
                         value = {
                             targetPath = dconfPath;
-                            sourceFile = /. + "${parentDir}/${dconfFileName}";
+                            sourceFile = parentDir + "/${dconfFileName}";
                         };
                     }
                 ) exports
