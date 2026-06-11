@@ -9,6 +9,7 @@
         ./inkscape.nix
         ./libreoffice.nix
         ./screenshot.nix
+        ./separator.nix
         ./simple-scan.nix
         ./universal-android-debloater.nix
         #./ventoy.nix
