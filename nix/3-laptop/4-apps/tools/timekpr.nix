@@ -1,5 +1,0 @@
-{
-    services.timekpr = {
-        enable = true;
-    };
-}
