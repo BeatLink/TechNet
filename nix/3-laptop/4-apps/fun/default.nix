@@ -9,6 +9,7 @@
         #./lutris.nix
         ./newsflash.nix
         ./picard.nix
+        ./quodlibet.nix
         ./steam.nix
         ./stremio.nix
         ./vlc.nix
