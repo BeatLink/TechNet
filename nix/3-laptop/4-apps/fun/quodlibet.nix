@@ -3,7 +3,10 @@
         { config, pkgs, ... }:
         {
             # Install Quod Libet directly into user profile
-            home.packages = [ pkgs.quodlibet ];
+            home.packages = [
+                pkgs.quodlibet
+                pkgs.python3Packages.musicbrainzngs
+            ];
 
             home = {
                 # Persist Quod Libet configurations & library database
