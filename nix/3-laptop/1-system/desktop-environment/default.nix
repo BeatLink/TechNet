@@ -18,6 +18,6 @@
         #./kde
         #./budgie
         ./cinnamon
-        ./plank
+        #./plank
     ];
 }
