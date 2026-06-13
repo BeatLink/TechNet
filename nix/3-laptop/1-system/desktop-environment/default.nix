@@ -18,6 +18,5 @@
         #./kde
         #./budgie
         ./cinnamon
-        #./plank
     ];
 }
