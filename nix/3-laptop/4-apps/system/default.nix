@@ -12,5 +12,6 @@
         ./borgmatic
         ./nemo
         ./tilix
+        ./ssh.nix
     ];
 }
