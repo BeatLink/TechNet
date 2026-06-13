@@ -4,8 +4,7 @@
         {
             # Install Quod Libet directly into user profile
             home.packages = [
-                pkgs.quodlibet
-                pkgs.python3Packages.musicbrainzngs
+                (pkgs.quodlibet.override { withMusicBrainzNgs = true; })
             ];
 
             home = {
