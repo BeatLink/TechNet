@@ -2,23 +2,7 @@
 #! nix-shell -i python
 #! nix-shell -p python313 python3Packages.textual
 
-import pathlib
-import json
-import asyncio
-import subprocess
-from datetime import datetime
-from textual import on, work
-from textual.app import App, ComposeResult
-from textual.containers import CenterMiddle, Center, Middle, Container, Vertical, Horizontal, HorizontalGroup
-from textual.widgets import Header, ContentSwitcher, Label, Digits, OptionList, RichLog, Button
-from textual.widgets.option_list import Option
-from textual.widget import Widget
-from textual.events import Focus
-from textual.message import Message
-from textual.reactive import reactive
-from textual.theme import Theme
 
-COMMANDS_TITLE = "Select a command"
 
 COMMANDS_DICT = {
     "Install NixOS": "install",
