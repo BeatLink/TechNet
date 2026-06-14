@@ -9,6 +9,7 @@ requires-python = ">=3.11"
 
 [project.scripts]
 technet-installer = "technet_installer.main:run"
+nixtool = "nixtool:run"
 
 [build-system]
 requires = ["setuptools>=61.0"]
