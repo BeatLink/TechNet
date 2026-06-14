@@ -31,37 +31,148 @@ config_file = script_folder / "nixtool-config.json"
 
 COMMANDS_TITLE = "Select a command"
 COMMANDS_DICT = {
-    "Run All Tasks": "run_all",
-    "Run Nix Flake Update": "flake_update",
-    "Export Dconf JSON Configs": "export_dconf",
-    "Run Nixos Rebuild": "rebuild",
-    "Preview Old Generations": "preview_generations",
-    "Remove Old Generations & GC": "purge_generations_gc",
-    "Run Nix Garbage Collection": "gc",
-    "Run Installation and Formatting Commands": "run_installer"
+    "run_all": {
+        "name": "Run All Tasks",
+        "command": "run_all"
+    },
+    "flake_update": {
+        "name": "Run Nix Flake Update",
+        "command": ["nix flake update --refresh"]
+    },
+    "export_dconf": {
+        "name": "Export Dconf JSON Configs",
+        "command": lambda app: app.get_dconf_commands()
+    },
+    "rebuild": {
+        "name": "Run Nixos Rebuild",
+        "command": "menu:rebuild-menu"
+    },
+    "preview_generations": {
+        "name": "Preview Old Generations",
+        "command": lambda app: app.add_commands_for_hosts(lambda a, h: a.get_preview_cmd(h))
+    },
+    "purge_generations_gc": {
+        "name": "Remove Old Generations & GC",
+        "command": lambda app: app.add_commands_for_hosts(lambda a, h: a.get_purge_cmd(h)) + app.add_commands_for_hosts(lambda a, h: a.get_gc_cmd(h))
+    },
+    "gc": {
+        "name": "Run Nix Garbage Collection",
+        "command": lambda app: app.add_commands_for_hosts(lambda a, h: a.get_gc_cmd(h))
+    },
+    "run_installer": {
+        "name": "Run Installation and Formatting Commands",
+        "command": "menu:installer-menu"
+    }
 }
 
 INSTALLER_TITLE = "Select an installation command"
 INSTALLER_DICT = {
-    "Install NixOS": "install",
-    "Format Data Drive (Backup Server)": "format_data_drive_backup",
-    "Format Data Drive (Server)": "format_data_drive_server",
-    "Format SD Card (Phone)": "format_sd_card_phone"
+    "install": {
+        "name": "Install NixOS",
+        "command": ["bash ./install.sh"]
+    },
+    "format_data_drive_backup": {
+        "name": "Format Data Drive (Backup Server)",
+        "command": ["bash ./format-data-drive-backup-server.sh"]
+    },
+    "format_data_drive_server": {
+        "name": "Format Data Drive (Server)",
+        "command": ["bash ./format-data-drive-server.sh"]
+    },
+    "format_sd_card_phone": {
+        "name": "Format SD Card (Phone)",
+        "command": ["bash ./format-sd-card-phone.sh"]
+    }
 }
 
 REBUILD_TITLE = "Select a NixOS Rebuild action"
 REBUILD_DICT = {
-    "switch - Activate config and save to bootloader": "switch",
-    "test - Activate config but reset next boot": "test",
-    "boot - Activate config on next boot":"boot",
-    "dry-activate - Build config but only show changes":"dry-activate",
-    "build-vm - Build Test VM": "build-vm",
-    "rollback - Rollback to previous configuration":"rollback"
+    "switch": {
+        "name": "switch - Activate config and save to bootloader",
+        "command": lambda app, host: app.get_rebuild_cmd(host, "switch")
+    },
+    "test": {
+        "name": "test - Activate config but reset next boot",
+        "command": lambda app, host: app.get_rebuild_cmd(host, "test")
+    },
+    "boot": {
+        "name": "boot - Activate config on next boot",
+        "command": lambda app, host: app.get_rebuild_cmd(host, "boot")
+    },
+    "dry-activate": {
+        "name": "dry-activate - Build config but only show changes",
+        "command": lambda app, host: app.get_rebuild_cmd(host, "dry-activate")
+    },
+    "build-vm": {
+        "name": "build-vm - Build Test VM",
+        "command": lambda app, host: app.get_rebuild_cmd(host, "build-vm")
+    },
+    "rollback": {
+        "name": "rollback - Rollback to previous configuration",
+        "command": lambda app, host: app.get_rebuild_cmd(host, "rollback")
+    }
 }
 
 HOST_TITLE = "Select Hosts"
 
+class OptionsWidget(Widget):
+    DEFAULT_CSS = """
+        #container {
+            width: auto;
+            height: auto;
+        }
+        #label {
+            width: 100%;
+            height: auto;
+            text-align: center;
+            color: $primary;
+            text-style: bold;
+        }
+        #list {
+            width: auto;
+            height: auto;
+            margin: 0;
+            border: round $primary;
+            background: transparent;
+        }
+    """
+    can_focus = True
+    title = reactive("")
+    options = reactive({}, recompose=True)
+    
+    class Selected(Message):
 
+        def __init__(self, widget: Widget, key: str, value: str) -> None:
+            super().__init__()
+            self.widget = widget
+            self.key = key
+            self.value = value
+
+        @property
+        def control(self) -> Widget:
+            return self.widget
+            
+
+    def compose(self) -> ComposeResult:
+        options = [Option(v["name"], id=k) for k, v in self.options.items()]
+        self.container = Container(id="container")
+        self.label = Label(self.title, id="label")
+        self.list = OptionList(*options, id="list")
+        with self.container:
+            yield self.label
+            yield self.list
+
+    def on_focus(self, event: Focus):
+        self.list.focus()
+
+    def on_option_list_option_selected(self, event: OptionList.OptionSelected):
+        self.post_message(
+            self.Selected(
+                self,
+                event.option.prompt,
+                str(event.option.id)
+            )
+        )
 
 class NixOSManager(App):
     CSS = """
@@ -156,30 +267,31 @@ class NixOSManager(App):
     @on(OptionsWidget.Selected, "#command-menu")
     def process_command(self, selected: OptionsWidget.Selected):
         print(f"command selected {selected.value}")
-        self.command = selected.value
-        if self.command == "flake_update":
+        self.command = str(selected.value)
+        logic = COMMANDS_DICT[self.command]["command"]
+
+        if isinstance(logic, str) and logic.startswith("menu:"):
+            target = logic.split(":")[1]
+            self.content_switcher.current = target
+            if target == "rebuild-menu":
+                self.rebuild_menu.focus()
+            elif target == "installer-menu":
+                self.installer_menu.focus()
+        elif self.command in ["flake_update", "export_dconf"]:
             self.prepare_command_queue()
-        elif self.command == "export_dconf":
-            self.prepare_command_queue()
-        elif self.command == "rebuild" or self.command == "run_all":
-            self.content_switcher.current = "rebuild-menu"
-            self.rebuild_menu.focus()
-        elif self.command == "run_installer":
-            self.content_switcher.current = "installer-menu"
-            self.installer_menu.focus()
         else:
             self.content_switcher.current = "host-selector"
             self.host_selector.focus()
 
     @on(OptionsWidget.Selected, "#installer-menu")
     def process_installer_action(self, selected: OptionsWidget.Selected):
-        self.installer_command = selected.value
+        self.installer_command = str(selected.value)
         self.content_switcher.current = "host-selector"
         self.host_selector.focus()
 
     @on(OptionsWidget.Selected, "#rebuild-menu")
     def process_rebuild_action(self, selected: OptionsWidget.Selected):
-        self.rebuild_action = selected.value
+        self.rebuild_action = str(selected.value)
         self.content_switcher.current = "host-selector"
         self.host_selector.focus()
 
@@ -188,109 +300,74 @@ class NixOSManager(App):
         self.host = {"hostname": message.hostname, "host_url": message.host_url}
         self.prepare_command_queue()
 
+    def add_commands_for_hosts(self, command_func):
+        """Executes a command generator function for the currently selected host(s)."""
+        queue = []
+        target_hosts = [h for h, u in self.config["hosts"].items() if u != "all"] if self.host["host_url"] == "all" else [self.host["hostname"]]
+        for hostname in target_hosts:
+            queue.append(command_func(self, hostname))
+        return queue
+
+    def get_rebuild_cmd(self, hostname, action):
+        return (
+            f"nixos-rebuild --sudo --no-reexec --show-trace "
+            f"--flake {self.config['flake_path']}#{hostname} "
+            f"--target-host {self.config['user']}@{self.config['hosts'][hostname]} {action}"
+        )
+
+    def get_preview_cmd(self, hostname):
+        remote_cmd = (
+            f'echo "---- {hostname} (system generations) ----" && '
+            'sudo nix-env --profile /nix/var/nix/profiles/system --list-generations && '
+            f'echo "---- {hostname} (user generations) ----" && nix-env --list-generations'
+        )
+        return f"ssh {self.config['user']}@{self.config['hosts'][hostname]} '{remote_cmd}'"
+
+    def get_purge_cmd(self, hostname):
+        remote_cmd = "sudo nix-env --profile /nix/var/nix/profiles/system --delete-generations old && nix-env --delete-generations old"
+        return f"ssh {self.config['user']}@{self.config['hosts'][hostname]} '{remote_cmd}'"
+
+    def get_gc_cmd(self, hostname):
+        return f"ssh {self.config['user']}@{self.config['hosts'][hostname]} 'sudo nix-collect-garbage -d'"
+
+    def get_dconf_commands(self):
+        queue = []
+        flake_root = pathlib.Path(self.config['flake_path'])
+        for config_path in flake_root.rglob("dconf-settings.json"):
+            try:
+                data = json.loads(config_path.read_text())
+                for dconf_path in data.get("dconf_exports", []):
+                    output_name = f"{dconf_path.strip('/').replace('/', '.')}.dconf"
+                    target_file = (config_path.parent / output_name).relative_to(flake_root)
+                    queue.append(f"dconf dump {dconf_path} > ./{target_file}")
+            except Exception as e:
+                queue.append(f"echo 'Error processing {config_path.name}: {str(e)}'")
+        return queue if queue else ["echo 'No localized dconf targets found.'"]
+
     def prepare_command_queue(self):
-        def add_commands_for_hosts(command):
-            if self.host["host_url"] == "all":
-                for key, value in self.config["hosts"].items():
-                    if value != "all":
-                        self.command_queue.append(command(key))
+        self.command_queue = []
+
+        if self.rebuild_action:
+            logic = REBUILD_DICT[self.rebuild_action]["command"]
+            if self.command == "run_all":
+                self.command_queue.append("nix flake update --refresh")
+                self.command_queue.extend(self.add_commands_for_hosts(logic))
+                self.command_queue.extend(self.add_commands_for_hosts(lambda a, h: a.get_purge_cmd(h)))
+                self.command_queue.extend(self.add_commands_for_hosts(lambda a, h: a.get_gc_cmd(h)))
             else:
-                self.command_queue.append(command(self.host["hostname"]))
-
-        def build_dconf_commands():
-            flake_root = pathlib.Path(self.config['flake_path'])
-            found_configs = list(flake_root.rglob("dconf-settings.json"))
-            
-            if not found_configs:
-                self.command_queue.append("echo 'No localized dconf-settings.json targets found in the repo.'")
-                return
-
-            for config_path in found_configs:
-                try:
-                    data = json.loads(config_path.read_text())
-                    exports = data.get("dconf_exports", [])
-                    
-                    if not isinstance(exports, list):
-                        self.command_queue.append(f"echo 'Error: \"exports\" key must be a list in {config_path.name}'")
-                        continue
-
-                    for dconf_path in exports:
-                        #dconf_path = item.get("dconf_path")
-                        output_name = f"{dconf_path.strip("/").replace("/", ".")}.dconf"
-                        
-                        if dconf_path and output_name:
-                            # Establish output destination relative to where this specific JSON file lives
-                            target_dir = config_path.parent
-                            relative_output = target_dir / output_name
-                            
-                            # Calculate path relative to the executing flake directory context
-                            execution_path = relative_output.relative_to(flake_root)
-                            
-                            # Generate sequential processing task
-                            self.command_queue.append(f"dconf dump {dconf_path} > ./{execution_path}")
-                        else:
-                            self.command_queue.append(f"echo 'Warning: Missing dconf_path or output_file_name in {config_path.name}'")
-                            
-                except Exception as e:
-                    self.command_queue.append(f"echo 'Error processing module target at {config_path.name}: {str(e)}'")
-
-        def build_command(hostname):
-            return (
-                "nixos-rebuild "
-                "--sudo "
-                "--no-reexec "
-                "--show-trace "
-                f"--flake {self.config['flake_path']}#{hostname} "
-                f"--target-host {self.config['user']}@{self.config['hosts'][hostname]} "
-                f"{self.rebuild_action}"
-            )
-
-        def preview_generations_command(hostname):
-
-            remote_cmd = (
-                f'echo "---- {hostname} (system generations) ----" && '
-                'sudo nix-env --profile /nix/var/nix/profiles/system --list-generations && '
-                f'echo "---- {hostname} (user generations) ----" && '
-                'nix-env --list-generations'
-            )
-            ssh_cmd = f"ssh {self.config['user']}@{self.config['hosts'][hostname]} '{remote_cmd}'"
-            return ssh_cmd
-
-        def remove_generations_command(hostname):
-            remote_cmd = (
-                "sudo nix-env --profile /nix/var/nix/profiles/system --delete-generations old "
-                "&& "
-                "nix-env --delete-generations old"
-            )
-            ssh_cmd = f"ssh {self.config['user']}@{self.config['hosts'][hostname]} '{remote_cmd}'"
-            return ssh_cmd
-
-        def gc_command(hostname):
-            remote_cmd = (
-                "sudo nix-collect-garbage -d"
-            )
-            ssh_cmd = f"ssh {self.config['user']}@{self.config['hosts'][hostname]} '{remote_cmd}'"
-            return ssh_cmd
-
-        match self.command:
-            case "run_all": 
-                self.command_queue.append("nix flake update --refresh")
-                add_commands_for_hosts(build_command)
-                add_commands_for_hosts(remove_generations_command)
-                add_commands_for_hosts(gc_command)
-            case "flake_update":
-                self.command_queue.append("nix flake update --refresh")
-            case "export_dconf":                 # Triggers the dynamic scanner block
-                build_dconf_commands()
-            case "rebuild":
-                add_commands_for_hosts(build_command)
-            case "preview_generations":
-                add_commands_for_hosts(preview_generations_command)
-            case "purge_generations_gc":
-                add_commands_for_hosts(remove_generations_command)
-                add_commands_for_hosts(gc_command)
-            case "gc":
-                add_commands_for_hosts(gc_command)
+                self.command_queue.extend(self.add_commands_for_hosts(logic))
+        elif self.installer_command:
+            logic = INSTALLER_DICT[self.installer_command]["command"]
+            if callable(logic):
+                self.command_queue.extend(logic(self))
+            else:
+                self.command_queue.extend(logic)
+        else:
+            logic = COMMANDS_DICT[self.command]["command"]
+            if callable(logic):
+                self.command_queue.extend(logic(self))
+            else:
+                self.command_queue.extend(logic)
 
         self.run_commands()
 
@@ -303,6 +380,7 @@ class NixOSManager(App):
     def reset(self, event: Button.Pressed):
         self.command = ""
         self.rebuild_action = ""
+        self.installer_command = ""
         self.host = {
             "hostname": "",
             "host_url": ""
