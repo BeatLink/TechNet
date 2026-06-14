@@ -46,13 +46,20 @@ class OptionsWidget(Widget):
 
     def compose(self) -> ComposeResult:
         options = []
-        for key, value in self.options.items():
-            if hasattr(value, "name"):
-                options.append(Option(value.name, id=key))
-            elif isinstance(value, dict) and "name" in value:
-                options.append(Option(value["name"], id=key))
-            else:
-                options.append(Option(key, id=value))
+        if isinstance(self.options, dict):
+            for key, value in self.options.items():
+                if hasattr(value, "name"):
+                    options.append(Option(value.name, id=key))
+                elif isinstance(value, dict) and "name" in value:
+                    options.append(Option(value["name"], id=key))
+                else:
+                    options.append(Option(key, id=value))
+        elif isinstance(self.options, list):
+            for index, item in enumerate(self.options):
+                if isinstance(item, dict) and "name" in item:
+                    options.append(Option(item["name"], id=str(index)))
+                else:
+                    options.append(Option(str(item), id=str(index)))
 
         with Container(id="container"):
             yield Label(self.title, id="label")
