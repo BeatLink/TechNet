@@ -84,7 +84,7 @@ loki.source.file "extra_logs" {
 }
 
 loki.source.journal "systemd" {
-    max_age       = "12h"
+    max_age       = "24h"
     forward_to    = [loki.process.add_labels.receiver]
     relabel_rules = loki.relabel.journal.rules
 }
