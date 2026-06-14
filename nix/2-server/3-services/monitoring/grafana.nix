@@ -9,6 +9,26 @@ let
         uid = "nixos-updates";
         schemaVersion = 36;
         editable = true;
+        templating = {
+            list = [
+                {
+                    name = "host";
+                    type = "query";
+                    datasource = {
+                        type = "prometheus";
+                        uid = "prometheus";
+                    };
+                    definition = "label_values(node_systemd_unit_state{name=\"nixos-upgrade.service\"}, instance)";
+                    includeAll = true;
+                    multi = true;
+                    current = {
+                        text = "All";
+                        value = [ "$__all" ];
+                    };
+                    refresh = 1;
+                }
+            ];
+        };
         panels = [
             {
                 title = "Upgrade Service Status";
@@ -25,10 +45,11 @@ let
                 };
                 targets = [
                     {
-                        expr = "node_systemd_unit_state{name=\"nixos-upgrade.service\", state=\"active\"}";
-                        legendFormat = "Active State";
+                        expr = "node_systemd_unit_state{name=\"nixos-upgrade.service\", state=\"active\", instance=~\"$host\"}";
+                        legendFormat = "{{instance}}";
                     }
                 ];
+                repeat = "host";
                 fieldConfig.defaults.mappings = [
                     {
                         type = "value";
@@ -60,7 +81,7 @@ let
                 };
                 targets = [
                     {
-                        expr = "{unit=\"nixos-upgrade.service\"}";
+                        expr = "{unit=\"nixos-upgrade.service\", host=~\"$host\"}";
                     }
                 ];
                 options = {
