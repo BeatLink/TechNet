@@ -22,8 +22,7 @@
     };
 
     systemd.tmpfiles.rules = [
-        "Z /Storage/Files/Backups/Laptop/Vorta 0750 borg borg - -"
-        "Z /Storage/Files/Backups/Laptop/Borgmatic 0750 borg borg - -"
+        "Z /Storage/Files/Backups/Laptop 0750 borg borg - -"
     ];
 
 }
