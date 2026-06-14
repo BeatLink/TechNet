@@ -33,7 +33,7 @@
             "command_line"
             "wyoming"
         ];
-        customComponents = with pkgs.home-assistant-custom-components; [
+        customComponents =   [
             (pkgs.home-assistant-custom-components.frigate.overrideAttrs (old: {
                 pytestFlagsArray = (old.pytestFlagsArray or [ ]) ++ [
                     "--deselect=tests/test_integration_services.py::test_review_summarize_service_version_check"
