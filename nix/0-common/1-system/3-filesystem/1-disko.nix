@@ -51,7 +51,7 @@
                         xattr = "sa"; # Allows extended attributes stored in the filesystem inodes
                         acltype = "posix"; # Uses posix compliant ACL for extended attributes
                         "com.sun:auto-snapshot" = "false"; # Prevents autosnapshots in general (will be enabled for specific datasets later)
-                        mountpoint = "legacy"; # This manages the mountpoint manually using typical tools (mount, fstab, etc)
+                        # This manages the mountpoint manually using typical tools (mount, fstab, etc)
                         encryption = "aes-256-gcm";
                         keyformat = "passphrase";
                         keylocation = "file:///tmp/encryption.key";
@@ -67,7 +67,6 @@
                     type = "zfs_fs";
                     mountpoint = "/nix";
                     options = {
-                        mountpoint = "legacy";
                         atime = "off"; # Nix does not use atime (impure), might as well turn it off
                     };
                 };
@@ -76,7 +75,7 @@
                     type = "zfs_fs";
                     mountpoint = "/persistent";
                     options = {
-                        mountpoint = "legacy";
+
                         "com.sun:auto-snapshot" = "true"; # Generates snapshots to persist data
                     };
                 };
@@ -85,7 +84,6 @@
                     type = "zfs_fs";
                     mountpoint = "/home";
                     options = {
-                        mountpoint = "legacy";
                         "com.sun:auto-snapshot" = "true"; # Generates snapshots to persist data
                     };
                     postCreateHook = ''
@@ -94,9 +92,11 @@
                 };
                 "root/swap" = {
                     type = "zfs_volume";
-                    size = "40G";
+                    size = "16G";
                     content = {
                         type = "swap";
+                        randomEncryption = true; # Generates a new key every boot, ideal for swap
+                        discardPolicy = "both"; # Enables TRIM for the ZVOL
                     };
                 };
             };

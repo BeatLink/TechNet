@@ -10,8 +10,8 @@
         unitConfig.DefaultDependencies = "no";
         serviceConfig.Type = "oneshot";
         script = ''
-            zfs rollback -r  root-pool-${config.networking.hostName}/root@blank && 
-            zfs rollback -r  root-pool-${config.networking.hostName}/root/home@blank && 
+            zfs rollback -Rf root-pool-${config.networking.hostName}/root@blank && 
+            zfs rollback -Rf root-pool-${config.networking.hostName}/root/home@blank && 
             echo "Rollback Complete"
         '';
     };
