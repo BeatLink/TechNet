@@ -14,6 +14,15 @@
             scrape_interval = "60s"; # "1m"
             scrape_timeout = "30s";
         };
+        extraFlags = [
+            "--web.enable-remote-write-receiver"
+        ];
+        # Allow receiving remote writes from Grafana Alloy instances
+        configText = ''
+            remote_write:
+              - url: "http://prometheus.heimdall.technet/api/v1/write"
+                send_exemplars: true
+        '';
         scrapeConfigs = [
             {
                 job_name = "pihole";
