@@ -11,6 +11,11 @@
         group = "frigate";
     };
 
+    systemd.tmpfiles.rules = [
+        "d /Storage/Services/Frigate 0750 frigate frigate - -"
+        "Z /Storage/Services/Frigate 0750 frigate frigate - -"
+    ];
+
     services = {
         frigate = {
             enable = true;
