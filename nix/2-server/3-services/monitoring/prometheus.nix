@@ -38,43 +38,43 @@
                 static_configs = [
                     {
                         labels.hostname = "Bedroom Light";
-                        targets = [ "light-bedroom.technet" ];
+                        targets = [ "light-bedroom.lan" ];
                     }
                     {
                         labels.hostname = "Bedroom Desk Light";
-                        targets = [ "light-bedroom-desk.technet" ];
+                        targets = [ "light-bedroom-desk.lan" ];
                     }
                     {
                         labels.hostname = "Bathroom Light";
-                        targets = [ "light-bathroom.technet" ];
+                        targets = [ "light-bathroom.lan" ];
                     }
                     {
                         labels.hostname = "Kitchen Light";
-                        targets = [ "light-kitchen.technet" ];
+                        targets = [ "light-kitchen.lan" ];
                     }
                     {
                         labels.hostname = "Outside Light";
-                        targets = [ "light-outside.technet" ];
+                        targets = [ "light-outside.lan" ];
                     }
                     {
                         labels.hostname = "Fan IR Blaster";
-                        targets = [ "ir-fan.technet" ];
+                        targets = [ "ir-fan.lan" ];
                     }
                     {
                         labels.hostname = "Fan Socket";
-                        targets = [ "socket-fan.technet" ];
+                        targets = [ "socket-fan.lan" ];
+                    }
+                    {
+                        labels.hostname = "Bedroom Motion Sensor";
+                        targets = [ "sensor-bedroom.lan" ];
+                    }
+                    {
+                        labels.hostname = "Bathroom Motion Sensor";
+                        targets = [ "sensor-bathroom.lan" ];
                     }
                     {
                         labels.hostname = "Ragnarok Socket";
                         targets = [ "socket-ragnarok.technet" ];
-                    }
-                    {
-                        labels.hostname = "Bedroom Motion Sensor";
-                        targets = [ "sensor-bedroom.technet" ];
-                    }
-                    {
-                        labels.hostname = "Bathroom Motion Sensor";
-                        targets = [ "sensor-bathroom.technet" ];
                     }
                 ];
             }
