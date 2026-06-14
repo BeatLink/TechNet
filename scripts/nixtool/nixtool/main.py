@@ -174,6 +174,8 @@ class NixOSManager(App):
     def run_commands(self):
         self.content_switcher.current = "command-runner"
         self.command_runner.focus()
+        if self.config.get("flake_path"):
+            self.command_runner.work_dir = self.config["flake_path"]
         self.command_runner.load_command_queue(self.command_queue)
 
     @on(Button.Pressed, "#return")

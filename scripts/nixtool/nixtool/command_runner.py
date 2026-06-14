@@ -80,9 +80,9 @@ class CommandRunner(Widget):
             return self.widget
     """
 
-    def __init__(self, *children: Widget, work_dir=None):
-        super().__init__(*children)
-        self.work_dir = work_dir
+    def __init__(self, work_dir=None, **kwargs):
+        super().__init__(**kwargs)
+        self.work_dir = reactive(work_dir)
         self.container = Container(id="container")
         self.label = Label(id="label")
         self.logview = RichLog(id="logview")
@@ -128,7 +128,6 @@ class CommandRunner(Widget):
     @on(Button.Pressed, "#start")
     def start(self, _: Button.Pressed):
         self.run_command()
-        self.return_button.focus()
 
     @work(exclusive=True)
     async def run_command(self):
@@ -157,6 +156,9 @@ class CommandRunner(Widget):
                 self.logview.write(f"\n>>> Command succeeded with return code {process.returncode} <<")
             else:
                 self.logview.write(f"\n>>> Command failed with return code {process.returncode} <<<")
+                # Stop the queue if a command fails
+                self.final_return_code = process.returncode
+                break
 
         # When process is finished show the end message        
         if int(self.final_return_code) == 0:
@@ -169,4 +171,5 @@ class CommandRunner(Widget):
         self.message.remove_class("invisible")
         self.message.refresh()
         self.return_button.remove_class("invisible")
+        self.return_button.focus()
         self.refresh()
