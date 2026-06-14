@@ -7,6 +7,8 @@ from textual.widget import Widget
 from textual.widgets import Label, OptionList
 from textual.widgets.option_list import Option
 
+HOST_TITLE = "Select Hosts"
+
 class HostSelector(Widget):
     """A portable widget for selecting NixOS hosts from a configuration file."""
 
