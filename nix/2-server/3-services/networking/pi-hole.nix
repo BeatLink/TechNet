@@ -70,6 +70,7 @@
                 dns = {
                     upstreams = [
                         "127.0.0.1#5335"
+                        "1.1.1.1" # Fallback to resolve NTP if Unbound fails due to inaccurate system time
                     ];
                     hosts = [
                         "10.100.100.1  heimdall.technet"
@@ -80,6 +81,7 @@
                         "10.100.100.6  ragnarok.technet"
                         "10.100.100.18 socket-ragnarok.technet"
                         "192.168.0.2 bltechnet.mooo.com"
+                        "162.159.200.1 time.cloudflare.com" # Static IP to break the DNS/NTP circular dependency
                     ];
                     cnameRecords = [
                         "calibre-web.heimdall.technet,heimdall.technet"
