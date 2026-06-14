@@ -58,7 +58,6 @@
                     # The dataset for the root filesystem mounted at /
                     type = "zfs_fs";
                     mountpoint = "/";
-                    options.mountpoint = "legacy"; # This manages the mountpoint manually using typical tools (mount, fstab, etc)
                     postCreateHook = ''
                         zfs snapshot root-pool-${config.networking.hostName}/root@blank             # This takes a snapshot of the blank pool. Every boot, the system will rollback to this snapshot
                     '';
@@ -68,7 +67,6 @@
                     type = "zfs_fs";
                     mountpoint = "/nix";
                     options = {
-                        mountpoint = "legacy";
                         atime = "off"; # Nix does not use atime (impure), might as well turn it off
                     };
                 };
@@ -77,7 +75,6 @@
                     type = "zfs_fs";
                     mountpoint = "/persistent";
                     options = {
-                        mountpoint = "legacy";
                         "com.sun:auto-snapshot" = "true"; # Generates snapshots to persist data
                     };
                 };
@@ -86,7 +83,6 @@
                     type = "zfs_fs";
                     mountpoint = "/home";
                     options = {
-                        mountpoint = "legacy";
                         "com.sun:auto-snapshot" = "true"; # Generates snapshots to persist data
                     };
                     postCreateHook = ''
