@@ -10,7 +10,7 @@
             useTang = true;
             devices = {
                 "data-pool-${config.networking.hostName}/storage".secretFile = config.sops.secrets.clevis_key.path;
-                "root-pool-${config.networking.hostName}".secretFile = config.sops.secrets.clevis_key.path;
+                "root-pool-${config.networking.hostName}/root".secretFile = config.sops.secrets.clevis_key.path;
             };
         };
 
