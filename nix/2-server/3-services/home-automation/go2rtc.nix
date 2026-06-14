@@ -19,6 +19,11 @@
         };
     };
 
+    systemd.tmpfiles.rules = [
+        "d /Storage/Services/go2rtc 0750 go2rtc go2rtc - -"
+        "Z /Storage/Services/go2rtc 0750 go2rtc go2rtc - -"
+    ];
+
     # Setup Users ------------------------------------------------------------------------------------------------------------------------------
     systemd.services.go2rtc = {
         preStart = ''
