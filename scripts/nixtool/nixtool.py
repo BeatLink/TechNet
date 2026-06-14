@@ -23,6 +23,7 @@ from textual.reactive import reactive
 from nixtool.theme import white_blue_theme
 from nixtool.command_runner import CommandRunner
 from nixtool.host_selector import HostSelector
+from nixtool.options_widget import OptionsWidget
 
 # Constants
 script_folder = pathlib.Path(__file__).parent
@@ -114,65 +115,6 @@ REBUILD_DICT = {
 }
 
 HOST_TITLE = "Select Hosts"
-
-class OptionsWidget(Widget):
-    DEFAULT_CSS = """
-        #container {
-            width: auto;
-            height: auto;
-        }
-        #label {
-            width: 100%;
-            height: auto;
-            text-align: center;
-            color: $primary;
-            text-style: bold;
-        }
-        #list {
-            width: auto;
-            height: auto;
-            margin: 0;
-            border: round $primary;
-            background: transparent;
-        }
-    """
-    can_focus = True
-    title = reactive("")
-    options = reactive({}, recompose=True)
-    
-    class Selected(Message):
-
-        def __init__(self, widget: Widget, key: str, value: str) -> None:
-            super().__init__()
-            self.widget = widget
-            self.key = key
-            self.value = value
-
-        @property
-        def control(self) -> Widget:
-            return self.widget
-            
-
-    def compose(self) -> ComposeResult:
-        options = [Option(v["name"], id=k) for k, v in self.options.items()]
-        self.container = Container(id="container")
-        self.label = Label(self.title, id="label")
-        self.list = OptionList(*options, id="list")
-        with self.container:
-            yield self.label
-            yield self.list
-
-    def on_focus(self, event: Focus):
-        self.list.focus()
-
-    def on_option_list_option_selected(self, event: OptionList.OptionSelected):
-        self.post_message(
-            self.Selected(
-                self,
-                event.option.prompt,
-                str(event.option.id)
-            )
-        )
 
 class NixOSManager(App):
     CSS = """
