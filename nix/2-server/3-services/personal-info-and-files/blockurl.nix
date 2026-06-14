@@ -10,6 +10,12 @@
         dataDir = "/Storage/Services/BlockURL/database";
         databaseFile = "blockurl.db";
     };
+
+    systemd.tmpfiles.rules = [
+        "d /Storage/Services/BlockURL 0750 blockurl blockurl - -"
+        "Z /Storage/Services/BlockURL 0750 blockurl blockurl - -"
+    ];
+
     nginx-vhosts.blockurl = {
         domain = "blockurl.heimdall.technet";
         port = 9001;
