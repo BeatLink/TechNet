@@ -2,7 +2,7 @@
     imports = [
         #./alloy.nix
         ./glances.nix
-        ./grafana.nix
+        ./grafana
         ./homepage.nix
         ./loki.nix
         ./prometheus.nix
