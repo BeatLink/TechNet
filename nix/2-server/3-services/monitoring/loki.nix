@@ -124,6 +124,12 @@
           }
         */
     };
+
+    systemd.tmpfiles.rules = [
+        "d /Storage/Services/Loki 0750 loki loki - -"
+        "Z /Storage/Services/Loki 0750 loki loki - -"
+    ];
+
     nginx-vhosts.loki = {
         domain = "loki.heimdall.technet";
         port = 3100;
