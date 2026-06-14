@@ -63,4 +63,3 @@ FINAL_COMMAND="nix run github:nix-community/nixos-anywhere -- --extra-files \"$I
 title "Ready to Install!" "" "Final Command: $FINAL_COMMAND" "" "Work Folder Path: $WORKDIR" "" "The installation can now proceed."
 
 gum confirm "Begin Installation?" && bash -c "$FINAL_COMMAND"
-
