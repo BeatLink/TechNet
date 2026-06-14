@@ -4,4 +4,4 @@
 CONFIG_PATH="/Storage/Files/Projects/TechNet/Repository/nixtool-config.json"
 
 # Run the tool via Nix. Replace <GITHUB_URL> with your actual repo URL.
-nix run github:BeatLink/NixTool -- --config "$CONFIG_PATH" "$@"
+nix run github:BeatLink/NixTool --no-write-lock-file --refresh -- --config "$CONFIG_PATH" "$@"
