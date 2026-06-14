@@ -8,12 +8,16 @@
         enable = true;
         dataDir = "/Storage/Services/Grafana/data";
 
-        provisioning.dashboards.settings.providers = [
-            {
-                name = "Declarative Dashboards";
-                options.path = pkgs.writeTextDir "dashboards" (builtins.toJSON (import ./dashboards/updates.nix));
-            }
-        ];
+        provision = {
+            enable = true;
+            dashboards.settings.providers = [
+                {
+                    name = "Declarative Dashboards";
+                    disableDeletion = true;
+                    options.path = ./dashboards;
+                }
+            ];
+        };
 
         settings = {
             security.secret_key = "SW2YcwTIb9zpOOhoPsMm";
