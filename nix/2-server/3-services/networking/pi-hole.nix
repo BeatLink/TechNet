@@ -123,7 +123,7 @@
     systemd.tmpfiles.rules = [
         # Type Path Mode User Group Age Argument
         "d /Storage/Services/PiHole 0750 pihole pihole - -"
-        "z /Storage/Services/PiHole 0750 pihole pihole - -"
+        "Z /Storage/Services/PiHole 0750 pihole pihole - -"
         "f /etc/pihole/versions 0644 pihole pihole - -"
     ];
 
