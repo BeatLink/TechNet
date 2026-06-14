@@ -124,13 +124,17 @@
         # Ensure the persistent storage is owned by pihole
         "d /Storage/Services/PiHole 0750 pihole pihole - -"
         "Z /Storage/Services/PiHole 0750 pihole pihole - -"
-        # Ensure the functional path /etc/pihole has correct permissions
-        "d /etc/pihole 0755 pihole pihole - -"
-        "Z /etc/pihole 0755 pihole pihole - -"
         "f /etc/pihole/versions 0644 pihole pihole - -"
     ];
 
-    environment.persistence."/Storage/Services/PiHole".directories = [ "/etc/pihole" ];
+    environment.persistence."/Storage/Services/PiHole".directories = [
+        {
+            directory = "/etc/pihole";
+            user = "pihole";
+            group = "pihole";
+            mode = "0755";
+        }
+    ];
 
     systemd.services.prometheus-pihole-exporter = {
         serviceConfig = {
