@@ -25,6 +25,12 @@
             };
         };
     };
+
+    systemd.tmpfiles.rules = [
+        "d /Storage/Services/Radicale 0750 radicale radicale -"
+        "z /Storage/Services/Radicale 0750 radicale radicale -"
+    ];
+
     nginx-vhosts.radicale = {
         domain = "radicale.heimdall.technet";
         port = 5232;
