@@ -44,7 +44,7 @@ REBUILD_TITLE = "Select a NixOS Rebuild action"
 REBUILD_DICT = {
     "switch - Activate config and save to bootloader": "switch",
     "test - Activate config but reset next boot": "test",
-    "boot - Activate config on next boot":"boot",
+    "boot - Activate config on next boot": "boot",
     "dry-activate - Build config but only show changes":"dry-activate",
     "build-vm - Build Test VM": "build-vm",
     "rollback - Rollback to previous configuration":"rollback"
@@ -379,12 +379,8 @@ class NixOSManager(App):
     @work(exclusive=True)
     async def load_config(self):
         self.config = json.loads(config_file.read_text())
-        self.config["hosts"] = dict(
-            {"All Hosts": "all"}, 
-            **self.config["hosts"]
-        )
+        self.config["hosts"] = {"All Hosts": "all"} | self.config["hosts"]
         self.host_menu.options = self.config["hosts"]
-        self.host_menu.mutate_reactive(OptionsWidget.options)
         self.content_switcher.loading = False
 
     @on(OptionsWidget.Selected, "#command-menu")
