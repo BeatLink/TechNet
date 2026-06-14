@@ -121,11 +121,16 @@
     };
 
     systemd.tmpfiles.rules = [
-        # Type Path Mode User Group Age Argument
+        # Ensure the persistent storage is owned by pihole
         "d /Storage/Services/PiHole 0750 pihole pihole - -"
         "Z /Storage/Services/PiHole 0750 pihole pihole - -"
+        # Ensure the functional path /etc/pihole has correct permissions
+        "d /etc/pihole 0755 pihole pihole - -"
+        "Z /etc/pihole 0755 pihole pihole - -"
         "f /etc/pihole/versions 0644 pihole pihole - -"
     ];
+
+    environment.persistence."/Storage/Services/PiHole".directories = [ "/etc/pihole" ];
 
     systemd.services.prometheus-pihole-exporter = {
         serviceConfig = {
