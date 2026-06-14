@@ -53,6 +53,8 @@
     };
 
     systemd.tmpfiles.rules = [
+        "d /Storage/Services/Home-Assistant 0750 hass hass --"
+        "z /Storage/Services/Home-Assistant 0750 hass hass --"
         "a+ /Storage/Files/Music - - - - u:hass:rx"
         "a+ /Storage/Files/Sounds - - - - u:hass:rx"
     ];

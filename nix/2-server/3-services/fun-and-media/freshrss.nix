@@ -17,6 +17,11 @@
         group = "freshrss";
     };
 
+    systemd.tmpfiles.rules = [
+        "d /Storage/Services/FreshRSS 0750 freshrss freshrss --"
+        "z /Storage/Services/FreshRSS 0750 freshrss freshrss --"
+    ];
+
     services = {
         freshrss = {
             enable = true;
