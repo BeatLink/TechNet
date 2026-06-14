@@ -22,6 +22,7 @@ from textual.reactive import reactive
 
 from nixtool.theme import white_blue_theme
 from nixtool.command_runner import CommandRunner
+from nixtool.host_selector import HostSelector
 
 # Constants
 script_folder = pathlib.Path(__file__).parent
@@ -103,7 +104,7 @@ class NixOSManager(App):
     rebuild_action = ""
     host = {
         "hostname": "",
-        "hosturl": ""
+        "host_url": ""
     }
     command_queue = []
 
@@ -125,9 +126,7 @@ class NixOSManager(App):
         self.rebuild_menu.title = REBUILD_TITLE
         self.rebuild_menu.options = REBUILD_DICT
         
-        self.host_menu = OptionsWidget(id="host-menu")
-        self.host_menu.title = HOST_TITLE
-        self.host_menu.options = {}
+        self.host_selector = HostSelector(config_file, id="host-selector")
 
         self.command_runner = CommandRunner(id="command-runner")
 
@@ -136,7 +135,7 @@ class NixOSManager(App):
             yield self.command_menu
             yield self.installer_menu
             yield self.rebuild_menu
-            yield self.host_menu
+            yield self.host_selector
             yield self.command_runner
 
 
@@ -152,8 +151,6 @@ class NixOSManager(App):
     @work(exclusive=True)
     async def load_config(self):
         self.config = json.loads(config_file.read_text())
-        self.config["hosts"] = {"All Hosts": "all"} | self.config["hosts"]
-        self.host_menu.options = self.config["hosts"]
         self.content_switcher.loading = False
 
     @on(OptionsWidget.Selected, "#command-menu")
@@ -168,32 +165,32 @@ class NixOSManager(App):
             self.content_switcher.current = "rebuild-menu"
             self.rebuild_menu.focus()
         elif self.command == "run_installer":
-            self.content_switcher.current = "installer_menu"
+            self.content_switcher.current = "installer-menu"
             self.installer_menu.focus()
         else:
-            self.content_switcher.current = "host-menu"
-            self.host_menu.focus()
+            self.content_switcher.current = "host-selector"
+            self.host_selector.focus()
 
     @on(OptionsWidget.Selected, "#installer-menu")
     def process_installer_action(self, selected: OptionsWidget.Selected):
         self.installer_command = selected.value
-        self.content_switcher.current = "host-menu"
-        self.host_menu.focus()
+        self.content_switcher.current = "host-selector"
+        self.host_selector.focus()
 
     @on(OptionsWidget.Selected, "#rebuild-menu")
     def process_rebuild_action(self, selected: OptionsWidget.Selected):
         self.rebuild_action = selected.value
-        self.content_switcher.current = "host-menu"
-        self.host_menu.focus()
+        self.content_switcher.current = "host-selector"
+        self.host_selector.focus()
 
-    @on(OptionsWidget.Selected, "#host-menu")
-    def process_host(self, selected: OptionsWidget.Selected):
-        self.host = {"hostname": selected.key, "hosturl": selected.value}
+    @on(HostSelector.Selected)
+    def process_host(self, message: HostSelector.Selected):
+        self.host = {"hostname": message.hostname, "host_url": message.host_url}
         self.prepare_command_queue()
 
     def prepare_command_queue(self):
         def add_commands_for_hosts(command):
-            if self.host["hosturl"] == "all":
+            if self.host["host_url"] == "all":
                 for key, value in self.config["hosts"].items():
                     if value != "all":
                         self.command_queue.append(command(key))
@@ -308,7 +305,7 @@ class NixOSManager(App):
         self.rebuild_action = ""
         self.host = {
             "hostname": "",
-            "hosturl": ""
+            "host_url": ""
         }
         self.command_queue = []
         self.content_switcher.current = "command-menu"
