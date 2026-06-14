@@ -29,89 +29,100 @@ from nixtool.options_widget import OptionsWidget
 script_folder = pathlib.Path(__file__).parent
 config_file = script_folder / "nixtool-config.json"
 
+class NixCommand:
+    """Encapsulates command metadata and execution logic."""
+    def __init__(self, name, action, is_remote=False, needs_host=False):
+        self.name = name
+        self.action = action  # Can be a string, list, callable, or menu redirect
+        self.is_remote = is_remote
+        self.needs_host = needs_host
+
+    def get_queue(self, app, hostname=None):
+        """Resolves the action into a list of shell commands."""
+        if callable(self.action):
+            if self.needs_host and hostname:
+                return self.action(app, hostname)
+            return self.action(app)
+        if isinstance(self.action, list):
+            return self.action
+        if isinstance(self.action, str):
+            return [self.action]
+        return []
+
 
 COMMANDS_TITLE = "Select a command"
 COMMANDS_DICT = {
-    "run_all": {
-        "name": "Run All Tasks",
-        "command": "run_all"
-    },
-    "flake_update": {
-        "name": "Run Nix Flake Update",
-        "command": ["nix flake update --refresh"]
-    },
-    "export_dconf": {
-        "name": "Export Dconf JSON Configs",
-        "command": lambda app: app.get_dconf_commands()
-    },
-    "rebuild": {
-        "name": "Run Nixos Rebuild",
-        "command": "menu:rebuild-menu"
-    },
-    "preview_generations": {
-        "name": "Preview Old Generations",
-        "command": lambda app: app.add_commands_for_hosts(lambda a, h: a.get_preview_cmd(h))
-    },
-    "purge_generations_gc": {
-        "name": "Remove Old Generations & GC",
-        "command": lambda app: app.add_commands_for_hosts(lambda a, h: a.get_purge_cmd(h)) + app.add_commands_for_hosts(lambda a, h: a.get_gc_cmd(h))
-    },
-    "gc": {
-        "name": "Run Nix Garbage Collection",
-        "command": lambda app: app.add_commands_for_hosts(lambda a, h: a.get_gc_cmd(h))
-    },
-    "run_installer": {
-        "name": "Run Installation and Formatting Commands",
-        "command": "menu:installer-menu"
-    }
+    "run_all": NixCommand("Run All Tasks", "run_all"),
+    "flake_update": NixCommand("Run Nix Flake Update", ["nix flake update --refresh"]),
+    "export_dconf": NixCommand("Export Dconf JSON Configs", lambda app: app.get_dconf_commands()),
+    "rebuild": NixCommand("Run Nixos Rebuild", "menu:rebuild-menu"),
+    "preview_generations": NixCommand(
+        "Preview Old Generations", 
+        lambda app: app.add_commands_for_hosts(lambda a, h: a.get_preview_cmd(h)),
+        is_remote=True, needs_host=True
+    ),
+    "purge_generations_gc": NixCommand(
+        "Remove Old Generations & GC",
+        lambda app: app.add_commands_for_hosts(lambda a, h: a.get_purge_cmd(h)) + app.add_commands_for_hosts(lambda a, h: a.get_gc_cmd(h)),
+        is_remote=True, needs_host=True
+    ),
+    "gc": NixCommand(
+        "Run Nix Garbage Collection",
+        lambda app: app.add_commands_for_hosts(lambda a, h: a.get_gc_cmd(h)),
+        is_remote=True, needs_host=True
+    ),
+    "run_installer": NixCommand("Run Installation and Formatting Commands", "menu:installer-menu")
 }
 
 INSTALLER_TITLE = "Select an installation command"
 INSTALLER_DICT = {
-    "install": {
-        "name": "Install NixOS",
-        "command": ["bash ./install.sh"]
-    },
-    "format_data_drive_backup": {
-        "name": "Format Data Drive (Backup Server)",
-        "command": ["bash ./format-data-drive-backup-server.sh"]
-    },
-    "format_data_drive_server": {
-        "name": "Format Data Drive (Server)",
-        "command": ["bash ./format-data-drive-server.sh"]
-    },
-    "format_sd_card_phone": {
-        "name": "Format SD Card (Phone)",
-        "command": ["bash ./format-sd-card-phone.sh"]
-    }
+    "install": NixCommand("Install NixOS", ["bash ./install.sh"]),
+    "format_data_drive_backup": NixCommand(
+        "Format Data Drive (Backup Server)", 
+        ["bash ./format-data-drive-backup-server.sh"]
+    ),
+    "format_data_drive_server": NixCommand(
+        "Format Data Drive (Server)", 
+        ["bash ./format-data-drive-server.sh"]
+    ),
+    "format_sd_card_phone": NixCommand(
+        "Format SD Card (Phone)", 
+        ["bash ./format-sd-card-phone.sh"]
+    )
 }
 
 REBUILD_TITLE = "Select a NixOS Rebuild action"
 REBUILD_DICT = {
-    "switch": {
-        "name": "switch - Activate config and save to bootloader",
-        "command": lambda app, host: app.get_rebuild_cmd(host, "switch")
-    },
-    "test": {
-        "name": "test - Activate config but reset next boot",
-        "command": lambda app, host: app.get_rebuild_cmd(host, "test")
-    },
-    "boot": {
-        "name": "boot - Activate config on next boot",
-        "command": lambda app, host: app.get_rebuild_cmd(host, "boot")
-    },
-    "dry-activate": {
-        "name": "dry-activate - Build config but only show changes",
-        "command": lambda app, host: app.get_rebuild_cmd(host, "dry-activate")
-    },
-    "build-vm": {
-        "name": "build-vm - Build Test VM",
-        "command": lambda app, host: app.get_rebuild_cmd(host, "build-vm")
-    },
-    "rollback": {
-        "name": "rollback - Rollback to previous configuration",
-        "command": lambda app, host: app.get_rebuild_cmd(host, "rollback")
-    }
+    "switch": NixCommand(
+        "switch - Activate config and save to bootloader",
+        lambda app, host: app.get_rebuild_cmd(host, "switch"),
+        is_remote=True, needs_host=True
+    ),
+    "test": NixCommand(
+        "test - Activate config but reset next boot",
+        lambda app, host: app.get_rebuild_cmd(host, "test"),
+        is_remote=True, needs_host=True
+    ),
+    "boot": NixCommand(
+        "boot - Activate config on next boot",
+        lambda app, host: app.get_rebuild_cmd(host, "boot"),
+        is_remote=True, needs_host=True
+    ),
+    "dry-activate": NixCommand(
+        "dry-activate - Build config but only show changes",
+        lambda app, host: app.get_rebuild_cmd(host, "dry-activate"),
+        is_remote=True, needs_host=True
+    ),
+    "build-vm": NixCommand(
+        "build-vm - Build Test VM",
+        lambda app, host: app.get_rebuild_cmd(host, "build-vm"),
+        is_remote=True, needs_host=True
+    ),
+    "rollback": NixCommand(
+        "rollback - Rollback to previous configuration",
+        lambda app, host: app.get_rebuild_cmd(host, "rollback"),
+        is_remote=True, needs_host=True
+    )
 }
 
 HOST_TITLE = "Select Hosts"
@@ -210,7 +221,7 @@ class NixOSManager(App):
     def process_command(self, selected: OptionsWidget.Selected):
         print(f"command selected {selected.value}")
         self.command = str(selected.value)
-        logic = COMMANDS_DICT[self.command]["command"]
+        logic = COMMANDS_DICT[self.command].action
 
         if isinstance(logic, str) and logic.startswith("menu:"):
             target = logic.split(":")[1]
@@ -290,26 +301,20 @@ class NixOSManager(App):
         self.command_queue = []
 
         if self.rebuild_action:
-            logic = REBUILD_DICT[self.rebuild_action]["command"]
+            cmd_obj = REBUILD_DICT[self.rebuild_action]
             if self.command == "run_all":
                 self.command_queue.append("nix flake update --refresh")
-                self.command_queue.extend(self.add_commands_for_hosts(logic))
+                self.command_queue.extend(self.add_commands_for_hosts(cmd_obj.action))
                 self.command_queue.extend(self.add_commands_for_hosts(lambda a, h: a.get_purge_cmd(h)))
                 self.command_queue.extend(self.add_commands_for_hosts(lambda a, h: a.get_gc_cmd(h)))
             else:
-                self.command_queue.extend(self.add_commands_for_hosts(logic))
+                self.command_queue.extend(self.add_commands_for_hosts(cmd_obj.action))
         elif self.installer_command:
-            logic = INSTALLER_DICT[self.installer_command]["command"]
-            if callable(logic):
-                self.command_queue.extend(logic(self))
-            else:
-                self.command_queue.extend(logic)
+            cmd_obj = INSTALLER_DICT[self.installer_command]
+            self.command_queue.extend(cmd_obj.get_queue(self))
         else:
-            logic = COMMANDS_DICT[self.command]["command"]
-            if callable(logic):
-                self.command_queue.extend(logic(self))
-            else:
-                self.command_queue.extend(logic)
+            cmd_obj = COMMANDS_DICT[self.command]
+            self.command_queue.extend(cmd_obj.get_queue(self))
 
         self.run_commands()
 

@@ -47,7 +47,9 @@ class OptionsWidget(Widget):
     def compose(self) -> ComposeResult:
         options = []
         for key, value in self.options.items():
-            if isinstance(value, dict) and "name" in value:
+            if hasattr(value, "name"):
+                options.append(Option(value.name, id=key))
+            elif isinstance(value, dict) and "name" in value:
                 options.append(Option(value["name"], id=key))
             else:
                 options.append(Option(key, id=value))
