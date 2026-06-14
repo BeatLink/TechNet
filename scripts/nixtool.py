@@ -44,7 +44,7 @@ REBUILD_TITLE = "Select a NixOS Rebuild action"
 REBUILD_DICT = {
     "switch - Activate config and save to bootloader": "switch",
     "test - Activate config but reset next boot": "test",
-    "boot - Activate config on next boot": "boot",
+    "boot - Activate config on next boot":"boot",
     "dry-activate - Build config but only show changes":"dry-activate",
     "build-vm - Build Test VM": "build-vm",
     "rollback - Rollback to previous configuration":"rollback"
