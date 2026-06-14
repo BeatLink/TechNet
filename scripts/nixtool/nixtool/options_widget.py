@@ -5,7 +5,7 @@ from textual.message import Message
 from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Label
-from textual.widgets._option_list import Option, OptionList
+from textual.widgets.option_list import Option, OptionList
 
 
 class OptionsWidget(Widget):
@@ -44,38 +44,26 @@ class OptionsWidget(Widget):
         def control(self) -> Widget:
             return self.widget
 
-    def __init__(
-            self,
-            *children: Widget,
-            name: str | None = None,
-            id: str | None = None,
-            classes: str | None = None,
-            disabled: bool = False,
-            markup: bool = True,
-    ):
-        super().__init__(children, name, id, classes, disabled, markup)
-        options = [
-            Option(key, id=value)
-            for key, value
-            in self.options.items()
-        ]
-        self.container = Container(id="container")
-        self.label = Label(self.title, id="label")
-        self.list = OptionList(*options, id="list")
-
     def compose(self) -> ComposeResult:
-        with self.container:
-            yield self.label
-            yield self.list
+        options = []
+        for key, value in self.options.items():
+            if isinstance(value, dict) and "name" in value:
+                options.append(Option(value["name"], id=key))
+            else:
+                options.append(Option(key, id=value))
+
+        with Container(id="container"):
+            yield Label(self.title, id="label")
+            yield OptionList(*options, id="list")
 
     def on_focus(self, event: Focus):
-        self.list.focus()
+        self.query_one(OptionList).focus()
 
     def on_option_list_option_selected(self, event: OptionList.OptionSelected):
         self.post_message(
             self.Selected(
                 self,
                 event.option.prompt,
-                event.option.id
+                str(event.option.id)
             )
         )
