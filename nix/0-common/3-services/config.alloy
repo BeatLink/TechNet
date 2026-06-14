@@ -101,6 +101,10 @@ loki.relabel "journal" {
         target_label  = "host"
     }
     rule {
+        source_labels = ["__journal__hostname"]
+        target_label  = "instance"
+    }
+    rule {
         source_labels = ["__journal_priority_keyword"]
         target_label  = "level"
     }
@@ -148,7 +152,7 @@ loki.process "add_labels" {
 // Write logs to local Loki instance
 loki.write "heimdall" {
     endpoint {
-        url = "http://heimdall.technet:3100/loki/api/v1/push"
+        url = "http://loki.heimdall.technet/loki/api/v1/push"
     }
     external_labels = {
         collector = "alloy",
