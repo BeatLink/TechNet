@@ -11,7 +11,7 @@
         serviceConfig.Type = "oneshot";
         script = ''
             zfs rollback -r  root-pool-${config.networking.hostName}/root@blank && 
-            zfs rollback -r  root-pool-${config.networking.hostName}/home@blank && 
+            zfs rollback -r  root-pool-${config.networking.hostName}/root/home@blank && 
             echo "Rollback Complete"
         '';
     };
