@@ -7,6 +7,7 @@ from textual.containers import Container, Center, CenterMiddle, HorizontalGroup
 from textual.widgets import Label, Button, RichLog
 from textual.widget import Widget
 from textual.events import Focus
+from textual.reactive import reactive
 
 
 CSS = """
@@ -65,6 +66,7 @@ class CommandRunner(Widget):
     can_focus = True
     command_queue = []
     final_return_code = 0
+    work_dir = reactive(None)
     
     """class Selected(Message):
         Sent when the command has been selected.
@@ -78,8 +80,9 @@ class CommandRunner(Widget):
             return self.widget
     """
 
-    def __init__(self, *children: Widget):
+    def __init__(self, *children: Widget, work_dir=None):
         super().__init__(*children)
+        self.work_dir = work_dir
         self.container = Container(id="container")
         self.label = Label(id="label")
         self.logview = RichLog(id="logview")
@@ -139,7 +142,7 @@ class CommandRunner(Widget):
             self.logview.write(f">>> {command_message} <<<")
             process = await asyncio.create_subprocess_shell(
                 command,
-                cwd=script_folder.parent,
+                cwd=self.work_dir,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT
             )
