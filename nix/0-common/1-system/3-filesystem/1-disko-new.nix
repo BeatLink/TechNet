@@ -57,7 +57,7 @@
                         keylocation = "file:///tmp/encryption.key";
                     };
                     postCreateHook = ''
-                        zfs set keylocation="prompt" "root-pool-${config.networking.hostName}";             # use this to read the key during boot
+                        zfs set keylocation="prompt" "root-pool-${config.networking.hostName}/root";        # use this to read the key during boot
                         zpool upgrade -a                                                                    # Enables all zfs features
                         zfs snapshot root-pool-${config.networking.hostName}/root@blank                     # This takes a snapshot of the blank pool. Every boot, the system will rollback to this snapshot
                     '';
@@ -89,14 +89,15 @@
                         "com.sun:auto-snapshot" = "true"; # Generates snapshots to persist data
                     };
                     postCreateHook = ''
-                        zfs snapshot root-pool-${config.networking.hostName}/home@blank             # This takes a snapshot of the blank pool. Every boot, the system will rollback to this snapshot
+                        zfs snapshot root-pool-${config.networking.hostName}/root/home@blank             # This takes a snapshot of the blank pool. Every boot, the system will rollback to this snapshot
                     '';
                 };
                 "root/swap" = {
                     type = "zfs_volume";
-                    size = "10M";
+                    size = "16G";
                     content = {
                         type = "swap";
+                        randomEncryption = true;
                     };
                 };
             };
