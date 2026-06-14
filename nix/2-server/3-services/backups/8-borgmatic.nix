@@ -49,11 +49,11 @@
             relocated_repo_access_is_ok = true;
 
             # Retention
-            keep_hourly = 24;
+            keep_hourly = 6;
             keep_daily = 7;
             keep_weekly = 4;
-            keep_monthly = 12;
-            keep_yearly = 3;
+            keep_monthly = 3;
+            keep_yearly = 1;
 
             commands = [
                 {
