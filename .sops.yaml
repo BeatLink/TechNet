@@ -5,7 +5,7 @@ keys:
     - &host_odin age19lxeg27tf95vs67jjh6e68ukf0d9hjyj5q4pcprzrvpwnnt6j3fsvjh4rd
     - &host_thor age1pcsyypcrls76syx5zl6szzw9tmnz602jn9fcxm6d8tc3yld2492qkudxhp
 creation_rules:
-    - path_regex: ^secrets/0-common(/.*)?\.(yaml|json|env|ini)$
+    - path_regex: secrets/0-common(/.*)?\.yaml$
       key_groups:
           - age:
                 - *user_beatlink
@@ -13,22 +13,22 @@ creation_rules:
                 - *host_heimdall
                 - *host_odin
                 - *host_thor
-    - path_regex: ^secrets/1-backup-server(/.*)?\.(yaml|json|env|ini)$
+    - path_regex: secrets/1-backup-server(/.*)?\.yaml$
       key_groups:
           - age:
                 - *user_beatlink
                 - *host_ragnarok
-    - path_regex: ^secrets/2-server(/.*)?\.(yaml|json|env|ini)$
+    - path_regex: secrets/2-server(/.*)?\.yaml$
       key_groups:
           - age:
                 - *user_beatlink
                 - *host_heimdall
-    - path_regex: ^secrets/3-laptop(/.*)?\.(yaml|json|env|ini)$
+    - path_regex: secrets/3-laptop(/.*)?\.yaml$
       key_groups:
           - age:
                 - *user_beatlink
                 - *host_odin
-    - path_regex: ^secrets/4-phone(/.*)?\.(yaml|json|env|ini)$
+    - path_regex: secrets/4-phone(/.*)?\.yaml$
       key_groups:
           - age:
                 - *user_beatlink
