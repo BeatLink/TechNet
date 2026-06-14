@@ -1,94 +1,314 @@
 {
-  "title": "NixOS Updates",
-  "uid": "nixos-updates",
-  "schemaVersion": 36,
-  "editable": true,
-  "templating": {
-    "list": [
-      {
-        "name": "host",
-        "type": "query",
-        "datasource": {
-          "type": "prometheus",
-          "uid": "prometheus"
-        },
-        "definition": "label_values(node_systemd_unit_state{name=\"nixos-upgrade.service\"}, instance)",
-        "includeAll": true,
-        "multi": true,
-        "current": {
-          "text": "All",
-          "value": [
-            "$__all"
-          ]
-        },
-        "refresh": 1
-      }
-    ]
-  },
-  "panels": [
-    {
-      "title": "Upgrade Service Status",
-      "type": "stat",
-      "datasource": {
-        "type": "prometheus",
-        "uid": "prometheus"
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 24,
-        "x": 0,
-        "y": 0
-      },
-      "targets": [
-        {
-          "expr": "node_systemd_unit_state{name=\"nixos-upgrade.service\", state=\"active\", instance=~\"$host\"}",
-          "legendFormat": "{{instance}}"
-        }
-      ],
-      "repeat": "host",
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [
+    "title": "NixOS Updates",
+    "uid": "nixos-updates",
+    "schemaVersion": 36,
+    "editable": true,
+    "templating": {
+        "list": [
             {
-              "type": "value",
-              "options": {
-                "0": {
-                  "text": "Idle",
-                  "color": "gray"
+                "name": "host",
+                "type": "query",
+                "datasource": {
+                    "type": "prometheus",
+                    "uid": "prometheus"
                 },
-                "1": {
-                  "text": "Running",
-                  "color": "blue"
-                }
-              }
+                "definition": "label_values(node_systemd_unit_state{name=\"nixos-upgrade.service\"}, instance)",
+                "label": "Host",
+                "includeAll": true,
+                "multi": true,
+                "current": {
+                    "text": "All",
+                    "value": [
+                        "$__all"
+                    ]
+                },
+                "refresh": 2
             }
-          ]
-        }
-      }
+        ]
     },
-    {
-      "title": "Recent Upgrade Logs",
-      "type": "logs",
-      "datasource": {
-        "type": "loki",
-        "uid": "loki"
-      },
-      "gridPos": {
-        "h": 12,
-        "w": 24,
-        "x": 0,
-        "y": 4
-      },
-      "targets": [
+    "panels": [
         {
-          "expr": "{unit=\"nixos-upgrade.service\", host=~\"$host\"}"
+            "title": "$host",
+            "type": "row",
+            "collapsed": false,
+            "repeat": "host",
+            "gridPos": {
+                "h": 1,
+                "w": 24,
+                "x": 0,
+                "y": 0
+            }
+        },
+        {
+            "title": "Upgrade Service State — $host",
+            "type": "stat",
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 8,
+                "x": 0,
+                "y": 1
+            },
+            "repeatDirection": "h",
+            "targets": [
+                {
+                    "expr": "node_systemd_unit_state{name=\"nixos-upgrade.service\", instance=\"$host\"}",
+                    "legendFormat": "{{state}}"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "mappings": [
+                        {
+                            "type": "value",
+                            "options": {
+                                "1": {
+                                    "text": "●",
+                                    "color": "text"
+                                }
+                            }
+                        },
+                        {
+                            "type": "value",
+                            "options": {
+                                "0": {
+                                    "text": "",
+                                    "color": "transparent"
+                                }
+                            }
+                        }
+                    ],
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "text",
+                                "value": null
+                            }
+                        ]
+                    }
+                },
+                "overrides": [
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "active"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "blue",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "inactive"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "gray",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "failed"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "red",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "matcher": {
+                            "id": "byName",
+                            "options": "activating"
+                        },
+                        "properties": [
+                            {
+                                "id": "color",
+                                "value": {
+                                    "fixedColor": "yellow",
+                                    "mode": "fixed"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ]
+                },
+                "orientation": "horizontal",
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "name",
+                "justifyMode": "center"
+            }
+        },
+        {
+            "title": "Current State — $host",
+            "type": "stat",
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 8,
+                "x": 8,
+                "y": 1
+            },
+            "targets": [
+                {
+                    "expr": "label_replace(max by (state) (node_systemd_unit_state{name=\"nixos-upgrade.service\", instance=\"$host\"} == 1), \"current\", \"$1\", \"state\", \"(.*)\")",
+                    "legendFormat": "{{state}}"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "mappings": [],
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "gray",
+                                "value": null
+                            }
+                        ]
+                    }
+                }
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ]
+                },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value",
+                "justifyMode": "center"
+            }
+        },
+        {
+            "title": "Failed — $host",
+            "type": "stat",
+            "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+            },
+            "gridPos": {
+                "h": 4,
+                "w": 8,
+                "x": 16,
+                "y": 1
+            },
+            "targets": [
+                {
+                    "expr": "node_systemd_unit_state{name=\"nixos-upgrade.service\", state=\"failed\", instance=\"$host\"}",
+                    "legendFormat": "{{instance}}"
+                }
+            ],
+            "fieldConfig": {
+                "defaults": {
+                    "mappings": [
+                        {
+                            "type": "value",
+                            "options": {
+                                "0": {
+                                    "text": "OK",
+                                    "color": "green"
+                                },
+                                "1": {
+                                    "text": "Failed",
+                                    "color": "red"
+                                }
+                            }
+                        }
+                    ],
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "red",
+                                "value": 1
+                            }
+                        ]
+                    }
+                }
+            },
+            "options": {
+                "reduceOptions": {
+                    "calcs": [
+                        "lastNotNull"
+                    ]
+                },
+                "colorMode": "background",
+                "graphMode": "none",
+                "textMode": "value_and_name",
+                "justifyMode": "center"
+            }
+        },
+        {
+            "title": "Upgrade Logs — $host",
+            "type": "logs",
+            "datasource": {
+                "type": "loki",
+                "uid": "loki"
+            },
+            "gridPos": {
+                "h": 14,
+                "w": 24,
+                "x": 0,
+                "y": 5
+            },
+            "targets": [
+                {
+                    "expr": "{unit=\"nixos-upgrade.service\", instance=\"$host\"}"
+                }
+            ],
+            "options": {
+                "showLabels": false,
+                "showTime": true,
+                "sortOrder": "Descending",
+                "wrapLogMessage": true,
+                "enableLogDetails": true
+            }
         }
-      ],
-      "options": {
-        "showLabels": false,
-        "showTime": true,
-        "sortOrder": "Descending"
-      }
-    }
-  ]
+    ]
 }
