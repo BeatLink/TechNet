@@ -1,5 +1,8 @@
 # Enables Automatic Upgrades ####################################################################################################################
-{ pkgs, config, lib, ... }:
+{
+    lib,
+    ...
+}:
 {
     system.autoUpgrade = {
         # Configures Automatic Upgrades at 2AM from my GitHub flake.
@@ -14,26 +17,14 @@
         allowReboot = true;
         persistent = true;
     };
-    systemd.services.nixos-upgrade =
-        let
-            # Sends status updates to Uptime Kuma on Heimdall
-            BaseURL = "https://uptime-kuma.heimdall.technet/api/push/";
-            Keys = {
-                Ragnarok = "sTgpl4hkEc";
-                Odin = "Iy9Tfr31nG";
-                Heimdall = "urMFRtdrYA";
-                Thor = "jvrkzUvvrB";
-            };
-            FullURL = "${BaseURL}${Keys.${config.networking.hostName}}";
-        in
-        {
-            postStop = ''
-                if [ "$SERVICE_RESULT" == "success" ]; then
-                    ${pkgs.wget}/bin/wget --spider --no-check-certificate "${FullURL}?status=up&msg=$(date '+%Y-%m-%d %H:%M:%S') System Upgrades Successful&ping=";
-                else
-                    ${pkgs.wget}/bin/wget --spider --no-check-certificate "${FullURL}?status=down&msg=$(date '+%Y-%m-%d %H:%M:%S') System Upgrades Failed&ping=";
-                fi        
-            '';
-        };
+    systemd.services.nixos-upgrade = {
+        postStop = ''
+            if [ "$SERVICE_RESULT" == "success" ]; then
+                echo "System upgrade successful at $(date '+%Y-%m-%d %H:%M:%S')"
+            else
+                echo "System upgrade failed at $(date '+%Y-%m-%d %H:%M:%S') with result: $SERVICE_RESULT"
+            fi        
+        '';
+    };
 
 }
