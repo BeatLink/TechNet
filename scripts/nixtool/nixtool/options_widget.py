@@ -4,8 +4,8 @@ from textual.events import Focus
 from textual.message import Message
 from textual.reactive import reactive
 from textual.widget import Widget
-from textual.widgets import Label
-from textual.widgets.option_list import Option, OptionList
+from textual.widgets import Label, OptionList
+from textual.widgets.option_list import Option
 
 
 class OptionsWidget(Widget):
