@@ -304,3 +304,9 @@ class OptionsWidget(Widget):
         self.command_runner.load_command_queue(queue)
 
 if __name__ == "__main__":
+class InstallerScriptCommand(NixCommand):
+    def __init__(self, name, script_name):
+        super().__init__(name)
+        self.script_name = script_name
+    def _resolve(self, app, hostname):
+        return [f"bash ./{self.script_name}"]

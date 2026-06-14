@@ -11,6 +11,15 @@ COMMANDS_DICT = {
     "Format SD Card for Phone": "format_sd_card_phone"
 }
 
+INSTALLER_TITLE = "Select an installation command"
+INSTALLER_DICT = {
+    "install": InstallerScriptCommand("Install NixOS", "install.sh"),
+    "format_data_drive_backup": InstallerScriptCommand("Format Data Drive (Backup Server)", "format-data-drive-backup-server.sh"),
+    "format_data_drive_server": InstallerScriptCommand("Format Data Drive (Server)", "format-data-drive-server.sh"),
+    "format_sd_card_phone": InstallerScriptCommand("Format SD Card (Phone)", "format-sd-card-phone.sh")
+}
+
+
 white_blue_theme = Theme(
     name="white_blue",
     primary="#00ACFF",
