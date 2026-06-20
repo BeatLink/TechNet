@@ -10,4 +10,8 @@
         domain = "trilium.heimdall.technet";
         port = 8080;
     };
+
+    systemd.tmpfiles.rules = [
+        "Z /Storage/Services/Trilium 0750 trilium trilium - -"
+    ];
 }
