@@ -47,11 +47,11 @@
       },
       "locked": {
         "dir": "sync-server",
-        "lastModified": 1782021174,
-        "narHash": "sha256-iWR/9nFluNuWIAZSfnQZjFhW89MWl9PLBl3NS90JZ58=",
+        "lastModified": 1782023028,
+        "narHash": "sha256-W3aa/B6pNkT0duLqlzPjMLpbHmjZ4TUrMLaJZ+ERW4M=",
         "owner": "BeatLink",
         "repo": "BlockURL",
-        "rev": "2e179f3d4a4b360926a93a21af77e389fc5e0df8",
+        "rev": "e3b6b00bcda38981d73c592c9cc0cc7393c6bf86",
         "type": "github"
       },
       "original": {
