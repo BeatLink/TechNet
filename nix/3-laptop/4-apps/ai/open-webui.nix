@@ -3,7 +3,7 @@
         enable = true;
         port = 9770;
     };
-    environment.persistence."/Storage/Apps/AI/Open-WebUI/data".directories = [
+    environment.persistence."/Storage/Services/AI/Open-WebUI/data".directories = [
         "/var/lib/private/open-webui"
     ];
     services.open-webui.environment = {

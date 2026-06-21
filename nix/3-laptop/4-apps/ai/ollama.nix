@@ -1,12 +1,12 @@
-{
+{pkgs, ...}:{
     services.ollama = {
         enable = true;
-        acceleration = "cuda";
-        home = "/Storage/Apps/AI/Ollama/data";
-        user = "beatlink";
-        group = "beatlink";
+        package = pkgs.ollama-cuda;
+        home = "/Storage/Services/AI/Ollama/data";
+        user = "ollama";
+        group = "ollama";
         loadModels = [
-            "qwen3-coder:14b"
+            "qwen3.5:9b"
         ];
         syncModels = true;
     };
