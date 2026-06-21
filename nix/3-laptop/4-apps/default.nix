@@ -1,5 +1,6 @@
 {
-    imports = [     
+    imports = [
+        ./ai
         ./comms
         ./core
         ./fun
