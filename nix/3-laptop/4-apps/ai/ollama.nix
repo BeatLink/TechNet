@@ -6,7 +6,7 @@
         user = "ollama";
         group = "ollama";
         loadModels = [
-            "qwen3.5:9b"
+            "qwen3.5:4b"
         ];
         syncModels = true;
     };
