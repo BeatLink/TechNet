@@ -8,6 +8,7 @@
         home.persistence."/Storage/Apps/System/SOPS" = {
             files = [
                 ".config/sops/age/keys.txt"
+                ".config/sops/sopsrc"
             ];
 
         };
