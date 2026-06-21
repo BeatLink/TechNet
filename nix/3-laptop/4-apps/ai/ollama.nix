@@ -9,9 +9,9 @@
             "qwen3-coder:14b"
         ];
         syncModels = true;
-        users.users.beatlink.extraGroups = [
-            "video"
-            "render"
-        ];
     };
+    users.users.beatlink.extraGroups = [
+        "video"
+        "render"
+    ];
 }
