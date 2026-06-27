@@ -5,8 +5,14 @@
             programs.vscodium = {
                 enable = true;
                 package = pkgs.vscodium;
-                # Leave 'extensions' empty here to keep the directory mutable
+                extensions = [
+                    pkgs.vscode-extensions.signageos.signageos-vscode-sops
+                    pkgs.vscode-extensions.hediet.vscode-drawio
+                    pkgs.vscode-extensions.anthropic.claude-code
+                ];
+                profiles.default = {};
             };
+
             home = {
                 packages = with pkgs; [
                     nixd
