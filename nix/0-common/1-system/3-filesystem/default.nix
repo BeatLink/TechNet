@@ -8,7 +8,7 @@
 # repo's flake, stored in /persistent or stored on the data drives
 #
 #
-# Links: 
+# Links:
 #   - https://mt-caret.github.io/blog/posts/2020-06-29-optin-state.html
 #   - https://discourse.nixos.org/t/impermanence-vs-systemd-initrd-w-tpm-unlocking/25167/3
 #   - https://ethan.roo.ke/notes/nix-on-kimsufi/
@@ -22,7 +22,5 @@
         ./4-persistence.nix
         ./5-scrub.nix
         ./6-trim.nix
-        ./7-disk-health.nix
-        ./8-disk-space.nix
     ];
 }

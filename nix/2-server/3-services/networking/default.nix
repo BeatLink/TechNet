@@ -1,6 +1,5 @@
 {
     imports = [
-        ./14-device-online.nix
         ./ddns-updater.nix
         ./nginx-vhosts.nix
         ./nginx.nix

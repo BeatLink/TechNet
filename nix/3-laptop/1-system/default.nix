@@ -13,10 +13,8 @@
         ./13-printing.nix
         ./14-fuse.nix
         ./15-home-folders.nix
-        ./16-disk-checking.nix
         ./18-tang.nix
         ./19-codecs.nix
-        ./20-device-online.nix
         ./plymouth.nix
         ./dconf
         ./desktop-environment
