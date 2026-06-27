@@ -58,6 +58,7 @@
         app-separators = {
             url = "github:/BeatLink/Plank-Separator";
         };
+        claude-code.url = "github:sadjow/claude-code-nix";
     };
     outputs =
         inputs@{
@@ -77,6 +78,7 @@
             mobile-nixos,
             vantage,
             app-separators,
+            claude-code,
             ...
         }:
         {
