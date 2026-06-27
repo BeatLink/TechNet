@@ -14,7 +14,6 @@
         ./14-fuse.nix
         ./15-home-folders.nix
         ./16-disk-checking.nix
-        ./17-disk-usage-monitoring.nix
         ./18-tang.nix
         ./19-codecs.nix
         ./20-device-online.nix
