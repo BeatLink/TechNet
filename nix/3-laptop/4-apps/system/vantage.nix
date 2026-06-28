@@ -1,6 +1,6 @@
-{ inputs, ... }:
+{ inputs, pkgs, ... }:
 {
     environment.systemPackages = [
-        inputs.vantage.packages.x86_64-linux.default
+        inputs.vantage.packages.${pkgs.stdenv.hostPlatform.system}.default
     ];
 }
