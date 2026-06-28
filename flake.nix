@@ -5,11 +5,16 @@
         nixpkgs = {
             url = "github:NixOS/nixpkgs/nixos-unstable";
         };
-        nixpkgs-stable = {
-            url = "github:NixOS/nixpkgs/nixos-25.05";
-        };
         nix-index-database = {
             url = "github:nix-community/nix-index-database";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
+        mobile-nixos = {
+            url = "github:NixOS/mobile-nixos";
+            flake = false;
+        };
+        sops-nix = {
+            url = "github:Mic92/sops-nix";
             inputs.nixpkgs.follows = "nixpkgs";
         };
         disko = {
@@ -19,13 +24,12 @@
         impermanence = {
             url = "github:nix-community/impermanence";
         };
-        sops-nix = {
-            url = "github:Mic92/sops-nix";
-            inputs.nixpkgs.follows = "nixpkgs";
-        };
         arion = {
             url = "github:hercules-ci/arion";
             inputs.nixpkgs.follows = "nixpkgs";
+        };
+        blockurl = {
+            url = "github:BeatLink/BlockURL?dir=sync-server";
         };
         home-manager = {
             url = "github:nix-community/home-manager";
@@ -34,23 +38,12 @@
         xdg-autostart = {
             url = "github:Zocker1999NET/home-manager-xdg-autostart";
         };
-        plank-reloaded = {
-            url = "github:zquestz/plank-reloaded";
-            inputs.nixpkgs.follows = "nixpkgs";
-        };
         gmusicbrowser = {
             url = "github:BeatLink/gmusicbrowser-nix-flake";
             inputs.nixpkgs.follows = "nixpkgs";
         };
-        blockurl.url = "github:BeatLink/BlockURL?dir=sync-server";
-        trilium-notes = {
-            url = "github:BeatLink/Trilium";
-            inputs.nixpkgs.follows = "nixpkgs";
-        };
-        nixos-plymouth.url = "github:BeatLink/nixos-plymouth";
-        mobile-nixos = {
-            url = "github:NixOS/mobile-nixos";
-            flake = false;
+        nixos-plymouth = {
+            url = "github:BeatLink/nixos-plymouth";
         };
         vantage = {
             url = "github:nabilksabu/vantage-nix";
@@ -58,13 +51,14 @@
         app-separators = {
             url = "github:/BeatLink/Plank-Separator";
         };
-        claude-code.url = "github:sadjow/claude-code-nix";
+        claude-code = {
+            url = "github:sadjow/claude-code-nix";
+        };
     };
     outputs =
         inputs@{
             self,
             nixpkgs,
-            nixpkgs-stable,
             nix-index-database,
             disko,
             impermanence,
@@ -123,6 +117,7 @@
                                 sharedModules = [
                                     xdg-autostart.homeManagerModules.xdg-autostart
                                     gmusicbrowser.homeManagerModules.gmusicbrowser
+                                    claude-code.homeManagerModules.claude-code
                                 ];
                             };
                         }
