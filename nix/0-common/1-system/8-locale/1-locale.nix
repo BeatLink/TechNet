@@ -5,6 +5,7 @@
 
 {
     time.timeZone = "America/Jamaica"; # Sets time zone.
+    services.timesyncd.enable = true; # Sync system clock from NTP
     i18n.defaultLocale = "en_US.UTF-8"; # Sets locale.
     services.xserver.xkb = {
         # Sets the Keyboard Layout
