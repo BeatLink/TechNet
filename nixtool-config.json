@@ -4,7 +4,7 @@
     "hosts": {
         "Odin": "odin.technet",
         "Heimdall": "heimdall.technet",
-        "Ragnarok": "ragnarok.technet",
+        "Ragnarok": "ragnarok.lan",
         "Thor": "thor.technet"
     }
 }
