@@ -1,9 +1,15 @@
 # https://hub.docker.com/repository/docker/beatlink/blockurl
 # https://github.com/BeatLink/BlockURL
 
-{
+{ inputs, config, ... }: {
+    sops.secrets.blockurl_api_key = {
+        owner = "blockurl"; # must match services.blockurl.user
+        sopsFile = "${inputs.self}/secrets/2-server/blockurl.yaml";
+    };
+
     services.blockurl = {
         enable = true;
+        apiKeyFile = config.sops.secrets.blockurl_api_key.path;
         openFirewall = true;
         port = 9001;
         host = "127.0.0.1";
