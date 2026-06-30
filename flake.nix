@@ -117,7 +117,6 @@
                                 sharedModules = [
                                     xdg-autostart.homeManagerModules.xdg-autostart
                                     gmusicbrowser.homeManagerModules.gmusicbrowser
-                                    claude-code.homeManagerModules.claude-code
                                 ];
                             };
                         }
