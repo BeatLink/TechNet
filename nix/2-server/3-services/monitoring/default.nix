@@ -1,7 +1,6 @@
 {
     imports = [
         #./alloy.nix
-        ./glances.nix
         ./grafana
         ./homepage.nix
         ./loki.nix
