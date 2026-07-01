@@ -84,7 +84,6 @@
                         "162.159.200.1 time.cloudflare.com" # Static IP to break the DNS/NTP circular dependency
                     ];
                     cnameRecords = [
-                        "calibre-web.heimdall.technet,heimdall.technet"
                         "trilium-sysadmin.heimdall.technet,heimdall.technet"
                     ];
                     domain = {
