@@ -6,7 +6,6 @@
         ./4-core
         ./5-software
         ./6-networking
-        ./7-docker.nix
         ./9-utilities.nix
         ./10-sound.nix
         ./13-clevis.nix
