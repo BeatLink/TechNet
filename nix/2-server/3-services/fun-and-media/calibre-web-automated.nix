@@ -3,40 +3,29 @@
 # Used for eBook viewing and management.
 #
 # https://github.com/crocodilestick/Calibre-Web-Automated
-# 
 
+{ inputs, pkgs, ... }:
 {
-    virtualisation.arion.projects.calibre-web-automated = {
-        serviceName = "calibre-web-automated";
-        settings = {
-            services = {
-                calibre-web.service = {
-                    image = "crocodilestick/calibre-web-automated:latest";
-                    container_name = "calibre-web-automated";
-                    restart = "always";
-                    environment = {
-                        "PUID" = "1000";
-                        "PGID" = "1000";
-                        "TZ" = "America/Jamaica";
-                    };
-                    volumes = [ 
-                        "/Storage/Services/Calibre-Web/config:/config"
-                        "/Storage/Services/Calibre-Web/Uploads:/cwa-book-ingest"
-                        "/Storage/Files/eBooks/Calibre/Library:/calibre-library"
-                    ];
-                    expose = [
-                        "8083"
-                    ];
-                    networks = [
-                        "nginx-proxy-manager_public"
-                    ];
-                };
-            };
-            networks = {
-                nginx-proxy-manager_public = {
-                    external = true;
-                };
-            };
-        };
+    services.calibre-web-automated = {
+        enable = true;
+        package = inputs.calibre-web-automated.packages.${pkgs.system}.default;
+        port = 8083;
+        configDir = "/Storage/Services/Calibre-Web/config";
+        libraryDir = "/Storage/Files/eBooks/Calibre/Library";
+        ingestDir = "/Storage/Services/Calibre-Web/Uploads";
+    };
+
+    systemd.tmpfiles.rules = [
+        "d /Storage/Services/Calibre-Web 0750 calibre-web calibre-web - -"
+        "d /Storage/Services/Calibre-Web/config 0750 calibre-web calibre-web - -"
+        "d /Storage/Services/Calibre-Web/Uploads 0750 calibre-web calibre-web - -"
+        "d /Storage/Files/eBooks/Calibre/Library 0755 calibre-web calibre-web - -"
+    ];
+
+    users.users.calibre-web.extraGroups = [ "beatlink" ];
+
+    nginx-vhosts.calibre-web = {
+        domain = "calibre-web.heimdall.technet";
+        port = 8083;
     };
 }
