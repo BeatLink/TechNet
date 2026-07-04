@@ -56,6 +56,8 @@
                         ".config/VSCodium"
                         ".local/share/codium"
                         ".vscode-oss"
+                        ".vscode-oss-shared"
+                        ".claude"
                     ];
                     files = [ ".config/npmrc" ];
                 };
