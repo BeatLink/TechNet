@@ -22,6 +22,7 @@
                         extensions = with pkgs.nix-vscode-extensions.open-vsx; [
                             hediet.vscode-drawio
                             anthropic.claude-code
+                            ms-python.python
                             signageos.signageos-vscode-sops
                             editorconfig.editorconfig
                             usernamehw.errorlens
