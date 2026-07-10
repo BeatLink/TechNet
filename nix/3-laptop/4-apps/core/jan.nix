@@ -12,7 +12,33 @@
     ];
     home-manager.users.beatlink =
         { pkgs, ... }:
+        let
+            fix-jan-nccl = pkgs.writeShellScriptBin "fix-jan-nccl" ''
+                set -euo pipefail
+                NCCL_LIB="${pkgs.cudaPackages.nccl}/lib/libnccl.so.2"
+                shopt -s nullglob
+                for dir in "$HOME"/.local/share/Jan/data/llamacpp/backends/*/linux-cuda-*/build/bin; do
+                  ln -sf "$NCCL_LIB" "$dir/libnccl.so.2"
+                  echo "linked nccl -> $dir"
+                done
+            '';
+        in
+
         {
+            systemd.user.services.fix-jan-nccl = {
+                Unit.Description = "Symlink libnccl.so.2 into Jan's llama.cpp backends";
+                Service = {
+                    Type = "oneshot";
+                    ExecStart = "${fix-jan-nccl}/bin/fix-jan-nccl";
+                };
+                Install.WantedBy = [ "default.target" ]; # <-- add this
+            };
+
+            systemd.user.paths.fix-jan-nccl = {
+                Unit.Description = "Watch Jan's backend dir for new llama.cpp builds";
+                Path.PathModified = "%h/.local/share/Jan/data/llamacpp/backends";
+                Install.WantedBy = [ "default.target" ];
+            };
             # ... your existing setup ...
             xdg.desktopEntries.jan-nvidia = {
                 name = "Jan (NVIDIA)";
@@ -28,7 +54,10 @@
                 type = "Application";
             };
             home = {
-                packages = with pkgs; [ jan ];
+                packages = with pkgs; [
+                    fix-jan-nccl
+                    jan
+                ];
 
                 persistence."/Storage/Apps/AI/Jan" = {
                     directories = [
