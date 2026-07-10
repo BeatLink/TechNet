@@ -16,7 +16,7 @@
                 name = "Jan (NVIDIA)";
                 genericName = "Local AI Desktop";
                 # %u allows the app to handle deep-links (like model downloads from the browser)
-                exec = "nvidia-offload jan %u";
+                exec = "nvidia-offload Jan %u";
                 icon = "jan";
                 terminal = false;
                 categories = [
