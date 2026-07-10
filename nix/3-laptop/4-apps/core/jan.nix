@@ -1,4 +1,13 @@
-{
+{ pkgs, ... }: {
+    # Enable nix-ld to run dynamically downloaded binaries
+    programs.nix-ld.enable = true;
+
+    # Expose the missing CUDA libraries to those binaries
+    programs.nix-ld.libraries = with pkgs; [
+        cudaPackages.nccl
+        cudaPackages.cudatoolkit
+        stdenv.cc.cc.lib # Often needed by random C++ binaries
+    ];
     home-manager.users.beatlink =
         { pkgs, ... }:
         {
