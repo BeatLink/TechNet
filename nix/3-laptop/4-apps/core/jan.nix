@@ -7,6 +7,8 @@
         cudaPackages.nccl
         cudaPackages.cudatoolkit
         stdenv.cc.cc.lib # Often needed by random C++ binaries
+        cudaPackages.cuda_cudart
+        cudaPackages.cudnn
     ];
     home-manager.users.beatlink =
         { pkgs, ... }:
