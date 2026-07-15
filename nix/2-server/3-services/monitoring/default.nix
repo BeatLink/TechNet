@@ -1,10 +1,10 @@
 {
     imports = [
         #./alloy.nix
-        ./grafana
+        #./grafana
         ./homepage.nix
-        ./loki.nix
-        ./prometheus.nix
-        ./uptime-kuma.nix
+        #./loki.nix
+        #./prometheus.nix
+        #./uptime-kuma.nix
     ];
 }
