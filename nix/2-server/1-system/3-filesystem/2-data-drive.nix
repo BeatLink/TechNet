@@ -1,6 +1,6 @@
 # Data Drive
 #
-# This module manages the mounting of the data drive that stores user files, docker databases and other information.
+# This module manages the mounting of the data drive that stores user files, software data and other information.
 # The data drive consists of 2 1TB Hard Drives configured for encrypted ZFS RAID 1. These settings decrypt and mount that
 # storage during boot
 #

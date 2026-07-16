@@ -71,7 +71,7 @@
                     };
                 };
                 "root/persistent" = {
-                    # The dataset for persistent system files that are preserved between rollbacks (ssh host keys, docker volumes, etc), mounted at /persistent
+                    # The dataset for persistent system files that are preserved between rollbacks (ssh host keys, software data, etc), mounted at /persistent
                     type = "zfs_fs";
                     mountpoint = "/persistent";
                     options = {
