@@ -99,16 +99,6 @@
                     frequency = "1 month";
                 }
             ];
-
-            # Notifications
-            uptime_kuma = {
-                push_url = "http://uptime-kuma.heimdall.technet/api/push/nDXOzelHhZ";
-                states = [
-                    #"start"
-                    "finish"
-                    "fail"
-                ];
-            };
         };
     };
 }
