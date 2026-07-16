@@ -47,7 +47,8 @@
                     type = "zfs_fs";
                     mountpoint = "/";
                     options = {
-                        compression = "zstd"; # Compresses files to save space
+                        compression = "zstd"; # Compresses files to save space (inherited by all child datasets)
+                        dedup = "on"; # Deduplicates identical blocks across datasets (inherited by all child datasets). NOTE: dedup keeps a table in RAM (~1-5GB per TB of unique data); ensure the system has enough memory
                         xattr = "sa"; # Allows extended attributes stored in the filesystem inodes
                         acltype = "posix"; # Uses posix compliant ACL for extended attributes
                         "com.sun:auto-snapshot" = "false"; # Prevents autosnapshots in general (will be enabled for specific datasets later)
