@@ -1,4 +1,3 @@
-# https://hub.docker.com/repository/docker/beatlink/blockurl
 # https://github.com/BeatLink/BlockURL
 
 { inputs, config, ... }: {

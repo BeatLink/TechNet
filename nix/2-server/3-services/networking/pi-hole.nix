@@ -1,6 +1,6 @@
 # Pi-Hole
 #
-# Pi-Hole acts as an ad-blocking system for the TechNet. More importantly, it also acts as the DNS server for all docker services and hosts
+# Pi-Hole acts as an ad-blocking system for the TechNet. More importantly, it also acts as the DNS server for all services and hosts
 # in the TechNet, allowing them to be accessed via the .technet domain
 #
 # Links:

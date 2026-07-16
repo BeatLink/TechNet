@@ -1,6 +1,6 @@
 # Borgmatic
 #
-# This handles backing up my server's docker files to my laptop and to my backup server
+# This handles backing up my server's  files to my laptop and to my backup server
 #
 
 {
