@@ -7,3 +7,4 @@
 * DDNS Updater - 9003
 * Pi-Hole 9018
 * Pi-Hole Prometheus Exporter - 9617
+* Vigil - 9611
