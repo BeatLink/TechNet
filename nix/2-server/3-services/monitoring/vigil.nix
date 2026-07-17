@@ -898,16 +898,6 @@
                                     };
                                 }
                                 {
-                                    name = "Glances";
-                                    id = "heimdall-glances";
-                                    type = "systemd_service";
-                                    interval = "1m";
-                                    service_name = "glances.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
-                                }
-                                {
                                     name = "Homepage";
                                     id = "heimdall-homepage";
                                     type = "systemd_service";
