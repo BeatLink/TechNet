@@ -8,9 +8,10 @@
 # into every monitor's `ssh_config` by the engine. Vigil logs into a dedicated
 # `vigil-access` account on each host, defined in nix/0-common/2-users/3-vigil.nix.
 #
-# Prerequisite handled elsewhere:
-#   - The borg repo passphrase file (/etc/vigil/borg-laptop.pass) must exist on
-#     Heimdall and Ragnarok (read remotely by passphrase_command).
+# The encrypted laptop Vorta repo's passphrase is provided once via
+# services.vigil.borgPassphraseFile (a sops secret, below) and injected into
+# every borg monitor. Vigil reads it locally on Heimdall and passes it to the
+# remote borg call, so only Heimdall holds the secret.
 #
 { inputs, config, ... }:
 {
@@ -23,10 +24,22 @@
         owner = "vigil";
     };
 
+    # Passphrase for the encrypted laptop Vorta borg repo. Vigil reads this file
+    # locally (see services.vigil.borgPassphraseFile below) and passes the
+    # passphrase to the remote borg command, so only Heimdall — the host Vigil
+    # runs on — needs the secret; the monitored hosts never get a copy.
+    sops.secrets.borg_laptop_passphrase = {
+        sopsFile = "${inputs.self}/secrets/2-server/vigil.yaml";
+        owner = "vigil";
+    };
+
     services.vigil = {
         enable = true;
         port = 9611;
         dataDir = "/Storage/Services/Vigil";   # SQLite database lives here (persisted)
+        # Injected into every borg monitor that doesn't set its own passphrase,
+        # read at runtime by Vigil on this host (never enters the Nix store).
+        borgPassphraseFile = config.sops.secrets.borg_laptop_passphrase.path;
         settings = {
             # Applied to every monitor's ssh_config unless overridden locally.
             ssh_defaults = {
@@ -1021,7 +1034,7 @@
                             interval = "1h";
                             max_age = "1d";
                             repo = "/Storage/Files/Backups/Laptop/Vorta";
-                            passphrase_command = "cat /etc/vigil/borg-laptop.pass";
+                            # Passphrase injected via services.vigil.borgPassphraseFile.
                             ssh_config = {
                                 host = "heimdall.technet";
                             };
@@ -1033,7 +1046,7 @@
                             interval = "1h";
                             max_age = "1d";
                             repo = "/Storage/Backups/Laptop/Vorta";
-                            passphrase_command = "cat /etc/vigil/borg-laptop.pass";
+                            # Passphrase injected via services.vigil.borgPassphraseFile.
                             ssh_config = {
                                 host = "ragnarok.technet";
                             };
