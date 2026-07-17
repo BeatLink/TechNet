@@ -1,10 +1,82 @@
 # Port Maps
 
-* Prometheus Node Exporter - 9000
-* BlockURL - 9001
-* Borg - 9001
-* Calibre Web - 9002
-* DDNS Updater - 9003
-* Pi-Hole 9018
-* Pi-Hole Prometheus Exporter - 9617
-* Vigil - 9611
+Ports used by Heimdall's services, grouped by category. Values are taken from
+the service definitions under `nix/2-server/3-services/`. Most web UIs listen on
+localhost and are reached through nginx (443) via their `*.heimdall.technet`
+vhost; the "Port" column is the upstream/service port nginx proxies to.
+
+## Reverse Proxy
+
+| Service | Port | Notes |
+|---------|------|-------|
+| Nginx (HTTP)  | 80  | Redirects to HTTPS |
+| Nginx (HTTPS) | 443 | Front door for all `*.heimdall.technet` vhosts |
+
+## Monitoring
+
+| Service | Port | Vhost |
+|---------|------|-------|
+| Grafana      | 3000 | grafana.heimdall.technet |
+| Prometheus   | 9090 | prometheus.heimdall.technet |
+| Uptime Kuma  | 3001 | uptime-kuma.heimdall.technet |
+| Homepage     | 9610 | homepage.heimdall.technet |
+| Vigil        | 9611 | vigil.heimdall.technet |
+
+## Networking / DNS
+
+| Service | Port | Notes |
+|---------|------|-------|
+| Pi-hole (web/FTL)        | 9018 | pi-hole.heimdall.technet |
+| Pi-hole Prometheus exp.  | 9019 | 127.0.0.1 only |
+| Unbound (recursive DNS)  | 5335 | 10.100.100.1 / 127.0.0.1 |
+| DDNS Updater             | 9420 | 127.0.0.1; ddns.heimdall.technet |
+
+## Home Automation
+
+| Service | Port | Vhost / Notes |
+|---------|------|---------------|
+| Home Assistant | 8123 | home-assistant.heimdall.technet |
+| Frigate        | 9310 | 127.0.0.1; frigate.heimdall.technet |
+| go2rtc         | 1984 | 127.0.0.1; go2rtc.heimdall.technet |
+| ESPHome        | 6052 | esphome.heimdall.technet |
+| Traccar        | 9280 | traccar.heimdall.technet |
+| Mosquitto MQTT | 1883 | Broker |
+
+## Fun & Media
+
+| Service | Port | Vhost / Notes |
+|---------|------|---------------|
+| Calibre Web  | 8083 | calibre-web.heimdall.technet |
+| FreshRSS     | —    | freshrss (php-fpm via nginx) |
+| Openbooks    | 9777 | openbooks.heimdall.technet |
+| qBittorrent (Web UI)   | 9050 | qbittorrent.heimdall.technet |
+| qBittorrent (torrents) | 6881 | TCP + UDP |
+| VLC (telnet)  | 4212 | Headless audio control |
+
+## AI / Search
+
+| Service | Port | Vhost |
+|---------|------|-------|
+| SearXNG | 8295 | searxng.heimdall.technet |
+
+## Personal Info & Files
+
+| Service | Port | Vhost / Notes |
+|---------|------|---------------|
+| Trilium      | 8080 | trilium.heimdall.technet |
+| Radicale     | 5232 | 127.0.0.1; radicale.heimdall.technet |
+| Syncthing (Web UI)   | 8384  | syncthing.heimdall.technet |
+| Syncthing (transfer) | 22000 | Default sync ports |
+| BlockURL     | 9001 | blockurl.heimdall.technet |
+
+## Vigil Reachability Checks
+
+Vigil's `ports` monitor on Heimdall (`heimdall-ports`) probes these endpoints
+from Heimdall to confirm the web stack is reachable:
+
+* Nginx (front door) - localhost:443
+* Home Assistant - https://home-assistant.heimdall.technet
+* Grafana - https://grafana.heimdall.technet
+* Pi-hole - https://pi-hole.heimdall.technet
+* Uptime Kuma - https://uptime-kuma.heimdall.technet
+* Homepage - https://homepage.heimdall.technet
