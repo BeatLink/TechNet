@@ -7,6 +7,10 @@
         };
     };
 
+    systemd.services.uptime-kuma.serviceConfig = {
+        SupplementaryGroups = [ "docker" ];
+    };
+
     environment.persistence."/Storage/Services/Uptime-Kuma".directories = [
         {
             directory = "/var/lib/private/uptime-kuma";
