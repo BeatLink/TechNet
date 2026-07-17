@@ -62,6 +62,10 @@
             url = "github:nix-community/nix-vscode-extensions";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        vigil = {
+            url = "path:/Storage/Files/Projects/Coding/Vigil";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
     };
     outputs =
         inputs@{

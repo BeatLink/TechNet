@@ -6,5 +6,6 @@
         #./loki.nix
         #./prometheus.nix
         ./uptime-kuma.nix
+        ./vigil.nix
     ];
 }

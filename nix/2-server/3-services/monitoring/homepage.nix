@@ -309,6 +309,15 @@
             {
                 "System" = [
                     {
+                        "Vigil" = {
+                            icon = "uptime-kuma.png";
+                            href = "https://vigil.heimdall.technet";
+                            description = "Network and Systems Monitor";
+                            siteMonitor = "https://vigil.heimdall.technet";
+                            statusStyle = "dot";
+                        };
+                    }
+                    {
                         "Grafana" = {
                             icon = "grafana.png";
                             href = "https://grafana.heimdall.technet";
