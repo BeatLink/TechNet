@@ -586,6 +586,26 @@
                                     };
                                 }
                                 {
+                                    # NVIDIA dGPU (PRIME offload). With finegrained power
+                                    # management the card sleeps when idle and nvidia-smi
+                                    # can't reach it — the plugin reports `offline` in that
+                                    # case rather than `failed`, which is expected here.
+                                    name = "GPU";
+                                    id = "odin-gpu";
+                                    type = "gpu";
+                                    interval = "1m";
+                                    util_warning = 85;
+                                    util_threshold = 95;
+                                    mem_warning = 85;
+                                    mem_threshold = 95;
+                                    temp_warning = 80;
+                                    temp_threshold = 90;
+                                    grid_col_span = 2;
+                                    ssh_config = {
+                                        host = "odin.technet";
+                                    };
+                                }
+                                {
                                     name = "Disk I/O";
                                     id = "odin-diskio";
                                     type = "diskio";
