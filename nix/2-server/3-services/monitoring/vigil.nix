@@ -6,7 +6,7 @@
 # Migrated from Vigil's config.yaml. SSH credentials for the locked-down `vigil`
 # service user are supplied once via `ssh_defaults` (username + key) and merged
 # into every monitor's `ssh_config` by the engine. Vigil logs into a dedicated
-# `vigil` account on each host, defined in nix/0-common/2-users/3-vigil.nix.
+# `vigil-access` account on each host, defined in nix/0-common/2-users/3-vigil.nix.
 #
 # Prerequisite handled elsewhere:
 #   - The borg repo passphrase file (/etc/vigil/borg-laptop.pass) must exist on
@@ -26,10 +26,11 @@
     services.vigil = {
         enable = true;
         port = 9611;
+        dataDir = "/Storage/Services/Vigil";   # SQLite database lives here (persisted)
         settings = {
             # Applied to every monitor's ssh_config unless overridden locally.
             ssh_defaults = {
-                username = "vigil";
+                username = "vigil-access";
                 key_path = config.sops.secrets.vigil_ssh_key.path;
             };
 
@@ -897,6 +898,11 @@
             ];
         };
     };
+
+    systemd.tmpfiles.rules = [
+        "d /Storage/Services/Vigil 0750 vigil vigil - -"
+        "Z /Storage/Services/Vigil 0750 vigil vigil - -"
+    ];
 
     nginx-vhosts.vigil = {
         domain = "vigil.heimdall.technet";
