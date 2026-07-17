@@ -229,6 +229,40 @@
                                     };
                                 }
                                 {
+                                    name = "Disk I/O";
+                                    id = "ragnarok-diskio";
+                                    type = "diskio";
+                                    interval = "30s";
+                                    grid_col_span = 2;
+                                    ssh_config = {
+                                        host = "ragnarok.technet";
+                                    };
+                                }
+                                {
+                                    name = "Connections";
+                                    id = "ragnarok-connections";
+                                    type = "connections";
+                                    interval = "1m";
+                                    total_warning = 500;
+                                    total_threshold = 1000;
+                                    grid_col_span = 1;
+                                    ssh_config = {
+                                        host = "ragnarok.technet";
+                                    };
+                                }
+                                {
+                                    name = "Interrupts";
+                                    id = "ragnarok-interrupts";
+                                    type = "interrupts";
+                                    interval = "1m";
+                                    irq_warning = 20000;
+                                    irq_threshold = 50000;
+                                    grid_col_span = 1;
+                                    ssh_config = {
+                                        host = "ragnarok.technet";
+                                    };
+                                }
+                                {
                                     name = "SMART";
                                     id = "ragnarok-smart";
                                     type = "smart_disk";
@@ -357,6 +391,61 @@
                                     };
                                 }
                                 {
+                                    name = "Disk I/O";
+                                    id = "heimdall-diskio";
+                                    type = "diskio";
+                                    interval = "30s";
+                                    grid_col_span = 2;
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
+                                    name = "Connections";
+                                    id = "heimdall-connections";
+                                    type = "connections";
+                                    interval = "1m";
+                                    total_warning = 500;
+                                    total_threshold = 1000;
+                                    grid_col_span = 1;
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
+                                    name = "Interrupts";
+                                    id = "heimdall-interrupts";
+                                    type = "interrupts";
+                                    interval = "1m";
+                                    irq_warning = 20000;
+                                    irq_threshold = 50000;
+                                    grid_col_span = 1;
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
+                                    name = "Service Reachability";
+                                    id = "heimdall-ports";
+                                    type = "ports";
+                                    interval = "1m";
+                                    timeout = 5;
+                                    grid_col_span = 4;
+                                    checks = [
+                                        # nginx fronts every web service on Heimdall; probe the
+                                        # local front door plus a few representative app URLs.
+                                        { name = "Nginx"; host = "localhost"; port = 443; }
+                                        { name = "Home Assistant"; url = "https://home-assistant.heimdall.technet"; }
+                                        { name = "Grafana"; url = "https://grafana.heimdall.technet"; }
+                                        { name = "Pi-hole"; url = "https://pi-hole.heimdall.technet"; }
+                                        { name = "Uptime Kuma"; url = "https://uptime-kuma.heimdall.technet"; }
+                                        { name = "Homepage"; url = "https://homepage.heimdall.technet"; }
+                                    ];
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
                                     name = "SMART";
                                     id = "heimdall-smart";
                                     type = "smart_disk";
@@ -480,6 +569,52 @@
                                     type = "network_usage";
                                     interval = "30s";
                                     grid_col_span = 4;
+                                    ssh_config = {
+                                        host = "odin.technet";
+                                    };
+                                }
+                                {
+                                    name = "WiFi";
+                                    id = "odin-wifi";
+                                    type = "wifi";
+                                    interval = "1m";
+                                    quality_warning = 40;
+                                    quality_threshold = 20;
+                                    grid_col_span = 2;
+                                    ssh_config = {
+                                        host = "odin.technet";
+                                    };
+                                }
+                                {
+                                    name = "Disk I/O";
+                                    id = "odin-diskio";
+                                    type = "diskio";
+                                    interval = "30s";
+                                    grid_col_span = 2;
+                                    ssh_config = {
+                                        host = "odin.technet";
+                                    };
+                                }
+                                {
+                                    name = "Connections";
+                                    id = "odin-connections";
+                                    type = "connections";
+                                    interval = "1m";
+                                    total_warning = 500;
+                                    total_threshold = 1000;
+                                    grid_col_span = 2;
+                                    ssh_config = {
+                                        host = "odin.technet";
+                                    };
+                                }
+                                {
+                                    name = "Interrupts";
+                                    id = "odin-interrupts";
+                                    type = "interrupts";
+                                    interval = "1m";
+                                    irq_warning = 20000;
+                                    irq_threshold = 50000;
+                                    grid_col_span = 2;
                                     ssh_config = {
                                         host = "odin.technet";
                                     };
