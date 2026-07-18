@@ -451,7 +451,6 @@
                                         { name = "Home Assistant"; url = "https://home-assistant.heimdall.technet"; }
                                         { name = "Grafana"; url = "https://grafana.heimdall.technet"; }
                                         { name = "Pi-hole"; url = "https://pi-hole.heimdall.technet"; }
-                                        { name = "Uptime Kuma"; url = "https://uptime-kuma.heimdall.technet"; }
                                         { name = "Homepage"; url = "https://homepage.heimdall.technet"; }
                                     ];
                                     ssh_config = {
@@ -851,16 +850,6 @@
                                     };
                                 }
                                 {
-                                    name = "Uptime Kuma";
-                                    id = "heimdall-uptime-kuma";
-                                    type = "systemd_service";
-                                    interval = "1m";
-                                    service_name = "uptime-kuma.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
-                                }
-                                {
                                     name = "FreshRSS";
                                     id = "heimdall-freshrss";
                                     type = "systemd_service";
@@ -1058,6 +1047,48 @@
                             interval = "1h";
                             max_age = "1d";
                             repo = "/Storage/Backups/Laptop/Vorta";
+                            # Passphrase injected via services.vigil.borgPassphraseFile.
+                            require_sudo = true;
+                            ssh_config = {
+                                host = "ragnarok.technet";
+                            };
+                        }
+                        {
+                            # Laptop's borgmatic backups. Distinct from the Vorta
+                            # repos above: Vorta and borgmatic each write their own
+                            # repo, so both need monitoring. These replace the
+                            # Uptime Kuma push that borgmatic used to send.
+                            name = "Laptop Borgmatic: On Disk";
+                            id = "backup-laptop-borgmatic-on-disk";
+                            type = "borg";
+                            interval = "1h";
+                            max_age = "1d";
+                            repo = "/Storage/Files/Backups/Laptop/Borgmatic";
+                            require_sudo = true;
+                            ssh_config = {
+                                host = "odin.technet";
+                            };
+                        }
+                        {
+                            name = "Laptop Borgmatic: Heimdall";
+                            id = "backup-laptop-borgmatic-heimdall";
+                            type = "borg";
+                            interval = "1h";
+                            max_age = "1d";
+                            repo = "/Storage/Files/Backups/Laptop/Borgmatic";
+                            # Passphrase injected via services.vigil.borgPassphraseFile.
+                            require_sudo = true;
+                            ssh_config = {
+                                host = "heimdall.technet";
+                            };
+                        }
+                        {
+                            name = "Laptop Borgmatic: Ragnarok";
+                            id = "backup-laptop-borgmatic-ragnarok";
+                            type = "borg";
+                            interval = "1h";
+                            max_age = "1d";
+                            repo = "/Storage/Backups/Laptop/Borgmatic";
                             # Passphrase injected via services.vigil.borgPassphraseFile.
                             require_sudo = true;
                             ssh_config = {

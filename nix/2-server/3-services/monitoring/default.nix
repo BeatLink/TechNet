@@ -4,7 +4,6 @@
         #./grafana
         ./homepage.nix
         #./prometheus.nix
-        ./uptime-kuma.nix
         ./vigil.nix
     ];
 }
