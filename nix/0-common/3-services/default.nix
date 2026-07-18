@@ -1,11 +1,10 @@
-# Users
+# Services
 #
-# Configures the user accounts for devices in the TechNet
+# Services common to every device in the TechNet.
 #
 
 {
     imports = [
         ./1-ssh.nix
-        ./alloy.nix
     ];
 }

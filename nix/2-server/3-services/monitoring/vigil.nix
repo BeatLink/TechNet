@@ -65,6 +65,28 @@
 
             plugins = [
                 {
+                    # Vigil watching itself. Runs in-process on Heimdall rather
+                    # than over SSH, so it needs no ssh_config.
+                    #
+                    # The value here is the stall check: if the engine wedges,
+                    # every other monitor simply stops updating while the UI
+                    # keeps serving their last known statuses — a screen full of
+                    # green that is indistinguishable from a healthy one. This
+                    # monitor is what makes that failure visible.
+                    #
+                    # Necessarily blind to Vigil being down entirely: a dead
+                    # process cannot report its own death. That gap closes with
+                    # external alerting, not from here.
+                    name = "Vigil";
+                    id = "vigil-self";
+                    type = "vigil_self";
+                    interval = "1m";
+                    # Vigil idles around 70 MB with this monitor count; these
+                    # leave generous headroom while still catching a real leak.
+                    memory_warning = 256;
+                    memory_threshold = 512;
+                }
+                {
                     name = "Device Availability";
                     type = "group";
                     children = [
