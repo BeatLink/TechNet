@@ -9,6 +9,13 @@
 # from the `vigil` service user that the services.vigil module creates on
 # Heimdall.
 #
+# Only the *public* key lives here. The matching private key stays on Heimdall
+# alone (secrets/2-server/vigil.yaml), because Vigil is the only thing that
+# uses it — to log in here. A Vigil-triggered backup runs `borg create` on this
+# host, but borg's own hop to the repo server authenticates with THIS host's
+# existing borg key (Vorta's or borgmatic's), not Vigil's, so no Vigil private
+# key is needed on the monitored hosts.
+#
 
 {
     users = {
