@@ -8,14 +8,17 @@
 # into every monitor's `ssh_config` by the engine. Vigil logs into a dedicated
 # `vigil-access` account on each host, defined in nix/0-common/2-users/3-vigil.nix.
 #
-# The encrypted laptop Vorta repo's passphrase is provided once via
-# services.vigil.borgPassphraseFile (a sops secret, below) and injected into
-# every borg monitor. Vigil reads it locally on Heimdall and passes it to the
-# remote borg call.
+# Repo passphrases are per monitor, not global. Each borg monitor sets
+# `passphrase_command` pointing at the sops secret of the tool that owns its
+# repo — Vorta's on Odin, borgmatic's on Odin or Heimdall. That command runs on
+# the host borg runs on, so Vigil never holds the passphrases and each repo is
+# unlocked with its own, exactly as the scheduled job does it. (Vorta and
+# borgmatic use different passphrases, so a single Vigil-wide default would
+# unlock only one of them.)
 #
-# Both secrets stay in secrets/2-server/vigil.yaml, encrypted to Heimdall alone:
-# Vigil's key is only ever used to log INTO the monitored hosts, which Vigil
-# does from here, so no other host needs a copy.
+# Vigil's own SSH key stays in secrets/2-server/vigil.yaml, encrypted to
+# Heimdall alone: it is only ever used to log INTO the monitored hosts, which
+# Vigil does from here, so no other host needs a copy.
 #
 # A backup monitor runs `borg create` on the host that owns the source data, and
 # borg then opens its own SSH connection to the repo server. That hop
@@ -28,18 +31,10 @@
 {
     imports = [ inputs.vigil.nixosModules.default ];
 
-    # Private SSH key the vigil service user authenticates with, owned by the
-    # `vigil` service user that runs the daemon here. (The common module
-    # provisions the same secret root-owned on the hosts that only run borg.)
+    # Private SSH key the vigil service user authenticates with, used only to log
+    # into the monitored hosts. Owned by the `vigil` service user that runs the
+    # daemon here; no other host needs a copy.
     sops.secrets.vigil_ssh_key = {
-        sopsFile = "${inputs.self}/secrets/2-server/vigil.yaml";
-        owner = "vigil";
-    };
-
-    # Passphrase for the encrypted laptop Vorta borg repo. Vigil reads this file
-    # locally (see services.vigil.borgPassphraseFile below) and passes the
-    # passphrase to the remote borg command.
-    sops.secrets.borg_laptop_passphrase = {
         sopsFile = "${inputs.self}/secrets/2-server/vigil.yaml";
         owner = "vigil";
     };
@@ -48,9 +43,6 @@
         enable = true;
         port = 9611;
         dataDir = "/Storage/Services/Vigil";   # SQLite database lives here (persisted)
-        # Injected into every borg monitor that doesn't set its own passphrase,
-        # read at runtime by Vigil on this host (never enters the Nix store).
-        borgPassphraseFile = config.sops.secrets.borg_laptop_passphrase.path;
         settings = {
             # Applied to every monitor's ssh_config unless overridden locally.
             ssh_defaults = {
@@ -1064,6 +1056,11 @@
                                             max_age = "1d";
                                             repo = "/Storage/Files/Backups/Vorta";
                                             require_sudo = true;
+                                            # Unlocks this repo with Vorta's own passphrase, read on the
+                                            # host borg runs on. Vorta and borgmatic use different
+                                            # passphrases, so this is per monitor rather than global, and
+                                            # the secret never leaves the host that owns it.
+                                            passphrase_command = "cat /run/secrets/vorta_backup_passphrase";
                                             source_paths = [
                                                 "/Storage"
                                             ];
@@ -1094,6 +1091,11 @@
                                             max_age = "1d";
                                             repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Vorta";
                                             require_sudo = true;
+                                            # Unlocks this repo with Vorta's own passphrase, read on the
+                                            # host borg runs on. Vorta and borgmatic use different
+                                            # passphrases, so this is per monitor rather than global, and
+                                            # the secret never leaves the host that owns it.
+                                            passphrase_command = "cat /run/secrets/vorta_backup_passphrase";
                                             # borg makes its OWN SSH connection to the repo server, with
                                             # its own identity — Vigil's login here does not carry over.
                                             # This is Odin's existing Vorta repo key, the same one Vorta
@@ -1132,6 +1134,11 @@
                                             max_age = "1d";
                                             repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Vorta";
                                             require_sudo = true;
+                                            # Unlocks this repo with Vorta's own passphrase, read on the
+                                            # host borg runs on. Vorta and borgmatic use different
+                                            # passphrases, so this is per monitor rather than global, and
+                                            # the secret never leaves the host that owns it.
+                                            passphrase_command = "cat /run/secrets/vorta_backup_passphrase";
                                             # borg makes its OWN SSH connection to the repo server, with
                                             # its own identity — Vigil's login here does not carry over.
                                             # This is Odin's existing Vorta repo key, the same one Vorta
@@ -1184,6 +1191,11 @@
                                             max_age = "1d";
                                             repo = "/Storage/Files/Backups/Laptop/Borgmatic";
                                             require_sudo = true;
+                                            # Unlocks this repo with borgmatic's own passphrase, read on the
+                                            # host borg runs on. Vorta and borgmatic use different
+                                            # passphrases, so this is per monitor rather than global, and
+                                            # the secret never leaves the host that owns it.
+                                            passphrase_command = "cat /run/secrets/borg_repo_encryption_key";
                                             source_paths = [
                                                 "/Storage/System"
                                             ];
@@ -1211,6 +1223,11 @@
                                             max_age = "1d";
                                             repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Borgmatic";
                                             require_sudo = true;
+                                            # Unlocks this repo with borgmatic's own passphrase, read on the
+                                            # host borg runs on. Vorta and borgmatic use different
+                                            # passphrases, so this is per monitor rather than global, and
+                                            # the secret never leaves the host that owns it.
+                                            passphrase_command = "cat /run/secrets/borg_repo_encryption_key";
                                             # borg makes its OWN SSH connection to the repo server, with
                                             # its own identity — Vigil's login here does not carry over.
                                             # This is the host's existing borgmatic key, the same one the
@@ -1244,6 +1261,11 @@
                                             max_age = "1d";
                                             repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Borgmatic";
                                             require_sudo = true;
+                                            # Unlocks this repo with borgmatic's own passphrase, read on the
+                                            # host borg runs on. Vorta and borgmatic use different
+                                            # passphrases, so this is per monitor rather than global, and
+                                            # the secret never leaves the host that owns it.
+                                            passphrase_command = "cat /run/secrets/borg_repo_encryption_key";
                                             # borg makes its OWN SSH connection to the repo server, with
                                             # its own identity — Vigil's login here does not carry over.
                                             # This is the host's existing borgmatic key, the same one the
@@ -1291,6 +1313,11 @@
                                             max_age = "1d";
                                             repo = "/Storage/Files/Backups/Server/Borgmatic";
                                             require_sudo = true;
+                                            # Unlocks this repo with borgmatic's own passphrase, read on the
+                                            # host borg runs on. Vorta and borgmatic use different
+                                            # passphrases, so this is per monitor rather than global, and
+                                            # the secret never leaves the host that owns it.
+                                            passphrase_command = "cat /run/secrets/borg_repo_encryption_key";
                                             source_paths = [
                                                 "/Storage/Services"
                                             ];
@@ -1321,6 +1348,11 @@
                                             max_age = "1d";
                                             repo = "ssh://borg@ragnarok.technet/Storage/Backups/Server/Borgmatic";
                                             require_sudo = true;
+                                            # Unlocks this repo with borgmatic's own passphrase, read on the
+                                            # host borg runs on. Vorta and borgmatic use different
+                                            # passphrases, so this is per monitor rather than global, and
+                                            # the secret never leaves the host that owns it.
+                                            passphrase_command = "cat /run/secrets/borg_repo_encryption_key";
                                             # borg makes its OWN SSH connection to the repo server, with
                                             # its own identity — Vigil's login here does not carry over.
                                             # This is the host's existing borgmatic key, the same one the
