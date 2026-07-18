@@ -18,7 +18,6 @@ vhost; the "Port" column is the upstream/service port nginx proxies to.
 |---------|------|-------|
 | Grafana      | 3000 | grafana.heimdall.technet |
 | Prometheus   | 9090 | prometheus.heimdall.technet |
-| Uptime Kuma  | 3001 | uptime-kuma.heimdall.technet |
 | Homepage     | 9610 | homepage.heimdall.technet |
 | Vigil        | 9611 | vigil.heimdall.technet |
 
@@ -78,5 +77,4 @@ from Heimdall to confirm the web stack is reachable:
 * Home Assistant - https://home-assistant.heimdall.technet
 * Grafana - https://grafana.heimdall.technet
 * Pi-hole - https://pi-hole.heimdall.technet
-* Uptime Kuma - https://uptime-kuma.heimdall.technet
 * Homepage - https://homepage.heimdall.technet
