@@ -27,7 +27,6 @@
             "mqtt"
             "open_meteo"
             "vlc_telnet"
-            "uptime_kuma"
             "motioneye"
             "traccar"
             "command_line"

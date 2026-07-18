@@ -104,14 +104,14 @@
             ];
 
             # Notifications
-            uptime_kuma = {
-                push_url = "http://uptime-kuma.heimdall.technet/api/push/f7xCy2APBy";
-                states = [
-                    #"start"
-                    "finish"
-                    "fail"
-                ];
-            };
+            #
+            # Backup health is monitored by Vigil rather than pushed from here.
+            # Vigil's `borg` monitors (nix/2-server/3-services/monitoring/vigil.nix,
+            # "Backups" group) read each repo directly over SSH and alert when the
+            # newest archive exceeds max_age. That checks the repository itself —
+            # the authoritative state — instead of trusting this scheduler to
+            # report its own failure, so a borgmatic unit that never runs at all
+            # is still caught.
         };
     };
 }
