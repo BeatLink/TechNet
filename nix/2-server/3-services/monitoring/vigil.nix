@@ -1029,7 +1029,10 @@
                             type = "borg";
                             interval = "1h";
                             max_age = "1d";
-                            repo = "/Storage/Files/Backups/Laptop/Vorta";
+                            # Odin's local Vorta repo has no "Laptop/" segment —
+                            # that layout is Heimdall's, where the laptop's repo
+                            # sits alongside the server's.
+                            repo = "/Storage/Files/Backups/Vorta";
                             require_sudo = true;
                             ssh_config = {
                                 host = "odin.technet";

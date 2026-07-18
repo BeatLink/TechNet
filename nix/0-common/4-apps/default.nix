@@ -15,5 +15,6 @@
         ./12-tree.nix
         ./13-powerline.nix
         ./smartctl.nix
+        ./borg.nix
     ];
 }
