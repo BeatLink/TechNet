@@ -9,24 +9,15 @@
 # from the `vigil` service user that the services.vigil module creates on
 # Heimdall.
 #
-# The matching *private* key is also provisioned here, on every host, because a
-# Vigil-triggered backup runs `borg create` on the host owning the source data
-# and pushes to an ssh:// repo on a borg server. That onward hop authenticates
-# as this key, so the source host needs it locally — Heimdall holding it is not
-# enough. It is deployed root-owned (0400): borg runs under `sudo -n`, so root
-# is the identity that reads it, and no unprivileged account should.
-#
-# Heimdall additionally declares this secret vigil-owned in its own vigil.nix,
-# for the Vigil daemon's own outbound SSH; sops-nix merges the two declarations.
+# Only the *public* key lives here. The matching private key stays on Heimdall
+# alone (secrets/2-server/vigil.yaml), because Vigil is the only thing that
+# uses it — to log in here. A Vigil-triggered backup runs `borg create` on this
+# host, but borg's own hop to the repo server authenticates with THIS host's
+# existing borg key (Vorta's or borgmatic's), not Vigil's, so no Vigil private
+# key is needed on the monitored hosts.
 #
 
-{ inputs, ... }:
 {
-    sops.secrets.vigil_ssh_key = {
-        sopsFile = "${inputs.self}/secrets/0-common/vigil.yaml";
-        mode = "0400";
-    };
-
     users = {
         groups."vigil-access" = { };
         users."vigil-access" = {

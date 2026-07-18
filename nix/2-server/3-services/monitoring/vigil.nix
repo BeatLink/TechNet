@@ -13,13 +13,16 @@
 # every borg monitor. Vigil reads it locally on Heimdall and passes it to the
 # remote borg call.
 #
-# Both secrets live in secrets/0-common/vigil.yaml (encrypted to every host)
-# rather than secrets/2-server/. A backup monitor runs `borg create` on the host
-# that owns the source data and pushes to an ssh:// repo, so that host — not
-# just Heimdall — needs the SSH key to authenticate to the borg server. Keeping
-# these under 2-server/ encrypted them to Heimdall alone, and every remote-repo
-# monitor failed with "Permission denied (publickey)". See
-# nix/0-common/3-vigil-secrets.nix, which provisions them on each host.
+# Both secrets stay in secrets/2-server/vigil.yaml, encrypted to Heimdall alone:
+# Vigil's key is only ever used to log INTO the monitored hosts, which Vigil
+# does from here, so no other host needs a copy.
+#
+# A backup monitor runs `borg create` on the host that owns the source data, and
+# borg then opens its own SSH connection to the repo server. That hop
+# authenticates with the SOURCE HOST's existing borg key (`ssh_key` on each
+# monitor: Vorta's or borgmatic's), never with Vigil's. Vigil therefore triggers
+# the host's backup rather than performing one under its own identity, and holds
+# no write credential to any backup repository.
 #
 { inputs, config, ... }:
 {
@@ -29,7 +32,7 @@
     # `vigil` service user that runs the daemon here. (The common module
     # provisions the same secret root-owned on the hosts that only run borg.)
     sops.secrets.vigil_ssh_key = {
-        sopsFile = "${inputs.self}/secrets/0-common/vigil.yaml";
+        sopsFile = "${inputs.self}/secrets/2-server/vigil.yaml";
         owner = "vigil";
     };
 
@@ -37,7 +40,7 @@
     # locally (see services.vigil.borgPassphraseFile below) and passes the
     # passphrase to the remote borg command.
     sops.secrets.borg_laptop_passphrase = {
-        sopsFile = "${inputs.self}/secrets/0-common/vigil.yaml";
+        sopsFile = "${inputs.self}/secrets/2-server/vigil.yaml";
         owner = "vigil";
     };
 
@@ -1091,11 +1094,12 @@
                                             max_age = "1d";
                                             repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Vorta";
                                             require_sudo = true;
-                                            # borg makes its OWN SSH connection to the repo server, with its
-                                            # own identity — Vigil's login to this host does not carry over.
-                                            # Without this it offers root's default keys and the borg server
-                                            # answers "Permission denied (publickey)".
-                                            ssh_key = "/run/secrets/vigil_ssh_key";
+                                            # borg makes its OWN SSH connection to the repo server, with
+                                            # its own identity — Vigil's login here does not carry over.
+                                            # This is Odin's existing Vorta repo key, the same one Vorta
+                                            # authenticates with, so Vigil triggers the host's backup
+                                            # rather than performing one under its own credentials.
+                                            ssh_key = "/run/secrets/vorta_ssh_key";
                                             source_paths = [
                                                 "/Storage"
                                             ];
@@ -1128,11 +1132,12 @@
                                             max_age = "1d";
                                             repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Vorta";
                                             require_sudo = true;
-                                            # borg makes its OWN SSH connection to the repo server, with its
-                                            # own identity — Vigil's login to this host does not carry over.
-                                            # Without this it offers root's default keys and the borg server
-                                            # answers "Permission denied (publickey)".
-                                            ssh_key = "/run/secrets/vigil_ssh_key";
+                                            # borg makes its OWN SSH connection to the repo server, with
+                                            # its own identity — Vigil's login here does not carry over.
+                                            # This is Odin's existing Vorta repo key, the same one Vorta
+                                            # authenticates with, so Vigil triggers the host's backup
+                                            # rather than performing one under its own credentials.
+                                            ssh_key = "/run/secrets/vorta_ssh_key";
                                             source_paths = [
                                                 "/Storage"
                                             ];
@@ -1206,11 +1211,12 @@
                                             max_age = "1d";
                                             repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Borgmatic";
                                             require_sudo = true;
-                                            # borg makes its OWN SSH connection to the repo server, with its
-                                            # own identity — Vigil's login to this host does not carry over.
-                                            # Without this it offers root's default keys and the borg server
-                                            # answers "Permission denied (publickey)".
-                                            ssh_key = "/run/secrets/vigil_ssh_key";
+                                            # borg makes its OWN SSH connection to the repo server, with
+                                            # its own identity — Vigil's login here does not carry over.
+                                            # This is the host's existing borgmatic key, the same one the
+                                            # scheduled job uses, so Vigil triggers the host's backup
+                                            # rather than performing one under its own credentials.
+                                            ssh_key = "/run/secrets/borg_repo_ssh_key";
                                             source_paths = [
                                                 "/Storage/System"
                                             ];
@@ -1238,11 +1244,12 @@
                                             max_age = "1d";
                                             repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Borgmatic";
                                             require_sudo = true;
-                                            # borg makes its OWN SSH connection to the repo server, with its
-                                            # own identity — Vigil's login to this host does not carry over.
-                                            # Without this it offers root's default keys and the borg server
-                                            # answers "Permission denied (publickey)".
-                                            ssh_key = "/run/secrets/vigil_ssh_key";
+                                            # borg makes its OWN SSH connection to the repo server, with
+                                            # its own identity — Vigil's login here does not carry over.
+                                            # This is the host's existing borgmatic key, the same one the
+                                            # scheduled job uses, so Vigil triggers the host's backup
+                                            # rather than performing one under its own credentials.
+                                            ssh_key = "/run/secrets/borg_repo_ssh_key";
                                             source_paths = [
                                                 "/Storage/System"
                                             ];
@@ -1314,11 +1321,12 @@
                                             max_age = "1d";
                                             repo = "ssh://borg@ragnarok.technet/Storage/Backups/Server/Borgmatic";
                                             require_sudo = true;
-                                            # borg makes its OWN SSH connection to the repo server, with its
-                                            # own identity — Vigil's login to this host does not carry over.
-                                            # Without this it offers root's default keys and the borg server
-                                            # answers "Permission denied (publickey)".
-                                            ssh_key = "/run/secrets/vigil_ssh_key";
+                                            # borg makes its OWN SSH connection to the repo server, with
+                                            # its own identity — Vigil's login here does not carry over.
+                                            # This is the host's existing borgmatic key, the same one the
+                                            # scheduled job uses, so Vigil triggers the host's backup
+                                            # rather than performing one under its own credentials.
+                                            ssh_key = "/run/secrets/borg_repo_ssh_key";
                                             source_paths = [
                                                 "/Storage/Services"
                                             ];
