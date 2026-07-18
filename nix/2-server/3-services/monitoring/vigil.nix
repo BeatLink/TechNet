@@ -1090,12 +1090,14 @@
                                             name = "Heimdall";
                                             id = "backup-laptop-heimdall";
                                             type = "borg";
-                                            interval = "30m";
+                                            interval = "1h";
                                             # Remote repo on the backup server, whose data pool is a single
                                             # USB disk (~13 MB/s): a read can take many minutes when the pool
                                             # is busy. Long timeout so a slow answer still counts, wide
-                                            # interval so polls cannot stack up behind each other.
-                                            timeout = "15m";
+                                            # interval so polls cannot stack up behind each other. The timeout stays
+                                            # well under the interval, so a poll that runs to its
+                                            # deadline is killed before the next one is due.
+                                            timeout = "30m";
                                             max_age = "1d";
                                             repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Vorta";
                                             require_sudo = true;
@@ -1138,12 +1140,14 @@
                                             name = "Ragnarok";
                                             id = "backup-laptop-ragnarok";
                                             type = "borg";
-                                            interval = "30m";
+                                            interval = "1h";
                                             # Remote repo on the backup server, whose data pool is a single
                                             # USB disk (~13 MB/s): a read can take many minutes when the pool
                                             # is busy. Long timeout so a slow answer still counts, wide
-                                            # interval so polls cannot stack up behind each other.
-                                            timeout = "15m";
+                                            # interval so polls cannot stack up behind each other. The timeout stays
+                                            # well under the interval, so a poll that runs to its
+                                            # deadline is killed before the next one is due.
+                                            timeout = "30m";
                                             max_age = "1d";
                                             repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Vorta";
                                             require_sudo = true;
@@ -1235,12 +1239,14 @@
                                             name = "Heimdall";
                                             id = "backup-laptop-borgmatic-heimdall";
                                             type = "borg";
-                                            interval = "30m";
+                                            interval = "1h";
                                             # Remote repo on the backup server, whose data pool is a single
                                             # USB disk (~13 MB/s): a read can take many minutes when the pool
                                             # is busy. Long timeout so a slow answer still counts, wide
-                                            # interval so polls cannot stack up behind each other.
-                                            timeout = "15m";
+                                            # interval so polls cannot stack up behind each other. The timeout stays
+                                            # well under the interval, so a poll that runs to its
+                                            # deadline is killed before the next one is due.
+                                            timeout = "30m";
                                             max_age = "1d";
                                             repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Borgmatic";
                                             require_sudo = true;
@@ -1278,12 +1284,14 @@
                                             name = "Ragnarok";
                                             id = "backup-laptop-borgmatic-ragnarok";
                                             type = "borg";
-                                            interval = "30m";
+                                            interval = "1h";
                                             # Remote repo on the backup server, whose data pool is a single
                                             # USB disk (~13 MB/s): a read can take many minutes when the pool
                                             # is busy. Long timeout so a slow answer still counts, wide
-                                            # interval so polls cannot stack up behind each other.
-                                            timeout = "15m";
+                                            # interval so polls cannot stack up behind each other. The timeout stays
+                                            # well under the interval, so a poll that runs to its
+                                            # deadline is killed before the next one is due.
+                                            timeout = "30m";
                                             max_age = "1d";
                                             repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Borgmatic";
                                             require_sudo = true;
@@ -1373,12 +1381,14 @@
                                             name = "Ragnarok";
                                             id = "backup-server-ragnarok";
                                             type = "borg";
-                                            interval = "30m";
+                                            interval = "1h";
                                             # Remote repo on the backup server, whose data pool is a single
                                             # USB disk (~13 MB/s): a read can take many minutes when the pool
                                             # is busy. Long timeout so a slow answer still counts, wide
-                                            # interval so polls cannot stack up behind each other.
-                                            timeout = "15m";
+                                            # interval so polls cannot stack up behind each other. The timeout stays
+                                            # well under the interval, so a poll that runs to its
+                                            # deadline is killed before the next one is due.
+                                            timeout = "30m";
                                             max_age = "1d";
                                             repo = "ssh://borg@ragnarok.technet/Storage/Backups/Server/Borgmatic";
                                             require_sudo = true;
