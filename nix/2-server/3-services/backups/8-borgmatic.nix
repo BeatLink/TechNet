@@ -52,7 +52,7 @@
             # repo for backup-health checks. Borgmatic passes this to borg's
             # --umask (local repo only); the remote Ragnarok repo is already
             # group-accessible via the borg server.
-            umask = "0027";
+            umask = 0027;
 
             # Retention
             keep_hourly = 6;
