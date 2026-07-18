@@ -1054,7 +1054,7 @@
                                             type = "borg";
                                             interval = "1h";
                                             max_age = "1d";
-                                            repo = "/Storage/Files/Backups/Vorta";
+                                            repo = "/Storage/Files/Backups/Laptop/Vorta";
                                             require_sudo = true;
                                             # Unlocks this repo with Vorta's own passphrase, read on the
                                             # host borg runs on. Vorta and borgmatic use different
