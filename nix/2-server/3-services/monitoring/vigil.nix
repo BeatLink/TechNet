@@ -1040,10 +1040,14 @@
                             # Odin (the laptop) owns /Storage. Vorta and borgmatic each keep their
                             # own repo set, so both appear here.
                             name = "Odin";
+                            # Explicit id: without one it defaults to the name and collides with the "Odin" group under System Stats,
+                            # so both would write status under the same key.
+                            id = "backups-odin";
                             type = "group";
                             children = [
                                 {
                                     name = "Vorta";
+                                    id = "backups-odin-vorta";
                                     type = "group";
                                     children = [
                                         {
@@ -1193,6 +1197,9 @@
                                 }
                                 {
                                     name = "Borgmatic";
+                                    # Explicit id: without one it defaults to the name and both host groups have a "Borgmatic" child,
+                                    # so both would write status under the same key.
+                                    id = "backups-odin-borgmatic";
                                     type = "group";
                                     children = [
                                         {
@@ -1333,10 +1340,14 @@
                             # Heimdall (the server) owns /Storage/Services, backed up by borgmatic
                             # only — there is no Vorta on the server.
                             name = "Heimdall";
+                            # Explicit id: without one it defaults to the name and collides with the "Heimdall" group under System Stats,
+                            # so both would write status under the same key.
+                            id = "backups-heimdall";
                             type = "group";
                             children = [
                                 {
                                     name = "Borgmatic";
+                                    id = "backups-heimdall-borgmatic";
                                     type = "group";
                                     children = [
                                         {
