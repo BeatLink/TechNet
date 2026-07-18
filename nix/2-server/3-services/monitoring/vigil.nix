@@ -1010,6 +1010,36 @@
                     # (nix/0-common/2-users/default.nix) grants it NOPASSWD:SETENV,
                     # so the non-interactive `sudo -n` succeeds and the inlined
                     # BORG_PASSPHRASE survives sudo's env_reset.
+                    #
+                    # Each monitor runs borg on the host that OWNS THE SOURCE DATA,
+                    # not on the host holding the repo. This matters for the remote
+                    # copies: `borg create` archives the filesystem of whichever
+                    # host borg runs on, so a monitor for the laptop's Heimdall repo
+                    # must run on Odin (and reach Heimdall over ssh://), otherwise a
+                    # backup would silently archive Heimdall's /Storage into the
+                    # laptop's repo. The ssh:// URLs mirror exactly what Vorta and
+                    # borgmatic use, so Vigil writes the same archives to the same
+                    # repos the scheduled jobs do.
+                    #
+                    # Vigil's key is authorized on each borg repo (see
+                    # 2-server/3-services/backups/borg.nix and
+                    # 1-backup-server/1-system/7-borg.nix) so the source host can
+                    # push as `vigil-access`.
+                    #
+                    # `source_paths`, `exclude` and `compression` are taken from the
+                    # tool that owns each repo — Vorta's profile settings (Odin's
+                    # ~/.local/share/Vorta/settings.db) for the Vorta repos, and the
+                    # borgmatic module for the Borgmatic ones — so a Vigil-triggered
+                    # backup produces an archive equivalent to the scheduled one.
+                    #
+                    # `keep_*` records each repo's retention policy. Vigil has no
+                    # prune action yet, so these are inert today; they are recorded
+                    # here so the policy lives with the monitor rather than only in
+                    # the tool that currently prunes.
+                    #
+                    # Scheduling is deliberately not represented: these backups are
+                    # triggered manually from the Vigil UI, while Vorta/borgmatic
+                    # keep their own schedules.
                     type = "group";
                     children = [
                         {
@@ -1023,6 +1053,24 @@
                             # sits alongside the server's.
                             repo = "/Storage/Files/Backups/Vorta";
                             require_sudo = true;
+                            # Vorta profile "1. On Disk Backup" (repo id 9).
+                            source_paths = [ "/Storage" ];
+                            exclude = [
+                                "**/.cache"
+                                "**/.Trash-1000"
+                                "**/venv"
+                                "**/node_modules"
+                                "**/.flatpak-builder"
+                                "/Storage/System"
+                                # Never recurse into the backup repos themselves.
+                                "/Storage/Files/Backups"
+                            ];
+                            compression = "lz4";
+                            archive_prefix = "odin";
+                            # Retention: keep_within 6H, hourly 12, daily 3.
+                            keep_within = "6H";
+                            keep_hourly = 12;
+                            keep_daily = 3;
                             ssh_config = {
                                 host = "odin.technet";
                             };
@@ -1033,11 +1081,32 @@
                             type = "borg";
                             interval = "1h";
                             max_age = "1d";
-                            repo = "/Storage/Files/Backups/Laptop/Vorta";
+                            # Runs on Odin and pushes here, matching Vorta profile
+                            # "2. Heimdall Backup" (repo id 7).
+                            repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Vorta";
                             # Passphrase injected via services.vigil.borgPassphraseFile.
                             require_sudo = true;
+                            source_paths = [ "/Storage" ];
+                            exclude = [
+                                "**/.cache"
+                                "**/.Trash-1000"
+                                "**/venv"
+                                "**/node_modules"
+                                "**/.flatpak-builder"
+                                "/Storage/System"
+                                "/Storage/Files/Backups"
+                            ];
+                            compression = "lz4";
+                            archive_prefix = "odin";
+                            # Retention: keep_within 6H, hourly 12, daily 3,
+                            # weekly 2, monthly 3.
+                            keep_within = "6H";
+                            keep_hourly = 12;
+                            keep_daily = 3;
+                            keep_weekly = 2;
+                            keep_monthly = 3;
                             ssh_config = {
-                                host = "heimdall.technet";
+                                host = "odin.technet";
                             };
                         }
                         {
@@ -1046,11 +1115,36 @@
                             type = "borg";
                             interval = "1h";
                             max_age = "1d";
-                            repo = "/Storage/Backups/Laptop/Vorta";
+                            # Runs on Odin and pushes here, matching Vorta profile
+                            # "3. Ragnarok Backup" (repo id 8).
+                            repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Vorta";
                             # Passphrase injected via services.vigil.borgPassphraseFile.
                             require_sudo = true;
+                            source_paths = [ "/Storage" ];
+                            exclude = [
+                                "**/.cache"
+                                "**/.Trash-1000"
+                                "**/venv"
+                                "**/node_modules"
+                                "**/.flatpak-builder"
+                                "/Storage/System"
+                                "/Storage/Files/Backups"
+                            ];
+                            # This profile additionally skips anything marked
+                            # .nobackup (Vorta's exclude_if_present).
+                            exclude_if_present = [ ".nobackup" ];
+                            compression = "lz4";
+                            archive_prefix = "odin";
+                            # Retention: keep_within 6H, hourly 24, daily 30,
+                            # weekly 8, monthly 24, yearly 3 — the long-term copy.
+                            keep_within = "6H";
+                            keep_hourly = 24;
+                            keep_daily = 30;
+                            keep_weekly = 8;
+                            keep_monthly = 24;
+                            keep_yearly = 3;
                             ssh_config = {
-                                host = "ragnarok.technet";
+                                host = "odin.technet";
                             };
                         }
                         {
@@ -1058,6 +1152,8 @@
                             # repos above: Vorta and borgmatic each write their own
                             # repo, so both need monitoring. These replace the
                             # Uptime Kuma push that borgmatic used to send.
+                            #
+                            # Settings mirror nix/3-laptop/4-apps/system/borgmatic.
                             name = "Laptop Borgmatic: On Disk";
                             id = "backup-laptop-borgmatic-on-disk";
                             type = "borg";
@@ -1065,6 +1161,21 @@
                             max_age = "1d";
                             repo = "/Storage/Files/Backups/Laptop/Borgmatic";
                             require_sudo = true;
+                            source_paths = [ "/Storage/System" ];
+                            exclude_if_present = [
+                                ".nobackup"
+                                ".stversions"
+                                ".thumbnails"
+                            ];
+                            compression = "lz4";
+                            archive_prefix = "backup";
+                            # Retention: hourly 24, daily 7, weekly 4, monthly 12,
+                            # yearly 3.
+                            keep_hourly = 24;
+                            keep_daily = 7;
+                            keep_weekly = 4;
+                            keep_monthly = 12;
+                            keep_yearly = 3;
                             ssh_config = {
                                 host = "odin.technet";
                             };
@@ -1075,11 +1186,26 @@
                             type = "borg";
                             interval = "1h";
                             max_age = "1d";
-                            repo = "/Storage/Files/Backups/Laptop/Borgmatic";
+                            # Runs on Odin and pushes here (borgmatic's "Heimdall
+                            # Backup" repository).
+                            repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Borgmatic";
                             # Passphrase injected via services.vigil.borgPassphraseFile.
                             require_sudo = true;
+                            source_paths = [ "/Storage/System" ];
+                            exclude_if_present = [
+                                ".nobackup"
+                                ".stversions"
+                                ".thumbnails"
+                            ];
+                            compression = "lz4";
+                            archive_prefix = "backup";
+                            keep_hourly = 24;
+                            keep_daily = 7;
+                            keep_weekly = 4;
+                            keep_monthly = 12;
+                            keep_yearly = 3;
                             ssh_config = {
-                                host = "heimdall.technet";
+                                host = "odin.technet";
                             };
                         }
                         {
@@ -1088,15 +1214,32 @@
                             type = "borg";
                             interval = "1h";
                             max_age = "1d";
-                            repo = "/Storage/Backups/Laptop/Borgmatic";
+                            # Runs on Odin and pushes here (borgmatic's "Ragnarok
+                            # Backup" repository).
+                            repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Borgmatic";
                             # Passphrase injected via services.vigil.borgPassphraseFile.
                             require_sudo = true;
+                            source_paths = [ "/Storage/System" ];
+                            exclude_if_present = [
+                                ".nobackup"
+                                ".stversions"
+                                ".thumbnails"
+                            ];
+                            compression = "lz4";
+                            archive_prefix = "backup";
+                            keep_hourly = 24;
+                            keep_daily = 7;
+                            keep_weekly = 4;
+                            keep_monthly = 12;
+                            keep_yearly = 3;
                             ssh_config = {
-                                host = "ragnarok.technet";
+                                host = "odin.technet";
                             };
                         }
                         {
                             # Server's own borgmatic backup, on-disk copy on Heimdall.
+                            # Settings mirror
+                            # nix/2-server/3-services/backups/8-borgmatic.nix.
                             name = "Server: On Disk";
                             id = "backup-server-on-disk";
                             type = "borg";
@@ -1105,22 +1248,54 @@
                             repo = "/Storage/Files/Backups/Server/Borgmatic";
                             # Passphrase injected via services.vigil.borgPassphraseFile.
                             require_sudo = true;
+                            source_paths = [ "/Storage/Services" ];
+                            exclude = [ "/Storage/Files/Backups/Server" ];
+                            exclude_if_present = [
+                                ".nobackup"
+                                ".stversions"
+                                ".thumbnails"
+                            ];
+                            compression = "lz4";
+                            archive_prefix = "backup";
+                            # Retention: hourly 6, daily 7, weekly 4, monthly 3,
+                            # yearly 1.
+                            keep_hourly = 6;
+                            keep_daily = 7;
+                            keep_weekly = 4;
+                            keep_monthly = 3;
+                            keep_yearly = 1;
                             ssh_config = {
                                 host = "heimdall.technet";
                             };
                         }
                         {
                             # Server's borgmatic backup pushed to the backup server.
+                            # Runs on Heimdall (which owns /Storage/Services) and
+                            # pushes to Ragnarok.
                             name = "Server: Ragnarok";
                             id = "backup-server-ragnarok";
                             type = "borg";
                             interval = "1h";
                             max_age = "1d";
-                            repo = "/Storage/Backups/Server/Borgmatic";
+                            repo = "ssh://borg@ragnarok.technet/Storage/Backups/Server/Borgmatic";
                             # Passphrase injected via services.vigil.borgPassphraseFile.
                             require_sudo = true;
+                            source_paths = [ "/Storage/Services" ];
+                            exclude = [ "/Storage/Files/Backups/Server" ];
+                            exclude_if_present = [
+                                ".nobackup"
+                                ".stversions"
+                                ".thumbnails"
+                            ];
+                            compression = "lz4";
+                            archive_prefix = "backup";
+                            keep_hourly = 6;
+                            keep_daily = 7;
+                            keep_weekly = 4;
+                            keep_monthly = 3;
+                            keep_yearly = 1;
                             ssh_config = {
-                                host = "ragnarok.technet";
+                                host = "heimdall.technet";
                             };
                         }
                     ];
