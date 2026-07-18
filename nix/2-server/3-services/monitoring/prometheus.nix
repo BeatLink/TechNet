@@ -17,7 +17,9 @@
         extraFlags = [
             "--web.enable-remote-write-receiver"
         ];
-        # Allow receiving remote writes from Grafana Alloy instances
+        # Remote-write receiver. Grafana Alloy was the sole producer until it
+        # was removed from the TechNet in favour of Vigil; nothing writes here
+        # now, so this only matters if a push-based collector is reintroduced.
         configText = ''
             remote_write:
               - url: "http://prometheus.heimdall.technet/api/v1/write"
