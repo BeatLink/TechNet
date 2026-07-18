@@ -1,9 +1,13 @@
+{ inputs, ... }:
 {
     home-manager.users.beatlink =
         { pkgs, ... }:
+        let
+            trilium-desktop = inputs.trilium.packages.${pkgs.stdenv.hostPlatform.system}.desktop;
+        in
         {
             home = {
-                packages = [ pkgs.trilium-desktop ];
+                packages = [ trilium-desktop ];
                 persistence."/Storage/Apps/Core/Trilium" = {
                     directories = [
                         ".local/share/trilium-data"
@@ -13,7 +17,7 @@
                 };
                 file = {
                     ".config/autostart/trilium-next.desktop".source =
-                        "${pkgs.trilium-desktop}/share/applications/Trilium.desktop";
+                        "${trilium-desktop}/share/applications/Trilium.desktop";
                 };
             };
         };
