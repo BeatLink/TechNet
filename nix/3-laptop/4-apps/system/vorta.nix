@@ -19,6 +19,14 @@
         mode = "0400";   # root-only; borg reads it via sudo
     };
 
+    # Passphrase for the encrypted Vorta repos, likewise for Vigil's use: its
+    # borg monitors run `cat` on this path to unlock the repo. Vorta itself
+    # takes the passphrase from the system keyring, not from here.
+    sops.secrets.vorta_backup_passphrase = {
+        sopsFile = "${inputs.self}/secrets/3-laptop/vorta.yaml";
+        mode = "0400";   # root-only; borg reads it via sudo
+    };
+
     home-manager.users.beatlink =
         { pkgs, ... }:
         {
