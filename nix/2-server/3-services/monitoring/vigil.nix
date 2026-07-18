@@ -1014,6 +1014,13 @@
                 }
                 {
                     name = "Backups";
+                    # Every borg monitor runs `borg` under sudo (`require_sudo`).
+                    # The repos are root-owned, so reading an archive as the
+                    # unprivileged `vigil-access` account fails on permissions.
+                    # That account is in `wheel`, and wheelNeedsPassword = false
+                    # (nix/0-common/2-users/default.nix) grants it NOPASSWD:SETENV,
+                    # so the non-interactive `sudo -n` succeeds and the inlined
+                    # BORG_PASSPHRASE survives sudo's env_reset.
                     type = "group";
                     children = [
                         {
@@ -1023,6 +1030,7 @@
                             interval = "1h";
                             max_age = "1d";
                             repo = "/Storage/Files/Backups/Laptop/Vorta";
+                            require_sudo = true;
                             ssh_config = {
                                 host = "odin.technet";
                             };
@@ -1035,6 +1043,7 @@
                             max_age = "1d";
                             repo = "/Storage/Files/Backups/Laptop/Vorta";
                             # Passphrase injected via services.vigil.borgPassphraseFile.
+                            require_sudo = true;
                             ssh_config = {
                                 host = "heimdall.technet";
                             };
@@ -1047,6 +1056,7 @@
                             max_age = "1d";
                             repo = "/Storage/Backups/Laptop/Vorta";
                             # Passphrase injected via services.vigil.borgPassphraseFile.
+                            require_sudo = true;
                             ssh_config = {
                                 host = "ragnarok.technet";
                             };
@@ -1060,6 +1070,7 @@
                             max_age = "1d";
                             repo = "/Storage/Files/Backups/Server/Borgmatic";
                             # Passphrase injected via services.vigil.borgPassphraseFile.
+                            require_sudo = true;
                             ssh_config = {
                                 host = "heimdall.technet";
                             };
@@ -1073,6 +1084,7 @@
                             max_age = "1d";
                             repo = "/Storage/Backups/Server/Borgmatic";
                             # Passphrase injected via services.vigil.borgPassphraseFile.
+                            require_sudo = true;
                             ssh_config = {
                                 host = "ragnarok.technet";
                             };
