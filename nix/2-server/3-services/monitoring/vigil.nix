@@ -1051,6 +1051,32 @@
                                 host = "ragnarok.technet";
                             };
                         }
+                        {
+                            # Server's own borgmatic backup, on-disk copy on Heimdall.
+                            name = "Server: On Disk";
+                            id = "backup-server-on-disk";
+                            type = "borg";
+                            interval = "1h";
+                            max_age = "1d";
+                            repo = "/Storage/Files/Backups/Server/Borgmatic";
+                            # Passphrase injected via services.vigil.borgPassphraseFile.
+                            ssh_config = {
+                                host = "heimdall.technet";
+                            };
+                        }
+                        {
+                            # Server's borgmatic backup pushed to the backup server.
+                            name = "Server: Ragnarok";
+                            id = "backup-server-ragnarok";
+                            type = "borg";
+                            interval = "1h";
+                            max_age = "1d";
+                            repo = "/Storage/Backups/Server/Borgmatic";
+                            # Passphrase injected via services.vigil.borgPassphraseFile.
+                            ssh_config = {
+                                host = "ragnarok.technet";
+                            };
+                        }
                     ];
                 }
             ];
