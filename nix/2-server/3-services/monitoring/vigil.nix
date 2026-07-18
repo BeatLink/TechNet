@@ -1052,7 +1052,10 @@
                                             name = "On Disk";
                                             id = "backup-laptop-on-disk";
                                             type = "borg";
-                                            interval = "1h";
+                                            interval = "15m";
+                                            # Local repo — no second SSH hop, so this answers far faster than
+                                            # the pushed copies.
+                                            timeout = "5m";
                                             max_age = "1d";
                                             repo = "/Storage/Files/Backups/Laptop/Vorta";
                                             require_sudo = true;
@@ -1087,7 +1090,12 @@
                                             name = "Heimdall";
                                             id = "backup-laptop-heimdall";
                                             type = "borg";
-                                            interval = "1h";
+                                            interval = "30m";
+                                            # Remote repo on the backup server, whose data pool is a single
+                                            # USB disk (~13 MB/s): a read can take many minutes when the pool
+                                            # is busy. Long timeout so a slow answer still counts, wide
+                                            # interval so polls cannot stack up behind each other.
+                                            timeout = "15m";
                                             max_age = "1d";
                                             repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Vorta";
                                             require_sudo = true;
@@ -1130,7 +1138,12 @@
                                             name = "Ragnarok";
                                             id = "backup-laptop-ragnarok";
                                             type = "borg";
-                                            interval = "1h";
+                                            interval = "30m";
+                                            # Remote repo on the backup server, whose data pool is a single
+                                            # USB disk (~13 MB/s): a read can take many minutes when the pool
+                                            # is busy. Long timeout so a slow answer still counts, wide
+                                            # interval so polls cannot stack up behind each other.
+                                            timeout = "15m";
                                             max_age = "1d";
                                             repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Vorta";
                                             require_sudo = true;
@@ -1187,7 +1200,10 @@
                                             name = "On Disk";
                                             id = "backup-laptop-borgmatic-on-disk";
                                             type = "borg";
-                                            interval = "1h";
+                                            interval = "15m";
+                                            # Local repo — no second SSH hop, so this answers far faster than
+                                            # the pushed copies.
+                                            timeout = "5m";
                                             max_age = "1d";
                                             repo = "/Storage/Files/Backups/Laptop/Borgmatic";
                                             require_sudo = true;
@@ -1219,7 +1235,12 @@
                                             name = "Heimdall";
                                             id = "backup-laptop-borgmatic-heimdall";
                                             type = "borg";
-                                            interval = "1h";
+                                            interval = "30m";
+                                            # Remote repo on the backup server, whose data pool is a single
+                                            # USB disk (~13 MB/s): a read can take many minutes when the pool
+                                            # is busy. Long timeout so a slow answer still counts, wide
+                                            # interval so polls cannot stack up behind each other.
+                                            timeout = "15m";
                                             max_age = "1d";
                                             repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Borgmatic";
                                             require_sudo = true;
@@ -1257,7 +1278,12 @@
                                             name = "Ragnarok";
                                             id = "backup-laptop-borgmatic-ragnarok";
                                             type = "borg";
-                                            interval = "1h";
+                                            interval = "30m";
+                                            # Remote repo on the backup server, whose data pool is a single
+                                            # USB disk (~13 MB/s): a read can take many minutes when the pool
+                                            # is busy. Long timeout so a slow answer still counts, wide
+                                            # interval so polls cannot stack up behind each other.
+                                            timeout = "15m";
                                             max_age = "1d";
                                             repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Borgmatic";
                                             require_sudo = true;
@@ -1309,7 +1335,10 @@
                                             name = "On Disk";
                                             id = "backup-server-on-disk";
                                             type = "borg";
-                                            interval = "1h";
+                                            interval = "15m";
+                                            # Local repo — no second SSH hop, so this answers far faster than
+                                            # the pushed copies.
+                                            timeout = "5m";
                                             max_age = "1d";
                                             repo = "/Storage/Files/Backups/Server/Borgmatic";
                                             require_sudo = true;
@@ -1344,7 +1373,12 @@
                                             name = "Ragnarok";
                                             id = "backup-server-ragnarok";
                                             type = "borg";
-                                            interval = "1h";
+                                            interval = "30m";
+                                            # Remote repo on the backup server, whose data pool is a single
+                                            # USB disk (~13 MB/s): a read can take many minutes when the pool
+                                            # is busy. Long timeout so a slow answer still counts, wide
+                                            # interval so polls cannot stack up behind each other.
+                                            timeout = "15m";
                                             max_age = "1d";
                                             repo = "ssh://borg@ragnarok.technet/Storage/Backups/Server/Borgmatic";
                                             require_sudo = true;
