@@ -1020,16 +1020,6 @@
                                     };
                                 }
                                 {
-                                    name = "go2rtc";
-                                    id = "heimdall-go2rtc";
-                                    type = "systemd_service";
-                                    interval = "1m";
-                                    service_name = "go2rtc.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
-                                }
-                                {
                                     name = "FreshRSS";
                                     id = "heimdall-freshrss";
                                     type = "systemd_service";
