@@ -518,7 +518,6 @@
                                         # local front door plus a few representative app URLs.
                                         { name = "Nginx"; host = "localhost"; port = 443; }
                                         { name = "Home Assistant"; url = "https://home-assistant.heimdall.technet"; }
-                                        { name = "Grafana"; url = "https://grafana.heimdall.technet"; }
                                         { name = "Pi-hole"; url = "https://pi-hole.heimdall.technet"; }
                                         { name = "Homepage"; url = "https://homepage.heimdall.technet"; }
                                     ];
@@ -1031,31 +1030,11 @@
                                     };
                                 }
                                 {
-                                    name = "Loki";
-                                    id = "heimdall-loki";
-                                    type = "systemd_service";
-                                    interval = "1m";
-                                    service_name = "loki.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
-                                }
-                                {
                                     name = "Prometheus";
                                     id = "heimdall-prometheus";
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "prometheus.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
-                                }
-                                {
-                                    name = "Grafana";
-                                    id = "heimdall-grafana";
-                                    type = "systemd_service";
-                                    interval = "1m";
-                                    service_name = "grafana.service";
                                     ssh_config = {
                                         host = "heimdall.technet";
                                     };
