@@ -33,7 +33,6 @@ vhost; the "Port" column is the upstream/service port nginx proxies to.
 |---------|------|---------------|
 | Home Assistant | 8123 | home-assistant.heimdall.technet |
 | Frigate        | 9310 | 127.0.0.1; frigate.heimdall.technet |
-| go2rtc         | 1984 | 127.0.0.1; go2rtc.heimdall.technet |
 | ESPHome        | 6052 | esphome.heimdall.technet |
 | Traccar        | 9280 | traccar.heimdall.technet |
 | Mosquitto MQTT | 1883 | Broker |

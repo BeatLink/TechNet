@@ -188,15 +188,6 @@
                         };
                     }
                     {
-                        "Go2RTC" = {
-                            icon = "go2rtc.png";
-                            description = "IP Camera Streaming Platform";
-                            href = "https://go2rtc.heimdall.technet";
-                            siteMonitor = "https://go2rtc.heimdall.technet";
-                            statusStyle = "dot";
-                        };
-                    }
-                    {
                         "Traccar" = {
                             icon = "traccar.png";
                             description = "Vehicle Tracking Server";

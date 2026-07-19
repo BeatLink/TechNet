@@ -69,9 +69,19 @@
                 };
                 cameras.apartment = {
                     ffmpeg = {
+                        input_args = [
+                            "-f"
+                            "v4l2"
+                            "-input_format"
+                            "mjpeg"
+                            "-video_size"
+                            "1280x720"
+                            "-framerate"
+                            "30"
+                        ];
                         inputs = [
                             {
-                                path = "rtsp://127.0.0.1:8554/webcam";
+                                path = "/dev/video0";
                                 roles = [
                                     "detect"
                                     "record"
@@ -111,6 +121,9 @@
     systemd.services = {
         frigate = {
             path = [ pkgs.ffmpeg-full ];
+            preStart = ''
+                ${pkgs.v4l-utils}/bin/v4l2-ctl -d /dev/video0 --set-fmt-video=width=1280,height=720,pixelformat=MJPG --set-parm=30
+            '';
             serviceConfig = {
                 EnvironmentFile = config.sops.secrets."frigate_env".path;
                 AmbientCapabilities = "CAP_PERFMON";
