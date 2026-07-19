@@ -50,8 +50,8 @@
                     description = "default blocklist";
                 }
                 {
-                    url = "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/pro.txt";
-                    description = "hagezi blocklist";
+                    url = "https://raw.githubusercontent.com/hagezi/dns-blocklists/main/adblock/ultimate.txt";
+                    description = "hagezi ultimate blocklist";
                 }
                 {
                     url = "https://raw.githubusercontent.com/PolishFiltersTeam/KADhosts/master/KADhosts.txt";
