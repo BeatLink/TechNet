@@ -23,7 +23,6 @@
                 { "Home and Car" = { }; }
                 { "Fun" = { }; }
                 { "TechNet" = { }; }
-                { "System" = { }; }
                 {
                     "System Info" = {
                         style = "row";
@@ -304,10 +303,6 @@
                             statusStyle = "dot";
                         };
                     }
-                ];
-            }
-            {
-                "System" = [
                     {
                         "Vigil" = {
                             icon = "uptime-kuma.png";
