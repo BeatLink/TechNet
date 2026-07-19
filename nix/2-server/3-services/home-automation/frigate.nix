@@ -70,27 +70,40 @@
                     track = [ "person" ];
                     filters.person.min_score = 0.6;
                 };
+                go2rtc = {
+                    # Bind RTSP/WebRTC to loopback only — the stream is consumed
+                    # locally by Frigate and proxied to clients through its web UI.
+                    rtsp.listen = "127.0.0.1:8554";
+                    webrtc.listen = "127.0.0.1:8555";
+                    api.listen = "127.0.0.1:1984";
+                    streams.webcam = [
+                        "ffmpeg:device?video=/dev/video0&input_format=mjpeg&video_size=1280x720&framerate=30#video=h264#hardware"
+                    ];
+                };
                 cameras.apartment = {
+                    # Armed/disarmed is driven by Home Assistant over MQTT:
+                    #   frigate/apartment/enabled/set  <- "ON" / "OFF"
+                    # While OFF, Frigate runs no capture, detection or recording
+                    # for this camera (go2rtc keeps the restream up regardless).
+                    #
+                    # This MUST stay true: Frigate refuses an MQTT "ON" unless the
+                    # camera is enabled in the config file ("Camera must be enabled
+                    # in the config to be turned on via MQTT"), so setting false
+                    # here would make the camera impossible to arm. HA should
+                    # publish OFF on startup to reach the disarmed state.
+                    enabled = true;
                     ffmpeg = {
-                        input_args = [
-                            "-f"
-                            "v4l2"
-                            "-input_format"
-                            "mjpeg"
-                            "-video_size"
-                            "1280x720"
-                            "-framerate"
-                            "30"
-                        ];
                         inputs = [
                             {
-                                path = "/dev/video0";
+                                path = "rtsp://127.0.0.1:8554/webcam";
+                                input_args = "preset-rtsp-restream";
                                 roles = [
                                     "detect"
                                     "record"
                                 ];
                             }
                         ];
+                        hwaccel_args = "preset-vaapi";
                     };
                     detect = {
                         enabled = true;
@@ -130,6 +143,24 @@
                 SupplementaryGroups = [
                     "video"
                     "render"
+                ];
+                # The webcam wedges into a state where it enumerates but only ever
+                # delivers truncated frames; a physical replug is what clears it.
+                # Unbind/rebind at the usb driver level re-enumerates the device for
+                # the same effect. The delay lets the port settle before rebinding,
+                # and gives uvcvideo time to reattach before go2rtc opens
+                # /dev/video0. The "+" prefix runs this as root, which writing to
+                # /sys/bus/usb/drivers requires — the unit itself runs as frigate.
+                ExecStartPre = [
+                    "+${pkgs.writeShellScript "frigate-usb-replug" ''
+                        usb_id=1-1
+                        if [ -e /sys/bus/usb/devices/$usb_id ]; then
+                            echo -n "$usb_id" > /sys/bus/usb/drivers/usb/unbind || true
+                            sleep 5
+                            echo -n "$usb_id" > /sys/bus/usb/drivers/usb/bind || true
+                            sleep 2
+                        fi
+                    ''}"
                 ];
             };
         };
