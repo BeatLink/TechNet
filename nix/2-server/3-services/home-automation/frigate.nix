@@ -17,6 +17,9 @@
     ];
 
     services = {
+        udev.extraRules = ''
+            ACTION=="add", SUBSYSTEM=="video4linux", KERNELS=="video0", RUN+="${pkgs.v4l-utils}/bin/v4l2-ctl -d /dev/video0 --set-fmt-video=width=1280,height=720,pixelformat=MJPG --set-parm=30"
+        '';
         frigate = {
             enable = true;
             hostname = "frigate";
@@ -121,9 +124,6 @@
     systemd.services = {
         frigate = {
             path = [ pkgs.ffmpeg-full ];
-            preStart = ''
-                ${pkgs.v4l-utils}/bin/v4l2-ctl -d /dev/video0 --set-fmt-video=width=1280,height=720,pixelformat=MJPG --set-parm=30
-            '';
             serviceConfig = {
                 EnvironmentFile = config.sops.secrets."frigate_env".path;
                 AmbientCapabilities = "CAP_PERFMON";
