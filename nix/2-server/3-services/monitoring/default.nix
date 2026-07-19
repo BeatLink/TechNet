@@ -1,8 +1,8 @@
 {
     imports = [
-        #./grafana
+        ./grafana
         ./homepage.nix
-        #./prometheus.nix
+        ./prometheus.nix
         ./vigil.nix
     ];
 }
