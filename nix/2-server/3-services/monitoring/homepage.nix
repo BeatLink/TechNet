@@ -240,9 +240,9 @@
                     {
                         "Calibre" = {
                             icon = "calibre.png";
-                            href = "https://calibre.heimdall.technet";
+                            href = "https://calibre-web.heimdall.technet";
                             description = "Web UI for Calibre";
-                            siteMonitor = "https://calibre.heimdall.technet";
+                            siteMonitor = "https://calibre-web.heimdall.technet";
                             statusStyle = "dot";
                         };
                     }
