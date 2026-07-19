@@ -1050,6 +1050,51 @@
                                     };
                                 }
                                 {
+                                    # Transfer health, as opposed to the monitor
+                                    # above, which only proves the daemon is
+                                    # running. The failure this exists to catch:
+                                    # the daemon keeps running while transfers
+                                    # have silently stopped — no peer
+                                    # connectivity, or the storage path went
+                                    # away — which every liveness check reports
+                                    # as healthy.
+                                    #
+                                    # Port 9050 is the WebUI listener on
+                                    # Heimdall (see qbittorrent.nix), read from
+                                    # that host over SSH so the monitor does not
+                                    # depend on the nginx vhost in front of it.
+                                    # That config sets LocalHostAuth = false, so
+                                    # requests from Heimdall itself need no
+                                    # credential and none is stored here. If that
+                                    # ever changes, set username together with
+                                    # password_command (pointing at a sops
+                                    # secret, as the borg monitors do) — the
+                                    # plugin reports a rejected login explicitly
+                                    # rather than failing obscurely.
+                                    #
+                                    # Exposes Resume All / Recheck Errored /
+                                    # Pause All on the monitor's page. Nothing
+                                    # destructive is offered: the dashboard fires
+                                    # actions with no confirmation step.
+                                    name = "qBittorrent Transfers";
+                                    id = "heimdall-qbittorrent-transfers";
+                                    type = "qbittorrent";
+                                    interval = "5m";
+                                    api_url = "http://127.0.0.1:9050";
+                                    # A couple of stalled torrents is a dead
+                                    # swarm and normal; the whole queue stalling
+                                    # at once is the connection, not the peers.
+                                    stalled_warning = 3;
+                                    stalled_threshold = 10;
+                                    # An errored torrent usually means the
+                                    # storage path under /Storage disappeared,
+                                    # which is worth failing on immediately.
+                                    error_threshold = 1;
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
                                     name = "Openbooks";
                                     id = "heimdall-openbooks";
                                     type = "systemd_service";
