@@ -317,15 +317,6 @@
                             statusStyle = "dot";
                         };
                     }
-                    {
-                        "Prometheus" = {
-                            icon = "prometheus.png";
-                            href = "https://prometheus.heimdall.technet";
-                            description = "Metrics and Alerting";
-                            siteMonitor = "https://prometheus.heimdall.technet";
-                            statusStyle = "dot";
-                        };
-                    }
                 ];
             }
         ];

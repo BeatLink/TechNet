@@ -1030,16 +1030,6 @@
                                     };
                                 }
                                 {
-                                    name = "Prometheus";
-                                    id = "heimdall-prometheus";
-                                    type = "systemd_service";
-                                    interval = "1m";
-                                    service_name = "prometheus.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
-                                }
-                                {
                                     name = "FreshRSS";
                                     id = "heimdall-freshrss";
                                     type = "systemd_service";

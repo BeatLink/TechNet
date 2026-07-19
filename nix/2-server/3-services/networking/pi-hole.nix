@@ -16,15 +16,8 @@
 #     - Ragnarok - ragnarok.technet
 #
 
+{ ... }:
 {
-    config,
-    inputs,
-    ...
-}:
-{
-
-    # Credentials ------------------------------------------------------------------------------------------------------------------------------
-    sops.secrets.pihole_env.sopsFile = "${inputs.self}/secrets/2-server/pi-hole.yaml";
 
     nginx-vhosts.pi-hole = {
         domain = "pi-hole.heimdall.technet";
@@ -110,15 +103,6 @@
             logDirectory = "/Storage/Services/PiHole/logs";
         };
 
-        # Pi-Hole Prometheus -----------------------------------------------------------------------------------------------------------------------
-        prometheus.exporters.pihole = {
-            enable = true;
-            listenAddress = "127.0.0.1";
-            port = 9019;
-            piholeHostname = "127.0.0.1";
-            piholePort = 9018;
-            protocol = "http";
-        };
     };
 
     systemd.tmpfiles.rules = [
@@ -136,12 +120,6 @@
             mode = "0755";
         }
     ];
-
-    systemd.services.prometheus-pihole-exporter = {
-        serviceConfig = {
-            EnvironmentFile = config.sops.secrets.pihole_env.path;
-        };
-    };
 
     systemd.services.pihole = {
         after = [ "unbound.service" ];
