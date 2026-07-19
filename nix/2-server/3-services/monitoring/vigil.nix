@@ -224,6 +224,19 @@
                                     };
                                 }
                                 {
+                                    # An OOM kill is an event, not a level: memory
+                                    # returns to normal before the next sample, so
+                                    # memory_usage above cannot see it. Reads the
+                                    # cumulative counter, so no kill is ever missed.
+                                    name = "OOM Kills";
+                                    id = "ragnarok-oom";
+                                    type = "oom";
+                                    interval = "1m";
+                                    ssh_config = {
+                                        host = "ragnarok.technet";
+                                    };
+                                }
+                                {
                                     name = "Temperature";
                                     id = "ragnarok-temperature";
                                     type = "temperature";
@@ -356,6 +369,24 @@
                                         host = "ragnarok.technet";
                                     };
                                 }
+                                {
+                                    # Auto-discovers every mount, so it also covers
+                                    # filesystems not listed explicitly above. Catches
+                                    # read-only remounts (which leave df reporting
+                                    # healthy usage forever) and inode exhaustion.
+                                    name = "Filesystems";
+                                    id = "ragnarok-filesystems";
+                                    type = "filesystems";
+                                    interval = "10m";
+                                    warning = 80;
+                                    threshold = 90;
+                                    inode_warning = 85;
+                                    inode_threshold = 95;
+                                    grid_col_span = 4;
+                                    ssh_config = {
+                                        host = "ragnarok.technet";
+                                    };
+                                }
                             ];
                         }
                         {
@@ -381,6 +412,19 @@
                                     interval = "1m";
                                     memory_warning = 75;
                                     memory_threshold = 90;
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
+                                    # An OOM kill is an event, not a level: memory
+                                    # returns to normal before the next sample, so
+                                    # memory_usage above cannot see it. Reads the
+                                    # cumulative counter, so no kill is ever missed.
+                                    name = "OOM Kills";
+                                    id = "heimdall-oom";
+                                    type = "oom";
+                                    interval = "1m";
                                     ssh_config = {
                                         host = "heimdall.technet";
                                     };
@@ -538,6 +582,24 @@
                                         host = "heimdall.technet";
                                     };
                                 }
+                                {
+                                    # Auto-discovers every mount, so it also covers
+                                    # filesystems not listed explicitly above. Catches
+                                    # read-only remounts (which leave df reporting
+                                    # healthy usage forever) and inode exhaustion.
+                                    name = "Filesystems";
+                                    id = "heimdall-filesystems";
+                                    type = "filesystems";
+                                    interval = "10m";
+                                    warning = 80;
+                                    threshold = 90;
+                                    inode_warning = 85;
+                                    inode_threshold = 95;
+                                    grid_col_span = 4;
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
                             ];
                         }
                         {
@@ -563,6 +625,19 @@
                                     interval = "1m";
                                     memory_warning = 75;
                                     memory_threshold = 90;
+                                    ssh_config = {
+                                        host = "odin.technet";
+                                    };
+                                }
+                                {
+                                    # An OOM kill is an event, not a level: memory
+                                    # returns to normal before the next sample, so
+                                    # memory_usage above cannot see it. Reads the
+                                    # cumulative counter, so no kill is ever missed.
+                                    name = "OOM Kills";
+                                    id = "odin-oom";
+                                    type = "oom";
+                                    interval = "1m";
                                     ssh_config = {
                                         host = "odin.technet";
                                     };
@@ -732,6 +807,24 @@
                                         host = "odin.technet";
                                     };
                                 }
+                                {
+                                    # Auto-discovers every mount, so it also covers
+                                    # filesystems not listed explicitly above. Catches
+                                    # read-only remounts (which leave df reporting
+                                    # healthy usage forever) and inode exhaustion.
+                                    name = "Filesystems";
+                                    id = "odin-filesystems";
+                                    type = "filesystems";
+                                    interval = "10m";
+                                    warning = 80;
+                                    threshold = 90;
+                                    inode_warning = 85;
+                                    inode_threshold = 95;
+                                    grid_col_span = 4;
+                                    ssh_config = {
+                                        host = "odin.technet";
+                                    };
+                                }
                             ];
                         }
                     ];
@@ -770,6 +863,68 @@
                                     interval = "1h";
                                     service_name = "nixos-upgrade.service";
                                     max_age = "1w";
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
+                                    # Timer-driven oneshot (OnCalendar=daily). Monitored
+                                    # in oneshot mode so a job that silently stops firing
+                                    # is caught by max_age — a plain is-active check would
+                                    # read "inactive" as healthy between runs.
+                                    name = "Stremio Export";
+                                    id = "heimdall-stremio-export";
+                                    type = "systemd_service";
+                                    interval = "1h";
+                                    service_name = "stremio-export.service";
+                                    max_age = "2d";
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
+                                    # OnCalendar=daily oneshot, same rationale as above.
+                                    name = "Trakt.tv Backup";
+                                    id = "heimdall-trakttv-backup";
+                                    type = "systemd_service";
+                                    interval = "1h";
+                                    service_name = "trakttv-backup.service";
+                                    max_age = "2d";
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
+                                    # OnCalendar=monthly. Refreshes the Trakt.tv OAuth
+                                    # token; if it stops running the backup above starts
+                                    # failing on expired credentials, so it is worth
+                                    # catching here rather than via the backup's fallout.
+                                    name = "Trakt.tv Auth";
+                                    id = "heimdall-trakttv-auth";
+                                    type = "systemd_service";
+                                    interval = "6h";
+                                    service_name = "trakttv-auth.service";
+                                    max_age = "5w";
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
+                                    name = "Mosquitto";
+                                    id = "heimdall-mosquitto";
+                                    type = "systemd_service";
+                                    interval = "1m";
+                                    service_name = "mosquitto.service";
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
+                                    name = "Calibre Web";
+                                    id = "heimdall-calibre-web";
+                                    type = "systemd_service";
+                                    interval = "1m";
+                                    service_name = "calibre-web-automated.service";
                                     ssh_config = {
                                         host = "heimdall.technet";
                                     };
