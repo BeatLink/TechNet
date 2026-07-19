@@ -318,29 +318,11 @@
                         };
                     }
                     {
-                        "Grafana" = {
-                            icon = "grafana.png";
-                            href = "https://grafana.heimdall.technet";
-                            description = "Metrics Dashboard";
-                            siteMonitor = "https://grafana.heimdall.technet";
-                            statusStyle = "dot";
-                        };
-                    }
-                    {
                         "Prometheus" = {
                             icon = "prometheus.png";
                             href = "https://prometheus.heimdall.technet";
                             description = "Metrics and Alerting";
                             siteMonitor = "https://prometheus.heimdall.technet";
-                            statusStyle = "dot";
-                        };
-                    }
-                    {
-                        "Loki" = {
-                            icon = "loki.png";
-                            href = "https://loki.heimdall.technet";
-                            description = "Log Aggregation";
-                            siteMonitor = "https://loki.heimdall.technet";
                             statusStyle = "dot";
                         };
                     }
