@@ -1,7 +1,6 @@
 {
     imports = [
-        #./frigate.nix
-        ./go2rtc.nix
+        ./frigate.nix
         ./home-assistant.nix
         ./mosquitto.nix
         ./traccar.nix

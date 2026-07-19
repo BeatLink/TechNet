@@ -23,7 +23,6 @@
             "stream"
             "mobile_app"
             "dhcp"
-            "go2rtc"
             "mqtt"
             "open_meteo"
             "vlc_telnet"
@@ -65,7 +64,7 @@
 
     security.polkit.extraConfig = ''
         polkit.addRule(function(action, subject) {
-          var allowedUnits = ["go2rtc.service", "frigate.service"];
+          var allowedUnits = ["frigate.service"];
           if (action.id == "org.freedesktop.systemd1.manage-units" &&
               allowedUnits.indexOf(action.lookup("unit")) !== -1 &&
               subject.user == "hass") {
