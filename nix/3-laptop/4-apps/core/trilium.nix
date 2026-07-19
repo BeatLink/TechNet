@@ -1,9 +1,9 @@
-{ inputs, ... }:
+{ ... }:
 {
     home-manager.users.beatlink =
         { pkgs, ... }:
         let
-            trilium-desktop = inputs.trilium.packages.${pkgs.stdenv.hostPlatform.system}.desktop;
+            trilium-desktop = pkgs.trilium-desktop;
         in
         {
             home = {

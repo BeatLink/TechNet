@@ -1,8 +1,7 @@
-{ pkgs, inputs, ... }:
+{ ... }:
 {
     services.trilium-server = {
         enable = true;
-        package = inputs.trilium.packages.${pkgs.stdenv.hostPlatform.system}.server;
         instanceName = "Heimdall";
         port = 8080;
         dataDir = "/Storage/Services/Trilium/data";
