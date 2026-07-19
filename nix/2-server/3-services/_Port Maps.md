@@ -16,8 +16,6 @@ vhost; the "Port" column is the upstream/service port nginx proxies to.
 
 | Service | Port | Vhost |
 |---------|------|-------|
-| Grafana      | 3000 | grafana.heimdall.technet |
-| Prometheus   | 9090 | prometheus.heimdall.technet |
 | Homepage     | 9610 | homepage.heimdall.technet |
 | Vigil        | 9611 | vigil.heimdall.technet |
 
@@ -26,7 +24,6 @@ vhost; the "Port" column is the upstream/service port nginx proxies to.
 | Service | Port | Notes |
 |---------|------|-------|
 | Pi-hole (web/FTL)        | 9018 | pi-hole.heimdall.technet |
-| Pi-hole Prometheus exp.  | 9019 | 127.0.0.1 only |
 | Unbound (recursive DNS)  | 5335 | 10.100.100.1 / 127.0.0.1 |
 | DDNS Updater             | 9420 | 127.0.0.1; ddns.heimdall.technet |
 
@@ -52,12 +49,6 @@ vhost; the "Port" column is the upstream/service port nginx proxies to.
 | qBittorrent (torrents) | 6881 | TCP + UDP |
 | VLC (telnet)  | 4212 | Headless audio control |
 
-## AI / Search
-
-| Service | Port | Vhost |
-|---------|------|-------|
-| SearXNG | 8295 | searxng.heimdall.technet |
-
 ## Personal Info & Files
 
 | Service | Port | Vhost / Notes |
@@ -75,6 +66,5 @@ from Heimdall to confirm the web stack is reachable:
 
 * Nginx (front door) - localhost:443
 * Home Assistant - https://home-assistant.heimdall.technet
-* Grafana - https://grafana.heimdall.technet
 * Pi-hole - https://pi-hole.heimdall.technet
 * Homepage - https://homepage.heimdall.technet

@@ -1,6 +1,5 @@
 {
     imports = [
-        ./ai
         ./backups
         ./fun-and-media
         ./home-automation
