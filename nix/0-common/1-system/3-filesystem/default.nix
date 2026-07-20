@@ -22,5 +22,6 @@
         ./4-persistence.nix
         ./5-scrub.nix
         ./6-trim.nix
+        ./7-cleanup.nix
     ];
 }
