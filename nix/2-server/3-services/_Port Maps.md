@@ -43,6 +43,7 @@ vhost; the "Port" column is the upstream/service port nginx proxies to.
 |---------|------|---------------|
 | Calibre Web  | 8083 | calibre-web.heimdall.technet |
 | FreshRSS     | —    | freshrss (php-fpm via nginx) |
+| Jackett      | 9117 | jackett.heimdall.technet |
 | Openbooks    | 9777 | openbooks.heimdall.technet |
 | qBittorrent (Web UI)   | 9050 | qbittorrent.heimdall.technet |
 | qBittorrent (torrents) | 6881 | TCP + UDP |
@@ -67,3 +68,27 @@ from Heimdall to confirm the web stack is reachable:
 * Home Assistant - https://home-assistant.heimdall.technet
 * Pi-hole - https://pi-hole.heimdall.technet
 * Homepage - https://homepage.heimdall.technet
+* Jackett - https://jackett.heimdall.technet
+
+Beyond that generic reachability probe, a few services get a dedicated
+app-aware Vigil plugin that checks the service is actually doing its job, not
+just answering:
+
+* Pi-hole (`heimdall-pihole-dns`) - block rate + gravity age via the FTL API
+* qBittorrent (`heimdall-qbittorrent-transfers`) - transfer/connection health via the WebUI API
+* Unbound (`heimdall-unbound-resolution`) - live query + SERVFAIL rate via `unbound-control`
+* Mosquitto (`heimdall-mosquitto-delivery`) - publish/subscribe round trip on a dedicated `vigil` MQTT user
+* Frigate (`heimdall-frigate-cameras`) - per-camera `connection_quality` via the internal (unauthenticated, loopback-only) API
+* Traccar (`heimdall-traccar-devices`) - device staleness via `/api/devices`, using a dedicated read-only account created once by hand
+* FreshRSS (`heimdall-freshrss-feeds`) - per-feed refresh staleness via the Fever API
+* Trilium (`heimdall-trilium-activity`) - note write-activity staleness via ETAPI metrics, using a token created once by hand
+* Radicale (`heimdall-radicale-webdav`) - live PROPFIND via a dedicated `vigil` htpasswd account
+* Syncthing (`heimdall-syncthing-health`) - folder sync state + device connectivity via the REST API
+* Calibre Web (`heimdall-calibre-web-library`) - live OPDS feed request via a dedicated account created once by hand
+* Openbooks (`heimdall-openbooks-irc`) - IRC bridge connectivity via a brief WebSocket probe
+* Blockurl (`heimdall-blockurl-database`) - blocklist database non-emptiness via its own API
+
+A few of these (Traccar, FreshRSS, Trilium, Calibre Web) authenticate as an
+account or token that has no declarative provisioning in the underlying app —
+each has a one-time manual setup step documented in its own `.nix` file and a
+placeholder sops secret to fill in afterward.
