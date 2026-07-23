@@ -48,6 +48,15 @@
         owner = "vigil";
     };
 
+    # FreeDNS's per-host dynamic update URL for bltechnet.mooo.com — a
+    # secret, account-specific URL that updates the record to the caller's
+    # apparent IP on GET. Read by the "DDNS" monitor's ddns_updater plugin
+    # (update_url_file) below. Replaces the standalone ddns-updater service.
+    sops.secrets.freedns_update_url = {
+        sopsFile = "${inputs.self}/secrets/2-server/vigil.yaml";
+        owner = "vigil";
+    };
+
     services.vigil = {
         enable = true;
         port = 9611;
@@ -201,6 +210,31 @@
                             ];
                         }
                     ];
+                }
+                {
+                    # Keeps bltechnet.mooo.com pointed at the home connection's
+                    # current public IP — this is also the WireGuard endpoint for
+                    # the laptop, phone, and backup server (see their networking.nix
+                    # files), so a stale record breaks remote access to all three.
+                    # Replaces the standalone ddns-updater service: Vigil now both
+                    # performs the update and reports on whether it's in sync,
+                    # instead of a separate opaque container doing the former with
+                    # no visibility into the latter.
+                    #
+                    # Checked against 8.8.8.8 rather than the local Pi-hole/Unbound
+                    # resolver: Pi-hole has a hosts-file override for this exact
+                    # name pointing at the LAN IP (pi-hole.nix), so asking it would
+                    # return that override and never notice a real DDNS failure.
+                    # 8.8.8.8 matches the old ddns-updater's own RESOLVER_ADDRESS,
+                    # for the same reason.
+                    name = "DDNS";
+                    id = "ddns-bltechnet";
+                    type = "ddns_updater";
+                    domain = "bltechnet.mooo.com";
+                    record_type = "A";
+                    resolver = "8.8.8.8";
+                    update_url_file = config.sops.secrets.freedns_update_url.path;
+                    interval = "5m";
                 }
                 {
                     name = "System Stats";
@@ -968,6 +1002,27 @@
                                     };
                                 }
                                 {
+                                    # Library-serving health, as opposed to the
+                                    # monitor above, which only proves the
+                                    # process is running. Requests /opds with
+                                    # a dedicated "vigil" account (created once
+                                    # by hand — see calibre-web-automated.nix)
+                                    # and checks the body is a real feed, not
+                                    # just any 200 — a known upstream issue
+                                    # means even a broken metadata DB can
+                                    # answer 200 on some routes.
+                                    name = "Calibre Web Library";
+                                    id = "heimdall-calibre-web-library";
+                                    type = "calibre_web";
+                                    interval = "10m";
+                                    url = "http://127.0.0.1:8083";
+                                    username = "vigil";
+                                    password_command = "cat /run/secrets/calibre_web_vigil_password";
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
                                     name = "Unbound";
                                     id = "heimdall-unbound";
                                     type = "systemd_service";
@@ -1085,11 +1140,49 @@
                                     };
                                 }
                                 {
+                                    # Camera health, as opposed to the monitor
+                                    # above, which only proves the process is
+                                    # running. Reads Frigate's own precomputed
+                                    # connection_quality per camera via its
+                                    # internal (unauthenticated-by-design,
+                                    # loopback-only) API on port 5000 — no
+                                    # credential needed, no change to the real
+                                    # auth setup on the regular port.
+                                    name = "Frigate Cameras";
+                                    id = "heimdall-frigate-cameras";
+                                    type = "frigate";
+                                    interval = "1m";
+                                    api_url = "http://127.0.0.1:5000";
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
                                     name = "FreshRSS";
                                     id = "heimdall-freshrss";
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "phpfpm-freshrss.service";
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
+                                    # Feed-refresh health, as opposed to the
+                                    # monitor above, which only proves
+                                    # PHP-FPM is running. Reads per-feed
+                                    # last-updated timestamps via the Fever
+                                    # API — the account's separate API
+                                    # password is set once by hand (see
+                                    # freshrss.nix) since FreshRSS has no
+                                    # declarative option for it.
+                                    name = "FreshRSS Feeds";
+                                    id = "heimdall-freshrss-feeds";
+                                    type = "freshrss";
+                                    interval = "15m";
+                                    api_url = "http://127.0.0.1:80";
+                                    username = "beatlink";
+                                    api_password_command = "cat /run/secrets/freshrss_api_password";
                                     ssh_config = {
                                         host = "heimdall.technet";
                                     };
@@ -1160,11 +1253,56 @@
                                     };
                                 }
                                 {
+                                    # IRC-bridge health, as opposed to the
+                                    # monitor above, which only proves the web
+                                    # server is running. Opens one short-lived
+                                    # WebSocket connection to confirm the IRC
+                                    # bridge to irc.irchighway.net is actually
+                                    # connected — closes immediately since
+                                    # OpenBooks serves only one client at a
+                                    # time. 10m interval keeps this probe's
+                                    # share of that single slot small.
+                                    name = "Openbooks IRC Bridge";
+                                    id = "heimdall-openbooks-irc";
+                                    type = "openbooks";
+                                    interval = "10m";
+                                    ws_url = "ws://127.0.0.1:9777/ws";
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
                                     name = "Traccar";
                                     id = "heimdall-traccar";
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "traccar.service";
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
+                                    # Device-staleness health, as opposed to
+                                    # the monitor above, which only proves the
+                                    # server is running. Authenticates as a
+                                    # dedicated read-only "vigil" user created
+                                    # once by hand (see traccar.nix, which has
+                                    # no declarative user provisioning at all)
+                                    # and computes staleness itself from each
+                                    # device's lastUpdate, rather than
+                                    # trusting Traccar's own status field —
+                                    # that field doesn't reliably reach
+                                    # "offline" on its own for a tracker that
+                                    # has simply gone silent.
+                                    name = "Traccar Devices";
+                                    id = "heimdall-traccar-devices";
+                                    type = "traccar";
+                                    interval = "15m";
+                                    api_url = "http://127.0.0.1:8082";
+                                    username = "vigil";
+                                    password_command = "cat /run/secrets/traccar_vigil_password";
+                                    stale_warning = 24;
+                                    stale_threshold = 72;
                                     ssh_config = {
                                         host = "heimdall.technet";
                                     };
@@ -1200,21 +1338,31 @@
                                     };
                                 }
                                 {
-                                    name = "DDNS Updater";
-                                    id = "heimdall-ddns-updater";
-                                    type = "systemd_service";
-                                    interval = "1m";
-                                    service_name = "ddns-updater.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
-                                }
-                                {
                                     name = "Blockurl";
                                     id = "heimdall-blockurl";
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "blockurl.service";
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
+                                    # Database health, as opposed to the
+                                    # monitor above, which only proves the
+                                    # process is running. Reads the domain
+                                    # list via BlockURL's own X-API-Key auth
+                                    # (blockurl.nix's existing secret — no new
+                                    # credential needed) and checks it is
+                                    # non-empty, catching a corrupted or
+                                    # wiped database that a liveness check
+                                    # cannot see.
+                                    name = "Blockurl Database";
+                                    id = "heimdall-blockurl-database";
+                                    type = "blockurl";
+                                    interval = "15m";
+                                    api_url = "http://127.0.0.1:9001";
+                                    api_key_command = "cut -d= -f2- /run/secrets/blockurl_api_key";
                                     ssh_config = {
                                         host = "heimdall.technet";
                                     };
@@ -1230,6 +1378,27 @@
                                     };
                                 }
                                 {
+                                    # CalDAV/CardDAV health, as opposed to the
+                                    # monitor above, which only proves the
+                                    # process is running. Radicale has no JSON
+                                    # API at all — issues a live PROPFIND as a
+                                    # dedicated "vigil" htpasswd account
+                                    # (provisioned declaratively; see
+                                    # radicale.nix) and checks for the 207
+                                    # Multi-Status a healthy WebDAV server
+                                    # returns.
+                                    name = "Radicale WebDAV";
+                                    id = "heimdall-radicale-webdav";
+                                    type = "radicale";
+                                    interval = "10m";
+                                    url = "http://127.0.0.1:5232";
+                                    username = "vigil";
+                                    password_command = "cat /run/secrets/radicale_vigil_password";
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
                                     name = "Syncthing";
                                     id = "heimdall-syncthing";
                                     type = "systemd_service";
@@ -1240,11 +1409,52 @@
                                     };
                                 }
                                 {
+                                    # Folder/device health, as opposed to the
+                                    # monitor above, which only proves the
+                                    # daemon is running. Reads Syncthing's own
+                                    # REST API, keyed by an API key extracted
+                                    # from config.xml by a small Nix-managed
+                                    # timer (see syncthing.nix) rather than a
+                                    # separately stored credential.
+                                    name = "Syncthing Sync Health";
+                                    id = "heimdall-syncthing-health";
+                                    type = "syncthing";
+                                    interval = "10m";
+                                    api_url = "http://127.0.0.1:8384";
+                                    api_key_command = "cat /Storage/Services/Syncthing/Config/vigil-api-key";
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
                                     name = "Trilium";
                                     id = "heimdall-trilium";
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "trilium-server.service";
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
+                                    # Write-activity health, as opposed to the
+                                    # monitor above, which only proves the
+                                    # process is running. Reads
+                                    # statistics.lastModified via ETAPI, using
+                                    # a token generated once by hand (see
+                                    # trilium.nix, which has no declarative
+                                    # token provisioning at all). Staleness
+                                    # here can be entirely normal (nobody used
+                                    # Trilium overnight), so the default
+                                    # window is generous and meant to be
+                                    # tuned per instance.
+                                    name = "Trilium Activity";
+                                    id = "heimdall-trilium-activity";
+                                    type = "trilium";
+                                    interval = "1h";
+                                    api_url = "http://127.0.0.1:8080";
+                                    token_command = "cat /run/secrets/trilium_etapi_token";
+                                    stale_warning = 72;
                                     ssh_config = {
                                         host = "heimdall.technet";
                                     };
