@@ -66,6 +66,12 @@ in
     };
 
     systemd.tmpfiles.rules = [
+        # qBittorrent itself creates data/ and data/nova3/ (root-owned, via
+        # tmpfiles running before this unit's first start) before our
+        # ExecStartPre ever runs, so every level needs an explicit rule —
+        # a rule for just the engines/ leaf leaves its unwritable parents.
+        "Z /Storage/Services/Qbittorrent/profile/data 0750 qbittorrent qbittorrent - -"
+        "Z /Storage/Services/Qbittorrent/profile/data/nova3 0750 qbittorrent qbittorrent - -"
         "d /Storage/Services/Qbittorrent/profile/data/nova3/engines 0750 qbittorrent qbittorrent - -"
     ];
 
@@ -82,18 +88,30 @@ in
             # own (unprivileged) user since the unit is otherwise hardened
             # with ProtectHome/ProtectSystem, so the key path resolves through
             # LoadCredential rather than being written into the Nix store.
+            #
+            # ExecStartPre lines are argv-split by systemd, not run through a
+            # shell, so $(), quoting, and > redirection need an explicit `sh
+            # -c` wrapper (writeShellScript) rather than a bare command string.
             ExecStartPre = [
-                ''
-                    ${pkgs.coreutils}/bin/install -Dm644 ${jackettPlugin} \
-                        /Storage/Services/Qbittorrent/profile/data/nova3/engines/jackett.py
-                ''
-                ''
-                    ${pkgs.jq}/bin/jq -n \
-                        --arg api_key "$(cat "$CREDENTIALS_DIRECTORY/jackett_api_key")" \
-                        --arg url "http://127.0.0.1:9117" \
-                        '{api_key: $api_key, url: $url, tracker_first: false, thread_count: 20}' \
-                        > /Storage/Services/Qbittorrent/profile/data/nova3/engines/jackett.json
-                ''
+                (pkgs.lib.getExe (pkgs.writeShellApplication {
+                    name = "qbittorrent-install-jackett-plugin";
+                    runtimeInputs = [ pkgs.coreutils ];
+                    text = ''
+                        install -Dm644 ${jackettPlugin} \
+                            /Storage/Services/Qbittorrent/profile/data/nova3/engines/jackett.py
+                    '';
+                }))
+                (pkgs.lib.getExe (pkgs.writeShellApplication {
+                    name = "qbittorrent-render-jackett-config";
+                    runtimeInputs = [ pkgs.jq ];
+                    text = ''
+                        jq -n \
+                            --arg api_key "$(cat "$CREDENTIALS_DIRECTORY/jackett_api_key")" \
+                            --arg url "http://127.0.0.1:9117" \
+                            '{api_key: $api_key, url: $url, tracker_first: false, thread_count: 20}' \
+                            > /Storage/Services/Qbittorrent/profile/data/nova3/engines/jackett.json
+                    '';
+                }))
             ];
         };
     };
