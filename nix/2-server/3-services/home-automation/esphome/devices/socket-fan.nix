@@ -7,5 +7,5 @@
         name = "socket-fan";
         sensor_update_interval = "1s";
     };
-    packages.common = "!include 2-base-socket.yaml";
+    packages.common = "!include .2-base-socket.yaml";
 }

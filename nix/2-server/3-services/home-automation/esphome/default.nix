@@ -33,7 +33,14 @@ let
     stateDir = "/var/lib/esphome";
 
     # `{ "<name>.yaml" = <derivation>; }` for every device and hardware profile.
-    configFiles = esphomeLib.renderDir ./templates // esphomeLib.renderDir ./devices;
+    # Hardware profiles are `!include`-only building blocks, not standalone
+    # devices -- dot-prefixing their filenames hides them from the dashboard's
+    # listing (it skips dotfiles) while leaving them resolvable as same-directory
+    # `!include`s. Without this, the dashboard lets you compile/flash a profile
+    # directly, which registers under the upstream package's default hostname
+    # instead of any of the real devices' names and can never be reached by OTA.
+    dotPrefix = lib.mapAttrs' (name: value: lib.nameValuePair ".${name}" value);
+    configFiles = dotPrefix (esphomeLib.renderDir ./templates) // esphomeLib.renderDir ./devices;
 
     deviceSecretsFile = "${inputs.self}/secrets/2-server/esphome-secrets.yaml";
 
