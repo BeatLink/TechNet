@@ -58,6 +58,30 @@
                     url = "https://v.firebog.net/hosts/static/w3kbl.txt";
                     description = "Firebog suspicious";
                 }
+                {
+                    url = "https://v.firebog.net/hosts/Prigent-Crypto.txt";
+                    description = "Firebog crypto-mining/ransomware";
+                }
+                {
+                    url = "https://phishing.army/download/phishing_army_blocklist_extended.txt";
+                    description = "Phishing Army extended blocklist";
+                }
+                {
+                    url = "https://urlhaus.abuse.ch/downloads/hostfile/";
+                    description = "URLhaus malware distribution";
+                }
+                {
+                    url = "https://gitlab.com/quidsup/notrack-blocklists/raw/master/notrack-malware.txt";
+                    description = "NoTrack malware";
+                }
+                {
+                    url = "https://raw.githubusercontent.com/AssoEchap/stalkerware-indicators/master/generated/hosts";
+                    description = "Stalkerware indicators";
+                }
+                {
+                    url = "https://raw.githubusercontent.com/DandelionSprout/adfilt/master/Alternate%20versions%20Anti-Malware%20List/AntiMalwareHosts.txt";
+                    description = "DandelionSprout anti-malware";
+                }
             ];
             settings = {
                 dns = {
