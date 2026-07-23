@@ -39,10 +39,21 @@
         owner = "vigil";
     };
 
+    # HTTP Basic Auth credentials gating the dashboard and REST API. The
+    # dashboard has no `openFirewall` here, so it's reachable only over the
+    # WireGuard mesh — auth is defense-in-depth against anyone else on that
+    # mesh, not the internet at large.
+    sops.secrets.vigil_dashboard_password = {
+        sopsFile = "${inputs.self}/secrets/2-server/vigil.yaml";
+        owner = "vigil";
+    };
+
     services.vigil = {
         enable = true;
         port = 9611;
         dataDir = "/Storage/Services/Vigil";   # SQLite database lives here (persisted)
+        authUsername = "admin";
+        authPasswordFile = config.sops.secrets.vigil_dashboard_password.path;
         settings = {
             # Applied to every monitor's ssh_config unless overridden locally.
             ssh_defaults = {
