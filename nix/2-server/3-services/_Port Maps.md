@@ -78,3 +78,17 @@ just answering:
 * qBittorrent (`heimdall-qbittorrent-transfers`) - transfer/connection health via the WebUI API
 * Unbound (`heimdall-unbound-resolution`) - live query + SERVFAIL rate via `unbound-control`
 * Mosquitto (`heimdall-mosquitto-delivery`) - publish/subscribe round trip on a dedicated `vigil` MQTT user
+* Frigate (`heimdall-frigate-cameras`) - per-camera `connection_quality` via the internal (unauthenticated, loopback-only) API
+* Traccar (`heimdall-traccar-devices`) - device staleness via `/api/devices`, using a dedicated read-only account created once by hand
+* FreshRSS (`heimdall-freshrss-feeds`) - per-feed refresh staleness via the Fever API
+* Trilium (`heimdall-trilium-activity`) - note write-activity staleness via ETAPI metrics, using a token created once by hand
+* Radicale (`heimdall-radicale-webdav`) - live PROPFIND via a dedicated `vigil` htpasswd account
+* Syncthing (`heimdall-syncthing-health`) - folder sync state + device connectivity via the REST API
+* Calibre Web (`heimdall-calibre-web-library`) - live OPDS feed request via a dedicated account created once by hand
+* Openbooks (`heimdall-openbooks-irc`) - IRC bridge connectivity via a brief WebSocket probe
+* Blockurl (`heimdall-blockurl-database`) - blocklist database non-emptiness via its own API
+
+A few of these (Traccar, FreshRSS, Trilium, Calibre Web) authenticate as an
+account or token that has no declarative provisioning in the underlying app —
+each has a one-time manual setup step documented in its own `.nix` file and a
+placeholder sops secret to fill in afterward.

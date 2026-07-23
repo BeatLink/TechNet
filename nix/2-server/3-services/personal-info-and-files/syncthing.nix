@@ -3,7 +3,7 @@
 # SyncThing is the main file synchronization system across all devices in the TechNet. By keeping files on multiple redundant devices it
 # also acts as a first line backup mechanism
 #
-{ config, inputs, ... }:
+{ config, pkgs, inputs, ... }:
 {
     sops.secrets.syncthing_cert = {
         sopsFile = "${inputs.self}/secrets/2-server/syncthing.yaml";
@@ -167,4 +167,35 @@
         port = 8384;
     };
 
+    # Syncthing's REST API key lives only inside config.xml (owned
+    # beatlink:beatlink, mode 0600, alongside the TLS key) — there is no
+    # separate credential to hand Vigil. Rather than widening vigil-access's
+    # sudo scope to read that whole file (which would also expose the TLS
+    # private key) or adding either account to the other's group, this runs
+    # as root (root can read any file regardless of group) and writes out
+    # just the <apikey> value, owned vigil-access:vigil-access, mode 0400.
+    # Re-run periodically (not just at boot) so a GUI-triggered API key
+    # regeneration is picked up without a reboot.
+    systemd.services.syncthing-vigil-api-key = {
+        description = "Extract Syncthing's API key for Vigil";
+        after = [ "syncthing-init.service" ];
+        serviceConfig.Type = "oneshot";
+        script = ''
+            ${pkgs.libxml2}/bin/xmllint --xpath 'string(configuration/gui/apikey)' \
+                /Storage/Services/Syncthing/Config/config.xml \
+                > /Storage/Services/Syncthing/Config/.vigil-api-key.new
+            chown vigil-access:vigil-access /Storage/Services/Syncthing/Config/.vigil-api-key.new
+            chmod 0400 /Storage/Services/Syncthing/Config/.vigil-api-key.new
+            mv -f /Storage/Services/Syncthing/Config/.vigil-api-key.new \
+                /Storage/Services/Syncthing/Config/vigil-api-key
+        '';
+    };
+
+    systemd.timers.syncthing-vigil-api-key = {
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+            OnBootSec = "1m";
+            OnUnitActiveSec = "1h";
+        };
+    };
 }

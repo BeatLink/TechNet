@@ -17,6 +17,17 @@
         group = "freshrss";
     };
 
+    # Vigil's `freshrss` plugin authenticates to the Fever API as this same
+    # (beatlink) user to check feed-refresh staleness. FreshRSS has no
+    # separate declarative API-password option — it must be set once by hand
+    # under Settings > Authentication > "API management" for this user, then
+    # stored here to match, the same one-time-manual-step pattern as
+    # Traccar's vigil account (see traccar.nix).
+    sops.secrets.freshrss_api_password = {
+        sopsFile = "${inputs.self}/secrets/2-server/freshrss.yaml";
+        owner = "vigil-access";
+    };
+
     systemd.tmpfiles.rules = [
         "d /Storage/Services/FreshRSS 0750 freshrss freshrss - -"
         "Z /Storage/Services/FreshRSS 0750 freshrss freshrss - -"
