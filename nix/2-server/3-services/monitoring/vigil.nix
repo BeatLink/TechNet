@@ -239,12 +239,12 @@
                 {
                     name = "System Stats";
                     type = "group";
-                    grid_columns = 1;
+                    grid_columns = 2;
                     children = [
                         {
                             name = "Ragnarok";
                             type = "group";
-                            grid_columns = 4;
+                            grid_columns = 2;
                             children = [
                                 {
                                     name = "CPU";
@@ -437,7 +437,7 @@
                         {
                             name = "Heimdall";
                             type = "group";
-                            grid_columns = 4;
+                            grid_columns = 2;
                             children = [
                                 {
                                     name = "CPU";
@@ -650,7 +650,7 @@
                         {
                             name = "Odin";
                             type = "group";
-                            grid_columns = 4;
+                            grid_columns = 2;
                             children = [
                                 {
                                     name = "CPU";
