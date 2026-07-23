@@ -5,10 +5,17 @@
 #
 #  Device configs are declarative: each device and hardware profile is a `.nix`
 #  file under `devices/` and `templates/`, rendered to YAML at build time and
-#  symlinked read-only into the dashboard's state directory. Nix is the single
-#  source of truth, so the dashboard's *editor* can no longer save changes --
-#  edit the `.nix` files and rebuild instead. Compiling, flashing and OTA all
-#  still work from the dashboard as before.
+#  bind-mounted read-only into the dashboard's state directory. Nix is the
+#  single source of truth, so the dashboard's *editor* can no longer save
+#  changes -- edit the `.nix` files and rebuild instead. Compiling, flashing
+#  and OTA all still work from the dashboard as before.
+#
+#  Bind mounts, not symlinks: ESPHome's dashboard resolves each config path
+#  and rejects it if that resolves outside the state directory (a path-
+#  traversal guard). A symlink into `/nix/store` fails that check, so every
+#  device silently 500s when opened. Bind-mounting a real file over an empty
+#  placeholder keeps the path itself inside the state directory while the
+#  content still comes from the store.
 #
 #  The build caches (`.esphome/`, `.platformio/`) and `secrets.yaml` deliberately
 #  stay mutable; only the config files themselves are Nix-owned.
@@ -26,7 +33,14 @@ let
     stateDir = "/var/lib/esphome";
 
     # `{ "<name>.yaml" = <derivation>; }` for every device and hardware profile.
-    configFiles = esphomeLib.renderDir ./templates // esphomeLib.renderDir ./devices;
+    # Hardware profiles are `!include`-only building blocks, not standalone
+    # devices -- dot-prefixing their filenames hides them from the dashboard's
+    # listing (it skips dotfiles) while leaving them resolvable as same-directory
+    # `!include`s. Without this, the dashboard lets you compile/flash a profile
+    # directly, which registers under the upstream package's default hostname
+    # instead of any of the real devices' names and can never be reached by OTA.
+    dotPrefix = lib.mapAttrs' (name: value: lib.nameValuePair ".${name}" value);
+    configFiles = dotPrefix (esphomeLib.renderDir ./templates) // esphomeLib.renderDir ./devices;
 
     deviceSecretsFile = "${inputs.self}/secrets/2-server/esphome-secrets.yaml";
 
@@ -78,14 +92,26 @@ in
     };
 
     # Device configurations --------------------------------------------------------------------------------------------------------------------
-    # Rendered YAML lives in the store and is linked into the state directory.
-    # Files are linked individually so the build caches alongside them stay
-    # writable.
+    # Rendered YAML lives in the store and is bind-mounted onto an empty
+    # placeholder file in the state directory, so the config's path stays
+    # inside the state directory while its content stays Nix-owned. Files are
+    # mounted individually so the build caches alongside them stay writable.
     systemd.tmpfiles.rules =
-        lib.mapAttrsToList (name: drv: "L+ ${stateDir}/${name} - - - - ${drv}") configFiles
+        lib.mapAttrsToList (name: _: "f ${stateDir}/${name} 0444 esphome esphome") configFiles
         ++ [
             "L+ ${stateDir}/secrets.yaml - - - - ${config.sops.templates."esphome-secrets.yaml".path}"
         ];
+
+    systemd.mounts = lib.mapAttrsToList (name: drv: {
+        what = "${drv}";
+        where = "${stateDir}/${name}";
+        type = "none";
+        options = "bind,ro";
+        requires = [ "var-lib-esphome.mount" ];
+        after = [ "var-lib-esphome.mount" ];
+        wantedBy = [ "esphome.service" ];
+        before = [ "esphome.service" ];
+    }) configFiles;
 
     # Setup Nginx Virtual Host and Pi-Hole -----------------------------------------------------------------------------------------------------
     nginx-vhosts.esphome = {

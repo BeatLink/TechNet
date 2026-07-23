@@ -2,7 +2,7 @@
 {
     packages = {
         athom = "github://athom-tech/athom-configs/athom-smart-plug-v2.yaml";
-        common = "!include 1-common.yaml";
+        common = "!include .1-common.yaml";
     };
 
     esp8266 = {
