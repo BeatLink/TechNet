@@ -43,6 +43,7 @@ vhost; the "Port" column is the upstream/service port nginx proxies to.
 |---------|------|---------------|
 | Calibre Web  | 8083 | calibre-web.heimdall.technet |
 | FreshRSS     | —    | freshrss (php-fpm via nginx) |
+| Jackett      | 9117 | jackett.heimdall.technet |
 | Openbooks    | 9777 | openbooks.heimdall.technet |
 | qBittorrent (Web UI)   | 9050 | qbittorrent.heimdall.technet |
 | qBittorrent (torrents) | 6881 | TCP + UDP |
@@ -67,3 +68,13 @@ from Heimdall to confirm the web stack is reachable:
 * Home Assistant - https://home-assistant.heimdall.technet
 * Pi-hole - https://pi-hole.heimdall.technet
 * Homepage - https://homepage.heimdall.technet
+* Jackett - https://jackett.heimdall.technet
+
+Beyond that generic reachability probe, a few services get a dedicated
+app-aware Vigil plugin that checks the service is actually doing its job, not
+just answering:
+
+* Pi-hole (`heimdall-pihole-dns`) - block rate + gravity age via the FTL API
+* qBittorrent (`heimdall-qbittorrent-transfers`) - transfer/connection health via the WebUI API
+* Unbound (`heimdall-unbound-resolution`) - live query + SERVFAIL rate via `unbound-control`
+* Mosquitto (`heimdall-mosquitto-delivery`) - publish/subscribe round trip on a dedicated `vigil` MQTT user

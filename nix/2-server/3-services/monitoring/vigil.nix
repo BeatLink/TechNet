@@ -531,6 +531,7 @@
                                         { name = "Home Assistant"; url = "https://home-assistant.heimdall.technet"; }
                                         { name = "Pi-hole"; url = "https://pi-hole.heimdall.technet"; }
                                         { name = "Homepage"; url = "https://homepage.heimdall.technet"; }
+                                        { name = "Jackett"; url = "https://jackett.heimdall.technet"; }
                                     ];
                                     ssh_config = {
                                         host = "heimdall.technet";
@@ -930,6 +931,33 @@
                                     };
                                 }
                                 {
+                                    # Message-delivery health, as opposed to the
+                                    # monitor above, which only proves the broker
+                                    # process is running. The failure this exists
+                                    # to catch: the broker accepts connections
+                                    # while routing itself is wedged (a
+                                    # persistence-file jam, a socket wired to a
+                                    # dead internal queue) — every liveness check
+                                    # stays green while every client silently
+                                    # stops seeing messages. Publishes a nonce and
+                                    # confirms it comes back on the same topic,
+                                    # authenticating as a dedicated `vigil` MQTT
+                                    # user (mosquitto.nix) scoped by ACL to
+                                    # vigil/probe/# only.
+                                    name = "Mosquitto Delivery";
+                                    id = "heimdall-mosquitto-delivery";
+                                    type = "mosquitto";
+                                    interval = "5m";
+                                    host = "127.0.0.1";
+                                    port = 1883;
+                                    username = "vigil";
+                                    password_command = "cat /run/secrets/mosquitto_vigil_password";
+                                    probe_topic = "vigil/probe/heimdall-mosquitto-delivery";
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
                                     name = "Calibre Web";
                                     id = "heimdall-calibre-web";
                                     type = "systemd_service";
@@ -945,6 +973,32 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "unbound.service";
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
+                                    # Resolution health, as opposed to the monitor
+                                    # above, which only proves the daemon is
+                                    # running. The failure this exists to catch:
+                                    # the process stays up and the socket stays
+                                    # open while recursion itself is broken (stale
+                                    # root hints, no outbound path, a validation
+                                    # wedge) — every liveness check reports that
+                                    # as healthy. Reads unbound-control's stats
+                                    # socket (see unbound.nix's
+                                    # localControlSocketPath) and issues one live
+                                    # query, both over SSH on Heimdall itself, so
+                                    # no new network exposure is added.
+                                    name = "Unbound Resolution";
+                                    id = "heimdall-unbound-resolution";
+                                    type = "unbound";
+                                    interval = "5m";
+                                    query_host = "127.0.0.1";
+                                    query_port = 5335;
+                                    query_domain = "cloudflare.com";
+                                    servfail_warning = 5;
+                                    servfail_threshold = 20;
                                     ssh_config = {
                                         host = "heimdall.technet";
                                     };
@@ -1111,6 +1165,16 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "traccar.service";
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
+                                    name = "Jackett";
+                                    id = "heimdall-jackett";
+                                    type = "systemd_service";
+                                    interval = "1m";
+                                    service_name = "jackett.service";
                                     ssh_config = {
                                         host = "heimdall.technet";
                                     };
