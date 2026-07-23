@@ -64,6 +64,15 @@
         authUsername = "admin";
         authPasswordFile = config.sops.secrets.vigil_dashboard_password.path;
         settings = {
+            # Batches queued metric/status/event/log writes into one commit
+            # every N seconds instead of committing each individually, cutting
+            # disk fsyncs under load at the cost of losing up to N seconds of
+            # unwritten data on a crash — acceptable for monitoring data.
+            # Matches the engine default; set explicitly so it's visible here.
+            database = {
+                write_batch_seconds = 5;
+            };
+
             # Applied to every monitor's ssh_config unless overridden locally.
             ssh_defaults = {
                 username = "vigil-access";
@@ -239,12 +248,12 @@
                 {
                     name = "System Stats";
                     type = "group";
-                    grid_columns = 1;
+                    grid_columns = 2;
                     children = [
                         {
                             name = "Ragnarok";
                             type = "group";
-                            grid_columns = 4;
+                            grid_columns = 2;
                             children = [
                                 {
                                     name = "CPU";
@@ -437,7 +446,7 @@
                         {
                             name = "Heimdall";
                             type = "group";
-                            grid_columns = 4;
+                            grid_columns = 2;
                             children = [
                                 {
                                     name = "CPU";
@@ -650,7 +659,7 @@
                         {
                             name = "Odin";
                             type = "group";
-                            grid_columns = 4;
+                            grid_columns = 2;
                             children = [
                                 {
                                     name = "CPU";
