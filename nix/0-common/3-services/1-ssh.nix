@@ -23,6 +23,15 @@
             challengeResponseAuthentication = false;
             PermitRootLogin = "no";
             PerSourcePenalties = "no";
+            # Default (10) is too low for Vigil's collector: it opens one
+            # persistent SSH connection per host and runs each monitor's
+            # command as a concurrent channel on it rather than a separate
+            # connection, so a host with many monitors can have more than 10
+            # channels open at once. Verified empirically — 15 concurrent
+            # channels against the default limit left 5 failing with "open
+            # failed". Raised well above the current worst case (Heimdall's
+            # monitor count) with headroom for future monitors.
+            MaxSessions = 50;
         };
         hostKeys = [
             {
