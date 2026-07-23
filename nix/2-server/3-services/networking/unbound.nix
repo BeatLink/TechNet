@@ -1,8 +1,19 @@
-{ ... }:
+{ pkgs, ... }:
 {
+    # dig, for Vigil's `unbound` plugin to issue a live resolution probe over
+    # SSH (services.unbound only installs the server/unbound-control itself,
+    # not a general-purpose query client).
+    environment.systemPackages = [ pkgs.dnsutils ];
+
     services.unbound = {
         enable = true;
         stateDir = "/Storage/Services/Unbound";
+        # Plain UNIX socket for `unbound-control` (no TLS cert setup, unlike
+        # the settings.remote-control route). Access is gated by group
+        # membership rather than a shared secret — vigil-access is added to
+        # the `unbound` group below so Vigil's plugin can read stats over
+        # SSH without any credential of its own.
+        localControlSocketPath = "/run/unbound/unbound.ctl";
         settings = {
             server = {
                 # Network
@@ -71,4 +82,9 @@
             Persistent = true;
         };
     };
+
+    # Lets vigil-access read the control socket (owned unbound:nogroup, mode
+    # 0770-ish per the NixOS module) so Vigil's `unbound` plugin can run
+    # `unbound-control stats_noreset` over SSH with no stored credential.
+    users.users."vigil-access".extraGroups = [ "unbound" ];
 }
