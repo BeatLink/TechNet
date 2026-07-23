@@ -11,5 +11,6 @@
         ./1-root.nix
         ./2-beatlink.nix
         ./3-vigil.nix
+        ./4-vigil-sudo.nix
     ];
  }

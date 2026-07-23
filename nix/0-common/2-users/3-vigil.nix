@@ -16,6 +16,9 @@
 # existing borg key (Vorta's or borgmatic's), not Vigil's, so no Vigil private
 # key is needed on the monitored hosts.
 #
+# Root command access (systemctl/smartctl/borg) is granted via a scoped sudo
+# rule, not `wheel` — see 4-vigil-sudo.nix.
+#
 
 {
     users = {
@@ -26,7 +29,6 @@
             group = "vigil-access";
             shell = "/run/current-system/sw/bin/bash";  # borg / systemctl are run over SSH exec, needs a shell
             extraGroups = [
-                "wheel"                         # Passwordless sudo (wheelNeedsPassword = false) for control actions, e.g. restarting services
                 "borg"                          # Read access to borg repos for backup health checks
                 "systemd-journal"               # Read systemd service status / logs
             ];
