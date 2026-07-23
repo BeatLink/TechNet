@@ -28,9 +28,14 @@
         dataDir = "/Storage/Services/Syncthing/Data";
         configDir = "/Storage/Services/Syncthing/Config";
         guiPasswordFile = config.sops.secrets.syncthing_gui_password.path;
+        overrideDevices = true;
+        overrideFolders = true;
         settings = {
             options = {
                 urAccepted = -1;
+                relaysEnabled = false;
+                globalAnnounceEnabled = false;
+                natEnabled = false;
             };
             gui = {
                 user = "beatlink";
@@ -63,6 +68,10 @@
                         "Thor"
                     ];
                     type = "sendreceive";
+                    versioning = {
+                        type = "trashcan";
+                        params.cleanoutDays = "30";
+                    };
                 };
                 "/Storage/Files/Downloads" = {
                     label = "Downloads";
@@ -72,6 +81,10 @@
                         "Thor"
                     ];
                     type = "sendreceive";
+                    versioning = {
+                        type = "trashcan";
+                        params.cleanoutDays = "30";
+                    };
                 };
                 "/Storage/Files/eBooks" = {
                     label = "eBooks";
@@ -81,6 +94,10 @@
                         "Thor"
                     ];
                     type = "sendreceive";
+                    versioning = {
+                        type = "trashcan";
+                        params.cleanoutDays = "30";
+                    };
                 };
                 "/Storage/Files/Music" = {
                     label = "Music";
@@ -99,6 +116,10 @@
                         "Thor"
                     ];
                     type = "sendreceive";
+                    versioning = {
+                        type = "trashcan";
+                        params.cleanoutDays = "30";
+                    };
                 };
                 "/Storage/Files/Projects" = {
                     label = "Projects";
@@ -107,6 +128,10 @@
                         "Odin"
                     ];
                     type = "sendreceive";
+                    versioning = {
+                        type = "trashcan";
+                        params.cleanoutDays = "30";
+                    };
                 };
                 "/Storage/Files/Sounds" = {
                     label = "Sounds";
@@ -116,6 +141,10 @@
                         "Thor"
                     ];
                     type = "sendreceive";
+                    versioning = {
+                        type = "trashcan";
+                        params.cleanoutDays = "30";
+                    };
                 };
                 "/Storage/Files/Videos" = {
                     label = "Videos";
@@ -125,6 +154,10 @@
                         "Thor"
                     ];
                     type = "sendreceive";
+                    versioning = {
+                        type = "trashcan";
+                        params.cleanoutDays = "30";
+                    };
                 };
             };
         };
