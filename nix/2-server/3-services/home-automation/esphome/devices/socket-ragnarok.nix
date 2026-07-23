@@ -10,7 +10,7 @@
 
     wifi.use_address = "socket-ragnarok.technet";
 
-    packages.common = "!include 2-base-socket.yaml";
+    packages.common = "!include .2-base-socket.yaml";
 
     wireguard = {
         private_key = "!secret wg-socket-ragnarok-privkey";

@@ -29,8 +29,8 @@
                 };
                 cert = config.sops.secrets.syncthing_cert.path;
                 key = config.sops.secrets.syncthing_key.path;
-                overwriteDevices = true;
-                overwriteFolders = true;
+                overrideDevices = true;
+                overrideFolders = true;
                 settings = {
                     devices = {
                         Heimdall = {

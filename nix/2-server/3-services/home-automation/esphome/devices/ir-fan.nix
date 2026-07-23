@@ -28,7 +28,7 @@ in
         web_password = "!secret web_password";
     };
 
-    packages.common = "!include 2-base-ir.yaml";
+    packages.common = "!include .2-base-ir.yaml";
 
     http_request = {
         timeout = "1s";
