@@ -29,6 +29,8 @@
                 };
                 cert = config.sops.secrets.syncthing_cert.path;
                 key = config.sops.secrets.syncthing_key.path;
+                overwriteDevices = true;
+                overwriteFolders = true;
                 settings = {
                     devices = {
                         Heimdall = {
@@ -56,6 +58,10 @@
                                 "Thor"
                             ];
                             type = "sendreceive";
+                            versioning = {
+                                type = "trashcan";
+                                params.cleanoutDays = "30";
+                            };
                         };
                         "/Storage/Files/Downloads" = {
                             label = "Downloads";
@@ -65,6 +71,10 @@
                                 "Thor"
                             ];
                             type = "sendreceive";
+                            versioning = {
+                                type = "trashcan";
+                                params.cleanoutDays = "30";
+                            };
                         };
                         "/Storage/Files/eBooks" = {
                             label = "eBooks";
@@ -74,6 +84,10 @@
                                 "Thor"
                             ];
                             type = "sendreceive";
+                            versioning = {
+                                type = "trashcan";
+                                params.cleanoutDays = "30";
+                            };
                         };
                         "/Storage/Files/Music" = {
                             label = "Music";
@@ -92,6 +106,10 @@
                                 "Thor"
                             ];
                             type = "sendreceive";
+                            versioning = {
+                                type = "trashcan";
+                                params.cleanoutDays = "30";
+                            };
                         };
                         "/Storage/Files/Projects" = {
                             label = "Projects";
@@ -100,6 +118,10 @@
                                 "Heimdall"
                             ];
                             type = "sendreceive";
+                            versioning = {
+                                type = "trashcan";
+                                params.cleanoutDays = "30";
+                            };
                         };
                         "/Storage/Files/Sounds" = {
                             label = "Sounds";
@@ -109,6 +131,10 @@
                                 "Thor"
                             ];
                             type = "sendreceive";
+                            versioning = {
+                                type = "trashcan";
+                                params.cleanoutDays = "30";
+                            };
                         };
                         "/Storage/Files/Videos" = {
                             label = "Videos";
@@ -118,6 +144,10 @@
                                 "Thor"
                             ];
                             type = "sendreceive";
+                            versioning = {
+                                type = "trashcan";
+                                params.cleanoutDays = "30";
+                            };
                         };
                     };
                 };
