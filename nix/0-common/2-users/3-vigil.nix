@@ -31,6 +31,7 @@
             extraGroups = [
                 "borg"                          # Read access to borg repos for backup health checks
                 "systemd-journal"               # Read systemd service status / logs
+                "blockurl"                      # Read blockurl_api_key secret for the blockurl monitor
             ];
             openssh.authorizedKeys.keys = [
                 "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID6oDtIndxb2aJJFhl3+xU+4nuVUQQrzcWOLX+RslJU/ vigil@technet"
