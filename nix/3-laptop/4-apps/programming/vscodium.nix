@@ -19,10 +19,17 @@
                     mutableExtensionsDir = false;
                     profiles.default = {
                         enableExtensionUpdateCheck = true;
+                        userSettings = {
+                            "[python]" = {
+                                "editor.defaultFormatter" = "ms-python.black-formatter";
+                                "editor.formatOnSave" = true;
+                            };
+                        };
                         extensions = with pkgs.nix-vscode-extensions.open-vsx; [
                             hediet.vscode-drawio
                             anthropic.claude-code
                             ms-python.python
+                            ms-python.black-formatter
                             signageos.signageos-vscode-sops
                             editorconfig.editorconfig
                             usernamehw.errorlens
@@ -51,6 +58,7 @@
                     nixd
                     nixfmt
                     nil
+                    black
                 ];
                 persistence."/Storage/Apps/Programming/VsCodium" = {
                     directories = [
