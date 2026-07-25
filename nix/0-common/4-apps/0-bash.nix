@@ -22,8 +22,10 @@
                 l = "ls";
                 la = "ls -la";
                 lt = "tree -a";
+
+                pyclean = "find . -type d -name __pycache__ -prune -exec rm -rf {} +";
             };
-            
+
         };
     };
 
