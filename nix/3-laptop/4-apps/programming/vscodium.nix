@@ -20,6 +20,15 @@
                     profiles.default = {
                         enableExtensionUpdateCheck = true;
                         userSettings = {
+                            "workbench.colorTheme" = "Light 2026";
+                            "workbench.tree.indent" = 20;
+                            "files.exclude" = {
+                                "**/__pycache__" = true;
+                                "**/*.pyc" = true;
+                                "**/*.pyo" = true;
+                            };
+                            "black-formatter.path" = [ "${pkgs.black}/bin/black" ];
+                            "black-formatter.showNotifications" = "always";
                             "[python]" = {
                                 "editor.defaultFormatter" = "ms-python.black-formatter";
                                 "editor.formatOnSave" = true;
@@ -30,12 +39,12 @@
                             anthropic.claude-code
                             ms-python.python
                             ms-python.black-formatter
+                            brainytech.pycacheclear
                             signageos.signageos-vscode-sops
                             editorconfig.editorconfig
                             usernamehw.errorlens
                             tobermory.es6-string-html
                             dbaeumer.vscode-eslint
-                            grafana.grafana-alloy
                             lokalise.i18n-ally
                             ms-vscode.live-server
                             jnoortheen.nix-ide
@@ -59,6 +68,9 @@
                     nixfmt
                     nil
                     black
+                    (poetry.overridePythonAttrs (old: {
+                        doCheck = false;
+                    }))
                 ];
                 persistence."/Storage/Apps/Programming/VsCodium" = {
                     directories = [
