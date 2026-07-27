@@ -29,10 +29,14 @@
                             };
                             "black-formatter.path" = [ "${pkgs.black}/bin/black" ];
                             "black-formatter.showNotifications" = "always";
+                            "black-formatter.interpreter" = [ "${pkgs.python3}/bin/python3" ];
                             "[python]" = {
                                 "editor.defaultFormatter" = "ms-python.black-formatter";
                                 "editor.formatOnSave" = true;
                             };
+                            "git.enableSmartCommit" = true;
+                            "git.confirmSync" = false;
+                            "claudeCode.preferredLocation" = "panel";
                         };
                         extensions = with pkgs.nix-vscode-extensions.open-vsx; [
                             hediet.vscode-drawio
@@ -67,6 +71,7 @@
                     nixd
                     nixfmt
                     nil
+                    python3
                     black
                     (poetry.overridePythonAttrs (old: {
                         doCheck = false;
