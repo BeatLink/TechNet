@@ -937,33 +937,6 @@
                                     };
                                 }
                                 {
-                                    # OnCalendar=daily oneshot, same rationale as above.
-                                    name = "Trakt.tv Backup";
-                                    id = "heimdall-trakttv-backup";
-                                    type = "systemd_service";
-                                    interval = "1h";
-                                    service_name = "trakttv-backup.service";
-                                    max_age = "2d";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
-                                }
-                                {
-                                    # OnCalendar=monthly. Refreshes the Trakt.tv OAuth
-                                    # token; if it stops running the backup above starts
-                                    # failing on expired credentials, so it is worth
-                                    # catching here rather than via the backup's fallout.
-                                    name = "Trakt.tv Auth";
-                                    id = "heimdall-trakttv-auth";
-                                    type = "systemd_service";
-                                    interval = "6h";
-                                    service_name = "trakttv-auth.service";
-                                    max_age = "5w";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
-                                }
-                                {
                                     name = "Mosquitto";
                                     id = "heimdall-mosquitto";
                                     type = "systemd_service";
