@@ -11,12 +11,18 @@
 # 
 # Budgie
 #   Pretty and the Raven sidebar is an interesting concept. Not as feature rich as cinnamon (no hot corners)
-# 
+#
+# Hyprland
+#   Wayland tiling compositor. Not a full desktop environment, so the bar, launcher, notifications, lock screen
+#   and wallpaper are assembled from separate components. Highly customizable and everything is declared in this
+#   repo rather than exported from dconf, but it needs the most manual configuration of the four.
+#
 
 {
-    imports = [              
+    imports = [
         #./kde
         #./budgie
+        #./hyprland
         ./cinnamon
     ];
 }
