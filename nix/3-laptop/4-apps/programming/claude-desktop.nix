@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 let
     # Claude Desktop is only shipped as a .deb from Anthropic's apt repo; there is no
     # nixpkgs package. Unpack the prebuilt Electron bundle and patch it for NixOS.
@@ -76,9 +76,17 @@ let
 
             # chrome-sandbox was excluded above since it needs root setuid, which a Nix
             # store path cannot have, so run Electron with its sandbox disabled.
+            # At runtime the app downloads a generic-linux `claude` CLI into
+            # ~/.config/Claude/claude-code and execs it. That binary is not patched for
+            # NixOS, so it needs nix-ld to supply a real loader (enabled below).
+            # CLAUDE_CODE_LOCAL_BINARY looks like it would point the app at a Nix-built
+            # CLI instead, but in 1.24012.9 the constructor only evaluates the variable
+            # and never calls initLocalBinary(), so the override is dead code upstream.
+            # It is set anyway to take effect if a later release wires it up.
             makeWrapper $out/lib/claude-desktop/claude-desktop $out/bin/claude-desktop \
                 --add-flags "--no-sandbox" \
-                --set-default ELECTRON_IS_DEV 0
+                --set-default ELECTRON_IS_DEV 0 \
+                --set-default CLAUDE_CODE_LOCAL_BINARY ${lib.getExe pkgs.claude-code}
 
             runHook postInstall
         '';
@@ -130,6 +138,17 @@ let
 in
 {
     environment.systemPackages = [ claude-desktop ];
+
+    # The app fetches its own unpatched `claude` CLI at runtime and execs it, so that
+    # binary needs a real dynamic loader rather than NixOS's stub-ld.
+    programs.nix-ld = {
+        enable = true;
+        libraries = with pkgs; [
+            stdenv.cc.cc.lib # libstdc++/libgcc_s
+            zlib
+        ];
+    };
+
     home-manager.users.beatlink = {
         home = {
             persistence."/Storage/Apps/AI/ClaudeDesktop" = {
