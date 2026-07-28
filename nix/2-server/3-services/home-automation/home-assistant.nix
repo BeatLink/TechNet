@@ -82,15 +82,17 @@
             #   mode           - without it the dashboards in .storage (Overview
             #                    and Map) stop rendering.
             #   resource_mode  - the module defaults this to "yaml" whenever
-            #                    customLovelaceModules is non-empty, which would
-            #                    make HA load only the Nix-generated resource list
-            #                    and drop the HACS-installed maxi-media-player.
+            #                    customLovelaceModules is non-empty. The resource
+            #                    list Nix generates points at versioned filenames
+            #                    ("<name>.js?version=..."), whereas the resources
+            #                    already registered in .storage use bare names.
+            #                    Flipping to "yaml" therefore swaps the URLs of
+            #                    every loaded module at once; keep it on "storage"
+            #                    until Lovelace itself is migrated and both sides
+            #                    can be changed together.
             #
             # In storage mode the generated lovelace.resources list below is
-            # inert: HA reads .storage/lovelace_resources instead, which already
-            # registers the modules by their unversioned filenames (the "?version"
-            # query string Nix appends is only for cache busting, and the bare
-            # filenames it omits do exist in www/nixos-lovelace-modules).
+            # inert: HA reads .storage/lovelace_resources instead.
             #
             # Note that mini-graph-card and mini-media-player are built by Nix but
             # have never been registered as resources, so they are not loaded
@@ -135,7 +137,6 @@
             "vlc_telnet"
             "motioneye"
             "traccar"
-            "wyoming"
         ];
         customComponents =   [
             (pkgs.home-assistant-custom-components.frigate.overrideAttrs (old: {
