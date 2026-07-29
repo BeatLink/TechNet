@@ -25,7 +25,10 @@ in
         enable = true;
         settings.Resolve = {
             DNSStubListener = false;
-            fallbackDns = [
+            # Keys under settings.Resolve are written to resolved.conf verbatim, so
+            # this must be resolved's own spelling. The camelCase `fallbackDns` was
+            # silently ignored ("Unknown key 'fallbackDns'") leaving no fallback at all.
+            FallbackDNS = [
                 "8.8.8.8"
                 "1.1.1.1"
             ];

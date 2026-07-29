@@ -162,6 +162,20 @@
             };
         };
     };
+    # Syncthing's rescans and transfers walk the whole of /Storage and, on a
+    # 2-disk HDD mirror, contend directly with borgmatic and with interactive
+    # reads. Held at best-effort/6 rather than idle: unlike a backup, sync is
+    # semi-interactive and a change should still propagate promptly, so it
+    # yields to foreground work without being starved outright by it.
+    # Requires BFQ on the data disks to take effect — see 2-data-drive.nix.
+    systemd.services.syncthing.serviceConfig = {
+        Nice = 10;
+        IOSchedulingClass = "best-effort";
+        IOSchedulingPriority = 6;
+        IOWeight = 50;
+        CPUWeight = 50;
+    };
+
     nginx-vhosts.syncthing = {
         domain = "syncthing.heimdall.technet";
         port = 8384;
