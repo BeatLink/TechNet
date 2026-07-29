@@ -13,15 +13,7 @@
     environment.persistence."/Storage/System/Tang" = {
         directories = [
             {
-                directory = "/var/db/tang";
-                mode = "0700";
-            }
-            {
                 directory = "/var/lib/private/tang";
-                mode = "0700";
-            }
-            {
-                directory = "/run/tang";
                 mode = "0700";
             }
         ];
