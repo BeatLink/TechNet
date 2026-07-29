@@ -55,6 +55,29 @@ in
             ReverseProxySupportEnabled = true;
             TrustedReverseProxiesList = "127.0.0.1";
         };
+
+        # Matches the Downloading/Seeding split that already exists under
+        # Torrents/: in-progress torrents go to Downloading, and qBittorrent
+        # moves them to Seeding on completion. Keeping partials out of the
+        # completed directory matters here because Downloads is a sendreceive
+        # Syncthing folder -- otherwise every partial file syncs out and then
+        # re-syncs repeatedly as it grows.
+        #
+        # The config previously held the upstream container defaults
+        # (/downloads/, /downloads/incomplete/), which are not paths on this
+        # host; downloads were landing in the Downloads root instead. Both key
+        # pairs are set because qBittorrent migrated Downloads\* to Session\*
+        # and reads whichever its config version calls for.
+        serverConfig.BitTorrent.Session = {
+            DefaultSavePath = "/Storage/Files/Downloads/Torrents/Seeding";
+            TempPath = "/Storage/Files/Downloads/Torrents/Downloading";
+            TempPathEnabled = true;
+        };
+        serverConfig.Preferences.Downloads = {
+            SavePath = "/Storage/Files/Downloads/Torrents/Seeding";
+            TempPath = "/Storage/Files/Downloads/Torrents/Downloading";
+            TempPathEnabled = true;
+        };
     };
     networking.firewall = {
         allowedTCPPorts = [ 6881 ];
@@ -65,7 +88,33 @@ in
         port = 9050;
     };
 
+    # Lets Syncthing (which runs as beatlink) delete and re-version completed
+    # downloads, rather than only read them. Paired with UMask=0002 below:
+    # without the group membership the group-write bit would go unused, and
+    # without the umask the membership would not help on new files.
+    users.users.beatlink.extraGroups = [ "qbittorrent" ];
+
+    # Downloads completed before UMask=0002 are still mode 0755 and stay
+    # undeletable by Syncthing. Targeted at qbittorrent-owned paths only: a
+    # blanket rule over /Storage/Files/Downloads would rewrite metadata on all
+    # ~42k entries there, almost all of which are beatlink's and already fine.
+    # `X` (capital) adds +x to directories for traversal without making files
+    # executable.
+    system.activationScripts.qbittorrentDownloadsGroupWrite = ''
+        if [ -d /Storage/Files/Downloads ]; then
+            ${pkgs.findutils}/bin/find /Storage/Files/Downloads -user qbittorrent \
+                -exec ${pkgs.coreutils}/bin/chmod g+rwX {} + 2>/dev/null || true
+        fi
+    '';
+
     systemd.tmpfiles.rules = [
+        # Save and temp paths, group-writable with setgid so Syncthing (via the
+        # qbittorrent group) can delete what lands here and new subdirectories
+        # inherit the group. These already existed as qbittorrent:rtkit 0755,
+        # which left Syncthing unable to remove completed downloads.
+        "d /Storage/Files/Downloads/Torrents/Seeding 2775 qbittorrent qbittorrent - -"
+        "d /Storage/Files/Downloads/Torrents/Downloading 2775 qbittorrent qbittorrent - -"
+
         # qBittorrent itself creates data/ and data/nova3/ (root-owned, via
         # tmpfiles running before this unit's first start) before our
         # ExecStartPre ever runs, so every level needs an explicit rule —
@@ -81,6 +130,17 @@ in
         path = [ pkgs.python3 ];
 
         serviceConfig = {
+            # Completed downloads land in /Storage/Files/Downloads, which is a
+            # sendreceive Syncthing folder scanned as beatlink. The default 0022
+            # umask makes them qbittorrent:qbittorrent 0755 -- readable, but not
+            # writable by the group, so Syncthing could not remove a file when a
+            # peer deleted it ("trashcan versioner: archive: remove ...:
+            # permission denied") and the delete never propagated.
+            #
+            # 0002 keeps group write on new downloads; beatlink is added to the
+            # qbittorrent group below so Syncthing can act on them.
+            UMask = "0002";
+
             LoadCredential = "jackett_api_key:${config.sops.secrets.qbittorrent_jackett_api_key.path}";
 
             # Installs the pinned Jackett plugin script and a jackett.json

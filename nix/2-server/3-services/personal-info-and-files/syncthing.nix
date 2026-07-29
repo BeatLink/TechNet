@@ -141,7 +141,11 @@
                         "Odin"
                         "Thor"
                     ];
-                    type = "sendonly";
+                    type = "sendreceive";
+                    versioning = {
+                        type = "trashcan";
+                        params.cleanoutDays = "30";
+                    };
                 };
                 "/Storage/Files/Pictures" = {
                     label = "Pictures";
