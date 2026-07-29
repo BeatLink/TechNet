@@ -103,7 +103,15 @@
                                 ];
                             }
                         ];
-                        hwaccel_args = "preset-vaapi";
+                        # No hwaccel_args: this camera delivers MJPEG, and VAAPI
+                        # is for H.264/H.265 streams. Forcing preset-vaapi on
+                        # MJPEG made ffmpeg fail in the hwdownload filter
+                        # ("Failed to sync surface", "Failed to download frame:
+                        # -5") and crash roughly every two minutes, taking
+                        # recording down for the length of each restart. Frigate
+                        # flagged it at startup too ("Did not detect hwaccel").
+                        # MJPEG is cheap to decode in software, and detection
+                        # still runs on the GPU via the openvino detector.
                     };
                     detect = {
                         enabled = true;
