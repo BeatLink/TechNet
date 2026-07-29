@@ -92,16 +92,10 @@ in
                             chown systemd-network:systemd-network ${config.sops.secrets.wireguard_private_key.path}
                         '';
                     };
-                    # A wireguard handshake that never completed is the usual reason clevis
-                    # cannot reach the tang server, so the tunnel is bounced rather than
-                    # the machine rebooted. Escalates to restarting systemd-networkd only
-                    # if reconfiguring the interface alone does not bring it back.
                     "initrd-wireguard-recover" = {
                         description = "Bounce the wireguard tunnel if it is not carrying traffic";
                         unitConfig.DefaultDependencies = "no";
                         serviceConfig.Type = "oneshot";
-                        # grep is not in the initrd's /bin, so operational state is matched
-                        # with bash's own pattern test rather than piping to it.
                         script = ''
                             routable() {
                                 local state
@@ -123,8 +117,6 @@ in
                             ${initrdSystemd}/bin/systemctl restart systemd-networkd || true
                         '';
                     };
-                    # Reaching initrd.target means the pools unlocked and sysroot is mounted,
-                    # so the recovery loop stands down instead of bouncing a healthy tunnel.
                     "initrd-wireguard-recover-cancel" = {
                         description = "Stop the wireguard recovery loop once unlocked";
                         wantedBy = [ "initrd.target" ];
@@ -137,10 +129,6 @@ in
                         };
                     };
                 };
-                # Tries to bounce the tunnel every 2 minutes, starting after wait-online's
-                # 120s timeout has had its chance. Keeps retrying for as long as the boot
-                # is waiting -- the system is never rebooted out from under a pending
-                # unlock, so an SSH session can always take over by hand instead.
                 timers."initrd-wireguard-recover" = {
                     description = "Timer to bounce the wireguard tunnel while stuck in initrd";
                     timerConfig = {
