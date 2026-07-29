@@ -85,6 +85,24 @@
             ];
             settings = {
                 dns = {
+                    # Stop appending every DNS query to pihole.log. The file had
+                    # reached 532MB, and it sits on the same HDD mirror
+                    # everything else contends for -- now that FTL is
+                    # prioritised those writes go to the front of the queue, so
+                    # it is worth not making them at all.
+                    #
+                    # This is the key that emits dnsmasq's `log-queries`. A
+                    # `log-queries=no` appended via misc.dnsmasq_lines does not
+                    # work: pihole writes a bare `log-queries` earlier in the
+                    # generated dnsmasq.conf, and the later assignment does not
+                    # override it.
+                    #
+                    # Only the plain-text log is affected. FTL still records
+                    # queries in its own database, so the dashboard, per-client
+                    # stats and the query log UI keep working, and privacylevel
+                    # stays 0.
+                    queryLogging = false;
+
                     upstreams = [
                         "127.0.0.1#5335"
                         "1.1.1.1" # Fallback to resolve NTP if Unbound fails due to inaccurate system time
