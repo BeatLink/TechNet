@@ -7,6 +7,7 @@ let
 
     zfs = "${config.boot.zfs.package}/sbin/zfs";
     clevis = "${clevisPackage}/bin/clevis";
+    systemd = config.boot.initrd.systemd.package;
 
     sssConfig = builtins.toJSON {
         t = 1;
@@ -15,9 +16,15 @@ let
 
     jweFile = ds: "${cfg.stateDir}/${builtins.replaceStrings [ "/" ] [ "-" ] ds}.jwe";
 
+    pools = lib.unique (map (ds: lib.head (lib.splitString "/" ds)) cfg.datasets);
+
+    importServices = map (pool: "zfs-import-${pool}.service") pools;
+
     retryScript = ''
         set -u
         remaining="${lib.concatStringsSep " " cfg.datasets}"
+        unlocked_any=false
+
         while [ -n "$remaining" ]; do
             still_locked=""
             for ds in $remaining; do
@@ -29,15 +36,50 @@ let
                 jwe="/etc/clevis/$ds.jwe"
                 if [ -r "$jwe" ] && ${clevis} decrypt < "$jwe" | ${zfs} load-key -L prompt "$ds" 2>/dev/null; then
                     echo "clevis-retry: unlocked $ds"
+                    unlocked_any=true
                     continue
                 fi
                 still_locked="$still_locked''${still_locked:+ }$ds"
             done
             remaining="$still_locked"
             [ -n "$remaining" ] || break
-            sleep 15
+            sleep 5
         done
-        echo "clevis-retry: all clevis datasets unlocked"
+
+        if [ -z "$remaining" ]; then
+            echo "clevis-retry: all clevis datasets unlocked"
+        fi
+
+        # The stock zfs-import services may already be sitting on a password prompt,
+        # started before tang became reachable. They re-read keystatus on every start,
+        # so restarting them now makes the prompt a no-op and cancels the outstanding
+        # password request. Only worth doing if we actually unlocked something.
+        if [ "$unlocked_any" = true ]; then
+            for unit in ${lib.concatStringsSep " " importServices}; do
+                state="$(${systemd}/bin/systemctl show -P ActiveState "$unit" 2>/dev/null || echo unknown)"
+                case "$state" in
+                    activating|active|failed)
+                        echo "clevis-retry: restarting $unit (was $state)"
+                        ${systemd}/bin/systemctl restart "$unit" || true
+                        ;;
+                    *)
+                        echo "clevis-retry: $unit is $state, leaving it alone"
+                        ;;
+                esac
+            done
+
+            # Restarting the import services is not enough on its own: if they timed
+            # out on the prompt first, zfs-import.target and the sysroot mounts have
+            # already failed by dependency, and systemd does not retry a job that has
+            # already failed. Start them explicitly so the boot can carry on.
+            for unit in zfs-import.target initrd-fs.target; do
+                state="$(${systemd}/bin/systemctl show -P ActiveState "$unit" 2>/dev/null || echo unknown)"
+                if [ "$state" != active ]; then
+                    echo "clevis-retry: starting $unit (was $state)"
+                    ${systemd}/bin/systemctl start --no-block "$unit" || true
+                fi
+            done
+        fi
     '';
 
     rebindClevis = pkgs.writeShellApplication {
@@ -139,6 +181,7 @@ in
             type = lib.types.path;
             description = "sops file holding zfs_passphrase for this host.";
         };
+
     };
 
     config = lib.mkIf cfg.enable {
@@ -161,16 +204,19 @@ in
             systemd.services.clevis-retry = {
                 description = "Keep retrying clevis/tang unlock in the background until it succeeds";
                 wantedBy = [ "sysinit.target" ];
-                after = [ "systemd-modules-load.service" ];
-                before = [ "zfs-import.target" ];
+                after = [
+                    "systemd-modules-load.service"
+                    "network-online.target"
+                ];
+                wants = [ "network-online.target" ];
                 unitConfig = {
                     DefaultDependencies = "no";
                     ConditionPathExists = "/etc/clevis";
                 };
                 serviceConfig = {
-                    Type = "simple";
-                    Restart = "on-failure";
-                    RestartSec = 15;
+                    Type = "oneshot";
+                    RemainAfterExit = true;
+                    TimeoutStartSec = "infinity";
                 };
                 script = retryScript;
             };
