@@ -15,6 +15,9 @@
     inputs,
     ...
 }:
+let
+    initrdSystemd = config.boot.initrd.systemd.package;
+in
 {
     # Prevents conflicts with pihole
     services.resolved = {
@@ -89,21 +92,63 @@
                             chown systemd-network:systemd-network ${config.sops.secrets.wireguard_private_key.path}
                         '';
                     };
-                    "initrd-reboot" = {
-                        description = "Reboot system after 10 minutes in initrd";
+                    # A wireguard handshake that never completed is the usual reason clevis
+                    # cannot reach the tang server, so the tunnel is bounced rather than
+                    # the machine rebooted. Escalates to restarting systemd-networkd only
+                    # if reconfiguring the interface alone does not bring it back.
+                    "initrd-wireguard-recover" = {
+                        description = "Bounce the wireguard tunnel if it is not carrying traffic";
+                        unitConfig.DefaultDependencies = "no";
+                        serviceConfig.Type = "oneshot";
+                        # grep is not in the initrd's /bin, so operational state is matched
+                        # with bash's own pattern test rather than piping to it.
+                        script = ''
+                            routable() {
+                                local state
+                                state="$(${initrdSystemd}/bin/networkctl --no-legend --no-pager list wireguard0 2>/dev/null)"
+                                [[ "$state" == *routable* ]]
+                            }
+                            if routable; then
+                                echo "wireguard-recover: tunnel is routable, nothing to do"
+                                exit 0
+                            fi
+                            echo "wireguard-recover: reconfiguring wireguard0"
+                            ${initrdSystemd}/bin/networkctl reconfigure wireguard0 || true
+                            sleep 10
+                            if routable; then
+                                echo "wireguard-recover: recovered after reconfigure"
+                                exit 0
+                            fi
+                            echo "wireguard-recover: restarting systemd-networkd"
+                            ${initrdSystemd}/bin/systemctl restart systemd-networkd || true
+                        '';
+                    };
+                    # Reaching initrd.target means the pools unlocked and sysroot is mounted,
+                    # so the recovery loop stands down instead of bouncing a healthy tunnel.
+                    "initrd-wireguard-recover-cancel" = {
+                        description = "Stop the wireguard recovery loop once unlocked";
+                        wantedBy = [ "initrd.target" ];
+                        before = [ "initrd-cleanup.service" ];
+                        unitConfig.DefaultDependencies = "no";
                         serviceConfig = {
                             Type = "oneshot";
-                            ExecStart = "systemctl reboot";
+                            RemainAfterExit = true;
+                            ExecStart = "${initrdSystemd}/bin/systemctl stop initrd-wireguard-recover.timer";
                         };
                     };
                 };
-                # A failsafe to reboot the system if it is stuck in initrd after 10 minutes, hopefully it can fix any wireguard issues
-                timers."initrd-reboot" = {
-                    description = "Timer to reboot system after 10 minutes in initrd";
+                # Tries to bounce the tunnel every 2 minutes, starting after wait-online's
+                # 120s timeout has had its chance. Keeps retrying for as long as the boot
+                # is waiting -- the system is never rebooted out from under a pending
+                # unlock, so an SSH session can always take over by hand instead.
+                timers."initrd-wireguard-recover" = {
+                    description = "Timer to bounce the wireguard tunnel while stuck in initrd";
                     timerConfig = {
-                        OnBootSec = "10min";
-                        Unit = "initrd-reboot.service";
+                        OnBootSec = "3min";
+                        OnUnitActiveSec = "2min";
+                        Unit = "initrd-wireguard-recover.service";
                     };
+                    unitConfig.DefaultDependencies = "no";
                     wantedBy = [ "timers.target" ];
                 };
                 # Sets up systemd-networkd in initrd using the same configuration from the booted system's network stack
