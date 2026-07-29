@@ -178,8 +178,7 @@ in
 
             systemd.services.tang-install-keys = lib.mkIf (cfg.server.sopsFile != null) {
                 description = "Install tang keys from sops into the tang state directory";
-                wantedBy = [ "sockets.target" ];
-                before = [ "tangd.socket" ];
+                wantedBy = [ "multi-user.target" ];
                 after = [ "var-lib-private-tang.mount" ];
                 unitConfig.RequiresMountsFor = "/var/lib/private/tang";
                 serviceConfig = {
@@ -198,7 +197,7 @@ in
                         else
                             thumb="$(${pkgs.jose}/bin/jose jwk thp -i "$src")"
                             dest="$dir/$thumb.jwk"
-                            if [ -e "$dest" ] && cmp -s "$src" "$dest"; then
+                            if [ -e "$dest" ] && ${pkgs.diffutils}/bin/cmp -s "$src" "$dest"; then
                                 echo "tang-install-keys: $thumb.jwk already current"
                             else
                                 install -m 0440 "$src" "$dest"
