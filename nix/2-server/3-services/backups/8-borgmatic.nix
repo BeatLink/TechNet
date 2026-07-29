@@ -108,6 +108,27 @@
         };
     };
 
+    # Backups are throughput jobs with no deadline, so they should yield to
+    # anything interactive. Reading /Storage on a 2-disk HDD mirror otherwise
+    # saturates the pool for the length of the run and blocks txg_sync for
+    # minutes at a time, stalling every other service on the box.
+    #
+    # IOSchedulingClass=idle only issues I/O when nothing else wants the disk,
+    # and IOWeight covers the cgroup path (borg spawns children, and weights are
+    # inherited by the whole unit cgroup where a per-process ionice would not
+    # be). Both depend on the data disks running BFQ — see 2-data-drive.nix.
+    # Nice keeps the compression threads off the CPU backs of foreground work.
+    # borgmatic ships its own unit file, which NixOS symlinks in as the base unit
+    # and layers these on top as a drop-in; the drop-in wins, so this relaxes the
+    # packaged best-effort/7 to genuine idle.
+    systemd.services.borgmatic.serviceConfig = {
+        Nice = 19;
+        IOSchedulingClass = "idle";
+        IOSchedulingPriority = 7;
+        IOWeight = 10;
+        CPUWeight = 10;
+    };
+
     # borgmatic runs as root, so the on-disk repo is created root-owned and
     # (before `umask` above) 0700 — unreadable by the Vigil monitor account.
     # Grant the `borg` group read+traverse so Vigil (a member of `borg`) can
