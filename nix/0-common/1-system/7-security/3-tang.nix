@@ -85,11 +85,15 @@ in
             };
 
             persistenceRoot = lib.mkOption {
-                type = lib.types.str;
+                type = lib.types.nullOr lib.types.str;
+                default = null;
                 description = ''
-                    Impermanence root for tang's key material. The keys under
-                    /var/lib/private/tang ARE the escrow: lose them and every JWE
-                    bound to them becomes undecryptable, so this must be persistent.
+                    Impermanence root for tang's key material, for when the keys are
+                    generated on the host rather than supplied by sops.
+
+                    Leave null when sopsFile is set: the keys are then reinstalled from
+                    sops on every boot, so the state directory does not need to survive
+                    a reboot and persisting it only creates a second place to lose them.
                 '';
             };
 
@@ -145,23 +149,29 @@ in
 
             networking.firewall.allowedTCPPorts = [ cfg.port ];
 
-            environment.persistence.${cfg.server.persistenceRoot} = {
-                directories = [
-                    {
-                        directory = "/var/lib/private/tang";
-                        mode = "0700";
-                    }
-                ];
+            environment.persistence = lib.mkIf (cfg.server.persistenceRoot != null) {
+                ${cfg.server.persistenceRoot} = {
+                    directories = [
+                        {
+                            directory = "/var/lib/private/tang";
+                            mode = "0700";
+                        }
+                    ];
+                };
             };
 
             systemd.sockets.tangd = {
                 wantedBy = lib.mkForce [ ];
-                unitConfig.RequiresMountsFor = "/var/lib/private/tang";
+                unitConfig = lib.mkIf (cfg.server.persistenceRoot != null) {
+                    RequiresMountsFor = "/var/lib/private/tang";
+                };
             };
 
             systemd.services."tangd@".unitConfig = {
-                RequiresMountsFor = "/var/lib/private/tang";
                 ConditionDirectoryNotEmpty = "/var/lib/private/tang";
+            }
+            // lib.optionalAttrs (cfg.server.persistenceRoot != null) {
+                RequiresMountsFor = "/var/lib/private/tang";
             };
 
             sops.secrets = lib.mkIf (cfg.server.sopsFile != null) (
@@ -179,8 +189,10 @@ in
             systemd.services.tang-install-keys = lib.mkIf (cfg.server.sopsFile != null) {
                 description = "Install tang keys from sops into the tang state directory";
                 wantedBy = [ "multi-user.target" ];
-                after = [ "var-lib-private-tang.mount" ];
-                unitConfig.RequiresMountsFor = "/var/lib/private/tang";
+                after = lib.optional (cfg.server.persistenceRoot != null) "var-lib-private-tang.mount";
+                unitConfig = lib.mkIf (cfg.server.persistenceRoot != null) {
+                    RequiresMountsFor = "/var/lib/private/tang";
+                };
                 serviceConfig = {
                     Type = "oneshot";
                     RemainAfterExit = true;
