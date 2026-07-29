@@ -93,6 +93,27 @@ in
                 '';
             };
 
+            sopsFile = lib.mkOption {
+                type = lib.types.nullOr lib.types.path;
+                default = null;
+                description = ''
+                    sops file holding tang_key_1 / tang_key_2 (the raw JWK contents) and
+                    their matching tang_key_N_thumbprint values. When set, the keys are
+                    installed into tang's state directory at boot instead of being
+                    generated on first start.
+
+                    These JWKs are tang's identity. Anything that can read them can
+                    impersonate the server to any host holding a matching JWE, so the
+                    file must not be readable beyond this host and the operator.
+                '';
+            };
+
+            keyCount = lib.mkOption {
+                type = lib.types.int;
+                default = 2;
+                description = "How many tang_key_N entries sopsFile provides.";
+            };
+
             screensaver = {
                 dbusName = lib.mkOption {
                     type = lib.types.str;
@@ -141,6 +162,54 @@ in
             systemd.services."tangd@".unitConfig = {
                 RequiresMountsFor = "/var/lib/private/tang";
                 ConditionDirectoryNotEmpty = "/var/lib/private/tang";
+            };
+
+            sops.secrets = lib.mkIf (cfg.server.sopsFile != null) (
+                lib.listToAttrs (
+                    map (i: {
+                        name = "tang_key_${toString i}";
+                        value = {
+                            sopsFile = cfg.server.sopsFile;
+                            mode = "0400";
+                        };
+                    }) (lib.range 1 cfg.server.keyCount)
+                )
+            );
+
+            systemd.services.tang-install-keys = lib.mkIf (cfg.server.sopsFile != null) {
+                description = "Install tang keys from sops into the tang state directory";
+                wantedBy = [ "sockets.target" ];
+                before = [ "tangd.socket" ];
+                after = [ "var-lib-private-tang.mount" ];
+                unitConfig.RequiresMountsFor = "/var/lib/private/tang";
+                serviceConfig = {
+                    Type = "oneshot";
+                    RemainAfterExit = true;
+                };
+                script = ''
+                    set -eu
+                    dir=/var/lib/private/tang
+                    install -d -m 0700 "$dir"
+
+                    ${lib.concatMapStringsSep "\n" (i: ''
+                        src="${config.sops.secrets."tang_key_${toString i}".path}"
+                        if [ ! -r "$src" ]; then
+                            echo "tang-install-keys: $src missing, skipping" >&2
+                        else
+                            thumb="$(${pkgs.jose}/bin/jose jwk thp -i "$src")"
+                            dest="$dir/$thumb.jwk"
+                            if [ -e "$dest" ] && cmp -s "$src" "$dest"; then
+                                echo "tang-install-keys: $thumb.jwk already current"
+                            else
+                                install -m 0440 "$src" "$dest"
+                                echo "tang-install-keys: installed $thumb.jwk"
+                            fi
+                        fi
+                    '') (lib.range 1 cfg.server.keyCount)}
+
+                    chown -R nobody:nogroup "$dir" 2>/dev/null || true
+                    chmod 0700 "$dir"
+                '';
             };
 
             security.polkit.extraConfig = ''
