@@ -149,4 +149,35 @@
         after = [ "unbound.service" ];
         requires = [ "unbound.service" ];
     };
+
+    # DNS is on the critical path for every other machine on the network: when
+    # the pool is busy, a stalled lookup does not just slow the server down, it
+    # looks like the internet is broken everywhere. So FTL and the resolver it
+    # forwards to are the one pair that should preempt the backup and sync jobs
+    # deprioritised elsewhere, rather than queue behind them.
+    #
+    # Prioritising FTL alone would only move the bottleneck: pihole forwards to
+    # unbound, so a starved unbound stalls FTL just the same. Both get the same
+    # treatment.
+    #
+    # Nice=-10 and the high CPUWeight cover scheduling; realtime I/O class is
+    # what matters most here, since these are small latency-critical reads
+    # (gravity lookups, cache and log writes) that must not sit behind a backup's
+    # queued I/O. Priority 2 rather than 0 leaves headroom above them if
+    # something ever needs it more.
+    systemd.services.pihole-ftl.serviceConfig = {
+        Nice = -10;
+        CPUWeight = 2000;
+        IOWeight = 1000;
+        IOSchedulingClass = "realtime";
+        IOSchedulingPriority = 2;
+    };
+
+    systemd.services.unbound.serviceConfig = {
+        Nice = -10;
+        CPUWeight = 2000;
+        IOWeight = 1000;
+        IOSchedulingClass = "realtime";
+        IOSchedulingPriority = 2;
+    };
 }
