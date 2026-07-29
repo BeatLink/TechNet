@@ -100,7 +100,12 @@ in
 
     systemd.tmpfiles.rules = [
       "d ${cfg.dataDir}   0750 ${cfg.user} ${cfg.group} -"
-      "d ${cfg.booksDir}  0750 ${cfg.user} ${cfg.group} -"
+      # booksDir is 2770, not 0750: it is the download target, so it is
+      # routinely shared with another service or a sync agent that must read it.
+      # Group access plus setgid means anything openbooks writes inherits
+      # cfg.group, so a member of that group keeps access to new downloads
+      # without the directory being opened up to world.
+      "d ${cfg.booksDir}  2770 ${cfg.user} ${cfg.group} -"
     ];
 
     systemd.services.openbooks = {
