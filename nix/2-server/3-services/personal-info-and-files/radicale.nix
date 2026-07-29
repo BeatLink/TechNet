@@ -10,9 +10,20 @@
 
 { pkgs, inputs, config, ... }:
 {
+    # Owned by `vigil`, not `vigil-access`, unlike the probe credentials that
+    # are read on the target host over SSH. Vigil's HTTP-style plugins resolve
+    # `password_command` on the Vigil host itself at plugin construction --
+    # a probe's ssh_config routes the request, not the password lookup -- so
+    # this is read by vigil.service, which runs as `vigil`. Owning it
+    # `vigil-access` made every PROPFIND probe send an empty password and fail
+    # authentication every 10 minutes.
+    #
+    # radicale-vigil-htpasswd reads it via LoadCredential, which systemd
+    # resolves as root before dropping to the radicale user, so that side is
+    # unaffected by the owner.
     sops.secrets.radicale_vigil_password = {
         sopsFile = "${inputs.self}/secrets/2-server/radicale.yaml";
-        owner = "vigil-access";
+        owner = "vigil";
     };
 
     services.radicale = {
