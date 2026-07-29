@@ -13,6 +13,7 @@
 {
     config,
     inputs,
+    pkgs,
     ...
 }:
 let
@@ -73,6 +74,10 @@ in
                     config.sops.secrets.wireguard_private_key.path;
             };
             systemd = {
+                # ping is used by initrd-wireguard-recover to tell a genuinely working
+                # link from one that is merely "routable" but carrying no traffic.
+                storePaths = [ "${pkgs.iputils}/bin/ping" ];
+
                 services = {
                     fix_wireguard_key_perms = {
                         # The Wireguard privatekey must be owned by systemd-network to be used.
@@ -97,24 +102,40 @@ in
                         unitConfig.DefaultDependencies = "no";
                         serviceConfig.Type = "oneshot";
                         script = ''
-                            routable() {
-                                local state
-                                state="$(${initrdSystemd}/bin/networkctl --no-legend --no-pager list wireguard0 2>/dev/null)"
-                                [[ "$state" == *routable* ]]
+                            # A link reports "routable" as soon as it has an address, even
+                            # when it carries no traffic at all, so link state is not a
+                            # usable health check. Heimdall is the wireguard server, so
+                            # peers dial in to it: what actually has to work for remote
+                            # access is the LAN. Test the gateway, not a peer -- a peer
+                            # may legitimately be down or still locked itself.
+                            carrying() {
+                                ${pkgs.iputils}/bin/ping -c1 -W3 192.168.0.1 > /dev/null 2>&1
                             }
-                            if routable; then
-                                echo "wireguard-recover: tunnel is routable, nothing to do"
+
+                            if carrying; then
+                                echo "wireguard-recover: LAN is carrying traffic, nothing to do"
                                 exit 0
                             fi
-                            echo "wireguard-recover: reconfiguring wireguard0"
+
+                            echo "wireguard-recover: no traffic, restarting systemd-networkd"
+                            ${initrdSystemd}/bin/systemctl restart systemd-networkd || true
+                            sleep 10
+
+                            if carrying; then
+                                echo "wireguard-recover: recovered after networkd restart"
+                                exit 0
+                            fi
+
+                            echo "wireguard-recover: still down, reconfiguring links as a last resort"
+                            ${initrdSystemd}/bin/networkctl reconfigure enp2s0f1 || true
                             ${initrdSystemd}/bin/networkctl reconfigure wireguard0 || true
                             sleep 10
-                            if routable; then
+                            if carrying; then
                                 echo "wireguard-recover: recovered after reconfigure"
-                                exit 0
+                            else
+                                echo "wireguard-recover: still down, will retry on next timer tick" >&2
                             fi
-                            echo "wireguard-recover: restarting systemd-networkd"
-                            ${initrdSystemd}/bin/systemctl restart systemd-networkd || true
+                            exit 0
                         '';
                     };
                     "initrd-wireguard-recover-cancel" = {
@@ -132,8 +153,8 @@ in
                 timers."initrd-wireguard-recover" = {
                     description = "Timer to bounce the wireguard tunnel while stuck in initrd";
                     timerConfig = {
-                        OnBootSec = "3min";
-                        OnUnitActiveSec = "2min";
+                        OnBootSec = "45s";
+                        OnUnitActiveSec = "60s";
                         Unit = "initrd-wireguard-recover.service";
                     };
                     unitConfig.DefaultDependencies = "no";

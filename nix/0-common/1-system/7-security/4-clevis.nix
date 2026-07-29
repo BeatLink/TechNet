@@ -80,6 +80,9 @@ let
                 fi
             done
         fi
+
+        # Always succeed: Restart=on-failure must never turn this into a restart loop.
+        exit 0
     '';
 
     rebindClevis = pkgs.writeShellApplication {
