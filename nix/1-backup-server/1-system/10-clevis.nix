@@ -1,4 +1,51 @@
-{ config, inputs, ... }:
+{ config, inputs, lib, ... }:
+let
+    hn = config.networking.hostName;
+
+    # Datasets clevis is expected to unlock, mapped to the JWE the initrd ships for each.
+    clevisDatasets = [
+        "data-pool-${hn}/storage"
+        "root-pool-${hn}/root"
+    ];
+
+    zfs = "${config.boot.zfs.package}/sbin/zfs";
+
+    # Retries clevis in the background for the whole time the boot is waiting. The ZFS
+    # import unit only tries Tang once, so without this a tang server that is briefly
+    # unreachable forces a manual passphrase even if it comes back seconds later. Every
+    # dataset that is already unlocked (by the one-shot attempt or by hand over SSH) is
+    # skipped, and the loop exits as soon as none are left.
+    retryScript = ''
+        set -u
+        remaining="${lib.concatStringsSep " " clevisDatasets}"
+        # ~20 minutes at 15s per pass.
+        attempts=80
+        while [ -n "$remaining" ] && [ "$attempts" -gt 0 ]; do
+            attempts=$((attempts - 1))
+            still_locked=""
+            for ds in $remaining; do
+                status="$(${zfs} get -H -o value keystatus "$ds" 2>/dev/null || echo unavailable)"
+                if [ "$status" = available ]; then
+                    continue
+                fi
+                jwe="/etc/clevis/$ds.jwe"
+                if [ -r "$jwe" ] && clevis decrypt < "$jwe" | ${zfs} load-key -L prompt "$ds" 2>/dev/null; then
+                    echo "clevis-retry: unlocked $ds"
+                    continue
+                fi
+                still_locked="$still_locked''${still_locked:+ }$ds"
+            done
+            remaining="$still_locked"
+            [ -n "$remaining" ] || break
+            sleep 15
+        done
+        if [ -n "$remaining" ]; then
+            echo "clevis-retry: giving up, still locked:$remaining"
+        else
+            echo "clevis-retry: all clevis datasets unlocked"
+        fi
+    '';
+in
 {
     sops.secrets.clevis_key = {
         sopsFile = "${inputs.self}/secrets/1-backup-server/clevis.yaml";
@@ -9,19 +56,32 @@
             enable = true;
             useTang = true;
             devices = {
-                "data-pool-${config.networking.hostName}/storage".secretFile = config.sops.secrets.clevis_key.path;
-                "root-pool-${config.networking.hostName}".secretFile = config.sops.secrets.clevis_key.path;
+                "data-pool-${hn}/storage".secretFile = config.sops.secrets.clevis_key.path;
+                "root-pool-${hn}/root".secretFile = config.sops.secrets.clevis_key.path;
             };
         };
 
-        systemd.services = {
-            "zfs-import-root-pool-${config.networking.hostName}".preStart = ''
-                /bin/sleep 30
-            '';
-
-            "zfs-import-data-pool-${config.networking.hostName}".preStart = ''
-                /bin/sleep 30
-            '';
+        systemd.services.clevis-retry = {
+            description = "Keep retrying clevis/tang unlock while the boot waits";
+            wantedBy = [ "initrd.target" ];
+            after = [ "network-online.target" ];
+            wants = [ "network-online.target" ];
+            unitConfig.DefaultDependencies = "no";
+            # Type=simple and no Before= on sysroot.mount, deliberately: this must run
+            # *alongside* the ZFS import unit's systemd-ask-password prompt, not ahead of
+            # it. Ordering it before the mount would let a permanently unreachable tang
+            # server block the boot outright and defeat the manual SSH unlock.
+            serviceConfig = {
+                Type = "simple";
+                # Only ever unlocks datasets; safe to abandon once the boot moves on.
+                TimeoutStartSec = "infinity";
+            };
+            script = retryScript;
         };
+    };
+
+    systemd.network = {
+        wait-online.anyInterface = lib.mkForce false;
+        networks."wg0".linkConfig.RequiredForOnline = "routable";
     };
 }
