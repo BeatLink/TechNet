@@ -203,20 +203,20 @@ in
 
             systemd.services.clevis-retry = {
                 description = "Keep retrying clevis/tang unlock in the background until it succeeds";
-                wantedBy = [ "sysinit.target" ];
-                after = [
-                    "systemd-modules-load.service"
-                    "network-online.target"
-                ];
-                wants = [ "network-online.target" ];
+                # Deliberately NOT a blocking oneshot and deliberately not ordered before
+                # anything: the loop can run forever when tang is unreachable, so any
+                # target that waits for it would stall the whole boot -- including the
+                # initrd sshd, which is the only way in to fix such a machine remotely.
+                wantedBy = [ "initrd.target" ];
+                after = [ "systemd-modules-load.service" ];
                 unitConfig = {
                     DefaultDependencies = "no";
                     ConditionPathExists = "/etc/clevis";
                 };
                 serviceConfig = {
-                    Type = "oneshot";
-                    RemainAfterExit = true;
-                    TimeoutStartSec = "infinity";
+                    Type = "simple";
+                    Restart = "on-failure";
+                    RestartSec = 15;
                 };
                 script = retryScript;
             };
