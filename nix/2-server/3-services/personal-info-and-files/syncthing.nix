@@ -3,7 +3,7 @@
 # SyncThing is the main file synchronization system across all devices in the TechNet. By keeping files on multiple redundant devices it
 # also acts as a first line backup mechanism
 #
-{ config, pkgs, inputs, ... }:
+{ config, lib, pkgs, inputs, ... }:
 {
     sops.secrets.syncthing_cert = {
         sopsFile = "${inputs.self}/secrets/2-server/syncthing.yaml";
@@ -36,6 +36,19 @@
                 relaysEnabled = false;
                 globalAnnounceEnabled = false;
                 natEnabled = false;
+
+                # Scanning is what makes syncthing expensive on this box: with
+                # maxFolderConcurrency unlimited, all 9 folders can walk /Storage
+                # simultaneously, and on a HDD mirror that is a seek storm rather
+                # than 9x the throughput. Serialising to one folder at a time
+                # costs little in latency (the filesystem watcher below is what
+                # actually picks up changes) and keeps the pool responsive.
+                maxFolderConcurrency = 1;
+
+                # Cap the write side too, so a burst of incoming files from a
+                # peer cannot saturate the mirror on its own.
+                maxConcurrentIncomingRequestKiB = 32768;
+                progressUpdateIntervalS = 30;
             };
             gui = {
                 user = "beatlink";
@@ -59,7 +72,29 @@
                     numConnections = 8;
                 };
             };
-            folders = {
+            # Every folder gets the same scan policy, layered on here rather than
+            # repeated nine times. Per-folder keys below still win, since the
+            # folder's own attrs are merged over these.
+            #
+            # rescanIntervalS is raised from the 1h default to 24h: a periodic
+            # rescan re-stats every file in the tree, which is the single most
+            # expensive thing syncthing does on spinning disks. It is only a
+            # safety net for changes the watcher misses, so it does not need to
+            # run hourly. fsWatcherEnabled is what actually detects edits, and it
+            # is near-free — inotify pushes changes instead of syncthing walking
+            # the tree to find them. The watcher delay batches a burst of writes
+            # into one scan rather than one per file.
+            folders = lib.mapAttrs (_: folder: {
+                rescanIntervalS = 86400;
+                fsWatcherEnabled = true;
+                fsWatcherDelayS = 60;
+                # Bound the per-folder worker pools. At 0 syncthing sizes hashers
+                # by CPU count, which on 4 cores means 4 threads seeking the same
+                # mirror at once; 1 hasher keeps reads sequential enough for the
+                # drives to stay useful to everything else.
+                hashers = 1;
+                copiers = 1;
+            } // folder) {
                 "/Storage/Files/Documents" = {
                     label = "Documents";
                     id = "hz0k1-egjw9";

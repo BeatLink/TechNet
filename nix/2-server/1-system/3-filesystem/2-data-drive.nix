@@ -7,18 +7,32 @@
 
 { config, ... }:
 {
-    # Put the rotational data disks on BFQ. The kernel defaults these to `none`
-    # (no reordering, no priority awareness), under which both ionice and
-    # systemd's IOSchedulingClass/IOWeight are silently ignored — a backup and a
-    # sync job then compete with interactive reads on equal footing, which is
-    # what starves the pool and leaves txg_sync blocked for minutes at a time.
-    # BFQ is the only available scheduler that honours per-cgroup io weights.
-    # Restricted to rotational devices; the boot SSD is left on `none`, where
-    # seek-ordering buys nothing.
-    services.udev.extraRules = ''
-        ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
+    # Queue depth for the data mirror.
+    #
+    # ZFS bypasses the kernel's block scheduler (nixpkgs' zfs module forces
+    # scheduler=none on every zfs_member device for exactly that reason) and
+    # schedules I/O itself, so ionice and BFQ weights do not reach these disks —
+    # only ZFS's own tunables do.
+    #
+    # The default zfs_vdev_max_active=1000 assumes a device that can keep a deep
+    # queue busy. These are 7200rpm spindles at roughly 150 IOPS, so a thousand
+    # queued I/Os is a multi-second backlog: a backup or a sync walk fills the
+    # queue, and every unrelated read then waits behind it. That is what left
+    # txg_sync blocked for over 245s at a stretch. A shallow queue costs a little
+    # streaming throughput and buys back latency for everything else.
+    #
+    # async_write_max_active is what bounds the writeback flood a backup
+    # produces; sync_read stays comparatively high so interactive reads keep
+    # jumping the queue, which is the priority split ionice could not express
+    # here. scrub is pinned low so the Saturday scrub stops competing with
+    # foreground work.
+    boot.extraModprobeConfig = ''
+        options zfs zfs_vdev_max_active=32
+        options zfs zfs_vdev_async_write_max_active=4
+        options zfs zfs_vdev_async_read_max_active=2
+        options zfs zfs_vdev_sync_read_min_active=16
+        options zfs zfs_vdev_scrub_max_active=1
     '';
-    boot.kernelModules = [ "bfq" ];
 
     systemd.tmpfiles.settings."Storage" = {
         # Sets the mount point permissions
