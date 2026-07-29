@@ -160,24 +160,28 @@
     # unbound, so a starved unbound stalls FTL just the same. Both get the same
     # treatment.
     #
-    # Nice=-10 and the high CPUWeight cover scheduling; realtime I/O class is
-    # what matters most here, since these are small latency-critical reads
-    # (gravity lookups, cache and log writes) that must not sit behind a backup's
-    # queued I/O. Priority 2 rather than 0 leaves headroom above them if
-    # something ever needs it more.
+    # Nice and the high CPUWeight cover scheduling; best-effort/0 is the top of
+    # the normal I/O class, so these still jump ahead of the idle-class backup
+    # and the deprioritised sync without leaving the normal scheduling classes.
+    #
+    # Deliberately NOT IOSchedulingClass=realtime: FTL stopped answering queries
+    # under it, leaving a 4800-deep backlog on the :53 socket while unbound
+    # behind it still resolved fine. Realtime I/O is not a "more important"
+    # best-effort -- it lets a process monopolise the device, and FTL's own
+    # threads starved each other. Best-effort/0 gives the priority without that.
     systemd.services.pihole-ftl.serviceConfig = {
         Nice = -10;
         CPUWeight = 2000;
         IOWeight = 1000;
-        IOSchedulingClass = "realtime";
-        IOSchedulingPriority = 2;
+        IOSchedulingClass = "best-effort";
+        IOSchedulingPriority = 0;
     };
 
     systemd.services.unbound.serviceConfig = {
         Nice = -10;
         CPUWeight = 2000;
         IOWeight = 1000;
-        IOSchedulingClass = "realtime";
-        IOSchedulingPriority = 2;
+        IOSchedulingClass = "best-effort";
+        IOSchedulingPriority = 0;
     };
 }
