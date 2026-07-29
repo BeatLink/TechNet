@@ -6,6 +6,7 @@
 {
     config,
     inputs,
+    pkgs,
     ...
 }:
 let
@@ -49,6 +50,10 @@ in
             config.sops.secrets.wireguard_private_key.path;
 
         systemd = {
+            # ping is used by initrd-wireguard-recover to tell a genuinely working
+            # tunnel from one that is merely "routable" with no peer endpoint.
+            storePaths = [ "${pkgs.iputils}/bin/ping" ];
+
             # The Wireguard privatekey must be owned by systemd-network to be used.
             services = {
                 fix_wireguard_key_perms = {
@@ -66,24 +71,39 @@ in
                     unitConfig.DefaultDependencies = "no";
                     serviceConfig.Type = "oneshot";
                     script = ''
-                        routable() {
-                            local state
-                            state="$(${initrdSystemd}/bin/networkctl --no-legend --no-pager list wg0 2>/dev/null)"
-                            [[ "$state" == *routable* ]]
+                        # wg0 reports "routable" as soon as it has an address, even with
+                        # no peer endpoint and no connectivity at all -- so link state is
+                        # useless here. Test whether the tunnel actually carries traffic.
+                        carrying() {
+                            ${pkgs.iputils}/bin/ping -c1 -W3 -I wg0 10.100.100.1 > /dev/null 2>&1
                         }
-                        if routable; then
-                            echo "wireguard-recover: tunnel is routable, nothing to do"
+
+                        if carrying; then
+                            echo "wireguard-recover: tunnel is carrying traffic, nothing to do"
                             exit 0
                         fi
-                        echo "wireguard-recover: reconfiguring wg0"
+
+                        # The usual failure is wg0 coming up before DNS, so the peer
+                        # endpoint never resolves and is silently dropped. networkctl
+                        # reconfigure does NOT re-resolve it; only a networkd restart does.
+                        echo "wireguard-recover: no traffic over wg0, restarting systemd-networkd"
+                        ${initrdSystemd}/bin/systemctl restart systemd-networkd || true
+                        sleep 10
+
+                        if carrying; then
+                            echo "wireguard-recover: recovered after networkd restart"
+                            exit 0
+                        fi
+
+                        echo "wireguard-recover: still no traffic, reconfiguring wg0 as a last resort"
                         ${initrdSystemd}/bin/networkctl reconfigure wg0 || true
                         sleep 10
-                        if routable; then
+                        if carrying; then
                             echo "wireguard-recover: recovered after reconfigure"
-                            exit 0
+                        else
+                            echo "wireguard-recover: tunnel still down, will retry on next timer tick" >&2
                         fi
-                        echo "wireguard-recover: restarting systemd-networkd"
-                        ${initrdSystemd}/bin/systemctl restart systemd-networkd || true
+                        exit 0
                     '';
                 };
 
@@ -103,8 +123,8 @@ in
             timers."initrd-wireguard-recover" = {
                 description = "Timer to bounce the wireguard tunnel while stuck in initrd";
                 timerConfig = {
-                    OnBootSec = "3min";
-                    OnUnitActiveSec = "2min";
+                    OnBootSec = "45s";
+                    OnUnitActiveSec = "60s";
                     Unit = "initrd-wireguard-recover.service";
                 };
                 unitConfig.DefaultDependencies = "no";
