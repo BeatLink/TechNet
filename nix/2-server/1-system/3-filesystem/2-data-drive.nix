@@ -4,9 +4,13 @@
 # The data drive consists of 2 1TB Hard Drives configured for encrypted ZFS RAID 1. These settings decrypt and mount that
 # storage during boot
 #
+# The mount itself comes from the shared module in 0-common; what is left here is the queue-depth tuning, which exists
+# because this host's data pool is a pair of spinning disks.
+#
 
-{ config, ... }:
 {
+    technet.dataDrive.enable = true;
+
     # Queue depth for the data mirror.
     #
     # ZFS bypasses the kernel's block scheduler (nixpkgs' zfs module forces
@@ -33,25 +37,4 @@
         options zfs zfs_vdev_sync_read_min_active=16
         options zfs zfs_vdev_scrub_max_active=1
     '';
-
-    systemd.tmpfiles.settings."Storage" = {
-        # Sets the mount point permissions
-        "/Storage" = {
-            d = {
-                user = "beatlink";
-                group = "beatlink";
-                mode = "1777";
-            };
-        };
-    };
-    fileSystems."/Storage" = {
-        # Mounts the drive
-        device = "data-pool-${config.networking.hostName}/storage";
-        fsType = "zfs";
-        options = [
-            "zfsutil"
-            "nofail"
-        ];
-        neededForBoot = true;
-    };
 }
