@@ -10,10 +10,16 @@
     # by a uid that no longer has a name, which leaves Syncthing unable to chmod
     # them now that the eBooks folder syncs permission bits. One-time migration
     # of the openbooks tree only -- the rest of eBooks is already beatlink's.
+    #
+    # logs/ is pruned: it belongs to vigil, which writes OpenBooks probe logs
+    # there as itself. It happens to sit inside the synced tree, but handing it
+    # to beatlink would leave vigil unable to write its own logs.
     system.activationScripts.openbooksChownToBeatlink = ''
         for dir in /Storage/Files/eBooks/OpenBooks /Storage/Services/OpenBooks; do
             if [ -d "$dir" ]; then
-                ${pkgs.findutils}/bin/find "$dir" \! -user beatlink \
+                ${pkgs.findutils}/bin/find "$dir" \
+                    -path /Storage/Files/eBooks/OpenBooks/logs -prune -o \
+                    \! -user beatlink \
                     -exec ${pkgs.coreutils}/bin/chown beatlink:beatlink {} + 2>/dev/null || true
             fi
         done

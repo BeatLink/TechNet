@@ -138,6 +138,11 @@
                         "Thor"
                     ];
                     type = "sendreceive";
+                    # Vigil writes OpenBooks probe logs here as itself, so these
+                    # are the one thing in the tree syncthing cannot chmod now
+                    # that permissions sync. They are host-local diagnostics with
+                    # no reason to reach the laptop or phone anyway.
+                    ignorePatterns = [ "/OpenBooks/logs" ];
                     versioning = {
                         type = "trashcan";
                         params.cleanoutDays = "30";
