@@ -1,5 +1,4 @@
 {
-    inputs,
     config,
     ...
 }:
@@ -17,12 +16,12 @@
         ];
     };
     sops.secrets.https_certificate = {
-        sopsFile = "${inputs.self}/secrets/2-server/nginx.yaml";
+        sopsFile = "${config.technet.secrets.path}/nginx.yaml";
         owner = "nginx";
         group = "nginx";
     };
     sops.secrets.https_certificate_key = {
-        sopsFile = "${inputs.self}/secrets/2-server/nginx.yaml";
+        sopsFile = "${config.technet.secrets.path}/nginx.yaml";
         owner = "nginx";
         group = "nginx";
     };

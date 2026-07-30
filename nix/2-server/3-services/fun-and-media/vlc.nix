@@ -1,11 +1,10 @@
 {
     pkgs,
     config,
-    inputs,
     ...
 }:
 {
-    sops.secrets.vlc_env.sopsFile = "${inputs.self}/secrets/2-server/vlc.yaml";
+    sops.secrets.vlc_env.sopsFile = "${config.technet.secrets.path}/vlc.yaml";
     systemd.services = {
         vlc-audio = {
             description = "Headless VLC Media Player for Playing Audio from Home Assistant";

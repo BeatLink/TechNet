@@ -12,10 +12,10 @@
 # so Vigil triggers this host's backup rather than performing one under
 # credentials of its own.
 #
-{ inputs, ... }:
+{ config, ... }:
 {
     sops.secrets.vorta_ssh_key = {
-        sopsFile = "${inputs.self}/secrets/3-laptop/vorta.yaml";
+        sopsFile = "${config.technet.secrets.path}/vorta.yaml";
         mode = "0400";   # root-only; borg reads it via sudo
     };
 
@@ -23,7 +23,7 @@
     # borg monitors run `cat` on this path to unlock the repo. Vorta itself
     # takes the passphrase from the system keyring, not from here.
     sops.secrets.vorta_backup_passphrase = {
-        sopsFile = "${inputs.self}/secrets/3-laptop/vorta.yaml";
+        sopsFile = "${config.technet.secrets.path}/vorta.yaml";
         mode = "0400";   # root-only; borg reads it via sudo
     };
 

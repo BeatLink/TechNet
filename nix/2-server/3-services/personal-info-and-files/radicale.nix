@@ -22,7 +22,7 @@
     # resolves as root before dropping to the radicale user, so that side is
     # unaffected by the owner.
     sops.secrets.radicale_vigil_password = {
-        sopsFile = "${inputs.self}/secrets/2-server/radicale.yaml";
+        sopsFile = "${config.technet.secrets.path}/radicale.yaml";
         owner = "vigil";
     };
 

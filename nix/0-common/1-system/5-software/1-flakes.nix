@@ -3,7 +3,7 @@
 {
 
     sops.secrets.github_access_token_conf = {
-        sopsFile = "${inputs.self}/secrets/0-common/github.yaml";
+        sopsFile = "${config.technet.secrets.commonPath}/github.yaml";
     };
 
     nix = {

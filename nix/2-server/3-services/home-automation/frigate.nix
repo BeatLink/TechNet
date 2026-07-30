@@ -1,12 +1,11 @@
 {
-    inputs,
     pkgs,
     config,
     ...
 }:
 {
     sops.secrets."frigate_env" = {
-        sopsFile = "${inputs.self}/secrets/2-server/frigate.yaml";
+        sopsFile = "${config.technet.secrets.path}/frigate.yaml";
         owner = "frigate";
         group = "frigate";
     };

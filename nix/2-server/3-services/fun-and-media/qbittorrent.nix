@@ -21,7 +21,7 @@ let
 in
 {
     sops.secrets.qbittorrent_jackett_api_key = {
-        sopsFile = "${inputs.self}/secrets/2-server/qbittorrent.yaml";
+        sopsFile = "${config.technet.secrets.path}/qbittorrent.yaml";
         key = "jackett_api_key";
         owner = "beatlink";
         group = "beatlink";
@@ -32,7 +32,7 @@ in
     # It cannot go in serverConfig: the module renders that with
     # pkgs.writeText, so anything there is world-readable in the Nix store.
     sops.secrets.qbittorrent_webui_password_hash = {
-        sopsFile = "${inputs.self}/secrets/2-server/qbittorrent.yaml";
+        sopsFile = "${config.technet.secrets.path}/qbittorrent.yaml";
         key = "webui_password_hash";
         owner = "beatlink";
         group = "beatlink";

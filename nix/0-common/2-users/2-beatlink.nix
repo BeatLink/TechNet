@@ -5,14 +5,13 @@
 
 {
     config,
-    inputs,
     lib,
     ...
 }:
 {
     # Setup Linux User Account
     sops.secrets.beatlink_hashed_password = {
-        sopsFile = "${inputs.self}/secrets/0-common/users.yaml";
+        sopsFile = "${config.technet.secrets.commonPath}/users.yaml";
         neededForUsers = true;
     };
     users = {

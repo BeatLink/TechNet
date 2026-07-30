@@ -4,7 +4,7 @@
 #
 # https://github.com/crocodilestick/Calibre-Web-Automated
 
-{ inputs, pkgs, ... }:
+{ config, inputs, pkgs, ... }:
 {
     # Vigil's `calibre_web` plugin authenticates to /opds as this account to
     # confirm the DB layer actually serves a real book feed, not just that
@@ -15,7 +15,7 @@
     # one-time-manual-step pattern as Traccar's vigil account (see
     # traccar.nix).
     sops.secrets.calibre_web_vigil_password = {
-        sopsFile = "${inputs.self}/secrets/2-server/calibre-web.yaml";
+        sopsFile = "${config.technet.secrets.path}/calibre-web.yaml";
         owner = "vigil-access";
     };
 

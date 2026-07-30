@@ -1,7 +1,7 @@
-{ inputs, ... }:
+{ config, ... }:
 {
     technet.clevis = {
         enable = true;
-        sopsFile = "${inputs.self}/secrets/2-server/clevis.yaml";
+        sopsFile = "${config.technet.secrets.path}/clevis.yaml";
     };
 }

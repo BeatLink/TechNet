@@ -11,7 +11,7 @@
 {
     technet.initrdWireguard = {
         enable = true;
-        sopsFile = "${inputs.self}/secrets/1-backup-server/wireguard.yaml";
+        sopsFile = "${config.technet.secrets.path}/wireguard.yaml";
         # Ragnarok is a client, so the tunnel itself is what has to work. Force the
         # probe out of wg0 rather than letting routing pick a path.
         probe = {

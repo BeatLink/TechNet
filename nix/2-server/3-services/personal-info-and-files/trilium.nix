@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ config, ... }:
 {
     # Vigil's `trilium` plugin reads /etapi/metrics to check the note
     # database is actually being modified, not just that the server answers.
@@ -7,7 +7,7 @@
     # match, the same one-time-manual-step pattern as Traccar's vigil
     # account (see traccar.nix).
     sops.secrets.trilium_etapi_token = {
-        sopsFile = "${inputs.self}/secrets/2-server/trilium.yaml";
+        sopsFile = "${config.technet.secrets.path}/trilium.yaml";
         owner = "vigil-access";
     };
 

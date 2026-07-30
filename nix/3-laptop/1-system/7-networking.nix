@@ -7,11 +7,11 @@
 # how Odin addresses itself on each of them.
 #
 
-{ inputs, ... }:
+{ config, ... }:
 {
     technet.wifi = {
         enable = true;
-        sopsFile = "${inputs.self}/secrets/3-laptop/networkmanager.yaml";
+        sopsFile = "${config.technet.secrets.path}/networkmanager.yaml";
 
         networks = {
             # Static lease on the house LAN, with Heimdall as DNS.

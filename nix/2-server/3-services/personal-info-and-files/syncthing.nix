@@ -10,15 +10,15 @@
 { config, lib, pkgs, inputs, ... }:
 {
     sops.secrets.syncthing_cert = {
-        sopsFile = "${inputs.self}/secrets/2-server/syncthing.yaml";
+        sopsFile = "${config.technet.secrets.path}/syncthing.yaml";
         owner = "beatlink";
     };
     sops.secrets.syncthing_key = {
-        sopsFile = "${inputs.self}/secrets/2-server/syncthing.yaml";
+        sopsFile = "${config.technet.secrets.path}/syncthing.yaml";
         owner = "beatlink";
     };
     sops.secrets.syncthing_gui_password = {
-        sopsFile = "${inputs.self}/secrets/2-server/syncthing.yaml";
+        sopsFile = "${config.technet.secrets.path}/syncthing.yaml";
         owner = "beatlink";
     };
     services.syncthing = {

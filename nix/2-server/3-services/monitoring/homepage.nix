@@ -1,7 +1,7 @@
-{ inputs, config, ... }:
+{ config, ... }:
 {
     sops.secrets.homepage_env = {
-        sopsFile = "${inputs.self}/secrets/2-server/homepage.yaml";
+        sopsFile = "${config.technet.secrets.path}/homepage.yaml";
     };
     services.homepage-dashboard = {
         enable = true;

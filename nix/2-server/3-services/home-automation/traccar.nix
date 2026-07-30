@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ config, ... }:
 {
     # Vigil's `traccar` plugin authenticates as a dedicated read-only user to
     # check device staleness via /api/devices. Traccar has no declarative
@@ -9,7 +9,7 @@
     # monitor), with its password then stored at
     # secrets/2-server/traccar.yaml as `vigil_password` to match.
     sops.secrets.traccar_vigil_password = {
-        sopsFile = "${inputs.self}/secrets/2-server/traccar.yaml";
+        sopsFile = "${config.technet.secrets.path}/traccar.yaml";
         owner = "vigil-access";
     };
 

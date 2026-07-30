@@ -11,7 +11,7 @@
 # to what the phone is already running.
 #
 
-{ inputs, ... }:
+{ config, ... }:
 let
     # Repeated verbatim on each of Thor's wifi profiles.
     wifiExtras = {
@@ -40,7 +40,7 @@ in
 {
     technet.wifi = {
         enable = true;
-        sopsFile = "${inputs.self}/secrets/4-phone/networkmanager.yaml";
+        sopsFile = "${config.technet.secrets.path}/networkmanager.yaml";
 
         networks = {
             "TechNet Wi-Fi" = wifiExtras // dhcpViaTechNetDNS;

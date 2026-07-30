@@ -10,5 +10,6 @@
         ./6-networking
         ./7-security
         ./8-locale.nix
+        ./9-secrets.nix
     ];
 }

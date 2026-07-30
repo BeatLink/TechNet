@@ -9,11 +9,11 @@
 { config, inputs, ... }:
 {
     sops.secrets.syncthing_cert = {
-        sopsFile = "${inputs.self}/secrets/3-laptop/syncthing.yaml";
+        sopsFile = "${config.technet.secrets.path}/syncthing.yaml";
         owner = "beatlink";
     };
     sops.secrets.syncthing_key = {
-        sopsFile = "${inputs.self}/secrets/3-laptop/syncthing.yaml";
+        sopsFile = "${config.technet.secrets.path}/syncthing.yaml";
         owner = "beatlink";
     };
 
