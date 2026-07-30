@@ -116,7 +116,7 @@
     # IOSchedulingClass=idle only issues I/O when nothing else wants the disk,
     # and IOWeight covers the cgroup path (borg spawns children, and weights are
     # inherited by the whole unit cgroup where a per-process ionice would not
-    # be). Both depend on the data disks running BFQ — see 2-data-drive.nix.
+    # be). Both depend on the data disks running BFQ — see 3-filesystem.nix.
     # Nice keeps the compression threads off the CPU backs of foreground work.
     # borgmatic ships its own unit file, which NixOS symlinks in as the base unit
     # and layers these on top as a drop-in; the drop-in wins, so this relaxes the

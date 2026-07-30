@@ -1,3 +1,8 @@
+# Boot Loader
+#
+# This section manages misc boot settings
+#
+
 { lib, ... }:
 {
     boot = {

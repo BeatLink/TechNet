@@ -7,6 +7,6 @@
         ./5-software.nix
         ./6-networking.nix
         ./7-borg.nix
-        ./10-clevis.nix
+        ./8-clevis.nix
     ];
 }

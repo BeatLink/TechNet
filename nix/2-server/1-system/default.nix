@@ -1,14 +1,13 @@
 {
     imports = [
-        ./1-hardware
-        ./2-boot
-        ./3-filesystem
-        ./4-core
-        ./5-software
-        ./6-networking
-        ./9-utilities.nix
-        ./10-sound.nix
-        ./13-clevis.nix
-        ./display.nix
+        ./1-hardware.nix
+        ./2-boot.nix
+        ./3-filesystem.nix
+        ./4-software.nix
+        ./5-networking.nix
+        ./6-utilities.nix
+        ./7-sound.nix
+        ./8-display.nix
+        ./9-clevis.nix
     ];
 }

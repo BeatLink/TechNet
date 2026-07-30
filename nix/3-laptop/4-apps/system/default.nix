@@ -9,7 +9,7 @@
         ./variety.nix
         ./vorta.nix
         ./blueman
-        ./borgmatic
+        ./borgmatic.nix
         ./nemo
         ./tilix
         ./ssh.nix
