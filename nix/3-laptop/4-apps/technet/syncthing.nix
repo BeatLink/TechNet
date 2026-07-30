@@ -1,3 +1,11 @@
+# Syncthing
+#
+# SyncThing is the main file synchronization system across all devices in the TechNet. By keeping files on multiple redundant devices it
+# also acts as a first line backup mechanism.
+#
+# The device IDs, folder set and the settings that have to agree across peers come from the shared mesh module in 0-common; what is left
+# here is Odin-specific -- the user service, the tray applet and where state persists.
+#
 { config, inputs, ... }:
 {
     sops.secrets.syncthing_cert = {
@@ -8,6 +16,9 @@
         sopsFile = "${inputs.self}/secrets/3-laptop/syncthing.yaml";
         owner = "beatlink";
     };
+
+    syncthing-mesh.self = "Odin";
+
     home-manager.users.beatlink =
         { pkgs, ... }:
         {
@@ -31,127 +42,7 @@
                 key = config.sops.secrets.syncthing_key.path;
                 overrideDevices = true;
                 overrideFolders = true;
-                settings = {
-                    devices = {
-                        Heimdall = {
-                            addresses = [
-                                "tcp://heimdall.lan:22000"
-                                "tcp://heimdall.technet:22000"
-                            ];
-                            id = "Q6AIAK4-4PFLB3Z-73QF54Y-EKQ2LC5-5FSVFRZ-RBGWFDI-KZQI45E-JBXXTQY";
-                            numConnections = 8;
-                        };
-                        Thor = {
-                            addresses = [
-                                "tcp://thorx.technet:22000"
-                                "tcp://thorx.lan:22000"
-                            ];
-                            id = "AGVZ3DQ-LX5CBXY-G6NKD4E-HOW7QNG-KAGSVOY-KRBUABG-BCDNEPU-SHJF4Q4";
-                            numConnections = 8;
-                        };
-                    };
-                    folders = {
-                        "/Storage/Files/Documents" = {
-                            label = "Documents";
-                            id = "hz0k1-egjw9";
-                            devices = [
-                                "Heimdall"
-                                "Thor"
-                            ];
-                            type = "sendreceive";
-                            versioning = {
-                                type = "trashcan";
-                                params.cleanoutDays = "30";
-                            };
-                        };
-                        "/Storage/Files/Downloads" = {
-                            label = "Downloads";
-                            id = "unmbe-b2iab";
-                            devices = [
-                                "Heimdall"
-                                "Thor"
-                            ];
-                            type = "sendreceive";
-                            versioning = {
-                                type = "trashcan";
-                                params.cleanoutDays = "30";
-                            };
-                        };
-                        "/Storage/Files/eBooks" = {
-                            label = "eBooks";
-                            id = "kj0id-3vcea";
-                            devices = [
-                                "Heimdall"
-                                "Thor"
-                            ];
-                            type = "sendreceive";
-                            versioning = {
-                                type = "trashcan";
-                                params.cleanoutDays = "30";
-                            };
-                        };
-                        "/Storage/Files/Music" = {
-                            label = "Music";
-                            id = "8g86n-1309l";
-                            devices = [
-                                "Heimdall"
-                                "Thor"
-                            ];
-                            type = "sendonly";
-                        };
-                        "/Storage/Files/Pictures" = {
-                            label = "Pictures";
-                            id = "ta09s-b2u0y";
-                            devices = [
-                                "Heimdall"
-                                "Thor"
-                            ];
-                            type = "sendreceive";
-                            versioning = {
-                                type = "trashcan";
-                                params.cleanoutDays = "30";
-                            };
-                        };
-                        "/Storage/Files/Projects" = {
-                            label = "Projects";
-                            id = "xjtvv-cyqwv";
-                            devices = [
-                                "Heimdall"
-                            ];
-                            type = "sendreceive";
-                            versioning = {
-                                type = "trashcan";
-                                params.cleanoutDays = "30";
-                            };
-                        };
-                        "/Storage/Files/Sounds" = {
-                            label = "Sounds";
-                            id = "kae2q-5740v";
-                            devices = [
-                                "Heimdall"
-                                "Thor"
-                            ];
-                            type = "sendreceive";
-                            versioning = {
-                                type = "trashcan";
-                                params.cleanoutDays = "30";
-                            };
-                        };
-                        "/Storage/Files/Videos" = {
-                            label = "Videos";
-                            id = "4kqye-6dosm";
-                            devices = [
-                                "Heimdall"
-                                "Thor"
-                            ];
-                            type = "sendreceive";
-                            versioning = {
-                                type = "trashcan";
-                                params.cleanoutDays = "30";
-                            };
-                        };
-                    };
-                };
+                settings = config.syncthing-mesh.settings;
             };
             home = {
                 persistence."/Storage/Apps/TechNet/SyncThing" = {

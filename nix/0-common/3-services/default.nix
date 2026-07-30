@@ -6,5 +6,6 @@
 {
     imports = [
         ./1-ssh.nix
+        ./2-syncthing-mesh.nix
     ];
 }
