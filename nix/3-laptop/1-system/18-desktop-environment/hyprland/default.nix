@@ -7,6 +7,10 @@
 # Hyprland is configured entirely through home-manager (wayland.windowManager.hyprland) rather than dconf or
 # plasma-manager, so the settings live in this repo directly rather than being exported from a running session.
 #
+# The settings here mirror the Cinnamon configuration in ../cinnamon as closely as Hyprland allows. Where the two
+# differ deliberately it is noted inline. The largest deliberate divergence is workspaces: Cinnamon runs a single
+# workspace with floating windows, while this configuration uses five workspaces with dwindle tiling.
+#
 
 { pkgs, ... }:
 {
@@ -71,18 +75,19 @@
                     ];
 
                     "$mod" = "SUPER";
-                    "$terminal" = "${pkgs.tilix}/bin/tilix";
+                    "$terminal" = "${pkgs.tilix}/bin/tilix"; # Matches desktop/applications/terminal from dconf
                     "$fileManager" = "${pkgs.nemo}/bin/nemo";
                     "$menu" = "${pkgs.rofi}/bin/rofi -show drun";
 
                     exec-once = [
-                        "${pkgs.waybar}/bin/waybar"
                         "${pkgs.hyprpaper}/bin/hyprpaper"
                         "${pkgs.swaynotificationcenter}/bin/swaync"
                         "${pkgs.hypridle}/bin/hypridle"
                         "${pkgs.wl-clipboard}/bin/wl-paste --watch ${pkgs.cliphist}/bin/cliphist store"
                     ];
 
+                    # Cinnamon uses a cursor-size of 5 in dconf, which is a Cinnamon specific scale rather than a
+                    # pixel count. Hyprland takes pixels, so the equivalent default of 24 is used here.
                     env = [
                         "XCURSOR_THEME,Bibata-Modern-Classic"
                         "XCURSOR_SIZE,24"
@@ -96,12 +101,18 @@
                         border_size = 2;
                         "col.active_border" = "rgba(5ac0c0ee)"; # Mint-Y-Aqua accent, matches the Cinnamon theme
                         "col.inactive_border" = "rgba(444444aa)";
+                        # Cinnamon's muffin draggable-border-width is 10, which covers the whole frame edge. The
+                        # closest Hyprland equivalent is extending the resize region beyond the visible border.
                         resize_on_border = true;
+                        extend_border_grab_area = 10;
                         layout = "dwindle";
                     };
 
                     decoration = {
                         rounding = 8;
+                        # Cinnamon's muffin min-window-opacity is 30, ie 30% is the floor for manually dimmed
+                        # windows. Hyprland has no user opacity keybind by default so inactive windows are left
+                        # fully opaque to match how Cinnamon actually renders them day to day.
                         blur = {
                             enabled = true;
                             size = 6;
@@ -114,27 +125,32 @@
                         };
                     };
 
+                    # Cinnamon's desktop-effects-map/minimize/close are all set to 'traditional', a short scale
+                    # and fade rather than an elaborate effect. These durations approximate that.
                     animations = {
                         enabled = true;
                         bezier = [ "smooth, 0.05, 0.9, 0.1, 1.0" ];
                         animation = [
-                            "windows, 1, 4, smooth"
+                            "windows, 1, 4, smooth, popin 80%"
                             "fade, 1, 5, default"
                             "workspaces, 1, 4, smooth, slide"
                         ];
                     };
 
                     input = {
-                        kb_layout = "us";
-                        follow_mouse = 1;
+                        kb_layout = "us"; # Matches desktop/input-sources sources=[('xkb', 'us')]
+                        follow_mouse = 0; # Cinnamon focus-mode is 'click', so focus does not follow the pointer
+                        repeat_delay = 570; # desktop/peripherals/keyboard delay
+                        repeat_rate = 53; # 1000ms / repeat-interval of 19ms, Hyprland takes a rate not an interval
+                        numlock_by_default = false; # desktop/peripherals/keyboard numlock-state=false
+                        accel_profile = "adaptive"; # desktop/peripherals/mouse accel-profile='default'
                         touchpad = {
-                            natural_scroll = true;
-                            tap-to-click = true;
-                            disable_while_typing = true;
+                            natural_scroll = false; # Cinnamon does not set natural scrolling
+                            tap-to-click = true; # desktop/peripherals/touchpad tap-to-click=true
+                            disable_while_typing = true; # desktop/peripherals/touchpad disable-while-typing=true
+                            clickfinger_behavior = true; # desktop/peripherals/touchpad click-method='fingers'
                         };
                     };
-
-                    gestures.workspace_swipe = true;
 
                     dwindle = {
                         pseudotile = true;
@@ -145,10 +161,15 @@
                         disable_hyprland_logo = true;
                         disable_splash_rendering = true;
                         force_default_wallpaper = 0;
+                        # Cinnamon's muffin bring-windows-to-current-workspace is true, so activating a window
+                        # pulls it to the active workspace rather than switching away from it.
+                        focus_on_activate = true;
                     };
 
                     windowrulev2 = [
                         "suppressevent maximize, class:.*"
+                        # Cinnamon's muffin attach-modal-dialogs is true, so dialogs are centered on their parent
+                        "center, floating:1"
                         "float, class:^(pavucontrol|blueman-manager|nm-connection-editor)$"
                         "float, class:^(org.keepassxc.KeePassXC)$, title:^(Unlock Database.*)$"
                     ];
@@ -179,6 +200,30 @@
                     ];
                 };
             };
+
+            # Mirrors the Cinnamon appearance settings from dconf so GTK applications look identical under
+            # Hyprland, which has no settings daemon of its own to apply them.
+            gtk = {
+                enable = true;
+                theme = {
+                    name = "Mint-Y-Dark-Aqua"; # org/cinnamon/theme name
+                    package = pkgs.mint-themes;
+                };
+                iconTheme = {
+                    name = "Mint-Y-Aqua"; # desktop/interface icon-theme
+                    package = pkgs.mint-y-icons;
+                };
+                font = {
+                    name = "Noto Sans"; # desktop/interface font-name='Noto Sans 12'
+                    size = 12;
+                };
+                gtk3.extraConfig = {
+                    gtk-menu-images = true; # settings-daemon/plugins/xsettings menus-have-icons=true
+                    gtk-button-images = true; # settings-daemon/plugins/xsettings buttons-have-icons=true
+                    gtk-xft-hinting = 1;
+                    gtk-xft-hintstyle = "hintfull"; # settings-daemon/plugins/xsettings hinting='full'
+                };
+            };
         };
 
     imports = [
@@ -192,5 +237,10 @@
         ./screenshot.nix
         ./overview.nix
         ./hot-corners.nix
+        ./gestures.nix
+        ./sounds.nix
+        ./night-light.nix
+        ./osd.nix
+        ./scripts.nix
     ];
 }
