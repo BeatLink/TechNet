@@ -4,15 +4,19 @@
 # surfaces in the corners of each output and runs a command when the pointer enters one.
 #
 # The corner assignments mirror the KDE setup this system replaces (see ../kde/hot-corners.nix):
-#   top left     - Overview, showing every window on the current workspace
+#   top left     - Overview, listing every window across every workspace (see ./overview.nix)
 #   bottom left  - Window switcher, the closest equivalent to KDE's Present Windows
 #   top right    - Show desktop
+#
+# Show desktop switches to a dedicated empty workspace and back again, so hitting the corner a second time
+# returns to the workspace the user came from, matching how KDE's ShowDesktop toggles. Dispatching
+# `workspace empty` alone would strand the user on a blank workspace with no way back via the corner.
 #
 # timeout_ms acts as the dwell time before a corner fires, equivalent to KDE's ElectricBorderDelay. It is kept
 # high enough that merely passing through a corner on the way to something else does not trigger it.
 #
 
-{ pkgs, ... }:
+{ ... }:
 {
     home-manager.users.beatlink =
         { pkgs, ... }:
@@ -22,7 +26,7 @@
             xdg.configFile."waycorner/config.toml".text = ''
                 [overview]
                 locations = ["top_left"]
-                enter_command = ["${pkgs.hyprland}/bin/hyprctl", "dispatch", "overview:toggle"]
+                enter_command = ["${pkgs.hypr-overview}/bin/hypr-overview"]
                 size = 10
                 timeout_ms = 250
 
@@ -34,7 +38,7 @@
 
                 [show-desktop]
                 locations = ["top_right"]
-                enter_command = ["${pkgs.hyprland}/bin/hyprctl", "dispatch", "workspace", "empty"]
+                enter_command = ["${pkgs.hypr-show-desktop}/bin/hypr-show-desktop"]
                 size = 10
                 timeout_ms = 250
             '';

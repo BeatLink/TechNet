@@ -56,8 +56,9 @@
                     "$mod SHIFT, Tab, workspace, e-1"
 
                     # Window switcher, replaces the KDE hot corner / present windows workflow. Rofi's window mode
-                    # sorts by most recently used, unlike KDE's Present Windows effect.
-                    "$mod, grave, exec, ${pkgs.rofi}/bin/rofi -show window"
+                    # sorts by most recently used, unlike KDE's Present Windows effect. The cross workspace
+                    # overview is bound to $mod+grave in ./overview.nix.
+                    "$mod, W, exec, ${pkgs.rofi}/bin/rofi -show window"
                 ];
 
                 # Repeatable binds for hardware keys
