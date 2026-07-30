@@ -25,9 +25,6 @@
         # Sets the hostName
         hostName = "Ragnarok";
 
-        # Sets the Host ID for ZFS
-        hostId = "bed2ee51";
-
         # Sets up DNS. The server's Pi-Hole is the main DNS with Google and Cloudfare as backup
         nameservers = [
             "10.100.100.1"

@@ -10,6 +10,10 @@
 #
 
 {
+    # ZFS requires a unique host ID to record pool ownership; it lives here
+    # rather than with the network config because it is a filesystem concern.
+    networking.hostId = "e5aa3553";
+
     disko.devices.disk.root-drive.device = "/dev/disk/by-id/ata-Dogfish_SSD_64GB_5E56255506071556041";
     technet.dataDrive.enable = true;
     # Optimizations for slower hard disk drives

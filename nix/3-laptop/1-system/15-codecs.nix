@@ -1,14 +1,6 @@
-{ pkgs, ... }:
 {
-    environment.systemPackages = with pkgs; [
-        gst_all_1.gst-plugins-good
-        gst_all_1.gst-plugins-bad
-        gst_all_1.gst-plugins-ugly
-        gst_all_1.gst-libav
-        ffmpegthumbnailer # Core video thumbnailer
-        ffmpeg # Needed to decode most video formats
-        ffmpeg-full
-    ];
+    technet.codecs.enable = true;
+
     home-manager.users.beatlink = {
         home = {
             persistence = {

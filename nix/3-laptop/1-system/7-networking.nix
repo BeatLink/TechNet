@@ -49,6 +49,5 @@
 
     networking = {
         hostName = "Odin"; # Sets hostname
-        hostId = "ee42298c";
     };
 }

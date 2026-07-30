@@ -10,5 +10,9 @@
 # 
 
 {
+    # ZFS requires a unique host ID to record pool ownership; it lives here
+    # rather than with the network config because it is a filesystem concern.
+    networking.hostId = "ee42298c";
+
     disko.devices.disk.root-drive.device = "/dev/disk/by-id/nvme-WDC_PC_SN530_SDBPMPZ-256G-1101_22215C456623";
 }

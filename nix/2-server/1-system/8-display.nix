@@ -1,15 +1,7 @@
 { pkgs, ... }:
 {
-    # Needed for Webcam
-    environment.systemPackages = with pkgs; [
-        gst_all_1.gst-plugins-good
-        gst_all_1.gst-plugins-bad
-        gst_all_1.gst-plugins-ugly
-        gst_all_1.gst-libav
-        ffmpegthumbnailer # Core video thumbnailer
-        ffmpeg # Needed to decode most video formats
-        ffmpeg-full
-    ];
+    technet.codecs.enable = true; # Needed for Webcam
+
     hardware = {
         intel-gpu-tools.enable = true;
         graphics = {

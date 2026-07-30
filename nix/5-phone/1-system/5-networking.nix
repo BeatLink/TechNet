@@ -69,7 +69,6 @@ in
 
     networking = {
         hostName = "Thor"; # Sets the hostName
-        hostId = "aef23b78"; # Sets the Host ID for ZFS
 
         # FIXME : configure usb rndis through networkmanager in the future.
         # Currently this relies on stage-1 having configured it.
