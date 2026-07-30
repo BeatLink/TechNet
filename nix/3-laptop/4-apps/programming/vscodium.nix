@@ -20,6 +20,8 @@
                         enableExtensionUpdateCheck = true;
                         userSettings = {
                             "workbench.colorTheme" = "Light 2026";
+                            "files.autoSave" = "afterDelay";
+                            "files.autoSaveDelay" = 1000;
                             "workbench.tree.indent" = 20;
                             "files.exclude" = {
                                 "**/__pycache__" = true;
