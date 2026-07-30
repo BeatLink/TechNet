@@ -95,19 +95,14 @@
                 hashers = 1;
                 copiers = 1;
 
-                # Do not sync permission bits. Several of these folders contain
-                # files written by a service under its own account -- qbittorrent
-                # under Downloads, openbooks under eBooks -- and chmod is
-                # restricted to a file's owner, so being in the service's group
-                # is not enough. Syncthing would fail every such directory with
-                # "handling dir (setting permissions): chmod ...: operation not
-                # permitted" and stall the folder, even though it can create and
-                # delete the files perfectly well.
-                #
-                # Modes here are set by the writing service (qbittorrent's
-                # UMask=0002, the setgid dirs in tmpfiles) rather than by peers,
-                # which is what should own that decision on a multi-user host.
-                ignorePerms = true;
+                # Sync permission bits. This works because every writer into
+                # these trees runs as beatlink -- qbittorrent under Downloads and
+                # openbooks under eBooks are both configured with user/group
+                # beatlink -- so syncthing owns every file it needs to chmod.
+                # If a service is ever moved back to its own account, chmod is
+                # owner-restricted and that folder will stall with "handling dir
+                # (setting permissions): chmod ...: operation not permitted".
+                ignorePerms = false;
             } // folder) {
                 "/Storage/Files/Documents" = {
                     label = "Documents";

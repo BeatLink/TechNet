@@ -23,12 +23,19 @@ in
     sops.secrets.qbittorrent_jackett_api_key = {
         sopsFile = "${inputs.self}/secrets/2-server/qbittorrent.yaml";
         key = "jackett_api_key";
-        owner = "qbittorrent";
-        group = "qbittorrent";
+        owner = "beatlink";
+        group = "beatlink";
     };
 
     services.qbittorrent = {
         enable = true;
+        # Runs as beatlink so completed downloads land already owned by the
+        # account Syncthing runs as. Syncthing syncs permission bits on the
+        # Downloads folder (ignorePerms = false), and chmod is owner-restricted,
+        # so a separate qbittorrent account would stall that folder no matter
+        # what group memberships were arranged.
+        user = "beatlink";
+        group = "beatlink";
         profileDir = "/Storage/Services/Qbittorrent/profile";
         webuiPort = 9050;
         torrentingPort = 6881;
@@ -88,40 +95,34 @@ in
         port = 9050;
     };
 
-    # Lets Syncthing (which runs as beatlink) delete and re-version completed
-    # downloads, rather than only read them. Paired with UMask=0002 below:
-    # without the group membership the group-write bit would go unused, and
-    # without the umask the membership would not help on new files.
-    users.users.beatlink.extraGroups = [ "qbittorrent" ];
-
-    # Downloads completed before UMask=0002 are still mode 0755 and stay
-    # undeletable by Syncthing. Targeted at qbittorrent-owned paths only: a
-    # blanket rule over /Storage/Files/Downloads would rewrite metadata on all
-    # ~42k entries there, almost all of which are beatlink's and already fine.
-    # `X` (capital) adds +x to directories for traversal without making files
-    # executable.
-    system.activationScripts.qbittorrentDownloadsGroupWrite = ''
-        if [ -d /Storage/Files/Downloads ]; then
-            ${pkgs.findutils}/bin/find /Storage/Files/Downloads -user qbittorrent \
-                -exec ${pkgs.coreutils}/bin/chmod g+rwX {} + 2>/dev/null || true
-        fi
+    # Downloads and profile state created while qbittorrent ran under its own
+    # account are still owned by a uid that no longer has a name, which leaves
+    # Syncthing unable to chmod them now that it syncs permission bits. Targeted
+    # at those paths only: a blanket chown over /Storage/Files/Downloads would
+    # rewrite metadata on all ~42k entries there, almost all of which are
+    # beatlink's already.
+    system.activationScripts.qbittorrentChownToBeatlink = ''
+        for dir in /Storage/Files/Downloads /Storage/Services/Qbittorrent; do
+            if [ -d "$dir" ]; then
+                ${pkgs.findutils}/bin/find "$dir" \! -user beatlink \
+                    -exec ${pkgs.coreutils}/bin/chown beatlink:beatlink {} + 2>/dev/null || true
+            fi
+        done
     '';
 
     systemd.tmpfiles.rules = [
-        # Save and temp paths, group-writable with setgid so Syncthing (via the
-        # qbittorrent group) can delete what lands here and new subdirectories
-        # inherit the group. These already existed as qbittorrent:rtkit 0755,
-        # which left Syncthing unable to remove completed downloads.
-        "d /Storage/Files/Downloads/Torrents/Seeding 2775 qbittorrent qbittorrent - -"
-        "d /Storage/Files/Downloads/Torrents/Downloading 2775 qbittorrent qbittorrent - -"
+        # Save and temp paths. Owned by beatlink to match both the service and
+        # Syncthing; setgid keeps the group on anything created below them.
+        "d /Storage/Files/Downloads/Torrents/Seeding 2775 beatlink beatlink - -"
+        "d /Storage/Files/Downloads/Torrents/Downloading 2775 beatlink beatlink - -"
 
         # qBittorrent itself creates data/ and data/nova3/ (root-owned, via
         # tmpfiles running before this unit's first start) before our
         # ExecStartPre ever runs, so every level needs an explicit rule —
         # a rule for just the engines/ leaf leaves its unwritable parents.
-        "Z /Storage/Services/Qbittorrent/profile/data 0750 qbittorrent qbittorrent - -"
-        "Z /Storage/Services/Qbittorrent/profile/data/nova3 0750 qbittorrent qbittorrent - -"
-        "d /Storage/Services/Qbittorrent/profile/data/nova3/engines 0750 qbittorrent qbittorrent - -"
+        "Z /Storage/Services/Qbittorrent/profile/data 0750 beatlink beatlink - -"
+        "Z /Storage/Services/Qbittorrent/profile/data/nova3 0750 beatlink beatlink - -"
+        "d /Storage/Services/Qbittorrent/profile/data/nova3/engines 0750 beatlink beatlink - -"
     ];
 
     systemd.services.qbittorrent = {
@@ -130,15 +131,12 @@ in
         path = [ pkgs.python3 ];
 
         serviceConfig = {
-            # Completed downloads land in /Storage/Files/Downloads, which is a
-            # sendreceive Syncthing folder scanned as beatlink. The default 0022
-            # umask makes them qbittorrent:qbittorrent 0755 -- readable, but not
-            # writable by the group, so Syncthing could not remove a file when a
-            # peer deleted it ("trashcan versioner: archive: remove ...:
-            # permission denied") and the delete never propagated.
-            #
-            # 0002 keeps group write on new downloads; beatlink is added to the
-            # qbittorrent group below so Syncthing can act on them.
+            # Completed downloads land in /Storage/Files/Downloads, a
+            # sendreceive Syncthing folder that now syncs permission bits.
+            # Keeping group write on new downloads means the modes qbittorrent
+            # creates already match what the setgid directories above imply, so
+            # Syncthing propagates them out rather than immediately chmod-ing
+            # every finished file to add the bit.
             UMask = "0002";
 
             LoadCredential = "jackett_api_key:${config.sops.secrets.qbittorrent_jackett_api_key.path}";
