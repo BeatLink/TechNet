@@ -16,6 +16,13 @@
             enable = true; # Enables X11 Server
             displayManager.lightdm = {
                 enable = true; # Enables LightDM Login Manager
+                # Puts the graphical session on VT7 instead of VT1. NixOS defaults
+                # minimum-vt to 1, which lands X on the same VT as the first getty
+                # and makes Ctrl+Alt+F1..F6 unusable. This key is emitted after the
+                # module's own, so it wins.
+                extraConfig = ''
+                    minimum-vt = 7
+                '';
                 greeters.gtk = {
                     cursorTheme = {
                         name = "Bibata-Modern-Classic";
