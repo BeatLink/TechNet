@@ -5,7 +5,6 @@
 
 {
     boot = {
-        loader.efi.canTouchEfiVariables = false;                            # Leaves Tow-Boot alone
         initrd.kernelModules = [ "phy_rockchip_inno_hdmi" "rockchipdrm" ];   # PHY must load before rockchipdrm or HDMI probe defers and screen goes blank
         kernelParams =  [
             "console=ttyS2,115200n8"

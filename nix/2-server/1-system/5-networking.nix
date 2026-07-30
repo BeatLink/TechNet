@@ -49,7 +49,6 @@
 
     networking = {
         hostName = "Heimdall"; # Sets hostname
-        hostId = "e5aa3553";
         nameservers = [
             "10.100.100.1"
         ];
