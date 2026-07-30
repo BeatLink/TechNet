@@ -167,7 +167,20 @@ in
 
         datasets = lib.mkOption {
             type = lib.types.listOf lib.types.str;
-            description = "ZFS datasets unlocked via clevis at boot.";
+            default = [
+                "data-pool-${config.networking.hostName}/storage"
+                "root-pool-${config.networking.hostName}/root"
+            ];
+            defaultText = lib.literalExpression ''
+                [ "data-pool-\''${hostName}/storage" "root-pool-\''${hostName}/root" ]
+            '';
+            description = ''
+                ZFS datasets unlocked via clevis at boot.
+
+                The default is the standard TechNet layout laid down by
+                3-filesystem/1-disko.nix (the root pool) plus the host's data pool.
+                Override this on a host whose pools differ from that layout.
+            '';
         };
 
         stateDir = lib.mkOption {
