@@ -6,7 +6,7 @@
 {
     imports = [
         ./1-system
-        ./2-users
+        ./2-users.nix
         ./3-apps
     ];
 }

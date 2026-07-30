@@ -4,20 +4,19 @@
         ./2-boot.nix
         ./3-root-drive-disko.nix
         ./4-disko-data-drive.nix
-        ./6-sops.nix
-        ./7-software.nix
-        ./8-networking.nix
-        ./10-display.nix
-        ./11-sound.nix
-        ./12-bluetooth.nix
-        ./13-printing.nix
-        ./14-fuse.nix
-        ./15-home-folders.nix
-        ./18-tang.nix
-        ./19-codecs.nix
-        ./plymouth.nix
-        ./dconf
-        ./desktop-environment
-
+        ./5-sops.nix
+        ./6-software.nix
+        ./7-networking.nix
+        ./8-display.nix
+        ./9-sound.nix
+        ./10-bluetooth.nix
+        ./11-printing.nix
+        ./12-fuse.nix
+        ./13-home-folders.nix
+        ./14-tang.nix
+        ./15-codecs.nix
+        ./16-plymouth.nix
+        ./17-dconf
+        ./18-desktop-environment
     ];
 }

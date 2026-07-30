@@ -1,5 +1,0 @@
-{
-    imports = [
-        ./beatlink.nix
-    ];
-}
