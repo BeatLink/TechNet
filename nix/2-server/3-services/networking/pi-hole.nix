@@ -29,7 +29,7 @@
         pihole-web = {
             enable = true;
             hostName = "127.0.0.1";
-            ports = [ "9018" ];
+            ports = [ "127.0.0.1:9018" ];
         };
 
         # Pi-Hole --------------------------------------------------------------------------------------------------------------------------------
@@ -84,6 +84,8 @@
                 }
             ];
             settings = {
+                webserver.acl = "-0.0.0.0/0,+127.0.0.1/32";
+
                 dns = {
                     # Stop appending every DNS query to pihole.log. The file had
                     # reached 532MB, and it sits on the same HDD mirror

@@ -298,6 +298,8 @@
             }
         ];
     };
+    systemd.services.homepage-dashboard.environment.HOSTNAME = "127.0.0.1";
+
     nginx-vhosts.homepage = {
         domain = "homepage.heimdall.technet";
         port = 9610;
