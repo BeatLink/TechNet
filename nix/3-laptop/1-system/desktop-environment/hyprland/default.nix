@@ -190,5 +190,7 @@
         ./screenlock.nix
         ./wallpaper.nix
         ./screenshot.nix
+        ./overview.nix
+        ./hot-corners.nix
     ];
 }
