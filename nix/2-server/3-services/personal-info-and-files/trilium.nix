@@ -14,9 +14,18 @@
     services.trilium-server = {
         enable = true;
         instanceName = "Heimdall";
+        host = "127.0.0.1";
         port = 8080;
         dataDir = "/Storage/Services/Trilium/data";
     };
+
+    system.activationScripts.triliumStaleConfigIni = ''
+        cfg=/Storage/Services/Trilium/data/config.ini
+        if [ -f "$cfg" ] && [ ! -L "$cfg" ]; then
+            echo "trilium: replacing stale non-symlink $cfg (was shadowing the Nix-managed config)"
+            mv -f "$cfg" "$cfg.pre-nix-backup"
+        fi
+    '';
 
     nginx-vhosts.trilium = {
         domain = "trilium.heimdall.technet";
