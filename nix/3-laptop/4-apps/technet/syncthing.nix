@@ -35,15 +35,16 @@
                     devices = {
                         Heimdall = {
                             addresses = [
-                                "tcp://192.168.0.2:22000"
-                                "tcp://10.100.100.1:22000"
+                                "tcp://heimdall.lan:22000"
+                                "tcp://heimdall.technet:22000"
                             ];
                             id = "Q6AIAK4-4PFLB3Z-73QF54Y-EKQ2LC5-5FSVFRZ-RBGWFDI-KZQI45E-JBXXTQY";
                             numConnections = 8;
                         };
                         Thor = {
                             addresses = [
-                                "tcp://10.100.100.5:22000"
+                                "tcp://thorx.technet:22000"
+                                "tcp://thorx.lan:22000"
                             ];
                             id = "AGVZ3DQ-LX5CBXY-G6NKD4E-HOW7QNG-KAGSVOY-KRBUABG-BCDNEPU-SHJF4Q4";
                             numConnections = 8;
