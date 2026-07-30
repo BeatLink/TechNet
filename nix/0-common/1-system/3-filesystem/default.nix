@@ -23,5 +23,6 @@
         ./5-scrub.nix
         ./6-trim.nix
         ./7-cleanup.nix
+        ./8-data-drive.nix
     ];
 }
