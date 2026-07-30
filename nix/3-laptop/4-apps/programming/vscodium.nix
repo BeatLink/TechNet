@@ -1,17 +1,16 @@
+{ inputs, ... }:
 {
+    # home-manager.useGlobalPkgs is enabled in nix/0-common/2-users, so the extension overlay is applied to the
+    # system package set rather than a per-user one. allowUnfree is already set globally in
+    # nix/0-common/1-system/5-software/4-unfree-packages.nix, which covers the unfree extensions here.
+    nixpkgs.overlays = [ inputs.nix-vscode-extensions.overlays.default ];
+
     home-manager.users.beatlink =
         {
             pkgs,
-            lib,
-            inputs,
             ...
         }:
         {
-            nixpkgs = {
-                overlays = [ inputs.nix-vscode-extensions.overlays.default ];
-                config.allowUnfreePredicate = pkg: lib.hasPrefix "vscode-extension-" (lib.getName pkg);
-            };
-
             programs = {
                 claude-code.enable = true;
                 vscodium = {
