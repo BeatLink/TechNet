@@ -47,7 +47,7 @@ vhost; the "Port" column is the upstream/service port nginx proxies to.
 | Openbooks    | 9777 | openbooks.heimdall.technet |
 | qBittorrent (Web UI)   | 9050 | qbittorrent.heimdall.technet |
 | qBittorrent (torrents) | 6881 | TCP + UDP |
-| VLC (telnet)  | 4212 | Headless audio control |
+| VLC (telnet)  | 4212 | 127.0.0.1; headless audio control for Home Assistant |
 
 ## Personal Info & Files
 
