@@ -27,6 +27,17 @@ in
         group = "beatlink";
     };
 
+    # The WebUI password, as qBittorrent's own PBKDF2-HMAC-SHA512 digest
+    # (@ByteArray(<b64 salt>:<b64 key>), 100k iterations) rather than plaintext.
+    # It cannot go in serverConfig: the module renders that with
+    # pkgs.writeText, so anything there is world-readable in the Nix store.
+    sops.secrets.qbittorrent_webui_password_hash = {
+        sopsFile = "${inputs.self}/secrets/2-server/qbittorrent.yaml";
+        key = "webui_password_hash";
+        owner = "beatlink";
+        group = "beatlink";
+    };
+
     services.qbittorrent = {
         enable = true;
         # Runs as beatlink so completed downloads land already owned by the
@@ -139,7 +150,10 @@ in
             # every finished file to add the bit.
             UMask = "0002";
 
-            LoadCredential = "jackett_api_key:${config.sops.secrets.qbittorrent_jackett_api_key.path}";
+            LoadCredential = [
+                "jackett_api_key:${config.sops.secrets.qbittorrent_jackett_api_key.path}"
+                "webui_password_hash:${config.sops.secrets.qbittorrent_webui_password_hash.path}"
+            ];
 
             # Installs the pinned Jackett plugin script and a jackett.json
             # populated from the sops-managed API key. Runs as the service's
@@ -151,6 +165,32 @@ in
             # shell, so $(), quoting, and > redirection need an explicit `sh
             # -c` wrapper (writeShellScript) rather than a bare command string.
             ExecStartPre = [
+                # Runs after the module's own ExecStartPre, which reinstalls
+                # qBittorrent.conf from the store on every start -- so without
+                # this the password key would be wiped each restart and
+                # qBittorrent would print a new temporary password to the
+                # journal. Appends the key if absent, replaces it if present.
+                (pkgs.lib.getExe (pkgs.writeShellApplication {
+                    name = "qbittorrent-set-webui-password";
+                    runtimeInputs = [ pkgs.gawk pkgs.coreutils ];
+                    text = ''
+                        conf=/Storage/Services/Qbittorrent/profile/qBittorrent/config/qBittorrent.conf
+                        hash=$(cat "$CREDENTIALS_DIRECTORY/webui_password_hash")
+
+                        # Inserted directly under [Preferences] rather than
+                        # appended, so it lands in the right section even if a
+                        # later-sorting one is ever added to serverConfig. awk
+                        # rather than sed because the base64 hash contains / and
+                        # & , which sed's s/// would interpret.
+                        awk -v hash="$hash" '
+                            /^WebUI\\Password_PBKDF2=/ { next }
+                            { print }
+                            /^\[Preferences\]$/ { print "WebUI\\Password_PBKDF2=" hash }
+                        ' "$conf" > "$conf.new"
+                        mv -f "$conf.new" "$conf"
+                        chmod 600 "$conf"
+                    '';
+                }))
                 (pkgs.lib.getExe (pkgs.writeShellApplication {
                     name = "qbittorrent-install-jackett-plugin";
                     runtimeInputs = [ pkgs.coreutils ];
