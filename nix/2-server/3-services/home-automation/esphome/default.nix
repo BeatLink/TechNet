@@ -21,7 +21,6 @@
 #  stay mutable; only the config files themselves are Nix-owned.
 
 {
-    inputs,
     config,
     pkgs,
     lib,
@@ -42,7 +41,7 @@ let
     dotPrefix = lib.mapAttrs' (name: value: lib.nameValuePair ".${name}" value);
     configFiles = dotPrefix (esphomeLib.renderDir ./templates) // esphomeLib.renderDir ./devices;
 
-    deviceSecretsFile = "${inputs.self}/secrets/2-server/esphome-secrets.yaml";
+    deviceSecretsFile = "${config.technet.secrets.path}/esphome-secrets.yaml";
 
     # The `!secret` names the device configs refer to, read off the encrypted
     # file itself so adding a secret needs no change here. Only the top-level
@@ -67,7 +66,7 @@ in
     # Configure authentiation ------------------------------------------------------------------------------------------------------------------
     # The dashboard's own HTTP credentials, plus the per-device secrets below.
     sops.secrets = {
-        esphome_env.sopsFile = "${inputs.self}/secrets/2-server/esphome.yaml";
+        esphome_env.sopsFile = "${config.technet.secrets.path}/esphome.yaml";
     }
     // lib.genAttrs deviceSecretKeys (_: {
         sopsFile = deviceSecretsFile;

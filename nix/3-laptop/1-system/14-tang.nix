@@ -1,8 +1,8 @@
-{ inputs, ... }:
+{ config, ... }:
 {
     technet.tang.server = {
         enable = true;
-        sopsFile = "${inputs.self}/secrets/3-laptop/tang.yaml";
+        sopsFile = "${config.technet.secrets.path}/tang.yaml";
         screensaver = {
             dbusName = "org.cinnamon.ScreenSaver";
             objectPath = "/org/cinnamon/ScreenSaver";

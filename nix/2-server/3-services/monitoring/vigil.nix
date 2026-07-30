@@ -27,7 +27,7 @@
 # the host's backup rather than performing one under its own identity, and holds
 # no write credential to any backup repository.
 #
-{ inputs, config, ... }:
+{ config, inputs, ... }:
 {
     imports = [ inputs.vigil.nixosModules.default ];
 
@@ -35,7 +35,7 @@
     # into the monitored hosts. Owned by the `vigil` service user that runs the
     # daemon here; no other host needs a copy.
     sops.secrets.vigil_ssh_key = {
-        sopsFile = "${inputs.self}/secrets/2-server/vigil.yaml";
+        sopsFile = "${config.technet.secrets.path}/vigil.yaml";
         owner = "vigil";
     };
 
@@ -44,7 +44,7 @@
     # WireGuard mesh — auth is defense-in-depth against anyone else on that
     # mesh, not the internet at large.
     sops.secrets.vigil_dashboard_password = {
-        sopsFile = "${inputs.self}/secrets/2-server/vigil.yaml";
+        sopsFile = "${config.technet.secrets.path}/vigil.yaml";
         owner = "vigil";
     };
 
@@ -53,7 +53,7 @@
     # apparent IP on GET. Read by the "DDNS" monitor's ddns_updater plugin
     # (update_url_file) below. Replaces the standalone ddns-updater service.
     sops.secrets.freedns_update_url = {
-        sopsFile = "${inputs.self}/secrets/2-server/vigil.yaml";
+        sopsFile = "${config.technet.secrets.path}/vigil.yaml";
         owner = "vigil";
     };
 

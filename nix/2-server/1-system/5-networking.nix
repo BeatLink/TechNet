@@ -15,13 +15,12 @@
 
 {
     config,
-    inputs,
     ...
 }:
 {
     technet.initrdWireguard = {
         enable = true;
-        sopsFile = "${inputs.self}/secrets/2-server/wireguard.yaml";
+        sopsFile = "${config.technet.secrets.path}/wireguard.yaml";
         # Heimdall is the wireguard server, so peers dial in to it: what actually
         # has to work for remote access is the LAN. Probe the gateway, not a peer --
         # a peer may legitimately be down or still locked itself.

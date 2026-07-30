@@ -1,16 +1,16 @@
 { pkgs, inputs, config, ... }:
 {
     sops.secrets.mosquitto_vigil_password = {
-        sopsFile = "${inputs.self}/secrets/2-server/mosquitto.yaml";
+        sopsFile = "${config.technet.secrets.path}/mosquitto.yaml";
         owner = "vigil-access";
     };
 
     sops.secrets.mosquitto_homeassistant_password_hash = {
-        sopsFile = "${inputs.self}/secrets/2-server/mosquitto.yaml";
+        sopsFile = "${config.technet.secrets.path}/mosquitto.yaml";
         key = "homeassistant_password_hash";
     };
     sops.secrets.mosquitto_frigate_password_hash = {
-        sopsFile = "${inputs.self}/secrets/2-server/mosquitto.yaml";
+        sopsFile = "${config.technet.secrets.path}/mosquitto.yaml";
         key = "frigate_password_hash";
     };
 

@@ -6,12 +6,11 @@
 {
     pkgs,
     config,
-    inputs,
     ...
 }:
 {
-    sops.secrets.borg_repo_encryption_key.sopsFile = "${inputs.self}/secrets/3-laptop/borgmatic.yaml";
-    sops.secrets.borg_repo_ssh_key.sopsFile = "${inputs.self}/secrets/3-laptop/borgmatic.yaml";
+    sops.secrets.borg_repo_encryption_key.sopsFile = "${config.technet.secrets.path}/borgmatic.yaml";
+    sops.secrets.borg_repo_ssh_key.sopsFile = "${config.technet.secrets.path}/borgmatic.yaml";
     services.borgmatic = {
         enable = true;
         settings = {

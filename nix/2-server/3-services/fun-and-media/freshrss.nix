@@ -1,5 +1,4 @@
 {
-    inputs,
     config,
     ...
 }:
@@ -12,7 +11,7 @@
     #           ),
 
     sops.secrets.freshrss_password = {
-        sopsFile = "${inputs.self}/secrets/2-server/freshrss.yaml";
+        sopsFile = "${config.technet.secrets.path}/freshrss.yaml";
         owner = "freshrss";
         group = "freshrss";
     };
@@ -24,7 +23,7 @@
     # stored here to match, the same one-time-manual-step pattern as
     # Traccar's vigil account (see traccar.nix).
     sops.secrets.freshrss_api_password = {
-        sopsFile = "${inputs.self}/secrets/2-server/freshrss.yaml";
+        sopsFile = "${config.technet.secrets.path}/freshrss.yaml";
         owner = "vigil-access";
     };
 

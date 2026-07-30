@@ -28,7 +28,7 @@ creation_rules:
           - age:
                 - *user_beatlink
                 - *host_odin
-    - path_regex: secrets/4-phone/.*
+    - path_regex: secrets/5-phone/.*
       key_groups:
           - age:
                 - *user_beatlink
