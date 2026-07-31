@@ -17,6 +17,7 @@
 
 {
     imports = [
+        ./theme.nix
         ./hyprland
         ./cinnamon
     ];

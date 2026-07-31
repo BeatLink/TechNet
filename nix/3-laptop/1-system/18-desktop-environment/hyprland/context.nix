@@ -22,8 +22,31 @@
 #   toggle-rail         collapse or expand the sidebar
 #
 
-{ ... }:
+{ config, ... }:
+let
+    palette = config.technet.theme.palette;
+in
 {
+    # Context loads $XDG_CONFIG_HOME/context/style.css over its built-in stylesheet — the same contract
+    # as waybar's style.css — so its look is declared here from the same palette as the rest of the
+    # session. Only the accent-derived colours need spelling out; the translucent overlays Context uses
+    # for cards and controls read correctly on any dark surface and are left to its defaults.
+    home-manager.users.beatlink = {
+        xdg.configFile."context/style.css".text = ''
+            @define-color ctx_accent #${palette.accent};
+            @define-color ctx_surface #${palette.surface};
+            @define-color ctx_on_surface #${palette.text};
+            @define-color ctx_slot_fill #${palette.accent}52;
+            @define-color ctx_slot_fill_active #${palette.accent}80;
+            @define-color ctx_slot_border #${palette.accent}b3;
+            @define-color ctx_tile_selected #${palette.accent}38;
+            @define-color ctx_drop_target #${palette.accent}24;
+            @define-color ctx_leaving_border #${palette.accent};
+            @define-color ctx_rail_open #${palette.accent}33;
+            @define-color ctx_rail_active #${palette.accent}59;
+        '';
+    };
+
     nixpkgs.overlays = [
         (final: prev: {
             context-launcher = final.writeShellApplication {

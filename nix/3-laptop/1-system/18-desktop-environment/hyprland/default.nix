@@ -12,7 +12,10 @@
 # workspace with floating windows, while this configuration uses five workspaces with dwindle tiling.
 #
 
-{ pkgs, ... }:
+{ config, pkgs, ... }:
+let
+    palette = config.technet.theme.palette;
+in
 {
     programs.hyprland = {
         enable = true; # Enables Hyprland and its NixOS session/portal wiring
@@ -101,8 +104,8 @@
                         gaps_in = 4;
                         gaps_out = 8;
                         border_size = 2;
-                        "col.active_border" = "rgba(5ac0c0ee)"; # Mint-Y-Aqua accent, matches the Cinnamon theme
-                        "col.inactive_border" = "rgba(444444aa)";
+                        "col.active_border" = "rgba(${palette.accent}ee)"; # The chosen look's accent (technet.theme)
+                        "col.inactive_border" = "rgba(${palette.border}aa)";
                         # Cinnamon's muffin draggable-border-width is 10, which covers the whole frame edge. The
                         # closest Hyprland equivalent is extending the resize region beyond the visible border.
                         resize_on_border = true;
@@ -209,17 +212,18 @@
                 };
             };
 
-            # Mirrors the Cinnamon appearance settings from dconf so GTK applications look identical under
-            # Hyprland, which has no settings daemon of its own to apply them.
+            # GTK applications follow the chosen look (technet.theme). Hyprland has no settings daemon of
+            # its own to apply a theme, so home-manager writes the settings files directly. Cinnamon is
+            # unaffected: its xsettings daemon applies the dconf theme over these files.
             gtk = {
                 enable = true;
                 theme = {
-                    name = "Mint-Y-Dark-Aqua"; # org/cinnamon/theme name
-                    package = pkgs.mint-themes;
+                    name = palette.gtk.name;
+                    package = palette.gtk.package;
                 };
                 iconTheme = {
-                    name = "Mint-Y-Aqua"; # desktop/interface icon-theme
-                    package = pkgs.mint-y-icons;
+                    name = palette.icons.name;
+                    package = palette.icons.package;
                 };
                 font = {
                     name = "Noto Sans"; # desktop/interface font-name='Noto Sans 12'

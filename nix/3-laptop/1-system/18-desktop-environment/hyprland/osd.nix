@@ -19,7 +19,10 @@
 # OSD, so they are overridden below to go through swayosd-client instead.
 #
 
-{ pkgs, ... }:
+{ config, pkgs, ... }:
+let
+    palette = config.technet.theme.palette;
+in
 {
     # Ships the libinput backend unit, the D-Bus policy and the backlight udev rules
     systemd.packages = [ pkgs.swayosd ];
@@ -63,14 +66,14 @@
                 }
                 window#osd image,
                 window#osd label {
-                    color: #ffffff;
+                    color: #${palette.text};
                 }
                 window#osd progressbar:disabled,
                 window#osd image:disabled {
                     opacity: 0.5;
                 }
                 window#osd progress {
-                    background: #5ac0c0;
+                    background: #${palette.accent};
                     border-radius: 4px;
                 }
                 window#osd trough {
