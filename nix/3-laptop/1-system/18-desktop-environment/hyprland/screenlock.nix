@@ -17,7 +17,10 @@
 # here. The battery timeouts are handled by logind and the power management configuration instead.
 #
 
-{ pkgs, ... }:
+{ config, pkgs, ... }:
+let
+    palette = config.technet.theme.palette;
+in
 {
     home-manager.users.beatlink =
         { pkgs, ... }:
@@ -43,9 +46,9 @@
                             halign = "center";
                             valign = "center";
                             outline_thickness = 2;
-                            outer_color = "rgb(5ac0c0)"; # Mint-Y-Aqua accent
-                            inner_color = "rgb(1e1e1e)";
-                            font_color = "rgb(ffffff)";
+                            outer_color = "rgb(${palette.accent})"; # The chosen look's accent (technet.theme)
+                            inner_color = "rgb(${palette.surface})";
+                            font_color = "rgb(${palette.text})";
                             placeholder_text = "Password";
                             fade_on_empty = false;
                         }
@@ -57,7 +60,7 @@
                             text = ''cmd[update:1000] date +"%I:%M:%S %p"'';
                             font_size = 64;
                             font_family = "Noto Sans";
-                            color = "rgb(ffffff)";
+                            color = "rgb(${palette.text})";
                             position = "0, 80";
                             halign = "center";
                             valign = "center";
@@ -66,7 +69,7 @@
                             text = ''cmd[update:60000] date +"%A, %B %e %Y"'';
                             font_size = 24;
                             font_family = "Noto Sans";
-                            color = "rgb(ffffff)";
+                            color = "rgb(${palette.text})";
                             position = "0, 20";
                             halign = "center";
                             valign = "center";

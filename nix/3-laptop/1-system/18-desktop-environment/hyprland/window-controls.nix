@@ -14,7 +14,10 @@
 # whole workspace, so the session can be used either way.
 #
 
-{ pkgs, ... }:
+{ config, pkgs, ... }:
+let
+    palette = config.technet.theme.palette;
+in
 {
     home-manager.users.beatlink =
         { pkgs, ... }:
@@ -27,8 +30,8 @@
                     # Colours follow the Mint-Y-Dark-Aqua theme used elsewhere in this config.
                     plugin.hyprbars = {
                         bar_height = 28;
-                        bar_color = "rgb(1e1e1e)";
-                        "col.text" = "rgb(ffffff)";
+                        bar_color = "rgb(${palette.surface})";
+                        "col.text" = "rgb(${palette.text})";
                         bar_text_size = 11;
                         bar_text_font = "Noto Sans";
                         bar_part_of_window = true; # Titlebar sits inside the window border, as in Cinnamon
@@ -40,8 +43,8 @@
                         # target, so every newly launched window landed there instead of the workspace
                         # that was focused. A context is the place windows belong to now.
                         hyprbars-button = [
-                            "rgb(e06c75), 14, , hyprctl dispatch killactive"
-                            "rgb(e5c07b), 14, , hyprctl dispatch fullscreen 1"
+                            "rgb(${palette.red}), 14, , hyprctl dispatch killactive"
+                            "rgb(${palette.yellow}), 14, , hyprctl dispatch fullscreen 1"
                         ];
                     };
 

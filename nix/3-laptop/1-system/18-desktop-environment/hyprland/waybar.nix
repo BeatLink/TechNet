@@ -14,7 +14,10 @@
 # module written against their APIs.
 #
 
-{ pkgs, ... }:
+{ config, pkgs, ... }:
+let
+    palette = config.technet.theme.palette;
+in
 {
     home-manager.users.beatlink =
         { pkgs, ... }:
@@ -167,17 +170,17 @@
                     };
                 };
 
-                # Colours follow the Mint-Y-Dark-Aqua theme from the Cinnamon config, with the #5ac0c0 aqua
-                # accent. The transparent-panels@germanfr extension is set to semi-transparent, so the panel
-                # backgrounds are translucent here too.
+                # Colours come from the chosen look (technet.theme). The transparent-panels@germanfr
+                # extension is set to semi-transparent under Cinnamon, so the panel backgrounds are
+                # translucent here too — the surface colour with an alpha suffix.
                 style = ''
                     * {
                         font-family: "Noto Sans", sans-serif;
                         font-size: 12px;
                     }
                     window#waybar {
-                        background: rgba(30, 30, 30, 0.75);
-                        color: #ffffff;
+                        background: #${palette.surface}c0;
+                        color: #${palette.text};
                     }
                     /* Buttons do not inherit the window colour: GTK styles them from the theme, which is
                        Mint-Y-Dark's near black text and left the taskbar unreadable on the dark bar. Every
@@ -195,23 +198,23 @@
                     #tray,
                     #idle_inhibitor,
                     #submap {
-                        color: #ffffff;
+                        color: #${palette.text};
                         background: transparent;
                     }
                     #taskbar button.active {
-                        border-bottom: 2px solid #5ac0c0;
-                        background: rgba(90, 192, 192, 0.15);
+                        border-bottom: 2px solid #${palette.accent};
+                        background: #${palette.accent}26;
                     }
                     #workspaces button.active {
-                        background: #5ac0c0;
-                        color: #1e1e1e;
+                        background: #${palette.accent};
+                        color: #${palette.surface};
                         border-radius: 6px;
                     }
                     #battery.critical {
-                        color: #ff5555;
+                        color: #${palette.red};
                     }
                     #idle_inhibitor.activated {
-                        color: #5ac0c0;
+                        color: #${palette.accent};
                     }
                 '';
             };
