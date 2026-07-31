@@ -34,13 +34,14 @@
                         bar_part_of_window = true; # Titlebar sits inside the window border, as in Cinnamon
                         bar_precedence_over_border = true;
 
-                        # Buttons are declared right to left, matching Cinnamon's close/maximize/minimize
-                        # order in the top right of the titlebar. Hyprland has no minimise concept, so that
-                        # button sends the window to a special workspace, which is the closest equivalent.
+                        # Close and maximise only. There is deliberately no minimise: Hyprland has no
+                        # such concept, and parking windows in a special workspace turned out to be a
+                        # black hole — while that workspace is open Hyprland treats it as the active
+                        # target, so every newly launched window landed there instead of the workspace
+                        # that was focused. A context is the place windows belong to now.
                         hyprbars-button = [
                             "rgb(e06c75), 14, , hyprctl dispatch killactive"
                             "rgb(e5c07b), 14, , hyprctl dispatch fullscreen 1"
-                            "rgb(98c379), 14, , hyprctl dispatch movetoworkspacesilent special:minimised"
                         ];
                     };
 
@@ -49,13 +50,10 @@
                     # draw their own titlebar (Firefox, VSCodium, Electron) therefore show two. Turning off
                     # their client side decorations is the only fix, and is per application.
 
-                    # No workspace-wide stacking toggle. Floating every window at once fights the dwindle
-                    # layout and leaves windows overlapping wherever they happened to be; Context places
-                    # windows deliberately instead. $mod+T in hotkeys.nix still floats a single window when
-                    # one genuinely needs it.
-                    bind = [
-                        "$mod, M, togglespecialworkspace, minimised"
-                    ];
+                    # No workspace-wide stacking toggle, and no minimise. Floating everything at once
+                    # fights the dwindle layout, and minimising hid windows somewhere the user could not
+                    # see. Context places windows deliberately instead; $mod+T in hotkeys.nix still
+                    # floats a single window when one genuinely needs it.
                 };
             };
         };
