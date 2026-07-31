@@ -32,6 +32,12 @@
                     "$mod, E, exec, $fileManager"
                     ", XF86Explorer, exec, $fileManager"
                     "$mod, Space, exec, $menu"
+                    # Context launcher. Run from its dev checkout rather than a package, as it is not
+                    # packaged yet; nix develop supplies pygobject and the layer-shell library it needs.
+                    "$mod, C, exec, ${pkgs.writeShellScript "context-launcher" ''
+                        cd /Storage/Files/Projects/Coding/Context || exit 1
+                        exec ${pkgs.nix}/bin/nix develop --command python3 -m context
+                    ''}"
                     "ALT, F2, exec, ${pkgs.rofi}/bin/rofi -show run" # Cinnamon panel-run-dialog
                     "$mod, V, exec, ${pkgs.cliphist}/bin/cliphist list | ${pkgs.rofi}/bin/rofi -dmenu | ${pkgs.cliphist}/bin/cliphist decode | ${pkgs.wl-clipboard}/bin/wl-copy"
 
