@@ -13,6 +13,11 @@
 
 { config, lib, pkgs, ... }:
 let
+    # GTK3 consumers (waybar) reject 8-digit hex, so translucency there needs rgba() with decimal
+    # channels. Every colour is therefore also published as an "r, g, b" triplet under palette.rgb.
+    hexToDec = h: (builtins.fromTOML "v = 0x${h}").v;
+    rgbOf = hex: lib.concatStringsSep ", " (map (i: toString (hexToDec (builtins.substring i 2 hex))) [ 0 2 4 ]);
+
     looks = {
         # Arc — the flat blue-grey look Budgie/Solus shipped by default. Assembled from the canonical
         # Arc-Dark palette; the GTK side is the maintained jnsh fork of arc-theme, with Papirus icons,
@@ -88,5 +93,12 @@ in
         };
     };
 
-    config.technet.theme.palette = looks.${config.technet.theme.look};
+    config.technet.theme.palette =
+        let
+            chosen = looks.${config.technet.theme.look};
+            colours = lib.filterAttrs (
+                _: v: builtins.isString v && builtins.match "[0-9a-f]{6}" v != null
+            ) chosen;
+        in
+        chosen // { rgb = lib.mapAttrs (_: rgbOf) colours; };
 }

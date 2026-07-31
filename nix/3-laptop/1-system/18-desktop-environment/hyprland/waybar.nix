@@ -172,14 +172,16 @@ in
 
                 # Colours come from the chosen look (technet.theme). The transparent-panels@germanfr
                 # extension is set to semi-transparent under Cinnamon, so the panel backgrounds are
-                # translucent here too — the surface colour with an alpha suffix.
+                # translucent here too. Translucency uses rgba() with palette.rgb triplets: waybar is
+                # GTK3, which rejects 8-digit hex — a bar that fails to parse its CSS exits rather
+                # than drawing unstyled, so the whole bar disappears.
                 style = ''
                     * {
                         font-family: "Noto Sans", sans-serif;
                         font-size: 12px;
                     }
                     window#waybar {
-                        background: #${palette.surface}c0;
+                        background: rgba(${palette.rgb.surface}, 0.75);
                         color: #${palette.text};
                     }
                     /* Buttons do not inherit the window colour: GTK styles them from the theme, which is
@@ -203,7 +205,7 @@ in
                     }
                     #taskbar button.active {
                         border-bottom: 2px solid #${palette.accent};
-                        background: #${palette.accent}26;
+                        background: rgba(${palette.rgb.accent}, 0.15);
                     }
                     #workspaces button.active {
                         background: #${palette.accent};
