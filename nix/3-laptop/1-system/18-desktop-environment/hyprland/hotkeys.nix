@@ -112,13 +112,19 @@
                     "CTRL ALT, right, workspace, e+1"
                     "CTRL SHIFT ALT, left, movetoworkspace, e-1"
                     "CTRL SHIFT ALT, right, movetoworkspace, e+1"
-                    "$mod, Tab, workspace, e+1"
-                    "$mod SHIFT, Tab, workspace, e-1"
 
-                    # Window switcher, the closest equivalent to Cinnamon's alttab-switcher with previews. Rofi's
-                    # window mode sorts by most recently used. The cross workspace overview is bound to
-                    # $mod+grave in ./overview.nix.
-                    "$mod, W, exec, ${pkgs.rofi}/bin/rofi -show window"
+                    # Context switching. Super+Tab picks a context by name; Super+Grave returns to the last
+                    # one, the way Alt+Tab returns to the last window.
+                    "$mod, Tab, exec, $context switch"
+                    "$mod SHIFT, grave, exec, $context previous"
+                    "$mod, comma, exec, $context settings"
+                    "$mod, R, exec, $context toggle-rail"
+
+                    # Window switching through Context, which lists windows with the context they belong to.
+                    # Sorted most recently focused first, the same order rofi's window mode used. The cross
+                    # context picker is bound to $mod+grave in ./overview.nix.
+                    "$mod, W, exec, $context switch-window"
+                    "$mod SHIFT, W, exec, $context switch-window-all"
                 ];
 
                 # The volume, microphone and brightness keys are bound in ./osd.nix rather than here, as they

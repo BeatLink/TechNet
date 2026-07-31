@@ -41,8 +41,8 @@
                     # The native workspace gesture follows the fingers and picks a direction from the swipe, so
                     # one entry per axis covers both left and right.
                     "4, horizontal, workspace"
-                    "4, up, dispatcher, exec, ${pkgs.hypr-overview}/bin/hypr-overview"
-                    "4, down, dispatcher, exec, ${pkgs.hypr-overview}/bin/hypr-overview"
+                    "4, up, dispatcher, exec, ${pkgs.context-launcher}/bin/context-launcher switch-window-all"
+                    "4, down, dispatcher, exec, ${pkgs.context-launcher}/bin/context-launcher switch-window-all"
                 ];
 
                 # Cinnamon's swipe-percent-threshold of 60 is a proportion of the touchpad, Hyprland takes a

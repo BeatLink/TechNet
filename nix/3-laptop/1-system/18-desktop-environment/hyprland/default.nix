@@ -75,17 +75,10 @@
                     "$mod" = "SUPER";
                     "$terminal" = "${pkgs.tilix}/bin/tilix"; # Matches desktop/applications/terminal from dconf
                     "$fileManager" = "${pkgs.nemo}/bin/nemo";
-                    # Application launching is Context's job now, so there is no separate menu. The
-                    # rofi package is still pulled in by ./overview.nix and ./hot-corners.nix, which use
-                    # it as a window switcher — that moves into Context too once it has one.
-                    #
-                    # Run from the dev checkout rather than a package, as it is not packaged yet; nix
-                    # develop supplies pygobject and the layer-shell library it needs. Context is single
-                    # instance, so a second invocation raises the running one rather than starting another.
-                    "$context" = "${pkgs.writeShellScript "context-launcher" ''
-                        cd /Storage/Files/Projects/Coding/Context || exit 1
-                        exec ${pkgs.nix}/bin/nix develop --command python3 -m context
-                    ''}";
+                    # Application launching and window switching are both Context's job now. The
+                    # package is defined by the overlay in ./context.nix so that the keybinds here,
+                    # the hot corners and the gestures all refer to the same store path.
+                    "$context" = "${pkgs.context-launcher}/bin/context-launcher";
 
                     # hyprpaper, swaync and hypridle are each started by their own home-manager systemd user
                     # service. Listing them here as well launched a second copy that raced the service: swaync
@@ -243,6 +236,7 @@
 
     imports = [
         # Import Other Modules
+        ./context.nix
         ./hotkeys.nix
         ./window-controls.nix
         ./edge-snap.nix
