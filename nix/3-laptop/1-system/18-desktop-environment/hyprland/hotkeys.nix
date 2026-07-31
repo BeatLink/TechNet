@@ -120,6 +120,19 @@
                     "$mod, comma, exec, $context settings"
                     "$mod, R, exec, $context toggle-rail"
 
+                    # Super+Shift+S, +P and +A are screenshots, bound in ./screenshot.nix.
+                    #
+                    # Window management through Context, so a window's context follows it. Hyprland's own
+                    # equivalents act on the compositor alone and leave the context's idea of what it owns
+                    # behind; these keep the two in step.
+                    "$mod SHIFT, M, exec, $context move-window" # Send this window to another context
+                    "$mod SHIFT, O, exec, $context adopt" # Give loose windows a home (Orphans)
+                    "$mod SHIFT, C, exec, $context capture" # Capture what this context has become
+                    "$mod CTRL, left, exec, $context window-left" # Throw the window to the previous screen
+                    "$mod CTRL, right, exec, $context window-right" # ...and the next
+                    "$mod, G, exec, $context group" # Fold this window into a tabbed group
+                    "$mod SHIFT, G, exec, $context ungroup"
+
                     # Window switching through Context, which lists windows with the context they belong to.
                     # Sorted most recently focused first, the same order rofi's window mode used. The cross
                     # context picker is bound to $mod+grave in ./overview.nix.
