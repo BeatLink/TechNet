@@ -1,7 +1,7 @@
 # Hyprland Keybindings
 #
 # Keybinds are split out from the main config so they can be edited without touching the compositor settings.
-# The $mod, $terminal, $fileManager and $menu variables are defined in ./default.nix.
+# The $mod, $terminal, $fileManager and $context variables are defined in ./default.nix.
 #
 # These mirror the Cinnamon keybindings from dconf (org/cinnamon/desktop/keybindings) so muscle memory carries
 # over. Bindings that have no Hyprland equivalent are noted where they are omitted.
@@ -21,7 +21,8 @@
             wayland.windowManager.hyprland.settings = {
                 # Cinnamon opens its menu on Super alone. Hyprland can only bind a bare modifier on release,
                 # via bindr, so that it does not fire while Super is held as part of another shortcut.
-                bindr = [ "SUPER, SUPER_L, exec, $menu" ];
+                # This raises Context, which is the launcher now.
+                bindr = [ "SUPER, SUPER_L, exec, $context" ];
 
                 bind = [
                     # Applications
@@ -31,13 +32,8 @@
                     "$mod, Return, exec, $terminal"
                     "$mod, E, exec, $fileManager"
                     ", XF86Explorer, exec, $fileManager"
-                    "$mod, Space, exec, $menu"
-                    # Context launcher. Run from its dev checkout rather than a package, as it is not
-                    # packaged yet; nix develop supplies pygobject and the layer-shell library it needs.
-                    "$mod, C, exec, ${pkgs.writeShellScript "context-launcher" ''
-                        cd /Storage/Files/Projects/Coding/Context || exit 1
-                        exec ${pkgs.nix}/bin/nix develop --command python3 -m context
-                    ''}"
+                    "$mod, Space, exec, $context"
+                    "$mod, C, exec, $context"
                     "ALT, F2, exec, ${pkgs.rofi}/bin/rofi -show run" # Cinnamon panel-run-dialog
                     "$mod, V, exec, ${pkgs.cliphist}/bin/cliphist list | ${pkgs.rofi}/bin/rofi -dmenu | ${pkgs.cliphist}/bin/cliphist decode | ${pkgs.wl-clipboard}/bin/wl-copy"
 
