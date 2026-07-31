@@ -21,7 +21,10 @@
         {
             programs.waybar = {
                 enable = true;
-                systemd.enable = false; # Started via exec-once so it restarts with the compositor
+                # Run as a systemd user service rather than exec-once. UWSM binds the graphical session to
+                # systemd, so the service starts and restarts with the session; the exec-once copy did not
+                # come up at all on first login.
+                systemd.enable = true;
                 settings = {
                     # Top panel, mirroring panel1 from the Cinnamon config
                     topBar = {
@@ -190,10 +193,8 @@
                 '';
             };
 
-            # Both bars are launched together so they restart with the compositor
-            wayland.windowManager.hyprland.settings.exec-once = [
-                "${pkgs.waybar}/bin/waybar"
-            ];
+            # Both bars come from the single waybar systemd user service enabled above, so nothing is
+            # started from exec-once here. Launching it both ways ran two copies of every bar.
 
             home.packages = with pkgs; [
                 pavucontrol
