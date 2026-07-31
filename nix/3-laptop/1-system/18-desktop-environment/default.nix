@@ -17,8 +17,7 @@
 
 {
     imports = [
-        #./kde
-        #./hyprland
+        ./hyprland
         ./cinnamon
     ];
 }
