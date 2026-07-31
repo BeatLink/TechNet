@@ -50,7 +50,10 @@
                         # Stands in for the Cinnamon menu applet, opening the rofi launcher
                         "custom/menu" = {
                             format = "Apps";
-                            on-click = "${pkgs.rofi}/bin/rofi -show drun";
+                            on-click =
+                                "${pkgs.nwg-menu}/bin/nwg-menu -wm hyprland -va bottom -ha left -k -d "
+                                + "-term ${pkgs.tilix}/bin/tilix -fm ${pkgs.nemo}/bin/nemo "
+                                + "-cmd-lock '${pkgs.hyprlock}/bin/hyprlock' -cmd-logout 'hyprctl dispatch exit'";
                             tooltip = false;
                         };
 
@@ -176,13 +179,33 @@
                         background: rgba(30, 30, 30, 0.75);
                         color: #ffffff;
                     }
+                    /* Buttons do not inherit the window colour: GTK styles them from the theme, which is
+                       Mint-Y-Dark's near black text and left the taskbar unreadable on the dark bar. Every
+                       module that renders as a button therefore sets its own foreground. */
+                    #taskbar button,
+                    #workspaces button,
+                    #custom-menu,
+                    #custom-weather,
+                    #clock,
+                    #pulseaudio,
+                    #network,
+                    #bluetooth,
+                    #battery,
+                    #backlight,
+                    #tray,
+                    #idle_inhibitor,
+                    #submap {
+                        color: #ffffff;
+                        background: transparent;
+                    }
+                    #taskbar button.active {
+                        border-bottom: 2px solid #5ac0c0;
+                        background: rgba(90, 192, 192, 0.15);
+                    }
                     #workspaces button.active {
                         background: #5ac0c0;
                         color: #1e1e1e;
                         border-radius: 6px;
-                    }
-                    #taskbar button.active {
-                        border-bottom: 2px solid #5ac0c0;
                     }
                     #battery.critical {
                         color: #ff5555;
