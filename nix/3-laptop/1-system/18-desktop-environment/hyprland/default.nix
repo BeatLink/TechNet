@@ -75,7 +75,15 @@
                     "$mod" = "SUPER";
                     "$terminal" = "${pkgs.tilix}/bin/tilix"; # Matches desktop/applications/terminal from dconf
                     "$fileManager" = "${pkgs.nemo}/bin/nemo";
-                    "$menu" = "${pkgs.rofi}/bin/rofi -show drun";
+                    # nwg-menu rather than rofi, as it is a categorised menu like Cinnamon's rather than a
+                    # flat search list. Anchored top right, with larger icons and hover-to-open submenus.
+                    # -k closes it on click-away; -d (close on pointer-leave) is deliberately not set, as it
+                    # dismisses the menu too eagerly when reaching for a category.
+                    # Rofi is still bound to ALT+F2 and $mod+W for keyboard search.
+                    "$menu" = "${pkgs.nwg-menu}/bin/nwg-menu -wm hyprland -va top -ha left -k -t "
+                        + "-isl 48 -iss 24 -padding 6 -mt 8 -ml 8 "
+                        + "-term ${pkgs.tilix}/bin/tilix -fm ${pkgs.nemo}/bin/nemo "
+                        + "-cmd-lock '${pkgs.hyprlock}/bin/hyprlock' -cmd-logout 'hyprctl dispatch exit'";
 
                     # hyprpaper, swaync and hypridle are each started by their own home-manager systemd user
                     # service. Listing them here as well launched a second copy that raced the service: swaync
@@ -144,7 +152,9 @@
                         numlock_by_default = false; # desktop/peripherals/keyboard numlock-state=false
                         accel_profile = "adaptive"; # desktop/peripherals/mouse accel-profile='default'
                         touchpad = {
-                            natural_scroll = false; # Cinnamon does not set natural scrolling
+                            # desktop/peripherals/touchpad natural-scroll=true. The mouse is left inverted to
+                            # match desktop/peripherals/mouse natural-scroll=false.
+                            natural_scroll = true;
                             tap-to-click = true; # desktop/peripherals/touchpad tap-to-click=true
                             disable_while_typing = true; # desktop/peripherals/touchpad disable-while-typing=true
                             clickfinger_behavior = true; # desktop/peripherals/touchpad click-method='fingers'
@@ -232,6 +242,8 @@
     imports = [
         # Import Other Modules
         ./hotkeys.nix
+        ./window-controls.nix
+        ./edge-snap.nix
         ./waybar.nix
         ./rofi.nix
         ./notifications.nix

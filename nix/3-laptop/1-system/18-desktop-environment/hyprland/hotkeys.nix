@@ -19,6 +19,10 @@
         { pkgs, ... }:
         {
             wayland.windowManager.hyprland.settings = {
+                # Cinnamon opens its menu on Super alone. Hyprland can only bind a bare modifier on release,
+                # via bindr, so that it does not fire while Super is held as part of another shortcut.
+                bindr = [ "SUPER, SUPER_L, exec, $menu" ];
+
                 bind = [
                     # Applications
                     # Cinnamon binds the terminal to Ctrl+Alt+T (media-keys terminal) and the file manager to
