@@ -77,10 +77,11 @@
                     "$fileManager" = "${pkgs.nemo}/bin/nemo";
                     "$menu" = "${pkgs.rofi}/bin/rofi -show drun";
 
+                    # hyprpaper, swaync and hypridle are each started by their own home-manager systemd user
+                    # service. Listing them here as well launched a second copy that raced the service: swaync
+                    # exited with "An instance is already running" and hit its restart limit. Only the clipboard
+                    # watcher, which home-manager has no service for, is started here.
                     exec-once = [
-                        "${pkgs.hyprpaper}/bin/hyprpaper"
-                        "${pkgs.swaynotificationcenter}/bin/swaync"
-                        "${pkgs.hypridle}/bin/hypridle"
                         "${pkgs.wl-clipboard}/bin/wl-paste --watch ${pkgs.cliphist}/bin/cliphist store"
                     ];
 
@@ -151,7 +152,8 @@
                     };
 
                     dwindle = {
-                        pseudotile = true;
+                        # dwindle:pseudotile was removed in Hyprland 0.56. Pseudotiling is now reached through
+                        # the `pseudo` dispatcher per window rather than a layout-wide default.
                         preserve_split = true;
                     };
 
@@ -164,12 +166,15 @@
                         focus_on_activate = true;
                     };
 
-                    windowrulev2 = [
-                        "suppressevent maximize, class:.*"
+                    # Hyprland 0.53 overhauled window rules: windowrulev2 is deprecated in favour of
+                    # windowrule, matchers moved behind a `match:` prefix, and effects now take an explicit
+                    # value. suppressevent was also renamed to suppress_event.
+                    windowrule = [
+                        "match:class .*, suppress_event maximize"
                         # Cinnamon's muffin attach-modal-dialogs is true, so dialogs are centered on their parent
-                        "center, floating:1"
-                        "float, class:^(pavucontrol|blueman-manager|nm-connection-editor)$"
-                        "float, class:^(org.keepassxc.KeePassXC)$, title:^(Unlock Database.*)$"
+                        "match:float 1, center on"
+                        "match:class ^(pavucontrol|blueman-manager|nm-connection-editor)$, float on"
+                        "match:class ^(org.keepassxc.KeePassXC)$, match:title ^(Unlock Database.*)$, float on"
                     ];
                 };
             };

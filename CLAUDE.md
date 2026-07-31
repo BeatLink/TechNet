@@ -1,0 +1,109 @@
+# TechNet — working notes
+
+A flake-based NixOS configuration for a personal network of devices, joined over
+WireGuard. See [README.md](README.md) for the network itself.
+
+## Hosts
+
+Each host is a `nixosConfigurations` entry in [flake.nix](flake.nix) composing
+`nix/0-common` with one device directory.
+
+| Host | Device | Modules |
+| --- | --- | --- |
+| `Odin` | laptop (x86_64) | `nix/0-common` + `nix/3-laptop` |
+| `Heimdall` | server (x86_64) | `nix/0-common` + `nix/2-server` |
+| `Ragnarok` | backup server (aarch64) | `nix/0-common` + `nix/1-backup-server` |
+| `Thor` | phone | `nix/0-common` + `nix/5-phone` |
+
+Host names are capitalised — `#Odin`, not `#odin`. The lowercase form in
+[nixtool-config.json](nixtool-config.json) is the SSH address (`odin.technet`).
+
+## Rebuilding
+
+Deploys go through `nixtool.sh`, which wraps `nixos-rebuild` with the flake path
+and target host already resolved:
+
+```sh
+./nixtool.sh run maintenance/rebuild --host Odin --action switch
+```
+
+| Action | Effect |
+| --- | --- |
+| `dry-activate` | Build and print what would change. **Always run this first.** |
+| `switch` | Activate now and set as the boot default |
+| `test` | Activate now, revert on next boot |
+| `boot` | Activate on next boot only |
+| `rollback` | Return to the previous generation |
+
+Other useful commands — `./nixtool.sh list` shows all of them:
+
+```sh
+./nixtool.sh run maintenance/flake-update              # bump flake.lock
+./nixtool.sh run maintenance/export-dconf              # dump Cinnamon settings back into the repo
+./nixtool.sh run maintenance/preview-generations --host Odin
+```
+
+Building without deploying, which is the fastest way to check a change compiles:
+
+```sh
+nix build --no-link .#nixosConfigurations.Odin.config.system.build.toplevel
+```
+
+Evaluating a single option, for checking what a module actually produced:
+
+```sh
+nix eval .#nixosConfigurations.Odin.config.services.xserver.displayManager.lightdm.enable
+```
+
+### Before deploying to Odin
+
+`Odin` is the machine this repo is usually edited from, so a bad deploy takes out
+the session you are working in. Always `dry-activate` first and read the unit list.
+`would NOT stop the following changed units: display-manager.service` means the
+graphical session survives; if the display manager *would* restart, expect to be
+logged out.
+
+## Desktop environments
+
+`nix/3-laptop/1-system/18-desktop-environment/default.nix` selects which are built.
+Cinnamon and Hyprland can both be imported at once — LightDM lists Wayland sessions
+alongside X11 ones, so all of them appear at login and you switch by logging out.
+
+Constraints learned the hard way:
+
+- **Only one display manager.** Cinnamon's module enables LightDM; the Hyprland
+  module deliberately declares none. Enabling SDDM too gives two display managers
+  fighting for the same VT.
+- **Impermanence rejects a file claimed twice.** Both modules wanted
+  `.config/mimeapps.list`; only Cinnamon persists it now.
+- **LightDM defaults to `minimum-vt = 1`** in nixpkgs, which lands X on the same VT
+  as the first getty and breaks Ctrl+Alt+F-key switching. The Cinnamon module
+  overrides it to 7 via `extraConfig`, which is emitted after the module's own key
+  and therefore wins.
+
+### Hyprland
+
+Configured entirely through home-manager, split across submodules imported at the
+bottom of `hyprland/default.nix` — bar, launcher, notifications, lock screen and so
+on are separate programs, since Hyprland is a compositor rather than a desktop.
+
+- **Start components as systemd user services, not `exec-once`.** `withUWSM = true`
+  binds the session to systemd, and home-manager already defines services for
+  hyprpaper, hypridle, swaync and waybar. Listing them in `exec-once` as well runs
+  two copies: swaync exits with "An instance is already running" and hits its
+  restart limit. Only things with no service of their own belong in `exec-once`.
+- **Config syntax moves between releases.** Check `hyprctl configerrors` after any
+  change. As of 0.56: `windowrulev2` → `windowrule` with `match:` prefixes and
+  explicit values, `suppressevent` → `suppress_event`, `dwindle:pseudotile` removed
+  in favour of the `pseudo` dispatcher, and `togglesplit` is now
+  `layoutmsg, togglesplit`.
+- **Verify syntax against the running compositor** rather than guessing:
+  `hyprctl keyword windowrule "match:class foo, float on"` answers `ok` or names the
+  bad field.
+- Stale processes survive a rebuild. After changing how a component is launched,
+  kill the old one — a rebuild will not do it, and you get two bars.
+
+## Secrets
+
+sops-nix, with the host SSH key as the age identity. Secrets live in `secrets/`.
+Nothing in this repo should contain a plaintext credential.

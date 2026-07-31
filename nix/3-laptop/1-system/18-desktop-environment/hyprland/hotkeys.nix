@@ -52,7 +52,9 @@
                     "ALT, F5, fullscreenstate, 0 0" # Restore, matching Cinnamon's unmaximize
                     "$mod, F, fullscreen,"
                     "$mod, T, togglefloating,"
-                    "$mod, J, togglesplit,"
+                    # The standalone togglesplit dispatcher was removed in Hyprland 0.56; it is now a
+                    # layout message, so it has to be sent through layoutmsg.
+                    "$mod, J, layoutmsg, togglesplit"
                     "ALT, F7, exec, ${pkgs.hyprland}/bin/hyprctl dispatch movewindow" # Cinnamon begin-move
                     "ALT, F8, exec, ${pkgs.hyprland}/bin/hyprctl dispatch resizewindow" # Cinnamon begin-resize
 
