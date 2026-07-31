@@ -134,10 +134,11 @@
                         position = "bottom";
                         height = 48; # panels-height '2:48'
                         spacing = 8;
+                        # Cinnamon's panels-autohide is '2:intel', ie intelligent hide: the panel stays visible
+                        # and only gets out of the way when a window would overlap it. Waybar's `hide` is
+                        # unconditional auto-hide, which is the '2:true' behaviour instead, so `dock` mode is
+                        # used to keep the taskbar visible and reserve its space.
                         mode = "dock";
-                        # Reveals the bar when the pointer reaches the bottom edge. Cinnamon's panels-hide-delay
-                        # and panels-show-delay are both 0 for this panel, so no dwell time is configured.
-                        hide = true;
                         modules-left = [ "hyprland/workspaces" ];
                         modules-center = [ "wlr/taskbar" ];
                         modules-right = [ "hyprland/submap" ];

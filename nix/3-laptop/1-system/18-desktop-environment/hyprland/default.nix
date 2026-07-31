@@ -21,11 +21,9 @@
     };
 
     services = {
-        displayManager.sddm = {
-            # Enable SDDM Login Manager. SDDM is used here instead of LightDM as it supports Wayland sessions
-            enable = true;
-            wayland.enable = true;
-        };
+        # No display manager is declared here. LightDM is enabled by the cinnamon module and already scans
+        # wayland-sessions alongside xsessions, so it lists Hyprland as well and both can be imported at once.
+        # Declaring SDDM here too would enable two display managers competing for the same VT.
         libinput.enable = true; # Enables Touchpad Functionality
         gnome.gnome-keyring.enable = true; # Provides a secret service, normally supplied by the DE
         gvfs.enable = true; # Trash, mounting and network shares for the file manager
@@ -195,9 +193,9 @@
                     directories = [
                         ".local/share/cliphist"
                     ];
-                    files = [
-                        ".config/mimeapps.list"
-                    ];
+                    # mimeapps.list is deliberately not listed here. The cinnamon module already persists it,
+                    # and impermanence rejects the same file being claimed twice. Default applications are a
+                    # user preference rather than a session one, so sharing the Cinnamon copy is correct.
                 };
             };
 
