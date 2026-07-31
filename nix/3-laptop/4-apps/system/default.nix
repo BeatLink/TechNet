@@ -1,6 +1,7 @@
 {
     imports = [
         ./bash.nix
+        ./context.nix
         ./dconf-editor.nix
         ./fonts.nix
         ./gparted.nix

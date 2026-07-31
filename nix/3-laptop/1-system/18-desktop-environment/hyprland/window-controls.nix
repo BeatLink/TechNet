@@ -49,10 +49,11 @@
                     # draw their own titlebar (Firefox, VSCodium, Electron) therefore show two. Turning off
                     # their client side decorations is the only fix, and is per application.
 
-                    # $mod+T already toggles floating for one window in hotkeys.nix; these extend that to the
-                    # whole workspace, and give minimised windows a way back.
+                    # No workspace-wide stacking toggle. Floating every window at once fights the dwindle
+                    # layout and leaves windows overlapping wherever they happened to be; Context places
+                    # windows deliberately instead. $mod+T in hotkeys.nix still floats a single window when
+                    # one genuinely needs it.
                     bind = [
-                        "$mod SHIFT, T, exec, hyprctl dispatch workspaceopt allfloat"
                         "$mod, M, togglespecialworkspace, minimised"
                     ];
                 };
