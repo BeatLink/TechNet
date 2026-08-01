@@ -17,7 +17,7 @@
 { config, pkgs, ... }:
 let
     palette = config.technet.theme.palette;
-    context = "${pkgs.context-launcher}/bin/context-launcher";
+    context = "${pkgs.context}/bin/context";
 in
 {
     home-manager.users.beatlink =

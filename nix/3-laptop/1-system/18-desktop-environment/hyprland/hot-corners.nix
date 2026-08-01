@@ -35,13 +35,13 @@
 
                 [expo]
                 locations = ["bottom_left"]
-                enter_command = [ "${pkgs.context-launcher}/bin/context-launcher" "switch-window-all" ]
+                enter_command = [ "${pkgs.context}/bin/context" "switch-window-all" ]
                 size = 10
                 timeout_ms = 100
 
                 [scale]
                 locations = ["bottom_right"]
-                enter_command = [ "${pkgs.context-launcher}/bin/context-launcher" "switch-window" ]
+                enter_command = [ "${pkgs.context}/bin/context" "switch-window" ]
                 size = 10
                 timeout_ms = 100
             '';

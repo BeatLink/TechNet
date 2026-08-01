@@ -81,7 +81,7 @@ in
                     # Application launching and window switching are both Context's job now. The
                     # package is defined by the overlay in ./context.nix so that the keybinds here,
                     # the hot corners and the gestures all refer to the same store path.
-                    "$context" = "${pkgs.context-launcher}/bin/context-launcher";
+                    "$context" = "${pkgs.context}/bin/context";
 
                     # hyprpaper, swaync and hypridle are each started by their own home-manager systemd user
                     # service. Listing them here as well launched a second copy that raced the service: swaync
