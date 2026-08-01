@@ -247,6 +247,7 @@ in
         ./waybar.nix
         ./notifications.nix
         ./screenlock.nix
+        ./lid.nix
         ./wallpaper.nix
         ./screenshot.nix
         ./overview.nix
