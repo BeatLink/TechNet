@@ -20,6 +20,8 @@
 #   previous            return to the last context, the way alt-tab returns to the last window
 #   settings            open the settings page
 #   toggle-rail         collapse or expand the sidebar
+#   overview            contexts and apps on one screen
+#   move-window         send the focused window to another context (the hyprbars button)
 #
 
 { config, ... }:
