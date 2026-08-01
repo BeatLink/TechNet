@@ -176,6 +176,10 @@ in
                 # and controls read correctly on any dark surface and are left to its defaults.
                 style = ''
                     @define-color ctx_accent #${palette.accent};
+                    /* The ring around a Context surface, matching the border Hyprland draws around an
+                       ordinary window and the one waybar draws for itself. Deliberately not ctx_border,
+                       which is also the line between two rows in a list - that stays a divider. */
+                    @define-color ctx_surface_border #${palette.accent};
                     @define-color ctx_surface rgba(${palette.rgb.surface}, ${toString cfg.transparency});
                     @define-color ctx_on_surface #${palette.text};
                     @define-color ctx_slot_fill #${palette.accent}52;

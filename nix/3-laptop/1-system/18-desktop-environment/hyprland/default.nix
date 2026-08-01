@@ -107,8 +107,12 @@ in
                         gaps_in = 4;
                         gaps_out = 8;
                         border_size = 2;
-                        "col.active_border" = "rgba(${palette.accent}ee)"; # The chosen look's accent (technet.theme)
-                        "col.inactive_border" = "rgba(${palette.border}aa)";
+                        # Both borders are the look's accent - Mint-Y-Aqua by default - so every edge on the
+                        # screen is the same colour and focus is told by how strong it is rather than by a
+                        # change of hue. The unfocused alpha is low enough that a wall of windows does not
+                        # read as a grid of aqua boxes, and high enough to still draw the edge.
+                        "col.active_border" = "rgba(${palette.accent}ee)";
+                        "col.inactive_border" = "rgba(${palette.accent}55)";
                         # Cinnamon's muffin draggable-border-width is 10, which covers the whole frame edge. The
                         # closest Hyprland equivalent is extending the resize region beyond the visible border.
                         resize_on_border = true;
