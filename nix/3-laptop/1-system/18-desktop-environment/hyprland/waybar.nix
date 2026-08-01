@@ -146,7 +146,7 @@ in
                         color: #${palette.text};
                         border: 2px solid #${palette.border};
                         border-radius: 10px;
-                        padding: 0 8px;
+                        padding: 4px 8px;
                     }
                     /* Buttons do not inherit the window colour: GTK styles them from the theme, which is
                        Mint-Y-Dark's near black text and left the modules unreadable on the dark bar. Every
@@ -162,6 +162,7 @@ in
                     #idle_inhibitor {
                         color: #${palette.text};
                         background: transparent;
+                        padding: 2px 8px;
                     }
                     #battery.critical {
                         color: #${palette.red};
