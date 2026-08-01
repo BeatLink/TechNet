@@ -66,6 +66,10 @@
             url = "path:/Storage/Files/Projects/Coding/Vigil";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        context = {
+            url = "path:/Storage/Files/Projects/Coding/Context";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
     };
     outputs =
         inputs@{

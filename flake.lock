@@ -102,6 +102,23 @@
         "type": "github"
       }
     },
+    "context": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1785593153,
+        "narHash": "sha256-VEEo4Ugsc63B/zzoCjQ/6F22TkOl/ew4kKHcJFQn9kQ=",
+        "path": "/Storage/Files/Projects/Coding/Context",
+        "type": "path"
+      },
+      "original": {
+        "path": "/Storage/Files/Projects/Coding/Context",
+        "type": "path"
+      }
+    },
     "disko": {
       "inputs": {
         "nixpkgs": [
@@ -559,6 +576,7 @@
         "blockurl": "blockurl",
         "calibre-web-automated": "calibre-web-automated",
         "claude-code": "claude-code",
+        "context": "context",
         "disko": "disko",
         "gmusicbrowser": "gmusicbrowser",
         "home-manager": "home-manager",
