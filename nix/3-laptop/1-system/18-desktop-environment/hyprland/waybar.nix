@@ -140,11 +140,14 @@ in
                         font-size: 12px;
                     }
                     /* The bar as a window among windows: the compositor's rounding plus its border width,
-                       and the same 2px border Context draws. The margins are in the config above. */
+                       and the same 2px border Context draws. A layer surface gets no border from the
+                       compositor, so this is the bar drawing for itself the edge every real window has -
+                       which means the accent, not the divider grey it used to use. The margins are in the
+                       config above. */
                     window#waybar {
                         background: rgba(${palette.rgb.surface}, 0.75);
                         color: #${palette.text};
-                        border: 2px solid #${palette.border};
+                        border: 2px solid #${palette.accent};
                         border-radius: 10px;
                         padding: 4px 8px;
                     }
