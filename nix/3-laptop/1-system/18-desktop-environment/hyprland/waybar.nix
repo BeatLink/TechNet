@@ -1,15 +1,15 @@
 # Waybar
 #
-# Waybar replaces the Cinnamon panels. Cinnamon runs two panels (org/cinnamon panels-enabled), both 48px tall
-# (panels-height), and this reproduces both:
+# One bar, along the top: weather, clock and the status applets from the right zone of the old Cinnamon panel.
+# It floats the way Context's surfaces do - margins off the screen edges, rounded corners, a bordered card -
+# so the session reads as windows on a desktop rather than panels bolted to the edges.
 #
-#   Top    - always visible (panels-autohide '1:false'), carrying the menu, weather, clock, timer and the status
-#            applets from the right zone of the Cinnamon panel
-#   Bottom - auto hiding (panels-autohide '2:intel'), carrying the window list. Cinnamon's 'intel' mode hides the
-#            panel only when a window would overlap it, which waybar cannot express, so it uses ordinary
-#            autohide: the bar reveals when the pointer reaches the bottom edge.
+# There is no bottom bar and no application menu any more. Both were reproductions of Cinnamon panels that
+# Context has since replaced outright: its sidebar lists what is running and switches between it, which is
+# what the window list was for, and its overview is the application menu. Two ways to do the same thing, one
+# of which knew nothing about contexts, is worse than one.
 #
-# Cinnamon applets with no waybar equivalent are deliberately left out for now: trilium-api, cinnamon-timer,
+# Cinnamon applets with no waybar equivalent are deliberately left out: trilium-api, cinnamon-timer,
 # cinnamon-sidebar, the Direct menu and show-hide-applets are all Cinnamon specific and would each need a custom
 # module written against their APIs.
 #
@@ -29,16 +29,18 @@ in
                 # come up at all on first login.
                 systemd.enable = true;
                 settings = {
-                    # Top panel, mirroring panel1 from the Cinnamon config
                     topBar = {
                         layer = "top";
                         position = "top";
-                        height = 48; # panels-height '1:48'
+                        height = 40;
                         spacing = 8;
-                        modules-left = [
-                            "custom/menu"
-                            "custom/weather"
-                        ];
+                        # Floating, like every Context surface: the margins are the compositor's own gaps,
+                        # and they are set here rather than in CSS because a layer surface reserves the space
+                        # it is given - a margin in the stylesheet would leave the reserved strip behind.
+                        margin-top = 8;
+                        margin-left = 8;
+                        margin-right = 8;
+                        modules-left = [ "custom/weather" ];
                         modules-center = [ "clock" ];
                         modules-right = [
                             "tray"
@@ -49,16 +51,6 @@ in
                             "network"
                             "battery"
                         ];
-
-                        # Stands in for the Cinnamon menu applet, opening the rofi launcher
-                        "custom/menu" = {
-                            format = "Apps";
-                            on-click =
-                                "${pkgs.nwg-menu}/bin/nwg-menu -wm hyprland -va bottom -ha left -k -d "
-                                + "-term ${pkgs.tilix}/bin/tilix -fm ${pkgs.nemo}/bin/nemo "
-                                + "-cmd-lock '${pkgs.hyprlock}/bin/hyprlock' -cmd-logout 'hyprctl dispatch exit'";
-                            tooltip = false;
-                        };
 
                         # Replaces the weather@mockturtl applet. The coordinates and the OpenMeteo provider are
                         # taken from that applet's settings, and the units are left to the locale as the applet
@@ -135,39 +127,6 @@ in
                             tooltip-format = "{timeTo}";
                         };
                     };
-
-                    # Bottom panel, mirroring panel2 from the Cinnamon config. This carries the
-                    # grouped-window-list applet, so wlr/taskbar is used rather than hyprland/workspaces.
-                    bottomBar = {
-                        layer = "top";
-                        position = "bottom";
-                        height = 48; # panels-height '2:48'
-                        spacing = 8;
-                        # Cinnamon's panels-autohide is '2:intel', ie intelligent hide: the panel stays visible
-                        # and only gets out of the way when a window would overlap it. Waybar's `hide` is
-                        # unconditional auto-hide, which is the '2:true' behaviour instead, so `dock` mode is
-                        # used to keep the taskbar visible and reserve its space.
-                        mode = "dock";
-                        modules-left = [ "hyprland/workspaces" ];
-                        modules-center = [ "wlr/taskbar" ];
-                        modules-right = [ "hyprland/submap" ];
-
-                        "hyprland/workspaces" = {
-                            format = "{id}";
-                            on-click = "activate";
-                        };
-
-                        # Cinnamon's grouped-window-list groups windows of the same application and shows icons at
-                        # 32px in the left zone of panel 2 (panel-zone-icon-sizes)
-                        "wlr/taskbar" = {
-                            format = "{icon} {title}";
-                            icon-size = 32;
-                            tooltip-format = "{title}";
-                            on-click = "activate";
-                            on-click-middle = "close";
-                            markup = false;
-                        };
-                    };
                 };
 
                 # Colours come from the chosen look (technet.theme). The transparent-panels@germanfr
@@ -180,16 +139,18 @@ in
                         font-family: "Noto Sans", sans-serif;
                         font-size: 12px;
                     }
+                    /* The bar as a window among windows: the compositor's rounding plus its border width,
+                       and the same 2px border Context draws. The margins are in the config above. */
                     window#waybar {
                         background: rgba(${palette.rgb.surface}, 0.75);
                         color: #${palette.text};
+                        border: 2px solid #${palette.border};
+                        border-radius: 10px;
+                        padding: 0 8px;
                     }
                     /* Buttons do not inherit the window colour: GTK styles them from the theme, which is
-                       Mint-Y-Dark's near black text and left the taskbar unreadable on the dark bar. Every
+                       Mint-Y-Dark's near black text and left the modules unreadable on the dark bar. Every
                        module that renders as a button therefore sets its own foreground. */
-                    #taskbar button,
-                    #workspaces button,
-                    #custom-menu,
                     #custom-weather,
                     #clock,
                     #pulseaudio,
@@ -198,19 +159,9 @@ in
                     #battery,
                     #backlight,
                     #tray,
-                    #idle_inhibitor,
-                    #submap {
+                    #idle_inhibitor {
                         color: #${palette.text};
                         background: transparent;
-                    }
-                    #taskbar button.active {
-                        border-bottom: 2px solid #${palette.accent};
-                        background: rgba(${palette.rgb.accent}, 0.15);
-                    }
-                    #workspaces button.active {
-                        background: #${palette.accent};
-                        color: #${palette.surface};
-                        border-radius: 6px;
                     }
                     #battery.critical {
                         color: #${palette.red};
@@ -221,8 +172,8 @@ in
                 '';
             };
 
-            # Both bars come from the single waybar systemd user service enabled above, so nothing is
-            # started from exec-once here. Launching it both ways ran two copies of every bar.
+            # The bar comes from the waybar systemd user service enabled above, so nothing is started
+            # from exec-once here. Launching it both ways ran two copies of it.
 
             home.packages = with pkgs; [
                 pavucontrol

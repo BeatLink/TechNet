@@ -3,7 +3,6 @@
         ./calculator.nix
         ./cheese.nix
         ./czkawka.nix
-        ./deluge.nix
         ./drawio.nix
         ./gallery-dl.nix
         ./inkscape.nix
