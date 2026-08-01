@@ -21,8 +21,12 @@
             wayland.windowManager.hyprland.settings = {
                 # Cinnamon opens its menu on Super alone. Hyprland can only bind a bare modifier on release,
                 # via bindr, so that it does not fire while Super is held as part of another shortcut.
-                # This raises Context, which is the launcher now.
-                bindr = [ "SUPER, SUPER_L, exec, $context" ];
+                #
+                # The overview rather than the launcher: the launcher is docked and already on screen, so
+                # raising it is barely an action, while the overview is contexts and applications on one
+                # screen with the keyboard in the search box. That is what a menu key should do. Pressing it
+                # again puts the overview away rather than stacking a second one.
+                bindr = [ "SUPER, SUPER_L, exec, $context overview" ];
 
                 bind = [
                     # Applications
