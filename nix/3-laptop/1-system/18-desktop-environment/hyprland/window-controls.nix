@@ -17,6 +17,7 @@
 { config, pkgs, ... }:
 let
     palette = config.technet.theme.palette;
+    context = "${pkgs.context-launcher}/bin/context-launcher";
 in
 {
     home-manager.users.beatlink =
@@ -37,14 +38,21 @@ in
                         bar_part_of_window = true; # Titlebar sits inside the window border, as in Cinnamon
                         bar_precedence_over_border = true;
 
-                        # Close and maximise only. There is deliberately no minimise: Hyprland has no
-                        # such concept, and parking windows in a special workspace turned out to be a
-                        # black hole — while that workspace is open Hyprland treats it as the active
-                        # target, so every newly launched window landed there instead of the workspace
-                        # that was focused. A context is the place windows belong to now.
+                        # Close, maximise, and move to another context. There is deliberately no
+                        # minimise: Hyprland has no such concept, and parking windows in a special
+                        # workspace turned out to be a black hole — while that workspace is open
+                        # Hyprland treats it as the active target, so every newly launched window
+                        # landed there instead of the workspace that was focused. A context is the
+                        # place windows belong to now, and the accent button is how a window gets
+                        # to the right one: it opens Context's picker and sends this window there.
+                        #
+                        # The command acts on the focused window, and hyprbars has no way to pass
+                        # the window it was clicked on — but pressing a titlebar focuses its window
+                        # first, which is the same assumption the close button already makes.
                         hyprbars-button = [
                             "rgb(${palette.red}), 14, , hyprctl dispatch killactive"
                             "rgb(${palette.yellow}), 14, , hyprctl dispatch fullscreen 1"
+                            "rgb(${palette.accent}), 14, , ${context} move-window"
                         ];
                     };
 
