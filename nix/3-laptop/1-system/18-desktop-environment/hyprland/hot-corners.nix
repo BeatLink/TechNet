@@ -19,7 +19,7 @@
 # 100ms for every enabled corner above.
 #
 
-{ ... }:
+{ config, ... }:
 {
     home-manager.users.beatlink =
         { pkgs, ... }:
@@ -35,13 +35,13 @@
 
                 [expo]
                 locations = ["bottom_left"]
-                enter_command = [ "${pkgs.context}/bin/context" "switch-window-all" ]
+                enter_command = [ "${config.technet.context.package}/bin/context" "switch-window-all" ]
                 size = 10
                 timeout_ms = 100
 
                 [scale]
                 locations = ["bottom_right"]
-                enter_command = [ "${pkgs.context}/bin/context" "switch-window" ]
+                enter_command = [ "${config.technet.context.package}/bin/context" "switch-window" ]
                 size = 10
                 timeout_ms = 100
             '';

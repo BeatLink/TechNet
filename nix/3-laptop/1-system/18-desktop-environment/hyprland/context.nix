@@ -43,9 +43,89 @@
 let
     palette = config.technet.theme.palette;
     cfg = config.technet.context;
+
+    # Context out of its own flake: a store path, updated when the flake input is.
+    packaged = pkgs.context;
+
+    # Context out of the working tree, through the dev shell. The same shape - a
+    # /bin/context taking the same subcommands - so nothing else has to know which
+    # of the two it is talking to.
+    fromCheckout = pkgs.writeShellApplication {
+        name = "context";
+        runtimeInputs = [ pkgs.nix ];
+        text = ''
+            cd ${cfg.checkout} || exit 1
+            exec nix develop --command python3 -m context "$@"
+        '';
+    };
+
+    # Kill Context and start it again.
+    #
+    # `context restart` is an execv inside the running process, so it needs that
+    # process to still be answering D-Bus. This is the one for when it is not -
+    # the only way out of a wedged launcher that does not involve a terminal.
+    hardRestart = pkgs.writeShellApplication {
+        name = "context-hard-restart";
+        runtimeInputs = with pkgs; [
+            procps
+            coreutils
+        ];
+        text = ''
+            pkill -f 'python3 -m context' || true
+
+            # Wait for it to actually go. A new instance that starts while the old
+            # one still owns the bus name hands its command line over and exits,
+            # so restarting too eagerly does nothing at all.
+            for _ in $(seq 1 50); do
+                if ! pgrep -f 'python3 -m context' >/dev/null; then
+                    break
+                fi
+                sleep 0.1
+            done
+
+            exec ${cfg.package}/bin/context "$@"
+        '';
+    };
 in
 {
     options.technet.context = {
+        useCheckout = lib.mkOption {
+            type = lib.types.bool;
+            default = true;
+            description = ''
+                Run Context from the working tree rather than from its flake.
+
+                The packaged build is a store path, so seeing a change means updating the flake input,
+                rebuilding and switching - a minute, against the two seconds `context restart` takes when
+                the running copy loads from the checkout. While Context is being changed daily the checkout
+                is the right daily driver; set this false once it settles.
+
+                Everything else is the same either way: the settings, the declared contexts and the theme
+                all go through Context's own home-manager module regardless.
+            '';
+        };
+
+        checkout = lib.mkOption {
+            type = lib.types.str;
+            default = "/Storage/Files/Projects/Coding/Context";
+            description = "Where the working tree is, for `useCheckout`.";
+        };
+
+        package = lib.mkOption {
+            type = lib.types.package;
+            internal = true;
+            description = ''
+                The Context every keybind, hot corner and gesture should name, so all of them resolve to
+                one build whichever of the two it is.
+            '';
+        };
+
+        restart = lib.mkOption {
+            type = lib.types.package;
+            internal = true;
+            description = "The hard restart, for when Context has stopped answering.";
+        };
+
         transparency = lib.mkOption {
             type = lib.types.numbers.between 0.0 1.0;
             default = 0.75;
@@ -60,15 +140,19 @@ in
     config = {
         nixpkgs.overlays = [ inputs.context.overlays.default ];
 
+        technet.context = {
+            package = if cfg.useCheckout then fromCheckout else packaged;
+            restart = hardRestart;
+        };
+
         home-manager.users.beatlink = {
             imports = [ inputs.context.homeModules.default ];
 
             programs.context = {
                 enable = true;
-                # The overlay's build rather than the flake's own, so there is one Context in the closure.
-                # home-manager.useGlobalPkgs is set in nix/0-common/2-users, so this is the system package set
-                # and the overlay has already been applied to it.
-                package = pkgs.context;
+                # Whichever of the two is in use. home-manager.useGlobalPkgs is set in nix/0-common/2-users,
+                # so this is the system package set and the overlay has already been applied to it.
+                package = cfg.package;
 
                 # This session: the sidebar hides itself and comes back on hover, and the overview is the
                 # application menu now that waybar has neither a menu nor a window list. The sidebar is

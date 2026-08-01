@@ -37,7 +37,9 @@
                     "$mod, E, exec, $fileManager"
                     ", XF86Explorer, exec, $fileManager"
                     "$mod, Space, exec, $context"
-                    "$mod, C, exec, $context"
+                    # Kill Context and start it again. Super+Space already raises the launcher, so
+                    # this key was a duplicate; a wedged launcher had no way back without a terminal.
+                    "$mod, C, exec, $contextRestart"
                     "ALT, F2, exec, ${pkgs.rofi}/bin/rofi -show run" # Cinnamon panel-run-dialog
                     "$mod, V, exec, ${pkgs.cliphist}/bin/cliphist list | ${pkgs.rofi}/bin/rofi -dmenu | ${pkgs.cliphist}/bin/cliphist decode | ${pkgs.wl-clipboard}/bin/wl-copy"
 
