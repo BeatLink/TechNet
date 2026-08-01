@@ -78,10 +78,13 @@ in
                     "$mod" = "SUPER";
                     "$terminal" = "${pkgs.tilix}/bin/tilix"; # Matches desktop/applications/terminal from dconf
                     "$fileManager" = "${pkgs.nemo}/bin/nemo";
-                    # Application launching and window switching are both Context's job now. The
-                    # package is defined by the overlay in ./context.nix so that the keybinds here,
-                    # the hot corners and the gestures all refer to the same store path.
-                    "$context" = "${pkgs.context}/bin/context";
+                    # Application launching and window switching are both Context's job now. Which
+                    # build is in use is decided in ./context.nix, so the keybinds here, the hot
+                    # corners and the gestures all refer to the same one.
+                    "$context" = "${config.technet.context.package}/bin/context";
+                    # Kills it and starts it again, for when it has stopped answering and the
+                    # `restart` subcommand — which needs it to answer — cannot reach it.
+                    "$contextRestart" = "${config.technet.context.restart}/bin/context-hard-restart";
 
                     # hyprpaper, swaync and hypridle are each started by their own home-manager systemd user
                     # service. Listing them here as well launched a second copy that raced the service: swaync

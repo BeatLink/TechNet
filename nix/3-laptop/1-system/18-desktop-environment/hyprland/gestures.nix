@@ -22,7 +22,7 @@
 # gesture_threshold in pixels rather than a percentage, so a value proportional to a typical touchpad is used.
 #
 
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 {
     home-manager.users.beatlink =
         { pkgs, ... }:
@@ -41,8 +41,8 @@
                     # The native workspace gesture follows the fingers and picks a direction from the swipe, so
                     # one entry per axis covers both left and right.
                     "4, horizontal, workspace"
-                    "4, up, dispatcher, exec, ${pkgs.context}/bin/context switch-window-all"
-                    "4, down, dispatcher, exec, ${pkgs.context}/bin/context switch-window-all"
+                    "4, up, dispatcher, exec, ${config.technet.context.package}/bin/context switch-window-all"
+                    "4, down, dispatcher, exec, ${config.technet.context.package}/bin/context switch-window-all"
                 ];
 
                 # Cinnamon's swipe-percent-threshold of 60 is a proportion of the touchpad, Hyprland takes a
