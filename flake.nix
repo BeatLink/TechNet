@@ -58,6 +58,10 @@
             url = "github:BeatLink/Calibre-Web-Automated/nix-packing-final";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        lnxlink = {
+            url = "github:BeatLink/lnxlink";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
         nix-vscode-extensions = {
             url = "github:nix-community/nix-vscode-extensions";
             inputs.nixpkgs.follows = "nixpkgs";
@@ -90,6 +94,7 @@
             app-separators,
             claude-code,
             calibre-web-automated,
+            lnxlink,
             ...
         }:
         {
@@ -121,6 +126,7 @@
                         arion.nixosModules.arion
                         blockurl.nixosModules.blockurl
                         calibre-web-automated.nixosModules.default
+                        lnxlink.nixosModules.default
                         ./nix/0-common
                         ./nix/2-server
                     ];
@@ -135,6 +141,7 @@
                                 sharedModules = [
                                     xdg-autostart.homeManagerModules.xdg-autostart
                                     gmusicbrowser.homeManagerModules.gmusicbrowser
+                                    lnxlink.homeModules.default
                                 ];
                             };
                         }
