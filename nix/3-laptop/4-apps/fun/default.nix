@@ -1,6 +1,6 @@
 {
     imports = [
-        ./calibre.nix
+        ./calibre-web
         ./ckan.nix
         ./freetube.nix
         ./gmusicbrowser.nix
