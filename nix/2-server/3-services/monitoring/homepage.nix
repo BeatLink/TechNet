@@ -295,6 +295,15 @@
                         };
                     }
                     {
+                        "Jackett" = {
+                            icon = "jackett.png";
+                            href = "https://jackett.heimdall.technet";
+                            description = "Torrent Indexer Proxy";
+                            siteMonitor = "https://jackett.heimdall.technet";
+                            statusStyle = "dot";
+                        };
+                    }
+                    {
                         "Vigil" = {
                             icon = "uptime-kuma.png";
                             href = "https://vigil.heimdall.technet";
@@ -308,6 +317,20 @@
         ];
     };
     systemd.services.homepage-dashboard.environment.HOSTNAME = "127.0.0.1";
+
+    # Homepage reads these once and caches; nothing in the unit depends on them,
+    # so a rebuild that only edits this file leaves the old dashboard on screen
+    # until the service happens to restart. A tile added here was in
+    # /etc/homepage-dashboard/services.yaml immediately and on the page only
+    # after a manual restart -- which reads as the rebuild not having worked.
+    systemd.services.homepage-dashboard.restartTriggers = [
+        config.environment.etc."homepage-dashboard/services.yaml".source
+        config.environment.etc."homepage-dashboard/settings.yaml".source
+        config.environment.etc."homepage-dashboard/widgets.yaml".source
+        config.environment.etc."homepage-dashboard/bookmarks.yaml".source
+        config.environment.etc."homepage-dashboard/custom.css".source
+        config.environment.etc."homepage-dashboard/custom.js".source
+    ];
 
     nginx-vhosts.homepage = {
         domain = "homepage.heimdall.technet";
