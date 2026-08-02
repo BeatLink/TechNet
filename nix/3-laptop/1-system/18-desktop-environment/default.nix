@@ -17,8 +17,8 @@
 
 {
     imports = [
-        ./theme.nix
-        ./hyprland
+        #./theme.nix
+        #./hyprland
         ./cinnamon
     ];
 }
