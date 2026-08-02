@@ -370,6 +370,26 @@
         "type": "github"
       }
     },
+    "lnxlink": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1785683704,
+        "narHash": "sha256-Q8ukjcSYjw3L+OTCSvlgI60c4rToaQXa8TGI/qFEf+s=",
+        "owner": "BeatLink",
+        "repo": "lnxlink",
+        "rev": "6d4f2e9324f502299a5273e4a17fb98540b6d407",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BeatLink",
+        "repo": "lnxlink",
+        "type": "github"
+      }
+    },
     "mobile-nixos": {
       "flake": false,
       "locked": {
@@ -581,6 +601,7 @@
         "gmusicbrowser": "gmusicbrowser",
         "home-manager": "home-manager",
         "impermanence": "impermanence",
+        "lnxlink": "lnxlink",
         "mobile-nixos": "mobile-nixos",
         "nix-index-database": "nix-index-database",
         "nix-vscode-extensions": "nix-vscode-extensions",
