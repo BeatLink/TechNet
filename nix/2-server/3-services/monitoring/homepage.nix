@@ -196,6 +196,15 @@
                             statusStyle = "dot";
                         };
                     }
+                    {
+                        "MQTT" = {
+                            icon = "mosquitto.png";
+                            description = "Message Broker Client";
+                            href = "https://mqtt-web.heimdall.technet";
+                            siteMonitor = "https://mqtt-web.heimdall.technet";
+                            statusStyle = "dot";
+                        };
+                    }
                 ];
             }
             {

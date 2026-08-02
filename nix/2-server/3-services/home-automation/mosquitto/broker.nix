@@ -1,5 +1,10 @@
-{ pkgs, inputs, config, ... }:
+{ pkgs, config, ... }:
 {
+    # Vigil and LNXlink get plaintext passwords rather than hashes because the
+    # same value has to be handed to the client as well: Vigil reads it with
+    # `password_command`, LNXlink through its environment file. The module hashes
+    # them into the generated password file at startup. Home Assistant and
+    # Frigate hold their own copies, so only the hash is needed here.
     sops.secrets.mosquitto_vigil_password = {
         sopsFile = "${config.technet.secrets.path}/mosquitto.yaml";
         owner = "vigil-access";
@@ -14,10 +19,7 @@
         key = "frigate_password_hash";
     };
 
-    # The two LNXlink instances. These are the plaintext passwords rather than
-    # hashes because the same value has to be handed to LNXlink itself through
-    # its environment file -- see lnxlink.nix here and on Odin. The module
-    # hashes them into the generated password file at startup.
+    # The two LNXlink instances -- see lnxlink.nix here and on Odin.
     sops.secrets.mosquitto_lnxlink_heimdall_password = {
         sopsFile = "${config.technet.secrets.path}/lnxlink.yaml";
         key = "heimdall_password";
@@ -27,7 +29,11 @@
         key = "odin_password";
     };
 
-    environment.systemPackages = [ pkgs.mosquitto ];
+    environment.systemPackages = [
+        pkgs.mosquitto # mosquitto_sub / mosquitto_pub
+        pkgs.mqttui # live topic tree in a terminal, for when the browser is not to hand
+    ];
+
     services.mosquitto = {
         enable = true;
         listeners = [
@@ -35,6 +41,12 @@
                 address = "127.0.0.1";
                 port = 1883;
                 users = {
+                    # Home Assistant's own side of this connection is *not*
+                    # declared anywhere: HA dropped broker settings from YAML, so
+                    # the host, username and password it presents live in its
+                    # storage under /Storage/Services/Home-Assistant/config. Only
+                    # the hash it is checked against is in this repo -- rebuilding
+                    # HA from nothing means entering the credential again.
                     homeassistant = {
                         acl = [
                             "readwrite homeassistant/#"
@@ -81,26 +93,4 @@
             }
         ];
     };
-
-    # Reaching the broker from another host --------------------------------------------------------------------------------------------------
-    # The broker itself stays bound to 127.0.0.1. Odin gets to it the same way
-    # it gets to every other service here: through nginx on a *.heimdall.technet
-    # name, terminating TLS with the TechNet certificate.
-    #
-    # This is a `stream` server rather than a virtualHost because MQTT is not
-    # HTTP -- LNXlink builds a plain paho client with no websocket transport, so
-    # nginx-vhosts.nix cannot carry it and nginx proxies the TCP session instead.
-    # 8883 is the registered port for MQTT over TLS.
-    services.nginx.streamConfig = ''
-        server {
-            listen 8883 ssl;
-            ssl_certificate ${config.sops.secrets.https_certificate.path};
-            ssl_certificate_key ${config.sops.secrets.https_certificate_key.path};
-            proxy_pass 127.0.0.1:1883;
-        }
-    '';
-
-    # nginx-vhosts.nix does this for every vhost it manages; a stream server is
-    # not one, so the name is pointed at Heimdall by hand.
-    services.pihole-ftl.settings.dns.cnameRecords = [ "mqtt.heimdall.technet,heimdall.technet" ];
 }

@@ -13,7 +13,7 @@
     # flake's overlay has to be applied here rather than by its NixOS module.
     nixpkgs.overlays = [ inputs.lnxlink.overlays.default ];
 
-    # Same password as the lnxlink-odin account in Heimdall's mosquitto.nix.
+    # Same password as the lnxlink-odin account in Heimdall's mosquitto/broker.nix.
     # Owned by beatlink because the unit is a user service.
     sops.secrets.lnxlink_mqtt_password = {
         sopsFile = "${config.technet.secrets.path}/lnxlink.yaml";
@@ -41,7 +41,7 @@
                     mqtt = {
                         # The broker is bound to localhost on Heimdall; this is
                         # the nginx stream endpoint in front of it, terminating
-                        # TLS with the TechNet certificate. See mosquitto.nix.
+                        # TLS with the TechNet certificate. See mosquitto/remote-access.nix.
                         server = "mqtt.heimdall.technet";
                         port = 8883;
                         prefix = "lnxlink";

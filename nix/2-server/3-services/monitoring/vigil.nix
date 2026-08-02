@@ -958,7 +958,7 @@
                                     # stops seeing messages. Publishes a nonce and
                                     # confirms it comes back on the same topic,
                                     # authenticating as a dedicated `vigil` MQTT
-                                    # user (mosquitto.nix) scoped by ACL to
+                                    # user (mosquitto/broker.nix) scoped by ACL to
                                     # vigil/probe/# only.
                                     name = "Mosquitto Delivery";
                                     id = "heimdall-mosquitto-delivery";

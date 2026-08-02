@@ -3,7 +3,7 @@
         ./frigate.nix
         ./home-assistant.nix
         ./lnxlink.nix
-        ./mosquitto.nix
+        ./mosquitto
         ./traccar.nix
         ./esphome
 
