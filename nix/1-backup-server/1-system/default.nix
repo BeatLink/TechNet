@@ -8,5 +8,6 @@
         ./6-networking.nix
         ./7-borg.nix
         ./8-clevis.nix
+        ./9-remote-builder.nix
     ];
 }

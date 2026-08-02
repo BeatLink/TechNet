@@ -11,5 +11,6 @@
         ./10-initrd-usb-gadget.nix
         ./11-power.nix
         ./12-keyboard.nix
+        ./13-kernel.nix
     ];
 }
