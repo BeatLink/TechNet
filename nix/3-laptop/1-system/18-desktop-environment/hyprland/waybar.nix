@@ -45,6 +45,7 @@ in
                         modules-right = [
                             "tray"
                             "idle_inhibitor"
+                            "custom/dnd"
                             "backlight"
                             "pulseaudio"
                             "bluetooth"
@@ -74,15 +75,29 @@ in
                             };
                         };
 
-                        # Replaces the inhibit@cinnamon.org applet
+                        # Replaces the inhibit@cinnamon.org applet, whose menu held two switches:
+                        # "Power management" is idle_inhibitor and "Notifications" is custom/dnd.
                         idle_inhibitor = {
                             format = "{icon}";
                             format-icons = {
-                                activated = "awake";
-                                deactivated = "idle";
+                                activated = "";
+                                deactivated = "";
                             };
-                            tooltip-format-activated = "Idle inhibited";
-                            tooltip-format-deactivated = "Idle allowed";
+                            tooltip-format-activated = "Power management: Inhibited";
+                            tooltip-format-deactivated = "Power management: Active";
+                        };
+
+                        "custom/dnd" = {
+                            exec = "${pkgs.swaynotificationcenter}/bin/swaync-client -swb";
+                            return-type = "json";
+                            format = "{icon}";
+                            format-icons = {
+                                none = "";
+                                notification = "";
+                                dnd-none = "";
+                                dnd-notification = "";
+                            };
+                            on-click = "${pkgs.swaynotificationcenter}/bin/swaync-client -d";
                         };
 
                         tray = {
@@ -136,7 +151,7 @@ in
                 # than drawing unstyled, so the whole bar disappears.
                 style = ''
                     * {
-                        font-family: "Noto Sans", sans-serif;
+                        font-family: "Noto Sans", "NotoSans Nerd Font", sans-serif;
                         font-size: 12px;
                     }
                     /* The bar as a window among windows: the compositor's rounding plus its border width,
@@ -162,7 +177,8 @@ in
                     #battery,
                     #backlight,
                     #tray,
-                    #idle_inhibitor {
+                    #idle_inhibitor,
+                    #custom-dnd {
                         color: #${palette.text};
                         background: transparent;
                         padding: 2px 8px;
@@ -171,6 +187,10 @@ in
                         color: #${palette.red};
                     }
                     #idle_inhibitor.activated {
+                        color: #${palette.accent};
+                    }
+                    #custom-dnd.dnd-none,
+                    #custom-dnd.dnd-notification {
                         color: #${palette.accent};
                     }
                 '';
