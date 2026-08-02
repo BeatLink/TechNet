@@ -7,5 +7,7 @@
         ./6-display.nix
         ./7-sensors.nix
         ./8-modem.nix
+        ./9-clevis.nix
+        ./10-initrd-usb-gadget.nix
     ];
 }

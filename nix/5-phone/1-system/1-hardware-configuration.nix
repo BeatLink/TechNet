@@ -21,6 +21,11 @@
         
     ];
 
+    boot.kernelParams = [
+        "console=tty0"
+        "console=ttyS0,115200"
+    ];
+
     boot.kernelModules = [
         "rtw88_8723cs" # Wifi Card
         "ax88179_178a" # USB Hub
@@ -30,5 +35,7 @@
         "axp20x_usb_power"
         "sun4i_usb_phy"
         "typec"
+        "pinephone_keyboard"
+        "ip5xxx_power"
     ];
 }
