@@ -75,7 +75,7 @@
             inputs.nixpkgs.follows = "nixpkgs";
         };
         nixtool = {
-            url = "path:/Storage/Files/Projects/Coding/NixTool";
+            url = "github:BeatLink/NixTool";
         };
     };
     outputs =
