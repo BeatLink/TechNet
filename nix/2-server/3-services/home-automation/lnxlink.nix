@@ -9,7 +9,7 @@
 
 { config, pkgs, ... }:
 {
-    # The broker account is declared in mosquitto.nix alongside the other users;
+    # The broker account is declared in mosquitto/broker.nix alongside the other users;
     # here the same password is rendered into the environment file systemd hands
     # to the service, so the credential never reaches the world-readable store.
     sops.templates."lnxlink.env".content = ''

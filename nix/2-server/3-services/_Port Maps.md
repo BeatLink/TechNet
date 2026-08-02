@@ -35,7 +35,10 @@ vhost; the "Port" column is the upstream/service port nginx proxies to.
 | Frigate        | 9310 | 127.0.0.1; frigate.heimdall.technet |
 | ESPHome        | 6052 | esphome.heimdall.technet |
 | Traccar        | 9280 | traccar.heimdall.technet |
-| Mosquitto MQTT | 1883 | Broker |
+| Mosquitto MQTT | 1883 | 127.0.0.1; broker |
+| Mosquitto (MQTT over TLS) | 8883 | nginx `stream`, proxied to 1883; mqtt.heimdall.technet |
+| Mosquitto (websockets) | 9320 | 127.0.0.1; proxied at /mqtt on the vhost below |
+| MQTTX Web | — | Static files served by nginx; mqtt-web.heimdall.technet |
 
 ## Fun & Media
 
