@@ -66,7 +66,14 @@
                     };
 
                     vigil = {
-                        acl = [ "readwrite vigil/probe/#" ];
+                        acl = [
+                            "readwrite vigil/probe/#"
+                            # The Frigate MQTT monitor reads the retained
+                            # availability topic to prove Frigate's session is
+                            # still up. One topic, read only -- Vigil has no
+                            # business anywhere else under frigate/.
+                            "read frigate/available"
+                        ];
                         passwordFile = config.sops.secrets.mosquitto_vigil_password.path;
                     };
 
