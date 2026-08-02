@@ -15,17 +15,25 @@ Each host is a `nixosConfigurations` entry in [flake.nix](flake.nix) composing
 | `Ragnarok` | backup server (aarch64) | `nix/0-common` + `nix/1-backup-server` |
 | `Thor` | phone | `nix/0-common` + `nix/5-phone` |
 
-Host names are capitalised — `#Odin`, not `#odin`. The lowercase form in
-[nixtool-config.json](nixtool-config.json) is the SSH address (`odin.technet`).
+Host names are capitalised — `#Odin`, not `#odin`. The lowercase form declared in
+[20-nixtool.nix](nix/3-laptop/1-system/20-nixtool.nix) is the SSH address
+(`odin.technet`).
 
 ## Rebuilding
 
-Deploys go through `nixtool.sh`, which wraps `nixos-rebuild` with the flake path
-and target host already resolved:
+Deploys go through `nixtool`, which wraps `nixos-rebuild` with the flake path and
+target host already resolved:
 
 ```sh
-./nixtool.sh run maintenance/rebuild --host Odin --action switch
+nixtool run maintenance/rebuild --host Odin --action switch
 ```
+
+`nixtool` is installed by [6-nixtool.nix](nix/0-common/1-system/5-software/6-nixtool.nix)
+and reads its config from `/etc/nixtool/nixtool-config.json`, rendered from
+[20-nixtool.nix](nix/3-laptop/1-system/20-nixtool.nix). There is no
+`nixtool-config.json` in the repo and no `nixtool.sh` wrapper — hosts, flake path
+and installer credentials are all declared in Nix, so no `--config` flag is needed
+and no credential is checked in.
 
 | Action | Effect |
 | --- | --- |
@@ -35,12 +43,20 @@ and target host already resolved:
 | `boot` | Activate on next boot only |
 | `rollback` | Return to the previous generation |
 
-Other useful commands — `./nixtool.sh list` shows all of them:
+Other useful commands — `nixtool list` shows all of them:
 
 ```sh
-./nixtool.sh run maintenance/flake-update              # bump flake.lock
-./nixtool.sh run maintenance/export-dconf              # dump Cinnamon settings back into the repo
-./nixtool.sh run maintenance/preview-generations --host Odin
+nixtool run maintenance/flake-update              # bump flake.lock
+nixtool run maintenance/export-dconf              # dump Cinnamon settings back into the repo
+nixtool run maintenance/preview-generations --host Odin
+```
+
+If `nixtool` is not on PATH yet — a fresh machine, or a generation built before
+the module landed — fall back to `nixos-rebuild` directly for the one deploy that
+installs it:
+
+```sh
+sudo nixos-rebuild switch --flake .#Odin
 ```
 
 Building without deploying, which is the fastest way to check a change compiles:
