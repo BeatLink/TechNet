@@ -74,6 +74,9 @@
             url = "path:/Storage/Files/Projects/Coding/Context";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        nixtool = {
+            url = "path:/Storage/Files/Projects/Coding/NixTool";
+        };
     };
     outputs =
         inputs@{
