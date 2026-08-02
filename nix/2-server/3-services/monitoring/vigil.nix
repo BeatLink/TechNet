@@ -1140,6 +1140,42 @@
                                     };
                                 }
                                 {
+                                    # The broker leg, which neither monitor above
+                                    # covers: Frigate can be running, and its API
+                                    # answering, while its MQTT session is gone --
+                                    # Home Assistant then stops seeing events and
+                                    # everything else stays green.
+                                    #
+                                    # frigate/available is retained and carries
+                                    # Frigate's last will, so the broker's own
+                                    # view of the session answers immediately:
+                                    # "online" was published on connect, "offline"
+                                    # is what the broker publishes on an unclean
+                                    # disconnect, and nothing at all means Frigate
+                                    # has never connected since the broker's
+                                    # persistence file was written. All three are
+                                    # a non-zero exit here. Read from Frigate's
+                                    # source (comms/mqtt.py) rather than assumed.
+                                    #
+                                    # Authenticates as the same `vigil` user as
+                                    # the delivery probe, which for this needs
+                                    # `read frigate/available` -- see
+                                    # mosquitto/broker.nix.
+                                    name = "Frigate MQTT";
+                                    id = "heimdall-frigate-mqtt";
+                                    type = "command";
+                                    interval = "5m";
+                                    timeout = 15;
+                                    command = ''
+                                        test "$(mosquitto_sub -h 127.0.0.1 -p 1883 \
+                                            -u vigil -P "$(cat /run/secrets/mosquitto_vigil_password)" \
+                                            -t frigate/available -C 1 -W 5)" = online
+                                    '';
+                                    ssh_config = {
+                                        host = "heimdall.technet";
+                                    };
+                                }
+                                {
                                     name = "FreshRSS";
                                     id = "heimdall-freshrss";
                                     type = "systemd_service";
