@@ -9,5 +9,6 @@
         ./3-garbage-collection.nix
         ./4-unfree-packages.nix
         ./5-default-packages.nix
+        ./6-nixtool.nix
     ];
 }
