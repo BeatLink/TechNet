@@ -4,6 +4,8 @@ The TechNet is my personal network of computing devices, all connected via a Wir
 
 [![Bump flake.lock](https://github.com/BeatLink/TechNet/actions/workflows/main.yml/badge.svg)](https://github.com/BeatLink/TechNet/actions/workflows/main.yml)
 
+Outstanding work is tracked in [TODO.md](TODO.md).
+
 ## Hosts
 
 Each host is a `nixosConfigurations` entry in [flake.nix](flake.nix), composing
