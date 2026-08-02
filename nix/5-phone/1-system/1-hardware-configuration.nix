@@ -26,16 +26,13 @@
         "console=ttyS0,115200"
     ];
 
+    # The sun4i USB phy and the musb controller are built into the kernel on this
+    # platform rather than being modules, so they are not listed here.
+    # Battery, charging and keyboard drivers live in 11-power.nix and
+    # 12-keyboard.nix.
     boot.kernelModules = [
         "rtw88_8723cs" # Wifi Card
         "ax88179_178a" # USB Hub
         "st_lsm6dsx" # Accelerometer
-        "typec_ucsi" # USB Port
-        "axp20x_battery"
-        "axp20x_usb_power"
-        "sun4i_usb_phy"
-        "typec"
-        "pinephone_keyboard"
-        "ip5xxx_power"
     ];
 }

@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 let
     gadget = "/sys/kernel/config/usb_gadget/technet";
 
@@ -16,13 +16,12 @@ in
     technet.tang.addresses = [ odinAddress ];
 
     boot.initrd = {
+        # The musb controller and the sun4i USB phy are built into the kernel on
+        # this platform, not modules, so only the gadget framework is listed.
         availableKernelModules = [
             "configfs"
             "libcomposite"
             "usb_f_ecm"
-            "musb_hdrc"
-            "sunxi"
-            "phy_sun4i_usb"
         ];
 
         systemd = {

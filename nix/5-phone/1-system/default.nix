@@ -9,5 +9,7 @@
         ./8-modem.nix
         ./9-clevis.nix
         ./10-initrd-usb-gadget.nix
+        ./11-power.nix
+        ./12-keyboard.nix
     ];
 }
