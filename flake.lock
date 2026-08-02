@@ -629,14 +629,17 @@
         "nixpkgs": "nixpkgs_6"
       },
       "locked": {
-        "lastModified": 1785697864,
-        "narHash": "sha256-WRfUSPzc1MNsT1mu7AzoQFeL8iAAcMSAQgrogj2M5vc=",
-        "path": "/Storage/Files/Projects/Coding/NixTool",
-        "type": "path"
+        "lastModified": 1785380781,
+        "narHash": "sha256-JBgvb50tnJuR6NLvdj89dFwij5TGYtufx8DRcFpFpDo=",
+        "owner": "BeatLink",
+        "repo": "NixTool",
+        "rev": "2598728e16610b484de0b39d2296aebefa365701",
+        "type": "github"
       },
       "original": {
-        "path": "/Storage/Files/Projects/Coding/NixTool",
-        "type": "path"
+        "owner": "BeatLink",
+        "repo": "NixTool",
+        "type": "github"
       }
     },
     "root": {
