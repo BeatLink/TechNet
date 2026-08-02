@@ -16,9 +16,15 @@ in
     technet.tang.addresses = [ odinAddress ];
 
     boot.initrd = {
+        # kernelModules, not availableKernelModules: the latter only places a
+        # module in the initrd to be loaded when a device matches it, and nothing
+        # binds the gadget framework to a device. Left merely available,
+        # /sys/kernel/config/usb_gadget never appears and the service below fails
+        # at its first mkdir.
+        #
         # The musb controller and the sun4i USB phy are built into the kernel on
-        # this platform, not modules, so only the gadget framework is listed.
-        availableKernelModules = [
+        # this platform rather than modules, so only the gadget framework is here.
+        kernelModules = [
             "configfs"
             "libcomposite"
             "usb_f_ecm"
