@@ -25,7 +25,6 @@ vhost; the "Port" column is the upstream/service port nginx proxies to.
 |---------|------|-------|
 | Pi-hole (web/FTL)        | 9018 | pi-hole.heimdall.technet |
 | Unbound (recursive DNS)  | 5335 | 10.100.100.1 / 127.0.0.1 |
-| DDNS Updater             | 9420 | 127.0.0.1; ddns.heimdall.technet |
 
 ## Home Automation
 
