@@ -34,11 +34,20 @@
                     outputs = {
                         DSI-1 = {
                             scale = 2;
-                            rotate = "90";
+                            # No `rotate`. The panel is natively portrait at
+                            # 720x1440, so a static rotate = "90" turned it
+                            # permanently sideways -- which is what "stuck in
+                            # landscape while the phone is vertical" was.
+                            #
+                            # It also left nothing for auto-rotation to do: the
+                            # sensor and iio-sensor-proxy work and report
+                            # orientation changes live, but a fixed transform in
+                            # phoc's config is not something the shell overrides.
+                            # Leaving it unset lets phosh drive the transform
+                            # from the sensor instead.
                             mode = "720x1440";
                         };
                     };
-
                 };
             };
         };
