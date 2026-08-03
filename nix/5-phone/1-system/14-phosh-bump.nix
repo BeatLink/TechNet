@@ -45,10 +45,24 @@ let
             # Same workaround nixpkgs applies -- NixOS/nixpkgs#485701.
             forceFetchGit = true;
         };
+
+    pkgsFetchWlroots =
+        pkgs: rev: hash:
+        pkgs.fetchFromGitLab {
+            domain = "gitlab.freedesktop.org";
+            owner = "wlroots";
+            repo = "wlroots";
+            inherit rev hash;
+        };
 in
 {
     nixpkgs.overlays = [
         (final: prev: {
+            wlroots_0_20 = prev.wlroots_0_20.overrideAttrs (_: rec {
+                version = "0.20.1";
+                src = pkgsFetchWlroots final version "sha256-uuc1dn13FXvFSBvE3+QOi35rLJZmWIUst64oaXGdPFk=";
+            });
+
             # 0.56 needs wlroots 0.20; nixpkgs' 0.54 expression asks for 0.19.
             # Swapped through .override because wlroots_0_19 is a function
             # argument, then src/version through overrideAttrs.
