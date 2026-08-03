@@ -90,20 +90,24 @@ contacts on the strength of them** — the pack is healthy.
       most. The regmap-debugfs write in
       [13-kernel.nix](nix/5-phone/1-system/13-kernel.nix) stays as a diagnostic,
       not as the fix.
-- [ ] Currently charging under JumpDrive, which is the best case the phone can
-      offer: 1.5A available and near-zero draw, and it sidesteps the auto-boot
-      loop that was burning the trickle. JumpDrive's kernel has no
-      `axp20x_battery` — no `/lib/modules`, no `modprobe`, so it cannot be added —
-      so progress is only readable by booting NixOS afterwards.
-- [ ] If hours under JumpDrive change nothing, replace the pack. It is a Samsung
-      J7 form factor (`EB-BJ700BBC`), widely available; Pine64 sell one directly,
-      which removes any doubt about contact layout and protection circuitry.
-- [ ] Do **not** improvise a charger. USB is 5V against a 4.2V maximum with no
-      current limit, and a cell that has sat at 0.13V is the highest-risk case
-      there is. A bench supply at ~4.0V with a 50-100mA limit is the legitimate
-      version; a NiMH charger such as the BQ-CC65 is the wrong chemistry entirely.
 
-## Decided — move Thor to an out-of-tree kernel
+### Recovering a deeply discharged pack
+
+Kept for the recovery procedure only, since the same trap catches every
+mainline-based distro on this hardware: a deeply discharged pack sits below the
+AXP803's ~3.0V pre-charge threshold and trickles at a few mA, which looks
+identical to the fault above. Booting JumpDrive from SD is the best case the
+phone can offer while recovering — 1.5A available and near-zero draw, and it
+sidesteps the auto-boot loop that burns the trickle. Its kernel has no
+`axp20x_battery` and no `modprobe`, so progress is only readable by booting
+something else afterwards.
+
+Do **not** improvise a charger. USB is 5V against a 4.2V maximum with no current
+limit, and a cell that has sat at 0.13V is the highest-risk case there is. A
+bench supply at ~4.0V with a 50–100mA limit is the legitimate version; a NiMH
+charger such as the BQ-CC65 is the wrong chemistry entirely.
+
+## Done — Thor runs megi's kernel
 
 The ANX7688 USB-C controller has no mainline driver, and that single gap costs
 three separate things:
@@ -154,7 +158,7 @@ Verified by evaluation: Thor's `system.build.toplevel` evaluates, the kernel now
 has a `dev` output, and `zfs_2_4` reports `broken = false` against 6.17 (ZFS 2.4.3
 supports up to 7.0).
 
-- [ ] **Build it.** Not in any binary cache, so this is a full aarch64 kernel
+- [x] **Build it.** Not in any binary cache, so this is a full aarch64 kernel
       build plus ZFS against it. Ragnarok is the only native aarch64 host but has
       2GB of RAM;
       [9-remote-builder.nix](nix/1-backup-server/1-system/9-remote-builder.nix)
@@ -204,30 +208,35 @@ What was tried and did not help, though all of it ran on a dead battery:
 - [ ] If it works, check whether the DT patch is needed at all, or whether stock
       would now do.
 
-## Keyboard accessory needs a device tree node
+## Keyboard accessory — should work now, untested
 
-The dock is connected and talking, but neither the keyboard nor its battery
-appears, because mainline's DTB does not describe the accessory. Instantiating it
-by hand gets most of the way:
+Under mainline this needed a hand-written device tree node. Instantiating the
+device over i2c got as far as an input device and then died:
 
     echo pinephone-keyboard 0x15 > /sys/bus/i2c/devices/i2c-2/new_device
-
-    input: PinePhone Keyboard as .../i2c-2/2-0015/input/input5
     pinephone-keyboard 2-0015: Failed to request IRQ: -22
 
-So the hardware answers at 0x15 on `1c2b400.i2c` (i2c-2, `&i2c1`) and the driver
-creates an input device, then dies on `request_irq`. `new_device` supplies a bus
-and an address; an interrupt can only come from a DT node.
+`new_device` supplies a bus and an address but not an interrupt, and an interrupt
+can only come from DT.
 
-The dock's battery follows from this: the IP5209 sits behind the keyboard
-controller's I2C passthrough, so `ip5xxx_power` cannot bind until the keyboard
-driver probes cleanly. Adding the modules in
-[12-keyboard.nix](nix/5-phone/1-system/12-keyboard.nix) was necessary but not
-sufficient.
+megi's tree has the node already, complete with the interrupt, and the case's
+IP5209 nested behind the keyboard's own i2c passthrough — which is why
+`ip5xxx_power` could never bind while the keyboard driver failed to probe:
 
-- [ ] Add a DT node for the keyboard on `&i2c1` at 0x15 with `interrupt-parent`
-      and `interrupts`. Take the GPIO from postmarketOS's overlay rather than
-      guessing. Likely moot if the out-of-tree kernel lands first.
+    ppkb: keyboard@15 {
+        compatible = "pine64,pinephone-keyboard";
+        interrupt-parent = <&r_pio>;
+        interrupts = <0 12 IRQ_TYPE_EDGE_FALLING>;  /* PL12 */
+        i2c { charger@75 { compatible = "injoinic,ip5209"; ... }; };
+    };
+
+What was missing was the driver, not the description: mobile-nixos' config had
+`# CONFIG_KEYBOARD_PINEPHONE is not set`, so the hardware was fully described and
+nothing bound to it. Now enabled in PinePhoneKernel.
+
+- [ ] **Test it.** Attach the case and check `dmesg | grep -i ppkb`, that keys
+      reach userspace, and that the case battery appears as a second entry under
+      `/sys/class/power_supply`. No DT patching should be needed.
 
 ## The accelerometer is an MPU6050
 
@@ -242,17 +251,40 @@ sideways, the fault is the **matrix value**, not the rule.
 - [ ] Drop `st_lsm6dsx` and the ST hwdb entries once settled — added for a part
       this phone does not have.
 
+## Next up on Thor
+
+The phone is deployed and running megi's kernel. These are the things standing
+between it and being usable without a serial cable, roughly in order.
+
+- [ ] **Deploy clevis.** Thor prompts for its passphrase on every boot and clevis
+      is off. Needs `zfs_passphrase` in `secrets/5-phone/clevis.yaml`
+      **identical** to `thor_encryption_key`, then `sudo rebind-clevis` on the
+      phone with tang reachable, then `enable = true` in
+      [9-clevis.nix](nix/5-phone/1-system/9-clevis.nix) and a rebuild. It is
+      disabled during install on purpose: `boot.initrd.clevis.devices` reads the
+      JWE at **build** time, so it cannot exist before the first boot.
+
+      Note what this does and does not buy. It only unlocks where tang is
+      reachable **and** Odin's session is unlocked, so away from home the phone
+      still prompts — which is the whole reason the next two items matter.
+- [ ] **Plymouth and graphical decryption.** The passphrase prompt is currently
+      a bare console on a device with no keyboard attached. Plymouth's password
+      prompt is what makes it enterable on a touchscreen at all, and
+      [nixos-plymouth](flake.nix) is already a flake input used elsewhere on the
+      network. Needs the initrd to bring up the DSI panel — check whether the
+      display comes up early enough in stage 1, since that is the part most
+      likely not to work.
+- [ ] **On-screen keyboard at the greeter.** Even past decryption the phone
+      cannot be logged into without a hardware keyboard or the serial console.
+      Phosh ships `squeekboard`, but the greeter enables it separately from the
+      session — check whether autologin is masking the problem rather than
+      solving it.
+- [ ] **Test the keyboard accessory** — see [above](#keyboard-accessory--should-work-now-untested).
+      If it works it also sidesteps the two items above, since the case provides
+      a real keyboard for both the passphrase prompt and the greeter.
+
 ## Other Thor items
 
-- [ ] **No on-screen keyboard at the login screen.** The phone cannot be logged
-      into without a hardware keyboard or the serial console. Phosh ships
-      `squeekboard`, but the greeter enables it separately from the session —
-      check whether autologin is masking the problem rather than solving it.
-- [ ] **Clevis.** Thor prompts for its passphrase every boot; clevis is off.
-      Needs `zfs_passphrase` in `secrets/5-phone/clevis.yaml` **identical** to
-      `thor_encryption_key`, then `rebind-clevis`, then `enable = true` in
-      [9-clevis.nix](nix/5-phone/1-system/9-clevis.nix). Note it only unlocks
-      where tang is reachable and Odin's session is unlocked.
 - [ ] **Unlock story more broadly.** The initrd USB gadget cannot work without the
       ANX7688 driver, so clevis-over-USB is dead as designed.
       [10-initrd-usb-gadget.nix](nix/5-phone/1-system/10-initrd-usb-gadget.nix)
