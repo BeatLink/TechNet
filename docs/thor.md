@@ -162,6 +162,23 @@ gauge reported `capacity 0`, `current_now 0` and a voltage that drifted around i
 a ~30mV band for over an hour across five different power sources. That is not
 proof of a dead pack, and it is worth not concluding so — it recovered.
 
+### The short version
+
+1. Install postmarketOS, or anything else running a megi kernel.
+2. Start the phone up with the charger already connected.
+3. Leave it for a few hours.
+
+That is the whole procedure now. Everything below this is why it works and what
+was needed before the kernel was right — the elaborate JumpDrive dance in
+[What actually helped](#what-actually-helped) was working around mainline
+refusing to charge at all, which
+[13-kernel.nix](../nix/5-phone/1-system/13-kernel.nix) has since settled.
+
+Do **not** improvise a charger. USB is 5V against a 4.2V maximum with no current
+limit, and a cell that has sat at 0.13V is the highest-risk case there is. A
+bench supply at ~4.0V with a 50–100mA limit is the legitimate version; a NiMH
+charger such as the BQ-CC65 is the wrong chemistry entirely.
+
 ### How the AXP803 charger works
 
 Sources: the [AXP803 datasheet](https://files.pine64.org/doc/datasheet/pine64/AXP803_Datasheet_V1.0.pdf)
