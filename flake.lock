@@ -424,6 +424,22 @@
         "type": "github"
       }
     },
+    "mobile-nixos_2": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1783912271,
+        "narHash": "sha256-CzwmiKxuh1u+H8hDnrVeUl/fL59PvsgLbr2l0FhqWK0=",
+        "owner": "NixOS",
+        "repo": "mobile-nixos",
+        "rev": "2c132754323fc1915e8d21dcfc0ef68ab084c6fb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "mobile-nixos",
+        "type": "github"
+      }
+    },
     "nix-flake-tests": {
       "locked": {
         "lastModified": 1677844186,
@@ -593,6 +609,22 @@
     },
     "nixpkgs_7": {
       "locked": {
+        "lastModified": 1785571196,
+        "narHash": "sha256-KoTsyMQqnXQZq8deCEnu4QkyldkwH/bpMMhUcfMdGIw=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "148bab9c1c3c53136ecb44a6ea356a0ed5b39b06",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "nixpkgs_8": {
+      "locked": {
         "lastModified": 1772963539,
         "narHash": "sha256-9jVDGZnvCckTGdYT53d/EfznygLskyLQXYwJLKMPsZs=",
         "owner": "NixOS",
@@ -607,7 +639,7 @@
         "type": "github"
       }
     },
-    "nixpkgs_8": {
+    "nixpkgs_9": {
       "locked": {
         "lastModified": 1775036866,
         "narHash": "sha256-ZojAnPuCdy657PbTq5V0Y+AHKhZAIwSIT2cb8UgAz/U=",
@@ -642,6 +674,25 @@
         "type": "github"
       }
     },
+    "pinephone-kernel": {
+      "inputs": {
+        "mobile-nixos": "mobile-nixos_2",
+        "nixpkgs": "nixpkgs_7"
+      },
+      "locked": {
+        "lastModified": 1785761185,
+        "narHash": "sha256-RD07PkN7+I39Mct+dbYvNI73XP7bBCeCvSQf2RvIikk=",
+        "owner": "BeatLink",
+        "repo": "PinePhoneKernel",
+        "rev": "7f60fc21ce6c1da7dd1fd7300bda427fece36c15",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BeatLink",
+        "repo": "PinePhoneKernel",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "app-separators": "app-separators",
@@ -661,6 +712,7 @@
         "nixos-plymouth": "nixos-plymouth",
         "nixpkgs": "nixpkgs_5",
         "nixtool": "nixtool",
+        "pinephone-kernel": "pinephone-kernel",
         "sops-nix": "sops-nix",
         "vantage": "vantage",
         "vigil": "vigil",
@@ -764,7 +816,7 @@
     },
     "vantage": {
       "inputs": {
-        "nixpkgs": "nixpkgs_7"
+        "nixpkgs": "nixpkgs_8"
       },
       "locked": {
         "lastModified": 1774234490,
@@ -803,7 +855,7 @@
         "flake-parts": "flake-parts_2",
         "home-manager": "home-manager_3",
         "nix-flake-tests": "nix-flake-tests",
-        "nixpkgs": "nixpkgs_8"
+        "nixpkgs": "nixpkgs_9"
       },
       "locked": {
         "lastModified": 1775350341,

@@ -77,6 +77,13 @@
         nixtool = {
             url = "github:BeatLink/NixTool";
         };
+        # megi's PinePhone kernel. Deliberately does NOT follow nixpkgs: the
+        # binary cache it publishes is built against its own pin, and overriding
+        # nixpkgs changes the stdenv, changes the derivation, and turns a one
+        # minute substitution back into a multi-hour aarch64 build.
+        pinephone-kernel = {
+            url = "github:BeatLink/PinePhoneKernel";
+        };
     };
     outputs =
         inputs@{
@@ -101,24 +108,6 @@
             ...
         }:
         {
-            # Exposed so the PinePhone kernel can be built and cached on its own,
-            # without evaluating a whole host. There is no megi/mobile-nixos
-            # kernel in cache.nixos.org, so anyone running NixOS on a PinePhone
-            # otherwise faces a multi-hour aarch64 build for a kernel that is
-            # bit-identical for all of them.
-            #
-            # Taken from the host rather than rebuilt standalone deliberately: a
-            # separate `pkgs` would differ from Thor's by overlays or config and
-            # silently produce a second, unshared derivation, leaving the cache
-            # useless for the one machine it was meant to serve.
-            packages.aarch64-linux = {
-                linux-pinephone-megi = self.nixosConfigurations.Thor.config.boot.kernelPackages.kernel;
-
-                # ZFS is out-of-tree, so it is rebuilt against every new kernel
-                # and is not in any cache either. Thor's root is on it.
-                zfs-pinephone-megi = self.nixosConfigurations.Thor.config.boot.kernelPackages.zfs_2_4;
-            };
-
             nixosConfigurations = {
                 Ragnarok = nixpkgs.lib.nixosSystem {
                     specialArgs = { inherit inputs; };
