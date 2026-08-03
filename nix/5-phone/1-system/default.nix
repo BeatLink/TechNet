@@ -8,7 +8,7 @@
         ./7-sensors.nix
         ./8-modem.nix
         ./9-clevis.nix
-        ./10-initrd-usb-gadget.nix
+        ./10-initrd-wifi.nix
         ./11-power.nix
         ./12-keyboard.nix
         ./13-kernel.nix

@@ -18,7 +18,6 @@
         ./16-plymouth.nix
         ./17-dconf
         ./18-desktop-environment
-        ./19-thor-usb-link.nix
         ./20-nixtool.nix
         ./21-remote-builder.nix
     ];
