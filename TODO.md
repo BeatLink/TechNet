@@ -3,7 +3,17 @@
 Outstanding work, most blocking first. Background for the Thor items is in
 [docs/thor.md](docs/thor.md).
 
-## Blocking — the battery will not take charge
+## RESOLVED — the battery charges; the pack was never faulty
+
+Confirmed on hardware by booting postmarketOS from SD, which ships the same megi
+kernel. It charges at **1.3A**:
+
+    [0.724851] axp20x-battery-power-supply: Configuring battery thermal regulation for Pinephone
+    status Charging   current_now 1312000   voltage_now 3573900   health Good
+
+Against 5-11mA and a stuck 2.9V under mainline. Voltage moved 2.902 -> 3.443 ->
+3.574V within minutes. Kept below for the reasoning, because the same trap catches
+every mainline-based distro on this hardware.
 
 Nothing else on Thor can be tested until this is settled: the radios run off the
 battery rail, not off USB. Pine64 state it plainly — the modem and WiFi/Bluetooth
@@ -19,19 +29,67 @@ keyboard dock, over more than an hour:
     voltage_now  126000        (0.13V, against a 2.9V minimum)
     energy-full  0 Wh          <- gauge cannot characterise the pack at all
 
-The driver is not at fault: `in_voltage2_raw` 116 x scale 1.1 = 127.6mV, exactly
-what it reports. All three ADC voltage channels read near zero, so nothing sees a
-cell. A fixed voltage with zero current is an open circuit, not a slow charge —
-either the pack's protection has latched permanently or the cell is dead.
+**Root cause found in the PMIC registers: the charger is being blocked by battery
+over-temperature protection.** Full working in
+[docs/thor.md](docs/thor.md#how-the-axp803-charger-works).
 
-Available input current is **not** the constraint, contrary to an earlier theory
-here. Under JumpDrive the PMIC reports `input_current_limit = 3000000` and
-`current_max = 1500000`, so 1.5A is on offer and nothing is taking it.
+The pack's NTC thermistor gates charging, and the PinePhone wires it for real —
+schematic page 06 fits R603 as `NC`, so there is no 10k stand-in resistor. The
+AXP803 reads the cell's own thermistor on its TS pin, and:
 
-- [ ] **Measure the pack across + and - with a multimeter, out of the phone.**
-      This is the cheap test that settles it. ~0V means the cell is gone;
-      3-something means the cell is fine and the fault is in the phone's charging
-      path.
+    39: 1f              over-temperature limit  VHTF = 0.397V
+    58: 0b  59: 03      TS pin ADC = 179 LSB    = 0.143V
+    01: 30              bit6 = 0                charger NOT charging
+    33: c5              charger enabled, 4.2V, 1200mA -- correctly configured
+
+Datasheet §9.4: over temperature means *"charger will stop charging and REG 01H[6]
+change to 0"* — exactly what REG 01H reports. The pulsing on the console is the
+charger retrying against the OTP hysteresis. Nothing is misconfigured, and input
+current is not the constraint: under JumpDrive the PMIC offers 1.5A and nothing
+takes it.
+
+No multimeter is needed to measure the thermistor — the TS pin's current source is
+**80µA**, derived from three datasheet rows agreeing to within 0.05%, so the ADC
+*is* an ohmmeter: `R = LSB * 10`. That matters because the pack has to be in the
+phone to be measured at all.
+
+**Why the threshold is wrong: the PinePhone's pack has a 3k NTC, and the AXP803's
+power-on defaults assume 10k.** Documented only in megi's kernel, which carries
+the curve in ohms — 4710R at 15°C down to 1080R at 50°C. Against that, the pack's
+measured 1.8k is **≈38°C**, and 2.2k under frozen peas is ≈33°C: a healthy sensor
+reading a real temperature, on a phone that had been running. The 5.0k limit is
+where a *10k* NTC sits at ~45°C and where a 3k NTC never sits at all.
+
+Mainline never reprograms it — `axp20x_battery`'s only temperature handling is in
+`axp717_set_battery_info()`, for a different PMIC — so mainline simply cannot
+charge a PinePhone whose battery is above about 10°C.
+
+**megi's kernel fixes this with no patch and no hardware change**, guarded on
+`of_machine_is_compatible("pine64,pinephone-1.2")`:
+
+    regmap_write(regmap, 0x39, 1080 * 80 / 12800);  // -> 6 -> 76.8mV -> 960 ohms
+
+960R is comfortably below the pack's 1.8k, so charging proceeds.
+
+Two earlier conclusions recorded here were wrong and are corrected above: that the
+cell was dead, and that the NTC was the wrong value or shunted by corrosion. Both
+came from assuming a 10k thermistor. **Do not replace the battery or clean
+contacts on the strength of them** — the pack is healthy.
+
+- [x] **Boot a megi kernel and confirm it charges.** Done via postmarketOS on SD —
+      1.3A on a DCP wall charger. The eMMC install was untouched.
+- [ ] **The threshold persists in the PMIC**, since REG 39H resets only on a true
+      power-on reset and mainline never writes it. So NixOS on its current
+      mainline kernel will keep charging after a reboot, until the pack is
+      disconnected or run flat. Useful as a stopgap; not a substitute for the
+      megi kernel, which sets it on every boot.
+- [ ] Do **not** add `x-powers,no-thermistor` handling to the AXP803 path, and do
+      not fit a 10k resistor across the TS contacts. Both force charging by
+      disabling a protection megi configures correctly for this battery — on a
+      pack that has been deeply discharged, which is when thermal limits matter
+      most. The regmap-debugfs write in
+      [13-kernel.nix](nix/5-phone/1-system/13-kernel.nix) stays as a diagnostic,
+      not as the fix.
 - [ ] Currently charging under JumpDrive, which is the best case the phone can
       offer: 1.5A available and near-zero draw, and it sidesteps the auto-boot
       loop that was burning the trickle. JumpDrive's kernel has no
@@ -65,14 +123,57 @@ and inert, because alt mode discovery needs a port controller to negotiate first
 postmarketOS works because megi's tree carries the driver; Tow-Boot works because
 U-Boot programs the ANX7688 itself.
 
-- [ ] Evaluate mobile-nixos or megi's kernel for Thor. It would settle the USB
-      gadget, DisplayPort, keyboard DT node and probably the WiFi items together,
-      rather than patching each separately against mainline. The mobile-nixos
-      device import is already in the flake, commented out in
-      [1-hardware-configuration.nix](nix/5-phone/1-system/1-hardware-configuration.nix).
-- [ ] Then revisit the DT patching in
-      [14-devicetree.nix](nix/5-phone/1-system/14-devicetree.nix) — most of it may
-      become unnecessary.
+[13-kernel.nix](nix/5-phone/1-system/13-kernel.nix) now builds megi's tree with
+**nixpkgs' `linuxManualConfig`**, taking only the source, config and patches from
+mobile-nixos' device directory rather than its `kernel-builder`.
+
+That builder turned out to be unusable here, and it would have been regardless of
+these changes: its `postInstall` deletes `lib/modules/*/build` and
+`lib/modules/*/source` and it produces no `dev` output, so there is **no build
+tree to compile out-of-tree modules against**. Fine for a phone with everything
+built in; fatal for Thor, whose root is ZFS. It also omits `features`, `config`
+and `commonMakeFlags`, all of which NixOS reads at evaluation time — each one
+surfacing only as the next error after the last was shimmed. `linuxManualConfig`
+supplies all of it, so the shims are gone.
+
+Two local changes ride on top:
+
+| Change | Why |
+| --- | --- |
+| `#undef` → `#define REGMAP_ALLOW_WRITE_DEBUGFS` | writable PMIC registers, for the thermistor threshold above |
+| `CONFIG_EFI=y`, `CONFIG_EFI_STUB=y` | megi ships `# CONFIG_EFI is not set`, which suits the extlinux boot postmarketOS uses; Thor goes through Tow-Boot UEFI into systemd-boot, which loads the kernel as an EFI application |
+
+The EFI options are appended to a generated copy of megi's config, where Kconfig's
+last-assignment-wins rule overrides the earlier `is not set`. Because `oldconfig`
+drops options with unmet dependencies *silently*, the result is asserted in
+`postConfigure` — a wrong guess costs two minutes rather than a full build.
+`features.efiBootStub` is declared alongside, since systemd-boot asserts on it
+separately and the two must agree.
+
+Verified by evaluation: Thor's `system.build.toplevel` evaluates, the kernel now
+has a `dev` output, and `zfs_2_4` reports `broken = false` against 6.17 (ZFS 2.4.3
+supports up to 7.0).
+
+- [ ] **Build it.** Not in any binary cache, so this is a full aarch64 kernel
+      build plus ZFS against it. Ragnarok is the only native aarch64 host but has
+      2GB of RAM;
+      [9-remote-builder.nix](nix/1-backup-server/1-system/9-remote-builder.nix)
+      now pins `nix.settings.cores = 2` so make does not run four compilers into
+      the OOM killer. Two things make 2GB more plausible than it sounds: megi's
+      config sets `CONFIG_DEBUG_INFO_NONE`, which is the single largest saving in
+      both memory and disk, and zram is already on from
+      [3-memory-management.nix](nix/0-common/1-system/4-core/3-memory-management.nix)
+      — build memory is anonymous and compresses well. Fallback if it still will
+      not fit: build on Odin under binfmt, correct but hours slower.
+- [ ] **Ragnarok is currently unreachable** — `ssh: connect to host
+      ragnarok.technet port 22: Connection timed out`, and a test build fell back
+      to local emulation. Bring it up before starting, or the kernel builds under
+      qemu by default without saying so.
+- [ ] Confirm `/sys/kernel/debug/regmap/sunxi-rsb-3a3/registers` comes up `0600`
+      afterwards, then try REG 39H before doing anything physical to the battery.
+- [ ] Recheck what is still needed once it boots — the USB gadget, DisplayPort,
+      keyboard DT node and WiFi items were all expected to be settled by this
+      kernel rather than by patching mainline separately.
 
 ## WiFi — where it actually stands
 
