@@ -661,11 +661,11 @@
         "nixpkgs": "nixpkgs_6"
       },
       "locked": {
-        "lastModified": 1785703208,
-        "narHash": "sha256-Etv1IBYRZVg0VHUPZPt2zSznc4N3kK7qFKi3IKVerTY=",
+        "lastModified": 1785796237,
+        "narHash": "sha256-HS6AAUy6NddowMZ6raDBUR7bhC3rUQLUkxPiN0FeEs0=",
         "owner": "BeatLink",
         "repo": "NixTool",
-        "rev": "7e0ff63a8b0586e3c8fed9b1374b4c56ca360725",
+        "rev": "5585a35751cb573face934cedc50fe2dd18eff1f",
         "type": "github"
       },
       "original": {
