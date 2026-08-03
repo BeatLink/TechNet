@@ -62,6 +62,20 @@
         gnome-terminal
         pipes
         phosh-mobile-settings
+
+        # stevia, the on-screen keyboard, defaults to the hunspell completer for
+        # word prediction and there was no dictionary installed anywhere, so it
+        # failed at every start:
+        #
+        #     Failed to init default completer 'hunspell':
+        #       Failed to find dictionary for en-us
+        #
+        # Word completion is not why the keyboard fails to draw -- it logs
+        # "Animation did not finish in time" immediately afterwards and still
+        # reports itself Started -- but a daemon erroring on startup is a
+        # variable worth removing before blaming the compositor, and the
+        # dictionary is wanted regardless.
+        hunspellDicts.en_US
     ];
 
     environment.etc."machine-info".text = lib.mkDefault ''
