@@ -13,6 +13,7 @@
 # supplies 5V to the phone over the pogo pins, and feeding the phone's port at
 # the same time drives two sources into one rail.
 #
+{ pkgs, ... }:
 {
     # ip5xxx_power, for the case's own battery via its IP5209, is `=y` in megi's
     # kernel and needs no declaration.
@@ -28,4 +29,34 @@
     # for the flashing and diagnostic tools, which is the only way to inspect the
     # MCU when the input driver does not bind.
     hardware.i2c.enable = true;
+
+    # i2c has no hotplug detection. The driver probes once at boot and logs
+    # "Keyboard was not found on the I2C bus" if the case is off, and nothing
+    # re-probes it later. The device node stays instantiated because the DT node
+    # is static, so a bind is all that is needed -- but something has to ask.
+    #
+    # Attaching the case puts 5V on the pogo pins, which the AXP803 sees as a
+    # VBUS change and udev reports as a power_supply event. That is the only
+    # attach signal this hardware produces. It does NOT fire when the phone is
+    # already on a charger, since VBUS is present either way; run
+    # `systemctl start pinephone-keyboard-bind` by hand in that case.
+    systemd.services.pinephone-keyboard-bind = {
+        description = "Bind the PinePhone keyboard case if it is attached";
+        serviceConfig = {
+            Type = "oneshot";
+            ExecStart = pkgs.writeShellScript "pinephone-keyboard-bind" ''
+                driver=/sys/bus/i2c/drivers/pinephone-keyboard
+                [ -e "$driver/3-0015" ] && exit 0
+                [ -e /sys/bus/i2c/devices/3-0015 ] || exit 0
+                echo 3-0015 > "$driver/bind" 2>/dev/null || true
+            '';
+        };
+    };
+
+    # systemctl rather than RUN+= directly: a udev RUN rule blocks the worker
+    # until it returns, and writing to a driver's bind attribute from inside one
+    # deadlocks against the uevents that bind itself emits.
+    services.udev.extraRules = ''
+        SUBSYSTEM=="power_supply", ACTION=="change", RUN+="${pkgs.systemd}/bin/systemctl --no-block start pinephone-keyboard-bind.service"
+    '';
 }
