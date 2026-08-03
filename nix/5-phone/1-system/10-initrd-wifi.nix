@@ -71,21 +71,40 @@ in
 
             services.wpa_supplicant-initrd = {
                 description = "Associate with WiFi so clevis can reach tang";
-                wantedBy = [ "initrd.target" ];
-                # Must follow the secret being copied in, and precede networkd:
-                # DHCP cannot succeed before association.
-                after = [ "initrd-nixos-copy-secrets.service" ];
+
+                # Started by the device appearing, not by initrd.target. The WiFi
+                # chip is on SDIO and takes a few seconds to enumerate: started
+                # from initrd.target this ran at 4.4s, before the interface
+                # existed, and died with
+                #
+                #     Could not read interface wld0 flags: No such device
+                #
+                # Restart alone did not save it. With the default rate limit of 5
+                # starts in 10s it exhausted its retries within seconds and gave
+                # up for the rest of the boot, so the initrd had no network at
+                # all and clevis fell through to the passphrase prompt.
+                bindsTo = [ "sys-subsystem-net-devices-${interface}.device" ];
+                after = [
+                    "sys-subsystem-net-devices-${interface}.device"
+                    "initrd-nixos-copy-secrets.service"
+                ];
+                wantedBy = [ "sys-subsystem-net-devices-${interface}.device" ];
                 before = [ "systemd-networkd.service" ];
-                unitConfig.DefaultDependencies = "no";
+
+                unitConfig = {
+                    DefaultDependencies = "no";
+                    # Belt and braces: if it does fail, keep retrying rather than
+                    # hitting the rate limit and stopping for good.
+                    StartLimitIntervalSec = 0;
+                };
                 serviceConfig = {
                     Type = "simple";
-                    # Not a oneshot and nothing waits on it. Association can take
-                    # a while or never happen -- away from home there is no
-                    # TechNet Wi-Fi at all -- and a boot that blocks on it would
-                    # be worse than one that falls through to the passphrase
-                    # prompt, which still works.
+                    # Nothing waits on this. Association can take a while or never
+                    # happen -- away from home there is no TechNet Wi-Fi at all --
+                    # and a boot that blocks on it would be worse than one that
+                    # falls through to the passphrase prompt, which still works.
                     Restart = "on-failure";
-                    RestartSec = 5;
+                    RestartSec = 2;
                     ExecStart = "${pkgs.wpa_supplicant}/bin/wpa_supplicant -i ${interface} -c ${confPath}";
                 };
             };
@@ -94,15 +113,24 @@ in
             # boot.initrd.systemd.network, not boot.initrd.network -- the latter
             # configures the scripted initrd, which is not in use here.
             #
-            # RequiredForOnline is off for the same reason the service does not
-            # block: away from this network the boot must fall through to the
-            # passphrase prompt rather than wait.
+            # RequiredForOnline = "routable" rather than "no", which is what it
+            # was first written as, on the reasoning that nothing should block
+            # when away from this network. That backfired: it is the *only* link
+            # in the initrd, so wait-online had nothing left to be satisfied by
+            # and sat out its full 120s timeout with the zfs import queued behind
+            # it. Measured, the initrd had WiFi at 12s and DHCP at 16s, then did
+            # nothing until the pool imported at 129s.
+            #
+            # Marking it routable lets wait-online finish the moment DHCP lands.
+            # The away-from-home case is handled by the timeout below instead,
+            # which is the right tool for it.
             network = {
                 enable = true;
+                wait-online.timeout = 30;
                 networks."20-${interface}" = {
                     matchConfig.Name = interface;
                     networkConfig.DHCP = "yes";
-                    linkConfig.RequiredForOnline = "no";
+                    linkConfig.RequiredForOnline = "routable";
                 };
             };
         };
