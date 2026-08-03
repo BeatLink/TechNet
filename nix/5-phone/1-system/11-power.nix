@@ -13,15 +13,17 @@
 #
 { lib, ... }:
 {
-    boot.kernelModules = [
-        "axp20x_battery" # Battery gauge
-        "axp20x_usb_power" # USB input, and what charging current is drawn
-        "typec"
-        "typec_ucsi"
-    ];
+    # Nothing to load. megi's kernel builds exactly two modules in the whole
+    # tree; what provides the battery and charger sysfs here is all `=y`:
+    #     axp20x_battery      the battery gauge
+    #     axp20x_usb_power    USB input, and what charging current is drawn
+    #     typec               the Type-C port class
+    #
+    # typec_ucsi was also listed and is `# CONFIG_TYPEC_UCSI is not set`, so it
+    # was a guaranteed modprobe failure on every boot.
 
     # upower is what desktop shells read for charge level and time remaining; the
-    # kernel drivers above only expose /sys/class/power_supply.
+    # kernel drivers only expose /sys/class/power_supply.
     services.upower = {
         enable = true;
         # A phone should warn earlier than a laptop: there is no second battery
