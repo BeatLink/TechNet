@@ -274,16 +274,41 @@ between it and being usable without a serial cable, roughly in order.
       network. Needs the initrd to bring up the DSI panel — check whether the
       display comes up early enough in stage 1, since that is the part most
       likely not to work.
-- [ ] **On-screen keyboard at the greeter.** Even past decryption the phone
-      cannot be logged into without a hardware keyboard or the serial console.
-      Phosh ships `squeekboard`, but the greeter enables it separately from the
-      session — check whether autologin is masking the problem rather than
-      solving it.
-- [ ] **Watch phosh's restart count after the reboot.** It reached
-      `NRestarts=6` while LightDM held /dev/dri/card1 — phosh has
-      `Restart=always`, so it crash-looped against the greeter rather than
-      failing outright. With the display manager removed it should settle at 0.
-      If it keeps climbing, the problem is phosh itself and not the greeter.
+- [ ] **Rotation and the on-screen keyboard both fail, and both point at phoc.**
+      Everything below them is verified working, so this is not sensor or
+      configuration:
+
+      | Layer | State |
+      | --- | --- |
+      | MPU6050 + iio-sensor-proxy | live; tracks left-up/right-up/bottom-up |
+      | `ACCEL_MOUNT_MATRIX` | applied; upright now reads `normal` |
+      | `orientation-lock` | `false`, auto-rotate on in the shell |
+      | stevia OSK | running, owns `sm.puri.OSK0`, `SetVisible` works |
+      | phosh | stable, `NRestarts=0`, no display manager |
+
+      Calling `SetVisible true` over D-Bus makes phosh **hide the PIN keypad to
+      make room** and then nothing draws, so phosh is handling the request and
+      the surface never appears. stevia logs `Animation did not finish in time:
+      0.000000`, which is what a surface with no frame callbacks looks like.
+
+      phoc throws a layer-shell assertion on every boot:
+
+          phoc_layout_transaction_notify_layer_configured:
+            assertion 'self->pending_layer_configures > 0' failed
+
+      A layer surface is exactly what an OSK is, and rotation is the other thing
+      phosh asks phoc to do. Both failing while everything underneath works
+      points at the compositor.
+
+      Next thing to try is a version bump, not more configuration. nixpkgs pins
+      phosh/phoc/stevia at **0.54.0** while upstream is at **0.56.0**, and
+      `xdg-desktop-portal-phosh` is already **0.55.0** in the same closure, so
+      the stack is not even internally consistent. The assertion is not
+      documented upstream, so check the phoc issue tracker against 0.55/0.56
+      before assuming a bump fixes it.
+
+      Not a blocker for using the phone: it is stuck in one orientation and the
+      lock screen needs a numeric PIN.
 - [ ] **Test the keyboard accessory** — see [above](#keyboard-accessory--should-work-now-untested).
       If it works it also sidesteps the two items above, since the case provides
       a real keyboard for both the passphrase prompt and the greeter.
