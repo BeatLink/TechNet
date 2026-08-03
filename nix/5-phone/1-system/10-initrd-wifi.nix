@@ -135,4 +135,34 @@ in
             };
         };
     };
+
+    # The initrd's networkd writes /run/systemd/netif/state, /run survives the
+    # switch to the real root, and NetworkManager takes over from there -- so
+    # networkd never runs again to update it. The file stays frozen at whatever
+    # the initrd last saw:
+    #
+    #     OPER_STATE=no-carrier
+    #     CARRIER_STATE=no-carrier
+    #
+    # Anything asking sd_network_get_operational_state() then believes this host
+    # has no network. systemd-timesyncd is the one that bites: it added its
+    # fallback servers, decided it was offline, and never contacted one, so the
+    # clock stayed months behind and every HTTPS fetch on the phone failed
+    # certificate validation. Odin has no initrd networking, the file does not
+    # exist there, the call returns -ENOENT and timesyncd assumes it is online --
+    # which is why the same 0-common config works on every other host.
+    #
+    # Removing the directory restores that -ENOENT. Confirmed: timesyncd
+    # contacted a server and stepped the clock within a second of the rm.
+    systemd.services.clear-initrd-networkd-state = {
+        description = "Discard initrd systemd-networkd state that nothing updates";
+        wantedBy = [ "sysinit.target" ];
+        before = [ "systemd-timesyncd.service" ];
+        unitConfig.ConditionPathExists = "/run/systemd/netif";
+        serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = "${pkgs.coreutils}/bin/rm -rf /run/systemd/netif";
+        };
+    };
 }
