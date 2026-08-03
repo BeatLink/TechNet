@@ -171,7 +171,10 @@
                             "redhat.telemetry.enabled" = true;
                             # Extensions come from the store and mutableExtensionsDir
                             # is off, so there is nothing for an auto-update to do.
-                            "extensions.autoUpdate" = false;
+                            # As of 1.125 this is a string enum ("on"/"off"), not a
+                            # boolean -- `false` fails validation and silently falls
+                            # back to the "on" default.
+                            "extensions.autoUpdate" = "off";
                         };
                         extensions = with pkgs.nix-vscode-extensions.open-vsx; [
                             hediet.vscode-drawio
