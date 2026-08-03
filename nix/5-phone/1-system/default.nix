@@ -12,6 +12,5 @@
         ./11-power.nix
         ./12-keyboard.nix
         ./13-kernel.nix
-        ./14-devicetree.nix
     ];
 }
