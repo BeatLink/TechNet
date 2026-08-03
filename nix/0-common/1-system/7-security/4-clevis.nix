@@ -163,7 +163,28 @@ let
 in
 {
     options.technet.clevis = {
-        enable = lib.mkEnableOption "clevis/tang ZFS unlocking with rebind tooling";
+        enable = lib.mkEnableOption "clevis/tang ZFS unlocking at boot";
+
+        rebindTool = {
+            enable = lib.mkOption {
+                type = lib.types.bool;
+                default = true;
+                description = ''
+                    Install rebind-clevis and the zfs_passphrase secret it needs,
+                    independently of whether unlocking at boot is enabled.
+
+                    Deliberately separate, because the two have a chicken-and-egg
+                    relationship: rebind-clevis is what *writes* the JWE, and
+                    unlocking at boot is what consumes it. Gating the tool behind
+                    `enable` means a freshly installed host cannot produce the JWE
+                    without first turning on a feature that has nothing to read.
+
+                    Defaults on. It costs one sops secret and one script, and
+                    nothing it installs runs on its own -- rebind-clevis only does
+                    anything when invoked by hand.
+                '';
+            };
+        };
 
         datasets = lib.mkOption {
             type = lib.types.listOf lib.types.str;
@@ -200,42 +221,49 @@ in
 
     };
 
-    config = lib.mkIf cfg.enable {
-        sops.secrets.zfs_passphrase = {
-            sopsFile = cfg.sopsFile;
-            mode = "0400";
-        };
-
-        environment.systemPackages = [ rebindClevis ];
-
-        boot.initrd = {
-            clevis = {
-                enable = true;
-                useTang = true;
-                devices = lib.genAttrs cfg.datasets (ds: {
-                    secretFile = jweFile ds;
-                });
+    config = lib.mkMerge [
+        # The tool and the passphrase it reads. Available whether or not unlocking
+        # at boot is on, so a new host can write its JWE before enabling the
+        # feature that needs one to exist.
+        (lib.mkIf (cfg.rebindTool.enable || cfg.enable) {
+            sops.secrets.zfs_passphrase = {
+                sopsFile = cfg.sopsFile;
+                mode = "0400";
             };
 
-            systemd.services.clevis-retry = {
-                description = "Keep retrying clevis/tang unlock in the background until it succeeds";
-                # Deliberately NOT a blocking oneshot and deliberately not ordered before
-                # anything: the loop can run forever when tang is unreachable, so any
-                # target that waits for it would stall the whole boot -- including the
-                # initrd sshd, which is the only way in to fix such a machine remotely.
-                wantedBy = [ "initrd.target" ];
-                after = [ "systemd-modules-load.service" ];
-                unitConfig = {
-                    DefaultDependencies = "no";
-                    ConditionPathExists = "/etc/clevis";
+            environment.systemPackages = [ rebindClevis ];
+        })
+
+        (lib.mkIf cfg.enable {
+            boot.initrd = {
+                clevis = {
+                    enable = true;
+                    useTang = true;
+                    devices = lib.genAttrs cfg.datasets (ds: {
+                        secretFile = jweFile ds;
+                    });
                 };
-                serviceConfig = {
-                    Type = "simple";
-                    Restart = "on-failure";
-                    RestartSec = 15;
+
+                systemd.services.clevis-retry = {
+                    description = "Keep retrying clevis/tang unlock in the background until it succeeds";
+                    # Deliberately NOT a blocking oneshot and deliberately not ordered before
+                    # anything: the loop can run forever when tang is unreachable, so any
+                    # target that waits for it would stall the whole boot -- including the
+                    # initrd sshd, which is the only way in to fix such a machine remotely.
+                    wantedBy = [ "initrd.target" ];
+                    after = [ "systemd-modules-load.service" ];
+                    unitConfig = {
+                        DefaultDependencies = "no";
+                        ConditionPathExists = "/etc/clevis";
+                    };
+                    serviceConfig = {
+                        Type = "simple";
+                        Restart = "on-failure";
+                        RestartSec = 15;
+                    };
+                    script = retryScript;
                 };
-                script = retryScript;
             };
-        };
-    };
+        })
+    ];
 }

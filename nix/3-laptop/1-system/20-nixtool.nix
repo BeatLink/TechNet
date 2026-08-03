@@ -12,7 +12,6 @@
             Thor = "thor.technet";
         };
 
-        hostValues.Thor.SSH_TARGET = "root@172.16.42.1";
     };
 
     technet.nixtool = {
