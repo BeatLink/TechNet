@@ -215,17 +215,36 @@ in
         };
 
         sopsFile = lib.mkOption {
-            type = lib.types.path;
-            description = "sops file holding zfs_passphrase for this host.";
+            type = lib.types.nullOr lib.types.path;
+            default = null;
+            description = ''
+                sops file holding zfs_passphrase for this host.
+
+                Null means this host has nothing to unlock, and the whole module
+                stays inert. That is not the same as `enable = false`:
+                `rebindTool.enable` defaults on, so without this a host that
+                never mentions clevis at all still reaches for the secret and
+                fails to evaluate. Odin is exactly that case -- it runs the tang
+                server the others unlock against and cannot unlock itself.
+            '';
         };
 
     };
 
     config = lib.mkMerge [
+        {
+            assertions = [
+                {
+                    assertion = cfg.enable -> cfg.sopsFile != null;
+                    message = "technet.clevis.enable is on for ${config.networking.hostName} but no sopsFile is set, so there is no zfs_passphrase to unlock with.";
+                }
+            ];
+        }
+
         # The tool and the passphrase it reads. Available whether or not unlocking
         # at boot is on, so a new host can write its JWE before enabling the
         # feature that needs one to exist.
-        (lib.mkIf (cfg.rebindTool.enable || cfg.enable) {
+        (lib.mkIf ((cfg.rebindTool.enable || cfg.enable) && cfg.sopsFile != null) {
             sops.secrets.zfs_passphrase = {
                 sopsFile = cfg.sopsFile;
                 mode = "0400";
