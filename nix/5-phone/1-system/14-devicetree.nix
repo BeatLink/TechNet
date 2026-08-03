@@ -14,33 +14,49 @@
 # and 6.18, so this is a gap in the upstream device tree rather than Tow-Boot
 # passing a stale one.
 #
-# The delay is the change actually being tested. ext_clock is left alone for now:
-# mainline does not wire one here either, and adding a second unverified change
-# at the same time would make a failure impossible to attribute.
+# The overlay is applied here rather than through hardware.deviceTree.overlays,
+# which silently produced an unpatched tree -- verified by decompiling the result
+# both ways. fdtoverlay resolves &wifi_pwrseq through the base tree's __symbols__
+# node, so the overlay must be compiled with -@ to carry the matching __fixups__.
 #
-{ ... }:
+# Only the delay is changed. ext_clock is left alone: mainline does not wire one
+# here either, and two unverified changes at once would make a failure
+# impossible to attribute.
+#
+{ config, lib, pkgs, ... }:
+let
+    dtbName = "allwinner/sun50i-a64-pinephone-1.2.dtb";
+
+    patchedDtbs = pkgs.runCommand "pinephone-dtbs-wifi-delay" {
+        nativeBuildInputs = [ pkgs.dtc ];
+    } ''
+        mkdir -p "$out/allwinner"
+
+        cat > overlay.dts <<'EOF'
+        /dts-v1/;
+        /plugin/;
+        &wifi_pwrseq {
+            post-power-on-delay-ms = <200>;
+        };
+        EOF
+
+        dtc -@ -I dts -O dtb -o overlay.dtbo overlay.dts
+        fdtoverlay \
+            -i "${config.boot.kernelPackages.kernel}/dtbs/${dtbName}" \
+            -o "$out/${dtbName}" \
+            overlay.dtbo
+
+        # Fail loudly rather than shipping a tree that silently lacks the fix.
+        if ! dtc -I dtb -O dts "$out/${dtbName}" 2>/dev/null | grep -q "post-power-on-delay-ms"; then
+            echo "overlay did not apply to $out/${dtbName}" >&2
+            exit 1
+        fi
+    '';
+in
 {
     hardware.deviceTree = {
         enable = true;
-        name = "allwinner/sun50i-a64-pinephone-1.2.dtb";
-
-        overlays = [
-            {
-                name = "pinephone-wifi-pwrseq-delay";
-                dtsText = ''
-                    /dts-v1/;
-                    /plugin/;
-
-                    / {
-                        fragment@0 {
-                            target-path = "/wifi-pwrseq";
-                            __overlay__ {
-                                post-power-on-delay-ms = <200>;
-                            };
-                        };
-                    };
-                '';
-            }
-        ];
+        name = dtbName;
+        package = lib.mkForce patchedDtbs;
     };
 }
