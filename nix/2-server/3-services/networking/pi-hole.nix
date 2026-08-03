@@ -204,4 +204,15 @@
         IOSchedulingClass = "best-effort";
         IOSchedulingPriority = 0;
     };
+
+    # FTL serves NTP as well as DNS and DHCP, and advertises itself as the time
+    # server in its DHCP leases -- but the module opens only 53 and 67, so every
+    # client that took that lease was pointed at a port the firewall dropped.
+    # Clients then sat at NTPSynchronized=no indefinitely: systemd-timesyncd only
+    # falls back to its FallbackNTP list when no server is configured at all, and
+    # a configured-but-silent one is never given up on.
+    #
+    # Ragnarok was 10 years behind because of this, which broke TLS to the binary
+    # cache: certificates read as "not yet valid".
+    networking.firewall.allowedUDPPorts = [ 123 ];
 }
