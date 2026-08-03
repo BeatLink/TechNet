@@ -279,6 +279,11 @@ between it and being usable without a serial cable, roughly in order.
       Phosh ships `squeekboard`, but the greeter enables it separately from the
       session — check whether autologin is masking the problem rather than
       solving it.
+- [ ] **Watch phosh's restart count after the reboot.** It reached
+      `NRestarts=6` while LightDM held /dev/dri/card1 — phosh has
+      `Restart=always`, so it crash-looped against the greeter rather than
+      failing outright. With the display manager removed it should settle at 0.
+      If it keeps climbing, the problem is phosh itself and not the greeter.
 - [ ] **Test the keyboard accessory** — see [above](#keyboard-accessory--should-work-now-untested).
       If it works it also sidesteps the two items above, since the case provides
       a real keyboard for both the passphrase prompt and the greeter.
@@ -315,6 +320,39 @@ mount the ESP by device node — see the partlabel collision below.
 
 ## Known bugs
 
+- [ ] **The remote builder has never worked — the key path does not exist.**
+      [21-remote-builder.nix](nix/3-laptop/1-system/21-remote-builder.nix) points
+      `sshKey` at `/persistent/etc/ssh/ssh_host_ed25519_key`, and that file is
+      not there on Odin. Reproduced exactly as the daemon runs it:
+
+          # ssh -i /persistent/etc/ssh/ssh_host_ed25519_key beatlink@ragnarok.technet
+          Warning: Identity file ... not accessible: No such file or directory
+          beatlink@ragnarok.technet: Permission denied (publickey).
+
+      So every aarch64 build has silently fallen back to emulation on Odin. It
+      shows up in build logs as one line that is easy to read past:
+
+          cannot build on 'ssh-ng://beatlink@ragnarok.technet':
+          error: failed to start SSH connection
+
+      Ragnarok was reachable the whole time — up since 10:22, answering
+      interactive ssh as beatlink. It is the daemon's key, not the host.
+
+      Find where Odin's host key actually lives (`/etc/ssh/ssh_host_ed25519_key`
+      is also absent, so check what 4-persistence.nix keeps and what sops uses as
+      its age identity) and point `sshKey` at that. Worth doing: it is the
+      difference between ~25 minutes and ~10 for a ZFS rebuild, and it was the
+      justification for the ARC and cores tuning in
+      [9-remote-builder.nix](nix/1-backup-server/1-system/9-remote-builder.nix),
+      which has therefore never been exercised.
+- [ ] **`zfs-kernel` is the only thing left on the critical path.** The kernel
+      now substitutes in seconds, so a nixpkgs bump costs ~25 minutes rebuilding
+      the ZFS module against it under emulation. Two ways out, in order of
+      preference: fix the remote builder above, or run attic on Heimdall and
+      cache Thor's closures privately. Do **not** publish zfs-kernel from
+      PinePhoneKernel — the module and userland must be the same ZFS version, and
+      coupling a public cache to the consumer's ZFS version breaks root-on-ZFS
+      machines rather than merely slowing them down.
 - [ ] **Partlabel collision between Odin and Thor.** Odin's fstab resolves
       `/boot` via `/dev/disk/by-partlabel/disk-root-drive-efi`, and Thor's disko
       config produces the *same* partlabel. While the phone's disk is attached the
@@ -338,10 +376,7 @@ mount the ESP by device node — see the partlabel collision below.
       predates the SSH-key newline fix and the build-before-partition reordering.
       Both are pushed but not locked here, so Odin's installed `nixtool` would
       still write host keys without the trailing newline.
-- [ ] **Ragnarok's clock does not survive a reboot.** It has no RTC battery and
-      depends on NTP. Fixed for now by opening udp/123 on Heimdall, but confirm
-      it syncs on its own after a cold boot — a wrong clock breaks TLS to the
-      binary cache and makes it build everything from source.
+- [ ] **Ragnarok's clock does not survive a reboot.
 
 ## Reference — resolved
 
