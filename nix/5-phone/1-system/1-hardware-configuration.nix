@@ -26,6 +26,8 @@
         "console=ttyS0,115200"
     ];
 
+    hardware.deviceTree.name = "allwinner/sun50i-a64-pinephone-1.2.dtb";
+
     # megi's kernel is monolithic: the entire tree builds exactly two modules,
     # efivarfs and r8723bs. Everything else this phone needs is `=y`, including
     # MMC_SUNXI, MMC_BLOCK, EXT4_FS, VFAT_FS, the AXP803 drivers, the USB gadget
