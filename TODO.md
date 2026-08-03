@@ -3,7 +3,39 @@
 Outstanding work, most blocking first. Background for the Thor items is in
 [docs/thor.md](docs/thor.md).
 
-## Blocking — Thor has no network
+## Blocking — WiFi: second fault, behind the first
+
+The 6.12 pin **worked** and fixed what it was meant to. On 6.18 the pwrseq probe
+failed outright and the WiFi MMC host never registered at all; on 6.12:
+
+    [3.148686] sunxi-mmc 1c10000.mmc: allocated mmc-pwrseq
+    [3.174459] sunxi-mmc 1c10000.mmc: initialized, max. request size: 16384 KB
+    [3.211196] mmc2: Failed to initialize a non-removable card
+
+So the host now probes and registers as `mmc2`, and the DT does describe the
+`wifi@1` child — but the RTL8723CS never answers. Note the timing: **37 ms**
+from controller init to giving up, with no regulator errors.
+
+The likely cause is that the PinePhone's `wifi-pwrseq` node carries only
+`compatible` and `reset-gpios` — no `post-power-on-delay-ms`. Other boards using
+this chip specify `200`. Confirmed the node is equally bare in the kernel's own
+DTB at both 6.12 and 6.18, so this is not Tow-Boot supplying a stale tree.
+
+- [ ] Add a device tree overlay setting `post-power-on-delay-ms = <200>` on
+      `wifi-pwrseq`, and possibly `clocks = <&rtc CLK_OSC32K_FANOUT>` /
+      `clock-names = "ext_clock"`, which mainline also omits here.
+- [ ] `hardware.deviceTree.enable` is already true but `name` is null, so
+      Tow-Boot's tree is used unmodified. Setting
+      `hardware.deviceTree.name = "allwinner/sun50i-a64-pinephone-1.2.dtb"` plus
+      `overlays` is the mechanism — but check whether Tow-Boot's UEFI honours the
+      `devicetree` line systemd-boot would emit, or overrides it with its own.
+- [ ] If the overlay route does not stick, the fallback is a kernel with the
+      PinePhone DT patches (mobile-nixos or megi's tree) rather than mainline.
+
+Deploying any of this still goes through Tow-Boot USB mass storage until WiFi
+works — see below.
+
+## Superseded — Thor has no network
 
 Thor is installed and boots, but WiFi does not come up on 6.13+ (see
 [13-kernel.nix](nix/5-phone/1-system/13-kernel.nix) for the full analysis). It is
@@ -52,6 +84,11 @@ None of the driver work is deployed yet; it arrives with the rebuild above.
       `172.16.42.1` from initrd.
 - [ ] **Battery and charging.** `upower -d` should report charge and time
       remaining.
+- [ ] **No on-screen keyboard at the login screen.** The phone cannot be logged
+      into without a hardware keyboard or the serial console. Phosh ships
+      `squeekboard`, but the greeter needs it enabled separately from the
+      session — check whether phoc/phosh's greeter is configured for it, and
+      whether autologin is masking the problem rather than solving it.
 - [ ] Drop the workaround: the SSH host keys were fixed by hand on Thor
       (appending the newline nixtool omitted). Confirm a fresh install no longer
       needs it.
@@ -69,6 +106,56 @@ Thor prompts for its passphrase on every boot; clevis is deliberately off.
 It only unlocks where tang is reachable **and** Odin's session is unlocked, so
 away from home it still prompts. Keep the passphrase — ZFS native encryption has
 one wrapping key per encryption root and no spare keyslots.
+
+## USB gadget does not work on a mainline kernel
+
+Settled by a controlled test: keyboard case removed, cable connected, phone
+booted into Linux, gadget correctly created by the initrd module.
+
+    axp20x-usb: online=1 type=USB     <- VBUS present, phone charging
+    udc state:  not attached          <- no host on the data lines
+
+Power flows and the PMIC sees it; the musb controller never sees a host. So the
+cable, the port and the case are all fine — the ANX7688 muxes the USB-C data
+path and sets the role, and its driver has never been merged. `/sys/class/usb_role/`
+and `/sys/class/typec/` are both empty, so there is nothing to switch.
+
+postmarketOS works because megi's tree carries that driver; Tow-Boot works
+because U-Boot programs the ANX7688 itself. Charging works on mainline precisely
+because it needs no data path.
+
+This is not fixable by configuration. It needs an out-of-tree kernel.
+
+This undercuts two things built on the assumption that it would work:
+
+- [ ] [10-initrd-usb-gadget.nix](nix/5-phone/1-system/10-initrd-usb-gadget.nix) —
+      cannot attach, so clevis can never reach tang over USB. Either drop it, or
+      keep it dormant against a future kernel that carries the driver.
+- [ ] [19-thor-usb-link.nix](nix/3-laptop/1-system/19-thor-usb-link.nix) on Odin —
+      the matching half, equally inert.
+- [ ] Decide how Thor is meant to unlock at all. WiFi in initrd needs
+      wpa_supplicant plus the PSK in an initrd on an unencrypted ESP, which was
+      rejected earlier for good reason. The remaining options are entering the
+      passphrase by hand, or an out-of-tree kernel.
+
+Deploying to an offline Thor therefore goes through Tow-Boot USB mass storage:
+expose the eMMC, unlock the pool on Odin, `nix copy` the closure in, and run
+`switch-to-configuration boot` under `nixos-enter`. No wipe involved.
+
+Two things that make Tow-Boot's UMS work, both learned the hard way:
+
+- **Take the phone out of the keyboard case.** The case supplies 5V over the
+  pogo pins, which stops the USB-C port entering peripheral mode. Tow-Boot
+  cheerfully reports `Allwinner mUSB OTG (Peripheral)` while the host sees
+  nothing at all.
+- **Connect the cable before starting UMS.** Tow-Boot binds the gadget when the
+  command starts; attaching a host afterwards does not make it re-enumerate.
+  Ctrl+C does not return to the menu either -- it falls through and boots.
+
+Never use `-a` forms while the phone's disk is attached. `zpool export -a`,
+`zfs unmount -a` and friends act on Odin's own pools too, and the partlabels
+collide so `/dev/disk/by-partlabel/disk-root-drive-efi` resolves to whichever
+disk udev saw last. Name the pool and mount by device node.
 
 ## Known bugs
 
