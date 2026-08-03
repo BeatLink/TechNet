@@ -14,10 +14,15 @@
 # the same time drives two sources into one rail.
 #
 {
-    boot.kernelModules = [
-        "pinephone_keyboard" # Key matrix, over i2c
-        "ip5xxx_power" # The case's own battery, via its IP5209
-    ];
+    # ip5xxx_power, for the case's own battery via its IP5209, is `=y` in megi's
+    # kernel and needs no declaration.
+    #
+    # pinephone_keyboard is a different matter: mobile-nixos' config has
+    # `# CONFIG_KEYBOARD_PINEPHONE is not set`, so the driver megi's tree carries
+    # is not actually built. Declaring it only produced a modprobe failure every
+    # boot. Enabling it means adding the option to the kernel config in
+    # PinePhoneKernel, not listing it here -- see TODO.md.
+    boot.kernelModules = [ ];
 
     # The keyboard sits on an i2c bus; i2c-dev makes it reachable from userspace
     # for the flashing and diagnostic tools, which is the only way to inspect the

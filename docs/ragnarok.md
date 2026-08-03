@@ -10,11 +10,57 @@
 Ragnarok is a low-power SBC whose job is to hold backups. It is a WireGuard
 client, dialling in to Heimdall.
 
+It lives off site, at family's home, so that the backups survive physical damage
+to or destruction of the house the rest of the network is in. That placement is
+why it dials in over WireGuard rather than sitting on the LAN.
+
 Despite both being quad Cortex-A53 aarch64, it shares no silicon with Thor:
 Ragnarok is Rockchip RK3328, Thor is Allwinner A64. Nothing vendor-specific
 transfers between them — different U-Boot targets, different DTBs, and recovery
 is Rockchip maskrom rather than Allwinner FEL. Its ethernet is `dwmac_rk` +
 `stmmac`, both in the initrd so the tunnel has a link to run over.
+
+## Hardware
+
+2 GB RAM, and three drives — nothing is internal, both the system and the data
+live on USB-attached 2.5" disks:
+
+| Use | Size | Format |
+| --- | --- | --- |
+| Tow-Boot | 32 GB | MicroSD card |
+| NixOS | 128 GB | 2.5" SATA USB SSD |
+| Backup drive | 5 TB | 2.5" SATA USB HDD |
+
+Two things to know before touching it physically:
+
+- It will not drive certain monitors over HDMI directly. An Xtech HDMI-to-VGA
+  adapter in between works.
+- Serial is the reliable console. Wire black to GND, white to RXD, brown to TXD,
+  then:
+
+  ```sh
+  nix-shell -p minicom --run 'sudo minicom -D /dev/ttyUSB0 -b 115200 --color=on'
+  ```
+
+References — [product page](https://pine64.com/product/rock64-2gb-single-board-computer/),
+[ROCK64 wiki](https://wiki.pine64.org/wiki/ROCK64),
+[software releases](https://wiki.pine64.org/wiki/ROCK64_Software_Releases).
+
+## Tow-Boot
+
+Ragnarok boots U-Boot built through Tow-Boot. This board has no SPI flash, so
+the Tow-Boot *shared disk image* goes on the 32 GB SD card instead. That is what
+lets the board boot any UEFI aarch64 ISO or drive, with no board-specific imaging
+or partition layout required on the target media.
+
+It builds from a fork, on the `rock64` branch —
+[BeatLink/Tow-Boot](https://github.com/BeatLink/Tow-Boot/tree/rock64):
+
+```sh
+git clone https://github.com/BeatLink/Tow-Boot -b rock64
+nix-build --arg src ./Tow-Boot -A pine64-rock64
+dd if=shared.disk-image.img of=/dev/XXX bs=1M oflag=direct,sync status=progress
+```
 
 ## Backups
 
