@@ -78,6 +78,34 @@
         hunspellDicts.en_US
     ];
 
+    # The stk3310 is an ambient light sensor as well as a proximity sensor, so
+    # phosh will track it unless told not to. This is only the default: a value
+    # the user has already set through Settings lives in their own dconf
+    # database and wins over anything declared here.
+    programs.dconf.profiles.user.databases = [
+        {
+            settings."org/gnome/settings-daemon/plugins/power".ambient-enabled = false;
+        }
+    ];
+
+    # After systemd-backlight, which restores the brightness saved at the last
+    # shutdown and would otherwise land after this and undo it.
+    systemd.services.backlight-max = {
+        description = "Set the panel backlight to maximum at boot";
+        wantedBy = [ "multi-user.target" ];
+        after = [ "systemd-backlight@backlight:backlight.service" ];
+        serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = pkgs.writeShellScript "backlight-max" ''
+                for panel in /sys/class/backlight/*; do
+                    [ -e "$panel/max_brightness" ] || continue
+                    cat "$panel/max_brightness" > "$panel/brightness"
+                done
+            '';
+        };
+    };
+
     environment.etc."machine-info".text = lib.mkDefault ''
         CHASSIS="handset"
     '';
