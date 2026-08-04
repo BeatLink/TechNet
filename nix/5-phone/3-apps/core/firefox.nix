@@ -17,8 +17,22 @@
 # Persistence is unaffected; it lives outside the module in 0-common/desktop and
 # the profile format is unchanged, so the existing profile carries over.
 #
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 let
+    # Paused, not removed.
+    #
+    # It works -- a window opens by handoff in 2.9s against 8.6s cold -- but it
+    # buys that by spending ~400MB and by keeping a browser resident all
+    # session, and it treats the symptom. The cause is that nothing on this
+    # phone renders on the GPU: GTK4 wants GLES 3.0, Mali-400 tops out at GLES
+    # 2.0, so everything falls back to software. Fixing that is worth more than
+    # hiding the cost of not having fixed it, so this waits until that is done
+    # and the numbers are re-measured.
+    #
+    # Everything below is left intact, including the phoc hidden-window patch it
+    # depends on, so turning it back on is this one line.
+    enable = false;
+
     # Fixed rather than generated per build: it has to be identical in the page
     # and in the environment, and regenerating it on every rebuild would rebuild
     # the page and restart Firefox for no reason.
@@ -36,12 +50,14 @@ in
 {
     programs.firefox.enable = false;
 
-    # Hide only the warm window from the overview.
+    # Hide only the warm window: not listed in the overview, and not drawn.
     #
-    # Read by the phoc patch in 1-system/14-phosh-bump.nix, which skips
-    # exporting a matching toplevel through zwlr_foreign_toplevel_manager_v1 --
-    # so phosh is never told that window exists and cannot list it. Set on
-    # phosh.service because phoc runs as its child and inherits it.
+    # Read by the phoc patch in 1-system/14-phosh-bump.nix, which for a matching
+    # title skips both exporting the toplevel through
+    # zwlr_foreign_toplevel_manager_v1 -- so phosh is never told that window
+    # exists and cannot list it -- and rendering it, so it is not what you see
+    # when nothing is covering it. Set on phosh.service because phoc runs as its
+    # child and inherits it.
     #
     # Matched on title, not app_id. Every Firefox window shares app_id
     # `firefox`, so matching that would hide the browser entirely; the warm
@@ -51,7 +67,9 @@ in
     # The patch re-exports a window whose title stops matching, so if this one
     # is ever navigated away from the marker page it becomes a normal, reachable
     # window rather than being stranded invisible.
-    systemd.services.phosh.environment.PHOC_HIDDEN_TITLES = warmMarker;
+    systemd.services.phosh.environment = lib.mkIf enable {
+        PHOC_HIDDEN_TITLES = warmMarker;
+    };
 
     home-manager.users.beatlink = {
         home.packages = [ pkgs.firefox-mobile ];
@@ -86,7 +104,7 @@ in
         # useless -- tested here, the headless instance took 377MB, held the
         # profile lock, and then failed to produce a window at all when asked,
         # timing out after 62s.
-        systemd.user.services.firefox-warm = {
+        systemd.user.services.firefox-warm = lib.mkIf enable {
             Unit = {
                 Description = "Keep Firefox warm so windows open by handoff";
                 PartOf = [ "graphical-session.target" ];

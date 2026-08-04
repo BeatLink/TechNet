@@ -1,6 +1,21 @@
---- a/src/view.c	2026-08-04 17:27:24.773179765 -0500
-+++ b/src/view.c	2026-08-04 17:27:24.835181024 -0500
-@@ -315,6 +315,29 @@
+diff -ru a/src/render.c b/src/render.c
+--- a/src/render.c	2026-08-04 18:16:27.509539057 -0500
++++ b/src/render.c	2026-08-04 18:16:27.534539549 -0500
+@@ -306,6 +306,10 @@
+ static void
+ render_view (PhocOutput *output, PhocView *view, PhocRenderContext *ctx)
+ {
++  /* Do not render views the user asked to keep out of sight */
++  if (phoc_view_is_hidden (view))
++    return;
++
+   /*  Do not render views fullscreened on other outputs */
+   if (phoc_view_is_fullscreen (view) && phoc_view_get_fullscreen_output (view) != output)
+     return;
+diff -ru a/src/view.c b/src/view.c
+--- a/src/view.c	2026-08-04 18:16:27.501538900 -0500
++++ b/src/view.c	2026-08-04 18:16:27.533539530 -0500
+@@ -315,6 +315,49 @@
  }
  
  
@@ -26,11 +41,31 @@
 +  return FALSE;
 +}
 +
++/**
++ * phoc_view_is_hidden:
++ * @self: The view
++ *
++ * Whether this view is one the user asked to keep out of sight entirely: not
++ * listed to the shell, and not drawn.
++ *
++ * Returns: %TRUE if the view should be hidden
++ */
++gboolean
++phoc_view_is_hidden (PhocView *self)
++{
++  PhocViewPrivate *priv;
++
++  g_assert (PHOC_IS_VIEW (self));
++  priv = phoc_view_get_instance_private (self);
++
++  return phoc_title_is_hidden (priv->title);
++}
++
 +
  static void
  view_create_foreign_toplevel_handle (PhocView *self)
  {
-@@ -324,6 +347,11 @@
+@@ -324,6 +367,11 @@
    g_assert (PHOC_IS_VIEW (self));
    priv = phoc_view_get_instance_private (self);
  
@@ -42,7 +77,7 @@
    priv->toplevel_handle =
      wlr_foreign_toplevel_handle_v1_create (desktop->foreign_toplevel_manager_v1);
    g_assert (priv->toplevel_handle);
-@@ -1556,14 +1584,16 @@
+@@ -1556,14 +1604,16 @@
  
    view_update_output (self, NULL);
  
@@ -66,7 +101,7 @@
  }
  
  /**
-@@ -1654,6 +1684,14 @@
+@@ -1654,6 +1704,15 @@
    g_free (priv->title);
    priv->title = g_strdup (title);
  
@@ -74,10 +109,22 @@
 +    if (priv->toplevel_handle)
 +      phoc_view_destroy_toplevel_handle (self);
 +  } else if (priv->toplevel_handle == NULL && phoc_view_is_mapped (self)) {
-+    /* Stopped matching, so let the window be reachable again. */
++    /* Stopped matching, so let the window be seen and reachable again. */
 +    view_create_foreign_toplevel_handle (self);
 +  }
++  phoc_view_damage_whole (self);
 +
    if (priv->toplevel_handle)
      wlr_foreign_toplevel_handle_v1_set_title (priv->toplevel_handle, title ?: "");
  
+diff -ru a/src/view.h b/src/view.h
+--- a/src/view.h	2026-08-04 18:16:27.505538978 -0500
++++ b/src/view.h	2026-08-04 18:16:27.534539549 -0500
+@@ -199,6 +199,7 @@
+ PhocOutput *          phoc_view_get_output (PhocView *self);
+ pid_t                 phoc_view_get_pid (PhocView *self);
+ bool                  phoc_view_is_mapped (PhocView *self);
++gboolean              phoc_view_is_hidden (PhocView *self);
+ PhocViewDecoPart      phoc_view_get_deco_part (PhocView *self, double sx, double sy);
+ void                  phoc_view_set_scale_to_fit (PhocView *self, gboolean enable);
+ gboolean              phoc_view_get_scale_to_fit (PhocView *self);
