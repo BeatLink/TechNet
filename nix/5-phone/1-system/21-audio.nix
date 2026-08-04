@@ -112,9 +112,15 @@ in
         serviceConfig = {
             Type = "oneshot";
             RemainAfterExit = true;
-            # `|| true` because a first boot has nothing stored yet, and a card
-            # that is absent -- the SD card is removable -- is not a failure.
-            ExecStart = "${pkgs.alsa-utils}/bin/alsactl restore || true";
+            # The leading `-` is systemd's ignore-failure prefix, and it has to
+            # be that rather than `|| true`: ExecStart is not run through a
+            # shell, so the shell form is passed to alsactl as arguments and it
+            # fails with "Cannot find soundcard '||'".
+            #
+            # Failure is tolerated because a first boot has nothing stored yet,
+            # and a card that is absent -- the SD card is removable -- is not an
+            # error worth failing activation over.
+            ExecStart = "-${pkgs.alsa-utils}/bin/alsactl restore";
         };
     };
 }
