@@ -154,11 +154,29 @@ in
     #
     # Removing the directory restores that -ENOENT. Confirmed: timesyncd
     # contacted a server and stepped the clock within a second of the rm.
+    # DefaultDependencies = "no" is load-bearing, not tidiness. Ordering before
+    # systemd-timesyncd puts this inside sysinit.target, while the default
+    # dependencies add After=basic.target -- and basic.target comes after
+    # sysinit.target. That is a cycle, and systemd breaks cycles by deleting
+    # jobs rather than failing:
+    #
+    #     Found ordering cycle: dbus-broker.service/start after dbus.socket/start
+    #       after sysinit.target/start after systemd-timesyncd.service/start
+    #       after clear-initrd-networkd-state.service/start after basic.target
+    #     Job dbus-broker.service/start deleted to break ordering cycle
+    #
+    # It took out dbus-broker, dbus.socket, nix-daemon.socket and
+    # sshd-unix-local.socket. No D-Bus means NetworkManager never starts, so the
+    # phone booted to a working desktop with no network and no way in but the
+    # serial console. Same reason clevis-retry in 0-common sets it.
     systemd.services.clear-initrd-networkd-state = {
         description = "Discard initrd systemd-networkd state that nothing updates";
         wantedBy = [ "sysinit.target" ];
         before = [ "systemd-timesyncd.service" ];
-        unitConfig.ConditionPathExists = "/run/systemd/netif";
+        unitConfig = {
+            DefaultDependencies = "no";
+            ConditionPathExists = "/run/systemd/netif";
+        };
         serviceConfig = {
             Type = "oneshot";
             RemainAfterExit = true;
