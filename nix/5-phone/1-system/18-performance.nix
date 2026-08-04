@@ -124,6 +124,57 @@
     # sustained load -- the dock's 1080p output is itself part of this budget.
     powerManagement.cpuFreqGovernor = "schedutil";
 
+    # Raise the passive thermal trip from 75C to 80C.
+    #
+    # Measured idle on this phone, nothing running: 57-59C, throttle state 0 for
+    # every sample, full 1152MHz. So there is no thermal problem at rest and 17C
+    # of headroom before the trip -- the throttling only appears once sustained
+    # load closes that gap, which is what a passively cooled phone does.
+    #
+    # Under load it crosses 75C, step_wise drops a frequency step, the die cools,
+    # the throttle releases, and it does that every few seconds. Five more
+    # degrees is five degrees of load before that cycle starts, and after it
+    # starts, longer between steps.
+    #
+    # Deliberately modest against the trips above it, which are unchanged:
+    #
+    #   80C  passive    this
+    #   90C  hot        emergency notification
+    #   110C critical   hardware shutdown
+    #
+    # Ten degrees of margin to `hot` is the point. The reports of PinePhones
+    # shutting down without warning and discolouring their screens came from
+    # throttling being effectively disabled and the die reaching the 90s, not
+    # from a trip moved five degrees.
+    #
+    # The cost is real and is heat in the hand. This is a v1.2 board, which
+    # predates the thermal pads and graphene foil that v1.2a added between the
+    # SoC shield and the screen -- so it has less help moving that heat out than
+    # a newer unit does. If it becomes unpleasant to hold, this is the knob that
+    # did it, and 75000 puts it back.
+    #
+    # A service rather than a kernel patch because the trip lives in the device
+    # tree and sysfs accepts the change at runtime -- the file is 0644 and the
+    # write takes effect immediately.
+    systemd.services.thermal-trip = {
+        description = "Raise the CPU passive thermal trip point";
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = pkgs.writeShellScript "thermal-trip" ''
+                zone=/sys/class/thermal/thermal_zone0
+                # Only if it really is the passive trip -- a kernel change that
+                # reorders the trips should not silently move `critical`.
+                if [ "$(cat "$zone/trip_point_0_type")" = "passive" ]; then
+                    echo 80000 > "$zone/trip_point_0_temp"
+                else
+                    echo "thermal-trip: trip_point_0 is not passive, leaving it alone" >&2
+                fi
+            '';
+        };
+    };
+
     # The compositor should be the last thing to stall. phoc runs as a child of
     # phosh.service, so it inherits all of this and needs no unit of its own.
     #
