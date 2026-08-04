@@ -43,6 +43,26 @@ and no credential is checked in.
 | `boot` | Activate on next boot only |
 | `rollback` | Return to the previous generation |
 
+### Run builds and deploys in the background
+
+Always start `nix build` and `nixtool run maintenance/rebuild` as background
+tasks — or hand them to a subagent — rather than blocking on them in the
+foreground. Two reasons, and the second is the important one:
+
+- They routinely outrun a foreground command timeout. An aarch64 closure under
+  binfmt, or anything that has to compile ZFS against a new kernel, is tens of
+  minutes; a foreground call gets killed at the limit and the output is lost.
+- A foreground build blocks the conversation. Backgrounding it means you can
+  keep giving instructions while it runs, instead of waiting for it to return.
+
+Poll the task output rather than piping the build through `tail` — `tail`
+buffers, so the log stays empty until the build finishes and progress is
+invisible for the whole run.
+
+One trap when cancelling: `pkill -f "nix build ..."` matches the pattern against
+its own command line and kills the calling shell along with the build. Match on
+something narrower, or kill by PID.
+
 Other useful commands — `nixtool list` shows all of them:
 
 ```sh
