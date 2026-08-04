@@ -97,7 +97,7 @@
                     }
                     {
                         # PinePhone
-                        PublicKey = "3HLX2V7Z1+40bXbetzOt/K8BX7/65my77j0SlwIBDXo=";
+                        PublicKey = "LQNOv6TQuKk7u/SQrafjrPqh4t++StUf4ELrhK7ZcBc=";
                         AllowedIPs = [ "10.100.100.4/32" ];
                         PersistentKeepalive = 25;
                     }
