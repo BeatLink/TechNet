@@ -8,8 +8,8 @@ Outstanding work, most blocking first. Background for the Thor items is in [docs
 Built and waiting to deploy, most of it unverified on hardware.
 
 * Deploy Ragnarok: SMR queue depths and Syncthing CPU quota
-* Apps launched into phosh's own cgroup dilute the compositor's memory floor
-* Booster only sees apps with their own app-* unit, Firefox has none
+* Try a higher CPUWeight for the focused app, 200 may be too timid
+* Consider lz4 over zstd on Thor, CPU is scarcer than the SD bus
 * Syncthing GUI password and reverse proxy, all hosts
 
 ## Ragnarok
