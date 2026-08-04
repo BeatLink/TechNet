@@ -19,6 +19,12 @@
                             type = "filesystem";
                             format = "vfat";
                             mountpoint = "/boot";
+                            # vfat has no permission bits of its own, so without a
+                            # mask every file lands 0777 and any user can read
+                            # /boot/loader/random-seed -- which bootctl flags on
+                            # each install as "world accessible, which is a
+                            # security hole". umask covers both files and dirs.
+                            mountOptions = [ "umask=0077" ];
                         };
                     };
                     zroot = {
