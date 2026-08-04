@@ -33,7 +33,17 @@
                     xwayland = "immediate";
                     outputs = {
                         DSI-1 = {
-                            scale = 2;
+                            # 175%. Not a dconf setting: org.gnome.desktop.interface
+                            # has only `scaling-factor`, which is an integer, and
+                            # `text-scaling-factor`, which resizes fonts and nothing
+                            # else. Real fractional output scaling is the
+                            # compositor's, so it belongs here -- the module's type
+                            # accepts a float.
+                            #
+                            # 720x1440 at 1.75 gives a 411x823 logical screen,
+                            # against 360x720 at the previous 2. More fits on
+                            # screen, which is what the on-screen keyboard needed.
+                            scale = 1.75;
                             # No `rotate`. The panel is natively portrait at
                             # 720x1440, so a static rotate = "90" turned it
                             # permanently sideways -- which is what "stuck in
@@ -84,7 +94,27 @@
     # database and wins over anything declared here.
     programs.dconf.profiles.user.databases = [
         {
-            settings."org/gnome/settings-daemon/plugins/power".ambient-enabled = false;
+            settings = {
+                "org/gnome/settings-daemon/plugins/power".ambient-enabled = false;
+                "org/gnome/desktop/interface".show-battery-percentage = true;
+
+                # Widgets on the lock screen. The built-in status icons -- wifi,
+                # bluetooth, battery -- are already drawn there; these are the
+                # optional panels underneath the clock. Names are the .plugin
+                # basenames from phosh's lib/phosh/plugins.
+                "sm/puri/phosh/plugins".lock-screen = [
+                    "media-players"
+                    "upcoming-events"
+                    "emergency-info"
+                ];
+
+                # Extra top-bar icons, which the lock screen shares.
+                # simple-custom-status-icon is deliberately left out: it shows
+                # nothing until given an icon and a command to run.
+                "mobi/phosh/shell/plugins".status-icons = [
+                    "load-meter-status-icon"
+                ];
+            };
         }
     ];
 
