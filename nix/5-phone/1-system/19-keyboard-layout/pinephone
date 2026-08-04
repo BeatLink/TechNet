@@ -1,0 +1,49 @@
+// PinePhone keyboard case
+//
+// The keycaps annotate the number row twice, colour-coded to the two
+// modifiers: blue for Pine, orange for FN.
+//
+//     &        *        (
+//     7        8        9
+//     _  F7    =  F8    -  F9
+//     ^blue    ^blue    ^blue     Pine  -> symbol
+//        ^orange  ^orange ^orange  FN   -> function key
+//
+// The driver already gets FN right: its built-in keymap puts F1-F10 on the FN
+// layer, along with Insert, Home, End, PageUp/Down and the arrows on FN plus
+// ; , . / ' [ ], all matching the orange labels. None of that is touched here.
+//
+// What is missing is the Pine layer. The driver maps the Pine key to
+// KEY_LEFTMETA and implements no second layer, so every blue symbol is
+// unreachable -- measured with evtest, Pine+7 emits plain KEY_7, and KEY_MINUS
+// is absent from the device's capability bitmask entirely.
+//
+// So Pine becomes the level 3 switch and the blue symbols go on level 3. Pure
+// xkb: nothing reaches the kernel, and the FN layer is left alone.
+//
+// Derived from the Simple Pine variant of ppkb-layouts:
+// https://codeberg.org/phalio/ppkb-layouts
+
+default partial alphanumeric_keys
+xkb_symbols "pine" {
+
+    include "us(basic)"
+
+    // The Pine key. lwin_switch makes LEFTMETA the level 3 modifier, which is
+    // what the blue labels assume.
+    include "level3(lwin_switch)"
+
+    name[Group1] = "PinePhone (Pine symbols)";
+
+    //         base  shift        Pine (level 3)
+    key <AE01> { [ 1, exclam,      bar        ] };
+    key <AE02> { [ 2, at,          backslash  ] };
+    key <AE03> { [ 3, numbersign,  sterling   ] };
+    key <AE04> { [ 4, dollar,      EuroSign   ] };
+    key <AE05> { [ 5, percent,     asciitilde ] };
+    key <AE06> { [ 6, asciicircum, grave      ] };
+    key <AE07> { [ 7, ampersand,   underscore ] };
+    key <AE08> { [ 8, asterisk,    equal      ] };
+    key <AE09> { [ 9, parenleft,   minus      ] };
+    key <AE10> { [ 0, parenright,  plus       ] };
+};
