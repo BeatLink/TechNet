@@ -31,6 +31,11 @@
 # overflow behind it.
 #
 {
+    config,
+    pkgs,
+    ...
+}:
+{
     # The ARC cap is confirmed on the first boot carrying it: c_max 512MB, ARC
     # size 516MB, available up from 429MB to 1756MB.
     #
@@ -129,5 +134,63 @@
     # On here and not on Odin because it is a response to 2972MB of RAM. A host
     # that is not reclaiming has nothing to protect anything from.
     technet.desktop.focusBoost.enable = true;
+
+    # 500 rather than the module's default 200, because the constraint measured
+    # on this phone is not the one the default was written for.
+    #
+    # Sampled with the session in normal use: memory pressure some avg10/60/300
+    # all 0.00 with 1554MB available, io pressure 3.44, and cpu pressure 63.92 /
+    # 65.99 / 72.69. Nothing is reclaiming, so MemoryLow above is inert and
+    # CPUWeight is the only part of the boost doing work -- which argues for
+    # giving it more than a 2x edge over its idle siblings.
+    #
+    # Read the cpu figure carefully though: a large share of it is Syncthing's
+    # own CPUQuota, since a quota-throttled task is runnable-but-not-running and
+    # that is exactly what PSI counts. Its cgroup alone sat at avg10 54.45. So
+    # this is a device that is CPU-bound rather than a device with a scheduling
+    # fault -- Firefox alone takes over a core of four at 1.15GHz -- and 500 is
+    # worth having without expecting it to change the character of the thing.
+    technet.desktop.focusBoost.cpuWeight = 500;
+
+    # lz4 rather than zstd, on both pools.
+    #
+    # zstd is the better ratio and the wrong trade here. z_wr_iss -- the ZFS
+    # write pipeline, where compression happens -- is the largest single CPU
+    # consumer on this phone across a whole boot, 514s of cumulative time ahead
+    # of Syncthing, phosh and Firefox, and it spikes past a full core during
+    # writes. Those are kernel threads in the root cgroup, so no CPUQuota,
+    # CPUWeight or Nice anywhere in this file reaches them; the only way to
+    # spend less CPU there is to ask for less work.
+    #
+    # The ratio being traded away costs little, because the resource it saves is
+    # the one in surplus: io pressure measured 3.44 against cpu pressure in the
+    # sixties, and the card's own ceiling is 23.9MB/s, which lz4 has no trouble
+    # feeding on four cores.
+    #
+    # A service rather than a property set by hand, because compression is
+    # recorded in the pool and would otherwise survive only until the next
+    # install -- and the pools are made by nixtool and by disko, neither of
+    # which is host-specific. Idempotent, so it costs one no-op zfs call per
+    # boot. Only new blocks are affected; existing data keeps whatever it was
+    # written with until rewritten.
+    systemd.services.zfs-compression = {
+        description = "Set ZFS compression to lz4 on this host's pools";
+        wantedBy = [ "multi-user.target" ];
+        after = [ "zfs.target" ];
+        serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = pkgs.writeShellScript "zfs-compression-lz4" ''
+                # `|| true` because the data pool lives on a removable card, and a
+                # phone booted without it should not fail a unit over it.
+                for dataset in \
+                    root-pool-${config.networking.hostName}/root \
+                    data-pool-${config.networking.hostName}/storage
+                do
+                    ${config.boot.zfs.package}/sbin/zfs set compression=lz4 "$dataset" || true
+                done
+            '';
+        };
+    };
 
 }
