@@ -77,14 +77,33 @@ in
                 inherit version;
                 src = phoshSrc final "phoc" "sha256-Xzb7C8ZadjS+fPPYlxoEMGcGkcs5yYzhGZs4Mk2lA70=";
 
-                # Let a window exist without phosh knowing about it.
+                # Let a window exist without phosh knowing about it, and without
+                # it being drawn.
                 #
-                # phosh only lists what phoc exports through
-                # zwlr_foreign_toplevel_manager_v1, so a toplevel that is never
-                # announced cannot appear in the overview. That is the only way
-                # to get a hidden window: Wayland has no hide primitive,
-                # set_minimized means minimised rather than hidden, and phoc has
-                # no window rules.
+                # Two halves, because either alone is insufficient:
+                #
+                #   not exported     phosh only lists what phoc announces through
+                #                    zwlr_foreign_toplevel_manager_v1, so a
+                #                    toplevel that is never announced cannot
+                #                    appear in the overview.
+                #
+                #   not rendered     but it is still a mapped surface, so the
+                #                    compositor keeps compositing it -- and with
+                #                    nothing above it, that means it is what you
+                #                    see. An early return in render_view() skips
+                #                    only the drawing; focus, damage and the
+                #                    view's lifecycle are untouched, so the
+                #                    Wayland connection stays live and the
+                #                    process stays warm, which is the entire
+                #                    point of it existing.
+                #
+                # This is the only way to get a hidden window: Wayland has no
+                # hide primitive, set_minimized means minimised rather than
+                # hidden -- and phoc does not implement it in any case
+                # (xdg-toplevel.c: "We don't do window menus or minimize") --
+                # and phoc has no window rules. Moving it off-screen does not
+                # work either: phoc_view_move() is undone by the maximise path,
+                # and phosh maximises everything.
                 #
                 # Wanted for the warm Firefox in 3-apps/core/firefox.nix, which
                 # has to hold a real window to serve handoffs but should not be
