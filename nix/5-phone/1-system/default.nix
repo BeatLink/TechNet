@@ -20,5 +20,6 @@
         ./19-keyboard-layout
         ./21-audio.nix
         ./22-bluetooth.nix
+        ./23-location.nix
     ];
 }
