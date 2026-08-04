@@ -62,6 +62,61 @@
             };
         };
     };
+
+    # phosh.service runs with PAMName = "login", so starting it is what makes
+    # logind open a session and start user@1000.service -- the user systemd
+    # manager that runs everything in home-manager's systemd.user.services.
+    #
+    # Nothing ordered that after home-manager's activation, and on this phone
+    # activation takes about eleven seconds. Measured on the boot that prompted
+    # this: phosh at 63.2s, home-manager-beatlink.service 63.3s -> 74.6s, and
+    # the user manager reaching default.target at 74.5s. It enumerated
+    # default.target.wants before linkGeneration had written the symlinks into
+    # it, so syncthing.service -- enabled, correct, and with its symlink present
+    # on disk a second later -- was simply never queued.
+    #
+    # home-manager's own fallback does not cover this either. Its activation
+    # ends by reloading the user manager and starting anything newly enabled,
+    # but only if `systemctl --user is-system-running` says running or degraded.
+    # Mid-boot it says "starting", so activation logs "User systemd daemon not
+    # running. Skipping reload." and nothing starts the unit. Whether the race
+    # is won or lost varies boot to boot, which is why it looked intermittent.
+    #
+    # systemd-user-sessions.service is the barrier this is for, and
+    # home-manager-<user>.service already declares Before on it; display
+    # managers in nixpkgs are ordered after it for the same reason. The phosh
+    # module, having no display manager, never picked that up.
+    #
+    # The cost is real: the session now waits for activation, so the shell
+    # appears about eleven seconds later. That is the right trade -- starting
+    # the session before the user's dotfiles and units are linked is a broader
+    # correctness problem than one Syncthing unit.
+    systemd.services.phosh.after = [ "systemd-user-sessions.service" ];
+
+    # tty1 belongs to phosh, so nothing else may claim it.
+    #
+    # phosh.service declares Conflicts=getty@tty1.service, which means whichever
+    # of the two starts last stops the other. nixpkgs drops autovt@tty1 from
+    # getty.target only when a display manager is enabled -- and this host
+    # deliberately has none, for the reasons above -- so getty.target goes on
+    # wanting it. The getty module's own comment says why that is the dangerous
+    # half:
+    #
+    #     We can't just rely on 'Conflicts=autovt@tty1.service' because
+    #     'switch-to-configuration switch' will start 'autovt@tty1.service'
+    #
+    # Which is what kept happening. Every `switch` started getty@tty1, systemd
+    # resolved the conflict by stopping phosh first, and the session died in the
+    # middle of the rebuild -- measured: phosh stopped at 824.35s, getty started
+    # at 825.15s. Restart=always does not undo it, because a unit stopped by an
+    # explicit job stays stopped, so the phone was left with no shell at all.
+    #
+    # The other VTs are unaffected. logind hardcodes spawning autovt@ttyN on VT
+    # switch, so Ctrl+Alt+F2 still gets a console on demand, and the serial
+    # getty on ttyS0 -- the one that recovered this phone once already -- is a
+    # separate unit this does not touch.
+    systemd.targets.getty.wants = lib.mkForce [ ];
+
     # unpatched gnome-initial-setup is partially broken in small screens
     #services.gnome.gnome-initial-setup.enable = false;
 
@@ -121,11 +176,29 @@
                     "emergency-info"
                 ];
 
-                # Syncthing is driven from here rather than a desktop tray app.
-                # Odin runs syncthingtray, which is Qt and desktop-shaped; this
-                # is phosh's own quick setting, so it belongs in the pull-down
-                # next to wifi and bluetooth.
+                # Toggles in the pull-down, alongside the built-in wifi,
+                # bluetooth, rotation and torch buttons phosh draws itself.
+                # These are the optional ones, and every name here is a
+                # .plugin shipped by the 0.56 build from 14-phosh-bump.nix.
+                #
+                # Syncthing is driven from here rather than a desktop tray app:
+                # Odin runs syncthingtray, which is Qt and desktop-shaped, so
+                # the phone uses phosh's own quick setting instead. It needs
+                # syncbus on the session bus to do anything -- see
+                # 3-apps/technet/syncbus.nix.
+                #
+                # location toggles org.gnome.system.location, which is why
+                # geoclue2 has to stay enabled for the button to mean
+                # anything; mobile-data and wifi-hotspot drive NetworkManager,
+                # the first through ModemManager's connection and the second
+                # by putting the wifi radio into shared mode.
                 "sm/puri/phosh/plugins".quick-settings = [
+                    "mobile-data-quick-setting"
+                    "wifi-hotspot-quick-setting"
+                    "location-quick-setting"
+                    "dark-mode-quick-setting"
+                    "caffeine-quick-setting"
+                    "pomodoro-quick-setting"
                     "syncthing-quick-setting"
                 ];
 
