@@ -30,6 +30,7 @@ let
     remoteStorage = lib.concatMapStringsSep "\n" (host:
         "sftp://beatlink@${lib.toLower host}.technet/Storage ${host}"
     ) (lib.filter (host: host != config.networking.hostName) [
+        "Odin"
         "Heimdall"
         "Ragnarok"
         "Thor"
