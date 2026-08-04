@@ -1,75 +1,68 @@
 # Audio
 #
-# Point ALSA at the UCM profiles, which is what gives this phone a speaker and
-# an earpiece.
+# Give ALSA a use case profile that matches this card, which is what gives the
+# phone a speaker and an earpiece.
 #
-# Symptom this fixes: both the default sink and the default source were the
+# The symptom was that both the default sink and the default source were the
 # snd-aloop Loopback card, and the real codec had no sink at all. That looks
 # like a defaulting problem and is not one. Walking it back:
 #
 #   * The PinePhone card sat on the profile `input:stereo-fallback` -- input
-#     only -- so no output node was ever created for it to be the default of.
+#     only -- so no output node existed for it to be the default of.
 #   * Its only output port was `analog-output-headphones`. No Speaker, no
-#     Earpiece, so even with an output profile there was nowhere to play except
-#     headphones.
-#   * Those two ports come from ALSA's use case manager, and alsa-ucm-conf ships
-#     exactly the right profile -- ucm2/Allwinner/A64/PinePhone/HiFi.conf defines
-#     SectionDevice "Speaker", "Earpiece" and "Mic".
-#   * ALSA never found it. There is no ALSA_CONFIG_UCM2 in PipeWire's
-#     environment, no /etc/alsa/ucm2 and no ucm2 under /run/current-system/sw,
-#     so the profiles were in the closure and unreachable.
+#     Earpiece, so even with an output profile there was nowhere to play.
+#   * Those ports come from ALSA's use case manager, and none was being applied:
+#     `alsaucm -c PinePhone list _verbs` failed with
+#     "failed to import PinePhone use case configuration -2".
 #
-# Which leaves three cards visible and the two useless ones winning by default:
-# snd-dummy and snd-aloop are both compiled into megi's kernel rather than being
-# modules, so blacklisting cannot remove them, and snd-dummy even describes
-# itself as "Built-in Audio", which is why it is hard to spot in wpctl output.
+# alsa-ucm-conf ships exactly the right profile and it is already reachable --
+# nixpkgs' alsa-lib symlinks ucm2 into its own share/alsa, and that resolves.
+# What it does not do is match. From ucm.conf, the lookup is
 #
-# Set on the units rather than through environment.variables because these are
-# user services and inherit the session environment only if it was imported
-# before they started -- which is the same race documented for syncthing in
-# 6-display.nix.
+#     ucm2/conf.d/${CardDriver}/${CardLongName}.conf
+#
+# and the shipped file is conf.d/simple-card/PinePhone.conf. That matches a card
+# whose *long* name is "PinePhone", which is what mainline and postmarketOS
+# produce. megi's tree names it differently:
+#
+#     2 [PinePhone      ]: simple-card - PinePhone
+#                          PINE64-PinephoneA64-
+#
+# so the driver matches, the long name does not, and nothing is found. Adding a
+# file under the long name is the whole fix -- confirmed by hand before writing
+# it down: verbs become HiFi and Voice Call, and HiFi offers Speaker, Earpiece,
+# Mic, Headset and Headphones.
+#
+# Done as a derived tree pointed at by ALSA_CONFIG_UCM2 rather than by
+# overriding alsa-ucm-conf, deliberately. alsa-lib embeds alsa-ucm-conf's path,
+# so overriding it rebuilds alsa-lib and everything downstream of it -- the
+# whole audio stack, under emulation, for one added filename.
+#
+# Set on the units as well as environment.variables because user services
+# inherit the session environment only if it was imported before they started.
 #
 { pkgs, ... }:
+let
+    # Upstream's tree plus one alias. Copied rather than symlinked because the
+    # store is read-only and the copy has to gain a file.
+    ucm2 = pkgs.runCommand "alsa-ucm-conf-pinephone-longname" { } ''
+        cp -r --no-preserve=mode ${pkgs.alsa-ucm-conf}/share/alsa/ucm2 "$out"
+        cp "$out/conf.d/simple-card/PinePhone.conf" \
+            "$out/conf.d/simple-card/PINE64-PinephoneA64-.conf"
+    '';
+in
 {
     systemd.user.services = {
-        pipewire.environment.ALSA_CONFIG_UCM2 = "${pkgs.alsa-ucm-conf}/share/alsa/ucm2";
-        wireplumber.environment.ALSA_CONFIG_UCM2 = "${pkgs.alsa-ucm-conf}/share/alsa/ucm2";
+        pipewire.environment.ALSA_CONFIG_UCM2 = "${ucm2}";
+        wireplumber.environment.ALSA_CONFIG_UCM2 = "${ucm2}";
     };
 
-    # Same value for anything else that opens ALSA directly -- alsamixer, or a
-    # call daemon reaching past PipeWire.
-    environment.variables.ALSA_CONFIG_UCM2 = "${pkgs.alsa-ucm-conf}/share/alsa/ucm2";
+    # For anything else that opens ALSA directly -- alsamixer, or a call daemon
+    # reaching past PipeWire.
+    environment.variables.ALSA_CONFIG_UCM2 = "${ucm2}";
 
     # For inspecting UCM by hand. `alsaucm -c PinePhone list _verbs` is the check
-    # that the profile is being found at all, and it was not installed while
-    # diagnosing this.
+    # that a profile is found at all, and it was not installed while diagnosing
+    # this, which is why the first attempt at a fix went out untested.
     environment.systemPackages = [ pkgs.alsa-utils ];
-
-    # Force the codec onto a profile that has an output.
-    #
-    # Left alone it selects `input:stereo-fallback` and stays there, so the card
-    # contributes a source and no sink at all, and the default sink falls to
-    # snd-dummy because nothing better exists. Setting it by hand with
-    # `wpctl set-profile` works and does not survive a restart of the audio
-    # stack, which is why it belongs here.
-    #
-    # This is the fallback path, not the good one. Until the UCM profile above
-    # actually resolves, the only output port the card offers is
-    # analog-output-headphones -- so this yields working headphones and neither
-    # a speaker nor an earpiece. It is worth having anyway: a real sink that
-    # persists beats no sink and a dummy default.
-    #
-    # api.acp.auto-profile is false on this device, which is why the profile has
-    # to be named rather than left to WirePlumber to pick.
-    services.pipewire.wireplumber.extraConfig."51-pinephone-output" = {
-        "monitor.alsa.rules" = [
-            {
-                matches = [ { "device.name" = "alsa_card.platform-sound"; } ];
-                actions.update-props = {
-                    "device.profile" = "output:stereo-fallback+input:stereo-fallback";
-                    "api.acp.auto-profile" = false;
-                };
-            }
-        ];
-    };
 }
