@@ -39,6 +39,12 @@
         sopsFile = "${config.technet.secrets.path}/syncthing.yaml";
         owner = "beatlink";
     };
+    sops.secrets.syncthing_gui_password = {
+        sopsFile = "${config.technet.secrets.path}/syncthing.yaml";
+        owner = "beatlink";
+    };
+
+    networking.firewall.interfaces."wg0".allowedTCPPorts = [ 8384 ];
 
     # Syncthing runs as beatlink and creates its own Database, Data and Config
     # directories, but it cannot create the parents: /Storage/Services came out
@@ -68,6 +74,8 @@
         openDefaultPorts = true;
         cert = config.sops.secrets.syncthing_cert.path;
         key = config.sops.secrets.syncthing_key.path;
+        guiAddress = "0.0.0.0:8384";
+        guiPasswordFile = config.sops.secrets.syncthing_gui_password.path;
         user = "beatlink";
         group = "beatlink";
         databaseDir = "/Storage/Services/Syncthing/Database";
@@ -114,10 +122,31 @@
 
     # Behind borg and the backup jobs. This host's reason to exist is receiving
     # backups; syncing is the secondary tier and should yield to it.
+    #
+    # CPUQuota is the addition that does something. Nice and CPUWeight only
+    # decide who wins a contest for the CPU, and the lesson from Thor was that on
+    # an otherwise idle box there is no contest to win: a Nice 19 Syncthing still
+    # took every core it could reach. A quota is an absolute ceiling whether or
+    # not anything else wants the time, which is what keeps a first sync from
+    # being the whole machine. 50% is two of four cores.
+    #
+    # Worth being honest about what it does not fix. The load average here was 41
+    # on four cores, and most of that is tasks blocked on the disk rather than
+    # tasks wanting the CPU, so capping CPU moves that number far less than it
+    # looks like it should. The disk side is the queue depths in
+    # 1-system/4-data-drive.nix and the folder concurrency above -- and on this
+    # host that side has a floor, because the pool is a single shingled drive
+    # whose write stalls are a property of the media rather than of scheduling.
+    #
+    # The IOSchedulingClass and IOWeight here reach the block layer without
+    # Syncthing's priority attached, because ZFS issues the actual I/O from its
+    # own threads. They are kept because they still apply to whatever Syncthing
+    # does outside the pool, not because they pace the sync.
     systemd.services.syncthing.serviceConfig = {
         Nice = 15;
         IOSchedulingClass = "idle";
         IOWeight = 30;
         CPUWeight = 30;
+        CPUQuota = "50%";
     };
 }

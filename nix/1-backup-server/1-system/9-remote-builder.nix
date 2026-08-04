@@ -1,9 +1,13 @@
 # Remote builder access
 #
-# Odin offloads aarch64 builds here, since this is the only native aarch64 host.
-# Its nix-daemon runs as root and connects as beatlink, using Odin's SSH host key
-# as the client key -- so what is authorised here is Odin's host identity rather
-# than a person's key. beatlink is already a trusted user, which is what lets the
+# Dormant. Odin no longer offloads here -- it builds aarch64 locally under
+# binfmt, for the reasons in 3-laptop/1-system/21-remote-builder.nix, chiefly
+# that this is a 2GB board whose actual job is receiving backups. The
+# authorisation is kept so that turning it back on is a one-file change there.
+#
+# What is authorised is Odin's host identity rather than a person's key: its
+# nix-daemon runs as root and connects as beatlink using Odin's SSH host key as
+# the client key. beatlink is already a trusted user, which is what lets the
 # daemon hand off a build.
 #
 {
@@ -11,8 +15,10 @@
         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINnDCoaEbXWh0rJshd2alkRQrGo+jsmKssXXMVbivl4p Odin"
     ];
 
-    # What actually starves builds on this board is not parallelism, it is the
-    # ZFS ARC. Measured idle, with 1911MB of RAM total:
+    # The ARC cap outlives the build role and is the reason it stays in this
+    # file. It was found while chasing builds, but what it protects is any burst
+    # of allocation on a 2GB board -- Syncthing hashing a first sync now, rather
+    # than compilers. Measured idle, with 1911MB of RAM total:
     #
     #   ARC size 1209MB, available 125MB       <- default, c_max ~= half of RAM
     #   ARC size  424MB, available 1056MB      <- capped at 512MB
