@@ -7,10 +7,9 @@ Outstanding work, most blocking first. Background for the Thor items is in [docs
 
 Built and waiting to deploy, most of it unverified on hardware.
 
-* Deploy Thor: syncbus, getty fix, booster protocol fix
 * Deploy Ragnarok: SMR queue depths and Syncthing CPU quota
-* Verify the foreground booster boosts a real app
-* Verify the Syncthing quick setting once syncbus is on the phone
+* Apps launched into phosh's own cgroup dilute the compositor's memory floor
+* Booster only sees apps with their own app-* unit, Firefox has none
 * Syncthing GUI password and reverse proxy, all hosts
 
 ## Ragnarok
