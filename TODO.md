@@ -2,14 +2,11 @@
 
 Outstanding work, most blocking first. Background for the Thor items is in [docs/thor.md](docs/thor.md).
 
-
 ## In flight
 
 Built and waiting to deploy, most of it unverified on hardware.
 
 * Deploy Ragnarok: SMR queue depths and Syncthing CPU quota
-* Try a higher CPUWeight for the focused app, 200 may be too timid
-* Consider lz4 over zstd on Thor, CPU is scarcer than the SD bus
 * Syncthing GUI password and reverse proxy, all hosts
 
 ## Ragnarok
@@ -32,7 +29,8 @@ Built and waiting to deploy, most of it unverified on hardware.
 * ethernet and docking
 * syncthing bus
 * Fix bluetooth, rtl8723cs firmware not in nixpkgs
-* Enable technet.initrdWireguard, Heimdall and Ragnarok have it and Thor does not
+* Let the initrd join more than one WiFi network, it cannot unlock away from home
+* WireGuard in initrd, but only after roaming, and not via the shared module
 * Speaker and earpiece need the ALSA UCM profile, only headphones without it
 * Fix fwupdate
 * [www.freedesktop.org/wiki/Specifications/desktop-bookmark-spec/?__goaway_challenge=meta-refresh&amp;__goaway_id=df93c11d9ee5b312d692e413745c8585&amp;__goaway_referer=https%3A%2F%2Fduckduckgo.com%2F](https://www.freedesktop.org/wiki/Specifications/desktop-bookmark-spec/?__goaway_challenge=meta-refresh&__goaway_id=df93c11d9ee5b312d692e413745c8585&__goaway_referer=https%3A%2F%2Fduckduckgo.com%2F)
