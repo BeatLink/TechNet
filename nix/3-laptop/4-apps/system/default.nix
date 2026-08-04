@@ -4,7 +4,6 @@
         ./bash.nix
         ./context.nix
         ./dconf-editor.nix
-        ./fonts.nix
         ./gparted.nix
         ./mission-center.nix
         ./vantage.nix
