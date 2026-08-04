@@ -1,5 +1,6 @@
 {
     imports = [
+        ./baobab.nix
         ./nemo.nix
         ./bash.nix
         ./context.nix

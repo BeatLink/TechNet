@@ -6,6 +6,35 @@ The TechNet is my personal network of computing devices, all connected via a Wir
 
 Outstanding work is tracked in [TODO.md](TODO.md).
 
+## Layout
+
+```
+flake.nix                 inputs, and one nixosConfigurations entry per host
+nix/
+├── 0-common/             imported by every host
+│   ├── 1-system/         boot, filesystems, networking, security, secrets
+│   ├── 2-users/          accounts
+│   ├── 3-services/       ssh, syncthing mesh
+│   ├── 4-apps/           tools every host gets, headless included
+│   └── desktop/          hosts with a screen — Odin and Thor only
+│       ├── 1-system/     home and storage folders, dconf, session tuning
+│       └── 4-apps/       browser, mail, files, password manager
+├── 1-backup-server/      Ragnarok
+├── 2-server/             Heimdall
+├── 3-laptop/             Odin
+├── 5-phone/              Thor
+├── 4-tablet/             unused
+└── 6-smartwatch/         unused
+secrets/                  sops, one directory per host, plus 0-common
+docs/                     per-host notes: odin, heimdall, ragnarok, thor
+```
+
+Two conventions the numbering does not make obvious. `0-common/desktop` is
+deliberately *not* imported by `0-common/default.nix` — Heimdall and Ragnarok
+pull in the rest of `0-common` and neither wants a browser in its closure, so
+each desktop host imports that directory explicitly. And a device directory
+contains only what differs: a host is `0-common` plus one of them.
+
 ## Hosts
 
 Each host is a `nixosConfigurations` entry in [flake.nix](flake.nix), composing
