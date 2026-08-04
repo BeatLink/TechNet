@@ -28,7 +28,6 @@ Built and waiting to deploy, most of it unverified on hardware.
   * Foreground booster
 * Let the initrd join more than one WiFi network, it cannot unlock away from home
 * WireGuard in initrd, but only after roaming, and not via the shared module
-* Speaker and earpiece need the ALSA UCM profile, only headphones without it
 * Fix fwupdate
 * [www.freedesktop.org/wiki/Specifications/desktop-bookmark-spec/?__goaway_challenge=meta-refresh&amp;__goaway_id=df93c11d9ee5b312d692e413745c8585&amp;__goaway_referer=https%3A%2F%2Fduckduckgo.com%2F](https://www.freedesktop.org/wiki/Specifications/desktop-bookmark-spec/?__goaway_challenge=meta-refresh&__goaway_id=df93c11d9ee5b312d692e413745c8585&__goaway_referer=https%3A%2F%2Fduckduckgo.com%2F)
 * Setup Waydroid
@@ -37,7 +36,7 @@ Built and waiting to deploy, most of it unverified on hardware.
 * Duress password via pam_duress
 * Update login password to digits, Thor only
 * phoc segfaults on touch-up in wlr_surface_get_root_surface, takes every app with it
-* Fix call audio, callaudiod segfaults walking the sink list, 17 times so far
+* Confirm callaudiod stopped segfaulting now that the sink list is real
 * Fix rotation on lockscreen (May be upstream)
 * Plymouth and graphical decryption
 * Setup Front and Rear Camera
