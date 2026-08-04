@@ -57,6 +57,48 @@
                             # from the sensor instead.
                             mode = "720x1440";
                         };
+
+                        # The dock. The ANX7688 is what makes this appear at all
+                        # -- it negotiates DP alt mode in its own firmware and
+                        # raises EXTCON_DISP_HDMI, which is why the kernel needs
+                        # CONFIG_TYPEC_ANX7688 and deliberately not
+                        # CONFIG_TYPEC_DP_ALTMODE. See PinePhoneKernel/kernel.nix.
+                        #
+                        # Declared here rather than set in Settings, and that is
+                        # not only a preference for reproducibility. The Displays
+                        # panel segfaults on this device the moment a monitor row
+                        # is clicked:
+                        #
+                        #   cc_display_monitor_get_scale
+                        #     <- cc_display_settings_rebuild_ui
+                        #     <- cc_display_settings_set_selected_output
+                        #     <- on_monitor_row_activated_cb
+                        #
+                        # so configuring the second screen through the GUI is not
+                        # currently possible. This is the way that works.
+                        #
+                        # scale 1 rather than the panel's 1.75: this is a desktop
+                        # monitor at arm's length, not a phone at reading
+                        # distance, and 1080p at 1.75 would leave very little on
+                        # screen.
+                        #
+                        # Worth knowing this is only the default. phoc 0.56 saves
+                        # runtime output state to ~/.local/state/phoc/outputs.gvdb,
+                        # keyed by the *combination* of connected outputs -- one
+                        # entry for the phone alone, another for phone plus this
+                        # monitor -- and what is saved there wins over this file.
+                        # Read it with `phoc-outputs-states --list` and `--show`.
+                        #
+                        # So this decides what happens the first time a display is
+                        # seen, and anything changed afterwards through the shell
+                        # persists on its own and overrides it. Notably that
+                        # includes DSI-1's scale and transform, which is how the
+                        # panel can end up at scale 1 and rotated despite what is
+                        # declared above.
+                        HDMI-A-1 = {
+                            mode = "1920x1080";
+                            scale = 1;
+                        };
                     };
                 };
             };
