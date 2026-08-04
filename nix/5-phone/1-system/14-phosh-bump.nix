@@ -87,6 +87,35 @@ in
                 inherit version;
                 src = phoshSrc final "stevia" "sha256-Ptlmh6T5VNnP7Atq2lhseop9qEgM7eNcYf/UbA0zbFM=";
             });
+
+            # Was the one straggler: nixpkgs still had 0.54.0 while the shell,
+            # the compositor and the keyboard were all on 0.56, which is exactly
+            # the split-version state the note at the top of this file warns
+            # about. It reads and writes the same sm.puri.phosh and
+            # mobi.phosh.shell keys the shell does, so a version behind means it
+            # can be editing a schema the running shell no longer has.
+            #
+            # 0.56.0 is the current release across all four -- checked against
+            # the tags on gitlab.gnome.org, not assumed.
+            # accountsservice and polkit are both new requirements in 0.56 and
+            # absent from nixpkgs' 0.54 expression, which fails at configure:
+            #
+            #     meson.build:33:22: ERROR: Dependency "accountsservice" not found
+            #     meson.build:75:21: ERROR: Dependency "polkit-gobject-1" not found
+            #
+            # Moving src across a release moves the build requirements with it,
+            # and overrideAttrs only carries what is named. These two are the
+            # whole difference -- taken by diffing 0.56's meson.build against the
+            # inputs nixpkgs already passes, rather than by rebuilding until it
+            # stopped complaining.
+            phosh-mobile-settings = prev.phosh-mobile-settings.overrideAttrs (old: {
+                inherit version;
+                src = phoshSrc final "phosh-mobile-settings" "sha256-2Z43syrJbJx1aDFoWthmHdDlOXyWkgPqCuifshEcTSI=";
+                buildInputs = (old.buildInputs or [ ]) ++ [
+                    final.accountsservice
+                    final.polkit
+                ];
+            });
         })
     ];
 }
