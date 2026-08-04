@@ -40,6 +40,29 @@
         owner = "beatlink";
     };
 
+    # Syncthing runs as beatlink and creates its own Database, Data and Config
+    # directories, but it cannot create the parents: /Storage/Services came out
+    # root-owned here, so the first start died with
+    #
+    #     Failed to ensure directory exists
+    #       (error="mkdir /Storage/Services/Syncthing/Database: permission denied")
+    #
+    # Heimdall has the same undeclared dependency and only works because those
+    # directories were made by hand in April. Declaring them is what makes this
+    # reproducible on a host that has never run it.
+    systemd.tmpfiles.settings."Syncthing" = {
+        "/Storage/Services".d = {
+            user = "beatlink";
+            group = "beatlink";
+            mode = "0755";
+        };
+        "/Storage/Services/Syncthing".d = {
+            user = "beatlink";
+            group = "beatlink";
+            mode = "0755";
+        };
+    };
+
     services.syncthing = {
         enable = true;
         openDefaultPorts = true;

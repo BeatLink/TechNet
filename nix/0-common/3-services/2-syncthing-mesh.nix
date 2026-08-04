@@ -148,16 +148,28 @@ in
         folders = lib.mapAttrs' (
             name: folder:
             lib.nameValuePair "/Storage/Files/${name}" (
-                cfg.folderOptions
+                # Three layers, and the order is the point. Defaults a host may
+                # replace come first; folderOptions second, so a host can; the
+                # shared contract last, because a folder id or device list that
+                # differs between two peers does not fail at build time, it
+                # fails at runtime as a folder that will not settle.
+                #
+                # versioning is a default rather than contract. It used to sit
+                # in the contract layer, which silently discarded any host that
+                # set it -- Ragnarok asked for staggered and got trashcan with
+                # no error anywhere.
+                {
+                    versioning = {
+                        type = "trashcan";
+                        params.cleanoutDays = "30";
+                    };
+                }
+                // cfg.folderOptions
                 // {
                     label = name;
                     id = folderIds.${name};
                     type = "sendreceive";
                     devices = lib.subtractLists [ cfg.self ] (folder.devices or allPeers);
-                    versioning = {
-                        type = "trashcan";
-                        params.cleanoutDays = "30";
-                    };
                     ignorePerms = false;
                 }
                 // (removeAttrs folder [ "devices" ])
