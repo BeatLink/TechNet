@@ -1,5 +1,6 @@
 {
     imports = [
+        ./nemo.nix
         ./bash.nix
         ./context.nix
         ./dconf-editor.nix
@@ -11,7 +12,6 @@
         ./vorta.nix
         ./blueman
         ./borgmatic.nix
-        ./nemo
         ./tilix
         ./ssh.nix
     ];

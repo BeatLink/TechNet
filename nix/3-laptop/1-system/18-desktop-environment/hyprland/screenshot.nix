@@ -6,7 +6,7 @@
 # This laptop has no Print key, so the Super+Shift bindings are the ones that actually work; the Print bindings
 # are kept for an external keyboard. S is for snip, P for print and A for the active window.
 #
-# grimblast writes to XDG_PICTURES_DIR, which ../../13-home-folders.nix points at /Storage/Files/Pictures.
+# grimblast writes to XDG_PICTURES_DIR, which ../../../0-common/desktop/1-system/1-home-folders.nix points at /Storage/Files/Pictures.
 #
 # Each mode also gets a desktop entry. Context is the application launcher now, and it lists desktop entries, so
 # without these a screenshot is only reachable from a key - not searchable, and not something a context can hold.

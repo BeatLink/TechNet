@@ -12,7 +12,6 @@
         ./10-bluetooth.nix
         ./11-printing.nix
         ./12-fuse.nix
-        ./13-home-folders.nix
         ./14-tang.nix
         ./15-codecs.nix
         ./16-plymouth.nix
