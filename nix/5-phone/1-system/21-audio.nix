@@ -65,4 +65,56 @@ in
     # that a profile is found at all, and it was not installed while diagnosing
     # this, which is why the first attempt at a fix went out untested.
     environment.systemPackages = [ pkgs.alsa-utils ];
+
+    # Save and restore the mixer across boots.
+    #
+    # Getting UCM to match was necessary and not sufficient. The codec still came
+    # up silent, because every gain stage was at a power-on default that no
+    # layer was fixing:
+    #
+    #   AIF1 DA0 Playback Volume    0 of 192    silence before the DAC
+    #   DAC Playback Volume         0, muted
+    #   AIF1 Slot 0 Digital DAC     off
+    #   Line Out Playback Switch    off
+    #
+    # UCM's FixedBootSequence sets the routing switches and none of the gains, so
+    # it could never have fixed this on its own. Nothing else was restoring
+    # state, because the host had no alsa-store/alsa-restore at all -- both units
+    # reported not-found.
+    #
+    # Worth recording the shape of the mistake this exposes: with the digital
+    # stages later opened to their maximum the sound was badly distorted, because
+    # 0-192 is not a percentage. 192 is +24dB and 160 is unity, so the working
+    # setting is digital stages at 0dB and the analog Line Out carrying the
+    # level. Anything that "fixes" audio by moving a raw control to its maximum
+    # is clipping rather than working.
+    hardware.alsa.enablePersistence = true;
+
+    # alsa-store writes here on shutdown and the restore reads it. On a host that
+    # rolls / back to a blank snapshot every boot, a state file in /var/lib is a
+    # state file that never survives.
+    environment.persistence."/persistent".directories = [ "/var/lib/alsa" ];
+
+    # enablePersistence installs a udev rule that restores each card as its
+    # controlC* appears. On this phone that happens around 1.7s, and /var/lib is
+    # on a pool that is not imported until roughly 20s -- the same ordering that
+    # left the Bluetooth firmware unloadable, see 22-bluetooth.nix. So the udev
+    # restore runs against a file that does not exist yet and quietly does
+    # nothing.
+    #
+    # Restoring again once the filesystem is actually there is what makes it
+    # work. Cheap, and idempotent: with no state file yet it is a no-op.
+    systemd.services.alsa-restore-late = {
+        description = "Restore the ALSA mixer once /var/lib is available";
+        wantedBy = [ "multi-user.target" ];
+        after = [ "local-fs.target" ];
+        before = [ "pipewire.service" ];
+        serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            # `|| true` because a first boot has nothing stored yet, and a card
+            # that is absent -- the SD card is removable -- is not a failure.
+            ExecStart = "${pkgs.alsa-utils}/bin/alsactl restore || true";
+        };
+    };
 }
