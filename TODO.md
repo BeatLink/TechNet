@@ -26,7 +26,7 @@ Built and waiting to deploy, most of it unverified on hardware.
 * Optimize
 
   * Foreground booster
-* Fix bluetooth, rtl8723cs firmware not in nixpkgs
+* Fix bluetooth. The firmware IS installed, so find out why the driver says otherwise
 * Let the initrd join more than one WiFi network, it cannot unlock away from home
 * WireGuard in initrd, but only after roaming, and not via the shared module
 * Speaker and earpiece need the ALSA UCM profile, only headphones without it
