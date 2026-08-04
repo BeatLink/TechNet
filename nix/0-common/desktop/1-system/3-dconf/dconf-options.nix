@@ -2,7 +2,6 @@
     config,
     lib,
     pkgs,
-    inputs,
     ...
 }:
 
@@ -10,7 +9,6 @@ with lib;
 
 let
     cfg = config.dconfImports;
-    flakeRoot = inputs.self.outPath;
     allFilesDeep =
         dir:
         let
@@ -24,7 +22,7 @@ let
             ) contents;
         in
         flatten files;
-    allPaths = allFilesDeep flakeRoot;
+    allPaths = flatten (map allFilesDeep cfg.roots);
     jsonPaths = filter (path: baseNameOf path == "dconf-settings.json") allPaths;
     parsedConfigsList = flatten (
         map (
@@ -60,6 +58,20 @@ in
 {
     options.dconfImports = {
         enable = mkEnableOption "Enable automated scattered dconf loader";
+
+        roots = mkOption {
+            type = types.listOf types.path;
+            default = [ ];
+            description = ''
+                Directories searched for dconf-settings.json.
+
+                Scoped rather than the whole flake, because this walks the
+                filesystem and not the module graph: every export it finds is
+                loaded, whether or not the host imports the module it belongs
+                to. Odin's Cinnamon export covers /org/gnome/desktop/, which on
+                another host would overwrite that host's own interface settings.
+            '';
+        };
     };
 
     config = mkIf cfg.enable {

@@ -15,7 +15,6 @@
         ./14-tang.nix
         ./15-codecs.nix
         ./16-plymouth.nix
-        ./17-dconf
         ./18-desktop-environment
         ./20-nixtool.nix
         ./21-remote-builder.nix
