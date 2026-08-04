@@ -37,4 +37,41 @@
         "vm.swappiness" = 100;
     };
 
+    # The compositor should be the last thing to stall. phoc runs as a child of
+    # phosh.service, so it inherits all of this and needs no unit of its own.
+    #
+    # Worth being clear about what each part actually fixes, because they are
+    # not the same freeze:
+    #
+    #   Nice, CPUWeight, IOWeight  help when something is competing for CPU or
+    #                              the card -- Syncthing hashing, a Waydroid
+    #                              container, a nix copy. Real here, and what
+    #                              these are for.
+    #
+    #   MemoryMin, MemoryLow       help when the stall is memory reclaim, which
+    #                              priority cannot touch at all: a high-priority
+    #                              process waits on a page fault exactly as long
+    #                              as a low-priority one. These reserve memory
+    #                              the kernel will not reclaim from the session.
+    #
+    # Nice = -5 rather than -10. Four 1.15GHz cores do not have the headroom for
+    # the compositor to monopolise them, and starving everything else shows up
+    # as the session being responsive while nothing it launches ever starts.
+    #
+    # Negative Nice works despite User = beatlink because systemd applies it in
+    # the child before dropping privileges.
+    #
+    # MemoryMin is a hard floor and MemoryLow best-effort above it. 192M against
+    # 2972M total is deliberately modest -- phoc and phosh together sit around
+    # 160M measured -- because a floor the system cannot satisfy trades a freeze
+    # for an OOM kill.
+    systemd.services.phosh.serviceConfig = {
+        Nice = -5;
+        CPUWeight = 1000;
+        IOWeight = 1000;
+        OOMScoreAdjust = -500;
+        MemoryMin = "192M";
+        MemoryLow = "512M";
+    };
+
 }
