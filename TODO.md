@@ -26,8 +26,6 @@ Built and waiting to deploy, most of it unverified on hardware.
 * Optimize
 
   * Foreground booster
-* ethernet and docking
-* syncthing bus
 * Fix bluetooth, rtl8723cs firmware not in nixpkgs
 * Let the initrd join more than one WiFi network, it cannot unlock away from home
 * WireGuard in initrd, but only after roaming, and not via the shared module
