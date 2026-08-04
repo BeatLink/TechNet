@@ -16,5 +16,6 @@
         ./15-data-drive.nix
         ./16-waydroid.nix
         ./17-mobile-data.nix
+        ./18-performance.nix
     ];
 }
