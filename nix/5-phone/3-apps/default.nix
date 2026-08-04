@@ -1,6 +1,7 @@
 {
     imports = [
         ./comms
+        ./core
         ./system
     ];
 }

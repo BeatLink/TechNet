@@ -1,15 +1,17 @@
 # Firefox
 #
-# Identical on both hosts, so all of it is shared. Odin adds its native
-# messaging hosts (firefoxpwa, keepassxc) from 3-laptop -- programs.firefox
-# merges across modules, so that stays a small block there rather than becoming
-# an option here.
+# The persistence and the enable are shared. What differs is per-host and set
+# next to each host's other overrides, because programs.firefox merges across
+# modules: Odin adds its native messaging hosts (firefoxpwa, keepassxc), and
+# Thor swaps the package for the mobile build.
 #
-{ pkgs, ... }:
+# mkDefault on the package so Thor can replace it without mkForce.
+#
+{ lib, pkgs, ... }:
 {
     programs.firefox = {
         enable = true;
-        package = pkgs.firefox;
+        package = lib.mkDefault pkgs.firefox;
     };
 
     home-manager.users.beatlink = {
