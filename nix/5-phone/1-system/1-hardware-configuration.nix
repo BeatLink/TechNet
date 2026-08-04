@@ -16,9 +16,7 @@
     };
 
     environment.systemPackages = [
-        pkgs.firefox
         pkgs.thunderbird
-        
     ];
 
     boot.kernelParams = [
