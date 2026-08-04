@@ -1,43 +1,27 @@
 # Remote builder
 #
-# Ragnarok is the only native aarch64 machine in the network, so Thor's closures
-# are built there rather than under binfmt on this host. Emulation is correct but
-# slow enough to matter: a kernel or anything Go-heavy takes hours under qemu and
-# roughly an hour natively.
+# Off. aarch64 closures are built here under binfmt instead -- 6-software.nix
+# registers the static qemu emulator that makes that work.
 #
-# nix-daemon runs as root, so the key it connects with has to be readable by
-# root. Odin's own SSH host key is used rather than a new secret; the matching
-# public half is authorised for beatlink on Ragnarok in 9-remote-builder.nix.
+# Ragnarok held this job because it is the only native aarch64 machine on the
+# network, and native beats emulated on comparable hardware. It is not
+# comparable hardware: a Rock64 with 2GB of RAM against twelve cores and 32GB
+# here. It is also a backup server, so a build competes with the one thing it
+# exists to do -- and during its first Syncthing sync, with that much RAM, that
+# is the whole machine.
+#
+# What makes emulation affordable is that the expensive part is never emulated.
+# megi's kernel is roughly 13 hours under binfmt, measured, and it is not built
+# at all: it arrives prebuilt from the signed cache configured in
+# 0-common/1-system/10-binary-caches.nix and substitutes in about a minute. What
+# is left to emulate is the out-of-tree modules built against that kernel -- ZFS
+# being the one that matters, since Thor's root is on it -- plus whatever
+# userland does not substitute from cache.nixos.org.
+#
+# Restoring it means putting back the buildMachines entry deleted here. The
+# matching authorisation for Odin's host key is still in
+# 1-backup-server/1-system/9-remote-builder.nix, so only this side has to change.
 #
 {
-    nix = {
-        distributedBuilds = true;
-
-        buildMachines = [
-            {
-                hostName = "ragnarok.technet";
-                sshUser = "beatlink";
-                sshKey = "/persistent/etc/ssh/ssh_host_ed25519_key";
-                systems = [ "aarch64-linux" ];
-                protocol = "ssh-ng";
-                maxJobs = 4;
-                # Below the local machine's, so anything Odin can build natively
-                # stays here and only foreign-architecture work is sent out.
-                speedFactor = 1;
-                supportedFeatures = [
-                    "big-parallel"
-                    "benchmark"
-                ];
-            }
-        ];
-
-        # Let the builder fetch from the binary cache itself rather than routing
-        # every substitutable path through this machine and back over the tunnel.
-        settings.builders-use-substitutes = true;
-    };
-
-    programs.ssh.extraConfig = ''
-        Host ragnarok.technet
-            StrictHostKeyChecking accept-new
-    '';
+    nix.distributedBuilds = false;
 }
