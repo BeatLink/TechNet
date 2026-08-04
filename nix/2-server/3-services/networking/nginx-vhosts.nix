@@ -13,9 +13,18 @@ in
         type = lib.types.attrsOf (
             lib.types.submodule {
                 options = {
+                    host = lib.mkOption {
+                        type = lib.types.str;
+                        default = "127.0.0.1";
+                        description = ''
+                            Address to proxy to. Defaults to loopback, for services
+                            running on Heimdall itself. A TechNet address such as
+                            10.100.100.2 proxies to another host over WireGuard.
+                        '';
+                    };
                     port = lib.mkOption {
                         type = lib.types.port;
-                        description = "Local port to proxy to";
+                        description = "Port to proxy to";
                     };
                     domain = lib.mkOption {
                         type = lib.types.str;
@@ -42,7 +51,7 @@ in
                 sslCertificate = config.sops.secrets."https_certificate".path;
                 sslCertificateKey = config.sops.secrets."https_certificate_key".path;
                 locations."/" = {
-                    proxyPass = "http://127.0.0.1:${toString svc.port}";
+                    proxyPass = "http://${svc.host}:${toString svc.port}";
                     proxyWebsockets = true;
                     recommendedProxySettings = true;
 

@@ -5,6 +5,10 @@ the service definitions under `nix/2-server/3-services/`. Most web UIs listen on
 localhost and are reached through nginx (443) via their `*.heimdall.technet`
 vhost; the "Port" column is the upstream/service port nginx proxies to.
 
+A few vhosts proxy to another TechNet host over WireGuard rather than to
+loopback. Those carry the upstream's `10.100.100.0/24` address in the Notes
+column, and their service definition lives in that host's own directory.
+
 ## Reverse Proxy
 
 | Service | Port | Notes |
@@ -59,6 +63,9 @@ vhost; the "Port" column is the upstream/service port nginx proxies to.
 | Radicale     | 5232 | 127.0.0.1; radicale.heimdall.technet |
 | Syncthing (Web UI)   | 8384  | syncthing.heimdall.technet |
 | Syncthing (transfer) | 22000 | Default sync ports |
+| Syncthing on Odin      | 8384 | 10.100.100.2; syncthing-odin.heimdall.technet |
+| Syncthing on Thor      | 8384 | 10.100.100.4; syncthing-thor.heimdall.technet |
+| Syncthing on Ragnarok  | 8384 | 10.100.100.6; syncthing-ragnarok.heimdall.technet |
 | BlockURL     | 9001 | blockurl.heimdall.technet |
 
 ## Vigil Reachability Checks

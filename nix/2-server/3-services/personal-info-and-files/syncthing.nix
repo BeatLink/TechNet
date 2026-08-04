@@ -67,9 +67,26 @@
         CPUWeight = 50;
     };
 
-    nginx-vhosts.syncthing = {
-        domain = "syncthing.heimdall.technet";
-        port = 8384;
+    nginx-vhosts = {
+        syncthing = {
+            domain = "syncthing.heimdall.technet";
+            port = 8384;
+        };
+        syncthing-odin = {
+            domain = "syncthing-odin.heimdall.technet";
+            host = "10.100.100.2";
+            port = 8384;
+        };
+        syncthing-thor = {
+            domain = "syncthing-thor.heimdall.technet";
+            host = "10.100.100.4";
+            port = 8384;
+        };
+        syncthing-ragnarok = {
+            domain = "syncthing-ragnarok.heimdall.technet";
+            host = "10.100.100.6";
+            port = 8384;
+        };
     };
 
     systemd.services.syncthing-vigil-api-key = {

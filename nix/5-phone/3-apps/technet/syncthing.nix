@@ -29,6 +29,12 @@
         sopsFile = "${config.technet.secrets.path}/syncthing.yaml";
         owner = "beatlink";
     };
+    sops.secrets.syncthing_gui_password = {
+        sopsFile = "${config.technet.secrets.path}/syncthing.yaml";
+        owner = "beatlink";
+    };
+
+    networking.firewall.interfaces."wireguard0".allowedTCPPorts = [ 8384 ];
 
     syncthing-mesh = {
         self = "Thor";
@@ -49,6 +55,11 @@
             enable = true;
             cert = config.sops.secrets.syncthing_cert.path;
             key = config.sops.secrets.syncthing_key.path;
+            guiAddress = "0.0.0.0:8384";
+            guiCredentials = {
+                username = "beatlink";
+                passwordFile = config.sops.secrets.syncthing_gui_password.path;
+            };
             overrideDevices = true;
             overrideFolders = true;
 
