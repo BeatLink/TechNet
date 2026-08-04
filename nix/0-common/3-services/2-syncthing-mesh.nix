@@ -9,7 +9,9 @@
 # reads `syncthing-mesh.settings` into `services.syncthing.settings`, so the peer list and per-folder device list are derived rather than
 # restated.
 #
-# Thor is the phone. Its Syncthing is configured on-device rather than through Nix, so it appears here only as a peer.
+# ThorX is the Android phone, at thorx.technet / 10.100.100.5. Its Syncthing is configured on the device rather than through Nix, so it
+# appears here only as a peer. It used to be called Thor, which collided with the PinePhone -- a NixOS host whose networking.hostName is
+# also Thor, at thor.technet / 10.100.100.4. pi-hole's device list has always distinguished the two; the mesh had not.
 #
 {
     config,
@@ -41,6 +43,13 @@ let
                 "tcp://heimdall.technet:22000"
             ];
         };
+        Ragnarok = {
+            id = "FSC6NQO-AS3VEAV-7TDTECF-MHBLG4P-A2SGTKM-E4ZTEBH-5TLLFR2-DMWGNQK";
+            addresses = [
+                "tcp://ragnarok.lan:22000"
+                "tcp://ragnarok.technet:22000"
+            ];
+        };
         Odin = {
             id = "CSIQ7OW-6MP3FSB-OBDABEA-S53TWYT-N2EFGT6-4FMUV7R-HMXLOF5-GLIW7AD";
             addresses = [
@@ -49,6 +58,13 @@ let
             ];
         };
         Thor = {
+            id = "DGCLOUO-G4JS2TA-Q65LAHH-2F53VKG-SCFK5UQ-RK7HYQH-3XUEDPV-E4OA7QV";
+            addresses = [
+                "tcp://thor.lan:22000"
+                "tcp://thor.technet:22000"
+            ];
+        };
+        ThorX = {
             id = "AGVZ3DQ-LX5CBXY-G6NKD4E-HOW7QNG-KAGSVOY-KRBUABG-BCDNEPU-SHJF4Q4";
             addresses = [
                 "tcp://thorx.lan:22000"
