@@ -66,6 +66,35 @@ in
     # this, which is why the first attempt at a fix went out untested.
     environment.systemPackages = [ pkgs.alsa-utils ];
 
+    # Stop the two phantom cards from registering.
+    #
+    # This phone shows three ALSA cards and only one of them is real:
+    #
+    #   0 [Dummy    ]  snd-dummy    describes itself as "Built-in Audio"
+    #   1 [Loopback ]  snd-aloop
+    #   2 [PinePhone]  simple-card  the actual codec
+    #
+    # Both of the others come from mobile-nixos' kernel config and neither has a
+    # use here. They are not merely noise: WirePlumber picked one of them as the
+    # default sink and one as the default source, which is what made the phone
+    # silent while the real codec sat unused. snd-dummy calling itself "Built-in
+    # Audio" is why that was hard to see in wpctl output.
+    #
+    # boot.blacklistedKernelModules cannot help -- CONFIG_SND_DUMMY=y and
+    # CONFIG_SND_ALOOP=y, so they are built in rather than modules. A built-in
+    # driver still parses its module parameters off the kernel command line
+    # though, and both expose `enable` as a per-card array:
+    #
+    #   /sys/module/snd_aloop/parameters/enable -> Y,N,N,N,...
+    #
+    # Setting the first element to 0 stops the card being registered at all,
+    # which is cleaner than hiding it in WirePlumber -- nothing enumerates it,
+    # so nothing can pick it.
+    boot.kernelParams = [
+        "snd_aloop.enable=0"
+        "snd_dummy.enable=0"
+    ];
+
     # Save and restore the mixer across boots.
     #
     # Getting UCM to match was necessary and not sufficient. The codec still came
