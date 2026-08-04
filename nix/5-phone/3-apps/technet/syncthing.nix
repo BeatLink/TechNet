@@ -19,7 +19,7 @@
 # under .local/state/syncthing, which is regenerable but expensive to rebuild --
 # losing it means rehashing every synced file on a phone.
 #
-{ config, ... }:
+{ config, lib, ... }:
 {
     sops.secrets.syncthing_cert = {
         sopsFile = "${config.technet.secrets.path}/syncthing.yaml";
@@ -51,7 +51,33 @@
             key = config.sops.secrets.syncthing_key.path;
             overrideDevices = true;
             overrideFolders = true;
-            settings = config.syncthing-mesh.settings;
+
+            # maxFolderConcurrency is the one that matters. Without it Syncthing
+            # hashes every folder it has work for at once -- eight of them here,
+            # on four 1.15GHz cores, which is what pinned the CPU. Both servers
+            # already set it to 1; the phone needs it more than either.
+            settings = lib.recursiveUpdate config.syncthing-mesh.settings {
+                options = {
+                    maxFolderConcurrency = 1;
+                    maxConcurrentIncomingRequestKiB = 8192;
+                    progressUpdateIntervalS = 60;
+                };
+            };
+        };
+
+        # Heimdall runs at Nice 10 and Ragnarok at 15; this is a phone with a
+        # user looking at it, so it goes further. Syncing is never the thing in
+        # front of you.
+        #
+        # A user unit rather than a system one, which is why the servers'
+        # systemd.services.syncthing block does not apply here. Nice is the part
+        # that always takes effect; CPUWeight and IOWeight depend on the user
+        # manager having those controllers delegated, and are harmless if not.
+        systemd.user.services.syncthing.Service = {
+            Nice = 19;
+            IOSchedulingClass = "idle";
+            CPUWeight = 20;
+            IOWeight = 20;
         };
 
         home.persistence."/Storage/Apps/TechNet/SyncThing" = {
