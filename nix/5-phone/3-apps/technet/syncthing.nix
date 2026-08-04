@@ -52,14 +52,33 @@
             overrideDevices = true;
             overrideFolders = true;
 
-            # maxFolderConcurrency is the one that matters. Without it Syncthing
-            # hashes every folder it has work for at once -- eight of them here,
-            # on four 1.15GHz cores, which is what pinned the CPU. Both servers
-            # already set it to 1; the phone needs it more than either.
+            # Turned down as far as it goes. Syncing here is explicitly allowed
+            # to take the scenic route; the phone being responsive is worth more
+            # than files arriving promptly.
+            #
+            # maxFolderConcurrency is the one that mattered most. Without it
+            # Syncthing hashes every folder it has work for at once -- eight of
+            # them here, on four 1.15GHz cores, which is what pinned the CPU.
             settings = lib.recursiveUpdate config.syncthing-mesh.settings {
                 options = {
+                    # One folder at a time, and one request in flight.
                     maxFolderConcurrency = 1;
-                    maxConcurrentIncomingRequestKiB = 8192;
+                    maxConcurrentIncomingRequestKiB = 2048;
+
+                    # Bounds how much a single folder can queue up before it has
+                    # to finish writing, which is what turns a burst of pulls
+                    # into a steady trickle on a card that hates bursts.
+                    pullerMaxPendingKiB = 2048;
+
+                    # Rate limits, applied to the LAN as well -- without
+                    # limitBandwidthInLan the caps are ignored between local
+                    # peers, which is every peer that matters here. 2MB/s is
+                    # well under what the card sustains, so the transfer itself
+                    # stops being the thing competing for IO.
+                    maxSendKbps = 2048;
+                    maxRecvKbps = 2048;
+                    limitBandwidthInLan = true;
+
                     progressUpdateIntervalS = 60;
                 };
             };
@@ -70,10 +89,21 @@
         # front of you.
         #
         # A user unit rather than a system one, which is why the servers'
-        # systemd.services.syncthing block does not apply here. Nice is the part
-        # that always takes effect; CPUWeight and IOWeight depend on the user
-        # manager having those controllers delegated, and are harmless if not.
+        # systemd.services.syncthing block does not apply here.
+        #
+        # CPUQuota is the one that actually bounds it. Nice and CPUWeight only
+        # decide who wins a contest for the CPU -- with three cores otherwise
+        # idle, a Nice 19 process still takes all three, which is exactly what
+        # happened: syncthing sat at 97% while niced to 19. A quota is an
+        # absolute ceiling whether or not anything else wants the time.
+        #
+        # 25% is one core's worth of four. Hashing the initial index will take
+        # correspondingly longer, which is the trade being made deliberately.
+        #
+        # Checked before relying on it: the user slice has `cpu io memory pids`
+        # delegated, so these apply rather than being silently ignored.
         systemd.user.services.syncthing.Service = {
+            CPUQuota = "25%";
             Nice = 19;
             IOSchedulingClass = "idle";
             CPUWeight = 20;

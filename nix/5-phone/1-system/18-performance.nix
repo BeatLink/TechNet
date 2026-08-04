@@ -31,11 +31,59 @@
 # overflow behind it.
 #
 {
-    boot.extraModprobeConfig = "options zfs zfs_arc_max=536870912";
+    # The ARC cap is confirmed on the first boot carrying it: c_max 512MB, ARC
+    # size 516MB, available up from 429MB to 1756MB.
+    #
+    # Queue depths, in the same spirit as Heimdall's
+    # 2-server/1-system/3-filesystem.nix but not the same numbers, because the
+    # two are slow for different reasons. Heimdall's pool is a spinning mirror
+    # and its 32 is about not drowning the disk in seeks. An SD card has no
+    # seeks; what it has is almost no parallelism and painful write
+    # amplification, so the depths go lower still and one extra knob appears.
+    #
+    # zfs_txg_timeout is that knob, and it is the SD-specific one: batching
+    # transaction groups into fewer, larger commits means fewer erase-block
+    # rewrites. 15s rather than the default 5s trades a longer window of
+    # unwritten data for materially less churn on a card whose write endurance
+    # is the thing that eventually kills it.
+    #
+    # Worth being clear that these are module parameters and therefore
+    # **global** -- they apply to root-pool-Thor on the eMMC as well as
+    # data-pool-Thor on the card. That is acceptable because the eMMC is also
+    # not an SSD and also prefers shallow queues, but it does mean this is not
+    # a per-pool tuning however much it reads like one.
+    #
+    # Unlike the ARC cap, these are a considered starting point rather than a
+    # measured win. The thing to watch is whether Syncthing's initial hashing
+    # still starves the session; if it does, the next lever is Syncthing's own
+    # concurrency rather than pushing these lower.
+    boot.extraModprobeConfig = ''
+        options zfs zfs_arc_max=536870912
+
+        options zfs zfs_vdev_max_active=4
+        options zfs zfs_vdev_async_write_max_active=2
+        options zfs zfs_vdev_async_read_max_active=2
+        options zfs zfs_vdev_sync_read_min_active=4
+        options zfs zfs_vdev_scrub_max_active=1
+        options zfs zfs_txg_timeout=15
+    '';
 
     boot.kernel.sysctl = {
         "vm.swappiness" = 100;
     };
+
+    # ibus arrives via services.gnome.core-os-services, which the phosh module
+    # turns on -- the same route as the tour and avahi. It is the largest CPU
+    # consumer on the phone: ibus-extension held 63-73% across repeated samples
+    # and had burned 48 seconds of CPU in the 82 it had been alive, which is a
+    # busy loop rather than work.
+    #
+    # Nothing here uses it. Text entry on screen is stevia, and the keyboard
+    # case's Pine layer is xkb. It was removed once before on the theory that it
+    # was blocking the on-screen keyboard, which an A/B disproved -- the OSK
+    # works either way -- and put back for that reason. The performance case is
+    # separate and much stronger.
+    i18n.inputMethod.enable = false;
 
     # The compositor should be the last thing to stall. phoc runs as a child of
     # phosh.service, so it inherits all of this and needs no unit of its own.
