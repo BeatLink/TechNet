@@ -124,6 +124,55 @@ in
     # state file that never survives.
     environment.persistence."/persistent".directories = [ "/var/lib/alsa" ];
 
+    # The gain structure this codec needs, declared rather than remembered.
+    #
+    # alsa-store below persists whatever the mixer happens to hold, which covers
+    # a running phone and not a reinstalled one -- a fresh install would come up
+    # at the power-on defaults that made this silent in the first place. These
+    # are the settings that had to be found by hand, so they are written down.
+    #
+    # Only what UCM does not already do. Routing switches come from the profile;
+    # what it has no opinion on is the gains, and the gains were the problem:
+    #
+    #   AIF1 DA0    0dB, unity. This is the stage that clips -- pushed to its
+    #               maximum it is +24dB and the sound is pure static. 0-192 is
+    #               not a percentage.
+    #   DAC        +6dB. Shared by both outputs. The earpiece control is already
+    #               at its own ceiling of 0dB, so the only headroom for it lives
+    #               here, and +6 is what sounded right without distorting.
+    #   Earpiece    its maximum, since it has no headroom to spare.
+    #
+    # Line Out is deliberately absent: PipeWire drives it as the speaker's mixer
+    # element, so anything set here is overwritten the moment the volume is
+    # touched. The earpiece is likewise PipeWire's, but starting it at maximum
+    # costs nothing.
+    #
+    # Ordered before alsa-restore-late so a stored state, if there is one, wins
+    # -- these are a floor for a fresh install, not a policy overriding whatever
+    # the phone was last set to.
+    #
+    # Addressed by card name rather than index because disabling the two phantom
+    # cards renumbers PinePhone from card 2 to card 0.
+    systemd.services.alsa-defaults = {
+        description = "Apply the codec gain structure this phone needs";
+        wantedBy = [ "multi-user.target" ];
+        after = [ "local-fs.target" ];
+        before = [
+            "alsa-restore-late.service"
+            "pipewire.service"
+        ];
+        serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = pkgs.writeShellScript "alsa-defaults" ''
+                card=PinePhone
+                ${pkgs.alsa-utils}/bin/amixer -c "$card" cset name='AIF1 DA0 Playback Volume' 160
+                ${pkgs.alsa-utils}/bin/amixer -c "$card" cset name='DAC Playback Volume' 168
+                ${pkgs.alsa-utils}/bin/amixer -c "$card" cset name='Earpiece Playback Volume' 31
+            '';
+        };
+    };
+
     # enablePersistence installs a udev rule that restores each card as its
     # controlC* appears. On this phone that happens around 1.7s, and /var/lib is
     # on a pool that is not imported until roughly 20s -- the same ordering that
