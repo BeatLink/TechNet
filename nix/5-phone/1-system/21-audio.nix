@@ -44,4 +44,32 @@
     # that the profile is being found at all, and it was not installed while
     # diagnosing this.
     environment.systemPackages = [ pkgs.alsa-utils ];
+
+    # Force the codec onto a profile that has an output.
+    #
+    # Left alone it selects `input:stereo-fallback` and stays there, so the card
+    # contributes a source and no sink at all, and the default sink falls to
+    # snd-dummy because nothing better exists. Setting it by hand with
+    # `wpctl set-profile` works and does not survive a restart of the audio
+    # stack, which is why it belongs here.
+    #
+    # This is the fallback path, not the good one. Until the UCM profile above
+    # actually resolves, the only output port the card offers is
+    # analog-output-headphones -- so this yields working headphones and neither
+    # a speaker nor an earpiece. It is worth having anyway: a real sink that
+    # persists beats no sink and a dummy default.
+    #
+    # api.acp.auto-profile is false on this device, which is why the profile has
+    # to be named rather than left to WirePlumber to pick.
+    services.pipewire.wireplumber.extraConfig."51-pinephone-output" = {
+        "monitor.alsa.rules" = [
+            {
+                matches = [ { "device.name" = "alsa_card.platform-sound"; } ];
+                actions.update-props = {
+                    "device.profile" = "output:stereo-fallback+input:stereo-fallback";
+                    "api.acp.auto-profile" = false;
+                };
+            }
+        ];
+    };
 }
