@@ -2,15 +2,17 @@
 
 Outstanding work, most blocking first. Background for the Thor items is in [docs/thor.md](docs/thor.md).
 
-
-
 ## Thor
 
-* `nix flake update nixtool`
-* Fix Data Root ZFS
-* Set display scale to 175% by default
+* Optimize
+* ethernet and docking
+* Fix fwupdate
+* [www.freedesktop.org/wiki/Specifications/desktop-bookmark-spec/?__goaway_challenge=meta-refresh&amp;__goaway_id=df93c11d9ee5b312d692e413745c8585&amp;__goaway_referer=https%3A%2F%2Fduckduckgo.com%2F](https://www.freedesktop.org/wiki/Specifications/desktop-bookmark-spec/?__goaway_challenge=meta-refresh&__goaway_id=df93c11d9ee5b312d692e413745c8585&__goaway_referer=https%3A%2F%2Fduckduckgo.com%2F)
+* Setup Waydroid
 * Fix spellcheck dictionary
-* Setup FLOW apn
+* Update login password to number only
+* Fix call app crashing
+* Fix call audio
 * Fix rotation on lockscreen (May be upstream)
 * Plymouth and graphical decryption
 * Setup Front and Rear Camera
@@ -18,31 +20,24 @@ Outstanding work, most blocking first. Background for the Thor items is in [docs
 * Fix Ragnarok AArch64 remote building
 * Setup Build caching for zfs kernel on thor
 * Fix all partlabel collisions between odin and thor
-* Review and install apps.
+* Research phosh plugins
+* Add wipefs prior to installation for disks
+* Figure how to run android apps on pinephone
+* Review and install apps
 
-  * Mobile Friendly KeepassXC database
   * Login and sync firefox
   * Setup Trilium
+  * Syncthing
   * Setup Matrix
   * Setup Discord
   * Setup Phone
   * Setup SMS
 
-
-
-
 ## Troubleshooting
 
 Kept so the same ground is not re-covered.
 
-| Symptom                                  | Cause                                                                                                                    | Solution |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | -------- |
-| Serial garbage at every baud             | Two readers on one port, not a baud mismatch                                                                             | Use     |
-| `nixos-anywhere` kexec failed          | postmarketOS kernel has no`kexec_load`                                                                                 |          |
-| Every aarch64 builder exited 255         | binfmt registered`P` not `PF`; interpreter invisible inside the chroot                                               |          |
-| `zpool` aborted under qemu             | disko script built for aarch64; ZFS ioctls cross an ABI                                                                  |          |
-| disko found a pool that "already exists" | `wipefs` on the disk leaves ZFS labels inside partitions                                                               |          |
-| sshd:`invalid format`                  | OpenSSH needs a trailing newline after the PEM footer                                                                    |          |
-| Install died mid-copy                    | USB disk dropped; ZFS suspended the pool, only a reboot cleared it                                                       |          |
-| Clients never synced time                | FTL advertises itself as NTP via DHCP but udp/123 was closed, and timesyncd never falls back once a server is configured |          |
-| Tow-Boot UMS invisible to host           | Keyboard case attached; its 5V on the pogo pins blocks peripheral mode                                                   |          |
+| Symptom                         | Cause                                        | Solution                               |
+| ------------------------------- | -------------------------------------------- | -------------------------------------- |
+| Serial garbage at every baud    | Two readers on one port, not a baud mismatch | Use multiplexing with multiple readers |
+| `nixos-anywhere` kexec failed | postmarketOS kernel has no`kexec_load`     | Use NixTool's local install mode       |
