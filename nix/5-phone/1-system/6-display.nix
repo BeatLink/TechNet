@@ -98,6 +98,19 @@
                 "org/gnome/settings-daemon/plugins/power".ambient-enabled = false;
                 "org/gnome/desktop/interface".show-battery-percentage = true;
 
+                # Show every app in the grid rather than only the ones declaring
+                # themselves mobile-friendly. The key is a flags type whose only
+                # member is 'adaptive', so the empty list means "do not filter"
+                # -- it is not an unset value. Without this the grid hides
+                # anything without an adaptive hint behind "Show All Apps",
+                # which on this phone is most of what is installed.
+                #
+                # mkEmptyArray rather than [ ]: an empty Nix list carries no
+                # element type, so the generator cannot tell an empty `as` from
+                # an empty `ai` and refuses it.
+                "sm/puri/phosh".app-filter-mode =
+                    lib.gvariant.mkEmptyArray lib.gvariant.type.string;
+
                 # Widgets on the lock screen. The built-in status icons -- wifi,
                 # bluetooth, battery -- are already drawn there; these are the
                 # optional panels underneath the clock. Names are the .plugin
@@ -135,6 +148,17 @@
             '';
         };
     };
+
+    # Two entries in the app grid that are noise on a phone. The tour is a GNOME
+    # Shell walkthrough for a desktop this device does not run, and the manual is
+    # the NixOS HTML documentation -- readable, but not from a launcher on a
+    # 720x1440 panel.
+    #
+    # documentation.nixos.enable covers the desktop entry and the generated HTML
+    # both. gnome-tour arrives with services.gnome.core-shell, which the phosh
+    # module turns on, so it has to be excluded rather than simply not added.
+    documentation.nixos.enable = false;
+    environment.gnome.excludePackages = [ pkgs.gnome-tour ];
 
     environment.etc."machine-info".text = lib.mkDefault ''
         CHASSIS="handset"
