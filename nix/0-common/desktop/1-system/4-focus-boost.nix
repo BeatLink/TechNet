@@ -53,6 +53,34 @@
 let
     cfg = config.technet.desktop.focusBoost;
 
+    # lswt binds whichever toplevel protocol the compositor offers, and when
+    # both are present the newer one wins unconditionally:
+    #
+    #     if ( zwlr_toplevel_manager != NULL ) used_protocol = ZWLR_FOREIGN_TOPLEVEL;
+    #     if ( ext_toplevel_list    != NULL ) used_protocol = EXT_FOREIGN_TOPLEVEL;
+    #
+    # The second assignment is not an `else`, so ext always wins. phoc offers
+    # both -- confirmed on the phone, lswt logs "Binding
+    # zwlr-foreign-toplevel-manager-v1" and then "Binding
+    # ext-foreign-toplevel-list-v1" -- and ext-foreign-toplevel-list-v1 carries
+    # no state whatsoever. No activated flag, so no focus events, so this daemon
+    # sat watching toplevels appear and never boosted one. `lswt -j` says so
+    # plainly: "activated": false in the capability block, and only title and
+    # app-id per toplevel.
+    #
+    # The wlr protocol is the one carrying state, so prefer it where both exist.
+    # The ext listener stays bound and discards its own events, which upstream
+    # already guards against -- its handlers return early unless ext is the
+    # protocol in use.
+    lswt = pkgs.lswt.overrideAttrs (old: {
+        postPatch = (old.postPatch or "") + ''
+            substituteInPlace lswt.c \
+                --replace-fail \
+                    "used_protocol = EXT_FOREIGN_TOPLEVEL;" \
+                    "used_protocol = (zwlr_toplevel_manager == NULL) ? EXT_FOREIGN_TOPLEVEL : ZWLR_FOREIGN_TOPLEVEL;"
+        '';
+    });
+
     boostd = pkgs.writers.writePython3Bin "technet-focus-boostd" {
         flakeIgnore = [
             "E501" # line length
@@ -163,7 +191,7 @@ let
             os.environ["WAYLAND_DISPLAY"] = found[0]
 
         proc = subprocess.Popen(
-            ["${pkgs.coreutils}/bin/stdbuf", "-oL", "${pkgs.lswt}/bin/lswt", "-w", "--debug"],
+            ["${pkgs.coreutils}/bin/stdbuf", "-oL", "${lswt}/bin/lswt", "-w", "--debug"],
             stdout=subprocess.PIPE, text=True,
         )
 
