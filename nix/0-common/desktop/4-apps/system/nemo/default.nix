@@ -64,10 +64,6 @@ in
                 import order, which is not something to rely on when the value
                 is a visible list in a sidebar. The shared entries come first,
                 host ones after.
-
-                Portfolio cannot use this -- its places list is hardcoded and
-                comes from the XDG user directories instead, which
-                1-home-folders.nix points at /Storage/Files.
             '';
         };
     };

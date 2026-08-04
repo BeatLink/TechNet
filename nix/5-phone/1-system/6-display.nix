@@ -121,6 +121,14 @@
                     "emergency-info"
                 ];
 
+                # Syncthing is driven from here rather than a desktop tray app.
+                # Odin runs syncthingtray, which is Qt and desktop-shaped; this
+                # is phosh's own quick setting, so it belongs in the pull-down
+                # next to wifi and bluetooth.
+                "sm/puri/phosh/plugins".quick-settings = [
+                    "syncthing-quick-setting"
+                ];
+
                 # Extra top-bar icons, which the lock screen shares.
                 # simple-custom-status-icon is deliberately left out: it shows
                 # nothing until given an icon and a command to run.
@@ -159,6 +167,21 @@
     # module turns on, so it has to be excluded rather than simply not added.
     documentation.nixos.enable = false;
     environment.gnome.excludePackages = [ pkgs.gnome-tour ];
+
+    # Same route as the tour: services.gnome.core-os-services, which the phosh
+    # module turns on, sets services.avahi.enable = mkDefault true. No other host
+    # on the network runs it, and this one has no use for mDNS service discovery.
+    #
+    # It was also failing on every activation, which mattered more than the
+    # service itself: switch-to-configuration returns non-zero when a unit fails
+    # to start, and nixos-rebuild reports that as
+    # "did you forget to use --ask-elevate-password?" -- so four consecutive
+    # deploys looked like sudo failures when activation had in fact succeeded.
+    # The underlying fault was a stale PID file it would not clean up:
+    #
+    #     open(/run/avahi-daemon//pid): File exists
+    #     Failed to create PID file: File exists
+    services.avahi.enable = false;
 
     environment.etc."machine-info".text = lib.mkDefault ''
         CHASSIS="handset"
