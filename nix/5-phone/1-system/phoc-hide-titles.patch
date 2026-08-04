@@ -1,0 +1,83 @@
+--- a/src/view.c	2026-08-04 17:27:24.773179765 -0500
++++ b/src/view.c	2026-08-04 17:27:24.835181024 -0500
+@@ -315,6 +315,29 @@
+ }
+ 
+ 
++static gboolean
++phoc_title_is_hidden (const char *title)
++{
++  const char *hidden;
++  g_auto (GStrv) tokens = NULL;
++
++  if (title == NULL)
++    return FALSE;
++
++  hidden = g_getenv ("PHOC_HIDDEN_TITLES");
++  if (hidden == NULL || hidden[0] == '\0')
++    return FALSE;
++
++  tokens = g_strsplit (hidden, ":", -1);
++  for (guint i = 0; tokens[i] != NULL; i++) {
++    if (tokens[i][0] != '\0' && strstr (title, tokens[i]) != NULL)
++      return TRUE;
++  }
++
++  return FALSE;
++}
++
++
+ static void
+ view_create_foreign_toplevel_handle (PhocView *self)
+ {
+@@ -324,6 +347,11 @@
+   g_assert (PHOC_IS_VIEW (self));
+   priv = phoc_view_get_instance_private (self);
+ 
++  if (phoc_title_is_hidden (priv->title)) {
++    g_debug ("Not exporting toplevel for hidden title '%s'", priv->title);
++    return;
++  }
++
+   priv->toplevel_handle =
+     wlr_foreign_toplevel_handle_v1_create (desktop->foreign_toplevel_manager_v1);
+   g_assert (priv->toplevel_handle);
+@@ -1556,14 +1584,16 @@
+ 
+   view_update_output (self, NULL);
+ 
+-  wlr_foreign_toplevel_handle_v1_set_fullscreen (priv->toplevel_handle,
+-                                                 phoc_view_is_fullscreen (self));
+-  wlr_foreign_toplevel_handle_v1_set_maximized (priv->toplevel_handle,
+-                                                phoc_view_is_maximized (self));
+-  if (self->parent)
+-    toplevel_handle = phoc_view_get_toplevel_handle (self->parent);
++  if (priv->toplevel_handle) {
++    wlr_foreign_toplevel_handle_v1_set_fullscreen (priv->toplevel_handle,
++                                                   phoc_view_is_fullscreen (self));
++    wlr_foreign_toplevel_handle_v1_set_maximized (priv->toplevel_handle,
++                                                  phoc_view_is_maximized (self));
++    if (self->parent)
++      toplevel_handle = phoc_view_get_toplevel_handle (self->parent);
+ 
+-  wlr_foreign_toplevel_handle_v1_set_parent (priv->toplevel_handle, toplevel_handle);
++    wlr_foreign_toplevel_handle_v1_set_parent (priv->toplevel_handle, toplevel_handle);
++  }
+ }
+ 
+ /**
+@@ -1654,6 +1684,14 @@
+   g_free (priv->title);
+   priv->title = g_strdup (title);
+ 
++  if (phoc_title_is_hidden (priv->title)) {
++    if (priv->toplevel_handle)
++      phoc_view_destroy_toplevel_handle (self);
++  } else if (priv->toplevel_handle == NULL && phoc_view_is_mapped (self)) {
++    /* Stopped matching, so let the window be reachable again. */
++    view_create_foreign_toplevel_handle (self);
++  }
++
+   if (priv->toplevel_handle)
+     wlr_foreign_toplevel_handle_v1_set_title (priv->toplevel_handle, title ?: "");
+ 
