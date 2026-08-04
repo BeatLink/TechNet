@@ -122,4 +122,12 @@
         MemoryLow = "512M";
     };
 
+    # The same argument as MemoryLow above, applied to whichever application is
+    # in front rather than to the compositor -- see
+    # 0-common/desktop/1-system/4-focus-boost.nix for how it finds it.
+    #
+    # On here and not on Odin because it is a response to 2972MB of RAM. A host
+    # that is not reclaiming has nothing to protect anything from.
+    technet.desktop.focusBoost.enable = true;
+
 }
