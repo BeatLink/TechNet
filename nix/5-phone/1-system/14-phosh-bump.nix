@@ -73,9 +73,41 @@ in
             # That is the same subsystem as the assertion this bump is chasing.
             # Because the patch is read from finalAttrs.src, overriding src
             # means the 0.56 version of it is used rather than 0.54's.
-            phoc = (prev.phoc.override { wlroots_0_19 = final.wlroots_0_20; }).overrideAttrs (_: {
+            phoc = (prev.phoc.override { wlroots_0_19 = final.wlroots_0_20; }).overrideAttrs (old: {
                 inherit version;
                 src = phoshSrc final "phoc" "sha256-Xzb7C8ZadjS+fPPYlxoEMGcGkcs5yYzhGZs4Mk2lA70=";
+
+                # Let a window exist without phosh knowing about it.
+                #
+                # phosh only lists what phoc exports through
+                # zwlr_foreign_toplevel_manager_v1, so a toplevel that is never
+                # announced cannot appear in the overview. That is the only way
+                # to get a hidden window: Wayland has no hide primitive,
+                # set_minimized means minimised rather than hidden, and phoc has
+                # no window rules.
+                #
+                # Wanted for the warm Firefox in 3-apps/core/firefox.nix, which
+                # has to hold a real window to serve handoffs but should not be
+                # something you scroll past.
+                #
+                # Matches on window *title*, colon-separated tokens in
+                # PHOC_HIDDEN_TITLES, substring rather than equality. Title
+                # rather than app_id because every Firefox window shares one
+                # app_id -- matching on that would hide the browser entirely
+                # instead of the one window that should not be there.
+                #
+                # Empty or unset means stock behaviour, so the patch is inert
+                # until asked for.
+                #
+                # It also tracks changes: a window whose title stops matching is
+                # exported again, so a hidden window that gets navigated becomes
+                # reachable rather than being stranded invisibly forever.
+                #
+                # Only the wlr manager is skipped. ext_foreign_toplevel_list_v1
+                # is left alone deliberately -- it carries no state and nothing
+                # here builds a switcher from it, so leaving it intact keeps
+                # `phoc-outputs-states` and lswt working for diagnosis.
+                patches = (old.patches or [ ]) ++ [ ./phoc-hide-titles.patch ];
             });
 
             phosh = prev.phosh.overrideAttrs (_: {

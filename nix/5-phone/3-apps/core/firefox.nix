@@ -18,8 +18,102 @@
 # the profile format is unchanged, so the existing profile carries over.
 #
 { pkgs, ... }:
+let
+    # Fixed rather than generated per build: it has to be identical in the page
+    # and in the environment, and regenerating it on every rebuild would rebuild
+    # the page and restart Firefox for no reason.
+    warmMarker = "6f8f32ea-159d-4722-a8a4-c1e43da1f8fa";
+
+    # A local file rather than a data: URL. Firefox has refused top-level
+    # navigation to data: since 59, so passing one on the command line silently
+    # gets nowhere.
+    warmPage = pkgs.writeText "firefox-warm.html" ''
+        <!doctype html>
+        <title>${warmMarker}</title>
+        <body style="background:#241f31"></body>
+    '';
+in
 {
     programs.firefox.enable = false;
 
-    home-manager.users.beatlink.home.packages = [ pkgs.firefox-mobile ];
+    # Hide only the warm window from the overview.
+    #
+    # Read by the phoc patch in 1-system/14-phosh-bump.nix, which skips
+    # exporting a matching toplevel through zwlr_foreign_toplevel_manager_v1 --
+    # so phosh is never told that window exists and cannot list it. Set on
+    # phosh.service because phoc runs as its child and inherits it.
+    #
+    # Matched on title, not app_id. Every Firefox window shares app_id
+    # `firefox`, so matching that would hide the browser entirely; the warm
+    # window is distinguished instead by the UUID in the page it holds, which
+    # nothing else will ever have in its title.
+    #
+    # The patch re-exports a window whose title stops matching, so if this one
+    # is ever navigated away from the marker page it becomes a normal, reachable
+    # window rather than being stranded invisible.
+    systemd.services.phosh.environment.PHOC_HIDDEN_TITLES = warmMarker;
+
+    home-manager.users.beatlink = {
+        home.packages = [ pkgs.firefox-mobile ];
+
+        # Keep one instance running so opening a window is a handoff rather than
+        # a start.
+        #
+        # Firefox hands a second invocation to the instance already holding the
+        # profile instead of starting another. Measured on this phone with the
+        # system otherwise idle:
+        #
+        #   cold start                 8.6s
+        #   --new-window, warm         2.9s
+        #   each further window        ~3s and ~55MB, four totalling 567MB
+        #
+        # And with Syncthing mid-sync, a cold start was 29.8s. So the warm path
+        # is worth 3x idle and 10x under load, which is the difference between
+        # irritating and unusable.
+        #
+        # It costs ~400MB resident. That is the right trade here: memory
+        # pressure has measured 0.00 in every sample taken on this device, with
+        # 1.2-1.6GB available, so this spends the resource that is spare to buy
+        # back the one that is not.
+        #
+        # This does NOT make the phone faster. It pays the cold cost once, at
+        # login, instead of every time you open a window.
+        #
+        # The window it holds is kept out of the overview by the phoc patch
+        # above. It has to exist: the warmth comes from the process holding a
+        # live Wayland connection, and any surface it owns is a toplevel.
+        # `--headless` was the obvious way to avoid that and is worse than
+        # useless -- tested here, the headless instance took 377MB, held the
+        # profile lock, and then failed to produce a window at all when asked,
+        # timing out after 62s.
+        systemd.user.services.firefox-warm = {
+            Unit = {
+                Description = "Keep Firefox warm so windows open by handoff";
+                PartOf = [ "graphical-session.target" ];
+                After = [ "graphical-session.target" ];
+            };
+
+            Service = {
+                # Deliberately late. Boot is already the slowest thing this
+                # phone does, and starting a browser into the middle of it moves
+                # the cost rather than removing it. The point is to pay it while
+                # the session is idle.
+                ExecStartPre = "${pkgs.coreutils}/bin/sleep 45";
+                ExecStart = "${pkgs.firefox-mobile}/bin/firefox file://${warmPage}";
+
+                # Unkillable from the phone. Swiping it away in the overview
+                # closes the window and, being the last one, exits Firefox --
+                # which would silently put the cold cost back. Restarting means
+                # the only way to stop it is `systemctl --user stop
+                # firefox-warm` from a shell.
+                #
+                # RestartSec is long enough that a genuine crash loop does not
+                # thrash a 1.15GHz A53.
+                Restart = "always";
+                RestartSec = 15;
+            };
+
+            Install.WantedBy = [ "graphical-session.target" ];
+        };
+    };
 }
