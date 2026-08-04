@@ -36,8 +36,8 @@ Built and waiting to deploy, most of it unverified on hardware.
 * Shut down 5s after a failed login, via PAM so serial, ssh and screen all count
 * Duress password via pam_duress
 * Update login password to digits, Thor only
-* Fix call app crashing
-* Fix call audio
+* phoc segfaults on touch-up in wlr_surface_get_root_surface, takes every app with it
+* Fix call audio, callaudiod segfaults walking the sink list, 17 times so far
 * Fix rotation on lockscreen (May be upstream)
 * Plymouth and graphical decryption
 * Setup Front and Rear Camera
