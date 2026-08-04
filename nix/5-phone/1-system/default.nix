@@ -18,5 +18,6 @@
         ./17-mobile-data.nix
         ./18-performance.nix
         ./19-keyboard-layout
+        ./21-audio.nix
     ];
 }
