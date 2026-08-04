@@ -19,5 +19,6 @@
         ./18-performance.nix
         ./19-keyboard-layout
         ./21-audio.nix
+        ./22-bluetooth.nix
     ];
 }
