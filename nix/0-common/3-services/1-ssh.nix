@@ -112,6 +112,37 @@
                     "odin-boot"
                 ];
             };
+            # Thor's initrd sshd is already built and wanted by initrd.target --
+            # boot.initrd.network.enable being false does not stop it, because
+            # that option configures the scripted initrd and Thor uses the
+            # systemd one. What was missing was only this: without a known host
+            # key, connecting to a phone stuck at the passphrase prompt means
+            # accepting a fingerprint you cannot verify.
+            #
+            # There is no WireGuard in the initrd, so 10.100.100.4 only answers
+            # once the system is up. Reaching the initrd means the LAN address,
+            # which is DHCP and may drift -- worth a reservation on the router if
+            # this gets used in anger.
+            "thor-boot" = {
+                publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP0HPTCMyqXEvmT4MxXqMVLqhEY016PYyMo/mnd4fZu8";
+                hostNames = [
+                    "192.168.0.113"
+                    "10.100.100.4"
+                    "thor.technet"
+                    "thor"
+                    "thor-boot"
+                ];
+            };
+            "thor" = {
+                publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMy7r0+HLy2pOSH8Je8IEUty7j2qHHbcpHWMo1Xdg0mU";
+                hostNames = [
+                    "192.168.0.113"
+                    "10.100.100.4"
+                    "thor.technet"
+                    "thor"
+                    "thor-boot"
+                ];
+            };
             "github.com" = {
                 publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl";
                 hostNames = [
