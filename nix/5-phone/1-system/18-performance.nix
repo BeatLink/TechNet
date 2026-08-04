@@ -90,6 +90,40 @@
     # separate and much stronger.
     i18n.inputMethod.enable = false;
 
+    # schedutil rather than the kernel's compiled-in performance.
+    #
+    # This is the fix for "the UI stutters even though CPU and memory are barely
+    # used", and the reason that symptom is confusing is that the clock is what
+    # moves, not the load. Sampled every two seconds with the phone docked:
+    #
+    #    2s  72C  throttle_state=0  cpu0=1152MHz
+    #    6s  74C  throttle_state=1  cpu0=1104MHz
+    #   10s  77C  throttle_state=2  cpu0=1056MHz
+    #   12s  70C  throttle_state=0  cpu0=1152MHz
+    #
+    # cpu0-thermal has a passive trip at 75C and cpufreq-cpu0 offers 7 throttle
+    # states. Under `performance` all four cores sit at 1152MHz permanently, so
+    # the die walks straight into that trip, the thermal governor drops the
+    # clock, the temperature falls, the throttle releases -- a cycle measured in
+    # seconds. Work takes longer during the throttled stretches while
+    # utilisation looks unremarkable, because the same work at a lower clock is
+    # not more load.
+    #
+    # Not the GPU, which was the obvious suspect: lima sits at 432MHz, its
+    # ceiling, and never moves.
+    #
+    # schedutil idles down to 648MHz between bursts, which is the point -- less
+    # heat generated means fewer crossings of the trip, and less time throttled
+    # is more sustained clock than pinning the maximum ever achieves. The trade
+    # is real rather than free: a burst has to ramp rather than already being at
+    # the top, so the very first frames after an idle moment can be slower.
+    # schedutil ramps from scheduler utilisation rather than on a sampling timer
+    # like ondemand, which is what makes that acceptable here.
+    #
+    # Worth rechecking against the sample above after any change that adds
+    # sustained load -- the dock's 1080p output is itself part of this budget.
+    powerManagement.cpuFreqGovernor = "schedutil";
+
     # The compositor should be the last thing to stall. phoc runs as a child of
     # phosh.service, so it inherits all of this and needs no unit of its own.
     #
