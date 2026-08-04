@@ -223,6 +223,60 @@
     # worth having without expecting it to change the character of the thing.
     technet.desktop.focusBoost.cpuWeight = 500;
 
+    # GTK4 draws through software Vulkan on this phone unless told otherwise,
+    # and cairo is four times faster.
+    #
+    # The Mali-400 is Utgard: GLES 2.0 hardware, confirmed by phoc, which does
+    # get the GPU --
+    #
+    #   [render/egl.c:376] EGL driver name: lima
+    #   [render/gles2/renderer.c:539] Using OpenGL ES 2.0 Mesa 26.1.5
+    #   [render/gles2/renderer.c:541] GL renderer: Mali400
+    #
+    # GTK4's `ngl` renderer wants GLES 3.0, so it cannot start at all here --
+    # `gtk4-rendernode-tool benchmark --renderer=gl` answers "Unable to create a
+    # GL context" every time. There is no lima Vulkan driver either (panfrost is
+    # Midgard/Bifrost), so the only ICD that binds is lavapipe. GSK's selection
+    # rejects it, fails to find GL, then comes back and takes it anyway:
+    #
+    #   Not using Vulkan: device is CPU
+    #   Not using GL: Unable to create a GL context
+    #   Using renderer 'GskVulkanRenderer' for surface 'GdkWaylandToplevel'
+    #
+    # So the default path is an LLVM-JIT software rasteriser pretending to be a
+    # GPU. Measured with gtk4-demo's paintable_animated -- fixed workload,
+    # continuous repaint, 20s, three runs each:
+    #
+    #                  fps    median paint   p90 paint   first frame
+    #   lavapipe    13.8-15.1     ~62ms        ~535ms       ~2460ms
+    #   cairo       56.8-57.8     ~10ms         ~11ms          26ms
+    #
+    # The p90 column is the one that is felt: lavapipe is not uniformly slow, it
+    # stalls for half a second periodically, which reads as stutter rather than
+    # sluggishness. Independently, gtk4-rendernode-tool on a 720x1441 scene of
+    # gradients, rounded clips, borders, text and a blur gave 0.19s per render
+    # against 0.47s, with a 5.9-7.8s penalty on lavapipe's first render for
+    # pipeline compilation -- paid once per process, so every window that opens.
+    #
+    # Not a case of cairo skipping work: the same scene rendered through both and
+    # compared came out visually identical, blur included.
+    #
+    # Scope worth knowing. This reaches GTK4 only. phosh is still GTK3
+    # (libgtk-3.so.0, libhandy-1.so.0 in the running shell) and GTK3 rasterises
+    # with cairo already, so the shell, the lock screen and stevia are unaffected
+    # either way -- which also means this cannot destabilise the session.
+    #
+    # environment.sessionVariables rather than a home-manager variable because
+    # phosh.service runs with PAMName = "login", so pam_env applies
+    # /etc/pam/environment to the session and everything the app grid launches
+    # inherits it. A shell-profile variable would reach an ssh login and nothing
+    # the user actually taps.
+    #
+    # The cairo renderer has thinner feature coverage than the Vulkan one, so the
+    # thing to watch is an app that leans on blend modes or masks looking wrong
+    # rather than slow. Unsetting this puts lavapipe back.
+    environment.sessionVariables.GSK_RENDERER = "cairo";
+
     # lz4 rather than zstd, on both pools.
     #
     # zstd is the better ratio and the wrong trade here. z_wr_iss -- the ZFS
