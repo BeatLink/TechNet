@@ -23,42 +23,26 @@ let
     retryScript = ''
         set -u
         remaining="${lib.concatStringsSep " " cfg.datasets}"
-        unlocked_any=false
-
-        while [ -n "$remaining" ]; do
-            still_locked=""
-            for ds in $remaining; do
-                status="$(${zfs} get -H -o value keystatus "$ds" 2>/dev/null || echo unavailable)"
-                if [ "$status" = available ]; then
-                    echo "clevis-retry: $ds already unlocked"
-                    continue
-                fi
-                jwe="/etc/clevis/$ds.jwe"
-                if [ -r "$jwe" ] && ${clevis} decrypt < "$jwe" | ${zfs} load-key -L prompt "$ds" 2>/dev/null; then
-                    echo "clevis-retry: unlocked $ds"
-                    unlocked_any=true
-                    continue
-                fi
-                still_locked="$still_locked''${still_locked:+ }$ds"
-            done
-            remaining="$still_locked"
-            [ -n "$remaining" ] || break
-            sleep 5
-        done
-
-        if [ -z "$remaining" ]; then
-            echo "clevis-retry: all clevis datasets unlocked"
-        fi
 
         # The stock zfs-import services may already be sitting on a password prompt,
         # started before tang became reachable. They re-read keystatus on every start,
         # so restarting them now makes the prompt a no-op and cancels the outstanding
         # password request. Only worth doing if we actually unlocked something.
-        if [ "$unlocked_any" = true ]; then
+        restart_imports() {
+            # Once initrd.target is up the boot has moved on to switch-root, and
+            # restarting an import service here takes sysroot.mount down with it.
+            if [ "$(${systemd}/bin/systemctl show -P ActiveState initrd.target 2>/dev/null || echo unknown)" = active ]; then
+                echo "clevis-retry: initrd.target is already active, leaving the imports alone"
+                return 0
+            fi
+
             for unit in ${lib.concatStringsSep " " importServices}; do
                 state="$(${systemd}/bin/systemctl show -P ActiveState "$unit" 2>/dev/null || echo unknown)"
+                # Deliberately not "active": a service sitting on a password prompt
+                # is activating. Restarting one that already succeeded tears down
+                # the mounts that depend on it.
                 case "$state" in
-                    activating|active|failed)
+                    activating|failed)
                         echo "clevis-retry: restarting $unit (was $state)"
                         ${systemd}/bin/systemctl restart "$unit" || true
                         ;;
@@ -79,7 +63,36 @@ let
                     ${systemd}/bin/systemctl start --no-block "$unit" || true
                 fi
             done
-        fi
+        }
+
+        while [ -n "$remaining" ]; do
+            unlocked_this_round=false
+            still_locked=""
+            for ds in $remaining; do
+                status="$(${zfs} get -H -o value keystatus "$ds" 2>/dev/null || echo unavailable)"
+                if [ "$status" = available ]; then
+                    echo "clevis-retry: $ds already unlocked"
+                    continue
+                fi
+                jwe="/etc/clevis/$ds.jwe"
+                if [ -r "$jwe" ] && ${clevis} decrypt < "$jwe" | ${zfs} load-key -L prompt "$ds" 2>/dev/null; then
+                    echo "clevis-retry: unlocked $ds"
+                    unlocked_this_round=true
+                    continue
+                fi
+                still_locked="$still_locked''${still_locked:+ }$ds"
+            done
+            remaining="$still_locked"
+
+            if [ "$unlocked_this_round" = true ]; then
+                restart_imports
+            fi
+
+            [ -n "$remaining" ] || break
+            sleep ${toString cfg.retryInterval}
+        done
+
+        echo "clevis-retry: all clevis datasets unlocked"
 
         # Always succeed: Restart=on-failure must never turn this into a restart loop.
         exit 0
@@ -201,6 +214,21 @@ in
                 The default is the standard TechNet layout laid down by
                 3-filesystem/1-disko.nix (the root pool) plus the host's data pool.
                 Override this on a host whose pools differ from that layout.
+            '';
+        };
+
+        retryInterval = lib.mkOption {
+            type = lib.types.int;
+            default = 5;
+            description = ''
+                Seconds clevis-retry waits between attempts at the datasets still
+                locked.
+
+                This is the pause *between* attempts, not the retry period: an
+                attempt against an unreachable tang address costs whatever curl's
+                connect timeout is, which clevis hardcodes. Shortening this alone
+                does not make retries much more frequent unless that timeout is
+                shortened too.
             '';
         };
 
