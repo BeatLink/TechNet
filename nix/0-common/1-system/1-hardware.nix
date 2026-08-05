@@ -27,6 +27,16 @@
             wants = [ "polkit.service" ];
         };
 
+        services.fwupd-refresh = {
+            after = [ "fwupd.service" ];
+            wants = [ "fwupd.service" ];
+        };
+
+        timers.fwupd-refresh.timerConfig = {
+            Persistent = false;
+            OnBootSec = "15min";
+        };
+
         timers.fwupd-auto-update = {
             wantedBy = [ "timers.target" ];
             timerConfig = {
