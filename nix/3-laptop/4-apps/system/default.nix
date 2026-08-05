@@ -1,7 +1,7 @@
 {
     imports = [
         ./baobab.nix
-        ./nemo.nix
+        ./nemo
         ./bash.nix
         ./context.nix
         ./dconf-editor.nix

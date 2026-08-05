@@ -3,6 +3,7 @@
         ./comms
         ./core
         ./media
+        ./system
         ./technet
     ];
 }
