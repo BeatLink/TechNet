@@ -1,23 +1,28 @@
-# Chromium -- the only engine on this phone that renders on the GPU.
+# Chromium -- here for compatibility, not for speed.
 #
-# The Mali-400 through lima is GLES 2.0, and GTK4 asks for GLES 3.0, so every
-# GTK4 application here -- Butler, Tangram, Epiphany, and the WebKit inside them
-# -- falls back to rasterising on four 1.15GHz A53 cores. Chromium does not ask
-# a toolkit for its GL context, it creates its own, and it turns out not to
-# blocklist lima. Measured on the same animating page, same device:
+# It renders on the CPU like everything else on this phone. Its GPU process asks
+# EGL for a GLES 3.0 context, the Mali-400 through lima offers 2.0, and it gives
+# up rather than stepping down:
 #
-#     Chromium, GPU               0.19 cores   GPU 14%   182MB
-#     Chromium, --disable-gpu     0.66 cores   GPU 28%   296MB
-#     WebKit GTK3 + GDK_GL=gles   0.39 cores   GPU 34%
-#     WebKit GTK3, software       1.52 cores   GPU 100%
+#     eglCreateContext ES 3.0 failed with error EGL_BAD_ATTRIBUTE.
+#       ES version fallback is disabled.
+#     gl::init::CreateGLContext failed
+#     Exiting GPU process due to errors during initialization
 #
-# So it is roughly twice as efficient as the best WebKit can manage here, and
-# 3.5x its own software path.
+# That is the same wall GTK4 hits, for the same reason, so Chromium is no better
+# off than Butler or Epiphany on this hardware. The one engine measured actually
+# reaching this GPU is WebKit under GTK3 with GDK_GL=gles, which asks for GLES
+# 2.0 and is granted it -- 0.39 cores against 1.52 on the same page.
 #
-# The other reason it is here is compatibility. WhatsApp Web refuses WebKitGTK
-# whatever user agent it is given -- a desktop Chrome string and a Safari 17
-# string were both rejected, and Tangram fails the same way for the same reason.
-# Chromium is what those sites are tested against.
+# An earlier note here claimed Chromium was accelerated and roughly twice as
+# efficient as WebKit. That was wrong: the phone had rebooted on a flat battery
+# between writing the test page and running the comparison, /tmp was cleared,
+# and both arms were rendering a file-not-found page rather than the animation.
+#
+# What it is genuinely for: sites that refuse WebKit outright. WhatsApp Web is
+# the case in hand -- it rejects WebKitGTK whatever user agent it is handed, a
+# desktop Chrome string and a Safari 17 string included, and Tangram fails on it
+# for exactly that reason. Chromium is what such sites are tested against.
 #
 { pkgs, ... }:
 {
