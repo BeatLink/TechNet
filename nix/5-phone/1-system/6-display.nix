@@ -1,10 +1,23 @@
 { pkgs, lib, ... }:
 {
-    # phocConfig sets xwayland = "immediate" below, and dropping
-    # services.xserver.enable took Xwayland with it. Enabled directly so X11
-    # applications still work; this pulls in the Xwayland binary only, not a
-    # display manager.
-    programs.xwayland.enable = true;
+    # No Xwayland.
+    #
+    # It was on and starting eagerly -- phocConfig said xwayland = "immediate",
+    # so phoc launched an X server at session start whether or not anything
+    # wanted one. Checked on the running phone: `xlsclients` against :0 listed
+    # nothing, and there is no X11-only application installed. Everything here
+    # is Wayland-native -- phosh and stevia by construction, Firefox through
+    # MOZ_ENABLE_WAYLAND, and the GTK4 apps by default.
+    #
+    # So it was an idle X server, its resident memory and a rootless window
+    # manager, held for the whole session on a phone with 2GB. Both halves have
+    # to go: "false" stops phoc offering the socket, and programs.xwayland.enable
+    # keeps the binary out of the closure.
+    #
+    # This is the thing to undo first if an X11 application is ever wanted --
+    # it will fail to start rather than fall back, and the error will be about
+    # not being able to open a display.
+    programs.xwayland.enable = false;
 
     services = {
         # No display manager. The phosh module does not use one -- it runs
@@ -30,7 +43,7 @@
                 user = "beatlink";
                 group = "beatlink";
                 phocConfig = {
-                    xwayland = "immediate";
+                    xwayland = "false";
                     outputs = {
                         DSI-1 = {
                             # 175%. Not a dconf setting: org.gnome.desktop.interface
