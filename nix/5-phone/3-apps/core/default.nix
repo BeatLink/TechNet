@@ -1,8 +1,7 @@
 {
     imports = [
-        ./firefox.nix
+        ./epiphany.nix
         ./gnome-secrets.nix
         ./tangram
-        ./home-assistant-webkit.nix
     ];
 }

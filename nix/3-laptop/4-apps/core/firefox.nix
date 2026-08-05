@@ -1,13 +1,29 @@
-# Firefox, laptop additions
+# Firefox
 #
-# The package, persistence and the rest are shared in
-# 0-common/desktop/4-apps/core/firefox.nix. programs.firefox merges across
-# modules, so this only names what Odin has and Thor does not.
+# Odin only. Thor ran the mobile build until Butler replaced it, so what used to
+# be shared in 0-common/desktop lives here now -- including the persistence,
+# which on Thor was bind-mounting a profile for a browser that was no longer
+# installed.
 #
 { pkgs, ... }:
 {
-    programs.firefox.nativeMessagingHosts.packages = with pkgs; [
-        firefoxpwa
-        keepassxc
-    ];
+    programs.firefox = {
+        enable = true;
+        nativeMessagingHosts.packages = with pkgs; [
+            firefoxpwa
+            keepassxc
+        ];
+    };
+
+    home-manager.users.beatlink = {
+        home = {
+            persistence."/Storage/Apps/Core/Firefox" = {
+                directories = [
+                    ".cache/mozilla/firefox"
+                    ".config/mozilla/firefox"
+                    ".local/share/mozilla/firefox"
+                ];
+            };
+        };
+    };
 }
