@@ -1,6 +1,6 @@
 # WebKitGTK, on a GPU it cannot use.
 #
-# Every WebKitGTK application on this phone -- Butler, Tangram, Epiphany --
+# Every GTK4 WebKit application on this phone -- Tangram, Epiphany --
 # segfaulted within a minute of opening a page. Same crash each time, in the UI
 # process rather than the web process:
 #
