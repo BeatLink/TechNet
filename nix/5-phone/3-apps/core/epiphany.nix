@@ -1,6 +1,6 @@
 # Epiphany -- the phone's general-purpose browser.
 #
-# Thor has WebLaunch for Home Assistant and Tangram for the other pinned sites, but
+# Thor has WebLaunch for its pinned sites, but
 # nothing that opens an arbitrary URL since Firefox came off. Epiphany is the
 # GTK4/WebKitGTK browser, which is the same engine both of those already run, so
 # it adds a browser without adding a second engine to the closure.
