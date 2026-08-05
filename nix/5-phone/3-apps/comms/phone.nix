@@ -18,6 +18,8 @@ let
     # remaining use is a g_debug format argument, so a NULL-safe expression is
     # the whole fix at every site.
     callaudiod = pkgs.callaudiod.overrideAttrs (old: {
+        patches = (old.patches or [ ]) ++ [ ../../1-system/patches/callaudiod-speaker-profile.patch ];
+
         postPatch = (old.postPatch or "") + ''
             substituteInPlace src/cad-pulse.c \
                 --replace-fail \

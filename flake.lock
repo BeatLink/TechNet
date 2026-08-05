@@ -289,6 +289,24 @@
         "type": "github"
       }
     },
+    "flake-utils_7": {
+      "inputs": {
+        "systems": "systems_7"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
     "gmusicbrowser": {
       "inputs": {
         "nixpkgs": [
@@ -692,17 +710,38 @@
         "type": "github"
       }
     },
+    "pinephone-charge": {
+      "inputs": {
+        "flake-utils": "flake-utils_5",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1785962759,
+        "narHash": "sha256-gvB/D6NVmfBi9m3Pn4Ueq8PY1FAYR4tvyCvqlf4ukko=",
+        "owner": "BeatLink",
+        "repo": "PinePhoneCharge",
+        "rev": "9042a4732a6446b10074f87f4ccdc2a8482862a9",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BeatLink",
+        "repo": "PinePhoneCharge",
+        "type": "github"
+      }
+    },
     "pinephone-kernel": {
       "inputs": {
         "mobile-nixos": "mobile-nixos_2",
         "nixpkgs": "nixpkgs_7"
       },
       "locked": {
-        "lastModified": 1785771420,
-        "narHash": "sha256-mg7Eisg0vNl05LnuqTvb6OAPRImXlo+PV09+vOCbhdI=",
+        "lastModified": 1785960041,
+        "narHash": "sha256-ET4IOpiZ0A6s+4IQT3v7a2SLcxajo2gRxwqHVde6w/8=",
         "owner": "BeatLink",
         "repo": "PinePhoneKernel",
-        "rev": "c79b7d9e32ba52b9708c68721eca79cd392df15d",
+        "rev": "b2734bf9af54eb1421c253bd6b3101193f9c2166",
         "type": "github"
       },
       "original": {
@@ -730,6 +769,7 @@
         "nixos-plymouth": "nixos-plymouth",
         "nixpkgs": "nixpkgs_5",
         "nixtool": "nixtool",
+        "pinephone-charge": "pinephone-charge",
         "pinephone-kernel": "pinephone-kernel",
         "sops-nix": "sops-nix",
         "vantage": "vantage",
@@ -848,6 +888,21 @@
         "type": "github"
       }
     },
+    "systems_7": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
     "vantage": {
       "inputs": {
         "nixpkgs": "nixpkgs_8"
@@ -868,7 +923,7 @@
     },
     "vigil": {
       "inputs": {
-        "flake-utils": "flake-utils_5",
+        "flake-utils": "flake-utils_6",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -886,7 +941,7 @@
     },
     "weblaunch": {
       "inputs": {
-        "flake-utils": "flake-utils_6",
+        "flake-utils": "flake-utils_7",
         "nixpkgs": [
           "nixpkgs"
         ]

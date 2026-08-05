@@ -88,6 +88,10 @@
         pinephone-kernel = {
             url = "github:BeatLink/PinePhoneKernel";
         };
+        pinephone-charge = {
+            url = "github:BeatLink/PinePhoneCharge";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
     };
     outputs =
         inputs@{

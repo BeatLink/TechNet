@@ -1,0 +1,78 @@
+--- a/src/cad-pulse.c
++++ b/src/cad-pulse.c
+@@ -826,6 +826,54 @@
+     }
+ }
+ 
++static void set_voice_call_output(pa_context *ctx, const pa_card_info *info, int eol, void *data)
++{
++    CadPulseOperation *operation = data;
++    pa_card_profile_info2 *profile;
++    pa_operation *op = NULL;
++    const char *wanted = operation->value ? "Speaker" : "Earpiece";
++    const char *target_profile = NULL;
++    uint32_t target_priority = 0;
++
++    if (eol != 0)
++        return;
++
++    if (!info) {
++        g_critical("PA returned no card info (eol=%d)", eol);
++        return;
++    }
++
++    if (info->index != operation->pulse->card_id)
++        return;
++
++    for (int i = 0; i < info->n_profiles; i++) {
++        profile = info->profiles2[i];
++
++        if (profile->available &&
++            g_str_has_prefix(profile->name, SND_USE_CASE_VERB_VOICECALL) &&
++            strstr(profile->name, wanted) &&
++            profile->priority > target_priority) {
++            target_profile = profile->name;
++            target_priority = profile->priority;
++        }
++    }
++
++    if (target_profile) {
++        g_debug("speaker %s: switching to profile '%s'",
++                operation->value ? "on" : "off", target_profile);
++        op = pa_context_set_card_profile_by_index(ctx, operation->pulse->card_id,
++                                                  target_profile,
++                                                  operation_complete_cb, operation);
++    }
++
++    if (op) {
++        pa_operation_unref(op);
++    } else {
++        g_debug("%s: no available voice call profile carrying '%s'", __func__, wanted);
++        operation_complete_cb(ctx, 0, operation);
++    }
++}
++
+ static void set_card_profile(pa_context *ctx, const pa_card_info *info, int eol, void *data)
+ {
+     CadPulseOperation *operation = data;
+@@ -1050,9 +1098,17 @@
+     operation->op = cad_op;
+     operation->value = (guint)enable;
+ 
+-    op = pa_context_get_sink_info_by_index(operation->pulse->ctx,
+-                                           operation->pulse->sink_id,
+-                                           set_output_port, operation);
++    if (operation->pulse->has_voice_profile &&
++        operation->pulse->audio_mode == CALL_AUDIO_MODE_CALL) {
++        op = pa_context_get_card_info_by_index(operation->pulse->ctx,
++                                               operation->pulse->card_id,
++                                               set_voice_call_output, operation);
++    } else {
++        op = pa_context_get_sink_info_by_index(operation->pulse->ctx,
++                                               operation->pulse->sink_id,
++                                               set_output_port, operation);
++    }
++
+     if (op)
+         pa_operation_unref(op);
+ 
