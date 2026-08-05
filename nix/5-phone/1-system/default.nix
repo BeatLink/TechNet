@@ -22,5 +22,6 @@
         ./22-bluetooth.nix
         ./23-location.nix
         ./24-gpu-meter.nix
+        ./25-webkit.nix
     ];
 }
