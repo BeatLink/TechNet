@@ -14,7 +14,6 @@
         ./12-fuse.nix
         ./14-tang.nix
         ./15-codecs.nix
-        ./16-plymouth.nix
         ./18-desktop-environment
         ./20-nixtool.nix
         ./21-remote-builder.nix

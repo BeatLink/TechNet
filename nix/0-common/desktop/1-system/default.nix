@@ -5,5 +5,6 @@
         ./3-dconf
         ./4-focus-boost.nix
         ./5-shader-cache.nix
+        ./6-plymouth.nix
     ];
 }

@@ -24,5 +24,8 @@
         ./24-gpu-meter.nix
         ./25-webkit.nix
         ./26-launchapp.nix
+        ./27-plymouth
+        ./28-unl0kr.nix
+        ./29-boot-leds.nix
     ];
 }
