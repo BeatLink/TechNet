@@ -8,7 +8,7 @@
 #
 # What is not settled is whether that difference is worth anything on the pages
 # actually used here, which is what these launchers are for: the same services
-# already reachable through Tangram and Butler, one tap away on the other
+# already reachable through Tangram, one tap away on the other
 # engine, so the comparison is a matter of using both rather than of reading
 # numbers.
 #
@@ -17,7 +17,7 @@
 # Tangram's copies of the same sites.
 #
 # When the trial is over this file either grows into the real declaration --
-# Tangram and Butler deleted, every service listed here -- or it goes away
+# Tangram deleted, every service listed here -- or it goes away
 # entirely. It should not sit half-adopted.
 { inputs, pkgs, ... }:
 let

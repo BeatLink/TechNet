@@ -2,7 +2,7 @@
 #
 # The phone splits cleanly along the toolkit. Every part of the shell is GTK3
 # (phosh, phoc and stevia link libgtk-3 and libhandy-1) and every application is
-# GTK4/libadwaita (Butler, Tangram, Epiphany, Nautilus, Secrets, Chats, Calls,
+# GTK4/libadwaita (Tangram, Epiphany, Nautilus, Secrets, Chats, Calls,
 # Showtime). The shell is the half that feels fine, and that is the same line
 # the complaint falls along.
 #
@@ -33,32 +33,19 @@
 #
 #   2. Can WebKit get a GL context under GTK3, having been refused under GTK4?
 #
-#      This is the interesting one. WebKitGTK ships parallel API series from one
-#      source tree: webkitgtk-6.0 is GTK4, webkit2gtk-4.1 is GTK3, and nixpkgs
-#      has both at 2.52.5 -- the same engine, a different toolkit. The crash
-#      documented in 1-system/25-webkit.nix was never WebKit's doing: GTK4 could
-#      not create a GL context, so the UI-side AcceleratedBackingStore was never
-#      built, and the web process entered compositing mode regardless. GTK3's
-#      context creation supports GLES 2.0, which is exactly what this GPU has.
+#      Answered: yes, but only when GTK3 is told to ask for GLES. Left alone it
+#      requests desktop GL 3.2 and is refused exactly like GTK4; with
+#      GDK_GL=gles it gets "EGL context version 2.0 (es:yes)" and WebKit
+#      composites through it -- 0.39 cores against 1.52 on an animating page.
 #
-#      Answered, and the answer is yes -- but only when GTK3 is told to ask for
-#      GLES. Left alone it requests desktop GL 3.2 and is refused exactly like
-#      GTK4; with GDK_GL=gles it gets "EGL context version 2.0 (es:yes)" and no
-#      "Disabled hardware acceleration" line, and WebKit composites through it.
-#      Measured on the same animating page:
+#      luakit was the probe and has been removed. What it proved now lives in
+#      WebLaunch (3-apps/core/weblaunch.nix), which sets the variable itself.
 #
-#          GDK_GL=gles   UI 0.22 + web 0.16 = 0.39 cores   GPU  34%   accel on
-#          default       UI 0.70 + web 0.82 = 1.52 cores   GPU 100%   accel off
-#
-#      So luakit is wrapped rather than installed bare: GDK_GL set, and the
-#      session-wide WEBKIT_DISABLE_COMPOSITING_MODE from 1-system/25-webkit.nix
-#      unset, since that variable exists for the GTK4 crash and would put this
-#      back on the software path. The wrapper is why it is `luakit` on PATH and
-#      in the app grid without the unwrapped package being installed at all.
-#
-#      What this does and does not buy: rasterising the page stays on the CPU in
-#      Skia either way. Compositing is what moves to the GPU, so the gain is in
-#      scrolling and animation rather than in first paint or JavaScript.
+#      Worth recording what the answer did not buy, since it is easy to
+#      overread: a Home Assistant dashboard still scrolls at about 5fps with
+#      compositing confirmed active and both processes near idle. The GPU is
+#      saturated on fill rate at 720x1440, and no engine choice changes how many
+#      pixels a Mali-400 can blend.
 #
 #   3. Does Qt Quick reach the GPU where GTK4 cannot?
 #
@@ -72,20 +59,6 @@
 # Delete this file once the three are answered; nothing else refers to it.
 { pkgs, ... }:
 let
-    # GTK3 asks for desktop GL unless told otherwise, and the session-wide
-    # compositing switch is aimed at GTK4. Both have to be corrected here or the
-    # GPU path is not taken.
-    luakit-gles = pkgs.symlinkJoin {
-        name = "luakit-gles";
-        paths = [ pkgs.luakit ];
-        nativeBuildInputs = [ pkgs.makeWrapper ];
-        postBuild = ''
-            wrapProgram $out/bin/luakit \
-                --set GDK_GL gles \
-                --unset WEBKIT_DISABLE_COMPOSITING_MODE
-        '';
-    };
-
     gtk-demos = pkgs.runCommand "gtk-demos" { } ''
         mkdir -p $out/bin $out/share/applications
 
@@ -120,7 +93,6 @@ in
         home.packages = [
             pkgs.nemo
             pkgs.xed-editor
-            luakit-gles
             pkgs.qt6.qtdeclarative
             gtk-demos
         ];
