@@ -6,7 +6,7 @@
             ".local/share/applications/home-assistant.desktop".text = ''
                 [Desktop Entry]
                 Name=Home Assistant
-                Exec=firefox https://homeassistant.heimdall.technet
+                Exec=firefox --kiosk https://home-assistant.heimdall.technet
                 Comment=
                 Terminal=false
                 PrefersNonDefaultGPU=false
