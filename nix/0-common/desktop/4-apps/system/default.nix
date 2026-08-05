@@ -1,6 +1,6 @@
 {
     imports = [
         ./fonts.nix
-        ./nemo
+        ./file-manager.nix
     ];
 }
