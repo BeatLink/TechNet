@@ -1,0 +1,12 @@
+[/]
+instances=['2e2daf3078cb4dd7a18bd2b676a5a5dd']
+window-maximized=true
+
+[instances/2e2daf3078cb4dd7a18bd2b676a5a5dd]
+name='WhatsApp Web'
+notifications-priority='normal'
+url='https://web.whatsapp.com/'
+user-agent='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36'
+
+[instances/877c42e4f0184c09ad01f955f9b22365]
+name=''

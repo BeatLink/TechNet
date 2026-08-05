@@ -1,0 +1,6 @@
+{
+    "host": "Thor",
+    "dconf_exports": [
+        "/re/sonny/Tangram/"
+    ]
+}

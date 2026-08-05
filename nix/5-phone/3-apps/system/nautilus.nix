@@ -15,11 +15,17 @@
 # the sidebar is the same list of places on both hosts, including the sftp
 # entries back to the other machines.
 #
-# No dconf export. The importer in 0-common/desktop/1-system/3-dconf builds an
-# ExecStart out of the path next to each dconf-settings.json, so a settings file
-# without its matching .dconf breaks evaluation rather than being skipped.
-# Running `nixtool run maintenance/export-dconf` after setting preferences is
-# what creates the pair; there is nothing to export yet.
+# No dconf export, because there are no preferences worth pinning yet. To add
+# one later, create a dconf-settings.json here holding `"host": "Thor"` and
+# `/org/gnome/nautilus/`, then run `nixtool run maintenance/export-dconf` --
+# the host tag is what makes it dump over ssh from the phone rather than from
+# whichever machine the command runs on. 3-apps/core/tangram is the worked
+# example.
+#
+# Create the pair in that order and in one go. The importer in
+# 0-common/desktop/1-system/3-dconf interpolates the .dconf path into a systemd
+# ExecStart, so a settings file without its matching export fails evaluation
+# rather than being skipped.
 #
 # Deliberately lean: no nautilus-python, no extensions, no thumbnailer stack.
 # Odin carries ffmpeg-full and imagemagick for Nemo's previews and that is a lot

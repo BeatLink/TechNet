@@ -18,6 +18,26 @@
 # hardware is a question this makes answerable rather than one to guess at --
 # `gpu-usage` from 1-system/24-gpu-meter.nix is how to tell, by watching whether
 # GPU duty moves while a page scrolls.
+#
+# The pinned tabs are declared by the dconf export in this directory rather than
+# set up by hand after every install: which sites, their names, and their user
+# agents.
+#
+# dconf-settings.json carries `"host": "Thor"`, and that tag is load-bearing.
+# export-dconf used to dump only on the machine it ran from, so exporting a
+# phone-only application from the laptop wrote a zero-byte file and reported
+# success -- dconf exits 0 with no output for a path holding no keys, so an
+# empty export is indistinguishable from an application that has no settings.
+# The tag makes the dump run over ssh against Thor instead. It needs a nixtool
+# new enough to understand it; an older one ignores the key and silently empties
+# this file on the next export.
+#
+# The user agent matters more than it looks. WhatsApp Web refuses mobile
+# browsers outright -- a UA containing "Mobile" is told to use the phone app
+# rather than served the QR pairing page -- and WebKitGTK's own string is not
+# one it recognises either. So that tab carries a desktop Chrome UA, which is
+# what whatsapp-for-linux uses against the same engine. The cost is that the
+# site then renders its desktop layout on a 411x823 logical screen.
 { pkgs, ... }:
 {
     home-manager.users.beatlink = {
