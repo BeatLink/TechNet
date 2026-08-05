@@ -32,10 +32,6 @@ let
             name = "Trilium (WebLaunch)";
             url = "https://trilium.heimdall.technet";
         };
-        Grafana = {
-            name = "Grafana (WebLaunch)";
-            url = "https://grafana.heimdall.technet";
-        };
         Syncthing = {
             name = "Syncthing (WebLaunch)";
             url = "http://localhost:8384";
@@ -59,6 +55,13 @@ let
                 "org.weblaunch.WebLaunch.${id}"
                 "--profile"
                 ''"/home/beatlink/.local/share/weblaunch/${id}"''
+                # Stated rather than left to the default, because the default is
+                # the interesting case here: it also relaxes WebKit's memory
+                # pressure thresholds, which on this phone is the difference
+                # between a cache that persists and one discarded before it is
+                # used again.
+                "--cache"
+                "on"
             ];
             icon = "web-browser";
             categories = [ "Network" ];

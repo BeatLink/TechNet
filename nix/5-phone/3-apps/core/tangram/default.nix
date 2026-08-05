@@ -1,7 +1,7 @@
 # Tangram -- web apps as windows, on WebKitGTK instead of Gecko.
 #
 # The phone reaches most of its services through a browser (Home Assistant,
-# Syncthing's UI, Grafana), and Firefox is the heaviest thing on the device: a
+# Syncthing's UI, etc), and Firefox is the heaviest thing on the device: a
 # cold start was measured at 8.6s idle and 29.8s under Syncthing load, and its
 # processes account for most of the CPU whenever it is open.
 #
