@@ -43,6 +43,31 @@
 # applies this to the session and everything launched from the app grid inherits
 # it. A shell-profile variable would reach an ssh login and nothing the user
 # taps.
+#
+# --------------------------------------------------------------------------
+# This applies to GTK4 only, and deliberately stays the default.
+#
+# GTK3 is not subject to any of the above. It asks for desktop GL 3.2 by
+# default and is refused like GTK4 -- but GDK_GL=gles makes it request GLES
+# instead, and lima grants it: "Creating EGL context version 2.0 (es:yes)", with
+# no "Disabled hardware acceleration" line after it. WebKit under GTK3
+# (webkit2gtk-4.1, the same 2.52.5 engine) then composites through it, measured
+# on the same animating page:
+#
+#     GDK_GL=gles     UI 0.22 + web 0.16 = 0.39 cores   GPU  34%   accel on
+#     default         UI 0.70 + web 0.82 = 1.52 cores   GPU 100%   accel off
+#
+# 3.9x less CPU, and less GPU with it -- because the software path changes the
+# whole surface every frame, so phoc re-uploads and recomposites 720x1440
+# continuously, while the accelerated path renders layers once and moves them.
+#
+# So this variable must NOT reach a GTK3 WebKit application: there it turns a
+# working GPU path back into the software one. It stays session-wide because
+# every WebKit application on this host is GTK4 and would crash without it, and
+# a GTK4 one added later should be safe by default rather than by memory. GTK3
+# WebKit applications opt out individually, by being wrapped with the variable
+# unset and GDK_GL set -- see 3-apps/system/toolkit-comparison.nix for the
+# worked example.
 { ... }:
 {
     environment.sessionVariables.WEBKIT_DISABLE_COMPOSITING_MODE = "1";

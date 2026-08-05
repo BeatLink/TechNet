@@ -41,15 +41,24 @@
 #      built, and the web process entered compositing mode regardless. GTK3's
 #      context creation supports GLES 2.0, which is exactly what this GPU has.
 #
-#      luakit is the probe -- GTK3 against webkitgtk_4_1, actively maintained,
-#      and with a URL bar that can be tapped, which vimb and surf lack. Launch
-#      it with WEBKIT_DISABLE_COMPOSITING_MODE unset, or the workaround in
-#      25-webkit.nix suppresses the thing being measured.
+#      Answered, and the answer is yes -- but only when GTK3 is told to ask for
+#      GLES. Left alone it requests desktop GL 3.2 and is refused exactly like
+#      GTK4; with GDK_GL=gles it gets "EGL context version 2.0 (es:yes)" and no
+#      "Disabled hardware acceleration" line, and WebKit composites through it.
+#      Measured on the same animating page:
 #
-#      Note what a win would and would not be. Rasterising the page stays on the
-#      CPU in Skia either way; accelerated compositing only moves already-drawn
-#      layers, so the gain would be in scrolling and animation, not in load
-#      time. On a Home Assistant dashboard that is still the half that hurts.
+#          GDK_GL=gles   UI 0.22 + web 0.16 = 0.39 cores   GPU  34%   accel on
+#          default       UI 0.70 + web 0.82 = 1.52 cores   GPU 100%   accel off
+#
+#      So luakit is wrapped rather than installed bare: GDK_GL set, and the
+#      session-wide WEBKIT_DISABLE_COMPOSITING_MODE from 1-system/25-webkit.nix
+#      unset, since that variable exists for the GTK4 crash and would put this
+#      back on the software path. The wrapper is why it is `luakit` on PATH and
+#      in the app grid without the unwrapped package being installed at all.
+#
+#      What this does and does not buy: rasterising the page stays on the CPU in
+#      Skia either way. Compositing is what moves to the GPU, so the gain is in
+#      scrolling and animation rather than in first paint or JavaScript.
 #
 #   3. Does Qt Quick reach the GPU where GTK4 cannot?
 #
@@ -63,6 +72,20 @@
 # Delete this file once the three are answered; nothing else refers to it.
 { pkgs, ... }:
 let
+    # GTK3 asks for desktop GL unless told otherwise, and the session-wide
+    # compositing switch is aimed at GTK4. Both have to be corrected here or the
+    # GPU path is not taken.
+    luakit-gles = pkgs.symlinkJoin {
+        name = "luakit-gles";
+        paths = [ pkgs.luakit ];
+        nativeBuildInputs = [ pkgs.makeWrapper ];
+        postBuild = ''
+            wrapProgram $out/bin/luakit \
+                --set GDK_GL gles \
+                --unset WEBKIT_DISABLE_COMPOSITING_MODE
+        '';
+    };
+
     gtk-demos = pkgs.runCommand "gtk-demos" { } ''
         mkdir -p $out/bin $out/share/applications
 
@@ -97,7 +120,7 @@ in
         home.packages = [
             pkgs.nemo
             pkgs.xed-editor
-            pkgs.luakit
+            luakit-gles
             pkgs.qt6.qtdeclarative
             gtk-demos
         ];
