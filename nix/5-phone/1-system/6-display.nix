@@ -148,6 +148,23 @@
     # correctness problem than one Syncthing unit.
     systemd.services.phosh.after = [ "systemd-user-sessions.service" ];
 
+    # Restart phosh in one step instead of stopping it for the whole switch.
+    #
+    # A NixOS switch handles a changed service in two halves by default: it
+    # stops it early, before the new /etc and the activation scripts, and starts
+    # it again at the very end. On this phone that gap is minutes -- most of it
+    # spent in home-manager-beatlink.service -- and there is nothing behind
+    # phosh to look at, so the screen is simply black until activation finishes.
+    #
+    # stopIfChanged = false makes switch-to-configuration issue a single
+    # `systemctl restart` at the end instead, so the compositor is down for
+    # seconds rather than for the deploy.
+    #
+    # This is not what `Restart=always` does, which the unit already carries
+    # from the phosh module: that covers phosh exiting on its own, and systemd
+    # correctly treats a deliberate stop as intentional and leaves it stopped.
+    systemd.services.phosh.stopIfChanged = false;
+
     # tty1 belongs to phosh, so nothing else may claim it.
     #
     # phosh.service declares Conflicts=getty@tty1.service, which means whichever

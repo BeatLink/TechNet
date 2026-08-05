@@ -99,6 +99,33 @@ the session you are working in. Always `dry-activate` first and read the unit li
 graphical session survives; if the display manager *would* restart, expect to be
 logged out.
 
+### After deploying to Thor
+
+**Always confirm phosh came back.** Anything that changes phoc, phosh or stevia
+restarts `phosh.service`, and while it is down the phone is a black screen —
+there is no login prompt behind it to fall back to. So finish every Thor deploy
+with:
+
+```sh
+ssh beatlink@thor.technet 'systemctl is-active phosh.service' \
+  || ssh beatlink@thor.technet 'sudo systemctl restart phosh.service'
+```
+
+Two things that look like they should cover this and do not. `Restart=always` is
+already on the unit from the phosh module, and only covers phosh exiting on its
+own — a deliberate stop is intentional as far as systemd is concerned. And a
+switch's default stop-early/start-late handling of a changed service left the
+screen black for the whole activation, which on this phone is minutes; that is
+what `stopIfChanged = false` in
+[6-display.nix](nix/5-phone/1-system/6-display.nix) is for.
+
+A switch can also exit non-zero while the generation is live and everything is
+running — a bind mount that impermanence no longer declares fails to unmount if
+any process holds it, including a login shell whose cwd is inside it. Check
+`readlink /run/current-system` and `systemctl --failed` before treating the
+deploy as failed; clear the mount with `sudo umount -l <path>`, which detaches it
+without killing whatever is holding it.
+
 ## Desktop environments
 
 `nix/3-laptop/1-system/18-desktop-environment/default.nix` selects which are built.
