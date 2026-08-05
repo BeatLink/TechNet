@@ -201,4 +201,21 @@ in
             ExecStart = "-${pkgs.alsa-utils}/bin/alsactl restore";
         };
     };
+
+    systemd.services.voice-call-mixer = {
+        description = "Set the AIF2 mixer levels the Voice Call UCM verb leaves alone";
+        wantedBy = [ "multi-user.target" ];
+        after = [ "alsa-restore-late.service" ];
+        serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+        };
+        script = ''
+            amixer -c 0 cset name='AIF2 ADC Capture Volume' 144
+            amixer -c 0 cset name='AIF2 DAC Playback Volume' 160
+            amixer -c 0 cset name='AIF2 Digital ADC Capture Switch' on
+            amixer -c 0 cset name='AIF2 DAC Stereo Playback Route' 'Mix Mono'
+        '';
+        path = [ pkgs.alsa-utils ];
+    };
 }
