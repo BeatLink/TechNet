@@ -1,6 +1,6 @@
 {
     imports = [
         ./nautilus.nix
-        ./gtk3-comparison.nix
+        ./toolkit-comparison.nix
     ];
 }
