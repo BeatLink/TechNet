@@ -208,6 +208,24 @@
                 "org/gnome/settings-daemon/plugins/power".ambient-enabled = false;
                 "org/gnome/desktop/interface".show-battery-percentage = true;
 
+                # GNOME's fundraising notification, off.
+                #
+                # It lives in gsd-housekeeping -- the disk-space plugin --
+                # rather than in the shell or in Software, which is why it
+                # appears on a phone running phosh at all: phosh is only the
+                # notification daemon here and displays whatever is sent to it,
+                # and the phosh module pulls in gnome-settings-daemon, so
+                # gsd-housekeeping runs and sends this.
+                #
+                # This is the plugin's own switch rather than a per-application
+                # notification block, so it stops the reminder being generated
+                # instead of hiding it after the fact -- and it leaves the rest
+                # of housekeeping's notifications, the low-disk-space warnings,
+                # working. Blanket-disabling notifications for gsd would have
+                # taken those with it, which on a phone with a 1TB card that can
+                # fill is not a trade worth making.
+                "org/gnome/settings-daemon/plugins/housekeeping".donation-reminder-enabled = false;
+
                 # Show every app in the grid rather than only the ones declaring
                 # themselves mobile-friendly. The key is a flags type whose only
                 # member is 'adaptive', so the empty list means "do not filter"
