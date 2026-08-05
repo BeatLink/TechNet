@@ -37,6 +37,11 @@ Built and waiting to deploy, most of it unverified on hardware.
 * Update login password to digits, Thor only
 * phoc segfaults on touch-up in wlr_surface_get_root_surface, takes every app with it
 * Confirm callaudiod stopped segfaulting now that the sink list is real
+* Raise the charging current the keyboard case supplies to the phone. Its
+  default is conservative enough that heavy work outruns it and the battery
+  falls even while attached — a 3% shutdown happened mid-session with the case
+  on. The KB151 firmware exposes charger control over I2C, so this is a setting
+  to drive from the host rather than a hardware limit
 * Fix rotation on lockscreen (May be upstream)
 * Plymouth and graphical decryption
 * Setup Front and Rear Camera
