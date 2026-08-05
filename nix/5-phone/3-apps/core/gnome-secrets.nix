@@ -11,10 +11,8 @@
 # extension -- and Secrets has no equivalent. Odin keeps KeePassXC for that;
 # see 3-laptop/4-apps/core/keepassxc.nix.
 #
-# Nor could this host have it either way: Thor runs firefox-mobile, which is a
-# callPackage of nixpkgs' mobile-config.nix and calls wrapFirefox with a fixed
-# argument set, so there is no nativeMessagingHosts to pass through without
-# forking that package.
+# Nor could this host have it either way: Thor's browser is Epiphany, and
+# KeePassXC-Browser is a WebExtension with no Epiphany equivalent.
 #
 # Persisted like the other apps. `.local/share/secrets` holds the app's own
 # state and the path to the last opened database; the database itself is
