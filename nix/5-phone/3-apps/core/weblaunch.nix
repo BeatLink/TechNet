@@ -1,84 +1,48 @@
-# WebLaunch -- web apps as windows, on the only path that reaches this GPU.
+# The phone's other WebLaunch apps.
 #
-# Installed to be tried rather than committed to. The engine question underneath
-# it is settled: WebKit under GTK3, asked for GLES 2.0 rather than the desktop
-# GL it requests by default, is the one thing measured compositing in hardware
-# on this phone -- 0.39 cores against 1.52 on the same animating page, while
-# GTK4 and Chromium both demand GLES 3.0 and are refused by lima.
+# Home Assistant is declared in 0-common/desktop/4-apps/technet/home-assistant,
+# because both hosts want it. These two are Thor-only: Trilium because the
+# desktop client is Electron and would be absurd here, and Syncthing because its
+# interface is a local web page with no client at all.
 #
-# What is not settled is whether that difference is worth anything on the pages
-# actually used here, which is what these launchers are for: the same services
-# already reachable through Tangram, one tap away on the other
-# engine, so the comparison is a matter of using both rather than of reading
-# numbers.
+# The engine question underneath all of them is settled. WebKit under GTK3,
+# asked for GLES 2.0 rather than the desktop GL it requests by default, is the
+# one thing measured compositing in hardware on this phone -- GTK4 and Chromium
+# both demand GLES 3.0 and are refused by lima.
 #
-# Each entry gets its own profile under /Storage, so a login survives the
-# rollback of / and so the sites do not share cookies with each other or with
-# Tangram's copies of the same sites.
+# Icons come from the packages that already ship them rather than being copied
+# into this repository: trilium-desktop for one, syncthing for the other. That
+# costs a build-time reference to each package but nothing at runtime, and it
+# means the icon tracks the upstream artwork instead of going stale.
 #
-# When the trial is over this file either grows into the real declaration --
-# Tangram deleted, every service listed here -- or it goes away
-# entirely. It should not sit half-adopted.
-{ inputs, pkgs, ... }:
-let
-    weblaunch = inputs.weblaunch.packages.${pkgs.stdenv.hostPlatform.system}.weblaunch;
-
-    services = {
-        HomeAssistant = {
-            name = "Home Assistant (WebLaunch)";
-            url = "https://home-assistant.heimdall.technet";
-        };
-        Trilium = {
-            name = "Trilium (WebLaunch)";
+# Each app gets its own profile, so the sites do not share cookies with each
+# other or with Tangram's copies of the same sites, and each is persisted
+# against the rollback of /.
+# The module itself is imported by the shared Home Assistant declaration, and
+# importing it twice declares its options twice, which evaluation rejects. This
+# file only adds apps.
+{ pkgs, ... }:
+{
+    programs.weblaunch.apps = {
+        trilium = {
+            name = "Trilium";
             url = "https://trilium.heimdall.technet";
+            icon = "${pkgs.trilium-desktop}/share/icons/hicolor/512x512/apps/trilium.png";
+            profile = "/home/beatlink/.local/share/weblaunch/Trilium";
         };
-        Syncthing = {
-            name = "Syncthing (WebLaunch)";
+
+        syncthing = {
+            name = "Syncthing";
             url = "http://localhost:8384";
+            icon = "${pkgs.syncthing}/share/icons/hicolor/scalable/apps/syncthing.svg";
+            profile = "/home/beatlink/.local/share/weblaunch/Syncthing";
         };
     };
 
-    launcher =
-        id: service:
-        pkgs.makeDesktopItem {
-            name = "org.weblaunch.WebLaunch.${id}";
-            desktopName = service.name;
-            # Not lib.escapeShellArg: Exec is not a shell command line, and the
-            # desktop entry spec reserves the single quote it would produce.
-            exec = builtins.concatStringsSep " " [
-                "${weblaunch}/bin/weblaunch"
-                "--name"
-                ''"${service.name}"''
-                "--url"
-                ''"${service.url}"''
-                "--app-id"
-                "org.weblaunch.WebLaunch.${id}"
-                "--profile"
-                ''"/home/beatlink/.local/share/weblaunch/${id}"''
-                # Stated rather than left to the default, because the default is
-                # the interesting case here: it also relaxes WebKit's memory
-                # pressure thresholds, which on this phone is the difference
-                # between a cache that persists and one discarded before it is
-                # used again.
-                "--cache"
-                "on"
-            ];
-            icon = "web-browser";
-            categories = [ "Network" ];
-            startupWMClass = "org.weblaunch.WebLaunch.${id}";
-        };
-in
-{
-    home-manager.users.beatlink = {
-        home = {
-            packages = [ weblaunch ] ++ pkgs.lib.mapAttrsToList launcher services;
-
-            # One directory for every profile rather than one entry per service,
-            # because the set of services being tried will change and the
-            # persistence declaration should not have to change with it.
-            persistence."/Storage/Apps/Core/WebLaunch" = {
-                directories = [ ".local/share/weblaunch" ];
-            };
-        };
+    home-manager.users.beatlink.home.persistence."/Storage/Apps/Core/WebLaunch" = {
+        directories = [
+            ".local/share/weblaunch/Trilium"
+            ".local/share/weblaunch/Syncthing"
+        ];
     };
 }
