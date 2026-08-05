@@ -16,8 +16,7 @@
 # means the icon tracks the upstream artwork instead of going stale.
 #
 # Each app gets its own profile, so the sites do not share cookies with each
-# other or with Tangram's copies of the same sites, and each is persisted
-# against the rollback of /.
+# other, and each is persisted against the rollback of /.
 # The module itself is imported by the shared Home Assistant declaration, and
 # importing it twice declares its options twice, which evaluation rejects. This
 # file only adds apps.

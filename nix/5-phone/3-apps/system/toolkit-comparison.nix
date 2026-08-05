@@ -2,8 +2,8 @@
 #
 # The phone splits cleanly along the toolkit. Every part of the shell is GTK3
 # (phosh, phoc and stevia link libgtk-3 and libhandy-1) and every application is
-# GTK4/libadwaita (Tangram, Epiphany, Nautilus, Secrets, Chats, Calls,
-# Showtime). The shell is the half that feels fine, and that is the same line
+# GTK4/libadwaita (Epiphany, Nautilus, Secrets, Chats, Calls, Showtime). The
+# shell is the half that feels fine, and that is the same line
 # the complaint falls along.
 #
 # Underneath it: lima on the Mali-400 is GLES 2.0, GTK4 asks for GLES 3.0 and is
