@@ -27,5 +27,6 @@
         ./27-plymouth
         ./28-unl0kr.nix
         ./29-boot-leds.nix
+        ./30-charging.nix
     ];
 }
