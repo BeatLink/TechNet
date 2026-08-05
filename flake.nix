@@ -101,7 +101,6 @@
             home-manager,
             xdg-autostart,
             gmusicbrowser,
-            nixos-plymouth,
             blockurl,
             mobile-nixos,
             vantage,
@@ -164,7 +163,6 @@
                         impermanence.nixosModules.impermanence
                         sops-nix.nixosModules.sops
                         home-manager.nixosModules.home-manager
-                        nixos-plymouth.nixosModules.default
                         ./nix/0-common
                         ./nix/3-laptop
                     ];

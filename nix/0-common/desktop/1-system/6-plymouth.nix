@@ -1,4 +1,7 @@
+{ inputs, ... }:
 {
+    imports = [ inputs.nixos-plymouth.nixosModules.default ];
+
     boot = {
         initrd.verbose = false;
         # Enable "Silent Boot"
