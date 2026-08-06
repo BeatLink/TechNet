@@ -78,9 +78,15 @@ in
                 src = phoshSrc final "phoc" "sha256-Xzb7C8ZadjS+fPPYlxoEMGcGkcs5yYzhGZs4Mk2lA70=";
             });
 
-            phosh = prev.phosh.overrideAttrs (_: {
+            # The patch fixes a use-after-free that takes the whole session
+            # down: on_startup_timeout reads through `state` after emitting
+            # app-failed, and a handler of that signal can already have freed
+            # it. It fires whenever an app misses phosh's 5s startup timeout,
+            # so a slow cold launch is enough. See the patch header.
+            phosh = prev.phosh.overrideAttrs (old: {
                 inherit version;
                 src = phoshSrc final "phosh" "sha256-ALpONfAaVP9pBP7qffsHBacH50RHdCKHiX63LaqGMf4=";
+                patches = (old.patches or [ ]) ++ [ ./patches/phosh-startup-timeout-uaf.patch ];
             });
 
             stevia = prev.stevia.overrideAttrs (_: {

@@ -1,0 +1,45 @@
+From: TechNet <local>
+Subject: [PATCH] app-tracker: Don't read through state after emitting app-failed
+
+on_startup_timeout ends a failed startup with:
+
+    g_signal_emit (state->tracker, signals[APP_FAILED], 0, state->info, state->startup_id);
+    g_hash_table_remove (state->tracker->apps, state->startup_id);
+
+self->apps owns the PhoshAppState (g_hash_table_new_full's value destroy is
+phosh_app_state_free), so anything that drops this startup id from the table
+frees `state`. Handlers of app-failed can do exactly that: overview's
+on_app_failed tears down the activity, which re-enters the tracker via the
+startup-tracker listener, and startup_tracker_handle_launched removes the entry
+itself. The second line then dereferences freed memory, and phosh dies with
+SIGSEGV in on_startup_timeout, taking the whole session with it.
+
+19f233f0 ("app-tracker: Fix use-after-free in on_startup_timeout") fixed the
+early-return paths but left these two lines.
+
+Take the tracker pointer, a copy of the startup id and a reference on the app
+info before emitting, and clear timeout.id first so phosh_app_state_free does
+not g_source_remove the source that is currently dispatching.
+
+--- a/src/app-tracker.c
++++ b/src/app-tracker.c
+@@ -152,8 +152,17 @@
+              g_app_info_get_name (G_APP_INFO (state->info)),
+              state->startup_id);
+
+-  g_signal_emit (state->tracker, signals[APP_FAILED], 0, state->info, state->startup_id);
+-  g_hash_table_remove (state->tracker->apps, state->startup_id);
++  {
++    PhoshAppTracker *tracker = state->tracker;
++    g_autofree char *startup_id = g_strdup (state->startup_id);
++    GDesktopAppInfo *info = g_object_ref (state->info);
++
++    state->timeout.id = 0;
++    g_signal_emit (tracker, signals[APP_FAILED], 0, info, startup_id);
++    g_hash_table_remove (tracker->apps, startup_id);
++
++    g_object_unref (info);
++  }
+
+   return G_SOURCE_REMOVE;
+ }
