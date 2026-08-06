@@ -777,13 +777,16 @@
       },
       "locked": {
         "lastModified": 1785998587,
-        "narHash": "sha256-s5OUQXM6EnKlSy2H5QqGspysneYhZWV5Ouoby16n7yc=",
-        "path": "/Storage/Files/Projects/Coding/Prewarm",
-        "type": "path"
+        "narHash": "sha256-LfafVgXSwrHXW9IeewljVUbjFZna29mnKS51SMweJ2A=",
+        "owner": "BeatLink",
+        "repo": "Prewarm",
+        "rev": "4b42716c26a9f0318c00ce7321f2ba70d2130cf6",
+        "type": "github"
       },
       "original": {
-        "path": "/Storage/Files/Projects/Coding/Prewarm",
-        "type": "path"
+        "owner": "BeatLink",
+        "repo": "Prewarm",
+        "type": "github"
       }
     },
     "root": {
