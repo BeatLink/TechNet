@@ -26,6 +26,8 @@ Built and waiting to deploy, most of it unverified on hardware.
 * Optimization ideas
 
   * CPU Optimization
+    * In app responsiveness
+    * Startup times
   * * Foreground booster
   * IO Optimization
   * prewarm dynamic app recording
