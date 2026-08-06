@@ -121,6 +121,10 @@
                             "[github-actions-workflow]" = {
                                 "editor.defaultFormatter" = "redhat.vscode-yaml";
                             };
+                            "[vala]" = {
+                                "editor.tabSize" = 4;
+                                "editor.insertSpaces" = true;
+                            };
                             "javascript.format.semicolons" = "remove";
                             "javascript.preferences.quoteStyle" = "double";
                             "javascript.updateImportsOnFileMove.enabled" = "always";
@@ -145,6 +149,11 @@
                                 ];
                             };
                             "nix.showUnstableFeatures" = true;
+
+                            # Vala language server ------------------------------------------------------------------------------------------
+                            "vala.languageServerPath" = "${pkgs.vala-language-server}/bin/vala-language-server";
+                            "vala.debugMode" = false;
+                            "vala.failOnCriticals" = false;
 
                             # sops -----------------------------------------------------------------------------------------------------------
                             "sops.defaults.ageKeyFile" = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
@@ -191,6 +200,7 @@
                             lokalise.i18n-ally
                             ms-vscode.live-server
                             jnoortheen.nix-ide
+                            prince781.vala
                             tyriar.sort-lines
                             hex-ci.stylelint-plus
                             gruntfuggly.todo-tree
@@ -210,6 +220,12 @@
                     nixd
                     nixfmt
                     nil
+                    vala
+                    vala-language-server
+                    vala-lint
+                    meson
+                    ninja
+                    pkg-config
                     python3
                     black
                     (poetry.overridePythonAttrs (old: {
