@@ -41,9 +41,19 @@
         maxLocked = 384 * 1024 * 1024;
 
         profiles = {
+            # The cache is here because a trace said so, not because it looked
+            # likely. Launching with everything else closed and the lock held,
+            # the only pages faulted in that no profile covered were 6.4 MiB of
+            # WebKitCache blobs -- against 0.36 MiB of library pages, so the
+            # recorded ranges are otherwise complete.
+            #
+            # It is on the eMMC rather than the card, and only 6.4 MiB of its
+            # 130 MiB was touched, so this is the cheap end of the problem. The
+            # SD-backed directories below are the expensive one.
             epiphany.dirs = [
                 "/home/beatlink/.local/share/epiphany"
                 "/home/beatlink/.config/epiphany"
+                "/home/beatlink/.cache/epiphany"
             ];
 
             weblaunch.dirs = [
