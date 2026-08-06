@@ -70,11 +70,26 @@ in
     networking = {
         hostName = "Thor"; # Sets the hostName
 
-        # FIXME : configure usb rndis through networkmanager in the future.
-        # Currently this relies on stage-1 having configured it.
-        networkmanager.unmanaged = [
-            "rndis0"
-            "usb0"
-        ];
+        networkmanager.ensureProfiles.profiles."USB Gadget" = {
+            connection = {
+                id = "USB Gadget";
+                type = "ethernet";
+                interface-name = "usb0";
+                autoconnect = "true";
+                permissions = "";
+            };
+            ethernet.cloned-mac-address = "preserve";
+            ipv4 = {
+                method = "manual";
+                addresses = "10.100.101.1/30";
+                never-default = "true";
+                dns-search = "";
+            };
+            ipv6 = {
+                method = "link-local";
+                addr-gen-mode = "stable-privacy";
+                dns-search = "";
+            };
+        };
     };
 }

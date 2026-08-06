@@ -31,5 +31,6 @@
         ./32-arc-policy.nix
         ./33-theme.nix
         ./34-fn-lock.nix
+        ./35-usb-networking.nix
     ];
 }
