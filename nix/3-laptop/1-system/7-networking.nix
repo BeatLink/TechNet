@@ -49,5 +49,21 @@
 
     networking = {
         hostName = "Odin"; # Sets hostname
+
+        networkmanager.ensureProfiles.profiles."Thor USB" = {
+            connection = {
+                id = "Thor USB";
+                type = "ethernet";
+                autoconnect = "true";
+            };
+            ethernet.mac-address = "02:00:00:00:00:02";
+            ipv4 = {
+                method = "manual";
+                addresses = "10.100.101.2/30";
+                never-default = "true";
+                dns-search = "";
+            };
+            ipv6.method = "link-local";
+        };
     };
 }
