@@ -1,0 +1,45 @@
+From: TechNet <local>
+Subject: [PATCH] app-tracker: Keep the pid DBus gave us for an app we launched
+
+Launching from the app grid creates the tracker state before anything knows a
+pid, so phosh_app_state_new is called with 0. The pid arrives moments later on
+org.gtk.gio.DesktopAppInfo's Launched signal -- which on_dbus_app_launched
+parses, and then throws away, passing a literal 0 to update_app_state for the
+case where the startup id is already known.
+
+update_app_state would have taken it:
+
+    if (state->pid && pid && state->pid != pid)
+      g_warning ("Ignoring pid change ...");
+    else if (pid)
+      state->pid = pid;
+
+so the state keeps pid == 0 for the whole launch, and that decides how long the
+app is given. on_startup_timeout only extends the deadline when it has a pid to
+check:
+
+    if (state->pid && state->timeout.waited < STARTUP_TRACKED_TIMEOUT)
+
+With no pid the first tick declares the launch failed, at STARTUP_TIMEOUT, five
+seconds. With one it waits up to STARTUP_TRACKED_TIMEOUT, twenty-seven.
+
+Five seconds is not long on a phone. Measured on a PinePhone, Files takes 14.7s
+warm and 21.8s cold, and Epiphany 8.6s -- so every one of them draws a spurious
+"failed to start" notification, has its splash torn down, and then appears
+anyway a few seconds later, because nothing actually went wrong. 26 of these
+were logged in a single boot.
+
+Passing the pid through puts those launches on the 27s deadline they were meant
+to have.
+
+--- a/src/app-tracker.c
++++ b/src/app-tracker.c
+@@ -513,7 +513,7 @@
+   if (g_hash_table_contains (self->apps, startup_id)) {
+     /* App already known, likely launched by us */
+     g_debug ("'%s' (%s) already known", startup_id, desktop_file);
+-    update_app_state (self, startup_id, PHOSH_APP_TRACKER_STATE_FLAG_DBUS_LAUNCH, 0);
++    update_app_state (self, startup_id, PHOSH_APP_TRACKER_STATE_FLAG_DBUS_LAUNCH, pid);
+   } else {
+     GDesktopAppInfo *info;
+     PhoshAppState *state;

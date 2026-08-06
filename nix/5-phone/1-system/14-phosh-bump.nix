@@ -78,15 +78,29 @@ in
                 src = phoshSrc final "phoc" "sha256-Xzb7C8ZadjS+fPPYlxoEMGcGkcs5yYzhGZs4Mk2lA70=";
             });
 
-            # The patch fixes a use-after-free that takes the whole session
+            # Two patches, both in the startup timeout path, and they are
+            # related. See each patch header for the detail.
+            #
+            # The first fixes a use-after-free that takes the whole session
             # down: on_startup_timeout reads through `state` after emitting
             # app-failed, and a handler of that signal can already have freed
-            # it. It fires whenever an app misses phosh's 5s startup timeout,
-            # so a slow cold launch is enough. See the patch header.
+            # it.
+            #
+            # The second stops that path being reached at all for most
+            # launches. An app started from the grid never gets its pid
+            # recorded -- DBus supplies one and on_dbus_app_launched discards
+            # it -- and without a pid phosh gives up after 5s rather than the
+            # 27s it would otherwise allow. Files takes 14.7s warm on this
+            # phone and 21.8s cold, so every launch drew a spurious "failed to
+            # start", tore down its splash, and then appeared anyway. 26 in one
+            # boot.
             phosh = prev.phosh.overrideAttrs (old: {
                 inherit version;
                 src = phoshSrc final "phosh" "sha256-ALpONfAaVP9pBP7qffsHBacH50RHdCKHiX63LaqGMf4=";
-                patches = (old.patches or [ ]) ++ [ ./patches/phosh-startup-timeout-uaf.patch ];
+                patches = (old.patches or [ ]) ++ [
+                    ./patches/phosh-startup-timeout-uaf.patch
+                    ./patches/phosh-startup-keep-pid.patch
+                ];
             });
 
             stevia = prev.stevia.overrideAttrs (_: {

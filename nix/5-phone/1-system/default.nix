@@ -30,5 +30,6 @@
         ./30-charging.nix
         ./31-prewarm.nix
         ./32-arc-policy.nix
+        ./33-theme.nix
     ];
 }

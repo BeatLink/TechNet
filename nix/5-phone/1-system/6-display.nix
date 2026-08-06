@@ -46,17 +46,27 @@
                     xwayland = "false";
                     outputs = {
                         DSI-1 = {
-                            # 175%. Not a dconf setting: org.gnome.desktop.interface
+                            # 150%. Not a dconf setting: org.gnome.desktop.interface
                             # has only `scaling-factor`, which is an integer, and
                             # `text-scaling-factor`, which resizes fonts and nothing
                             # else. Real fractional output scaling is the
                             # compositor's, so it belongs here -- the module's type
                             # accepts a float.
                             #
-                            # 720x1440 at 1.75 gives a 411x823 logical screen,
-                            # against 360x720 at the previous 2. More fits on
-                            # screen, which is what the on-screen keyboard needed.
-                            scale = 1.75;
+                            # 720x1440 at 1.5 gives a 480x960 logical screen,
+                            # against 411x823 at 1.75 and 360x720 at 2. Lower
+                            # scale means more fits on a screen this small, and
+                            # that space is worth more here than larger targets.
+                            #
+                            # It costs nothing to render. The compositor tells
+                            # the client its fractional scale and the client
+                            # renders exactly that many pixels -- checked on the
+                            # wire, preferred_scale(180) and a 1440x650 buffer
+                            # for a 960x433 window, matching the panel one to
+                            # one. Integer scales are not cheaper: 2 was
+                            # measured against 1.5 across cold launches and came
+                            # out the same, 9.5s against 9.8s.
+                            scale = 1.5;
                             # No `rotate`. The panel is natively portrait at
                             # 720x1440, so a static rotate = "90" turned it
                             # permanently sideways -- which is what "stuck in

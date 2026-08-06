@@ -36,6 +36,11 @@
 
     networking.firewall.interfaces."wireguard0".allowedTCPPorts = [ 8384 ];
 
+    # syncthing.thor.lan, served by nginx on this phone and proxied to loopback.
+    # Not routed through Heimdall on purpose: a request from the phone to a
+    # process on the phone should not leave over WireGuard and come back.
+    technet.vhosts.syncthing.port = 8384;
+
     syncthing-mesh = {
         self = "Thor";
 
