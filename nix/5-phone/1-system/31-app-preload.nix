@@ -106,12 +106,65 @@ let
             exec vmtouch -f -l -m ${maxLockedFile} "''${paths[@]}"
         '';
     };
+    status = pkgs.writeShellApplication {
+        name = "app-preload-status";
+        runtimeInputs = [
+            pkgs.coreutils
+            pkgs.gnugrep
+            pkgs.gawk
+            pkgs.systemd
+            pkgs.vmtouch
+        ];
+        text = ''
+            shopt -s nullglob
+
+            printf '%-12s %7s %10s %10s %7s\n' app files size resident share
+
+            for list in ${stateDir}/*.list; do
+                name="$(basename "$list" .list)"
+
+                mapfile -t paths < <(while IFS= read -r path; do
+                    if [ -f "$path" ]; then
+                        printf '%s\n' "$path"
+                    fi
+                done < "$list")
+
+                if [ "''${#paths[@]}" -eq 0 ]; then
+                    printf '%-12s %7s %10s %10s %7s\n' "$name" 0 - - -
+                    continue
+                fi
+
+                vmtouch -f "''${paths[@]}" 2>/dev/null \
+                    | awk -v name="$name" -v n="''${#paths[@]}" '
+                        /Resident Pages/ {
+                            split($3, p, "/")
+                            r += p[1]; t += p[2]
+                        }
+                        END {
+                            printf "%-12s %7d %9.0fM %9.0fM %6.0f%%\n",
+                                name, n, t*4096/1048576, r*4096/1048576,
+                                (t ? 100*r/t : 0)
+                        }'
+            done
+
+            printf '\nlocked in memory : %s MiB\n' \
+                "$(awk '/^Mlocked/ {printf "%.0f", $2/1024}' /proc/meminfo)"
+            printf 'warm pass        : %s (%s)\n' \
+                "$(systemctl is-active app-preload.service)" \
+                "$(systemctl show -P ExecMainStatus app-preload.service)"
+            printf 'lock service     : %s\n' \
+                "$(systemctl is-active app-preload-lock.service)"
+            printf 'next warm pass   : %s\n' \
+                "$(systemctl list-timers app-preload.timer --no-pager 2>/dev/null | awk 'NR==2 {print $1, $2, $3}')"
+        '';
+    };
 in
 {
     environment.systemPackages = [
         record
         preload
         lock
+        status
     ];
 
     environment.persistence."/persistent".directories = [ stateDir ];
