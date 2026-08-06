@@ -6,6 +6,7 @@
     services.prewarm = {
         enable = true;
         group = "beatlink";
+        # Overrunning this drops pages by path order, not by usefulness
         maxLocked = 384 * 1024 * 1024;
 
         # Watch ------------------------------------
