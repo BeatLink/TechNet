@@ -1,16 +1,25 @@
 # Which datasets the ARC is allowed to keep file data for.
 #
-# `metadata` is not "stop caching this dataset". ZFS serves mmap through the
-# Linux page cache and keeps its own ARC copy of the same blocks, so a mapped
-# library is held twice; `metadata` drops the second copy and leaves the page
-# cache one. Executables and shared libraries are mmapped, so they still cache
-# normally. What loses its cache is read() traffic, which for the store is icon
-# and locale data rather than code.
+# /Storage is bulk data that is read once and never re-read, so caching it only
+# pushes out things that are.
 #
-# That is the whole point on /nix: 31-app-preload locks the pages apps actually
-# fault in, and those locked pages live in the page cache. Leaving primarycache
-# at `all` means the ARC holds a second, uncompressed-in-page-cache-anyway copy
-# of exactly the bytes we already pinned.
+# /nix is deliberately left at `all`, and the value is set rather than left
+# alone because the property persists on the dataset once written.
+#
+# It was worth trying `metadata` there. ZFS serves mmap through the page cache
+# while keeping its own ARC copy, so every library that 31-app-preload locks is
+# held twice, and `metadata` drops the second copy. Measured on a quiet phone,
+# four cold Epiphany launches each with the page locks up:
+#
+#     primarycache=all        13078 17009 17347 17951   mean 16.3s
+#     primarycache=metadata   15424 15750 16852 27020   mean 18.8s
+#
+# The ranges overlap and the medians go the other way -- no real difference.
+# And the duplication was not costing anything to begin with: across the same
+# session the ARC moved 1331 -> 1008 -> 279 -> 168 MiB on its own as the locks
+# and the apps asked for memory. It yields under pressure by itself, so the
+# second copy is free in practice, while still covering the ~500 MiB of
+# Epiphany's set that is not locked and every app with no profile at all.
 #
 { config, ... }:
 let
@@ -18,7 +27,7 @@ let
 in
 {
     systemd.services.zfs-cache-policy = {
-        description = "Keep the ARC off data the page cache already holds";
+        description = "Set which datasets the ARC may cache file data for";
         wantedBy = [ "multi-user.target" ];
         after = [ "zfs-import.target" ];
         serviceConfig = {
@@ -29,10 +38,18 @@ in
         script = ''
             set -u
 
-            for dataset in "data-pool-${host}/storage" "root-pool-${host}/root/nix"; do
+            set -- \
+                "data-pool-${host}/storage" metadata \
+                "root-pool-${host}/root/nix" all
+
+            while [ "$#" -ge 2 ]; do
+                dataset="$1"
+                policy="$2"
+                shift 2
+
                 if zfs list -H -o name "$dataset" >/dev/null 2>&1; then
-                    zfs set primarycache=metadata "$dataset"
-                    echo "$dataset: primarycache=metadata"
+                    zfs set "primarycache=$policy" "$dataset"
+                    echo "$dataset: primarycache=$policy"
                 else
                     echo "$dataset: absent, skipped"
                 fi
