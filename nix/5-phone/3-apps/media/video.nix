@@ -70,7 +70,14 @@
         # The output formats are the codecs it accepts. Worth having on the
         # device because the answer depends on the kernel, not on this file.
         # On the 6.17.5 kernel here that is MPEG-2, H.264, HEVC and VP8.
-        pkgs.v4l-utils
+        #
+        # withGUI = false drops qv4l2 and qvidcap, the two Qt front ends this
+        # package also ships. Nothing on this phone is Qt, so they pulled the
+        # whole qtbase and qt5compat closure onto an SD card to provide a test
+        # pattern viewer and a capture window for a decoder with no camera path
+        # through it. The flag gates those two binaries only -- v4l2-ctl and the
+        # rest of the command line tools are on withUtils and stay.
+        (pkgs.v4l-utils.override { withGUI = false; })
 
         # gst-inspect-1.0 and gst-launch-1.0, for the other half of the
         # question: v4l-utils says what the hardware can do, these say whether
