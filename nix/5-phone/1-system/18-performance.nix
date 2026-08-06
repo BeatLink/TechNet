@@ -77,8 +77,33 @@
         options zfs zfs_txg_timeout=15
     '';
 
+    # vm.vfs_cache_pressure is lowered from the default 100, because every
+    # measurement of what makes an app slow to start on this phone came back
+    # dominated by per-file cost rather than by bytes. Reading a directory tree
+    # cold, after drop_caches:
+    #
+    #   eMMC  /nix, 807 files,    3 MiB   1040 ms   1288 us per file
+    #   SD    HA profile, 5500 files, 53 MiB  16657 ms   3028 us per file
+    #
+    # Throughput is about 3 MiB/s either way, so the medium is not what is being
+    # measured -- the dentry and inode lookups are. 50 asks the kernel to hold
+    # that metadata rather than reclaim it at the same rate as page cache, which
+    # is the difference between resolving 5500 dentries off the card again and
+    # not.
+    #
+    # Left well above the aggressive end people use for this. The cache is not
+    # free and the phone has 2972MB; the intent is to stop it being thrown away
+    # early, not to pin it.
+    #
+    # swappiness stays at 100 rather than going higher. Swap only ever takes
+    # anonymous pages -- clean file pages are dropped and re-read from origin,
+    # never written to swap -- so raising it does nothing for the caches above,
+    # while zram costs lz4 on a phone whose measured constraint is CPU (pressure
+    # 63-72, against io at 3.44) and the 16GB zvol behind it costs ZFS write
+    # pipeline and encryption on top.
     boot.kernel.sysctl = {
         "vm.swappiness" = 100;
+        "vm.vfs_cache_pressure" = 50;
     };
 
     # ibus arrives via services.gnome.core-os-services, which the phosh module

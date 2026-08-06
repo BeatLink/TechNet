@@ -23,19 +23,44 @@ Built and waiting to deploy, most of it unverified on hardware.
 
 ## Thor
 
-* Raise the charging current the keyboard case supplies to the phone. Its
-  default is conservative enough that heavy work outruns it and the battery
-  falls even while attached. The KB151 firmware exposes charger control over I2C, so this is a setting
-  to drive from the host rather than a hardware limit. Charge the phone at maximum safe charging rate until the phones battery reaches 75% then hold between 75 and 80%. if it drops below.
-* Fix fwupdate
+* Optimization ideas
+
+  * CPU Optimization
+  * * Foreground booster
+  * IO Optimization
+  * Every app's persistence is on the SD card. /Storage is data-pool-Thor on
+    mmcblk0 (SD); only /, /nix, /home and /persistent are on the eMMC. Measured
+    2.4x slower per file than eMMC -- 3028us vs 1288us -- and reading Home
+    Assistant's 5500-file profile cold takes 16.7s. Moving /Storage/Apps to the
+    eMMC is worth ~2.4x but needs a size audit first: it is 2.9G against 28.5G
+    of eMMC, and /Storage/Apps/System alone is 1.9G.
+  * primarycache=metadata on data-pool-Thor/storage denies the ARC 2.9G of hot
+    app state -- every browser profile and cache. The policy was written for
+    bulk media, which app profiles are the opposite of. The same experiment
+    that settled it for /nix (32-arc-policy.nix) would settle it here; the
+    finding there was that the ARC is elastic and manages the tension itself.
+  * /Storage/Apps holds 387M of dead data: Core/Firefox is 311M and
+    Core/Chromium 76M, both for apps that were removed. Nothing reads them.
+  * Waydroid is 1.9G of the 2.9G under /Storage/Apps, so any plan to move app
+    persistence to the eMMC is really a question about Waydroid first.
+  * Preload profiles go stale on a nixpkgs bump, since the recorded paths are
+    exact store paths. app-preload warns when over half are gone but nothing
+    re-records. Automate if it bites.
+  * Consider consolidating WebLaunch onto Epiphany's engine. WebLaunch is
+    WebKit under GTK3 and costs ~95 MiB of the locked set that Epiphany's
+    abi=6.0 engine would make free. Blocked on re-measuring the compositing
+    finding in weblaunch.nix -- both engines now hold /dev/dri/renderD128 under
+    mesa 26.1.5, so "GTK4 is refused by lima" may no longer hold, but device
+    access is not proof of hardware compositing.
 * [www.freedesktop.org/wiki/Specifications/desktop-bookmark-spec/?__goaway_challenge=meta-refresh&amp;__goaway_id=df93c11d9ee5b312d692e413745c8585&amp;__goaway_referer=https%3A%2F%2Fduckduckgo.com%2F](https://www.freedesktop.org/wiki/Specifications/desktop-bookmark-spec/?__goaway_challenge=meta-refresh&__goaway_id=df93c11d9ee5b312d692e413745c8585&__goaway_referer=https%3A%2F%2Fduckduckgo.com%2F)
+* 
 * Setup Waydroid
+* Figure how to run android apps on pinephone
 * Fix spellcheck dictionary
 * Shut down 5s after a failed login, via PAM so serial, ssh and screen all count
 * Duress password via pam_duress
 * Update login password to digits, Thor only
 * phoc segfaults on touch-up in wlr_surface_get_root_surface, takes every app with it
-* Confirm callaudiod stopped segfaulting now that the sink list is real
 * Fix rotation on lockscreen (May be upstream)
 * Setup Front and Rear Camera
 * Validate NixTool Local install procedure and write procedure for using it to update towboot in emmc mode
@@ -44,11 +69,8 @@ Built and waiting to deploy, most of it unverified on hardware.
 * Fix all partlabel collisions between odin and thor
 * Research phosh plugins
 * Add wipefs prior to installation for disks
-* * Optimize
-  * Foreground booster
 * Let the initrd join more than one WiFi network, it cannot unlock away from home
 * WireGuard in initrd, but only after roaming, and not via the shared module
-* Figure how to run android apps on pinephone
 * Review and install apps
 
   * Login and sync firefox
