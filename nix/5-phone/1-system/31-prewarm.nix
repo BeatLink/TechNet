@@ -40,6 +40,37 @@
         # available with everything above already locked.
         maxLocked = 384 * 1024 * 1024;
 
+        # Recording by hand catches what was running when it was run. A trace of
+        # a launch with everything else closed found the recorded set all but
+        # complete -- 0.36 MiB of library pages faulted in that it did not have
+        # -- but that is one application on one day, and every profile here is
+        # invalidated by the next nixpkgs bump.
+        #
+        # Sampling everything costs 3.1s per pass on this phone, so 300s is
+        # about 1% of one core, and a single sample of everything running
+        # captured 212 MiB against the 243 MiB assembled here app by app.
+        # Retention is deliberately far longer than the sampling interval. A
+        # preloader whose memory is shorter than a session defeats itself: an
+        # application opened after lunch would have aged out by then and be
+        # back to faulting off the eMMC.
+        #
+        # A page is kept for a day after the last sample that saw it, and
+        # carries a count of how many samples have, so the lock budget spends
+        # itself on what is actually used.
+        watch = {
+            enable = true;
+            interval = 300;
+            retention = 86400;
+
+            # Reacting to a launch matters more here than the interval does.
+            # Waiting up to five minutes to notice an application started means
+            # the one thing not covered is the thing just opened -- and on this
+            # phone that costs a cold read off the card. 20s is long enough for
+            # webkit to finish mapping and the window to be up.
+            settle = 20;
+            minGap = 60;
+        };
+
         profiles = {
             # The cache is here because a trace said so, not because it looked
             # likely. Launching with everything else closed and the lock held,
