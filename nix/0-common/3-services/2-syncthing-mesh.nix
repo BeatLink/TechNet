@@ -74,6 +74,17 @@ let
     };
 
     allPeers = lib.attrNames devices;
+
+    # Merged into every folder's patterns; (?d) lets peers delete what they already hold
+    commonIgnorePatterns = [
+        "(?d)node_modules"
+        "(?d)/**/target/debug"
+        "(?d)/**/target/release"
+        "(?d)__pycache__"
+        "(?d).venv"
+        "(?d)*.pyc"
+    ];
+
     folders = {
         Documents = { };
         Downloads = {
@@ -86,7 +97,13 @@ let
         eBooks = {
             ignorePatterns = [ "/OpenBooks/logs" ];
         };
-        Music = { };
+        Music = {
+            ignorePatterns = [
+                ".thumbnails"
+                ".database_uuid"
+                ".nomedia"
+            ];
+        };
         Pictures = { };
         Projects = {
             devices = [
@@ -172,7 +189,15 @@ in
                     devices = lib.subtractLists [ cfg.self ] (folder.devices or allPeers);
                     ignorePerms = false;
                 }
-                // (removeAttrs folder [ "devices" ])
+                // (removeAttrs folder [
+                    "devices"
+                    "ignorePatterns"
+                ])
+                # Concatenated rather than merged: `//` would let a folder's own
+                # patterns replace the shared list instead of adding to it.
+                // {
+                    ignorePatterns = commonIgnorePatterns ++ (folder.ignorePatterns or [ ]);
+                }
             )
         ) folders;
     };
