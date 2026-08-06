@@ -5,22 +5,8 @@
 # GTK4/WebKitGTK browser, which is the same engine both of those already run, so
 # it adds a browser without adding a second engine to the closure.
 #
-{ lib, pkgs, ... }:
+{ pkgs, ... }:
 {
-    programs.dconf.profiles.user.databases = [
-        {
-            settings."org/gnome/epiphany/web" = {
-                enable-adblock = false;
-                content-filters = lib.gvariant.mkEmptyArray lib.gvariant.type.string;
-            };
-
-            locks = [
-                "/org/gnome/epiphany/web/enable-adblock"
-                "/org/gnome/epiphany/web/content-filters"
-            ];
-        }
-    ];
-
     home-manager.users.beatlink = {
         home = {
             packages = [ pkgs.epiphany ];

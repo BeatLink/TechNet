@@ -1,0 +1,3 @@
+[/]
+sources=[('xkb', 'pinephone')]
+xkb-options=@as []

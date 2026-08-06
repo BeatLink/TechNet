@@ -29,21 +29,6 @@
     # mkForce because 0-common sets `us` plainly for the whole network.
     services.xserver.xkb.layout = lib.mkForce "pinephone";
 
-    # phosh reads its layout from here rather than from services.xserver, so
-    # both have to agree or the session keeps using us while the console does
-    # not. A user value in dconf would still win over this default -- as
-    # ambient-enabled and app-filter-mode both did -- so it may need
-    # `dconf reset /org/gnome/desktop/input-sources/sources` once.
-    programs.dconf.profiles.user.databases = [
-        {
-            settings."org/gnome/desktop/input-sources" = {
-                sources = [
-                    (lib.gvariant.mkTuple [
-                        "xkb"
-                        "pinephone"
-                    ])
-                ];
-            };
-        }
-    ];
+    # phosh reads its layout from dconf, not services.xserver; both must agree
+    # Exported to ../dconf/shell as org.gnome.desktop.input-sources.dconf
 }

@@ -67,43 +67,11 @@
 
     # Shell settings ########################################################
 
-    # Defaults only: anything set through Settings wins over these.
+    # Exported to dconf/shell; edit on the phone, then nixtool run maintenance/export-dconf
     programs.dconf.profiles.user.databases = [
         {
             settings = {
-                "org/gnome/settings-daemon/plugins/power".ambient-enabled = false;
                 "org/gnome/desktop/interface".show-battery-percentage = true;
-                "org/gnome/settings-daemon/plugins/housekeeping".donation-reminder-enabled = false;
-
-                "org/gnome/desktop/wm/keybindings" = {
-                    toggle-fullscreen = [ "<Alt>F11" ];
-                    move-to-monitor-right = [ "<Alt><Shift>Right" ];
-                    move-to-monitor-left = [ "<Alt><Shift>Left" ];
-                };
-
-                # Empty means "do not filter", and the generator refuses [ ].
-                "sm/puri/phosh".app-filter-mode =
-                    lib.gvariant.mkEmptyArray lib.gvariant.type.string;
-
-                "sm/puri/phosh/plugins".lock-screen = [
-                    "media-players"
-                    "upcoming-events"
-                    "emergency-info"
-                ];
-
-                "sm/puri/phosh/plugins".quick-settings = [
-                    "mobile-data-quick-setting"
-                    "wifi-hotspot-quick-setting"
-                    "location-quick-setting"
-                    "dark-mode-quick-setting"
-                    "caffeine-quick-setting"
-                    "pomodoro-quick-setting"
-                    "syncthing-quick-setting"
-                ];
-
-                "mobi/phosh/shell/plugins".status-icons = [
-                    "load-meter-status-icon"
-                ];
             };
         }
     ];

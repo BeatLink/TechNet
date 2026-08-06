@@ -1,0 +1,6 @@
+{
+    "host": "Thor",
+    "dconf_exports": [
+        "/org/gnome/epiphany/web/"
+    ]
+}

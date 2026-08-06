@@ -1,0 +1,11 @@
+{
+    "host": "Thor",
+    "dconf_exports": [
+        "/sm/puri/phosh/",
+        "/mobi/phosh/shell/plugins/",
+        "/org/gnome/desktop/wm/keybindings/",
+        "/org/gnome/desktop/input-sources/",
+        "/org/gnome/settings-daemon/plugins/power/",
+        "/org/gnome/settings-daemon/plugins/housekeeping/"
+    ]
+}
