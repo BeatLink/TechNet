@@ -1,7 +1,20 @@
 { pkgs, ... }:
 let
     stateDir = "/var/lib/app-preload";
+
+    # Whole-file locking only pays off while the file is small. Anything above
+    # this is locked page by page instead -- see pages/lockPages below.
     maxLockedFile = "2m";
+    maxLockedFileBytes = 2 * 1024 * 1024;
+
+    # Measured working set of the six large libraries is ~58 MiB against 449 MiB
+    # of file. The budget is headroom over that, not a target.
+    maxLockedPages = 128 * 1024 * 1024;
+
+    pages = pkgs.runCommandCC "preload-pages" { } ''
+        mkdir -p $out/bin
+        $CC -O2 -Wall -Wextra -o $out/bin/preload-pages ${./preload-pages.c}
+    '';
 
     record = pkgs.writeShellApplication {
         name = "app-preload-record";
@@ -106,6 +119,66 @@ let
             exec vmtouch -f -l -m ${maxLockedFile} "''${paths[@]}"
         '';
     };
+    recordPages = pkgs.writeShellApplication {
+        name = "app-preload-record-pages";
+        runtimeInputs = [
+            pkgs.coreutils
+            pkgs.procps
+            pages
+        ];
+        text = ''
+            if [ "$#" -lt 2 ]; then
+                echo "usage: app-preload-record-pages <name> <pattern>" >&2
+                echo "  pattern matches process names, e.g. 'epiphany|WebKit'" >&2
+                exit 1
+            fi
+
+            name="$1"
+            shift
+
+            # Deliberately not -f: the recorded paths appear in our own command
+            # lines, so a full-cmdline match picks up vmtouch and preload-pages.
+            mapfile -t pids < <(pgrep "$@")
+
+            if [ "''${#pids[@]}" -eq 0 ]; then
+                echo "no process matches '$*' -- start the app first" >&2
+                exit 1
+            fi
+
+            mkdir -p ${stateDir}
+
+            preload-pages record \
+                --min-size ${toString maxLockedFileBytes} \
+                --prefix /nix/store \
+                "''${pids[@]}" | sort -u > ${stateDir}/"$name".pages
+
+            bytes="$(awk -F'\t' '{s+=$3} END {print s+0}' ${stateDir}/"$name".pages)"
+            echo "$name: $(wc -l < ${stateDir}/"$name".pages) ranges, $((bytes / 1048576)) MiB from ''${#pids[@]} processes"
+        '';
+    };
+
+    lockPages = pkgs.writeShellApplication {
+        name = "app-preload-lock-pages";
+        runtimeInputs = [
+            pkgs.coreutils
+            pages
+        ];
+        text = ''
+            shopt -s nullglob
+
+            profiles=(${stateDir}/*.pages)
+
+            if [ "''${#profiles[@]}" -eq 0 ]; then
+                echo "nothing recorded to lock" >&2
+                exit 0
+            fi
+
+            exec preload-pages lock \
+                --max-total ${toString maxLockedPages} \
+                "''${profiles[@]}"
+        '';
+    };
+
     status = pkgs.writeShellApplication {
         name = "app-preload-status";
         runtimeInputs = [
@@ -147,8 +220,32 @@ let
                         }'
             done
 
+            profiles=(${stateDir}/*.pages)
+
+            if [ "''${#profiles[@]}" -gt 0 ]; then
+                printf '\n%-12s %7s %10s\n' app ranges size
+                for profile in "''${profiles[@]}"; do
+                    name="$(basename "$profile" .pages)"
+                    awk -F'\t' -v name="$name" '
+                        {n++; s+=$3}
+                        END {printf "%-12s %7d %9.0fM\n", name, n, s/1048576}
+                    ' "$profile"
+                done
+
+                printf '%-12s %7s %9sM  (overlap between apps is locked once)\n' \
+                    "= merged" "" \
+                    "$(journalctl -u app-preload-lock-pages.service -n 20 --no-pager 2>/dev/null \
+                        | awk '/locked [0-9]+ KiB/ {
+                                   for (i = 1; i < NF; i++)
+                                       if ($i == "locked") v = $(i + 1) / 1024
+                               }
+                               END {printf "%.0f", v}')"
+            fi
+
             printf '\nlocked in memory : %s MiB\n' \
                 "$(awk '/^Mlocked/ {printf "%.0f", $2/1024}' /proc/meminfo)"
+            printf 'page locks       : %s\n' \
+                "$(systemctl is-active app-preload-lock-pages.service)"
             printf 'warm pass        : %s (%s)\n' \
                 "$(systemctl is-active app-preload.service)" \
                 "$(systemctl show -P ExecMainStatus app-preload.service)"
@@ -162,9 +259,12 @@ in
 {
     environment.systemPackages = [
         record
+        recordPages
         preload
         lock
+        lockPages
         status
+        pages
     ];
 
     environment.persistence."/persistent".directories = [ stateDir ];
@@ -195,6 +295,25 @@ in
             Nice = 19;
             IOSchedulingClass = "idle";
             ExecStart = "${lock}/bin/app-preload-lock";
+        };
+    };
+
+    # Separate from app-preload-lock because the two cover disjoint sets: that
+    # one locks whole files under maxLockedFile, this one locks only the pages
+    # a warm app actually faulted in out of the files above it.
+    systemd.services.app-preload-lock-pages = {
+        description = "Hold the used pages of the large libraries in memory";
+        wantedBy = [ "multi-user.target" ];
+        after = [ "app-preload.service" ];
+        unitConfig.ConditionPathExistsGlob = "${stateDir}/*.pages";
+        serviceConfig = {
+            Type = "simple";
+            Restart = "always";
+            RestartSec = 30;
+            LimitMEMLOCK = "infinity";
+            Nice = 19;
+            IOSchedulingClass = "idle";
+            ExecStart = "${lockPages}/bin/app-preload-lock-pages";
         };
     };
 
