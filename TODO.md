@@ -28,6 +28,8 @@ Built and waiting to deploy, most of it unverified on hardware.
   * CPU Optimization
   * * Foreground booster
   * IO Optimization
+  * prewarm dynamic app recording
+    * While an app is running, record the pages it accessed and locks it into memory as it goes
   * Every app's persistence is on the SD card. /Storage is data-pool-Thor on
     mmcblk0 (SD); only /, /nix, /home and /persistent are on the eMMC. Measured
     2.4x slower per file than eMMC -- 3028us vs 1288us -- and reading Home
