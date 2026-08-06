@@ -52,6 +52,20 @@ Built and waiting to deploy, most of it unverified on hardware.
     finding in weblaunch.nix -- both engines now hold /dev/dri/renderD128 under
     mesa 26.1.5, so "GTK4 is refused by lima" may no longer hold, but device
     access is not proof of hardware compositing.
+  * Rewrite PinePhoneCharge in Vala, as Prewarm now is. Measured on the phone,
+    `chargectl --help` costs 839-1810ms against 21ms for a native binary --
+    that is interpreter startup and the PyGObject import, paid on every
+    invocation, and the GTK4/libadwaita GUI pays considerably more than
+    --help does. Three parts to move: the CLI, the polling daemon, and the
+    GUI. Vala suits the GUI especially, being GObject natively.
+  * Retire nix/5-phone/1-system/31-app-preload in favour of the Prewarm flake
+    (/Storage/Files/Projects/Coding/Prewarm), once the warm-pass timing is
+    confirmed on hardware. The module there is services.prewarm.
+  * The old preloader recorded read()-opened store files via strace as well as
+    mapped ones; Prewarm records only mappings, from pagemap. Most of that set
+    was shared libraries, which are mapped, so recording with minSize=0 should
+    cover it -- but icons, locales and gsettings schemas are read(), not
+    mapped, and would need warmDirs or a records-files mode to stay covered.
 * [www.freedesktop.org/wiki/Specifications/desktop-bookmark-spec/?__goaway_challenge=meta-refresh&amp;__goaway_id=df93c11d9ee5b312d692e413745c8585&amp;__goaway_referer=https%3A%2F%2Fduckduckgo.com%2F](https://www.freedesktop.org/wiki/Specifications/desktop-bookmark-spec/?__goaway_challenge=meta-refresh&__goaway_id=df93c11d9ee5b312d692e413745c8585&__goaway_referer=https%3A%2F%2Fduckduckgo.com%2F)
 * 
 * Setup Waydroid
