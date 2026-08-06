@@ -155,6 +155,29 @@
                             "vala.debugMode" = false;
                             "vala.failOnCriticals" = false;
 
+                            # Vala lint ------------------------------------------------------------------------------------------------------
+                            "linter-vala.config" = {
+                                name = "Vala-Lint";
+                                enabled = true;
+                                languages = [ "vala" ];
+                                capabilities = [ ];
+                                configFiles = [
+                                    "vala-lint.conf"
+                                    ".vala-lint.conf"
+                                ];
+                                command = [
+                                    "${pkgs.vala-lint}/bin/io.elementary.vala-lint"
+                                    "--print-end"
+                                    [
+                                        "$config"
+                                        "--config"
+                                        "$config"
+                                    ]
+                                    "$file"
+                                ];
+                                url = "https://github.com/vala-lang/vala-lint";
+                            };
+
                             # sops -----------------------------------------------------------------------------------------------------------
                             "sops.defaults.ageKeyFile" = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
                             "sops.creationEnabled" = true;
@@ -210,7 +233,11 @@
                             ms-playwright.playwright
                             vitest.explorer
                             tomoki1207.pdf
-                        ];
+                        ]
+                        ++ (with pkgs.nix-vscode-extensions.vscode-marketplace; [
+                            fnando.linter
+                            colinkiama.linter-vala
+                        ]);
                     };
                 };
             };
