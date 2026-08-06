@@ -28,7 +28,11 @@
     # syncthing.odin.lan, served by nginx here and proxied to loopback, so the
     # name does not depend on Heimdall or WireGuard being up to reach a service
     # running on this machine.
-    technet.vhosts.syncthing.port = 8384;
+    technet.vhosts.syncthing = {
+        port = 8384;
+        # Reachable from other machines too, via the CNAME on Heimdall.
+        openFirewall = true;
+    };
 
     home-manager.users.beatlink =
         { pkgs, ... }:

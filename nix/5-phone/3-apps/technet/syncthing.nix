@@ -39,7 +39,11 @@
     # syncthing.thor.lan, served by nginx on this phone and proxied to loopback.
     # Not routed through Heimdall on purpose: a request from the phone to a
     # process on the phone should not leave over WireGuard and come back.
-    technet.vhosts.syncthing.port = 8384;
+    technet.vhosts.syncthing = {
+        port = 8384;
+        # Reachable from other machines too, via the CNAME on Heimdall.
+        openFirewall = true;
+    };
 
     syncthing-mesh = {
         self = "Thor";

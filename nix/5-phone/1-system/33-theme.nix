@@ -30,12 +30,13 @@
             };
         };
 
-        # The theme is a preference rather than a fixed part of the system, so
-        # it is persisted and can be changed from Settings without a rebuild
-        # putting it back.
-        home.persistence."/Storage/Apps/System/Theme".directories = [
-            ".config/gtk-3.0"
-            ".config/gtk-4.0"
-        ];
+        # Deliberately not persisted. Persisting .config/gtk-3.0 bind-mounts an
+        # empty directory over the settings.ini home-manager generates, so the
+        # theme silently does not apply -- which is exactly what happened the
+        # first time this was written.
+        #
+        # The two cannot both be true: either this file is declared here and a
+        # rebuild restores it, or it is runtime state and the config does not
+        # own it. Declared wins, so changing theme means changing this.
     };
 }
