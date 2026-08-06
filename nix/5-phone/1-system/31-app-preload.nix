@@ -1,6 +1,7 @@
 { pkgs, ... }:
 let
     stateDir = "/var/lib/app-preload";
+    maxLockedFile = "2m";
 
     record = pkgs.writeShellApplication {
         name = "app-preload-record";
@@ -71,7 +72,7 @@ let
             found="$(wc -l < "$present")"
 
             if [ "$found" -gt 0 ]; then
-                xargs -a "$present" -d '\n' -r vmtouch -q -t
+                xargs -a "$present" -d "\n" -r vmtouch -q -f -t
             fi
 
             echo "warmed $found of $listed recorded paths"
@@ -81,11 +82,36 @@ let
             fi
         '';
     };
+    lock = pkgs.writeShellApplication {
+        name = "app-preload-lock";
+        runtimeInputs = [
+            pkgs.coreutils
+            pkgs.vmtouch
+        ];
+        text = ''
+            shopt -s nullglob
+
+            mapfile -t paths < <(cat ${stateDir}/*.list 2>/dev/null | sort -u | while IFS= read -r path; do
+                if [ -f "$path" ]; then
+                    printf '%s\n' "$path"
+                fi
+            done)
+
+            if [ "''${#paths[@]}" -eq 0 ]; then
+                echo "nothing recorded to lock" >&2
+                exit 0
+            fi
+
+            echo "locking ''${#paths[@]} paths up to ${maxLockedFile} each"
+            exec vmtouch -f -l -m ${maxLockedFile} "''${paths[@]}"
+        '';
+    };
 in
 {
     environment.systemPackages = [
         record
         preload
+        lock
     ];
 
     environment.persistence."/persistent".directories = [ stateDir ];
@@ -101,6 +127,22 @@ in
             ExecStart = "${preload}/bin/app-preload";
         };
         unitConfig.ConditionPathExistsGlob = "${stateDir}/*.list";
+    };
+
+    systemd.services.app-preload-lock = {
+        description = "Hold the small startup files in memory so nothing can evict them";
+        wantedBy = [ "multi-user.target" ];
+        after = [ "app-preload.service" ];
+        unitConfig.ConditionPathExistsGlob = "${stateDir}/*.list";
+        serviceConfig = {
+            Type = "simple";
+            Restart = "always";
+            RestartSec = 30;
+            LimitMEMLOCK = "infinity";
+            Nice = 19;
+            IOSchedulingClass = "idle";
+            ExecStart = "${lock}/bin/app-preload-lock";
+        };
     };
 
     systemd.timers.app-preload = {
