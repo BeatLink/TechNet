@@ -41,12 +41,7 @@ Built and waiting to deploy, most of it unverified on hardware.
   * IO Optimization
   * prewarm dynamic app recording
     * While an app is running, record the pages and files it accessed and save so that next time prewarming is done, those records are added
-  * Every app's persistence is on the SD card. /Storage is data-pool-Thor on
-    mmcblk0 (SD); only /, /nix, /home and /persistent are on the eMMC. Measured
-    2.4x slower per file than eMMC -- 3028us vs 1288us -- and reading Home
-    Assistant's 5500-file profile cold takes 16.7s. Moving /Storage/Apps to the
-    eMMC is worth ~2.4x but needs a size audit first: it is 2.9G against 28.5G
-    of eMMC, and /Storage/Apps/System alone is 1.9G.
+  * 
   * /Storage/Apps holds 387M of dead data: Core/Firefox is 311M and
     Core/Chromium 76M, both for apps that were removed. Nothing reads them.
   * Waydroid is 1.9G of the 2.9G under /Storage/Apps, so any plan to move app

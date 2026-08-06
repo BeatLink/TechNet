@@ -10,8 +10,8 @@
 #
 # Anything here has to work on both a laptop and a phone. Where they genuinely
 # differ, the module exposes an option and each host fills it in -- the file
-# manager is the clearest case: Odin runs Nemo and Thor runs Nautilus, so only
-# the bookmark list they both read is shared, in 4-apps/system/file-manager.nix.
+# manager is the clearest case: both hosts run Nemo but keep their own packages
+# and state, so only the bookmark list is shared, in 4-apps/system/file-manager.nix.
 #
 
 {
