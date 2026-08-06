@@ -17,9 +17,13 @@
 # 1-backup-server/1-system/9-remote-builder.nix, which caps it for the same
 # reason on a smaller board.
 #
-# 512MB here as well. This is a phone: the working set is a handful of apps and
-# their libraries, already warm in the page cache, and Waydroid wants 1-1.5GB of
-# its own the moment an Android app starts.
+# 1.5GB, which is what ZFS would pick on its own at half of RAM. The 512MB this
+# started at was chosen to leave room for Waydroid, and it cost more than it
+# saved: measured on this phone, a cold nautilus took 8.0s and a cold epiphany
+# 18.8s, both entirely waiting on small random reads that a larger cache would
+# have held. Warm, the same launches are 72ms and 63ms. The ARC gives memory
+# back under pressure, and there is 17GB of swap behind it if it gives it back
+# too slowly.
 #
 # A module parameter rather than a runtime write, because zfs is loaded in the
 # initrd and anything set later applies after the ARC has already grown.
@@ -63,7 +67,7 @@
     # still starves the session; if it does, the next lever is Syncthing's own
     # concurrency rather than pushing these lower.
     boot.extraModprobeConfig = ''
-        options zfs zfs_arc_max=536870912
+        options zfs zfs_arc_max=1610612736
 
         options zfs zfs_vdev_max_active=4
         options zfs zfs_vdev_async_write_max_active=2
