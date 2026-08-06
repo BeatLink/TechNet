@@ -93,10 +93,8 @@
             inputs.nixpkgs.follows = "nixpkgs";
         };
 
-        # Local until it is pushed; swap the url for github:BeatLink/Prewarm
-        # and nothing else here changes.
         prewarm = {
-            url = "path:/Storage/Files/Projects/Coding/Prewarm";
+            url = "github:BeatLink/Prewarm";
             inputs.nixpkgs.follows = "nixpkgs";
         };
     };

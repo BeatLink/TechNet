@@ -36,11 +36,6 @@ Built and waiting to deploy, most of it unverified on hardware.
     Assistant's 5500-file profile cold takes 16.7s. Moving /Storage/Apps to the
     eMMC is worth ~2.4x but needs a size audit first: it is 2.9G against 28.5G
     of eMMC, and /Storage/Apps/System alone is 1.9G.
-  * primarycache=metadata on data-pool-Thor/storage denies the ARC 2.9G of hot
-    app state -- every browser profile and cache. The policy was written for
-    bulk media, which app profiles are the opposite of. The same experiment
-    that settled it for /nix (32-arc-policy.nix) would settle it here; the
-    finding there was that the ARC is elastic and manages the tension itself.
   * /Storage/Apps holds 387M of dead data: Core/Firefox is 311M and
     Core/Chromium 76M, both for apps that were removed. Nothing reads them.
   * Waydroid is 1.9G of the 2.9G under /Storage/Apps, so any plan to move app

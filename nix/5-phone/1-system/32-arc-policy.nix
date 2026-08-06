@@ -1,12 +1,28 @@
 # Which datasets the ARC is allowed to keep file data for.
 #
-# /Storage is bulk data that is read once and never re-read, so caching it only
-# pushes out things that are.
+# Both are `all`, and the values are set rather than left alone because
+# primarycache persists on the dataset once written.
 #
-# /nix is deliberately left at `all`, and the value is set rather than left
-# alone because the property persists on the dataset once written.
+# /Storage was `metadata` on the theory that it is bulk media read once, so
+# caching it only evicts things that are re-read. That was wrong, because it is
+# also where every application's profile and cache lives, and those are read
+# constantly. Measured over 2226 files of WebKit cache, cold each time:
 #
-# It was worth trying `metadata` there. ZFS serves mmap through the page cache
+#                    first read   re-read   disk on re-read
+#   metadata            6081ms     5553ms       24708 KiB
+#   all                 6083ms      500ms           0 KiB
+#
+# Under `metadata` an application re-reads its own cache off the SD card every
+# time it starts, forever. Under `all` the second read is served from the ARC.
+#
+# Worth reading alongside the /nix result below, because they look
+# contradictory and are not. Libraries are mmapped, so they land in the page
+# cache and primarycache genuinely does not matter -- measured, four cold
+# Epiphany launches each side, no difference outside noise. Application data is
+# read(), so it lives or dies by the ARC. Same knob, opposite answers, because
+# the two are reached by different paths.
+#
+# It was worth trying `metadata` on /nix. ZFS serves mmap through the page cache
 # while keeping its own ARC copy, so every library that 31-app-preload locks is
 # held twice, and `metadata` drops the second copy. Measured on a quiet phone,
 # four cold Epiphany launches each with the page locks up:
@@ -39,7 +55,7 @@ in
             set -u
 
             set -- \
-                "data-pool-${host}/storage" metadata \
+                "data-pool-${host}/storage" all \
                 "root-pool-${host}/root/nix" all
 
             while [ "$#" -ge 2 ]; do
