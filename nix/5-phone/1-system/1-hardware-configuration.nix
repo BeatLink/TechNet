@@ -24,6 +24,7 @@
         kernelModules = [ ];
 
         initrd = {
+            # Both false because megi's kernel builds neither set; true fails the build with modprobe: FATAL
             includeDefaultModules = false;
             systemd.tpm2.enable = false;
         };
