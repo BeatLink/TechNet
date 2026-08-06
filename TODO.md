@@ -44,8 +44,6 @@ Built and waiting to deploy, most of it unverified on hardware.
   * 
   * /Storage/Apps holds 387M of dead data: Core/Firefox is 311M and
     Core/Chromium 76M, both for apps that were removed. Nothing reads them.
-  * Waydroid is 1.9G of the 2.9G under /Storage/Apps, so any plan to move app
-    persistence to the eMMC is really a question about Waydroid first.
   * Preload profiles go stale on a nixpkgs bump, since the recorded paths are
     exact store paths. app-preload warns when over half are gone but nothing
     re-records. Automate if it bites.
@@ -71,7 +69,6 @@ Built and waiting to deploy, most of it unverified on hardware.
     mapped, and would need warmDirs or a records-files mode to stay covered.
 * [www.freedesktop.org/wiki/Specifications/desktop-bookmark-spec/?__goaway_challenge=meta-refresh&amp;__goaway_id=df93c11d9ee5b312d692e413745c8585&amp;__goaway_referer=https%3A%2F%2Fduckduckgo.com%2F](https://www.freedesktop.org/wiki/Specifications/desktop-bookmark-spec/?__goaway_challenge=meta-refresh&__goaway_id=df93c11d9ee5b312d692e413745c8585&__goaway_referer=https%3A%2F%2Fduckduckgo.com%2F)
 * 
-* Setup Waydroid
 * Figure how to run android apps on pinephone
 * Fix spellcheck dictionary
 * Shut down 5s after a failed login, via PAM so serial, ssh and screen all count

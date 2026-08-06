@@ -14,7 +14,6 @@
         ./13-kernel.nix
         ./14-phosh-bump.nix
         ./15-data-drive.nix
-        ./16-waydroid.nix
         ./17-mobile-data.nix
         ./18-performance.nix
         ./19-keyboard-layout
