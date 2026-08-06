@@ -1,0 +1,4 @@
+[/]
+move-to-monitor-left=['<Alt><Shift>Left']
+move-to-monitor-right=['<Alt><Shift>Right']
+toggle-fullscreen=['<Alt>F11']

@@ -1,0 +1,6 @@
+[/]
+app-filter-mode=@as []
+
+[plugins]
+lock-screen=['media-players', 'upcoming-events', 'emergency-info']
+quick-settings=['mobile-data-quick-setting', 'wifi-hotspot-quick-setting', 'location-quick-setting', 'dark-mode-quick-setting', 'caffeine-quick-setting', 'pomodoro-quick-setting', 'syncthing-quick-setting']
