@@ -64,9 +64,40 @@
 # directory and wants initialising again. That is the right failure -- the
 # alternative is filling the eMMC with Android images.
 #
-{ lib, ... }:
+{ lib, pkgs, ... }:
 {
     virtualisation.waydroid.enable = true;
+
+    # The nftables build, because this kernel has no legacy iptables at all.
+    #
+    # waydroid-net.sh -- which sets up the waydroid0 bridge, its dnsmasq and the
+    # NAT that gives Android a route out -- picks its binary like this:
+    #
+    #     IPTABLES_BIN="$(command -v iptables-legacy)"
+    #
+    # iptables-legacy always exists, since the nixpkgs iptables package ships it
+    # as a symlink to xtables-legacy-multi, so that branch always wins. The
+    # kernel is where it comes apart: megi's tree has CONFIG_NF_TABLES=y but
+    # leaves CONFIG_NETFILTER_XTABLES_LEGACY unset, so there is no backend for
+    # that binary to talk to and every container start died on
+    #
+    #     modprobe: FATAL: Module ip_tables not found in .../6.17.5
+    #     iptables (legacy): can't initialize iptables table `filter'
+    #
+    # then tore the container down again. Nothing else on the host noticed,
+    # because the firewall uses iptables-nft, which is nf_tables underneath.
+    #
+    # waydroid-nftables is the same package built with USE_NFTABLES=1: it
+    # installs the nft variant of the script and wraps it with nftables on PATH
+    # instead of iptables. The kernel has what that needs -- NFT_NAT, NFT_MASQ
+    # and NF_NAT_MASQUERADE are all on -- and its table is separate from the
+    # firewall's, so the two coexist.
+    #
+    # The module would have chosen this itself if networking.nftables.enable
+    # were set. It is not: that option swaps the whole firewall implementation,
+    # which is a much larger change than one Android container is worth, and
+    # iptables-nft already puts the host's own rules in nf_tables regardless.
+    virtualisation.waydroid.package = pkgs.waydroid-nftables;
 
     systemd.services.waydroid-container.wantedBy = lib.mkForce [ ];
 

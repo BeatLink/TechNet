@@ -1,13 +1,13 @@
-# File manager bookmarks, shared between two different file managers.
+# File manager bookmarks, shared between hosts.
 #
-# Odin runs Nemo and Thor runs Nautilus -- see 3-laptop/4-apps/system/nemo and
-# 5-phone/3-apps/system/nautilus for why. What they have in common is the
-# sidebar: both read ~/.config/gtk-3.0/bookmarks, the standard GTK bookmarks
-# file, so the list of places lives here and neither host restates it.
+# Both hosts run Nemo -- see 3-laptop/4-apps/system/nemo and
+# 5-phone/3-apps/system/nemo for why. What they have in common is the sidebar:
+# it reads ~/.config/gtk-3.0/bookmarks, the standard GTK bookmarks file, so the
+# list of places lives here and neither host restates it.
 #
-# That path is not a typo on the Nautilus side. Nautilus has been GTK4 since 43
-# and still keeps its bookmarks under gtk-3.0/, because the file is the
-# freedesktop-era location rather than a per-toolkit-version one.
+# The path outlives any one file manager. gtk-3.0/ is the freedesktop-era
+# location rather than a per-toolkit-version one, which is why Nautilus kept
+# reading it after going GTK4 in 43, back when Thor ran it.
 #
 # Only the bookmarks are shared. The packages, the persisted state and the dconf
 # exports are per-host, because the two programs agree on nothing else.
@@ -38,7 +38,7 @@ in
             default = "";
             description = ''
                 Contents of ~/.config/gtk-3.0/bookmarks, the standard GTK
-                bookmarks file both Nemo and Nautilus read.
+                bookmarks file every GTK file manager reads.
 
                 types.lines merges definitions by joining them with newlines, so
                 a host adds its own by simply setting this again -- no separate

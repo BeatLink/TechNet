@@ -13,23 +13,13 @@
 #
 #   1. Does GTK4-through-a-fallback cost more than GTK3-by-design?
 #
-#      gtk3-demo and gtk4-demo both ship the Fishbowl benchmark, which adds
-#      moving widgets until it can no longer hold the frame rate and reports the
-#      count and FPS on screen. One device, one benchmark, toolkit as the only
-#      variable -- the only such pairing available, since gtk4-rendernode-tool
-#      has no GTK3 equivalent. They live in each package's `dev` output and are
-#      linked here with their own launchers, because the app grid is the only
-#      way to start anything on a phone.
+#      Answered, and acted on: chargectl is Vala on GTK3/libhandy because of it.
+#      The Fishbowl pairing that settled it -- gtk3-demo against gtk4-demo, one
+#      device, toolkit as the only variable -- has been removed.
 #
-#      nemo is the applied version: a file manager against Nautilus, one task
-#      with one variable changed. Nemo was deliberately dropped from this host
-#      in favour of Nautilus (see nautilus.nix) because it is built for a mouse
-#      and a wide window. That judgement stands; this does not reverse it.
-#
-#      xed is a second GTK3 sample with no GTK4 counterpart, so it says whether
-#      GTK3 is comfortable here rather than settling the comparison. The
-#      attribute is xed-editor: `xed` is Intel's X86 Encoder Decoder, marked
-#      broken on aarch64, and it fails evaluation rather than being skipped.
+#      The two applied samples stayed and are now installed for their own sake
+#      rather than as instruments: nemo.nix (a file manager against Nautilus)
+#      and xed.nix (a GTK3 editor with no GTK4 counterpart here).
 #
 #   2. Can WebKit get a GL context under GTK3, having been refused under GTK4?
 #
@@ -58,43 +48,8 @@
 #
 # Delete this file once the three are answered; nothing else refers to it.
 { pkgs, ... }:
-let
-    gtk-demos = pkgs.runCommand "gtk-demos" { } ''
-        mkdir -p $out/bin $out/share/applications
-
-        ln -s ${pkgs.gtk3.dev}/bin/gtk3-demo $out/bin/gtk3-demo
-        ln -s ${pkgs.gtk4.dev}/bin/gtk4-demo $out/bin/gtk4-demo
-
-        cat > $out/share/applications/gtk3-demo-benchmark.desktop <<EOF
-        [Desktop Entry]
-        Type=Application
-        Name=GTK3 Demo
-        Comment=GTK3 widget gallery and Fishbowl benchmark
-        Exec=${pkgs.gtk3.dev}/bin/gtk3-demo
-        Icon=applications-development
-        Terminal=false
-        Categories=Development;
-        EOF
-
-        cat > $out/share/applications/gtk4-demo-benchmark.desktop <<EOF
-        [Desktop Entry]
-        Type=Application
-        Name=GTK4 Demo
-        Comment=GTK4 widget gallery and Fishbowl benchmark
-        Exec=${pkgs.gtk4.dev}/bin/gtk4-demo
-        Icon=applications-development
-        Terminal=false
-        Categories=Development;
-        EOF
-    '';
-in
 {
     home-manager.users.beatlink = {
-        home.packages = [
-            pkgs.nemo
-            pkgs.xed-editor
-            pkgs.qt6.qtdeclarative
-            gtk-demos
-        ];
+        home.packages = [ pkgs.qt6.qtdeclarative ];
     };
 }
