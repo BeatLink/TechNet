@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 let
     stateDir = "/var/lib/app-preload";
 
@@ -15,6 +15,22 @@ let
     # drops whatever sorts last by path, which is arbitrary rather than least
     # useful, so a set that overruns loses random pages instead of cheap ones.
     maxLockedPages = 224 * 1024 * 1024;
+
+    # App profile data, as opposed to the store. These live on
+    # data-pool-Thor/storage, which is primarycache=metadata because it is
+    # mostly bulk media -- so ZFS keeps no ARC copy of them and every launch
+    # re-reads the lot. Warming them puts the pages in the page cache, which is
+    # a separate cache from the ARC and unaffected by that policy.
+    #
+    # Only launch-critical profiles belong here. The rest of /Storage/Apps is
+    # either dead -- Firefox and Chromium are 387M between them for apps that
+    # were removed -- or not read at startup, like Waydroid's 1.9G image and
+    # Syncthing's own data.
+    warmDirs = [
+        "/home/beatlink/.local/share/weblaunch"
+        "/home/beatlink/.local/share/epiphany"
+        "/home/beatlink/.config/epiphany"
+    ];
 
     pages = pkgs.runCommandCC "preload-pages" { } ''
         mkdir -p $out/bin
@@ -92,6 +108,18 @@ let
             if [ "$found" -gt 0 ]; then
                 xargs -a "$present" -d "\n" -r vmtouch -q -f -t
             fi
+
+            # Directories are walked live rather than recorded: a browser
+            # profile is rewritten as the app runs, so a recorded file list goes
+            # stale in a way the store never does.
+            warm_dirs=(${lib.escapeShellArgs warmDirs})
+
+            for dir in "''${warm_dirs[@]}"; do
+                if [ -d "$dir" ]; then
+                    vmtouch -q -t "$dir" || true
+                    echo "warmed $dir"
+                fi
+            done
 
             echo "warmed $found of $listed recorded paths"
 
@@ -247,6 +275,21 @@ let
                                END {printf "%.0f", v}')"
             fi
 
+            printf '\n%-12s %7s %10s %10s %7s\n' profile files size resident share
+            warm_dirs=(${lib.escapeShellArgs warmDirs})
+
+            for dir in "''${warm_dirs[@]}"; do
+                [ -d "$dir" ] || continue
+                vmtouch "$dir" 2>/dev/null | awk -v name="$(basename "$dir")" '
+                    /Files:/          {files = $2}
+                    /Resident Pages:/ {split($3, p, "/"); r = p[1]; t = p[2]}
+                    END {
+                        printf "%-12s %7d %9.0fM %9.0fM %6.0f%%\n",
+                            name, files, t*4096/1048576, r*4096/1048576,
+                            (t ? 100*r/t : 0)
+                    }'
+            done
+
             printf '\nlocked in memory : %s MiB\n' \
                 "$(awk '/^Mlocked/ {printf "%.0f", $2/1024}' /proc/meminfo)"
             printf 'page locks       : %s\n' \
@@ -270,6 +313,12 @@ in
         lockPages
         status
         pages
+
+        # The services carry their own copy through runtimeInputs, so this is
+        # purely so that checking residency by hand is possible at all -- its
+        # absence from PATH silently turned a warm pass in a benchmark into a
+        # no-op that still reported a time.
+        pkgs.vmtouch
     ];
 
     environment.persistence."/persistent".directories = [ stateDir ];
@@ -322,11 +371,20 @@ in
         };
     };
 
+    # Repeats, because the warmed pages are evictable by design -- only the
+    # locked ones are guaranteed -- and nothing else would ever put them back.
+    #
+    # Affordable only because a repeat pass is cheap. Warming Home Assistant's
+    # profile from cold costs 83.5s, since vmtouch faults 5504 files in one at a
+    # time off the card; the same pass with the pages already resident is
+    # 2.3s. So the hourly run is the 2.3s case almost always, and pays the long
+    # one only after something has actually evicted the cache.
     systemd.timers.app-preload = {
         wantedBy = [ "timers.target" ];
         timerConfig = {
             OnBootSec = "2min";
-            AccuracySec = "30s";
+            OnUnitActiveSec = "1h";
+            AccuracySec = "5min";
         };
     };
 }
