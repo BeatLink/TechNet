@@ -29,5 +29,6 @@
         ./29-boot-leds.nix
         ./30-charging.nix
         ./31-app-preload.nix
+        ./32-arc-policy.nix
     ];
 }
