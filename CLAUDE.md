@@ -126,6 +126,44 @@ any process holds it, including a login shell whose cwd is inside it. Check
 deploy as failed; clear the mount with `sudo umount -l <path>`, which detaches it
 without killing whatever is holding it.
 
+### Getting a tool onto a host without rebuilding
+
+Diagnosing something usually needs a tool the host does not have. Rebuilding to
+add one is slow and puts it in the closure permanently, so don't — fetch it for
+the one command instead.
+
+On the host, if it has network:
+
+```sh
+ssh beatlink@thor.technet 'nix run nixpkgs#vmtouch -- -v /some/path'
+```
+
+`nix run` builds or substitutes into the store and runs it, leaving nothing
+installed. For repeated use in a script, resolve the path once and reuse it:
+
+```sh
+V=$(nix build --no-link --print-out-paths nixpkgs#vmtouch)/bin/vmtouch
+```
+
+For something built locally — a package from this repo, or an aarch64 build made
+on Odin under binfmt — push the closure rather than rebuilding it there:
+
+```sh
+OUT=$(nix build --no-link --print-out-paths .#packages.aarch64-linux.default)
+nix copy --to ssh://beatlink@thor.technet "$OUT"
+ssh beatlink@thor.technet "$OUT/bin/whatever"
+```
+
+The store path is identical on both ends, so the path printed on Odin is the
+path to run on Thor.
+
+Two traps. Nix wraps most binaries, so the process name is not what you would
+guess — `.epiphany-wrapp`, `.gtk4-demo-wrap` — and `pgrep -x epiphany` silently
+matches nothing. Match on `pgrep -f`, or read `/proc/PID/comm` first. And a
+graphical tool started over ssh needs the session's environment: use `launchapp`
+(see [26-launchapp.nix](nix/5-phone/1-system/26-launchapp.nix)) rather than
+exporting `WAYLAND_DISPLAY` by hand.
+
 ## Desktop environments
 
 `nix/3-laptop/1-system/18-desktop-environment/default.nix` selects which are built.
