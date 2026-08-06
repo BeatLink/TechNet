@@ -7,9 +7,14 @@ let
     maxLockedFile = "2m";
     maxLockedFileBytes = 2 * 1024 * 1024;
 
-    # Measured working set of the six large libraries is ~58 MiB against 449 MiB
-    # of file. The budget is headroom over that, not a target.
-    maxLockedPages = 128 * 1024 * 1024;
+    # Headroom over the recorded set, not a target. With Epiphany, Files,
+    # Secrets, Settings and the three WebLaunch apps profiled, the merged set is
+    # ~180 MiB against 813 MiB of file.
+    #
+    # Worth keeping ahead of the recordings rather than trimming to fit: the cap
+    # drops whatever sorts last by path, which is arbitrary rather than least
+    # useful, so a set that overruns loses random pages instead of cheap ones.
+    maxLockedPages = 224 * 1024 * 1024;
 
     pages = pkgs.runCommandCC "preload-pages" { } ''
         mkdir -p $out/bin
