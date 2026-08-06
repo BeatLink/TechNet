@@ -1,42 +1,15 @@
 { pkgs, lib, ... }:
 {
-    # No Xwayland.
-    #
-    # It was on and starting eagerly -- phocConfig said xwayland = "immediate",
-    # so phoc launched an X server at session start whether or not anything
-    # wanted one. Checked on the running phone: `xlsclients` against :0 listed
-    # nothing, and there is no X11-only application installed. Everything here
-    # is Wayland-native -- phosh and stevia by construction, Firefox through
-    # MOZ_ENABLE_WAYLAND, and the GTK4 apps by default.
-    #
-    # So it was an idle X server, its resident memory and a rootless window
-    # manager, held for the whole session on a phone with 2GB. Both halves have
-    # to go: "false" stops phoc offering the socket, and programs.xwayland.enable
-    # keeps the binary out of the closure.
-    #
-    # This is the thing to undo first if an X11 application is ever wanted --
-    # it will fail to start rather than fall back, and the error will be about
-    # not being able to open a display.
+    # Xwayland ##############################################################
+
     programs.xwayland.enable = false;
 
+    # Qt defaults to xcb, and there is no X server here.
+    environment.sessionVariables.QT_QPA_PLATFORM = "wayland";
+
+    # Compositor ############################################################
+
     services = {
-        # No display manager. The phosh module does not use one -- it runs
-        # phosh-session directly as a systemd service under `user`, with
-        # PAMName = "login", and says so in its own source: "We are running
-        # without a display manager". Phosh then presents its own lock screen,
-        # which has the on-screen keypad a phone needs.
-        #
-        # services.xserver.enable would undo that. It turns on LightDM by
-        # default, and both then run at once: lightdm-gtk-greeter took
-        # /dev/dri/card1 and put a desktop login box with a password field and no
-        # on-screen keyboard in front of a device with no keyboard, while phoc
-        # ran alongside it. That is the same two-display-managers-fighting
-        # problem documented for Odin in CLAUDE.md.
-        #
-        # displayManager.autoLogin and defaultSession were configured but dead:
-        # nothing consumes them without a display manager, so they were not the
-        # reason a login screen appeared, and removing the greeter is what
-        # actually fixes it.
         xserver = {
             desktopManager.phosh = {
                 enable = true;
@@ -46,78 +19,10 @@
                     xwayland = "false";
                     outputs = {
                         DSI-1 = {
-                            # 150%. Not a dconf setting: org.gnome.desktop.interface
-                            # has only `scaling-factor`, which is an integer, and
-                            # `text-scaling-factor`, which resizes fonts and nothing
-                            # else. Real fractional output scaling is the
-                            # compositor's, so it belongs here -- the module's type
-                            # accepts a float.
-                            #
-                            # 720x1440 at 1.5 gives a 480x960 logical screen,
-                            # against 411x823 at 1.75 and 360x720 at 2. Lower
-                            # scale means more fits on a screen this small, and
-                            # that space is worth more here than larger targets.
-                            #
-                            # It costs nothing to render. The compositor tells
-                            # the client its fractional scale and the client
-                            # renders exactly that many pixels -- checked on the
-                            # wire, preferred_scale(180) and a 1440x650 buffer
-                            # for a 960x433 window, matching the panel one to
-                            # one. Integer scales are not cheaper: 2 was
-                            # measured against 1.5 across cold launches and came
-                            # out the same, 9.5s against 9.8s.
                             scale = 1.5;
-                            # No `rotate`. The panel is natively portrait at
-                            # 720x1440, so a static rotate = "90" turned it
-                            # permanently sideways -- which is what "stuck in
-                            # landscape while the phone is vertical" was.
-                            #
-                            # It also left nothing for auto-rotation to do: the
-                            # sensor and iio-sensor-proxy work and report
-                            # orientation changes live, but a fixed transform in
-                            # phoc's config is not something the shell overrides.
-                            # Leaving it unset lets phosh drive the transform
-                            # from the sensor instead.
                             mode = "720x1440";
                         };
 
-                        # The dock. The ANX7688 is what makes this appear at all
-                        # -- it negotiates DP alt mode in its own firmware and
-                        # raises EXTCON_DISP_HDMI, which is why the kernel needs
-                        # CONFIG_TYPEC_ANX7688 and deliberately not
-                        # CONFIG_TYPEC_DP_ALTMODE. See PinePhoneKernel/kernel.nix.
-                        #
-                        # Declared here rather than set in Settings, and that is
-                        # not only a preference for reproducibility. The Displays
-                        # panel segfaults on this device the moment a monitor row
-                        # is clicked:
-                        #
-                        #   cc_display_monitor_get_scale
-                        #     <- cc_display_settings_rebuild_ui
-                        #     <- cc_display_settings_set_selected_output
-                        #     <- on_monitor_row_activated_cb
-                        #
-                        # so configuring the second screen through the GUI is not
-                        # currently possible. This is the way that works.
-                        #
-                        # scale 1 rather than the panel's 1.75: this is a desktop
-                        # monitor at arm's length, not a phone at reading
-                        # distance, and 1080p at 1.75 would leave very little on
-                        # screen.
-                        #
-                        # Worth knowing this is only the default. phoc 0.56 saves
-                        # runtime output state to ~/.local/state/phoc/outputs.gvdb,
-                        # keyed by the *combination* of connected outputs -- one
-                        # entry for the phone alone, another for phone plus this
-                        # monitor -- and what is saved there wins over this file.
-                        # Read it with `phoc-outputs-states --list` and `--show`.
-                        #
-                        # So this decides what happens the first time a display is
-                        # seen, and anything changed afterwards through the shell
-                        # persists on its own and overrides it. Notably that
-                        # includes DSI-1's scale and transform, which is how the
-                        # panel can end up at scale 1 and rotated despite what is
-                        # declared above.
                         HDMI-A-1 = {
                             mode = "1920x1080";
                             scale = 1;
@@ -126,194 +31,24 @@
                 };
             };
         };
+
+        avahi.enable = false;
     };
 
-    # phosh.service runs with PAMName = "login", so starting it is what makes
-    # logind open a session and start user@1000.service -- the user systemd
-    # manager that runs everything in home-manager's systemd.user.services.
-    #
-    # Nothing ordered that after home-manager's activation, and on this phone
-    # activation takes about eleven seconds. Measured on the boot that prompted
-    # this: phosh at 63.2s, home-manager-beatlink.service 63.3s -> 74.6s, and
-    # the user manager reaching default.target at 74.5s. It enumerated
-    # default.target.wants before linkGeneration had written the symlinks into
-    # it, so syncthing.service -- enabled, correct, and with its symlink present
-    # on disk a second later -- was simply never queued.
-    #
-    # home-manager's own fallback does not cover this either. Its activation
-    # ends by reloading the user manager and starting anything newly enabled,
-    # but only if `systemctl --user is-system-running` says running or degraded.
-    # Mid-boot it says "starting", so activation logs "User systemd daemon not
-    # running. Skipping reload." and nothing starts the unit. Whether the race
-    # is won or lost varies boot to boot, which is why it looked intermittent.
-    #
-    # systemd-user-sessions.service is the barrier this is for, and
-    # home-manager-<user>.service already declares Before on it; display
-    # managers in nixpkgs are ordered after it for the same reason. The phosh
-    # module, having no display manager, never picked that up.
-    #
-    # The cost is real: the session now waits for activation, so the shell
-    # appears about eleven seconds later. That is the right trade -- starting
-    # the session before the user's dotfiles and units are linked is a broader
-    # correctness problem than one Syncthing unit.
+    # Session ###############################################################
+
+    # Start the session only once home-manager has linked the user's units.
     systemd.services.phosh.after = [ "systemd-user-sessions.service" ];
 
     # Restart phosh in one step instead of stopping it for the whole switch.
-    #
-    # A NixOS switch handles a changed service in two halves by default: it
-    # stops it early, before the new /etc and the activation scripts, and starts
-    # it again at the very end. On this phone that gap is minutes -- most of it
-    # spent in home-manager-beatlink.service -- and there is nothing behind
-    # phosh to look at, so the screen is simply black until activation finishes.
-    #
-    # stopIfChanged = false makes switch-to-configuration issue a single
-    # `systemctl restart` at the end instead, so the compositor is down for
-    # seconds rather than for the deploy.
-    #
-    # This is not what `Restart=always` does, which the unit already carries
-    # from the phosh module: that covers phosh exiting on its own, and systemd
-    # correctly treats a deliberate stop as intentional and leaves it stopped.
     systemd.services.phosh.stopIfChanged = false;
 
-    # tty1 belongs to phosh, so nothing else may claim it.
-    #
-    # phosh.service declares Conflicts=getty@tty1.service, which means whichever
-    # of the two starts last stops the other. nixpkgs drops autovt@tty1 from
-    # getty.target only when a display manager is enabled -- and this host
-    # deliberately has none, for the reasons above -- so getty.target goes on
-    # wanting it. The getty module's own comment says why that is the dangerous
-    # half:
-    #
-    #     We can't just rely on 'Conflicts=autovt@tty1.service' because
-    #     'switch-to-configuration switch' will start 'autovt@tty1.service'
-    #
-    # Which is what kept happening. Every `switch` started getty@tty1, systemd
-    # resolved the conflict by stopping phosh first, and the session died in the
-    # middle of the rebuild -- measured: phosh stopped at 824.35s, getty started
-    # at 825.15s. Restart=always does not undo it, because a unit stopped by an
-    # explicit job stays stopped, so the phone was left with no shell at all.
-    #
-    # The other VTs are unaffected. logind hardcodes spawning autovt@ttyN on VT
-    # switch, so Ctrl+Alt+F2 still gets a console on demand, and the serial
-    # getty on ttyS0 -- the one that recovered this phone once already -- is a
-    # separate unit this does not touch.
+    # tty1 belongs to phosh.
     systemd.targets.getty.wants = lib.mkForce [ ];
 
-    # unpatched gnome-initial-setup is partially broken in small screens
-    #services.gnome.gnome-initial-setup.enable = false;
+    # Backlight #############################################################
 
-    #environment.gnome.excludePackages = with pkgs.gnome3; [
-
-    #];
-    environment.systemPackages = with pkgs; [
-        gnome-terminal
-        pipes
-        phosh-mobile-settings
-
-        # stevia, the on-screen keyboard, defaults to the hunspell completer for
-        # word prediction and there was no dictionary installed anywhere, so it
-        # failed at every start:
-        #
-        #     Failed to init default completer 'hunspell':
-        #       Failed to find dictionary for en-us
-        #
-        # Word completion is not why the keyboard fails to draw -- it logs
-        # "Animation did not finish in time" immediately afterwards and still
-        # reports itself Started -- but a daemon erroring on startup is a
-        # variable worth removing before blaming the compositor, and the
-        # dictionary is wanted regardless.
-        hunspellDicts.en_US
-    ];
-
-    # The stk3310 is an ambient light sensor as well as a proximity sensor, so
-    # phosh will track it unless told not to. This is only the default: a value
-    # the user has already set through Settings lives in their own dconf
-    # database and wins over anything declared here.
-    programs.dconf.profiles.user.databases = [
-        {
-            settings = {
-                "org/gnome/settings-daemon/plugins/power".ambient-enabled = false;
-                "org/gnome/desktop/interface".show-battery-percentage = true;
-
-                # GNOME's fundraising notification, off.
-                #
-                # It lives in gsd-housekeeping -- the disk-space plugin --
-                # rather than in the shell or in Software, which is why it
-                # appears on a phone running phosh at all: phosh is only the
-                # notification daemon here and displays whatever is sent to it,
-                # and the phosh module pulls in gnome-settings-daemon, so
-                # gsd-housekeeping runs and sends this.
-                #
-                # This is the plugin's own switch rather than a per-application
-                # notification block, so it stops the reminder being generated
-                # instead of hiding it after the fact -- and it leaves the rest
-                # of housekeeping's notifications, the low-disk-space warnings,
-                # working. Blanket-disabling notifications for gsd would have
-                # taken those with it, which on a phone with a 1TB card that can
-                # fill is not a trade worth making.
-                "org/gnome/settings-daemon/plugins/housekeeping".donation-reminder-enabled = false;
-
-                # Show every app in the grid rather than only the ones declaring
-                # themselves mobile-friendly. The key is a flags type whose only
-                # member is 'adaptive', so the empty list means "do not filter"
-                # -- it is not an unset value. Without this the grid hides
-                # anything without an adaptive hint behind "Show All Apps",
-                # which on this phone is most of what is installed.
-                #
-                # mkEmptyArray rather than [ ]: an empty Nix list carries no
-                # element type, so the generator cannot tell an empty `as` from
-                # an empty `ai` and refuses it.
-                "sm/puri/phosh".app-filter-mode =
-                    lib.gvariant.mkEmptyArray lib.gvariant.type.string;
-
-                # Widgets on the lock screen. The built-in status icons -- wifi,
-                # bluetooth, battery -- are already drawn there; these are the
-                # optional panels underneath the clock. Names are the .plugin
-                # basenames from phosh's lib/phosh/plugins.
-                "sm/puri/phosh/plugins".lock-screen = [
-                    "media-players"
-                    "upcoming-events"
-                    "emergency-info"
-                ];
-
-                # Toggles in the pull-down, alongside the built-in wifi,
-                # bluetooth, rotation and torch buttons phosh draws itself.
-                # These are the optional ones, and every name here is a
-                # .plugin shipped by the 0.56 build from 14-phosh-bump.nix.
-                #
-                # Syncthing is driven from here rather than a desktop tray app:
-                # Odin runs syncthingtray, which is Qt and desktop-shaped, so
-                # the phone uses phosh's own quick setting instead. It needs
-                # syncbus on the session bus to do anything -- see
-                # 3-apps/technet/syncbus.nix.
-                #
-                # location toggles org.gnome.system.location, which is why
-                # geoclue2 has to stay enabled for the button to mean
-                # anything; mobile-data and wifi-hotspot drive NetworkManager,
-                # the first through ModemManager's connection and the second
-                # by putting the wifi radio into shared mode.
-                "sm/puri/phosh/plugins".quick-settings = [
-                    "mobile-data-quick-setting"
-                    "wifi-hotspot-quick-setting"
-                    "location-quick-setting"
-                    "dark-mode-quick-setting"
-                    "caffeine-quick-setting"
-                    "pomodoro-quick-setting"
-                    "syncthing-quick-setting"
-                ];
-
-                # Extra top-bar icons, which the lock screen shares.
-                # simple-custom-status-icon is deliberately left out: it shows
-                # nothing until given an icon and a command to run.
-                "mobi/phosh/shell/plugins".status-icons = [
-                    "load-meter-status-icon"
-                ];
-            };
-        }
-    ];
-
-    # After systemd-backlight, which restores the brightness saved at the last
-    # shutdown and would otherwise land after this and undo it.
+    # After systemd-backlight, which would otherwise land after this and undo it.
     systemd.services.backlight-max = {
         description = "Set the panel backlight to maximum at boot";
         wantedBy = [ "multi-user.target" ];
@@ -330,34 +65,62 @@
         };
     };
 
-    # Two entries in the app grid that are noise on a phone. The tour is a GNOME
-    # Shell walkthrough for a desktop this device does not run, and the manual is
-    # the NixOS HTML documentation -- readable, but not from a launcher on a
-    # 720x1440 panel.
-    #
-    # documentation.nixos.enable covers the desktop entry and the generated HTML
-    # both. gnome-tour arrives with services.gnome.core-shell, which the phosh
-    # module turns on, so it has to be excluded rather than simply not added.
+    # Shell settings ########################################################
+
+    # Defaults only: anything set through Settings wins over these.
+    programs.dconf.profiles.user.databases = [
+        {
+            settings = {
+                "org/gnome/settings-daemon/plugins/power".ambient-enabled = false;
+                "org/gnome/desktop/interface".show-battery-percentage = true;
+                "org/gnome/settings-daemon/plugins/housekeeping".donation-reminder-enabled = false;
+
+                "org/gnome/desktop/wm/keybindings" = {
+                    toggle-fullscreen = [ "<Alt>F11" ];
+                    move-to-monitor-right = [ "<Alt><Shift>Right" ];
+                    move-to-monitor-left = [ "<Alt><Shift>Left" ];
+                };
+
+                # Empty means "do not filter", and the generator refuses [ ].
+                "sm/puri/phosh".app-filter-mode =
+                    lib.gvariant.mkEmptyArray lib.gvariant.type.string;
+
+                "sm/puri/phosh/plugins".lock-screen = [
+                    "media-players"
+                    "upcoming-events"
+                    "emergency-info"
+                ];
+
+                "sm/puri/phosh/plugins".quick-settings = [
+                    "mobile-data-quick-setting"
+                    "wifi-hotspot-quick-setting"
+                    "location-quick-setting"
+                    "dark-mode-quick-setting"
+                    "caffeine-quick-setting"
+                    "pomodoro-quick-setting"
+                    "syncthing-quick-setting"
+                ];
+
+                "mobi/phosh/shell/plugins".status-icons = [
+                    "load-meter-status-icon"
+                ];
+            };
+        }
+    ];
+
+    # Packages ##############################################################
+
+    environment.systemPackages = with pkgs; [
+        gnome-terminal
+        pipes
+        phosh-mobile-settings
+        hunspellDicts.en_US
+    ];
+
     documentation.nixos.enable = false;
     environment.gnome.excludePackages = [ pkgs.gnome-tour ];
-
-    # Same route as the tour: services.gnome.core-os-services, which the phosh
-    # module turns on, sets services.avahi.enable = mkDefault true. No other host
-    # on the network runs it, and this one has no use for mDNS service discovery.
-    #
-    # It was also failing on every activation, which mattered more than the
-    # service itself: switch-to-configuration returns non-zero when a unit fails
-    # to start, and nixos-rebuild reports that as
-    # "did you forget to use --ask-elevate-password?" -- so four consecutive
-    # deploys looked like sudo failures when activation had in fact succeeded.
-    # The underlying fault was a stale PID file it would not clean up:
-    #
-    #     open(/run/avahi-daemon//pid): File exists
-    #     Failed to create PID file: File exists
-    services.avahi.enable = false;
 
     environment.etc."machine-info".text = lib.mkDefault ''
         CHASSIS="handset"
     '';
-
 }
