@@ -776,11 +776,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1785998587,
-        "narHash": "sha256-LfafVgXSwrHXW9IeewljVUbjFZna29mnKS51SMweJ2A=",
+        "lastModified": 1786042622,
+        "narHash": "sha256-2QA5DUPdreUxPqX3PngdtiMacf6pw5WhT2HZxbh2HZE=",
         "owner": "BeatLink",
         "repo": "Prewarm",
-        "rev": "4b42716c26a9f0318c00ce7321f2ba70d2130cf6",
+        "rev": "56012452b7faa160652bb8fdbfe731638f93824b",
         "type": "github"
       },
       "original": {
@@ -1002,8 +1002,8 @@
         ]
       },
       "locked": {
-        "lastModified": 1786037224,
-        "narHash": "sha256-yhSn0PCehAM/qXSCKHcBwMEwEv370cdsv7YXdBlcZBk=",
+        "lastModified": 1786042175,
+        "narHash": "sha256-+Q+PWK79c3GYv8GUKfLVfiKFn6KcQ+4kxEnoUB/ULRg=",
         "path": "/Storage/Files/Projects/Coding/WebLaunch",
         "type": "path"
       },

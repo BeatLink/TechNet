@@ -74,10 +74,10 @@
                 # physical key is really down, which keyd has just intercepted.
                 # Latched, the number row still emitted KEY_7.
                 #
-                # So the digits are mapped here explicitly. Only the number row:
-                # everything else on the orange layer -- Home, End, PageUp/Down,
-                # the arrows on ; , . / ' [ ] -- is reached by holding FN, which
-                # still behaves exactly as it always did.
+                # So the whole orange layer is restated here. Every pairing below
+                # was read off the hardware with evtest -- keyd stopped, FN held,
+                # one key at a time -- rather than taken from the keycaps, which
+                # do not label the navigation half at all.
                 fnlock = {
                     "1" = "f1";
                     "2" = "f2";
@@ -89,6 +89,30 @@
                     "8" = "f8";
                     "9" = "f9";
                     "0" = "f10";
+
+                    # Navigation, read off the hardware one key at a time:
+                    #
+                    #   ;  insert      '  left
+                    #   ,  home        [  down
+                    #   .  up          ]  right
+                    #   /  end
+                    #
+                    # The arrows are an inverted-T on ' [ ] with up on the row
+                    # above, which is not what the keycaps suggest -- worth
+                    # measuring rather than inferring from the legends.
+                    semicolon = "insert";
+                    comma = "home";
+                    dot = "up";
+                    slash = "end";
+                    apostrophe = "left";
+                    leftbrace = "down";
+                    rightbrace = "right";
+
+                    # PageUp and PageDown are on this layer too -- both turned up
+                    # in earlier captures -- but which keys carry them was never
+                    # isolated, so they are left out rather than guessed. Holding
+                    # FN still reaches them. Add them here once measured the same
+                    # way as the rest.
 
                     fn = "toggle(fnlock)";
                 };
