@@ -3,6 +3,14 @@
     "[nix]": {
         "editor.tabSize": 4
     },
+    "emeraldwalk.runonsave": {
+        "commands": [
+            {
+                "match": "\\.nix$",
+                "cmd": "python3 ${workspaceFolder}/nix/3-laptop/4-apps/tools/banner-lint.py ${file}"
+            }
+        ]
+    },
     "cSpell.words": [
         "arion",
         "dconf",
