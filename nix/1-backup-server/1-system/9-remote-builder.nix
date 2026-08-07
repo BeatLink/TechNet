@@ -39,7 +39,7 @@
     # giving up a quarter of the throughput -- which matters on 1.3GHz A53 cores,
     # where a kernel build is measured in hours either way.
     #
-    # zram from 0-common/1-system/4-core/3-memory-management.nix backstops the
+    # zram from 0-common/1-system/4-core.nix backstops the
     # rest: build memory is anonymous and compresses well, so a spill costs speed
     # rather than the build.
     nix.settings.cores = 3;
