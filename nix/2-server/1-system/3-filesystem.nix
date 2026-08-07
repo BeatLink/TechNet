@@ -15,7 +15,7 @@
     networking.hostId = "e5aa3553";
 
     disko.devices.disk.root-drive.device = "/dev/disk/by-id/ata-Dogfish_SSD_64GB_5E56255506071556041";
-    technet.dataDrive.enable = true;
+
     # Optimizations for slower hard disk drives
     boot.extraModprobeConfig = ''
         options zfs zfs_vdev_max_active=32

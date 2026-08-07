@@ -17,6 +17,4 @@
 # desktop convention, declared in 0-common/desktop alongside the XDG directories
 # that depend on them.
 #
-{
-    technet.dataDrive.enable = true;
-}
+{ }
