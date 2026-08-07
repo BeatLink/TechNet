@@ -1,14 +1,10 @@
-# Language and Time
-#
-# Sets the language, time and locale
-#
+# Language and Time ##########################
 
 {
-    time.timeZone = "America/Jamaica"; # Sets time zone.
-    services.timesyncd.enable = true; # Sync system clock from NTP
-    i18n.defaultLocale = "en_US.UTF-8"; # Sets locale.
+    time.timeZone = "America/Jamaica";
+    services.timesyncd.enable = true;
+    i18n.defaultLocale = "en_US.UTF-8";
     services.xserver.xkb = {
-        # Sets the Keyboard Layout
         layout = "us";
         variant = "";
     };
