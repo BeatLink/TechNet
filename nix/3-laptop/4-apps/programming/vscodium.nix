@@ -11,11 +11,6 @@
             pkgs,
             ...
         }:
-        let
-            banner-lint = pkgs.writers.writePython3Bin "banner-lint" { } (
-                builtins.readFile ../tools/banner-lint.py
-            );
-        in
         {
             programs = {
                 claude-code.enable = true;
@@ -199,17 +194,6 @@
                                 "[x]"
                             ];
                             "todo-tree.regex.regex" = "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)";
-
-                            # Run on save -----------------------------------------------------------------------------------------------------------
-                            # formatOnSave never fires under files.autoSave, so banner padding runs from here instead
-                            "emeraldwalk.runonsave" = {
-                                commands = [
-                                    {
-                                        match = "\\.nix$";
-                                        cmd = "${banner-lint}/bin/banner-lint \${file}";
-                                    }
-                                ];
-                            };
 
                             # Other extensions -------------------------------------------------------------------------------------------------------
                             "claudeCode.preferredLocation" = "panel";
