@@ -7,7 +7,7 @@
         ./3-filesystem.nix
         ./5-folder-structure.nix
         ./6-core.nix
-        ./5-software
+        ./5-software.nix
         ./6-networking
         ./7-security
         ./8-locale.nix
