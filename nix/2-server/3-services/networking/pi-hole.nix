@@ -154,6 +154,7 @@
                         # host itself, via its own /etc/hosts, and nowhere else.
                         "syncthing.thor.lan,thor.lan"
                         "syncthing.odin.lan,odin.lan"
+                        "syncthing.ragnarok.lan,ragnarok.lan"
                     ];
                     domain = {
                         name = "lan";

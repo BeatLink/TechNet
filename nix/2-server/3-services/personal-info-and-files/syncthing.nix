@@ -82,10 +82,17 @@
             host = "10.100.100.4";
             port = 8384;
         };
+        # Port 80, not 8384: Ragnarok's Syncthing binds to loopback, so this
+        # proxies to its nginx rather than to Syncthing directly.
         syncthing-ragnarok = {
             domain = "syncthing-ragnarok.heimdall.technet";
             host = "10.100.100.6";
-            port = 8384;
+            port = 80;
+            # Ragnarok's nginx matches on serverName, and recommendedProxySettings
+            # would pass this vhost's own name, which it does not serve.
+            extraConfig.locations."/".extraConfig = ''
+                proxy_set_header Host syncthing.ragnarok.lan;
+            '';
         };
     };
 
