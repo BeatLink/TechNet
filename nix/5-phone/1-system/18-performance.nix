@@ -227,31 +227,6 @@
         MemoryLow = "512M";
     };
 
-    # The same argument as MemoryLow above, applied to whichever application is
-    # in front rather than to the compositor -- see
-    # 0-common/desktop/1-system/4-focus-boost.nix for how it finds it.
-    #
-    # On here and not on Odin because it is a response to 2972MB of RAM. A host
-    # that is not reclaiming has nothing to protect anything from.
-    technet.desktop.focusBoost.enable = true;
-
-    # 500 rather than the module's default 200, because the constraint measured
-    # on this phone is not the one the default was written for.
-    #
-    # Sampled with the session in normal use: memory pressure some avg10/60/300
-    # all 0.00 with 1554MB available, io pressure 3.44, and cpu pressure 63.92 /
-    # 65.99 / 72.69. Nothing is reclaiming, so MemoryLow above is inert and
-    # CPUWeight is the only part of the boost doing work -- which argues for
-    # giving it more than a 2x edge over its idle siblings.
-    #
-    # Read the cpu figure carefully though: a large share of it is Syncthing's
-    # own CPUQuota, since a quota-throttled task is runnable-but-not-running and
-    # that is exactly what PSI counts. Its cgroup alone sat at avg10 54.45. So
-    # this is a device that is CPU-bound rather than a device with a scheduling
-    # fault -- Firefox alone takes over a core of four at 1.15GHz -- and 500 is
-    # worth having without expecting it to change the character of the thing.
-    technet.desktop.focusBoost.cpuWeight = 500;
-
     # GTK4 draws through software Vulkan on this phone unless told otherwise,
     # and cairo is four times faster.
     #

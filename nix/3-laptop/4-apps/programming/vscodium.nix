@@ -35,7 +35,6 @@
                             "workbench.preferredLightColorTheme" = "Light 2026";
                             "workbench.preferredDarkColorTheme" = "Dark 2026";
                             "workbench.colorTheme" = "Light 2026";
-                            "workbench.iconTheme" = "material-icon-theme";
                             "workbench.tree.indent" = 20;
                             "workbench.enableExperiments" = false;
                             "workbench.editor.enablePreview" = false;
@@ -211,7 +210,6 @@
                         extensions = with pkgs.nix-vscode-extensions.open-vsx; [
                             hediet.vscode-drawio
                             anthropic.claude-code
-                            pkief.material-icon-theme
                             ms-python.python
                             ms-python.black-formatter
                             brainytech.pycacheclear
