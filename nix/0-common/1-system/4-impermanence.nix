@@ -4,7 +4,7 @@
     ...
 }:
 {
-    # Impermanent Filesystem Rollback ###############################################################################################################
+    # Impermanent Filesystem Rollback ################################################################################################################
     boot.initrd.systemd.services.rollback = {
         description = "Rollback ZFS root subvolume to a pristine state";
         wantedBy = [ "initrd.target" ];
@@ -20,7 +20,7 @@
         '';
     };
 
-    # Persistence Subvolume Mounting ################################################################################################################
+    # Persistence Subvolume Mounting #################################################################################################################
     environment.persistence."/persistent" = {
         hideMounts = true;
     };

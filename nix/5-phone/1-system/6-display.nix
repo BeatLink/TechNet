@@ -1,13 +1,13 @@
 { pkgs, lib, ... }:
 {
-    # Xwayland ##############################################################
+    # Xwayland #######################################################################################################################################
 
     programs.xwayland.enable = false;
 
     # Qt defaults to xcb, and there is no X server here.
     environment.sessionVariables.QT_QPA_PLATFORM = "wayland";
 
-    # Compositor ############################################################
+    # Compositor #####################################################################################################################################
 
     services = {
         xserver = {
@@ -35,7 +35,7 @@
         avahi.enable = false;
     };
 
-    # Session ###############################################################
+    # Session ########################################################################################################################################
 
     # Start the session only once home-manager has linked the user's units.
     systemd.services.phosh.after = [ "systemd-user-sessions.service" ];
@@ -46,7 +46,7 @@
     # tty1 belongs to phosh.
     systemd.targets.getty.wants = lib.mkForce [ ];
 
-    # Backlight #############################################################
+    # Backlight ######################################################################################################################################
 
     # After systemd-backlight, which would otherwise land after this and undo it.
     systemd.services.backlight-max = {
@@ -65,7 +65,7 @@
         };
     };
 
-    # Shell settings ########################################################
+    # Shell settings #################################################################################################################################
 
     # Exported to dconf/shell; edit on the phone, then nixtool run maintenance/export-dconf
     programs.dconf.profiles.user.databases = [
@@ -76,7 +76,7 @@
         }
     ];
 
-    # Packages ##############################################################
+    # Packages #######################################################################################################################################
 
     environment.systemPackages = with pkgs; [
         gnome-terminal

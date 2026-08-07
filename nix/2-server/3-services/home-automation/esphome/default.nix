@@ -53,7 +53,7 @@ let
     );
 in
 {
-    # Enable the service -----------------------------------------------------------------------------------------------------------------------
+    # Enable the service -----------------------------------------------------------------------------------------------------------------------------
     services.esphome = {
         enable = true;
         port = 6052;
@@ -63,7 +63,7 @@ in
 
     environment.persistence."/Storage/Services/ESPHome".directories = [ stateDir ];
 
-    # Configure authentiation ------------------------------------------------------------------------------------------------------------------
+    # Configure authentiation ------------------------------------------------------------------------------------------------------------------------
     # The dashboard's own HTTP credentials, plus the per-device secrets below.
     sops.secrets = {
         esphome_env.sopsFile = "${config.technet.secrets.path}/esphome.yaml";
@@ -78,7 +78,7 @@ in
         EnvironmentFile = config.sops.secrets.esphome_env.path;
     };
 
-    # Device secrets ---------------------------------------------------------------------------------------------------------------------------
+    # Device secrets ---------------------------------------------------------------------------------------------------------------------------------
     # Each key is decrypted individually and reassembled into the `secrets.yaml`
     # that the `!secret` references in the device configs resolve against.
     sops.templates."esphome-secrets.yaml" = {
@@ -90,7 +90,7 @@ in
         ) deviceSecretKeys;
     };
 
-    # Device configurations --------------------------------------------------------------------------------------------------------------------
+    # Device configurations --------------------------------------------------------------------------------------------------------------------------
     # Rendered YAML lives in the store and is bind-mounted onto an empty
     # placeholder file in the state directory, so the config's path stays
     # inside the state directory while its content stays Nix-owned. Files are
@@ -112,7 +112,7 @@ in
         before = [ "esphome.service" ];
     }) configFiles;
 
-    # Setup Nginx Virtual Host and Pi-Hole -----------------------------------------------------------------------------------------------------
+    # Setup Nginx Virtual Host and Pi-Hole -----------------------------------------------------------------------------------------------------------
     nginx-vhosts.esphome = {
         domain = "esphome.heimdall.technet";
         port = 6052;

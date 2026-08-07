@@ -11,6 +11,11 @@
             pkgs,
             ...
         }:
+        let
+            banner-lint = pkgs.writers.writePython3Bin "banner-lint" { } (
+                builtins.readFile ../tools/banner-lint.py
+            );
+        in
         {
             programs = {
                 claude-code.enable = true;
@@ -25,7 +30,7 @@
                         # settings.json.hmbackup, the mutable file home-manager
                         # displaced when it took the path over.
                         userSettings = {
-                            # Appearance -----------------------------------------------------------------------------------------------------
+                            # Appearance -------------------------------------------------------------------------------------------------------------
                             # With autoDetectColorScheme on, workbench.colorTheme
                             # is ignored entirely -- the preferred* pair is what
                             # applies, picked by the system light/dark preference.
@@ -47,7 +52,7 @@
                             "window.newWindowProfile" = "Default";
                             "editor.minimap.enabled" = false;
 
-                            # Files and explorer ---------------------------------------------------------------------------------------------
+                            # Files and explorer -----------------------------------------------------------------------------------------------------
                             "files.autoSave" = "afterDelay";
                             "files.autoSaveDelay" = 1000;
                             "files.exclude" = {
@@ -65,7 +70,7 @@
                             "explorer.compactFolders" = false;
                             "explorer.sortOrder" = "filesFirst";
 
-                            # Editor ---------------------------------------------------------------------------------------------------------
+                            # Editor -----------------------------------------------------------------------------------------------------------------
                             "editor.formatOnSave" = true;
                             "diffEditor.ignoreTrimWhitespace" = false;
                             "diffEditor.codeLens" = true;
@@ -74,7 +79,7 @@
                             };
                             "http.systemCertificatesNode" = true;
 
-                            # Terminal -------------------------------------------------------------------------------------------------------
+                            # Terminal ---------------------------------------------------------------------------------------------------------------
                             # Only bash is declared; the zsh/fish/tmux/pwsh entries
                             # the old file carried named shells this machine does
                             # not install.
@@ -91,7 +96,7 @@
                             };
                             "terminal.integrated.initialHint" = false;
 
-                            # Git ------------------------------------------------------------------------------------------------------------
+                            # Git --------------------------------------------------------------------------------------------------------------------
                             "git.path" = "${pkgs.git}/bin/git";
                             "git.enableSmartCommit" = true;
                             "git.confirmSync" = false;
@@ -103,7 +108,7 @@
                             "git.replaceTagsWhenPull" = true;
                             "github.gitProtocol" = "ssh";
 
-                            # Languages ------------------------------------------------------------------------------------------------------
+                            # Languages --------------------------------------------------------------------------------------------------------------
                             "[python]" = {
                                 "editor.defaultFormatter" = "ms-python.black-formatter";
                                 "editor.formatOnSave" = true;
@@ -130,12 +135,12 @@
                             "javascript.updateImportsOnFileMove.enabled" = "always";
                             "typescript.updateImportsOnFileMove.enabled" = "always";
 
-                            # Python formatting ----------------------------------------------------------------------------------------------
+                            # Python formatting ------------------------------------------------------------------------------------------------------
                             "black-formatter.path" = [ "${pkgs.black}/bin/black" ];
                             "black-formatter.showNotifications" = "always";
                             "black-formatter.interpreter" = [ "${pkgs.python3}/bin/python3" ];
 
-                            # Nix language server --------------------------------------------------------------------------------------------
+                            # Nix language server ----------------------------------------------------------------------------------------------------
                             # The old file pointed at ~/.nix-profile, which is not
                             # what installs these -- they come from home.packages
                             # below, so name the store paths directly.
@@ -150,12 +155,12 @@
                             };
                             "nix.showUnstableFeatures" = true;
 
-                            # Vala language server ------------------------------------------------------------------------------------------
+                            # Vala language server ---------------------------------------------------------------------------------------------------
                             "vala.languageServerPath" = "${pkgs.vala-language-server}/bin/vala-language-server";
                             "vala.debugMode" = false;
                             "vala.failOnCriticals" = false;
 
-                            # Vala lint ------------------------------------------------------------------------------------------------------
+                            # Vala lint --------------------------------------------------------------------------------------------------------------
                             "linter-vala.config" = {
                                 name = "Vala-Lint";
                                 enabled = true;
@@ -178,11 +183,11 @@
                                 url = "https://github.com/vala-lang/vala-lint";
                             };
 
-                            # sops -----------------------------------------------------------------------------------------------------------
+                            # sops -------------------------------------------------------------------------------------------------------------------
                             "sops.defaults.ageKeyFile" = "${config.home.homeDirectory}/.config/sops/age/keys.txt";
                             "sops.creationEnabled" = true;
 
-                            # todo-tree ------------------------------------------------------------------------------------------------------
+                            # todo-tree --------------------------------------------------------------------------------------------------------------
                             "todo-tree.tree.showScanModeButton" = false;
                             "todo-tree.general.tags" = [
                                 "BUG"
@@ -195,7 +200,18 @@
                             ];
                             "todo-tree.regex.regex" = "(//|#|<!--|;|/\\*|^|^\\s*(-|\\d+.))\\s*($TAGS)";
 
-                            # Other extensions -----------------------------------------------------------------------------------------------
+                            # Run on save -----------------------------------------------------------------------------------------------------------
+                            # formatOnSave never fires under files.autoSave, so banner padding runs from here instead
+                            "emeraldwalk.runonsave" = {
+                                commands = [
+                                    {
+                                        match = "\\.nix$";
+                                        cmd = "${banner-lint}/bin/banner-lint \${file}";
+                                    }
+                                ];
+                            };
+
+                            # Other extensions -------------------------------------------------------------------------------------------------------
                             "claudeCode.preferredLocation" = "panel";
                             "chat.extensionUnification.enabled" = false;
                             "liveServer.settings.donotShowInfoMsg" = true;
@@ -237,6 +253,7 @@
                         ++ (with pkgs.nix-vscode-extensions.vscode-marketplace; [
                             fnando.linter
                             colinkiama.linter-vala
+                            emeraldwalk.runonsave
                         ]);
                     };
                 };
