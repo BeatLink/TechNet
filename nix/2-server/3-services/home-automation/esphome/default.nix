@@ -95,11 +95,21 @@ in
     # placeholder file in the state directory, so the config's path stays
     # inside the state directory while its content stays Nix-owned. Files are
     # mounted individually so the build caches alongside them stay writable.
-    systemd.tmpfiles.rules =
-        lib.mapAttrsToList (name: _: "f ${stateDir}/${name} 0444 esphome esphome") configFiles
-        ++ [
-            "L+ ${stateDir}/secrets.yaml - - - - ${config.sops.templates."esphome-secrets.yaml".path}"
-        ];
+    systemd.tmpfiles.settings."ESPHome" =
+        lib.mapAttrs' (
+            name: _:
+            lib.nameValuePair "${stateDir}/${name}" {
+                f = {
+                    user = "esphome";
+                    group = "esphome";
+                    mode = "0444";
+                };
+            }
+        ) configFiles
+        // {
+            "${stateDir}/secrets.yaml"."L+".argument =
+                config.sops.templates."esphome-secrets.yaml".path;
+        };
 
     systemd.mounts = lib.mapAttrsToList (name: drv: {
         what = "${drv}";

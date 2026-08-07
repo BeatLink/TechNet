@@ -32,7 +32,9 @@
         port = 8080;
     };
 
-    systemd.tmpfiles.rules = [
-        "Z /Storage/Services/Trilium 0750 trilium trilium - -"
-    ];
+    systemd.tmpfiles.settings."Trilium"."/Storage/Services/Trilium".Z = {
+        user = "trilium";
+        group = "trilium";
+        mode = "0750";
+    };
 }

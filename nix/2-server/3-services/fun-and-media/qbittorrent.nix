@@ -121,20 +121,36 @@ in
         done
     '';
 
-    systemd.tmpfiles.rules = [
-        # Save and temp paths. Owned by beatlink to match both the service and
-        # Syncthing; setgid keeps the group on anything created below them.
-        "d /Storage/Files/Downloads/Torrents/Seeding 2775 beatlink beatlink - -"
-        "d /Storage/Files/Downloads/Torrents/Downloading 2775 beatlink beatlink - -"
+    systemd.tmpfiles.settings."Qbittorrent" = {
+        # setgid keeps the group on anything created below these, matching both the service and Syncthing
+        "/Storage/Files/Downloads/Torrents/Seeding".d = {
+            user = "beatlink";
+            group = "beatlink";
+            mode = "2775";
+        };
+        "/Storage/Files/Downloads/Torrents/Downloading".d = {
+            user = "beatlink";
+            group = "beatlink";
+            mode = "2775";
+        };
 
-        # qBittorrent itself creates data/ and data/nova3/ (root-owned, via
-        # tmpfiles running before this unit's first start) before our
-        # ExecStartPre ever runs, so every level needs an explicit rule —
-        # a rule for just the engines/ leaf leaves its unwritable parents.
-        "Z /Storage/Services/Qbittorrent/profile/data 0750 beatlink beatlink - -"
-        "Z /Storage/Services/Qbittorrent/profile/data/nova3 0750 beatlink beatlink - -"
-        "d /Storage/Services/Qbittorrent/profile/data/nova3/engines 0750 beatlink beatlink - -"
-    ];
+        # Every level needs its own entry; qBittorrent creates these root-owned before ExecStartPre runs
+        "/Storage/Services/Qbittorrent/profile/data".Z = {
+            user = "beatlink";
+            group = "beatlink";
+            mode = "0750";
+        };
+        "/Storage/Services/Qbittorrent/profile/data/nova3".Z = {
+            user = "beatlink";
+            group = "beatlink";
+            mode = "0750";
+        };
+        "/Storage/Services/Qbittorrent/profile/data/nova3/engines".d = {
+            user = "beatlink";
+            group = "beatlink";
+            mode = "0750";
+        };
+    };
 
     systemd.services.qbittorrent = {
         # nova3 search plugins are plain Python scripts; qBittorrent shells

@@ -135,9 +135,11 @@
     # group-readable; this activation step relaxes the group and any files that
     # predate it, using `g+rX` so directories get +x for traversal while data
     # files get only +r (never +x).
-    systemd.tmpfiles.rules = [
-        "d /Storage/Files/Backups/Server/Borgmatic 0750 root borg - -"
-    ];
+    systemd.tmpfiles.settings."Borgmatic"."/Storage/Files/Backups/Server/Borgmatic".d = {
+        user = "root";
+        group = "borg";
+        mode = "0750";
+    };
     system.activationScripts.borgmaticRepoGroupRead = ''
         if [ -d /Storage/Files/Backups/Server/Borgmatic ]; then
             chgrp -R borg /Storage/Files/Backups/Server/Borgmatic || true

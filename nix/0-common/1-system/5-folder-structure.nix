@@ -26,7 +26,7 @@
                     user = "root";
                     group = "root";
                     mode = "1777";
-                    age = "10d";
+                    age = "1d";
                 };
             };
             "/var/tmp" = {
@@ -39,7 +39,7 @@
                     user = "root";
                     group = "root";
                     mode = "1777";
-                    age = "30d";
+                    age = "7d";
                 };
             };
         };

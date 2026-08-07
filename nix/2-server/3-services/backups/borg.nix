@@ -27,8 +27,10 @@
         };
     };
 
-    systemd.tmpfiles.rules = [
-        "Z /Storage/Files/Backups/Laptop 0750 borg borg - -"
-    ];
+    systemd.tmpfiles.settings."Borg"."/Storage/Files/Backups/Laptop".Z = {
+        user = "borg";
+        group = "borg";
+        mode = "0750";
+    };
 
 }

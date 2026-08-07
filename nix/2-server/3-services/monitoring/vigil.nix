@@ -1961,10 +1961,18 @@
         };
     };
 
-    systemd.tmpfiles.rules = [
-        "d /Storage/Services/Vigil 0750 vigil vigil - -"
-        "Z /Storage/Services/Vigil 0750 vigil vigil - -"
-    ];
+    systemd.tmpfiles.settings."Vigil"."/Storage/Services/Vigil" = {
+        d = {
+            user = "vigil";
+            group = "vigil";
+            mode = "0750";
+        };
+        Z = {
+            user = "vigil";
+            group = "vigil";
+            mode = "0750";
+        };
+    };
 
     nginx-vhosts.vigil = {
         domain = "vigil.heimdall.technet";

@@ -31,9 +31,11 @@
     # itself rather than a recursive Z: everything below it is already group- and
     # world-readable, and a recursive 2770 would strip world-read from the
     # existing log file and mark it group-executable for no reason.
-    systemd.tmpfiles.rules = [
-        "z /Storage/Files/eBooks/OpenBooks 2770 beatlink beatlink - -"
-    ];
+    systemd.tmpfiles.settings."OpenBooks-Relabel"."/Storage/Files/eBooks/OpenBooks".z = {
+        user = "beatlink";
+        group = "beatlink";
+        mode = "2770";
+    };
 
     # websocat: Vigil's `openbooks` plugin uses it to open one short-lived
     # WebSocket connection and confirm the IRC bridge is actually connected

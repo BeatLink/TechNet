@@ -158,12 +158,22 @@
 
     };
 
-    systemd.tmpfiles.rules = [
-        "d /Storage/Services/Home-Assistant 0750 hass hass - -"
-        "Z /Storage/Services/Home-Assistant 0750 hass hass - -"
-        "a+ /Storage/Files/Music - - - - u:hass:rx"
-        "a+ /Storage/Files/Sounds - - - - u:hass:rx"
-    ];
+    systemd.tmpfiles.settings."Home-Assistant" = {
+        "/Storage/Services/Home-Assistant" = {
+            d = {
+                user = "hass";
+                group = "hass";
+                mode = "0750";
+            };
+            Z = {
+                user = "hass";
+                group = "hass";
+                mode = "0750";
+            };
+        };
+        "/Storage/Files/Music"."a+".argument = "u:hass:rx";
+        "/Storage/Files/Sounds"."a+".argument = "u:hass:rx";
+    };
 
     nginx-vhosts.home-assistant = {
         domain = "home-assistant.heimdall.technet";
