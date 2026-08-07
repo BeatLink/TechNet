@@ -21,20 +21,6 @@
 
 let
     cfg = config.syncthing-mesh;
-
-    # Each peer is listed on the house LAN first and the TechNet VPN second, so
-    # that two devices at home take the direct path and fall back to the tunnel
-    # only when one of them is away.
-    #
-    # The .lan names do not all resolve yet. Pi-hole serves `lan` as a local
-    # domain but its static hosts list only holds .technet entries, so today
-    # heimdall.lan answers with the VPN address (expand-hosts appending the
-    # domain to heimdall.technet) while odin.lan and thorx.lan do not answer at
-    # all. Syncthing treats an address it cannot resolve as one dead entry in
-    # the list and keeps using the rest, so these are declared ahead of the DNS
-    # records rather than after them; giving each host an A record on
-    # 192.168.0.0/24 is what turns them into the direct path. Thor is a DHCP
-    # phone and needs a fixed lease before its name can be pointed anywhere.
     devices = {
         Heimdall = {
             id = "Q6AIAK4-4PFLB3Z-73QF54Y-EKQ2LC5-5FSVFRZ-RBGWFDI-KZQI45E-JBXXTQY";
