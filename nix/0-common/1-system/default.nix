@@ -6,7 +6,7 @@
         ./2-boot.nix
         ./3-filesystem.nix
         ./5-folder-structure.nix
-        ./4-core
+        ./6-core.nix
         ./5-software
         ./6-networking
         ./7-security
