@@ -19,6 +19,9 @@
         dataDir = "/Storage/Services/Trilium/data";
     };
 
+    # Backend scripts run as the trilium user with full filesystem, network and OS access.
+    systemd.services.trilium-server.environment.TRILIUM_SECURITY_BACKEND_SCRIPTING_ENABLED = "true";
+
     system.activationScripts.triliumStaleConfigIni = ''
         cfg=/Storage/Services/Trilium/data/config.ini
         if [ -f "$cfg" ] && [ ! -L "$cfg" ]; then
