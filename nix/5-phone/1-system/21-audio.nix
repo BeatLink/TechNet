@@ -1,4 +1,4 @@
-# Audio ################################
+# Audio ##############################################################################################################################################
 { pkgs, ... }:
 let
     # Upstream's UCM tree plus an alias matching megi's card long name.
@@ -9,7 +9,7 @@ let
     '';
 in
 {
-    # UCM ----------------------------------------
+    # UCM --------------------------------------------------------------------------------------------------------------------------------------------
     systemd.user.services = {
         pipewire.environment.ALSA_CONFIG_UCM2 = "${ucm2}";
         wireplumber.environment.ALSA_CONFIG_UCM2 = "${ucm2}";
@@ -18,13 +18,13 @@ in
     environment.variables.ALSA_CONFIG_UCM2 = "${ucm2}";
     environment.systemPackages = [ pkgs.alsa-utils ];
 
-    # Phantom cards ------------------------------
+    # Phantom cards ----------------------------------------------------------------------------------------------------------------------------------
     boot.kernelParams = [
         "snd_aloop.enable=0"
         "snd_dummy.enable=0"
     ];
 
-    # Mixer persistence --------------------------
+    # Mixer persistence ------------------------------------------------------------------------------------------------------------------------------
     hardware.alsa.enablePersistence = true;
     environment.persistence."/persistent".directories = [ "/var/lib/alsa" ];
 

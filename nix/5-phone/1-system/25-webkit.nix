@@ -45,7 +45,7 @@
 # it. A shell-profile variable would reach an ssh login and nothing the user
 # taps.
 #
-# --------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------------------------------------------------------------
 # This applies to GTK4 only, and deliberately stays the default.
 #
 # GTK3 is not subject to any of the above. It asks for desktop GL 3.2 by

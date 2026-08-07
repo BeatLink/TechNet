@@ -8,12 +8,12 @@ WireGuard. See [README.md](README.md) for the network itself.
 Each host is a `nixosConfigurations` entry in [flake.nix](flake.nix) composing
 `nix/0-common` with one device directory.
 
-| Host | Device | Modules |
-| --- | --- | --- |
-| `Odin` | laptop (x86_64) | `nix/0-common` + `nix/3-laptop` |
-| `Heimdall` | server (x86_64) | `nix/0-common` + `nix/2-server` |
+| Host         | Device                  | Modules                                    |
+| ------------ | ----------------------- | ------------------------------------------ |
+| `Odin`     | laptop (x86_64)         | `nix/0-common` + `nix/3-laptop`        |
+| `Heimdall` | server (x86_64)         | `nix/0-common` + `nix/2-server`        |
 | `Ragnarok` | backup server (aarch64) | `nix/0-common` + `nix/1-backup-server` |
-| `Thor` | phone | `nix/0-common` + `nix/5-phone` |
+| `Thor`     | phone                   | `nix/0-common` + `nix/5-phone`         |
 
 Host names are capitalised — `#Odin`, not `#odin`. The lowercase form declared in
 [20-nixtool.nix](nix/3-laptop/1-system/20-nixtool.nix) is the SSH address
@@ -35,13 +35,13 @@ and reads its config from `/etc/nixtool/nixtool-config.json`, rendered from
 and installer credentials are all declared in Nix, so no `--config` flag is needed
 and no credential is checked in.
 
-| Action | Effect |
-| --- | --- |
-| `dry-activate` | Build and print what would change. **Always run this first.** |
-| `switch` | Activate now and set as the boot default |
-| `test` | Activate now, revert on next boot |
-| `boot` | Activate on next boot only |
-| `rollback` | Return to the previous generation |
+| Action           | Effect                                                             |
+| ---------------- | ------------------------------------------------------------------ |
+| `dry-activate` | Build and print what would change.**Always run this first.** |
+| `switch`       | Activate now and set as the boot default                           |
+| `test`         | Activate now, revert on next boot                                  |
+| `boot`         | Activate on next boot only                                         |
+| `rollback`     | Return to the previous generation                                  |
 
 ### Run builds and deploys in the background
 
@@ -211,9 +211,10 @@ Nothing in this repo should contain a plaintext credential.
 
 ## Comments
 
-Comments are for structure and for hazards. Three uses, and no others.
+Comments should be limited to the following areas:
 
-Visual separation, marking out the shape of a file:
+1. A brief block at the top of the file, no more than 5 lines, describing the module and its purpose. Any unobvious details or hazards should be described here.
+2. Visual separation, marking out the shape of a file. Banners for major sections, dashes for smaller subsections and for functions. The separators plus their text plus their indentation should equal to 150 characters. Pad or trim # or - as necessary.
 
 ```nix
 # Section Name ##########################
@@ -221,13 +222,7 @@ Visual separation, marking out the shape of a file:
 # Subsection name ------------------------------
 ```
 
-Banners for major sections, dashes for smaller subsections and for functions.
-
-A single sentence above a function saying what it does — what, not how and not
-why.
-
-And a single line marking a hazard: a value that looks wrong and is right, or
-looks droppable and is load-bearing.
+3. A single sentence inline comment may be added for settings, choices or hazards that are not intuitive to an intermediary programmer.
 
 ```nix
 # 160 is unity, not a maximum; 192 is +24dB and clips into static

@@ -1,4 +1,4 @@
-# Hardware Configuration ###############
+# Hardware Configuration #############################################################################################################################
 {
     inputs,
     pkgs,
@@ -7,14 +7,14 @@
 {
     nixpkgs.hostPlatform = "aarch64-linux";
 
-    # Firmware -----------------------------------
+    # Firmware ---------------------------------------------------------------------------------------------------------------------------------------
     hardware = {
         enableRedistributableFirmware = true;
         firmware = [ (pkgs.callPackage "${inputs.mobile-nixos}/devices/pine64-pinephone/firmware" { }) ];
         deviceTree.name = "allwinner/sun50i-a64-pinephone-1.2.dtb";
     };
 
-    # Boot ---------------------------------------
+    # Boot -------------------------------------------------------------------------------------------------------------------------------------------
     boot = {
         kernelParams = [
             "console=tty0"
