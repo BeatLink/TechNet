@@ -72,9 +72,7 @@ in
                     };
                     postCreateHook = ''
                         zfs set keylocation="prompt" "${rootPool}/root";
-
                         zpool upgrade -a
-
                         # Impermanence rolls back to this snapshot every boot; removing it strands the rollback
                         zfs snapshot ${rootPool}/root@blank
                     '';
@@ -125,13 +123,13 @@ in
         "/nix".neededForBoot = true;
         "/persistent".neededForBoot = true;
         "/home".neededForBoot = true;
-        # Created by hand at install, not by disko. nofail keeps a missing pool from stranding the boot
         "/Storage" = {
+            # Created by hand at install, not by disko.
             device = "${dataPool}/storage";
             fsType = "zfs";
             options = [
                 "zfsutil"
-                "nofail"
+                "nofail" # nofail keeps a missing pool from stranding the boot
             ];
             neededForBoot = true;
         };
