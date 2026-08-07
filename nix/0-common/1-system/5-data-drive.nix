@@ -82,23 +82,7 @@ in
             inherit (cfg) user group mode;
         };
 
-        # Both stock zfs-import-<pool> services start the instant
-        # network-online.target is reached -- 13ms apart, measured -- and each
-        # spends up to 60 rounds running `zpool import -d` to find its pool.
-        #
-        # Two of those scans overlapping do not merely contend. One of them comes
-        # back "no pools available", because a scan cannot read labels another
-        # scan holds open, and the import script reports that as "Pool X in state
-        # MISSING, waiting". Measured on Thor with a throwaway file-backed pool:
-        # 15 of 30 concurrent scans missed it, against 0 of 30 run serially.
-        #
-        # Both services then sleep 1s and retry in lockstep, so they collide again
-        # on nearly every round and both burn all 60 trials before the loop gives
-        # up -- at which point the pool imports fine. That was 90 seconds of a
-        # 175-second initrd spent entirely on the two units blinding each other.
-        #
-        # Ordering the data pool after the root pool costs nothing, since the root
-        # pool has to come first regardless -- it carries /.
+        # Prevents Import Racing
         boot.initrd.systemd.services."zfs-import-${dataPool}".after = [
             "zfs-import-${rootPool}.service"
         ];
