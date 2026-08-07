@@ -1,55 +1,32 @@
-# Filesystem ###########################################################################################################################
+# Filesystem #########################################################################################################################################
 
-#
-# Every TechNet host mounts its data drive the same way: the `storage` dataset
-# of that host's own `data-pool-<hostname>`, mounted at /Storage with `zfsutil`
-# so ZFS supplies the mount options, `nofail` so a missing or still-locked pool
-# does not strand the boot, and `neededForBoot` because persistence and service
-# state live under it.
-#
-# The pool itself is NOT created here -- it is made by hand or by a setup
-# script during installation, unlike the root pool which disko lays down.
-
-{ config, lib, ... }:
+{ config, ... }:
 let
-
     rootPool = "root-pool-${config.networking.hostName}";
-
-
-    zvolSwaps = lib.filter (swap: lib.hasPrefix "/dev/zvol/" swap.device) config.swapDevices;
-
-    # mkswap runs before the zvol exists otherwise, and the unit fails the boot
-    waitForZvol =
-        swap:
-        lib.nameValuePair "mkswap-${swap.deviceName}" {
-            after = [ "zfs-volume-wait.service" ];
-            requires = [ "zfs-volume-wait.service" ];
-        };
+    dataPool = "data-pool-${config.networking.hostName}";
+    swapZvol = "dev-zvol-${rootPool}-swap";
 in
 {
-    # ZFS Support
+    # ZFS Support ####################################################################################################################################
     boot = {
         supportedFilesystems = [ "zfs" ];
         initrd = {
             supportedFilesystems = [ "zfs" ];
-            # Prevents Import Racing
-            systemd.services."zfs-import-data-pool-${config.networking.hostName}".after = [
-                "zfs-import-${rootPool}.service"
-            ];
+            # Data pool must import after root, otherwise the two race
+            systemd.services."zfs-import-${dataPool}".after = [ "zfs-import-${rootPool}.service" ];
         };
         zfs.forceImportRoot = false;
     };
 
-    # Root Drive Disko ##########################
-    # Creates Disk at installation, guides mounting during boot
+    # Root Drive Disko ###############################################################################################################################
     disko.devices = {
-        # Disks and Partitions
+
+        # Disks and partitions -----------------------------------------------------------------------------------------------------------------------
         disk.root-drive = {
             type = "disk";
             content = {
                 type = "gpt";
                 partitions = {
-                    # Bootloader
                     efi = {
                         size = "512M";
                         type = "EF00";
@@ -60,25 +37,24 @@ in
                             mountOptions = [ "umask=0077" ]; # Adds security, prevent world readable boot
                         };
                     };
-                    # Root Pool
                     zroot = {
                         size = "100%";
                         content = {
                             type = "zfs";
-                            pool = "root-pool-${config.networking.hostName}";
+                            pool = rootPool;
                         };
                     };
                 };
             };
         };
-        # Pools
-        zpool."root-pool-${config.networking.hostName}" = {
+        # Pools --------------------------------------------------------------------------------------------------------------------------------------
+        zpool.${rootPool} = {
             type = "zpool";
             options = {
                 autotrim = "on";
             };
             rootFsOptions = {
-                mountpoint = "none"; # Data stored in children datasets
+                mountpoint = "none";
             };
             datasets = {
                 "root" = {
@@ -95,21 +71,19 @@ in
                         keylocation = "file:///tmp/encryption.key";
                     };
                     postCreateHook = ''
-                        # Prompt for Decryption Key at Boot
-                        zfs set keylocation="prompt" "root-pool-${config.networking.hostName}/root";
+                        zfs set keylocation="prompt" "${rootPool}/root";
 
-                        # Enable all features
                         zpool upgrade -a
 
-                        # Snapshot for Impermanence. Future boots roll back to this
-                        zfs snapshot root-pool-${config.networking.hostName}/root@blank
+                        # Impermanence rolls back to this snapshot every boot; removing it strands the rollback
+                        zfs snapshot ${rootPool}/root@blank
                     '';
                 };
                 "root/nix" = {
                     type = "zfs_fs";
                     mountpoint = "/nix";
                     options = {
-                        atime = "off"; # Nix does not use atime (impure), might as well turn it of
+                        atime = "off";
                     };
                 };
                 "root/persistent" = {
@@ -126,8 +100,8 @@ in
                         "com.sun:auto-snapshot" = "true";
                     };
                     postCreateHook = ''
-                        # Snapshot for Impermanence. Future boots roll back to this
-                        zfs snapshot root-pool-${config.networking.hostName}/root/home@blank
+                        # Impermanence rolls back to this snapshot every boot; removing it strands the rollback
+                        zfs snapshot ${rootPool}/root/home@blank
                     '';
                 };
                 "root/swap" = {
@@ -136,7 +110,7 @@ in
                     content = {
                         type = "swap";
                         randomEncryption = true;
-                        discardPolicy = "both"; # Enables TRIM for the ZVOL
+                        discardPolicy = "both";
                     };
                 };
             };
@@ -144,14 +118,16 @@ in
 
     };
 
+    # Mounts #########################################################################################################################################
     fileSystems = {
         "/".neededForBoot = true;
         "/boot".neededForBoot = true;
         "/nix".neededForBoot = true;
         "/persistent".neededForBoot = true;
         "/home".neededForBoot = true;
+        # Created by hand at install, not by disko. nofail keeps a missing pool from stranding the boot
         "/Storage" = {
-            device = "data-pool-${config.networking.hostName}/storage";
+            device = "${dataPool}/storage";
             fsType = "zfs";
             options = [
                 "zfsutil"
@@ -161,9 +137,14 @@ in
         };
     };
 
-    systemd.services = lib.listToAttrs (map waitForZvol zvolSwaps);
+    # Swap ###########################################################################################################################################
+    # mkswap must come after the zvol exists. Otherwise, the unit fails the boot
+    systemd.services."mkswap-${swapZvol}" = {
+        after = [ "zfs-volume-wait.service" ];
+        requires = [ "zfs-volume-wait.service" ];
+    };
 
-    # Filesystem Maintenance. TRIM, scrubbing, etc ############################################################
+    # Filesystem Maintenance #########################################################################################################################
     services = {
         fstrim.enable = true;
         zfs = {
