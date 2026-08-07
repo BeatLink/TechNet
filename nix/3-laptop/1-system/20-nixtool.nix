@@ -12,18 +12,17 @@
             Thor = "thor.technet";
         };
 
-    };
+        sops = {
+            enable = true;
+            owner = "beatlink";
+            sopsFile = "${config.technet.secrets.path}/nixtool.yaml";
 
-    technet.nixtool = {
-        enable = true;
-        owner = "beatlink";
-        sopsFile = "${config.technet.secrets.path}/nixtool.yaml";
-
-        credentials.Thor = {
-            ENCRYPTION_KEY = "thor_encryption_key";
-            SSH_HOST_KEY = "thor_ssh_host_key";
-            SSH_INITRD_KEY = "thor_ssh_initrd_key";
-            SSH_PASSWORD = "thor_ssh_password";
+            hostValueSecrets.Thor = {
+                ENCRYPTION_KEY = "thor_encryption_key";
+                SSH_HOST_KEY = "thor_ssh_host_key";
+                SSH_INITRD_KEY = "thor_ssh_initrd_key";
+                SSH_PASSWORD = "thor_ssh_password";
+            };
         };
     };
 }
