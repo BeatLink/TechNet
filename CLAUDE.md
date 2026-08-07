@@ -208,3 +208,53 @@ on are separate programs, since Hyprland is a compositor rather than a desktop.
 
 sops-nix, with the host SSH key as the age identity. Secrets live in `secrets/`.
 Nothing in this repo should contain a plaintext credential.
+
+## Comments
+
+Comments are for structure and for hazards. Three uses, and no others.
+
+Visual separation, marking out the shape of a file:
+
+```nix
+# Section Name ##########################
+
+# Subsection name ------------------------------
+```
+
+Banners for major sections, dashes for smaller subsections and for functions.
+
+A single sentence above a function saying what it does — what, not how and not
+why.
+
+And a single line marking a hazard: a value that looks wrong and is right, or
+looks droppable and is load-bearing.
+
+```nix
+# 160 is unity, not a maximum; 192 is +24dB and clips into static
+amixer -c "$card" cset name='AIF1 DA0 Playback Volume' 160
+
+# Needed to prevent a dependency loop
+DefaultDependencies = "no";
+
+# Might be a security risk, PSK in initrd, consider certificate based auth
+sops.templates."wpa_supplicant-initrd.conf" = { ... };
+```
+
+Three rules for these:
+
+- **One line.** No block, no quoted output, no walkthrough of how it was found.
+- **On the line that would need to change**, not in a file header. A comment
+  about a PSK reaching the ESP goes on the template that renders it, not on the
+  sops secret above it and not at the top of the file.
+- **Only where the reader would act differently without it.** The test is
+  whether someone editing this line would break something, not whether the
+  history is interesting.
+
+Say what the hazard is, not the mechanism behind it, and name the way out if
+there is one.
+
+**In every other case, no comments unless explicitly asked.** This applies to new
+files and to edits of existing ones. Mechanism, history, measurements, what
+upstream does and what was tried and rejected all go in the chat response, not
+the file — as does rationale for a settled choice, which is not a hazard however
+hard-won it was.

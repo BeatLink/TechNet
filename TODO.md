@@ -6,7 +6,6 @@ Outstanding work, most blocking first. Background for the Thor items is in [docs
 
 Built and waiting to deploy, most of it unverified on hardware.
 
-* Deploy Ragnarok: SMR queue depths and Syncthing CPU quota
 * Syncthing GUI password and reverse proxy, all hosts
 
 ## Ragnarok

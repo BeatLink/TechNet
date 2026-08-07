@@ -46,6 +46,15 @@
 
     networking.firewall.interfaces."wg0".allowedTCPPorts = [ 8384 ];
 
+    # syncthing.ragnarok.lan, served by nginx here and proxied to loopback, so
+    # the GUI survives Heimdall or WireGuard being down -- which is when this
+    # host's backups are most likely to be what you need.
+    technet.vhosts.syncthing = {
+        port = 8384;
+        # Reachable from other machines too, via the CNAME on Heimdall.
+        openFirewall = true;
+    };
+
     # Syncthing runs as beatlink and creates its own Database, Data and Config
     # directories, but it cannot create the parents: /Storage/Services came out
     # root-owned here, so the first start died with
@@ -74,7 +83,7 @@
         openDefaultPorts = true;
         cert = config.sops.secrets.syncthing_cert.path;
         key = config.sops.secrets.syncthing_key.path;
-        guiAddress = "0.0.0.0:8384";
+        guiAddress = "127.0.0.1:8384";
         guiPasswordFile = config.sops.secrets.syncthing_gui_password.path;
         user = "beatlink";
         group = "beatlink";
