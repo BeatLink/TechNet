@@ -182,12 +182,26 @@
 
     };
 
-    systemd.tmpfiles.rules = [
-        # Ensure the persistent storage is owned by pihole
-        "d /Storage/Services/PiHole 0750 pihole pihole - -"
-        "Z /Storage/Services/PiHole 0750 pihole pihole - -"
-        "f /etc/pihole/versions 0644 pihole pihole - -"
-    ];
+    # Ensure the persistent storage is owned by pihole
+    systemd.tmpfiles.settings."PiHole" = {
+        "/Storage/Services/PiHole" = {
+            d = {
+                user = "pihole";
+                group = "pihole";
+                mode = "0750";
+            };
+            Z = {
+                user = "pihole";
+                group = "pihole";
+                mode = "0750";
+            };
+        };
+        "/etc/pihole/versions".f = {
+            user = "pihole";
+            group = "pihole";
+            mode = "0644";
+        };
+    };
 
     environment.persistence."/Storage/Services/PiHole".directories = [
         {

@@ -28,12 +28,28 @@
         ingestDir = "/Storage/Services/Calibre-Web/Uploads";
     };
 
-    systemd.tmpfiles.rules = [
-        "d /Storage/Services/Calibre-Web 0750 calibre-web calibre-web - -"
-        "d /Storage/Services/Calibre-Web/config 0750 calibre-web calibre-web - -"
-        "d /Storage/Services/Calibre-Web/Uploads 0750 calibre-web calibre-web - -"
-        "d /Storage/Files/eBooks/Calibre/Library 0755 calibre-web calibre-web - -"
-    ];
+    systemd.tmpfiles.settings."Calibre-Web" = {
+        "/Storage/Services/Calibre-Web".d = {
+            user = "calibre-web";
+            group = "calibre-web";
+            mode = "0750";
+        };
+        "/Storage/Services/Calibre-Web/config".d = {
+            user = "calibre-web";
+            group = "calibre-web";
+            mode = "0750";
+        };
+        "/Storage/Services/Calibre-Web/Uploads".d = {
+            user = "calibre-web";
+            group = "calibre-web";
+            mode = "0750";
+        };
+        "/Storage/Files/eBooks/Calibre/Library".d = {
+            user = "calibre-web";
+            group = "calibre-web";
+            mode = "0755";
+        };
+    };
 
     users.users.calibre-web.extraGroups = [ "beatlink" ];
 

@@ -18,10 +18,18 @@
         databaseFile = "blockurl.db";
     };
 
-    systemd.tmpfiles.rules = [
-        "d /Storage/Services/BlockURL 0750 blockurl blockurl - -"
-        "Z /Storage/Services/BlockURL 0750 blockurl blockurl - -"
-    ];
+    systemd.tmpfiles.settings."BlockURL"."/Storage/Services/BlockURL" = {
+        d = {
+            user = "blockurl";
+            group = "blockurl";
+            mode = "0750";
+        };
+        Z = {
+            user = "blockurl";
+            group = "blockurl";
+            mode = "0750";
+        };
+    };
 
     nginx-vhosts.blockurl = {
         domain = "blockurl.heimdall.technet";

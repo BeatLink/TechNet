@@ -10,10 +10,18 @@
         group = "frigate";
     };
 
-    systemd.tmpfiles.rules = [
-        "d /Storage/Services/Frigate 0750 frigate frigate - -"
-        "Z /Storage/Services/Frigate 0750 frigate frigate - -"
-    ];
+    systemd.tmpfiles.settings."Frigate"."/Storage/Services/Frigate" = {
+        d = {
+            user = "frigate";
+            group = "frigate";
+            mode = "0750";
+        };
+        Z = {
+            user = "frigate";
+            group = "frigate";
+            mode = "0750";
+        };
+    };
 
     services = {
         udev.extraRules = ''

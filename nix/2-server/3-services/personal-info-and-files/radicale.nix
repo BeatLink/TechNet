@@ -43,10 +43,18 @@
         };
     };
 
-    systemd.tmpfiles.rules = [
-        "d /Storage/Services/Radicale 0750 radicale radicale - -"
-        "Z /Storage/Services/Radicale 0750 radicale radicale - -"
-    ];
+    systemd.tmpfiles.settings."Radicale"."/Storage/Services/Radicale" = {
+        d = {
+            user = "radicale";
+            group = "radicale";
+            mode = "0750";
+        };
+        Z = {
+            user = "radicale";
+            group = "radicale";
+            mode = "0750";
+        };
+    };
 
     # The htpasswd file is otherwise unmanaged by Nix (the real beatlink
     # login was added once by hand), so this only ever touches the single

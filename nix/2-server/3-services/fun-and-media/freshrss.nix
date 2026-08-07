@@ -27,10 +27,18 @@
         owner = "vigil-access";
     };
 
-    systemd.tmpfiles.rules = [
-        "d /Storage/Services/FreshRSS 0750 freshrss freshrss - -"
-        "Z /Storage/Services/FreshRSS 0750 freshrss freshrss - -"
-    ];
+    systemd.tmpfiles.settings."FreshRSS"."/Storage/Services/FreshRSS" = {
+        d = {
+            user = "freshrss";
+            group = "freshrss";
+            mode = "0750";
+        };
+        Z = {
+            user = "freshrss";
+            group = "freshrss";
+            mode = "0750";
+        };
+    };
 
     services = {
         freshrss = {
