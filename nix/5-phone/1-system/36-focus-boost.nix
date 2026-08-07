@@ -142,6 +142,7 @@ let
         RE_GONE = re.compile(r"^toplevel (\d+): destroyed")
 
         app_ids = {}
+        active = set()
         boosted = None
 
 
@@ -228,7 +229,7 @@ let
                     ["/run/wrappers/bin/sudo", "-n", "${systemFreeze}", verb, unit],
                     capture_output=True, timeout=5,
                 )
-            print(verb + "d background units", flush=True)
+            print(verb + " background units", flush=True)
 
 
         def focus(unit):
@@ -283,11 +284,21 @@ let
             m = RE_ACTIVE.match(line)
             if m:
                 if m.group(2) == "1":
+                    active.add(m.group(1))
                     focus(find_unit(app_ids.get(m.group(1))))
+                else:
+                    active.discard(m.group(1))
+                    # Nothing focused means nothing to protect, and leaving the
+                    # suspended units frozen would stop them for good.
+                    if not active:
+                        focus(None)
                 continue
             m = RE_GONE.match(line)
             if m:
                 app_ids.pop(m.group(1), None)
+                active.discard(m.group(1))
+                if not active:
+                    focus(None)
 
         cleanup()
     '';
