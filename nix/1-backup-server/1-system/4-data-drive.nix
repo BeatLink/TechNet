@@ -2,9 +2,8 @@
 #
 # Configures settings for mounting the Data Drive for backups
 #
-# The mount itself comes from the shared module in 0-common, and this host now
-# uses the fleet-wide defaults for it: /Storage is beatlink's, like everywhere
-# else.
+# The mount itself comes from the shared module in 0-common: /Storage is
+# beatlink's, like everywhere else.
 #
 # Ownership is scoped to the borg tree instead. /Storage itself used to be
 # borg:borg 0770 reset recursively, which meant nothing but borg could put
@@ -25,8 +24,6 @@
 #
 
 {
-    technet.dataDrive.enable = true;
-
     # Queue depths, in the same spirit as Heimdall's
     # 2-server/1-system/3-filesystem.nix but not the same numbers, because the
     # drive is a worse one in a specific way.
