@@ -1,15 +1,9 @@
 # Focus boost
 #
-# Raises the resource limits of whichever application currently has focus, and
-# puts them back when focus moves on. Off by default; Thor turns it on.
-#
-# The point is not CPU. phosh already runs at Nice -5 and CPUWeight 1000, and
-# the things that compete with it are quota'd. The point is `MemoryLow`, for the
-# reason 5-phone/1-system/18-performance.nix already gives about phosh: a
-# high-priority process waits on a page fault exactly as long as a low-priority
-# one, so priority cannot touch a stall caused by reclaim, and only a memory
-# floor can. IOWeight matters here too -- Thor's SD card saturates at 23.9MB/s
-# measured, which is a queue worth having a share of.
+# Raises the focused application's CPU, IO, memory and scheduler priority, puts
+# them back when focus moves on, and freezes the units in `suspendUnits` for as
+# long as any application is focused. Thor only -- it is a response to 2972MB of
+# RAM and four 1.15GHz cores.
 #
 # Nothing in the session knows which application is focused, so this bridges the
 # two halves that do:
@@ -45,13 +39,42 @@
 # no match means no boost, never a boost applied to the wrong unit.
 #
 {
-    config,
     lib,
     pkgs,
     ...
 }:
 let
-    cfg = config.technet.desktop.focusBoost;
+    cfg = {
+        # 500 rather than a modest 2x edge: nothing on this phone is reclaiming,
+        # so MemoryLow is inert and CPUWeight is the only part doing work.
+        cpuWeight = 500;
+        ioWeight = 200;
+        # Stays behind phosh's -5 so the compositor outranks what draws into it.
+        nice = -3;
+        memoryLow = "384M";
+        # Syncthing resumes mid-transfer, so a long foreground session delays a
+        # sync rather than corrupting one.
+        suspendUnits = [ "syncthing.service" ];
+        # Reached through the sudo helper below, not the session's own systemctl.
+        suspendSystemUnits = [ "prewarm-watch.service" ];
+    };
+
+    # Takes only freeze|thaw and refuses any unit outside the list, so the
+    # NOPASSWD grant cannot be widened by argument.
+    systemFreeze = pkgs.writeShellScript "technet-focus-boost-system-freeze" ''
+        verb="$1"
+        unit="$2"
+        case "$verb" in
+            freeze|thaw) ;;
+            *) exit 1 ;;
+        esac
+        for allowed in ${lib.escapeShellArgs cfg.suspendSystemUnits}; do
+            if [ "$unit" = "$allowed" ]; then
+                exec ${pkgs.systemd}/bin/systemctl "$verb" "$unit"
+            fi
+        done
+        exit 1
+    '';
 
     # lswt binds whichever toplevel protocol the compositor offers, and when
     # both are present the newer one wins unconditionally:
@@ -106,6 +129,11 @@ let
         # unit exiting.
         RESET = {"CPUWeight": "100", "IOWeight": "100", "MemoryLow": "0"}
 
+        NICE = ${toString cfg.nice}
+
+        SUSPEND = ${builtins.toJSON cfg.suspendUnits}
+        SUSPEND_SYSTEM = ${builtins.toJSON cfg.suspendSystemUnits}
+
         # systemd escapes "-" in unit names; ":" and "." are passed through.
         ESCAPED_DASH = chr(92) + "x2d"
 
@@ -155,16 +183,68 @@ let
             )
 
 
+        def unit_pids(unit):
+            try:
+                out = subprocess.run(
+                    ["systemctl", "--user", "show", "-p", "ControlGroup",
+                     "--value", unit],
+                    capture_output=True, text=True, timeout=5,
+                )
+                path = out.stdout.strip()
+            except Exception:
+                return []
+            if not path:
+                return []
+            root = "/sys/fs/cgroup" + path
+            pids = []
+            # A slice keeps its processes in child cgroups, not its own cgroup.procs.
+            for dirpath, _, _ in os.walk(root):
+                try:
+                    with open(os.path.join(dirpath, "cgroup.procs")) as f:
+                        pids += [int(line) for line in f if line.strip()]
+                except OSError:
+                    continue
+            return pids
+
+
+        def renice(unit, value):
+            for pid in unit_pids(unit):
+                try:
+                    os.setpriority(os.PRIO_PROCESS, pid, value)
+                except OSError:
+                    # Exited between listing the cgroup and setting priority.
+                    pass
+
+
+        def freeze(frozen):
+            verb = "freeze" if frozen else "thaw"
+            for unit in SUSPEND:
+                subprocess.run(
+                    ["systemctl", "--user", verb, unit],
+                    capture_output=True, timeout=5,
+                )
+            for unit in SUSPEND_SYSTEM:
+                subprocess.run(
+                    ["/run/wrappers/bin/sudo", "-n", "${systemFreeze}", verb, unit],
+                    capture_output=True, timeout=5,
+                )
+            print(verb + "d background units", flush=True)
+
+
         def focus(unit):
             global boosted
             if unit == boosted:
                 return
             if boosted is not None:
                 apply(boosted, RESET)
+                renice(boosted, 0)
             boosted = unit
             if boosted is not None:
                 apply(boosted, BOOST)
+                renice(boosted, NICE)
                 print("boosted " + boosted, flush=True)
+            if SUSPEND or SUSPEND_SYSTEM:
+                freeze(boosted is not None)
 
 
         def cleanup(*_):
@@ -213,44 +293,21 @@ let
     '';
 in
 {
-    options.technet.desktop.focusBoost = {
-        enable = lib.mkEnableOption ''
-            raising the focused application's cgroup limits.
+    config = {
+        # systemd gates FreezeUnit on root and does not route it through polkit,
+        # so a sudo rule is the only way to reach it from the session.
+        security.sudo.extraRules = [
+            {
+                users = [ "beatlink" ];
+                commands = [
+                    {
+                        command = "${systemFreeze}";
+                        options = [ "NOPASSWD" ];
+                    }
+                ];
+            }
+        ];
 
-            Worth having on a memory-constrained host and pointless on one with
-            RAM to spare, so it is opt-in per host rather than on for everything
-            that imports the desktop layer
-        '';
-
-        cpuWeight = lib.mkOption {
-            type = lib.types.ints.between 1 10000;
-            default = 200;
-            description = ''
-                CPUWeight for the focused application, against a default of 100.
-                Deliberately modest: the compositor sits at 1000 and should stay
-                ahead of the application drawing into it.
-            '';
-        };
-
-        ioWeight = lib.mkOption {
-            type = lib.types.ints.between 1 10000;
-            default = 200;
-            description = "IOWeight for the focused application, against a default of 100.";
-        };
-
-        memoryLow = lib.mkOption {
-            type = lib.types.str;
-            default = "384M";
-            description = ''
-                Memory the kernel should avoid reclaiming from the focused
-                application. Best-effort rather than a reservation -- MemoryLow,
-                not MemoryMin -- so setting it higher than the host can satisfy
-                degrades rather than trading a freeze for an OOM kill.
-            '';
-        };
-    };
-
-    config = lib.mkIf cfg.enable {
         home-manager.users.beatlink = {
             systemd.user.services.technet-focus-boost = {
                 Unit = {
@@ -261,6 +318,15 @@ in
 
                 Service = {
                     ExecStart = "${boostd}/bin/technet-focus-boostd";
+                    # Without this a SIGKILL leaves the units frozen forever.
+                    ExecStopPost = pkgs.writeShellScript "technet-focus-boost-thaw" ''
+                        for unit in ${lib.escapeShellArgs cfg.suspendUnits}; do
+                            ${pkgs.systemd}/bin/systemctl --user thaw "$unit" || true
+                        done
+                        for unit in ${lib.escapeShellArgs cfg.suspendSystemUnits}; do
+                            /run/wrappers/bin/sudo -n ${systemFreeze} thaw "$unit" || true
+                        done
+                    '';
                     Restart = "on-failure";
                     # The compositor may not have a socket up the instant the
                     # target is reached, and the daemon exits rather than
@@ -270,6 +336,9 @@ in
                     # reason anything else waits.
                     Nice = 5;
                     CPUWeight = 20;
+                    # Renicing the focused app below 0 needs this raised; without
+                    # it the boost silently does nothing but the weights.
+                    LimitNICE = 20 - cfg.nice;
                 };
 
                 Install.WantedBy = [ "graphical-session.target" ];
