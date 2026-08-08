@@ -1,6 +1,5 @@
 {
     imports = [
-        ./comms
         ./system
         ./technet
     ];
