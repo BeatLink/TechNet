@@ -1,20 +1,10 @@
-# sops writes a plaintext copy alongside the encrypted file while an editor is
-# open on it, and leaves it behind if the editor or sops dies. The name is
-# literal, not a glob of the pattern below -- .decrypted~<file>.
-#
-# Nothing in this repository should ever contain a plaintext credential, and an
-# untracked file is one `git add -A` away from being committed, so these are
-# ignored rather than relied upon to be cleaned up.
 .decrypted~*
 *.decrypted
 
-# Keys, in whatever form they arrive. None of these belong in the tree: private
-# halves live in sops, public halves are not secret and are written inline.
 *.key
 *.pem
 id_ed25519
 id_rsa
 
-# Build artefacts from `nix build` without --no-link.
 result
 result-*
