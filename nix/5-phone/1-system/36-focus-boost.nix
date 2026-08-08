@@ -57,6 +57,9 @@ let
         suspendUnits = [ "syncthing.service" ];
         # Reached through the sudo helper below, not the session's own systemctl.
         suspendSystemUnits = [ "prewarm-watch.service" ];
+        # Above the 11s an app took to cold-start here, or switching apps thaws
+        # and refreezes in the gap between the two.
+        thawDelay = 15;
     };
 
     # Takes only freeze|thaw and refuses any unit outside the list, so the
@@ -116,6 +119,7 @@ let
         import os
         import json
         import signal
+        import threading
 
         BOOST = {
             "CPUWeight": "${toString cfg.cpuWeight}",
@@ -133,6 +137,7 @@ let
 
         SUSPEND = ${builtins.toJSON cfg.suspendUnits}
         SUSPEND_SYSTEM = ${builtins.toJSON cfg.suspendSystemUnits}
+        THAW_DELAY = ${toString cfg.thawDelay}
 
         # systemd escapes "-" in unit names; ":" and "." are passed through.
         ESCAPED_DASH = chr(92) + "x2d"
@@ -144,6 +149,10 @@ let
         app_ids = {}
         active = set()
         boosted = None
+        frozen = False
+        thaw_timer = None
+        # Reentrant because the signal handler runs in the thread that may hold it.
+        freeze_lock = threading.RLock()
 
 
         def app_units():
@@ -217,8 +226,8 @@ let
                     pass
 
 
-        def freeze(frozen):
-            verb = "freeze" if frozen else "thaw"
+        def freeze(want):
+            verb = "freeze" if want else "thaw"
             for unit in SUSPEND:
                 subprocess.run(
                     ["systemctl", "--user", verb, unit],
@@ -230,6 +239,29 @@ let
                     capture_output=True, timeout=5,
                 )
             print(verb + " background units", flush=True)
+
+
+        def set_frozen(want, now=False):
+            global frozen, thaw_timer
+            if not (SUSPEND or SUSPEND_SYSTEM):
+                return
+            with freeze_lock:
+                if thaw_timer is not None:
+                    thaw_timer.cancel()
+                    thaw_timer = None
+                if want == frozen:
+                    return
+                if want or now:
+                    frozen = want
+                    freeze(want)
+                    return
+                # Thawing waits, so switching apps does not resume the background
+                # units for the seconds the next one takes to appear.
+                thaw_timer = threading.Timer(
+                    THAW_DELAY, lambda: set_frozen(False, True)
+                )
+                thaw_timer.daemon = True
+                thaw_timer.start()
 
 
         def focus(unit):
@@ -244,12 +276,12 @@ let
                 apply(boosted, BOOST)
                 renice(boosted, NICE)
                 print("boosted " + boosted, flush=True)
-            if SUSPEND or SUSPEND_SYSTEM:
-                freeze(boosted is not None)
+            set_frozen(boosted is not None)
 
 
         def cleanup(*_):
             focus(None)
+            set_frozen(False, True)
             sys.exit(0)
 
 
