@@ -25,23 +25,23 @@ Smart Watch, Bio-Monitor and TechNet Remote Control
 ## Apps
 
 - Timer Apps
-- Clock
-- Alarm Clock
-- Stopwatch
-- Countdown Timer
+  - Clock
+  - Alarm Clock
+  - Stopwatch
+  - Countdown Timer
 - Phone Integration
-- GPS Navigation
-- Media Controller
-- Notification Bridge
+  - GPS Navigation
+  - Media Controller
+  - Notification Bridge
 - Health Apps
-- Heart Rate Monitor
-- Step Counter w/ Goal
-- Sleep Tracker
+  - Heart Rate Monitor
+  - Step Counter w/ Goal
+  - Sleep Tracker
 - Tools
-- Flash Light
-- Metronome
-- Accelerometer
+  - Flashlight
+  - Metronome
+  - Accelerometer
 - Games
-- Paint
-- Ping Pong
-- 2048
+  - Paint
+  - Ping Pong
+  - 2048
