@@ -81,13 +81,15 @@ WireGuard address then the LAN one. Thor overrides this to its USB link address.
 
 ## nixtool
 
-`nixtool` is installed by
-[`6-nixtool.nix`](../nix/0-common/1-system/5-software/6-nixtool.nix) and
-configured by [`20-nixtool.nix`](../nix/3-laptop/1-system/20-nixtool.nix), which
+The module is imported for every host by
+[`5-software.nix`](../nix/0-common/1-system/5-software.nix), but only Odin
+enables it, in [`20-nixtool.nix`](../nix/3-laptop/1-system/20-nixtool.nix), which
 renders `/etc/nixtool/nixtool-config.json`. Installer credentials are named as
 sops paths rather than values, so nothing sensitive reaches the Nix store.
 
-See the [main README](../README.md#rebuilding) for the commands.
+Every host is deployed from here. Its own command is under *Deploying to Odin*
+above; the others are in [Heimdall](heimdall.md), [Ragnarok](ragnarok.md) and
+[Thor](thor.md).
 
 ## Cross-architecture builds
 

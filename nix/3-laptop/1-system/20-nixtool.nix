@@ -17,11 +17,11 @@
             owner = "beatlink";
             sopsFile = "${config.technet.secrets.path}/nixtool.yaml";
 
+            # No SSH_PASSWORD: it belongs to install-nixos, and Thor cannot kexec, so it installs locally
             hostValueSecrets.Thor = {
                 ENCRYPTION_KEY = "thor_encryption_key";
                 SSH_HOST_KEY = "thor_ssh_host_key";
                 SSH_INITRD_KEY = "thor_ssh_initrd_key";
-                SSH_PASSWORD = "thor_ssh_password";
             };
         };
     };
