@@ -60,6 +60,7 @@ let
     };
 
     allPeers = lib.attrNames devices;
+    exceptThor = lib.subtractLists [ "Thor" ] allPeers;
 
     # Merged into every folder's patterns; (?d) lets peers delete what they already hold
     commonIgnorePatterns = [
@@ -74,6 +75,7 @@ let
     folders = {
         Documents = { };
         Downloads = {
+            devices = exceptThor;
             ignorePatterns = [
                 "(?d)*.!qB"
                 "(?d)*.parts"
@@ -97,7 +99,9 @@ let
                 "Odin"
             ];
         };
-        Sounds = { };
+        Sounds = {
+            devices = exceptThor;
+        };
         Videos = { };
     };
     folderIds = {
@@ -185,6 +189,7 @@ in
                     ignorePatterns = commonIgnorePatterns ++ (folder.ignorePatterns or [ ]);
                 }
             )
-        ) folders;
+            # Load-bearing: without it a host configures folders it is not a member of and scans them for nothing.
+        ) (lib.filterAttrs (_: folder: builtins.elem cfg.self (folder.devices or allPeers)) folders);
     };
 }
