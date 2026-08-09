@@ -68,7 +68,6 @@
     # concurrency rather than pushing these lower.
     boot.extraModprobeConfig = ''
         options zfs zfs_arc_max=1610612736
-
         options zfs zfs_vdev_max_active=4
         options zfs zfs_vdev_async_write_max_active=2
         options zfs zfs_vdev_async_read_max_active=2
