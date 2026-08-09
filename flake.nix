@@ -23,6 +23,7 @@
         };
         impermanence = {
             url = "github:nix-community/impermanence";
+            inputs.nixpkgs.follows = "nixpkgs";
         };
         arion = {
             url = "github:hercules-ci/arion";
@@ -30,6 +31,7 @@
         };
         blockurl = {
             url = "github:BeatLink/BlockURL?dir=sync-server";
+            inputs.nixpkgs.follows = "nixpkgs";
         };
         home-manager = {
             url = "github:nix-community/home-manager";
@@ -37,6 +39,7 @@
         };
         xdg-autostart = {
             url = "github:Zocker1999NET/home-manager-xdg-autostart";
+            inputs.nixpkgs.follows = "nixpkgs";
         };
         gmusicbrowser = {
             url = "github:BeatLink/gmusicbrowser-nix-flake";
@@ -47,6 +50,7 @@
         };
         vantage = {
             url = "github:nabilksabu/vantage-nix";
+            inputs.nixpkgs.follows = "nixpkgs";
         };
         # Source only: the branch behind PR #2 packages itself, but its derivation
         # omits tkinter and crashes on launch, so nix/3-laptop builds its own.
@@ -56,9 +60,11 @@
         };
         app-separators = {
             url = "github:/BeatLink/Plank-Separator";
+            inputs.nixpkgs.follows = "nixpkgs";
         };
         claude-code = {
             url = "github:sadjow/claude-code-nix";
+            inputs.nixpkgs.follows = "nixpkgs";
         };
         calibre-web-automated = {
             url = "github:BeatLink/Calibre-Web-Automated/nix-packing-final";
