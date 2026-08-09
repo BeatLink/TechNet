@@ -6,6 +6,7 @@
         ./context.nix
         ./dconf-editor.nix
         ./gparted.nix
+        ./lenovo-control-center.nix
         ./mission-center.nix
         ./vantage.nix
         ./variety.nix
