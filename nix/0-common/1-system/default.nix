@@ -12,6 +12,5 @@
         ./7-security
         ./8-locale.nix
         ./9-secrets.nix
-        ./10-binary-caches.nix
     ];
 }

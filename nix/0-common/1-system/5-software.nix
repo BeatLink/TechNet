@@ -11,8 +11,10 @@
     imports = [ inputs.nixtool.nixosModules.default ];
 
     # Enable Flakes ##############################################################################################################################
+    # Owned, not root-only: flake fetching runs as the user, and `!include` swallows the permission error
     sops.secrets.github_access_token_conf = {
         sopsFile = "${config.technet.secrets.commonPath}/github.yaml";
+        owner = "beatlink";
     };
 
     nix = {
