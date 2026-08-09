@@ -227,6 +227,9 @@
         MemoryLow = "512M";
     };
 
+    # High, not Max: Max OOM-kills the app instead of pushing it to zram
+    systemd.user.slices.app.sliceConfig.MemoryHigh = "1800M";
+
     # GTK4 draws through software Vulkan on this phone unless told otherwise,
     # and cairo is four times faster.
     #
