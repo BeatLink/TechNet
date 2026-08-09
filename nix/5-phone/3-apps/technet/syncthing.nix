@@ -45,19 +45,7 @@
         openFirewall = true;
     };
 
-    syncthing-mesh = {
-        self = "Thor";
-
-        # Scheduled scans rather than continuous, and one worker each. This is
-        # four slow cores on an SD card, and the phone has other things to do.
-        folderOptions = {
-            rescanIntervalS = 86400;
-            fsWatcherEnabled = true;
-            fsWatcherDelayS = 60;
-            hashers = 1;
-            copiers = 1;
-        };
-    };
+    syncthing-mesh.self = "Thor";
 
     home-manager.users.beatlink = {
         services.syncthing = {
@@ -71,63 +59,17 @@
             };
             overrideDevices = true;
             overrideFolders = true;
-
-            # Turned down as far as it goes. Syncing here is explicitly allowed
-            # to take the scenic route; the phone being responsive is worth more
-            # than files arriving promptly.
-            #
-            # maxFolderConcurrency is the one that mattered most. Without it
-            # Syncthing hashes every folder it has work for at once -- eight of
-            # them here, on four 1.15GHz cores, which is what pinned the CPU.
+            # Stated as defaults rather than dropped: the module PATCHes /rest/config/options, so an omitted key keeps whatever is already on disk.
             settings = lib.recursiveUpdate config.syncthing-mesh.settings {
                 options = {
-                    # One folder at a time, and one request in flight.
-                    maxFolderConcurrency = 1;
-                    maxConcurrentIncomingRequestKiB = 2048;
-
-                    # Bounds how much a single folder can queue up before it has
-                    # to finish writing, which is what turns a burst of pulls
-                    # into a steady trickle on a card that hates bursts.
-                    pullerMaxPendingKiB = 2048;
-
-                    # Rate limits, applied to the LAN as well -- without
-                    # limitBandwidthInLan the caps are ignored between local
-                    # peers, which is every peer that matters here. 2MB/s is
-                    # well under what the card sustains, so the transfer itself
-                    # stops being the thing competing for IO.
-                    maxSendKbps = 2048;
-                    maxRecvKbps = 2048;
-                    limitBandwidthInLan = true;
-
-                    progressUpdateIntervalS = 60;
+                    maxFolderConcurrency = 0;
+                    maxConcurrentIncomingRequestKiB = 0;
+                    maxSendKbps = 0;
+                    maxRecvKbps = 0;
+                    limitBandwidthInLan = false;
+                    progressUpdateIntervalS = 5;
                 };
             };
-        };
-
-        # Heimdall runs at Nice 10 and Ragnarok at 15; this is a phone with a
-        # user looking at it, so it goes further. Syncing is never the thing in
-        # front of you.
-        #
-        # A user unit rather than a system one, which is why the servers'
-        # systemd.services.syncthing block does not apply here.
-        #
-        # CPUQuota is the one that actually bounds it. Nice and CPUWeight only
-        # decide who wins a contest for the CPU -- with three cores otherwise
-        # idle, a Nice 19 process still takes all three, which is exactly what
-        # happened: syncthing sat at 97% while niced to 19. A quota is an
-        # absolute ceiling whether or not anything else wants the time.
-        #
-        # 25% is one core's worth of four. Hashing the initial index will take
-        # correspondingly longer, which is the trade being made deliberately.
-        #
-        # Checked before relying on it: the user slice has `cpu io memory pids`
-        # delegated, so these apply rather than being silently ignored.
-        systemd.user.services.syncthing.Service = {
-            CPUQuota = "25%";
-            Nice = 19;
-            IOSchedulingClass = "idle";
-            CPUWeight = 20;
-            IOWeight = 20;
         };
 
         home.persistence."/Storage/Apps/TechNet/SyncThing" = {
