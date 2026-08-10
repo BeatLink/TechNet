@@ -20,19 +20,8 @@
 
         # Profiles -----------------------------------------------------------------------------------------------------------------------------------
         profiles = {
-            epiphany.dirs = [
-                "/home/beatlink/.local/share/epiphany"
-                "/home/beatlink/.config/epiphany"
-                "/home/beatlink/.cache/epiphany"
-            ];
-
             weblaunch.dirs = [
                 "/home/beatlink/.local/share/weblaunch"
-            ];
-
-            firefox.dirs = [
-                "/home/beatlink/.mozilla/firefox"
-                "/home/beatlink/.config/mozilla/firefox"
             ];
         };
     };
