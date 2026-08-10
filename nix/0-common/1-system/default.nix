@@ -11,5 +11,7 @@
         ./7-networking
         ./8-security
         ./9-locale.nix
+        ./10-graphics
+        ./11-dconf.nix
     ];
 }

@@ -1,8 +1,6 @@
-# Waypipe -- runs a Wayland application on another host and shows it here.
+# Waypipe ############################################################################################################################################
 #
-# Both ends need the package, and the key exchange only reads correctly as a
-# pair: each host authorises the other's dedicated key and holds its own half
-# from sops. Apps are declared in technet.waypipe.apps and get a launcher each.
+# Runs a Wayland application on another host and shows it here; each end authorises the other's key and holds its own half from sops.
 #
 {
     config,
@@ -101,6 +99,8 @@ let
 in
 {
     options.technet.waypipe = {
+        enable = lib.mkEnableOption "waypipe remote application launchers"; # Off by default because sops needs a waypipe.yaml under the host's secrets directory
+
         flags = lib.mkOption {
             type = lib.types.listOf lib.types.str;
             # Measured on Odin->Thor: DMABUF costs 3x the CPU for fewer frames, and zstd beats lz4 because sshd is the scarcer resource
@@ -119,7 +119,7 @@ in
         };
     };
 
-    config = {
+    config = lib.mkIf cfg.enable {
         home-manager.users.beatlink.home.packages =
             [ pkgs.waypipe ]
             ++ lib.flatten (lib.mapAttrsToList (key: app: [ (launcher key app) (desktopItem key app) ]) cfg.apps);
