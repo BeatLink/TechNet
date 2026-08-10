@@ -257,7 +257,8 @@ lid-close-battery-action='suspend'
 lock-on-suspend=true
 sleep-display-ac=1800
 sleep-display-battery=600
-sleep-inactive-ac-timeout=3600
+sleep-inactive-ac-timeout=0
+sleep-inactive-ac-type='nothing'
 sleep-inactive-battery-timeout=1800
 
 [settings-daemon/plugins/xsettings]

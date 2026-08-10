@@ -1,7 +1,7 @@
 # Helper Scripts
 #
-# Small scripts that back the waybar modules and hot corners. They are exposed through pkgs by the overlay below
-# so that every module referring to them resolves to the same store path.
+# Small scripts shared by the modules in this directory. They are exposed through pkgs by the overlay below so
+# that every module referring to them resolves to the same store path.
 #
 # The overlay for the overview and show desktop scripts lives in ./overview.nix, next to the module that
 # documents why they exist.
@@ -11,6 +11,21 @@
 {
     nixpkgs.overlays = [
         (final: prev: {
+            # Succeeds when the machine is running off a wall socket rather than the battery.
+            hypr-on-mains = final.writeShellApplication {
+                name = "hypr-on-mains";
+                runtimeInputs = with final; [ coreutils ];
+                text = ''
+                    for supply in /sys/class/power_supply/*; do
+                        if [ "$(cat "$supply/type" 2>/dev/null)" = "Mains" ] &&
+                           [ "$(cat "$supply/online" 2>/dev/null)" = "1" ]; then
+                            exit 0
+                        fi
+                    done
+                    exit 1
+                '';
+            };
+
             # Replaces the weather@mockturtl applet in the Cinnamon panel. That applet was configured to use the
             # OpenMeteo provider at 18.0028,-76.7897 with automatic units, so the same provider and coordinates
             # are used here. OpenMeteo needs no API key, which is why the applet defaulted to it.

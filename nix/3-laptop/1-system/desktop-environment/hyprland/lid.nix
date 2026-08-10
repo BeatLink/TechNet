@@ -20,6 +20,7 @@
                 name = "hypr-lid";
                 runtimeInputs = with final; [
                     hyprland
+                    hypr-on-mains
                     jq
                     systemd
                     coreutils
@@ -33,23 +34,13 @@
 
                     externals=$(hyprctl -j monitors | jq --arg internal "$internal" '[.[] | select(.name != $internal)] | length')
 
-                    on_mains() {
-                        for supply in /sys/class/power_supply/*; do
-                            if [ "$(cat "$supply/type" 2>/dev/null)" = "Mains" ] &&
-                               [ "$(cat "$supply/online" 2>/dev/null)" = "1" ]; then
-                                return 0
-                            fi
-                        done
-                        return 1
-                    }
-
                     case "''${1:-}" in
                         close)
                             if [ "$externals" -gt 0 ]; then
                                 # Disabling the last monitor leaves Hyprland with nowhere to draw, so this
                                 # branch is only safe while something else is attached.
                                 hyprctl keyword monitor "$internal, disable"
-                            elif on_mains; then
+                            elif hypr-on-mains; then
                                 loginctl lock-session
                                 hyprctl dispatch dpms off
                             else
