@@ -86,10 +86,6 @@
             url = "path:/Storage/Files/Projects/Coding/Context";
             inputs.nixpkgs.follows = "nixpkgs";
         };
-        weblaunch = {
-            url = "path:/Storage/Files/Projects/Coding/WebLaunch";
-            inputs.nixpkgs.follows = "nixpkgs";
-        };
         nixtool = {
             url = "github:BeatLink/NixTool";
             inputs.nixpkgs.follows = "nixpkgs";

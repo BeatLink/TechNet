@@ -1,8 +1,8 @@
-# Firefox on Odin, displayed here over waypipe, on Odin's own Personal profile.
+# Firefox on Odin, displayed here over waypipe, on a copy of Odin's Personal
+# profile, so the two run at once.
 #
-# Odin's Firefox has to be closed first -- one profile cannot be open in two
-# processes, and --new-instance turns that into a dialog here rather than a
-# window that silently opens on the laptop instead.
+# Passed by path rather than -P: a directory absent from profiles.ini gets no
+# toolkit profile entry, and so no "account already in use" refusal from Sync.
 #
 {
     technet.waypipe.apps.firefox-odin = {
@@ -16,8 +16,8 @@
 
         command = [
             "firefox"
-            "-P"
-            "Personal"
+            "--profile"
+            "/home/beatlink/.config/mozilla/firefox-waypipe/Personal-Thor"
             "--new-instance"
         ];
 
