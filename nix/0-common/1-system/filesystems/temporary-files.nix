@@ -1,11 +1,14 @@
 # Temporary File Cleanup #############################################################################################################################
 #
-# Puts /tmp on tmpfs so it empties at every boot, and ages out /var/tmp on a daily timer.
+# Puts /tmp on a capped tmpfs so it empties at every boot, and prunes both temporary directories hourly.
 #
 
-{ ... }:
+{ lib, ... }:
 {
-    boot.tmp.useTmpfs = true; # Sized at half of RAM by default, so a build needing more than that must set TMPDIR elsewhere
+    boot.tmp = {
+        useTmpfs = true;
+        tmpfsSize = lib.mkDefault "25%"; # A share of RAM rather than a fixed size, because the same value has to suit both the laptop and the phone
+    };
 
     # The q rules only set the ages; the timer is what actually walks them, so neither does anything useful without the other.
     systemd.tmpfiles.settings."Cleanup" = {
@@ -40,7 +43,7 @@
     systemd.timers."systemd-tmpfiles-clean" = {
         wantedBy = [ "timers.target" ];
         timerConfig = {
-            OnCalendar = "daily";
+            OnCalendar = "hourly"; # Hourly rather than daily, because /tmp now spends RAM and filling it is fatal rather than merely untidy
             Persistent = true;
         };
     };
