@@ -2,7 +2,7 @@
     imports = [
         ./uefi.nix
         ./boot-loader.nix
-        ./silent-boot.nix
+        ./boot-splash.nix
         ./firmware.nix
     ];
 }
