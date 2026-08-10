@@ -1,7 +1,14 @@
+# Tang ###############################################################################################################################################
+#
+# The tang key server Odin hosts, tied to the desktop session lock so keys are only served while the session is unlocked.
+#
+
 { config, lib, pkgs, ... }:
 let
-    cfg = config.technet.tang;
+    tangCfg = config.technet.tang;
 
+    # Session Gate -----------------------------------------------------------------------------------------------------------------------------------
+    # Starts and stops tangd.socket in step with the screensaver, and fails closed whenever the screensaver cannot be reached.
     gate = pkgs.writeShellScript "tang-session-gate" ''
         set -u
 
@@ -24,9 +31,9 @@ let
         }
 
         active="$($GDBUS call --session \
-            --dest ${cfg.server.screensaver.dbusName} \
-            --object-path ${cfg.server.screensaver.objectPath} \
-            --method ${cfg.server.screensaver.dbusName}.GetActive 2>/dev/null)"
+            --dest ${tangCfg.server.screensaver.dbusName} \
+            --object-path ${tangCfg.server.screensaver.objectPath} \
+            --method ${tangCfg.server.screensaver.dbusName}.GetActive 2>/dev/null)"
         case "$active" in
             *true*)  apply true ;;
             *false*) apply false ;;
@@ -34,8 +41,8 @@ let
         esac
 
         $GDBUS monitor --session \
-            --dest ${cfg.server.screensaver.dbusName} \
-            --object-path ${cfg.server.screensaver.objectPath} 2>/dev/null |
+            --dest ${tangCfg.server.screensaver.dbusName} \
+            --object-path ${tangCfg.server.screensaver.objectPath} 2>/dev/null |
         while read -r line; do
             case "$line" in
                 *ActiveChanged*true*)  apply true ;;
@@ -49,6 +56,7 @@ let
     '';
 in
 {
+    # Options ########################################################################################################################################
     options.technet.tang = {
         port = lib.mkOption {
             type = lib.types.port;
@@ -133,24 +141,29 @@ in
     };
 
     config = lib.mkMerge [
+
+        # URLs #######################################################################################################################################
+        # Derived on every host, not just the server, because the clevis JWEs on the others are bound to these addresses.
         {
-            technet.tang.urls = map (addr: "http://${addr}:${toString cfg.port}") cfg.addresses;
+            technet.tang.urls = map (addr: "http://${addr}:${toString tangCfg.port}") tangCfg.addresses;
         }
 
-        (lib.mkIf cfg.server.enable {
+
+        # Server #####################################################################################################################################
+        (lib.mkIf tangCfg.server.enable {
             services.tang = {
                 enable = true;
                 ipAddressAllow = [
                     "10.100.100.0/24"
                     "192.168.0.0/24"
                 ];
-                listenStream = [ "0.0.0.0:${toString cfg.port}" ];
+                listenStream = [ "0.0.0.0:${toString tangCfg.port}" ];
             };
 
-            networking.firewall.allowedTCPPorts = [ cfg.port ];
+            networking.firewall.allowedTCPPorts = [ tangCfg.port ];
 
-            environment.persistence = lib.mkIf (cfg.server.persistenceRoot != null) {
-                ${cfg.server.persistenceRoot} = {
+            environment.persistence = lib.mkIf (tangCfg.server.persistenceRoot != null) {
+                ${tangCfg.server.persistenceRoot} = {
                     directories = [
                         {
                             directory = "/var/lib/private/tang";
@@ -161,8 +174,8 @@ in
             };
 
             systemd.sockets.tangd = {
-                wantedBy = lib.mkForce [ ];
-                unitConfig = lib.mkIf (cfg.server.persistenceRoot != null) {
+                wantedBy = lib.mkForce [ ]; # Started by the session gate alone, never by a boot target
+                unitConfig = lib.mkIf (tangCfg.server.persistenceRoot != null) {
                     RequiresMountsFor = "/var/lib/private/tang";
                 };
             };
@@ -170,27 +183,27 @@ in
             systemd.services."tangd@".unitConfig = {
                 ConditionDirectoryNotEmpty = "/var/lib/private/tang";
             }
-            // lib.optionalAttrs (cfg.server.persistenceRoot != null) {
+            // lib.optionalAttrs (tangCfg.server.persistenceRoot != null) {
                 RequiresMountsFor = "/var/lib/private/tang";
             };
 
-            sops.secrets = lib.mkIf (cfg.server.sopsFile != null) (
+            sops.secrets = lib.mkIf (tangCfg.server.sopsFile != null) (
                 lib.listToAttrs (
                     map (i: {
                         name = "tang_key_${toString i}";
                         value = {
-                            sopsFile = cfg.server.sopsFile;
+                            sopsFile = tangCfg.server.sopsFile;
                             mode = "0400";
                         };
-                    }) (lib.range 1 cfg.server.keyCount)
+                    }) (lib.range 1 tangCfg.server.keyCount)
                 )
             );
 
-            systemd.services.tang-install-keys = lib.mkIf (cfg.server.sopsFile != null) {
+            systemd.services.tang-install-keys = lib.mkIf (tangCfg.server.sopsFile != null) {
                 description = "Install tang keys from sops into the tang state directory";
                 wantedBy = [ "multi-user.target" ];
-                after = lib.optional (cfg.server.persistenceRoot != null) "var-lib-private-tang.mount";
-                unitConfig = lib.mkIf (cfg.server.persistenceRoot != null) {
+                after = lib.optional (tangCfg.server.persistenceRoot != null) "var-lib-private-tang.mount";
+                unitConfig = lib.mkIf (tangCfg.server.persistenceRoot != null) {
                     RequiresMountsFor = "/var/lib/private/tang";
                 };
                 serviceConfig = {
@@ -216,7 +229,7 @@ in
                                 echo "tang-install-keys: installed $thumb.jwk"
                             fi
                         fi
-                    '') (lib.range 1 cfg.server.keyCount)}
+                    '') (lib.range 1 tangCfg.server.keyCount)}
 
                     chown -R nobody:nogroup "$dir" 2>/dev/null || true
                     chmod 0700 "$dir"
@@ -227,7 +240,7 @@ in
                 polkit.addRule(function(action, subject) {
                     if (action.id == "org.freedesktop.systemd1.manage-units" &&
                         action.lookup("unit") == "tangd.socket" &&
-                        subject.user == "${cfg.server.user}" &&
+                        subject.user == "${tangCfg.server.user}" &&
                         subject.local && subject.active) {
                         return polkit.Result.YES;
                     }

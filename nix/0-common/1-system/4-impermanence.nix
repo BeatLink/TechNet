@@ -19,9 +19,4 @@
             echo "Rollback Complete"
         '';
     };
-
-    # Persistence Subvolume Mounting #################################################################################################################
-    environment.persistence."/persistent" = {
-        hideMounts = true;
-    };
 }

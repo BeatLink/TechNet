@@ -12,7 +12,7 @@
 # so it would have meant giving up F-keys the hardware labels correctly.
 #
 # Odin is untouched: it has a normal keyboard and gets the plain `us` layout
-# from 0-common/1-system/8-locale.nix.
+# from 0-common/1-system/9-locale.nix.
 #
 { lib, ... }:
 {
