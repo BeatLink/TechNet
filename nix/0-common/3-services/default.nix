@@ -7,5 +7,6 @@
     imports = [
         ./ssh.nix
         ./syncthing.nix
+        ./vigil.nix
     ];
 }

@@ -11,6 +11,5 @@
     imports = [
         ./root.nix
         ./beatlink.nix
-        ./vigil.nix
     ];
  }
