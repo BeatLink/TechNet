@@ -10,6 +10,8 @@
         host = "odin-waypipe";
         icon = ./vscodium.png; # A copy, so the phone does not carry Electron in its closure for one PNG
         categories = [
+            "Utility"
+            "TextEditor"
             "Development"
             "IDE"
         ];

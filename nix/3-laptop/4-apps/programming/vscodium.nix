@@ -243,6 +243,10 @@
             };
 
             home = {
+                # Thor's waypipe instance runs on its own --user-data-dir, which VSCodium reads settings from instead; same store path, so the two never diverge
+                file."${config.xdg.configHome}/vscodium-waypipe/Thor/User/settings.json".source =
+                    config.home.file."${config.xdg.configHome}/VSCodium/User/settings.json".source;
+
                 packages = with pkgs; [
                     nixd
                     nixfmt
@@ -262,6 +266,8 @@
                 persistence."/Storage/Apps/Programming/VsCodium" = {
                     directories = [
                         ".config/VSCodium"
+                        # A second user-data root, beside the first rather than inside it, holding the instance Thor opens over waypipe
+                        ".config/vscodium-waypipe"
                         ".local/share/codium"
                         ".vscode-oss"
                         ".vscode-oss-shared"

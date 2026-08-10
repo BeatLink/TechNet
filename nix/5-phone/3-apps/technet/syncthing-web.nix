@@ -11,6 +11,11 @@
         title = "Syncthing Web UI";
         host = "odin-waypipe";
         icon = "${pkgs.syncthing}/share/icons/hicolor/scalable/apps/syncthing.svg";
+        categories = [
+            "Network"
+            "FileTransfer"
+            "P2P"
+        ];
 
         command = [
             "firefox"

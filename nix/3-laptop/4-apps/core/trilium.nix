@@ -11,7 +11,7 @@
                 persistence."/Storage/Apps/Core/Trilium" = {
                     directories = [
                         ".local/share/trilium-data"
-                        ".config/Trilium Notes"
+                        ".config/trilium-37840" # Electron userData; Trilium names it after its port, so TRILIUM_PORT changes this path
                     ];
 
                 };
