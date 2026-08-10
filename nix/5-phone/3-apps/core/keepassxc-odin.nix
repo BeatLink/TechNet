@@ -11,6 +11,7 @@
         categories = [
             "Utility"
             "Security"
+            "Qt"
         ];
 
         command = [
