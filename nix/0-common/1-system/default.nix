@@ -5,7 +5,7 @@
         ./hardware
         ./filesystems
         ./software
-        ./core.nix
+        ./core
         ./networking
         ./security
         ./locale
