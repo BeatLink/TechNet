@@ -25,7 +25,7 @@ logged out.
 
 ## Desktop environments
 
-[`18-desktop-environment/default.nix`](../nix/3-laptop/1-system/18-desktop-environment/default.nix)
+[`18-desktop-environment/default.nix`](../nix/3-laptop/1-system/desktop-environment/default.nix)
 selects which are built. Cinnamon and Hyprland can both be imported at once —
 LightDM lists Wayland sessions alongside X11 ones, so all of them appear at login
 and you switch by logging out.
@@ -69,7 +69,7 @@ desktop.
 ## Tang server
 
 Odin hosts the tang server that unlocks Heimdall, Ragnarok and Thor, configured
-in [`14-tang.nix`](../nix/3-laptop/1-system/14-tang.nix). It is **gated on an
+in [`tang.nix`](../nix/3-laptop/1-system/tang.nix). It is **gated on an
 unlocked desktop session**: `tangd.socket` stops when the screensaver locks.
 
 The consequence is network-wide — a host that reboots while Odin is locked or
@@ -82,7 +82,7 @@ WireGuard address then the LAN one. Thor overrides this to its USB link address.
 ## nixtool
 
 The module is imported for every host by
-[`5-software.nix`](../nix/0-common/1-system/5-software.nix), but only Odin
+[`software.nix`](../nix/0-common/1-system/software.nix), but only Odin
 enables it, in [`20-nixtool.nix`](../nix/3-laptop/1-system/20-nixtool.nix), which
 renders `/etc/nixtool/nixtool-config.json`. Installer credentials are named as
 sops paths rather than values, so nothing sensitive reaches the Nix store.

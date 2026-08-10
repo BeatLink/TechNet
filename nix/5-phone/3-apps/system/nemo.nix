@@ -12,7 +12,7 @@
 # window that renders in software is worse to use than a desktop-shaped one that
 # does not, and toolkit-comparison.nix is where that was measured.
 #
-# The bookmarks come from 0-common/4-apps/2-file-manager.nix and
+# The bookmarks come from 0-common/4-apps/system/file-manager.nix and
 # are not restated here. Both file managers read ~/.config/gtk-3.0/bookmarks, so
 # the sidebar is the same list of places as on Odin, including the sftp entries
 # back to the other machines.

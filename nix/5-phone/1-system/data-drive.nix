@@ -14,7 +14,7 @@
 # phone, and the card is removable.
 #
 # /Storage/Apps and /Storage/Files are not created here -- they are declared in
-# 0-common/1-system/4-folder-structure.nix alongside the XDG directories that
+# 0-common/1-system/folder-structure.nix alongside the XDG directories that
 # depend on them.
 #
 { }

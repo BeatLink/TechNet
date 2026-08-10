@@ -25,7 +25,7 @@
 
 {
     # Queue depths, in the same spirit as Heimdall's
-    # 2-server/1-system/3-filesystem.nix but not the same numbers, because the
+    # 2-server/1-system/filesystem.nix but not the same numbers, because the
     # drive is a worse one in a specific way.
     #
     # data-pool-Ragnarok is a single ST5000LM000 -- Seagate's 5TB 2.5", which is
@@ -41,7 +41,7 @@
     # quieter stretches to fold in: shallow async write depth rather than deep,
     # and txg_timeout raised so a batch is committed as one larger run instead of
     # five smaller ones. Same knob, and the same reasoning, as Thor's SD card in
-    # 5-phone/1-system/18-performance.nix.
+    # 5-phone/1-system/performance.nix.
     #
     # Heimdall's numbers are higher because its vdev is a two-disk CMR mirror:
     # more spindles to keep busy, and no fold-back penalty for asking.

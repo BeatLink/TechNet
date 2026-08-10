@@ -14,7 +14,7 @@
 # problem is not having any. The ARC is reclaimable in principle, but it gives
 # memory back more slowly than a burst of allocation takes it, so the headroom
 # has to exist up front -- the same finding as Ragnarok's
-# 1-backup-server/1-system/9-remote-builder.nix, which caps it for the same
+# 1-backup-server/1-system/remote-builder.nix, which caps it for the same
 # reason on a smaller board.
 #
 # 1.5GB, which is what ZFS would pick on its own at half of RAM. The 512MB this
@@ -44,7 +44,7 @@
     # size 516MB, available up from 429MB to 1756MB.
     #
     # Queue depths, in the same spirit as Heimdall's
-    # 2-server/1-system/3-filesystem.nix but not the same numbers, because the
+    # 2-server/1-system/filesystem.nix but not the same numbers, because the
     # two are slow for different reasons. Heimdall's pool is a spinning mirror
     # and its 32 is about not drowning the disk in seeks. An SD card has no
     # seeks; what it has is almost no parallelism and painful write

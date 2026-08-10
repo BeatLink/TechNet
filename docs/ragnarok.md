@@ -139,15 +139,15 @@ dd if=shared.disk-image.img of=/dev/XXX bs=1M oflag=direct,sync status=progress
 
 ## Backups
 
-Borg is configured in [`7-borg.nix`](../nix/1-backup-server/1-system/7-borg.nix),
+Borg is configured in [`borg.nix`](../nix/1-backup-server/1-system/borg.nix),
 with the repository living on the data drive from
-[`4-data-drive.nix`](../nix/1-backup-server/1-system/4-data-drive.nix). Other
+[`data-drive.nix`](../nix/1-backup-server/1-system/data-drive.nix). Other
 hosts push to it; the `borg` group on each client grants repo access.
 
 ## Unlocking
 
 Same arrangement as Heimdall — clevis against Odin's tang, enabled in
-[`8-clevis.nix`](../nix/1-backup-server/1-system/8-clevis.nix), passphrase in
+[`clevis.nix`](../nix/1-backup-server/1-system/clevis.nix), passphrase in
 `secrets/1-backup-server/clevis.yaml`.
 
 As a WireGuard *client*, its initrd recovery loop probes the server through the

@@ -2,16 +2,16 @@
 
 {
     imports = [
-        ./1-hardware.nix
-        ./2-boot.nix
-        ./3-filesystem.nix
-        ./4-folder-structure.nix
-        ./5-software.nix
-        ./6-core.nix
-        ./7-networking
-        ./8-security
-        ./9-locale.nix
-        ./10-graphics
-        ./11-dconf.nix
+        ./hardware.nix
+        ./boot.nix
+        ./filesystem.nix
+        ./folder-structure.nix
+        ./software.nix
+        ./core.nix
+        ./networking
+        ./security
+        ./locale.nix
+        ./graphics
+        ./dconf.nix
     ];
 }
