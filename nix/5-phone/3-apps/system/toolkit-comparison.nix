@@ -28,8 +28,9 @@
 #      GDK_GL=gles it gets "EGL context version 2.0 (es:yes)" and WebKit
 #      composites through it -- 0.39 cores against 1.52 on an animating page.
 #
-#      luakit was the probe and has been removed. What it proved now lives in
-#      WebLaunch (3-apps/core/weblaunch.nix), which sets the variable itself.
+#      luakit was the probe and has been removed. So has WebLaunch, which was
+#      what the answer bought: every web app is a waypipe app now, rendered on
+#      Odin, so no browser engine runs on this GPU at all.
 #
 #      Worth recording what the answer did not buy, since it is easy to
 #      overread: a Home Assistant dashboard still scrolls at about 5fps with
