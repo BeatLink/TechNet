@@ -3,6 +3,7 @@
     "dconf_exports": [
         "/sm/puri/phosh/",
         "/mobi/phosh/shell/plugins/",
+        "/org/gnome/desktop/app-folders/",
         "/org/gnome/desktop/wm/keybindings/",
         "/org/gnome/desktop/input-sources/",
         "/org/gnome/settings-daemon/plugins/power/",

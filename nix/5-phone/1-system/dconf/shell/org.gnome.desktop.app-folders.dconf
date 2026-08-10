@@ -1,0 +1,22 @@
+[/]
+folder-children=['4a488f8a-6f6c-4dbf-9f35-951cf85395ae', 'f78d9294-7d59-4a43-b7be-1446de0bd02a', '75a2da12-9c72-4273-afdb-4e87e9dc0666', '5892149e-bd15-4977-a9fc-34a10f50ad19', '7e415f5d-2679-40e6-9c9a-9bb487e98e2d']
+
+[folders/4a488f8a-6f6c-4dbf-9f35-951cf85395ae]
+apps=['xviewer.desktop', 'org.x.editor.desktop', 'me.gapixels.Megapixels.desktop', 'org.gnome.Terminal.desktop', 'htop.desktop']
+name='Tools'
+
+[folders/5892149e-bd15-4977-a9fc-34a10f50ad19]
+apps=['mobi.phosh.MobileSettings.desktop']
+name='Mobile Settings'
+
+[folders/75a2da12-9c72-4273-afdb-4e87e9dc0666]
+apps=['org.gnome.Settings.desktop', 'io.github.beatlink.Chargectl.desktop', 'org.gnome.Extensions.desktop']
+name='Settings'
+
+[folders/7e415f5d-2679-40e6-9c9a-9bb487e98e2d]
+apps=['org.gnome.Calls.desktop', 'sm.puri.Chatty.desktop']
+name='Comms'
+
+[folders/f78d9294-7d59-4a43-b7be-1446de0bd02a]
+apps=['waypipe-firefox-odin.desktop', 'nemo.desktop', 'org.weblaunch.WebLaunch.Trilium.desktop', 'org.weblaunch.WebLaunch.HomeAssistant.desktop', 'waypipe-keepassxc-odin.desktop']
+name='Core'
