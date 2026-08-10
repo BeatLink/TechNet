@@ -2,7 +2,8 @@
 #
 # Firefox runs on Odin, so the address has to name this phone: localhost over
 # there is Odin's own daemon. syncthing.thor.lan does not resolve off the LAN,
-# so the WireGuard name is the one that always answers.
+# so the WireGuard name is the one that always answers. Kiosk profile, shared
+# with the other dashboard -- see home-assistant.nix for why.
 #
 { pkgs, ... }:
 {
@@ -14,9 +15,9 @@
         command = [
             "firefox"
             "--profile"
-            "/home/beatlink/.config/mozilla/firefox-waypipe/Personal-Thor"
+            "/home/beatlink/.config/mozilla/firefox-waypipe/Kiosk-Thor"
             "--kiosk"
-            "--new-instance"
+            "--new-window"
             "http://thor.technet:8384"
         ];
 
