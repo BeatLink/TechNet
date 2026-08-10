@@ -82,7 +82,7 @@ WireGuard address then the LAN one. Thor overrides this to its USB link address.
 ## nixtool
 
 The module is imported for every host by
-[`software.nix`](../nix/0-common/1-system/software.nix), but only Odin
+[`software.nix`](../nix/0-common/1-system/software/auto-upgrade.nix), but only Odin
 enables it, in [`20-nixtool.nix`](../nix/3-laptop/1-system/20-nixtool.nix), which
 renders `/etc/nixtool/nixtool-config.json`. Installer credentials are named as
 sops paths rather than values, so nothing sensitive reaches the Nix store.

@@ -1,9 +1,7 @@
 {
     imports = [
         ./hardware-configuration.nix
-        ./boot.nix
-        ./root-drive-disko.nix
-        ./disko-data-drive.nix
+        ./filesystem.nix
         ./sops.nix
         ./software.nix
         ./networking.nix
@@ -14,6 +12,5 @@
         ./fuse.nix
         ./tang.nix
         ./desktop-environment
-        ./remote-builder.nix
     ];
 }

@@ -1,13 +1,16 @@
 # Firmware Updates ###################################################################################################################################
+#
+# Runs fwupd and refreshes it on boot, with a weekly timer that applies whatever updates are available.
+#
 
 { pkgs, ... }:
 {
     services.fwupd.enable = true;
+
     systemd = {
         services = {
             fwupd = {
-                # Without this fwupd races polkit on activation and fails the whole rebuild
-                after = [ "polkit.service" ];
+                after = [ "polkit.service" ]; # Without this fwupd races polkit on activation and fails the whole rebuild
                 wants = [ "polkit.service" ];
             };
 
@@ -15,6 +18,7 @@
                 after = [ "fwupd.service" ];
                 wants = [ "fwupd.service" ];
             };
+
             fwupd-auto-update = {
                 script = ''
                     ${pkgs.fwupd}/bin/fwupdmgr refresh --force

@@ -1,9 +1,9 @@
 # Remote builder access
 #
 # Dormant. Odin no longer offloads here -- it builds aarch64 locally under
-# binfmt, for the reasons in 3-laptop/1-system/remote-builder.nix, chiefly
-# that this is a 2GB board whose actual job is receiving backups. The
-# authorisation is kept so that turning it back on is a one-file change there.
+# binfmt, chiefly because this is a 2GB board whose actual job is receiving
+# backups. The authorisation is kept so that turning it back on is a one-file
+# change on Odin.
 #
 # What is authorised is Odin's host identity rather than a person's key: its
 # nix-daemon runs as root and connects as beatlink using Odin's SSH host key as

@@ -1,4 +1,4 @@
-# VLC #
+# VLC ################################################################################################################################################
 #
 # Media player. Hardware decoding is forced off until the session renders on the same GPU that VA-API decodes on, or every video plays back green.
 #
@@ -15,6 +15,10 @@
                         nativeBuildInputs = [ pkgs.makeWrapper ];
                         postBuild = ''
                             wrapProgram $out/bin/vlc --add-flags "--avcodec-hw=none"
+                            entry=$out/share/applications/vlc.desktop
+                            source=$(readlink -f $entry)
+                            rm $entry
+                            substitute $source $entry --replace-fail ${pkgs.vlc}/bin/vlc $out/bin/vlc
                         '';
                     })
                 ];

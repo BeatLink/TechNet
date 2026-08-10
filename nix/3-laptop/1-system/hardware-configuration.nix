@@ -1,31 +1,46 @@
+# Hardware Configuration #############################################################################################################################
+#
+# Kernel modules, CPU, firmware and boot loader settings for this laptop.
+#
+
+{ lib, ... }:
 {
-    boot = {
-        initrd = {
-            availableKernelModules = [
-                "nvme" # For NVMe Storage Drives
-                "xhci_pci" # For USB 3 and PCI Devices
-                "usbhid" # For USB Devices
-                "mt7921e" # Wi-Fi Drivers
-                "ideapad_laptop" # Lenovo Drivers (Function Keys, Battery Management, etc)
-            ];
-        };
-        kernelModules = [
-            "kvm-amd"
-        ]; # Virtualization for VMs
-        kernelParams = [
-            "amd_pstate=active" # Enables Power Management for AMD CPUs
-            "pcie_aspm=off"
-        ];
-    };
-    hardware = {
-        cpu.amd = {
-            updateMicrocode = true; # Updates the CPU Microcode
-            ryzen-smu.enable = true;
-        };
-        enableRedistributableFirmware = true; # Enable firmware with a license allowing redistribution.
-    };
-    nixpkgs.hostPlatform = "x86_64-linux"; # This laptop has a 64 bit architecture
-    services = {
-        thermald.enable = true;
-    };
+    config = lib.mkMerge [
+
+        # Kernel #####################################################################################################################################
+        {
+            boot = {
+                initrd.availableKernelModules = [
+                    "nvme"
+                    "xhci_pci"
+                    "usbhid"
+                    "mt7921e"
+                    "ideapad_laptop"
+                ];
+                kernelModules = [ "kvm-amd" ];
+                kernelParams = [
+                    "amd_pstate=active"
+                    "pcie_aspm=off"
+                ];
+            };
+        }
+
+        # Boot Loader ################################################################################################################################
+        {
+            boot.loader.efi.canTouchEfiVariables = lib.mkForce true; # Forced over 0-common's false, which otherwise wins
+        }
+
+        # CPU and Firmware ###########################################################################################################################
+        {
+            nixpkgs.hostPlatform = "x86_64-linux";
+            hardware = {
+                cpu.amd = {
+                    updateMicrocode = true;
+                    ryzen-smu.enable = true;
+                };
+                enableRedistributableFirmware = true;
+            };
+            services.thermald.enable = true;
+        }
+    ];
 }
