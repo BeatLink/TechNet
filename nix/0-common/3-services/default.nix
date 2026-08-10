@@ -5,7 +5,7 @@
 
 {
     imports = [
-        ./1-ssh.nix
-        ./2-syncthing.nix
+        ./ssh.nix
+        ./syncthing.nix
     ];
 }

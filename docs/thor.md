@@ -13,13 +13,13 @@ SMS stack in [`3-apps/comms`](../nix/5-phone/3-apps/comms), display and sensor
 setup, and NetworkManager profiles for WiFi and the WireGuard tunnel.
 
 The mobile-nixos device import in
-[`1-hardware-configuration.nix`](../nix/5-phone/1-system/1-hardware-configuration.nix)
+[`hardware-configuration.nix`](../nix/5-phone/1-system/hardware-configuration.nix)
 is commented out; only its firmware package is used. Thor boots via Tow-Boot,
 which provides UEFI, so the bootloader is systemd-boot rather than extlinux.
 
 The kernel is megi's tree, built by nixpkgs' `linuxManualConfig` from source,
 config and patches borrowed out of mobile-nixos' device directory —
-see [`13-kernel.nix`](../nix/5-phone/1-system/13-kernel.nix) for why its own
+see [`kernel.nix`](../nix/5-phone/1-system/kernel.nix) for why its own
 `kernel-builder` cannot be used. The short version: that builder deletes the
 kernel build tree, and ZFS is an out-of-tree module.
 
@@ -130,7 +130,7 @@ sudo rebind-clevis                        # needs tang reachable
 ```
 
 then set `enable = true` in
-[`9-clevis.nix`](../nix/5-phone/1-system/9-clevis.nix) and `nixos-rebuild boot`.
+[`clevis.nix`](../nix/5-phone/1-system/clevis.nix) and `nixos-rebuild boot`.
 
 ### Troubleshooting
 
@@ -172,7 +172,7 @@ That is the whole procedure now. Everything below this is why it works and what
 was needed before the kernel was right — the elaborate JumpDrive dance in
 [What actually helped](#what-actually-helped) was working around mainline
 refusing to charge at all, which
-[13-kernel.nix](../nix/5-phone/1-system/13-kernel.nix) has since settled.
+[kernel.nix](../nix/5-phone/1-system/kernel.nix) has since settled.
 
 Do **not** improvise a charger. USB is 5V against a 4.2V maximum with no current
 limit, and a cell that has sat at 0.13V is the highest-risk case there is. A
@@ -299,7 +299,7 @@ step, so those constants are resistances in ohms. `1080 * 80 / 12800` truncates 
 so charging proceeds.
 
 That is the fix. It needs no patch and no hardware change: the kernel in
-[13-kernel.nix](../nix/5-phone/1-system/13-kernel.nix) already carries it.
+[kernel.nix](../nix/5-phone/1-system/kernel.nix) already carries it.
 
 **Confirmed on hardware.** Booting postmarketOS from an SD card — same megi tree,
 eMMC untouched — produced:
@@ -335,7 +335,7 @@ source code directly"*, and singling out PMICs as the reason. The `#undef` sits
 above the guard, so `-D` on the command line is discarded before it is read. The
 same symbol picks 0600 over 0400 for the `registers` file further down.
 
-[13-kernel.nix](../nix/5-phone/1-system/13-kernel.nix) flips it to `#define` with
+[kernel.nix](../nix/5-phone/1-system/kernel.nix) flips it to `#define` with
 a `substituteInPlace --replace-fail`, so the build breaks loudly if that line ever
 moves. Once the megi kernel is running, REG 39H and REG 84H become writable and
 the thermistor threshold is testable without a rebuild per attempt.

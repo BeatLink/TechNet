@@ -20,7 +20,7 @@
 #
 # Restoring it means putting back the buildMachines entry deleted here. The
 # matching authorisation for Odin's host key is still in
-# 1-backup-server/1-system/9-remote-builder.nix, so only this side has to change.
+# 1-backup-server/1-system/remote-builder.nix, so only this side has to change.
 #
 {
     nix.distributedBuilds = false;

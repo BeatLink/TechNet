@@ -135,7 +135,7 @@
                         "trilium-sysadmin.heimdall.technet,heimdall.technet"
 
                         # Services a host serves itself, declared as
-                        # technet.vhosts in 0-common/1-system/7-networking/4-vhosts.nix
+                        # technet.vhosts in 0-common/1-system/networking/vhosts.nix
                         # and reachable from other machines through these.
                         #
                         # One line per service rather than a wildcard. dnsmasq

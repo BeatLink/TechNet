@@ -3,8 +3,8 @@
 Everything here is specific to running Firefox on a 2972MB, 1.15GHz A53 phone
 with a Mali-400 that no browser on this device can use. The reasoning behind the
 device-level numbers is in
-[`18-performance.nix`](../nix/5-phone/1-system/18-performance.nix) and
-[`25-webkit.nix`](../nix/5-phone/1-system/25-webkit.nix); this file only covers
+[`performance.nix`](../nix/5-phone/1-system/performance.nix) and
+[`webkit.nix`](../nix/5-phone/1-system/webkit.nix); this file only covers
 the browser.
 
 Verified against Firefox **153.0.3**.
@@ -134,7 +134,7 @@ to exist in 153.0.3; none of it is measured on this board.
       page size so a page update rewrites one record rather than a 128K block,
       `logbias=throughput` keeps sqlite's syncs out of the ZIL.
 - [x] ~~Lock `libxul.so` in
-      [`31-prewarm.nix`](../nix/5-phone/1-system/31-prewarm.nix).~~ **Already
+      [`prewarm.nix`](../nix/5-phone/1-system/prewarm.nix).~~ **Already
       covered, and adding it explicitly would make things worse.**
 
       prewarm's watcher runs with `PREWARM_PREFIX=/nix/store`, and
@@ -158,9 +158,9 @@ to exist in 153.0.3; none of it is measured on this board.
       pages by path order rather than by usefulness — so it would evict the
       profile dirs that are working today.
 - [x] **`MemoryHigh` on `app.slice`**, in
-      [`18-performance.nix`](../nix/5-phone/1-system/18-performance.nix) next to
+      [`performance.nix`](../nix/5-phone/1-system/performance.nix) next to
       the phosh block it complements. phosh has `MemoryMin`/`MemoryLow` and
-      [`36-focus-boost.nix`](../nix/5-phone/1-system/36-focus-boost.nix) handles
+      [`focus-boost.nix`](../nix/5-phone/1-system/focus-boost.nix) handles
       CPU and IO priority; the gap was the other direction — nothing made an app
       reclaim before the session got reclaimed out from under it.
 

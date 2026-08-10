@@ -6,7 +6,7 @@
 # Migrated from Vigil's config.yaml. SSH credentials for the locked-down `vigil`
 # service user are supplied once via `ssh_defaults` (username + key) and merged
 # into every monitor's `ssh_config` by the engine. Vigil logs into a dedicated
-# `vigil-access` account on each host, defined in nix/0-common/2-users/3-vigil.nix.
+# `vigil-access` account on each host, defined in nix/0-common/2-users/vigil.nix.
 #
 # Repo passphrases are per monitor, not global. Each borg monitor sets
 # `passphrase_command` pointing at the sops secret of the tool that owns its

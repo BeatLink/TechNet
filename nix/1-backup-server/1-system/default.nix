@@ -1,13 +1,13 @@
 {
     imports = [
-        ./1-hardware-configuration.nix
-        ./2-boot.nix
-        ./3-root-drive-disko.nix
-        ./4-data-drive.nix
-        ./5-software.nix
-        ./6-networking.nix
-        ./7-borg.nix
-        ./8-clevis.nix
-        ./9-remote-builder.nix
+        ./hardware-configuration.nix
+        ./boot.nix
+        ./root-drive-disko.nix
+        ./data-drive.nix
+        ./software.nix
+        ./networking.nix
+        ./borg.nix
+        ./clevis.nix
+        ./remote-builder.nix
     ];
 }

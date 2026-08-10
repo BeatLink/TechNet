@@ -8,13 +8,13 @@
 # Still under 3-laptop rather than 0-common, because the two hosts share only the
 # package name. Odin's is the full Cinnamon-shaped install with the thumbnailer
 # stack behind it; the phone's is deliberately lean. Keeping them apart also
-# scopes the dconf export in this directory: 0-common/1-system/11-dconf.nix walks
+# scopes the dconf export in this directory: 0-common/1-system/dconf.nix walks
 # 0-common plus the host's own directory, so an export here is loaded on Odin and
 # nowhere else.
 #
 # The bookmarks are not here. Both file managers read
 # ~/.config/gtk-3.0/bookmarks, so that list stays shared in
-# 0-common/4-apps/2-file-manager.nix and this only adds the three places that
+# 0-common/4-apps/system/file-manager.nix and this only adds the three places that
 # exist on this machine and not on the phone.
 #
 # Settings are stored in dconf and exported into this folder by

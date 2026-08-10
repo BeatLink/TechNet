@@ -16,7 +16,7 @@ Peers connect *to* Heimdall rather than to each other, so it is the one host
 whose reachability everything else depends on. Its initrd WireGuard probe
 therefore targets the LAN gateway rather than a peer — a peer may legitimately be
 down or still locked, so it is not a usable health signal. See
-[`2-initrd-wireguard.nix`](../nix/0-common/1-system/6-networking/2-initrd-wireguard.nix).
+[`initrd-wireguard.nix`](../nix/0-common/1-system/6-networking/2-initrd-wireguard.nix).
 
 DNS for the network is Pi-hole at `10.100.100.1`, backed by Unbound.
 
@@ -41,7 +41,7 @@ as its own module.
 ## Unlocking
 
 Heimdall's root pool is unlocked by clevis against Odin's tang server, enabled in
-[`9-clevis.nix`](../nix/2-server/1-system/9-clevis.nix). The passphrase is stored
+[`clevis.nix`](../nix/2-server/1-system/clevis.nix). The passphrase is stored
 in `secrets/2-server/clevis.yaml`, so it is recoverable — unlike a host where
 clevis is disabled.
 

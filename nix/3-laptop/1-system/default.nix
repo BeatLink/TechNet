@@ -1,19 +1,19 @@
 {
     imports = [
-        ./1-hardware-configuration.nix
-        ./2-boot.nix
-        ./3-root-drive-disko.nix
-        ./4-disko-data-drive.nix
-        ./5-sops.nix
-        ./6-software.nix
-        ./7-networking.nix
-        ./8-display.nix
-        ./9-sound.nix
-        ./10-bluetooth.nix
-        ./11-printing.nix
-        ./12-fuse.nix
-        ./14-tang.nix
-        ./18-desktop-environment
-        ./21-remote-builder.nix
+        ./hardware-configuration.nix
+        ./boot.nix
+        ./root-drive-disko.nix
+        ./disko-data-drive.nix
+        ./sops.nix
+        ./software.nix
+        ./networking.nix
+        ./display.nix
+        ./sound.nix
+        ./bluetooth.nix
+        ./printing.nix
+        ./fuse.nix
+        ./tang.nix
+        ./desktop-environment
+        ./remote-builder.nix
     ];
 }

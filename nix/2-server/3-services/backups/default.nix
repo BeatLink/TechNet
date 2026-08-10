@@ -1,6 +1,6 @@
 {
     imports = [
-        ./8-borgmatic.nix
+        ./borgmatic.nix
         ./borg.nix
         ./stremio-export.nix
     ];
