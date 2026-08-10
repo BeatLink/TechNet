@@ -1,7 +1,7 @@
 # Firefox
 #
 # Odin only. Thor ran the mobile build until WebLaunch replaced it, so what used to
-# be shared in 0-common/desktop lives here now -- including the persistence,
+# be shared under 0-common lives here now -- including the persistence,
 # which on Thor was bind-mounting a profile for a browser that was no longer
 # installed.
 #

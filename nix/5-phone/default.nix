@@ -9,7 +9,6 @@
     technet.waypipe.enable = true;
 
     imports = [
-        ../0-common/desktop
         ./1-system
         ./2-users.nix
         ./3-apps
