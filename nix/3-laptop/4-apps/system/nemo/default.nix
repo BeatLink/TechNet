@@ -8,7 +8,7 @@
 # Still under 3-laptop rather than 0-common, because the two hosts share only the
 # package name. Odin's is the full Cinnamon-shaped install with the thumbnailer
 # stack behind it; the phone's is deliberately lean. Keeping them apart also
-# scopes the dconf export in this directory: 0-common/1-system/dconf.nix walks
+# scopes the dconf export in this directory: 0-common/1-system/desktop/dconf.nix walks
 # 0-common plus the host's own directory, so an export here is loaded on Odin and
 # nowhere else.
 #
