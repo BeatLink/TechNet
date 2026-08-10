@@ -20,9 +20,11 @@
             "codium"
             "--user-data-dir"
             "/home/beatlink/.config/vscodium-waypipe/Thor"
+            # Overrides the wrapper's --ozone-platform-hint=auto, which resolves to X11 over ssh because XDG_SESSION_TYPE is tty there, and leaves a black window
+            "--ozone-platform=wayland"
         ];
 
-        # The codium wrapper reads this to add --ozone-platform-hint plus Wayland decorations and text-input v3, which is what the phone's keyboard needs
+        # The codium wrapper reads this to add Wayland decorations and text-input v3, which is what the phone's keyboard needs
         environment.NIXOS_OZONE_WL = "1";
     };
 }

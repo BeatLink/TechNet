@@ -243,9 +243,14 @@
             };
 
             home = {
-                # Thor's waypipe instance runs on its own --user-data-dir, which VSCodium reads settings from instead; same store path, so the two never diverge
+                # Thor's waypipe instance reads settings from its own --user-data-dir; the same set as here, plus the in-window file picker, because a portal dialog is drawn by Odin's session and lands on Odin's screen
                 file."${config.xdg.configHome}/vscodium-waypipe/Thor/User/settings.json".source =
-                    config.home.file."${config.xdg.configHome}/VSCodium/User/settings.json".source;
+                    (pkgs.formats.json { }).generate "vscode-user-settings-thor" (
+                        config.programs.vscodium.profiles.default.userSettings
+                        // {
+                            "files.simpleDialog.enable" = true;
+                        }
+                    );
 
                 packages = with pkgs; [
                     nixd
