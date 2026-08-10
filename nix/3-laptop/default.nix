@@ -3,10 +3,10 @@
 
 {
     technet.secrets.directory = "3-laptop";
+    technet.pinephoneCache.enable = true; # Odin builds Thor's closure under binfmt
 
     imports = [
         ../0-common/desktop
-        ../0-common/pinephone-cache.nix                                      # Odin builds Thor's closure under binfmt
         ./1-system
         ./4-apps
     ];
