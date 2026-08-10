@@ -252,6 +252,9 @@
                         }
                     );
 
+                # Claude Code's temp root, inside the persisted .claude below rather than on /tmp, so scratchpads and task output outlive a reboot along with the rest of its state
+                sessionVariables.CLAUDE_CODE_TMPDIR = "${config.home.homeDirectory}/.claude/tmp";
+
                 packages = with pkgs; [
                     nixd
                     nixfmt
