@@ -1,24 +1,13 @@
-# Filesystem #########################################################################################################################################
+# Root Drive Disko ###################################################################################################################################
+#
+# The declarative layout of the root drive: an EFI partition and a ZFS pool holding root, nix, persistent, home and swap.
+#
 
 { config, ... }:
 let
     rootPool = "root-pool-${config.networking.hostName}";
-    dataPool = "data-pool-${config.networking.hostName}";
-    swapZvol = "dev-zvol-${rootPool}-swap";
 in
 {
-    # ZFS Support ####################################################################################################################################
-    boot = {
-        supportedFilesystems = [ "zfs" ];
-        initrd = {
-            supportedFilesystems = [ "zfs" ];
-            # Data pool must import after root, otherwise the two race
-            systemd.services."zfs-import-${dataPool}".after = [ "zfs-import-${rootPool}.service" ];
-        };
-        zfs.forceImportRoot = false;
-    };
-
-    # Root Drive Disko ###############################################################################################################################
     disko.devices = {
 
         # Disks and partitions -----------------------------------------------------------------------------------------------------------------------
@@ -47,6 +36,7 @@ in
                 };
             };
         };
+
         # Pools --------------------------------------------------------------------------------------------------------------------------------------
         zpool.${rootPool} = {
             type = "zpool";
@@ -112,42 +102,6 @@ in
                     };
                 };
             };
-        };
-
-    };
-
-    # Mounts #########################################################################################################################################
-    fileSystems = {
-        "/".neededForBoot = true;
-        "/boot".neededForBoot = true;
-        "/nix".neededForBoot = true;
-        "/persistent".neededForBoot = true;
-        "/home".neededForBoot = true;
-        "/Storage" = {
-            # Created by hand at install, not by disko.
-            device = "${dataPool}/storage";
-            fsType = "zfs";
-            options = [
-                "zfsutil"
-                "nofail" # nofail keeps a missing pool from stranding the boot
-            ];
-            neededForBoot = true;
-        };
-    };
-
-    # Swap ###########################################################################################################################################
-    # mkswap must come after the zvol exists. Otherwise, the unit fails the boot
-    systemd.services."mkswap-${swapZvol}" = {
-        after = [ "zfs-volume-wait.service" ];
-        requires = [ "zfs-volume-wait.service" ];
-    };
-
-    # Filesystem Maintenance #########################################################################################################################
-    services = {
-        fstrim.enable = true;
-        zfs = {
-            trim.enable = true;
-            autoScrub.enable = true;
         };
     };
 }

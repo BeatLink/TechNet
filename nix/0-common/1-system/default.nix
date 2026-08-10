@@ -2,11 +2,9 @@
 
 {
     imports = [
-        ./hardware.nix
-        ./boot.nix
-        ./filesystem.nix
-        ./folder-structure.nix
-        ./software.nix
+        ./hardware
+        ./filesystems
+        ./software
         ./core.nix
         ./networking
         ./security
