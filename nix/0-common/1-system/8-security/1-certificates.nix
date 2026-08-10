@@ -1,6 +1,6 @@
-# Certificates
+# Certificates #######################################################################################################################################
 #
-# Add TechNet Certificate Heimdall Services and Websites
+# Trusts the TechNet root CA so Heimdall's internal services and websites validate without a per-host exception.
 #
 
 {

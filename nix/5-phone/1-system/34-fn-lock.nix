@@ -43,7 +43,16 @@
 #
 # Read it back with `sudo keyd monitor` if the case is ever replaced -- the hash
 # is derived from the device, not stored anywhere in this repo.
+{ lib, ... }:
 {
+    # Starting keyd at boot would leave its virtual keyboard present with no case attached, which suppresses the on-screen keyboard; pinephone-keyboard-sync owns it instead.
+    systemd.services.keyd = {
+        wantedBy = lib.mkForce [ ];
+
+        # keyd exits 15 on SIGTERM, which would leave a failed unit behind every time the case comes off.
+        serviceConfig.SuccessExitStatus = 15;
+    };
+
     services.keyd = {
         enable = true;
 

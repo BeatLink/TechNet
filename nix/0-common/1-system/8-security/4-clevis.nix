@@ -1,36 +1,39 @@
+# Clevis #############################################################################################################################################
+#
+# Unlocks this host's ZFS datasets at boot against the tang servers, and the tool that rebinds the JWEs when those keys change.
+#
+
 { config, lib, pkgs, ... }:
 let
-    cfg = config.technet.clevis;
-    tang = config.technet.tang;
+    tangCfg = config.technet.tang;
+    clevisCfg = config.technet.clevis;
 
+    # Helpers ----------------------------------------------------------------------------------------------------------------------------------------
     clevisPackage = config.boot.initrd.clevis.package;
-
     zfs = "${config.boot.zfs.package}/sbin/zfs";
     clevis = "${clevisPackage}/bin/clevis";
     systemd = config.boot.initrd.systemd.package;
 
     sssConfig = builtins.toJSON {
         t = 1;
-        pins.tang = map (url: { inherit url; }) tang.urls;
+        pins.tang = map (url: { inherit url; }) tangCfg.urls;
     };
 
-    jweFile = ds: "${cfg.stateDir}/${builtins.replaceStrings [ "/" ] [ "-" ] ds}.jwe";
+    jweFile = ds: "${clevisCfg.stateDir}/${builtins.replaceStrings [ "/" ] [ "-" ] ds}.jwe";
 
-    pools = lib.unique (map (ds: lib.head (lib.splitString "/" ds)) cfg.datasets);
+    pools = lib.unique (map (ds: lib.head (lib.splitString "/" ds)) clevisCfg.datasets);
 
     importServices = map (pool: "zfs-import-${pool}.service") pools;
 
+    # Retry Loop -------------------------------------------------------------------------------------------------------------------------------------
+    # Retries every still-locked dataset until they all open, then nudges the import units that were left waiting on a prompt.
     retryScript = ''
         set -u
-        remaining="${lib.concatStringsSep " " cfg.datasets}"
+        remaining="${lib.concatStringsSep " " clevisCfg.datasets}"
 
-        # The stock zfs-import services may already be sitting on a password prompt,
-        # started before tang became reachable. They re-read keystatus on every start,
-        # so restarting them now makes the prompt a no-op and cancels the outstanding
-        # password request. Only worth doing if we actually unlocked something.
+        # Restarting an import cancels its outstanding password prompt, so it is only worth doing once something has actually unlocked.
         restart_imports() {
-            # Once initrd.target is up the boot has moved on to switch-root, and
-            # restarting an import service here takes sysroot.mount down with it.
+            # Once initrd.target is active the boot has moved on to switch-root, where restarting an import takes sysroot.mount down with it.
             if [ "$(${systemd}/bin/systemctl show -P ActiveState initrd.target 2>/dev/null || echo unknown)" = active ]; then
                 echo "clevis-retry: initrd.target is already active, leaving the imports alone"
                 return 0
@@ -38,9 +41,7 @@ let
 
             for unit in ${lib.concatStringsSep " " importServices}; do
                 state="$(${systemd}/bin/systemctl show -P ActiveState "$unit" 2>/dev/null || echo unknown)"
-                # Deliberately not "active": a service sitting on a password prompt
-                # is activating. Restarting one that already succeeded tears down
-                # the mounts that depend on it.
+                # Not "active": a unit sitting on a password prompt is activating, and restarting one that already succeeded tears down its mounts.
                 case "$state" in
                     activating|failed)
                         echo "clevis-retry: restarting $unit (was $state)"
@@ -52,10 +53,7 @@ let
                 esac
             done
 
-            # Restarting the import services is not enough on its own: if they timed
-            # out on the prompt first, zfs-import.target and the sysroot mounts have
-            # already failed by dependency, and systemd does not retry a job that has
-            # already failed. Start them explicitly so the boot can carry on.
+            # Systemd never retries an already-failed job, so targets that failed by dependency have to be started explicitly.
             for unit in zfs-import.target initrd-fs.target; do
                 state="$(${systemd}/bin/systemctl show -P ActiveState "$unit" 2>/dev/null || echo unknown)"
                 if [ "$state" != active ]; then
@@ -89,7 +87,7 @@ let
             fi
 
             [ -n "$remaining" ] || break
-            sleep ${toString cfg.retryInterval}
+            sleep ${toString clevisCfg.retryInterval}
         done
 
         echo "clevis-retry: all clevis datasets unlocked"
@@ -98,6 +96,8 @@ let
         exit 0
     '';
 
+    # Rebind Script ----------------------------------------------------------------------------------------------------------------------------------
+    # Re-encrypts the ZFS passphrase against the current tang keys and writes one verified JWE per dataset.
     rebindClevis = pkgs.writeShellApplication {
         name = "rebind-clevis";
         runtimeInputs = [
@@ -127,7 +127,7 @@ let
             fi
 
             reachable=0
-            for url in ${lib.concatStringsSep " " tang.urls}; do
+            for url in ${lib.concatStringsSep " " tangCfg.urls}; do
                 if curl -sf --max-time 5 "$url/adv" > /dev/null; then
                     echo "rebind-clevis: tang reachable at $url"
                     reachable=$((reachable + 1))
@@ -141,12 +141,12 @@ let
                 exit 1
             fi
 
-            if [ "$reachable" -ne ${toString (builtins.length tang.urls)} ]; then
-                echo "rebind-clevis: WARNING - only $reachable of ${toString (builtins.length tang.urls)} tang addresses responded." >&2
+            if [ "$reachable" -ne ${toString (builtins.length tangCfg.urls)} ]; then
+                echo "rebind-clevis: WARNING - only $reachable of ${toString (builtins.length tangCfg.urls)} tang addresses responded." >&2
                 echo "rebind-clevis: unreachable addresses are still bound but unverified." >&2
             fi
 
-            install -d -m 0700 -o root -g root "${cfg.stateDir}"
+            install -d -m 0700 -o root -g root "${clevisCfg.stateDir}"
 
             expected="$(tr -d '\n' < "$PASSPHRASE_FILE")"
 
@@ -165,7 +165,7 @@ let
                 rm -f "$tmp"
                 trap - EXIT
                 echo "rebind-clevis: wrote ${jweFile ds} (${ds})"
-            '') cfg.datasets}
+            '') clevisCfg.datasets}
 
             echo
             echo "rebind-clevis: all JWEs rebound and verified."
@@ -175,6 +175,7 @@ let
     };
 in
 {
+    # Options ########################################################################################################################################
     options.technet.clevis = {
         enable = lib.mkEnableOption "clevis/tang ZFS unlocking at boot";
 
@@ -256,47 +257,45 @@ in
                 server the others unlock against and cannot unlock itself.
             '';
         };
-
     };
 
     config = lib.mkMerge [
+
+        # Guards #####################################################################################################################################
         {
             assertions = [
                 {
-                    assertion = cfg.enable -> cfg.sopsFile != null;
+                    assertion = clevisCfg.enable -> clevisCfg.sopsFile != null;
                     message = "technet.clevis.enable is on for ${config.networking.hostName} but no sopsFile is set, so there is no zfs_passphrase to unlock with.";
                 }
             ];
         }
 
-        # The tool and the passphrase it reads. Available whether or not unlocking
-        # at boot is on, so a new host can write its JWE before enabling the
-        # feature that needs one to exist.
-        (lib.mkIf ((cfg.rebindTool.enable || cfg.enable) && cfg.sopsFile != null) {
+        # Rebind Tool ################################################################################################################################
+        # Available whether or not boot unlocking is on, so a new host can write its first JWE before enabling the feature that consumes it.
+        (lib.mkIf ((clevisCfg.rebindTool.enable || clevisCfg.enable) && clevisCfg.sopsFile != null) {
             sops.secrets.zfs_passphrase = {
-                sopsFile = cfg.sopsFile;
+                sopsFile = clevisCfg.sopsFile;
                 mode = "0400";
             };
 
             environment.systemPackages = [ rebindClevis ];
         })
 
-        (lib.mkIf cfg.enable {
+        # Boot Unlock ################################################################################################################################
+        (lib.mkIf clevisCfg.enable {
             boot.initrd = {
                 clevis = {
                     enable = true;
                     useTang = true;
-                    devices = lib.genAttrs cfg.datasets (ds: {
+                    devices = lib.genAttrs clevisCfg.datasets (ds: {
                         secretFile = jweFile ds;
                     });
                 };
 
                 systemd.services.clevis-retry = {
                     description = "Keep retrying clevis/tang unlock in the background until it succeeds";
-                    # Deliberately NOT a blocking oneshot and deliberately not ordered before
-                    # anything: the loop can run forever when tang is unreachable, so any
-                    # target that waits for it would stall the whole boot -- including the
-                    # initrd sshd, which is the only way in to fix such a machine remotely.
+                    # Never make this blocking or ordered-before anything: the loop can run forever and would stall the initrd sshd needed to fix that.
                     wantedBy = [ "initrd.target" ];
                     after = [ "systemd-modules-load.service" ];
                     unitConfig = {

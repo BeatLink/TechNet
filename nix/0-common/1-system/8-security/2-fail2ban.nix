@@ -1,8 +1,6 @@
-# Fail2Ban
+# Fail2Ban ###########################################################################################################################################
 #
-# Bans IPs that repeatedly fail SSH authentication. Defense-in-depth behind
-# key-only SSH auth (see 3-services/1-ssh.nix) — blocks the scan/brute-force
-# noise itself rather than relying solely on auth rejecting it.
+# Bans IPs that repeatedly fail SSH authentication, as defence in depth behind the key-only auth in 3-services/1-ssh.nix.
 #
 
 {

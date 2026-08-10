@@ -1,6 +1,8 @@
-# Software
+# Software ###########################################################################################################################################
 #
 # Configures software in NixOS: flakes, automatic upgrades, garbage collection, unfree packages and the PinePhone kernel cache.
+#
+
 {
     config,
     lib,
@@ -19,14 +21,17 @@
         # Called rather than imported, because `imports` cannot be placed behind mkIf; this keeps the URL and key from drifting out of the input
         (lib.mkIf config.technet.pinephoneCache.enable (inputs.pinephone-kernel.nixosModules.binaryCache { }))
 
+        # GitHub Access Token ########################################################################################################################
+        # Owned, not root-only: flake fetching runs as the user, and `!include` swallows the permission error.
         {
-            # Enable Flakes ##########################################################################################################################
-            # Owned, not root-only: flake fetching runs as the user, and `!include` swallows the permission error
             sops.secrets.github_access_token_conf = {
                 sopsFile = "${config.technet.secrets.commonPath}/github.yaml";
                 owner = "beatlink";
             };
+        }
 
+        # Flakes #####################################################################################################################################
+        {
             nix = {
                 extraOptions = ''
                     experimental-features = nix-command flakes
@@ -35,14 +40,20 @@
                 registry.nixpkgs.flake = inputs.nixpkgs;
                 nixPath = [ "nixpkgs=${inputs.nixpkgs.outPath}" ]; # Configures nix to use nixpkgs from flakes, fixes pesky errors in nix-shell
             };
+        }
+
+        # Command Not Found ##########################################################################################################################
+        # The handler indexes the channel's programs.sqlite, which a flake-only system never populates, so every miss is an error instead of a hint.
+        {
             programs.command-not-found.enable = false;
             home-manager.users.beatlink = {
                 programs.command-not-found.enable = false;
             };
+        }
 
-            # Enables Automatic Upgrades #############################################################################################################
+        # Automatic Upgrades #########################################################################################################################
+        {
             system.autoUpgrade = {
-                # Configures Automatic Upgrades at 2AM from my GitHub flake.
                 enable = true;
                 flake = "github:BeatLink/TechNet";
                 operation = "switch";
@@ -63,18 +74,24 @@
                     fi
                 '';
             };
+        }
 
-            # Enable Garbage Collection ##############################################################################################################
+        # Garbage Collection #########################################################################################################################
+        {
             nix.gc = {
                 automatic = true;
                 dates = "weekly";
                 options = "--delete-older-than 7d";
             };
+        }
 
-            # Enables Unfree Packages ################################################################################################################
+        # Unfree Packages ############################################################################################################################
+        {
             nixpkgs.config.allowUnfree = true;
+        }
 
-            # Removes Default Packages ###############################################################################################################
+        # Default Packages ###########################################################################################################################
+        {
             environment.defaultPackages = lib.mkForce [ ];
         }
     ];

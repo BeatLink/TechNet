@@ -101,6 +101,7 @@
                             "git.useEditorAsCommitInput" = false;
                             "git.replaceTagsWhenPull" = true;
                             "github.gitProtocol" = "ssh";
+                            "scm.defaultViewMode" = "tree";
 
                             # Languages --------------------------------------------------------------------------------------------------------------
                             "[python]" = {
