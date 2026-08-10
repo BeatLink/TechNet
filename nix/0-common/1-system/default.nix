@@ -8,8 +8,8 @@
         ./core.nix
         ./networking
         ./security
-        ./locale.nix
+        ./locale
         ./graphics
-        ./dconf.nix
+        ./desktop
     ];
 }
