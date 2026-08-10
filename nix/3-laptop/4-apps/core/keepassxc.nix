@@ -60,6 +60,13 @@
 
                 file.".config/autostart/org.keepassxc.KeePassXC.desktop".source =
                     "${pkgs.keepassxc}/share/applications/org.keepassxc.KeePassXC.desktop";
+
+                # Thor's waypipe launcher runs against this: without it KeePassXC hands over to the autostarted instance here
+                # Deliberately outside .config/keepassxc, which is a bind mount from the data pool
+                file.".config/keepassxc-waypipe.ini".text = ''
+                    [General]
+                    SingleInstance=false
+                '';
             };
         };
 }
