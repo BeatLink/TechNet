@@ -1,7 +1,7 @@
 {
     imports = [
         ./1-tools
-        ./2-file-manager.nix
+        ./2-system
         ./3-technet
     ];
 }

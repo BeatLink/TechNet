@@ -1,3 +1,8 @@
+# Valent ############################################################################################################################################
+#
+# KDE Connect implementation pairing the phone and the laptop, on the port range the protocol requires.
+#
+
 {
     networking.firewall = rec {
         allowedTCPPortRanges = [
