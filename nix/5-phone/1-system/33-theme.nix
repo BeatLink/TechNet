@@ -5,7 +5,7 @@
 # applications follow it too.
 #
 # GTK4 applications do not. libadwaita draws its own styling and deliberately
-# ignores the GTK theme, so Epiphany, Files, Settings and Secrets stay Adwaita
+# ignores the GTK theme, so Files, Settings and Secrets stay Adwaita
 # whatever is set here. Mint-Y ships gtk-3.0, cinnamon and gnome-shell
 # stylesheets and no gtk-4.0 one, so there is nothing for them to pick up even
 # if they looked.
