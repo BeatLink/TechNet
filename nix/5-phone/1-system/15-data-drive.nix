@@ -13,8 +13,8 @@
 # `nofail` in the shared module matters more here than elsewhere: this is a
 # phone, and the card is removable.
 #
-# /Storage/Apps and /Storage/Files are not created here -- they are the shared
-# desktop convention, declared in 0-common/desktop alongside the XDG directories
-# that depend on them.
+# /Storage/Apps and /Storage/Files are not created here -- they are declared in
+# 0-common/1-system/5-folder-structure.nix alongside the XDG directories that
+# depend on them.
 #
 { }
