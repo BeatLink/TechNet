@@ -72,6 +72,12 @@
         {
             settings = {
                 "org/gnome/desktop/interface".show-battery-percentage = true;
+
+                # A window that cannot shrink to the 433px usable area keeps its own size, and phoc slides the excess under the top bar rather than fitting it.
+                "sm/puri/phoc".scale-to-fit = true;
+
+                # phoc draws the focus frame at the unscaled size, so leaving it on paints a block of blue beside every scaled window.
+                "mobi/phosh/phoc".focus-frame = false;
             };
         }
     ];
