@@ -1,5 +1,5 @@
 [/]
-folder-children=['4a488f8a-6f6c-4dbf-9f35-951cf85395ae', 'f78d9294-7d59-4a43-b7be-1446de0bd02a', '75a2da12-9c72-4273-afdb-4e87e9dc0666', '5892149e-bd15-4977-a9fc-34a10f50ad19', '7e415f5d-2679-40e6-9c9a-9bb487e98e2d']
+folder-children=['7e415f5d-2679-40e6-9c9a-9bb487e98e2d', 'f78d9294-7d59-4a43-b7be-1446de0bd02a', '75a2da12-9c72-4273-afdb-4e87e9dc0666', '5892149e-bd15-4977-a9fc-34a10f50ad19', 'f089a48d-2e2a-40c6-a6c6-17b9a668ba2b', '4a488f8a-6f6c-4dbf-9f35-951cf85395ae']
 
 [folders/4a488f8a-6f6c-4dbf-9f35-951cf85395ae]
 apps=['xviewer.desktop', 'org.x.editor.desktop', 'me.gapixels.Megapixels.desktop', 'org.gnome.Terminal.desktop', 'htop.desktop']
@@ -17,6 +17,10 @@ name='Settings'
 apps=['org.gnome.Calls.desktop', 'sm.puri.Chatty.desktop']
 name='Comms'
 
+[folders/f089a48d-2e2a-40c6-a6c6-17b9a668ba2b]
+apps=['waypipe-home-assistant.desktop', 'syncthing-ui.desktop', 'waypipe-syncthing-web.desktop', 'ca.andyholmes.Valent.desktop']
+name='TechNet'
+
 [folders/f78d9294-7d59-4a43-b7be-1446de0bd02a]
-apps=['waypipe-firefox-odin.desktop', 'nemo.desktop', 'org.weblaunch.WebLaunch.Trilium.desktop', 'org.weblaunch.WebLaunch.HomeAssistant.desktop', 'waypipe-keepassxc-odin.desktop']
+apps=['waypipe-firefox-odin.desktop', 'nemo.desktop', 'waypipe-trilium.desktop', 'waypipe-keepassxc-odin.desktop']
 name='Core'
