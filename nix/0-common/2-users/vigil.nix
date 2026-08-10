@@ -1,41 +1,54 @@
-# Vigil Access
+# Vigil Access #######################################################################################################################################
 #
-# Dedicated, unprivileged login account for the Vigil monitor to SSH into every
-# host as (agentless monitoring). Vigil runs on Heimdall and connects to this
-# account on each target to read metrics, systemd service status and borg
-# backup health.
-#
-# This is the *remote* account Vigil logs into (`vigil-access`), kept separate
-# from the `vigil` service user that the services.vigil module creates on
-# Heimdall.
-#
-# Only the *public* key lives here. The matching private key stays on Heimdall
-# alone (secrets/2-server/vigil.yaml), because Vigil is the only thing that
-# uses it — to log in here. A Vigil-triggered backup runs `borg create` on this
-# host, but borg's own hop to the repo server authenticates with THIS host's
-# existing borg key (Vorta's or borgmatic's), not Vigil's, so no Vigil private
-# key is needed on the monitored hosts.
-#
-# Root command access (systemctl/smartctl/borg) is granted via a scoped sudo
-# rule, not `wheel` — see 4-vigil-sudo.nix.
+# Unprivileged account the Vigil monitor on Heimdall SSHes into on every host, and the scoped sudo rule its plugins run through.
 #
 
+{ lib, ... }:
 {
-    users = {
-        groups."vigil-access" = { };
-        users."vigil-access" = {
-            isSystemUser = true;               # Service account, no interactive desktop login
-            description = "Vigil monitor (remote login account)";
-            group = "vigil-access";
-            shell = "/run/current-system/sw/bin/bash";  # borg / systemctl are run over SSH exec, needs a shell
-            extraGroups = [
-                "borg"                          # Read access to borg repos for backup health checks
-                "systemd-journal"               # Read systemd service status / logs
-                "blockurl"                      # Read blockurl_api_key secret for the blockurl monitor
+    config = lib.mkMerge [
+
+        # Remote Login Account #######################################################################################################################
+        {
+            users = {
+                groups."vigil-access" = { };
+                users."vigil-access" = {
+                    isSystemUser = true;
+                    description = "Vigil monitor (remote login account)";
+                    group = "vigil-access";
+                    shell = "/run/current-system/sw/bin/bash";                  # borg and systemctl run over SSH exec, which needs a shell
+                    extraGroups = [
+                        "borg"                                                  # Read access to borg repos for backup health checks
+                        "systemd-journal"                                       # Read systemd service status and logs
+                        "blockurl"                                              # Read blockurl_api_key for the blockurl monitor
+                    ];
+                    openssh.authorizedKeys.keys = [
+                        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID6oDtIndxb2aJJFhl3+xU+4nuVUQQrzcWOLX+RslJU/ vigil@technet"
+                    ];
+                };
+            };
+        }
+
+        # Sudo Scope #################################################################################################################################
+        {
+            security.sudo.extraRules = [
+                {
+                    users = [ "vigil-access" ];
+                    commands = [                                                # Never add the python3 heredoc helper, since sudoers matches argv rather than the script body and it would grant arbitrary root
+                        { command = "/run/current-system/sw/bin/systemctl start *"; options = [ "NOPASSWD" ]; }
+                        { command = "/run/current-system/sw/bin/systemctl stop *"; options = [ "NOPASSWD" ]; }
+                        { command = "/run/current-system/sw/bin/systemctl restart *"; options = [ "NOPASSWD" ]; }
+                        { command = "/run/current-system/sw/bin/systemctl enable *"; options = [ "NOPASSWD" ]; }
+                        { command = "/run/current-system/sw/bin/systemctl disable *"; options = [ "NOPASSWD" ]; }
+                        { command = "/run/current-system/sw/bin/systemctl daemon-reload"; options = [ "NOPASSWD" ]; }
+                        { command = "/run/current-system/sw/bin/systemctl cat *"; options = [ "NOPASSWD" ]; }
+                        { command = "/run/current-system/sw/bin/systemctl status *"; options = [ "NOPASSWD" ]; }
+                        { command = "/run/current-system/sw/bin/systemctl show *"; options = [ "NOPASSWD" ]; }
+                        { command = "/run/current-system/sw/bin/smartctl -H *"; options = [ "NOPASSWD" ]; }
+                        { command = "/run/current-system/sw/bin/smartctl -H -d sat *"; options = [ "NOPASSWD" ]; }
+                        { command = "/run/current-system/sw/bin/borg *"; options = [ "NOPASSWD" "SETENV" ]; }
+                    ];
+                }
             ];
-            openssh.authorizedKeys.keys = [
-                "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID6oDtIndxb2aJJFhl3+xU+4nuVUQQrzcWOLX+RslJU/ vigil@technet"
-            ];
-        };
-    };
+        }
+    ];
 }
