@@ -633,11 +633,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786015138,
-        "narHash": "sha256-tD2rl5gntd3xNhoYUyelX2FWOxW9HooB4pxDQ7Ktf00=",
+        "lastModified": 1786338773,
+        "narHash": "sha256-dcIR+ysauM7Y/msHXmgdVP/fP8XURkFNq8e4JwPCvFE=",
         "owner": "BeatLink",
         "repo": "PinePhoneCharge",
-        "rev": "73edd3b066cca28372eac7d7e27febbce2b85246",
+        "rev": "c1e79faba216f890b935dabb679ee778614375f2",
         "type": "github"
       },
       "original": {
