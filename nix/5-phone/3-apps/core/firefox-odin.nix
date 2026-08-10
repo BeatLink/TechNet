@@ -14,11 +14,11 @@
             "WebBrowser"
         ];
 
+        # No --new-instance: with none, a second launch opens another window in the running Firefox rather than failing on the profile lock
         command = [
             "firefox"
             "--profile"
             "/home/beatlink/.config/mozilla/firefox-waypipe/Personal-Thor"
-            "--new-instance"
         ];
 
         # Odin's GTK apps otherwise reach for its own session rather than waypipe's display

@@ -1,7 +1,8 @@
 # Home Assistant
 #
-# The dashboard as a kiosk window, on the same profile as the Firefox launcher,
-# so only one of the two can be open at a time.
+# The dashboard as a kiosk window. Kiosk is a process-wide flag once set, so
+# this shares a profile with the other dashboard rather than with the browser,
+# whose windows would otherwise come up fullscreen after this one had run.
 #
 {
     technet.waypipe.apps.home-assistant = {
@@ -12,9 +13,9 @@
         command = [
             "firefox"
             "--profile"
-            "/home/beatlink/.config/mozilla/firefox-waypipe/Personal-Thor"
+            "/home/beatlink/.config/mozilla/firefox-waypipe/Kiosk-Thor"
             "--kiosk"
-            "--new-instance"
+            "--new-window"
             "https://home-assistant.heimdall.technet"
         ];
 
