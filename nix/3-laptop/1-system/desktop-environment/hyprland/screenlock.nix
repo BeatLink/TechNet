@@ -1,23 +1,11 @@
 # Screen Locking and Idle Management
 #
-# Mirrors the Cinnamon screensaver and power settings. hypridle drives the timers and hyprlock draws the lock
-# screen, together replacing cinnamon-screensaver and the power plugin of cinnamon-settings-daemon.
-#
-# The Cinnamon configuration being reproduced:
-#   desktop/session idle-delay              300   - blank and lock after 5 minutes idle
-#   desktop/screensaver lock-enabled        true  - require a password to get back in
-#   settings-daemon/plugins/power lock-on-suspend true
-#   settings-daemon/plugins/power sleep-display-ac         1800  - turn the screen off after 30 minutes on AC
-#   settings-daemon/plugins/power sleep-display-battery    600   - and after 10 minutes on battery
-#   settings-daemon/plugins/power sleep-inactive-ac-timeout      3600  - suspend after an hour on AC
-#   settings-daemon/plugins/power sleep-inactive-battery-timeout 1800  - and after 30 minutes on battery
-#   settings-daemon/plugins/power idle-brightness           5    - dim to 5% before blanking
-#
-# hypridle has a single set of timers rather than separate AC and battery profiles, so the AC values are used
-# here. The battery timeouts are handled by logind and the power management configuration instead.
+# Mirrors the Cinnamon screensaver and power settings: hypridle drives the timers, hyprlock draws the lock
+# screen. hypridle has one set of timers rather than separate AC and battery profiles, so the display and
+# lock timeouts use the AC values and the suspend timer checks the power source itself.
 #
 
-{ config, pkgs, ... }:
+{ config, ... }:
 let
     palette = config.technet.theme.palette;
 in
@@ -103,8 +91,8 @@ in
                             on-resume = "${pkgs.hyprland}/bin/hyprctl dispatch dpms on";
                         }
                         {
-                            timeout = 3600; # sleep-inactive-ac-timeout
-                            on-timeout = "${pkgs.systemd}/bin/systemctl suspend";
+                            timeout = 1800; # sleep-inactive-battery-timeout, AC never suspends
+                            on-timeout = "${pkgs.hypr-on-mains}/bin/hypr-on-mains || ${pkgs.systemd}/bin/systemctl suspend";
                         }
                     ];
                 };
