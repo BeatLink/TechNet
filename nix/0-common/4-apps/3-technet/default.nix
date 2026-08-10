@@ -1,5 +1,5 @@
 {
     imports = [
-        ./valent
+        ./1-home-assistant
     ];
 }

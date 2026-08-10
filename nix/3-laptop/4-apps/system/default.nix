@@ -2,7 +2,6 @@
     imports = [
         ./baobab.nix
         ./nemo
-        ./bash.nix
         ./context.nix
         ./dconf-editor.nix
         ./gparted.nix

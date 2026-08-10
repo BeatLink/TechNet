@@ -62,7 +62,7 @@
                             "explorer.confirmDelete" = false;
                             "explorer.confirmDragAndDrop" = false;
                             "explorer.compactFolders" = false;
-                            "explorer.sortOrder" = "filesFirst";
+                            "explorer.sortOrder" = "mixed";
 
                             # Editor -----------------------------------------------------------------------------------------------------------------
                             "editor.formatOnSave" = true;

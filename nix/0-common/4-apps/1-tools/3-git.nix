@@ -1,6 +1,6 @@
-# Git
+# Git ################################################################################################################################################
 #
-# Version Control System
+# Version control system for beatlink, using the full build for its extra commands.
 #
 
 { pkgs, ... }:
