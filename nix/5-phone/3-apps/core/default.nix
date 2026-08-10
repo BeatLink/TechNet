@@ -1,9 +1,7 @@
 {
     imports = [
-        ./epiphany.nix
-        ./firefox.nix
-        ./gnome-secrets.nix
-        ./keepassxc.nix
+        ./firefox-odin.nix
+        ./keepassxc-odin.nix
         ./weblaunch.nix
     ];
 }
