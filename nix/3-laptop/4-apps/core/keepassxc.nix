@@ -43,9 +43,40 @@
     security.pam.services.login.kwallet.enable = false;
 
     home-manager.users.beatlink =
-        { pkgs, ... }:
+        { config, pkgs, ... }:
+        let
+            thorConfigDir = "${config.xdg.configHome}/keepassxc-waypipe/Thor";
+
+            # Thor has no system tray, so anything that parks the window in one leaves that instance with no window at all
+            thorConfig = (pkgs.formats.ini { }).generate "keepassxc-thor.ini" {
+                General = {
+                    SingleInstance = false; # Otherwise the launch is handed to the instance running here and opens on this screen
+                    MinimizeAfterUnlock = false;
+                    HideWindowOnCopy = false;
+                    DropToBackgroundOnCopy = false;
+                };
+
+                GUI = {
+                    MinimizeOnStartup = false;
+                    MinimizeOnClose = false;
+                    MinimizeToTray = false;
+                    ShowTrayIcon = false;
+                };
+
+                SSHAgent.Enabled = false; # The instance autostarted here already adds the database's keys to gcr-ssh-agent
+                Browser.Enabled = false; # One proxy socket per user, so a second server would take it from the first
+            };
+        in
         {
             services.gnome-keyring.enable = lib.mkForce false;
+
+            # Seeded rather than linked, because KeePassXC rewrites its config on startup and would replace a store symlink with a file
+            home.activation.keepassxcThorConfig = config.lib.dag.entryAfter [ "writeBoundary" ] ''
+                if [ ! -e ${thorConfigDir}/keepassxc.ini ]; then
+                    run mkdir -p ${thorConfigDir}
+                    run install -m 644 ${thorConfig} ${thorConfigDir}/keepassxc.ini
+                fi
+            '';
 
             home = {
                 packages = [ pkgs.keepassxc ];
@@ -53,6 +84,8 @@
                 persistence."/Storage/Apps/Core/KeePassXC" = {
                     directories = [
                         ".config/keepassxc"
+                        # A second config root, beside the first rather than inside it, holding the instance Thor opens over waypipe
+                        ".config/keepassxc-waypipe"
                         ".cache/keepassxc"
                         ".mozilla/native-messaging-hosts"
                     ];
