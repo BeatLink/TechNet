@@ -19,7 +19,7 @@
         command = [
             "codium"
             "--user-data-dir"
-            "/home/beatlink/.config/vscodium-waypipe/Thor"
+            "/Storage/PhoneApps/VSCodium/Thor"
             # Overrides the wrapper's --ozone-platform-hint=auto, which resolves to X11 over ssh because XDG_SESSION_TYPE is tty there, and leaves a black window
             "--ozone-platform=wayland"
         ];

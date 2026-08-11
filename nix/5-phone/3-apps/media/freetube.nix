@@ -20,7 +20,7 @@
         command = [
             "freetube"
             # The `=` form is required: Chromium's parser reads a separate word as a positional arg, and FreeTube treats those as URLs to open
-            "--user-data-dir=/home/beatlink/.config/freetube-waypipe/Thor"
+            "--user-data-dir=/Storage/PhoneApps/FreeTube/Thor"
             # The freetube wrapper passes no ozone platform at all, and Electron defaults to X11, which leaves a black window on the phone
             "--ozone-platform=wayland"
             "--wayland-text-input-version=3"

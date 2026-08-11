@@ -18,7 +18,7 @@
         command = [
             "keepassxc"
             "--config"
-            "/home/beatlink/.config/keepassxc-waypipe/Thor/keepassxc.ini"
+            "/Storage/PhoneApps/KeePassXC/Thor/keepassxc.ini"
             "/Storage/Files/Documents/SecurityDatabase.kdbx"
         ];
 
