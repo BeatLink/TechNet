@@ -1,5 +1,5 @@
 [/]
-folder-children=['7e415f5d-2679-40e6-9c9a-9bb487e98e2d', 'f78d9294-7d59-4a43-b7be-1446de0bd02a', '248624a6-9c53-49ec-95f7-cd991e33e433', '75a2da12-9c72-4273-afdb-4e87e9dc0666', '5892149e-bd15-4977-a9fc-34a10f50ad19', 'f089a48d-2e2a-40c6-a6c6-17b9a668ba2b', '4a488f8a-6f6c-4dbf-9f35-951cf85395ae']
+folder-children=['7e415f5d-2679-40e6-9c9a-9bb487e98e2d', 'f78d9294-7d59-4a43-b7be-1446de0bd02a', '248624a6-9c53-49ec-95f7-cd991e33e433', '75a2da12-9c72-4273-afdb-4e87e9dc0666', 'f089a48d-2e2a-40c6-a6c6-17b9a668ba2b', '4a488f8a-6f6c-4dbf-9f35-951cf85395ae']
 
 [folders/248624a6-9c53-49ec-95f7-cd991e33e433]
 apps=['waypipe-vscodium-odin.desktop']
@@ -9,12 +9,8 @@ name='Programming'
 apps=['xviewer.desktop', 'org.x.editor.desktop', 'me.gapixels.Megapixels.desktop', 'org.gnome.Terminal.desktop', 'htop.desktop']
 name='Tools'
 
-[folders/5892149e-bd15-4977-a9fc-34a10f50ad19]
-apps=['mobi.phosh.MobileSettings.desktop']
-name='Mobile Settings'
-
 [folders/75a2da12-9c72-4273-afdb-4e87e9dc0666]
-apps=['org.gnome.Settings.desktop', 'io.github.beatlink.Chargectl.desktop', 'org.gnome.Extensions.desktop']
+apps=['org.gnome.Settings.desktop', 'mobi.phosh.MobileSettings.desktop', 'io.github.beatlink.Chargectl.desktop', 'org.gnome.Extensions.desktop']
 name='Settings'
 
 [folders/7e415f5d-2679-40e6-9c9a-9bb487e98e2d]
