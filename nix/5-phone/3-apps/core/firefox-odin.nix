@@ -14,6 +14,8 @@
             "WebBrowser"
         ];
 
+        audio = true; # waypipe carries Wayland alone, so without this video and calls come out of Odin
+
         # No --new-instance: with none, a second launch opens another window in the running Firefox rather than failing on the profile lock
         command = [
             "firefox"
