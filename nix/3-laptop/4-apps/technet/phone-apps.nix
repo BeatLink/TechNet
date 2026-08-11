@@ -1,10 +1,17 @@
 # Phone Apps #########################################################################################################################################
 #
 # What Thor's waypipe launchers cost on this side: a second config or data root per app, beside Odin's own rather than inside it, so both
-# instances run at once. The launchers themselves are declared on Thor, under 5-phone/3-apps.
+# instances run at once. Their state persists under /Storage/PhoneApps rather than with Odin's own copy. The launchers are declared on Thor,
+# under 5-phone/3-apps.
 #
 { lib, ... }:
 {
+    systemd.tmpfiles.settings."PhoneApps"."/Storage/PhoneApps".d = {
+        user = "root"; # Root-owned like /Storage/Apps, because impermanence creates each app's bind-mount source under it itself
+        group = "root";
+        mode = "0755";
+    };
+
     home-manager.users.beatlink =
         { config, pkgs, ... }:
         {
@@ -12,7 +19,7 @@
                 # Firefox ----------------------------------------------------------------------------------------------------------------------------
                 {
                     # Outside the profile root, so profiles.ini never lists it and Sync does not refuse the second copy
-                    home.persistence."/Storage/Apps/Core/Firefox".directories = [
+                    home.persistence."/Storage/PhoneApps/Firefox".directories = [
                         ".config/mozilla/firefox-waypipe"
                     ];
                 }
@@ -51,7 +58,7 @@
                             fi
                         '';
 
-                        home.persistence."/Storage/Apps/Core/KeePassXC".directories = [
+                        home.persistence."/Storage/PhoneApps/KeePassXC".directories = [
                             ".config/keepassxc-waypipe"
                         ];
                     }
@@ -59,7 +66,7 @@
 
                 # Trilium ----------------------------------------------------------------------------------------------------------------------------
                 {
-                    home.persistence."/Storage/Apps/Core/Trilium".directories = [
+                    home.persistence."/Storage/PhoneApps/Trilium".directories = [
                         ".config/trilium-waypipe"
                         ".local/share/trilium-waypipe"
                     ];
@@ -85,7 +92,7 @@
                             ]
                         );
 
-                        home.persistence."/Storage/Apps/Fun/FreeTube".directories = [
+                        home.persistence."/Storage/PhoneApps/FreeTube".directories = [
                             ".config/freetube-waypipe"
                         ];
                     }
@@ -102,7 +109,7 @@
                             }
                         );
 
-                    home.persistence."/Storage/Apps/Programming/VsCodium".directories = [
+                    home.persistence."/Storage/PhoneApps/VSCodium".directories = [
                         ".config/vscodium-waypipe"
                     ];
                 }
