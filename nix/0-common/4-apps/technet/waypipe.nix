@@ -75,6 +75,13 @@ let
                     default = false;
                     description = "Play the app's sound here rather than out of the remote host's speakers.";
                 };
+
+                audioLatency = lib.mkOption {
+                    type = lib.types.nullOr lib.types.ints.positive;
+                    default = null;
+                    example = 400;
+                    description = "Milliseconds of audio buffered ahead, trading delay for tolerance of a jittery link. Null leaves PipeWire's own default.";
+                };
             };
         };
 
@@ -87,6 +94,7 @@ let
             "DBUS_SESSION_BUS_ADDRESS=unix:path=${busSocket}"
         ]
         ++ lib.optional app.audio "PULSE_SERVER=unix:${audioSocket}"
+        ++ lib.optional (app.audioLatency != null) "PULSE_LATENCY_MSEC=${toString app.audioLatency}"
         ++ lib.mapAttrsToList (n: v: "${n}=${v}") app.environment
         ++ app.command;
 

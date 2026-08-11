@@ -59,8 +59,12 @@ in
                 listen-port = "51820";
                 peer-routes = "yes";
             };
+            # DNS rides the tunnel rather than the link below it, so .technet resolves on mobile data as well as on the wifi
             ipv4 = {
                 method = "manual";
+                dns = "10.100.100.1";
+                # Negative, so Pi-hole answers alone while the tunnel is up: a carrier resolver listed first NXDOMAINs .technet and glibc stops at the first answer
+                dns-priority = "-100";
                 dns-search = "";
                 addresses = "10.100.100.4/24";
             };
