@@ -22,8 +22,8 @@
 
         environment = {
             # Holds the single-instance lock, so Odin's running copy does not adopt the launch and draw the window on its own screen
-            TRILIUM_ELECTRON_DATA_DIR = "/home/beatlink/.config/trilium-waypipe/Thor";
-            TRILIUM_DATA_DIR = "/home/beatlink/.local/share/trilium-waypipe/Thor";
+            TRILIUM_ELECTRON_DATA_DIR = "/Storage/PhoneApps/Trilium/Thor/electron";
+            TRILIUM_DATA_DIR = "/Storage/PhoneApps/Trilium/Thor/data";
             TRILIUM_PORT = "37841"; # Odin's instance holds 37840, and the collision would exit this one
             TRILIUM_SYNC_SYNCSERVERHOST = "https://trilium.heimdall.technet";
         };

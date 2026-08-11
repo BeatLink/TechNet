@@ -20,7 +20,7 @@
         command = [
             "firefox"
             "--profile"
-            "/home/beatlink/.config/mozilla/firefox-waypipe/Kiosk-Thor"
+            "/Storage/PhoneApps/Firefox/Thor/Kiosk"
             "--kiosk"
             "--new-window"
             "http://thor.technet:8384"

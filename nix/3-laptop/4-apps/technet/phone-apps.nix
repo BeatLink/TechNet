@@ -1,118 +1,136 @@
 # Phone Apps #########################################################################################################################################
 #
-# What Thor's waypipe launchers cost on this side: a second config or data root per app, beside Odin's own rather than inside it, so both
-# instances run at once. Their state persists under /Storage/PhoneApps rather than with Odin's own copy. The launchers are declared on Thor,
-# under 5-phone/3-apps.
+# The state of the applications Thor runs here over waypipe. It lives under /Storage/PhoneApps rather than in this user's home, because it
+# belongs to the phone's sessions rather than to Odin's; the launchers that name these paths are declared on Thor, under 5-phone/3-apps.
 #
-{ lib, ... }:
 {
-    systemd.tmpfiles.settings."PhoneApps"."/Storage/PhoneApps".d = {
-        user = "root"; # Root-owned like /Storage/Apps, because impermanence creates each app's bind-mount source under it itself
-        group = "root";
-        mode = "0755";
-    };
-
-    home-manager.users.beatlink =
-        { config, pkgs, ... }:
+    config,
+    lib,
+    pkgs,
+    ...
+}:
+let
+    # Declares each path as a directory belonging to beatlink.
+    dirs =
+        paths:
+        lib.genAttrs paths (_: {
+            d = {
+                user = "beatlink";
+                group = "beatlink";
+                mode = "0755";
+            };
+        });
+in
+{
+    config = lib.mkMerge [
+        # Storage Root -------------------------------------------------------------------------------------------------------------------------------
         {
-            config = lib.mkMerge [
-                # Firefox ----------------------------------------------------------------------------------------------------------------------------
-                {
-                    # Outside the profile root, so profiles.ini never lists it and Sync does not refuse the second copy
-                    home.persistence."/Storage/PhoneApps/Firefox".directories = [
-                        ".config/mozilla/firefox-waypipe"
-                    ];
-                }
+            systemd.tmpfiles.settings.PhoneApps = dirs [ "/Storage/PhoneApps" ];
+        }
 
-                # KeePassXC --------------------------------------------------------------------------------------------------------------------------
-                (
-                    let
-                        thorConfigDir = "${config.xdg.configHome}/keepassxc-waypipe/Thor";
-
-                        # Thor has no system tray, so anything that parks the window in one leaves that instance with no window at all
-                        thorConfig = (pkgs.formats.ini { }).generate "keepassxc-thor.ini" {
-                            General = {
-                                SingleInstance = false; # Otherwise the launch is handed to the instance running here and opens on this screen
-                                MinimizeAfterUnlock = false;
-                                HideWindowOnCopy = false;
-                                DropToBackgroundOnCopy = false;
-                            };
-
-                            GUI = {
-                                MinimizeOnStartup = false;
-                                MinimizeOnClose = false;
-                                MinimizeToTray = false;
-                                ShowTrayIcon = false;
-                            };
-
-                            SSHAgent.Enabled = false; # The instance autostarted here already adds the database's keys to gcr-ssh-agent
-                            Browser.Enabled = false; # One proxy socket per user, so a second server would take it from the first
-                        };
-                    in
-                    {
-                        # Seeded rather than linked, because KeePassXC rewrites its config on startup and would replace a store symlink with a file
-                        home.activation.keepassxcThorConfig = config.lib.dag.entryAfter [ "writeBoundary" ] ''
-                            if [ ! -e ${thorConfigDir}/keepassxc.ini ]; then
-                                run mkdir -p ${thorConfigDir}
-                                run install -m 644 ${thorConfig} ${thorConfigDir}/keepassxc.ini
-                            fi
-                        '';
-
-                        home.persistence."/Storage/PhoneApps/KeePassXC".directories = [
-                            ".config/keepassxc-waypipe"
-                        ];
-                    }
-                )
-
-                # Trilium ----------------------------------------------------------------------------------------------------------------------------
-                {
-                    home.persistence."/Storage/PhoneApps/Trilium".directories = [
-                        ".config/trilium-waypipe"
-                        ".local/share/trilium-waypipe"
-                    ];
-                }
-
-                # FreeTube ---------------------------------------------------------------------------------------------------------------------------
-                (
-                    let
-                        # Links one of Odin's databases into Thor's user data dir, so the two instances share it.
-                        shareWithThor =
-                            name:
-                            lib.nameValuePair ".config/freetube-waypipe/Thor/${name}.db" {
-                                source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/.config/FreeTube/${name}.db";
-                            };
-                    in
-                    {
-                        # settings.db is left out so the phone keeps its own UI scale, and subscription-cache.db because sharing the busiest file buys nothing
-                        home.file = lib.listToAttrs (
-                            map shareWithThor [
-                                "profiles" # Subscriptions live in here, as an array on each profile rather than a database of their own
-                                "playlists"
-                                "history"
-                            ]
-                        );
-
-                        home.persistence."/Storage/PhoneApps/FreeTube".directories = [
-                            ".config/freetube-waypipe"
-                        ];
-                    }
-                )
-
-                # VSCodium ---------------------------------------------------------------------------------------------------------------------------
-                {
-                    # The same settings as Odin's instance, plus the in-window file picker, because a portal dialog is drawn by Odin's session and lands on Odin's screen
-                    home.file."${config.xdg.configHome}/vscodium-waypipe/Thor/User/settings.json".source =
-                        (pkgs.formats.json { }).generate "vscode-user-settings-thor" (
-                            config.programs.vscodium.profiles.default.userSettings
-                            // {
-                                "files.simpleDialog.enable" = true;
-                            }
-                        );
-
-                    home.persistence."/Storage/PhoneApps/VSCodium".directories = [
-                        ".config/vscodium-waypipe"
-                    ];
-                }
+        # Firefox ------------------------------------------------------------------------------------------------------------------------------------
+        {
+            systemd.tmpfiles.settings.PhoneApps = dirs [
+                "/Storage/PhoneApps/Firefox"
+                "/Storage/PhoneApps/Firefox/Thor"
             ];
-        };
+        }
+
+        # KeePassXC ----------------------------------------------------------------------------------------------------------------------------------
+        (
+            let
+                # Thor has no system tray, so anything that parks the window in one leaves that instance with no window at all
+                thorConfig = (pkgs.formats.ini { }).generate "keepassxc-thor.ini" {
+                    General = {
+                        SingleInstance = false; # Otherwise the launch is handed to the instance running here and opens on this screen
+                        MinimizeAfterUnlock = false;
+                        HideWindowOnCopy = false;
+                        DropToBackgroundOnCopy = false;
+                    };
+
+                    GUI = {
+                        MinimizeOnStartup = false;
+                        MinimizeOnClose = false;
+                        MinimizeToTray = false;
+                        ShowTrayIcon = false;
+                    };
+
+                    SSHAgent.Enabled = false; # The instance autostarted here already adds the database's keys to gcr-ssh-agent
+                    Browser.Enabled = false; # One proxy socket per user, so a second server would take it from the first
+                };
+            in
+            {
+                systemd.tmpfiles.settings.PhoneApps = dirs [
+                    "/Storage/PhoneApps/KeePassXC"
+                    "/Storage/PhoneApps/KeePassXC/Thor"
+                ]
+                // {
+                    # Copied rather than linked, because KeePassXC rewrites its config on startup and would replace a store symlink with a file
+                    "/Storage/PhoneApps/KeePassXC/Thor/keepassxc.ini".C = {
+                        argument = "${thorConfig}";
+                        user = "beatlink";
+                        group = "beatlink";
+                        mode = "0644";
+                    };
+                };
+            }
+        )
+
+        # Trilium ------------------------------------------------------------------------------------------------------------------------------------
+        {
+            systemd.tmpfiles.settings.PhoneApps = dirs [
+                "/Storage/PhoneApps/Trilium"
+                "/Storage/PhoneApps/Trilium/Thor"
+            ];
+        }
+
+        # FreeTube -----------------------------------------------------------------------------------------------------------------------------------
+        (
+            let
+                # Safe because FreeTube resolves each database's realpath before opening it, so nedb compacting over the target leaves the link alone
+                shareWithThor =
+                    name:
+                    lib.nameValuePair "/Storage/PhoneApps/FreeTube/Thor/${name}.db" {
+                        "L+".argument = "/home/beatlink/.config/FreeTube/${name}.db";
+                    };
+            in
+            {
+                systemd.tmpfiles.settings.PhoneApps = dirs [
+                    "/Storage/PhoneApps/FreeTube"
+                    "/Storage/PhoneApps/FreeTube/Thor"
+                ]
+                # settings.db is left out so the phone keeps its own UI scale, and subscription-cache.db because sharing the busiest file buys nothing
+                // lib.listToAttrs (
+                    map shareWithThor [
+                        "profiles" # Subscriptions live in here, as an array on each profile rather than a database of their own
+                        "playlists"
+                        "history"
+                    ]
+                );
+            }
+        )
+
+        # VSCodium -----------------------------------------------------------------------------------------------------------------------------------
+        (
+            let
+                # The same settings as Odin's instance, plus the in-window file picker, because a portal dialog is drawn by Odin's session and lands on Odin's screen
+                thorSettings = (pkgs.formats.json { }).generate "vscode-user-settings-thor" (
+                    config.home-manager.users.beatlink.programs.vscodium.profiles.default.userSettings
+                    // {
+                        "files.simpleDialog.enable" = true;
+                    }
+                );
+            in
+            {
+                systemd.tmpfiles.settings.PhoneApps = dirs [
+                    "/Storage/PhoneApps/VSCodium"
+                    "/Storage/PhoneApps/VSCodium/Thor"
+                    "/Storage/PhoneApps/VSCodium/Thor/User"
+                ]
+                // {
+                    "/Storage/PhoneApps/VSCodium/Thor/User/settings.json"."L+".argument = "${thorSettings}";
+                };
+            }
+        )
+    ];
 }

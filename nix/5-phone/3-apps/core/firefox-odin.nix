@@ -21,7 +21,7 @@
         command = [
             "firefox"
             "--profile"
-            "/home/beatlink/.config/mozilla/firefox-waypipe/Personal-Thor"
+            "/Storage/PhoneApps/Firefox/Thor/Personal"
         ];
 
         # Odin's GTK apps otherwise reach for its own session rather than waypipe's display
