@@ -1,5 +1,6 @@
 [/]
 app-filter-mode=@as []
+favorites=@as []
 
 [plugins]
 lock-screen=['media-players', 'upcoming-events', 'emergency-info']
