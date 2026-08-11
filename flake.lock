@@ -712,6 +712,7 @@
         "sops-nix": "sops-nix",
         "vantage": "vantage",
         "vigil": "vigil",
+        "waypipe-desktop": "waypipe-desktop",
         "xdg-autostart": "xdg-autostart"
       }
     },
@@ -875,6 +876,23 @@
       },
       "original": {
         "path": "/Storage/Files/Projects/Coding/Vigil",
+        "type": "path"
+      }
+    },
+    "waypipe-desktop": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1786458632,
+        "narHash": "sha256-d6BBdrhFcPcDGrOAOZQHjhX8TRHSK/volvxVBMvC10A=",
+        "path": "/Storage/Files/Projects/Coding/WaypipeDesktop",
+        "type": "path"
+      },
+      "original": {
+        "path": "/Storage/Files/Projects/Coding/WaypipeDesktop",
         "type": "path"
       }
     },

@@ -106,6 +106,10 @@
             url = "github:BeatLink/Prewarm";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        waypipe-desktop = {
+            url = "path:/Storage/Files/Projects/Coding/WaypipeDesktop";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
     };
     outputs =
         inputs@{
