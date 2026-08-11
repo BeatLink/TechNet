@@ -131,8 +131,11 @@ let
             ];
             # The forward is left outside escapeShellArgs so XDG_RUNTIME_DIR still expands, which is what keeps the local uid out of this file
             text = ''
-                # waypipe binds the display socket without unlinking first, so one left by an unclean death would fail every session after it
-                ssh -o BatchMode=yes ${lib.escapeShellArg host} rm -f ${displaySocket}
+                # sshd does not reap the remote command when the link drops, and the sockets are removed below, so without this a restart
+                # orphans the previous session's bus and strands every app still attached to it
+                ssh -o BatchMode=yes ${lib.escapeShellArg host} ${
+                    lib.escapeShellArg "pkill -f '^dbus-daemon --session --address=unix:path=${busSocket}' || true; pkill -f '^waypipe .*--display ${displaySocket}' || true; rm -f ${displaySocket} ${busSocket}"
+                }
 
                 exec waypipe ${lib.escapeShellArgs cfg.flags} --display ${displaySocket} \
                     ssh -R ${audioSocket}:"$XDG_RUNTIME_DIR/pulse/native" \
