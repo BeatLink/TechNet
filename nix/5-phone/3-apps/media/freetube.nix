@@ -15,6 +15,7 @@
         ];
 
         audio = true; # waypipe carries Wayland alone, so without this the sound comes out of Odin
+        audioLatency = 400; # Sized for mobile data, where the round trip has swung between 65ms and 334ms
 
         command = [
             "freetube"
