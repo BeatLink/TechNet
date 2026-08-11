@@ -1,6 +1,6 @@
 # Waypipe ############################################################################################################################################
 #
-# Runs a Wayland application on another host and shows it here; each end authorises the other's key and holds its own half from sops.
+# Runs Wayland applications from another host inside one shared session per host, so they share a bus, a portal stack and this host's speakers.
 #
 {
     config,
@@ -16,6 +16,17 @@ let
 
     isOdin = config.networking.hostName == "Odin";
     peer = if isOdin then "thor" else "odin";
+
+    # Named after this host, because the sockets sit in the remote host's /tmp beside any other display's
+    session = lib.toLower config.networking.hostName;
+
+    # Absolute paths under /tmp, so nothing here has to resolve the remote host's uid or runtime directory
+    displaySocket = "/tmp/waypipe-${session}-display";
+    busSocket = "/tmp/waypipe-${session}-bus";
+    audioSocket = "/tmp/waypipe-${session}-audio";
+
+    hosts = lib.unique (lib.mapAttrsToList (_: app: app.host) cfg.apps);
+    unitName = host: "waypipe-session-${host}";
 
     appOptions =
         { name, ... }:
@@ -59,30 +70,96 @@ let
                     description = "Freedesktop categories for the launcher.";
                 };
 
-                extraFlags = lib.mkOption {
-                    type = lib.types.listOf lib.types.str;
-                    default = [ ];
-                    description = "Waypipe flags for this app alone, appended after the shared ones.";
+                audio = lib.mkOption {
+                    type = lib.types.bool;
+                    default = false;
+                    description = "Play the app's sound here rather than out of the remote host's speakers.";
                 };
             };
         };
 
-    # `env` with no assignments is still a valid exec, so an app needing no variables needs no special case
+    # Every app joins the session's display and bus, which is what gives them one portal stack and one instance each
     remoteArgv =
         app:
-        [ "env" ] ++ lib.mapAttrsToList (n: v: "${n}=${v}") app.environment ++ app.command;
+        [
+            "env"
+            "WAYLAND_DISPLAY=${displaySocket}"
+            "DBUS_SESSION_BUS_ADDRESS=unix:path=${busSocket}"
+        ]
+        ++ lib.optional app.audio "PULSE_SERVER=unix:${audioSocket}"
+        ++ lib.mapAttrsToList (n: v: "${n}=${v}") app.environment
+        ++ app.command;
 
+    # Holds the remote end of one session open: the bus it serves is the process, so the display lives exactly as long as the link
+    sessionLeader = pkgs.writeShellApplication {
+        name = "waypipe-session-leader";
+        runtimeInputs = with pkgs; [
+            coreutils
+            dbus
+        ];
+        text = ''
+            # ssh runs no login shell, so without this dbus finds no portal service file and every portal call times out
+            XDG_DATA_DIRS="$HOME/.nix-profile/share:/etc/profiles/per-user/$(id -un)/share:/run/current-system/sw/share"
+            export XDG_DATA_DIRS
+
+            # GDK would otherwise pick X11 and draw the portal's dialogs on this host's own screen
+            export GDK_BACKEND=wayland
+
+            rm -f "$1"
+
+            # No --systemd-activation, so dbus spawns each portal from its Exec= line and the child inherits this session's display
+            exec dbus-daemon --session --address="unix:path=$1" --nofork --nopidfile
+        '';
+    };
+
+    # ServerAlive is what turns a dead link into a unit failure, rather than a session that hangs holding every window
+    sessionRunner =
+        host:
+        pkgs.writeShellApplication {
+            name = "waypipe-session-${host}";
+            runtimeInputs = with pkgs; [
+                openssh
+                waypipe
+            ];
+            # The forward is left outside escapeShellArgs so XDG_RUNTIME_DIR still expands, which is what keeps the local uid out of this file
+            text = ''
+                # waypipe binds the display socket without unlinking first, so one left by an unclean death would fail every session after it
+                ssh -o BatchMode=yes ${lib.escapeShellArg host} rm -f ${displaySocket}
+
+                exec waypipe ${lib.escapeShellArgs cfg.flags} --display ${displaySocket} \
+                    ssh -R ${audioSocket}:"$XDG_RUNTIME_DIR/pulse/native" \
+                        -o ServerAliveInterval=15 -o ServerAliveCountMax=3 \
+                        ${lib.escapeShellArg host} waypipe-session-leader ${busSocket}
+            '';
+        };
+
+    # Polls on the far side, so waiting for the bus costs one connection rather than one per attempt
+    sessionReady =
+        host:
+        pkgs.writeShellApplication {
+            name = "waypipe-session-${host}-ready";
+            runtimeInputs = [ pkgs.openssh ];
+            text = ''
+                exec ssh -o BatchMode=yes ${lib.escapeShellArg host} ${
+                    lib.escapeShellArg "for _ in $(seq 60); do if test -S ${busSocket}; then exit 0; fi; sleep 0.2; done; exit 1"
+                }
+            '';
+        };
+
+    # Start blocks until ExecStartPost returns, so the app never races the display it is about to connect to
     launcher =
         key: app:
         pkgs.writeShellApplication {
             name = "waypipe-${key}";
             runtimeInputs = with pkgs; [
                 openssh
-                waypipe
+                systemd
             ];
             text = ''
-                exec waypipe ${lib.escapeShellArgs (cfg.flags ++ app.extraFlags)} \
-                    ssh ${lib.escapeShellArg app.host} ${lib.escapeShellArgs (remoteArgv app)}
+                # A session parked in failed state by the start limit would otherwise refuse every later launch
+                systemctl --user reset-failed ${unitName app.host}.service || true
+                systemctl --user start ${unitName app.host}.service
+                exec ssh -o BatchMode=yes ${lib.escapeShellArg app.host} ${lib.escapeShellArgs (remoteArgv app)}
             '';
         };
 
@@ -109,7 +186,7 @@ in
                 "--compress"
                 "zstd=1"
             ];
-            description = "Waypipe flags applied to every app, so tuning changes in one place.";
+            description = "Waypipe flags applied to each session, so tuning changes in one place.";
         };
 
         apps = lib.mkOption {
@@ -119,26 +196,66 @@ in
         };
     };
 
-    config = lib.mkIf cfg.enable {
-        home-manager.users.beatlink.home.packages =
-            [ pkgs.waypipe ]
-            ++ lib.flatten (lib.mapAttrsToList (key: app: [ (launcher key app) (desktopItem key app) ]) cfg.apps);
+    config = lib.mkIf cfg.enable (lib.mkMerge [
+        # Sessions -----------------------------------------------------------------------------------------------------------------------------------
+        {
+            home-manager.users.beatlink.systemd.user.services = lib.listToAttrs (
+                map (
+                    host:
+                    lib.nameValuePair (unitName host) {
+                        Unit = {
+                            Description = "Shared waypipe session on ${host}";
+                            After = [ "graphical-session.target" ];
+                            PartOf = [ "graphical-session.target" ];
 
-        sops.secrets.waypipe_key = {
-            sopsFile = "${config.technet.secrets.path}/waypipe.yaml";
-            owner = "beatlink";
-        };
+                            # Without a limit the 5s restart never trips systemd's default, so an unreachable host would be retried forever
+                            StartLimitBurst = 3;
+                            StartLimitIntervalSec = 60;
+                        };
 
-        users.users.beatlink.openssh.authorizedKeys.keys = [ (if isOdin then thorToOdin else odinToThor) ];
+                        # No Install section: a launcher starts this on demand, so a boot with the other host off does not retry forever
+                        Service = {
+                            ExecStart = lib.getExe (sessionRunner host);
+                            ExecStartPost = lib.getExe (sessionReady host);
+                            Restart = "on-failure";
+                            RestartSec = 5;
+                        };
+                    }
+                ) hosts
+            );
+        }
 
-        # A dedicated alias, so the waypipe key never displaces the agent key on a plain `ssh odin`
-        programs.ssh.extraConfig = ''
+        # Launchers ----------------------------------------------------------------------------------------------------------------------------------
+        {
+            home-manager.users.beatlink.home.packages =
+                [ pkgs.waypipe ]
+                ++ lib.flatten (lib.mapAttrsToList (key: app: [ (launcher key app) (desktopItem key app) ]) cfg.apps);
 
-            Host ${peer}-waypipe
-                HostName ${peer}.technet
-                User beatlink
-                IdentityFile ${config.sops.secrets.waypipe_key.path}
-                IdentitiesOnly yes
-        '';
-    };
+            # In the system profile, because the far end resolves it on a non-login PATH that need not carry the user's own
+            environment.systemPackages = [ sessionLeader ];
+        }
+
+        # Access -------------------------------------------------------------------------------------------------------------------------------------
+        {
+            sops.secrets.waypipe_key = {
+                sopsFile = "${config.technet.secrets.path}/waypipe.yaml";
+                owner = "beatlink";
+            };
+
+            users.users.beatlink.openssh.authorizedKeys.keys = [ (if isOdin then thorToOdin else odinToThor) ];
+
+            # An audio forward leaves its socket file behind, and sshd refuses to bind over one, so the next launch would come up silent
+            services.openssh.settings.StreamLocalBindUnlink = true;
+
+            # A dedicated alias, so the waypipe key never displaces the agent key on a plain `ssh odin`
+            programs.ssh.extraConfig = ''
+
+                Host ${peer}-waypipe
+                    HostName ${peer}.technet
+                    User beatlink
+                    IdentityFile ${config.sops.secrets.waypipe_key.path}
+                    IdentitiesOnly yes
+            '';
+        }
+    ]);
 }
