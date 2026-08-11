@@ -12,9 +12,6 @@
                     directories = [
                         ".local/share/trilium-data"
                         ".config/trilium-37840" # Electron userData; Trilium names it after its port, so TRILIUM_PORT changes this path
-                        # A second pair of roots, beside the first rather than inside it, holding the instance Thor opens over waypipe
-                        ".config/trilium-waypipe"
-                        ".local/share/trilium-waypipe"
                     ];
 
                 };

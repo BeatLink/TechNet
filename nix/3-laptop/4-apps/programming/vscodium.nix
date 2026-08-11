@@ -243,15 +243,6 @@
             };
 
             home = {
-                # Thor's waypipe instance reads settings from its own --user-data-dir; the same set as here, plus the in-window file picker, because a portal dialog is drawn by Odin's session and lands on Odin's screen
-                file."${config.xdg.configHome}/vscodium-waypipe/Thor/User/settings.json".source =
-                    (pkgs.formats.json { }).generate "vscode-user-settings-thor" (
-                        config.programs.vscodium.profiles.default.userSettings
-                        // {
-                            "files.simpleDialog.enable" = true;
-                        }
-                    );
-
                 # Claude Code's temp root, inside the persisted .claude below rather than on /tmp, so scratchpads and task output outlive a reboot along with the rest of its state
                 sessionVariables.CLAUDE_CODE_TMPDIR = "${config.home.homeDirectory}/.claude/tmp";
 
@@ -274,8 +265,6 @@
                 persistence."/Storage/Apps/Programming/VsCodium" = {
                     directories = [
                         ".config/VSCodium"
-                        # A second user-data root, beside the first rather than inside it, holding the instance Thor opens over waypipe
-                        ".config/vscodium-waypipe"
                         ".local/share/codium"
                         ".vscode-oss"
                         ".vscode-oss-shared"
