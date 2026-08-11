@@ -1,7 +1,8 @@
 # KeePassXC on Odin, displayed here over waypipe, on the same database.
 #
-# Odin autostarts its own instance for the SSH agent; single instance is off in
-# KeePassXC's own settings there, so this one opens here rather than handing over.
+# Odin autostarts its own instance for the SSH agent, minimized to its tray. This
+# one reads a config of its own, seeded by Odin's module, because there is no tray
+# here to hold a window or to get one back.
 #
 {
     technet.waypipe.apps.keepassxc-odin = {
@@ -16,6 +17,8 @@
 
         command = [
             "keepassxc"
+            "--config"
+            "/home/beatlink/.config/keepassxc-waypipe/Thor/keepassxc.ini"
             "/Storage/Files/Documents/SecurityDatabase.kdbx"
         ];
 
