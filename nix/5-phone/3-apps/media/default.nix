@@ -2,7 +2,8 @@
     imports = [
         ./camera.nix
         ./freetube.nix
-        ./images.nix
-        ./video.nix
+        ./pix-odin.nix
+        ./vlc-odin.nix
+        ./xviewer-odin.nix
     ];
 }
