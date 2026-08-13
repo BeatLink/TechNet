@@ -5,7 +5,6 @@
 
 {
     technet.secrets.directory = "5-phone";
-    technet.pinephoneCache.enable = true;
     technet.waypipe.enable = true;
 
     imports = [

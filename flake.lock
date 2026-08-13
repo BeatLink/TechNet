@@ -637,11 +637,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1785960041,
-        "narHash": "sha256-ET4IOpiZ0A6s+4IQT3v7a2SLcxajo2gRxwqHVde6w/8=",
+        "lastModified": 1786635653,
+        "narHash": "sha256-41cgv3QCRlnt6YSk1Ocfrul9reesO7xYKyX3VSMMyqA=",
         "owner": "BeatLink",
         "repo": "PinePhoneKernel",
-        "rev": "b2734bf9af54eb1421c253bd6b3101193f9c2166",
+        "rev": "d0fb732062eb32564198957c1fbbf19eaee4457c",
         "type": "github"
       },
       "original": {
