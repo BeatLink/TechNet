@@ -94,7 +94,7 @@ in
                 };
                 "root/swap" = {
                     type = "zfs_volume";
-                    size = "16G";
+                    size = "2G";
                     content = {
                         type = "swap";
                         randomEncryption = true;
