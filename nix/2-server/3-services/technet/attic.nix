@@ -36,7 +36,10 @@
     };
 
     # atticd keeps both its SQLite database and its chunk store in the state directory, so the whole thing lives on the data pool.
-    environment.persistence."/Storage/Services/Attic".directories = [ "/var/lib/atticd" ];
+    #
+    # The private path, not /var/lib/atticd: the service runs DynamicUser, so systemd owns /var/lib/private/atticd and leaves the shorter path as a
+    # symlink to it. Binding over /var/lib/atticd instead makes systemd try to migrate a mountpoint and fail the unit with EBUSY.
+    environment.persistence."/Storage/Services/Attic".directories = [ "/var/lib/private/atticd" ];
 
     # Cache contents are reproducible and large; the marker keeps borgmatic's `exclude_if_present` from pulling them into the repo.
     systemd.tmpfiles.settings."Attic" = {
