@@ -55,6 +55,12 @@ column, and their service definition lives in that host's own directory.
 | qBittorrent (torrents) | 6881 | TCP + UDP |
 | VLC (telnet)  | 4212 | 127.0.0.1; headless audio control for Home Assistant |
 
+## TechNet
+
+| Service | Port | Vhost / Notes |
+|---------|------|---------------|
+| Attic (binary cache) | 9400 | 127.0.0.1; attic.heimdall.technet |
+
 ## Personal Info & Files
 
 | Service | Port | Vhost / Notes |

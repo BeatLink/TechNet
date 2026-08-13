@@ -6,5 +6,6 @@
         ./monitoring
         ./networking
         ./personal-info-and-files
+        ./technet
     ];
 }

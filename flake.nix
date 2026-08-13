@@ -79,11 +79,11 @@
             inputs.nixpkgs.follows = "nixpkgs";
         };
         vigil = {
-            url = "path:/Storage/Files/Projects/Coding/Vigil";
+            url = "github:BeatLink/Vigil";
             inputs.nixpkgs.follows = "nixpkgs";
         };
         context = {
-            url = "path:/Storage/Files/Projects/Coding/Context";
+            url = "github:BeatLink/Context";
             inputs.nixpkgs.follows = "nixpkgs";
         };
         nixtool = {
@@ -107,7 +107,7 @@
             inputs.nixpkgs.follows = "nixpkgs";
         };
         waypipe-desktop = {
-            url = "path:/Storage/Files/Projects/Coding/WaypipeDesktop";
+            url = "github:BeatLink/WaypipeDesktop";
             inputs.nixpkgs.follows = "nixpkgs";
         };
     };
