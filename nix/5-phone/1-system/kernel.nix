@@ -22,9 +22,13 @@
 # The kernel deliberately comes from that flake's nixpkgs rather than ours. A
 # kernel built against a slightly different nixpkgs than userland is fine; making
 # it follow ours would change the stdenv, change the derivation, and lose the
-# cache entirely. The substituter is configured in
-# 0-common/1-system/10-binary-caches.nix, which is where it has to be for *Odin*
-# to fetch it while building Thor's closure.
+# cache entirely.
+#
+# That cache is published as a release asset rather than served, so it is not a
+# substituter anyone can point at. Heimdall unpacks it once and re-serves it from
+# Attic, which is where every host including Odin substitutes the kernel from
+# while building Thor's closure. See
+# nix/2-server/3-services/technet/pinephone-kernel-mirror.nix.
 #
 # Out-of-tree modules are still built locally against it. ZFS is the one that
 # matters here, since Thor's root is on it -- linuxPackagesFor builds that with

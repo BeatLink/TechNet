@@ -6,10 +6,13 @@
 # Caches and tokens are created once by hand with `atticd-atticadm`, the same one-time-manual-step pattern as Trilium's ETAPI token.
 #
 
-{ config, ... }:
+{ config, pkgs, ... }:
 {
     # RS256 key atticd signs its JWTs with; replacing it invalidates every token already handed out.
     sops.secrets.attic_env.sopsFile = "${config.technet.secrets.path}/attic.yaml";
+
+    # The module installs only the atticadm wrapper; creating caches and reading keys is the client's job.
+    environment.systemPackages = [ pkgs.attic-client ];
 
     services.atticd = {
         enable = true;
