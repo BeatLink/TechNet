@@ -115,14 +115,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1786246449,
-        "narHash": "sha256-kvr/ALFGX285ZHWvQSo5N/tLlSaDUIxTKJpBvQJHyjQ=",
-        "path": "/Storage/Files/Projects/Coding/Context",
-        "type": "path"
+        "lastModified": 1785623149,
+        "narHash": "sha256-l6yDUzufpieRkRyFESnZQQDsw2dR/iv/wGmEK60DKIk=",
+        "owner": "BeatLink",
+        "repo": "Context",
+        "rev": "1b87d5fbe9fe0fd3412fc21066a02905ceb3cb62",
+        "type": "github"
       },
       "original": {
-        "path": "/Storage/Files/Projects/Coding/Context",
-        "type": "path"
+        "owner": "BeatLink",
+        "repo": "Context",
+        "type": "github"
       }
     },
     "disko": {
@@ -851,14 +854,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1786632130,
-        "narHash": "sha256-XWK3UlUQ6XaC2XOHrAqDMOSGgJ2+tGuXB10P+Frh4Fg=",
-        "path": "/Storage/Files/Projects/Coding/Vigil",
-        "type": "path"
+        "lastModified": 1786632519,
+        "narHash": "sha256-dLohR6s6/ZB241Zpo3TW+Yo41PefTJhsrfBUc/9rRKo=",
+        "owner": "BeatLink",
+        "repo": "Vigil",
+        "rev": "67755a503166f96436362da1aa4ab189842f0a8d",
+        "type": "github"
       },
       "original": {
-        "path": "/Storage/Files/Projects/Coding/Vigil",
-        "type": "path"
+        "owner": "BeatLink",
+        "repo": "Vigil",
+        "type": "github"
       }
     },
     "waypipe-desktop": {
@@ -868,14 +874,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1786545382,
-        "narHash": "sha256-qAiJXDW2dNawhvBwG+nF05nvgm5BMOXz0nJinsUXqXs=",
-        "path": "/Storage/Files/Projects/Coding/WaypipeDesktop",
-        "type": "path"
+        "lastModified": 1786458632,
+        "narHash": "sha256-1jn8W6zUkRhGUY2UTeKtHY6Go3YeUhsv+Xl4/kAr1YQ=",
+        "owner": "BeatLink",
+        "repo": "WaypipeDesktop",
+        "rev": "50ee119123ef750e9a2dd72c95464c55e69bc100",
+        "type": "github"
       },
       "original": {
-        "path": "/Storage/Files/Projects/Coding/WaypipeDesktop",
-        "type": "path"
+        "owner": "BeatLink",
+        "repo": "WaypipeDesktop",
+        "type": "github"
       }
     },
     "xdg-autostart": {
