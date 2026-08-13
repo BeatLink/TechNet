@@ -47,11 +47,30 @@ substitutes from the `technet` cache, configured in
 [`attic-cache.nix`](../nix/0-common/1-system/software/attic-cache.nix); pushing
 into it needs a write token, which is not handed out by default.
 
-Caches and tokens have no declarative provisioning. They are created once with
-`atticd-atticadm`, which runs the admin tool as the service user:
+Caches and tokens have no declarative provisioning — they are created once by
+hand. `atticd-atticadm` runs the admin tool as the service user and mints
+tokens; the cache itself is created through the API with one of those tokens:
 
 ```sh
-atticd-atticadm make-token --sub odin --validity '1y' --pull 'technet' --push 'technet'
+# On Heimdall. A bootstrap token, then the cache, then the key the fleet trusts.
+atticd-atticadm make-token --sub bootstrap --validity '1h' \
+    --create-cache 'technet' --configure-cache 'technet' --push 'technet' --pull 'technet'
+attic login technet https://attic.heimdall.technet/ <token>
+attic cache create technet --public
+attic cache info technet          # prints the public key for attic-cache.nix
+```
+
+The cache is public, meaning any host that can reach the vhost substitutes from
+it without a token. That vhost is only reachable over the WireGuard mesh, so
+this is the same trust boundary the rest of the network already has, and it
+keeps every client's substituter config to a URL and a key with no netrc.
+
+Pushing still needs a token. The mirror service has a long-lived one in
+`secrets/2-server/attic.yaml`:
+
+```sh
+atticd-atticadm make-token --sub heimdall-mirror --validity '10y' \
+    --push 'technet' --pull 'technet'
 ```
 
 The store itself lives on the data pool via

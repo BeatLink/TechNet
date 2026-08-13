@@ -22,8 +22,8 @@ let
         map (name: builtins.unsafeDiscardStringContext kernel.${name}.outPath) kernel.outputs
     );
 
-    # The release is tagged with the commit, so the locked input revision is the whole address; no API call and no "latest" to race against.
-    releaseUrl = "https://github.com/BeatLink/PinePhoneKernel/releases/download/${inputs.pinephone-kernel.rev}/binary-cache.tar.zst";
+    # The release tag carries the commit, so the locked input revision is the whole address; no API call and no "latest" to race against.
+    releaseUrl = "https://github.com/BeatLink/PinePhoneKernel/releases/download/cache-${inputs.pinephone-kernel.rev}/binary-cache.tar.zst";
 
     cacheKey = "pinephone-kernel-1:Bh9JYKdNDBNwefy+ZrjHKjVUR453bPDXRMZ+kO9K33w=";
 in
