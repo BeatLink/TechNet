@@ -54,11 +54,18 @@ tokens; the cache itself is created through the API with one of those tokens:
 ```sh
 # On Heimdall. A bootstrap token, then the cache, then the key the fleet trusts.
 atticd-atticadm make-token --sub bootstrap --validity '1h' \
-    --create-cache 'technet' --configure-cache 'technet' --push 'technet' --pull 'technet'
+    --create-cache 'technet' --configure-cache 'technet' \
+    --configure-cache-retention 'technet' --push 'technet' --pull 'technet'
 attic login technet https://attic.heimdall.technet/ <token>
-attic cache create technet --public
+attic cache create technet
+attic cache configure technet --public
 attic cache info technet          # prints the public key for attic-cache.nix
 ```
+
+`--configure-cache-retention` is needed even though nothing here sets a
+retention period: `attic cache configure` always sends one, defaulting to the
+global value, so every call is checked against that permission as well. Without
+it the command fails with a bare "User does not have permission".
 
 The cache is public, meaning any host that can reach the vhost substitutes from
 it without a token. That vhost is only reachable over the WireGuard mesh, so
@@ -76,7 +83,24 @@ atticd-atticadm make-token --sub heimdall-mirror --validity '10y' \
 The store itself lives on the data pool via
 `environment.persistence."/Storage/Services/Attic"`, and carries a `.nobackup`
 marker so borgmatic skips it — the contents are reproducible and would otherwise
-dominate the repo.
+dominate the repo. The persisted path is `/var/lib/private/atticd`, not
+`/var/lib/atticd`: atticd runs under `DynamicUser`, so systemd owns the private
+path and leaves the shorter one as a symlink. Binding over `/var/lib/atticd`
+makes systemd try to migrate a mountpoint and the unit dies with `EBUSY`.
+
+## Mirroring the PinePhone kernel
+
+megi's kernel is not on `cache.nixos.org` and its flake no longer publishes a
+served substituter — it attaches a signed cache to a GitHub release per commit,
+because the GitHub Pages it used before answered HTTP 429 once more than a
+machine or two pulled from it.
+
+[`pinephone-kernel-mirror.nix`](../nix/2-server/3-services/technet/pinephone-kernel-mirror.nix)
+closes that gap: daily, it downloads the release asset for whatever revision the
+flake has locked, imports it, and pushes the three kernel outputs into Attic.
+The fleet then substitutes the kernel from Heimdall at LAN speed. It only
+downloads when the paths are absent from the store, so this is a cost per kernel
+bump rather than a daily one.
 
 ## Unlocking
 
