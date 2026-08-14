@@ -8,6 +8,7 @@
     config,
     lib,
     inputs,
+    pkgs,
     ...
 }:
 let
@@ -34,6 +35,19 @@ in
     };
 
     config = lib.mkIf cfg.enable (lib.mkMerge [
+        # Package ------------------------------------------------------------------------------------------------------------------------------------
+        {
+            nixpkgs.overlays = [
+                inputs.waypipe-desktop.overlays.default # Rebuilds the wrapper against the waypipe below, which its own flake output would miss
+                (final: prev: {
+                    waypipe = prev.waypipe.overrideAttrs (old: {
+                        # Drop when waypipe supports ffmpeg 9; 0.11.0 reads AVVulkanDeviceContext fields it no longer has and fails to compile
+                        mesonFlags = (old.mesonFlags or [ ]) ++ [ "-Dwith_video=disabled" ];
+                    });
+                })
+            ];
+        }
+
         # Launchers ----------------------------------------------------------------------------------------------------------------------------------
         {
             home-manager.users.beatlink = {
@@ -42,6 +56,7 @@ in
                 programs.waypipe-desktop = {
                     enable = true;
                     inherit (cfg) apps;
+                    package = pkgs.waypipe-desktop; # The overlay build, so the wrapper picks up the patched waypipe off this host's package set
 
                     # Declared rather than left to the tool's runtime hostname, so the sockets keep their names if this host ever gains a domain
                     sessionName = lib.toLower config.networking.hostName;

@@ -29,6 +29,11 @@ in
                 extraConfig = ''
                     minimum-vt = 7
                 '';
+                # defaultSession only stamps AccountsService, which web-greeter does not read; without this LightDM
+                # has no default and takes the first entry in sessions-directory, where xsessions comes first.
+                extraSeatDefaults = ''
+                    user-session = cinnamon-wayland
+                '';
                 greeters.gtk.enable = false; # Defaults on, and its own greeter definition would collide with the one below
                 # web-greeter has no NixOS module, so the greeter is named directly
                 greeter = {

@@ -1,4 +1,4 @@
-# Wayland Clients ###################################################################################################################################
+# Wayland Clients ####################################################################################################################################
 #
 # GTK, Qt 6 and Gecko all pick Wayland on their own under a Wayland session. Qt 5 and Chromium do not, so this sets the switch each of them reads.
 # Both switches fall back to X11 when there is no compositor, so an X11 session is unaffected. The Chromium apps whose wrapper ignores NIXOS_OZONE_WL

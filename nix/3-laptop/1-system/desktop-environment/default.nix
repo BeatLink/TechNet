@@ -20,5 +20,6 @@
         #./theme.nix
         #./hyprland
         ./cinnamon
+        ./wayland.nix
     ];
 }
