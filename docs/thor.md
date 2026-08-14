@@ -77,9 +77,10 @@ So Thor is installed from Odin over USB mass storage instead, with
 
 ### 1. Boot Thor into Tow-Boot's USB mass storage mode
 
-Hold **volume up** during boot to reach the Tow-Boot menu and select USB Mass
-Storage. Tow-Boot drives USB from U-Boot's own stack, so none of the Linux
-driver gaps above apply.
+Hold **volume up** during boot. The firmware drives USB from U-Boot's own stack,
+so none of the Linux driver gaps above apply. On the stock Tow-Boot build this
+reaches a menu; on the build described under [firmware](#firmware-and-the-boot-menu)
+it enters mass storage directly.
 
 ### 2. Connect Thor to Odin and identify the disk
 
@@ -148,6 +149,84 @@ sudo wipefs -a /dev/sdX
 built for Thor's architecture and is running under emulation. `install-local`
 forces `nixpkgs.hostPlatform` to the host's own system to avoid this; a
 hand-rolled `nix build` of `diskoScript` will hit it.
+
+## Firmware and the boot menu
+
+Thor's firmware is built from
+[BeatLink/Tow-Boot](https://github.com/BeatLink/Tow-Boot), branch
+`pinephone-display`, and lives in the eMMC boot partition
+(`/dev/mmcblk2boot0`). The A64 boot ROM prefers the SD card, so a card carrying
+firmware always wins over what is installed.
+
+### Why the screen used to stay dark until Plymouth
+
+Tow-Boot's own PinePhone build is *blind* by design — its board file sets
+`phone-ux.blind = true`, and its README states there is no display output for
+this device. That is not a configuration choice: no U-Boot release can drive
+this panel. `drivers/video/sunxi/` has the display engine, HDMI and a parallel
+LCD path, but no MIPI-DSI host at all, and the PinePhone's Xingbangda XBD599 is
+DSI. So the firmware signalled with LEDs and the vibrator, and systemd-boot,
+which draws on the UEFI console, only ever appeared over the serial console.
+
+### What the fork adds
+
+| | |
+| --- | --- |
+| `sunxi_mipi_dsi.c` | sun6i DSI host, ported from Linux by way of [pdscomp/u-boot-cc2](https://github.com/pdscomp/u-boot-cc2) |
+| `sunxi_lcd.c` | TCON0 in DSI mode: PLL_MIPI at four times the pixel clock, the 8080 CPU interface |
+| `panel-xingbangda-xbd599.c` | the panel itself, init sequence from Linux `panel-sitronix-st7703.c` |
+| `axp_regulator.c` | the AXP803 GPIO LDOs, which feed the panel and backlight |
+| `button-sun4i-lradc.c`, `button-axp-pek.c` | the volume keys and the power key, as a keyboard |
+
+Once a framebuffer exists, U-Boot puts `vidconsole` on `stdout` and hands the
+framebuffer to EFI as a GOP, so systemd-boot renders on the panel with no
+further work. The buttons reach it as arrow keys and enter:
+
+| Button | Key |
+| --- | --- |
+| Volume up | ↑ |
+| Volume down | ↓ |
+| Power | Enter |
+
+The mapping comes from `u-boot,code` in a U-Boot-only device tree overlay, which
+the drivers prefer over `linux,code`, so the volume keys stay volume keys under
+Linux.
+
+The build moved from Tow-Boot's own U-Boot fork (2023.07) to a stock release,
+because the patches target current code. That drops the LED and vibrator UX, and
+with it the blind menu. Holding **volume up** at power-on still enters USB mass
+storage mode, which is what the install above depends on.
+
+### Testing a new firmware safely
+
+Never write a new build to the eMMC first. The boot ROM prefers the SD card, so
+put it there instead and pull the card to fall back:
+
+```sh
+nix-build -A pine64-pinephoneA64          # in the Tow-Boot checkout
+sudo dd if=result/binaries/Tow-Boot.noenv.bin of=/dev/sdX bs=1024 seek=8 conv=fsync
+```
+
+`seek=8` is 8 KiB in, where the boot ROM looks. **Only that region** — Thor's SD
+card carries `data-pool-Thor` in its second partition, so writing the whole
+`shared.disk-image.img` destroys it.
+
+Watch the serial console during the first boot. Nothing about the display path
+runs in the SPL, so a failure there still reaches U-Boot's prompt over UART.
+
+Once a build is trusted, install it to the eMMC boot partition from Thor itself:
+
+```sh
+echo 0 | sudo tee /sys/block/mmcblk2boot0/force_ro
+sudo dd if=Tow-Boot.noenv.bin of=/dev/mmcblk2boot0 bs=1024 seek=8 conv=fsync
+```
+
+### Untested
+
+The display and button code has never run on hardware — Thor was offline when it
+was written. It builds, and the register sequences follow Linux's drivers, but
+every clock rate and every delay in it is unverified. Expect bring-up work, and
+keep a serial cable attached for the first attempt.
 
 ## Recovering a deeply discharged battery
 
