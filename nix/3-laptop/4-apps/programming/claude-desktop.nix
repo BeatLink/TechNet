@@ -85,6 +85,7 @@ let
             # It is set anyway to take effect if a later release wires it up.
             makeWrapper $out/lib/claude-desktop/claude-desktop $out/bin/claude-desktop \
                 --add-flags "--no-sandbox" \
+                --add-flags "--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations --enable-wayland-ime=true" \
                 --set-default ELECTRON_IS_DEV 0 \
                 --set-default CLAUDE_CODE_LOCAL_BINARY ${lib.getExe pkgs.claude-code}
 

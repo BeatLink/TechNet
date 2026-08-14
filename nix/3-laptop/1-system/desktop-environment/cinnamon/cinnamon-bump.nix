@@ -16,6 +16,9 @@ let
         };
 in
 {
+    # 6.7 locks the screen in-process and calls pam_start("cinnamon"); nixpkgs only defines cinnamon-screensaver
+    security.pam.services.cinnamon = { };
+
     nixpkgs.overlays = [
         (final: prev: {
             muffin = prev.muffin.overrideAttrs (old: {

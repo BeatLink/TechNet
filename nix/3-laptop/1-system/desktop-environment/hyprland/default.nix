@@ -35,14 +35,12 @@ in
 
     security.pam.services.hyprlock = { }; # Allows hyprlock to authenticate and unlock the session
 
-    # Nvidia Optimus requires these to be set for Wayland clients to pick the correct backend. Without them
-    # Electron/Chromium apps fall back to XWayland and Firefox ignores the hardware cursor.
+    # Nvidia Optimus requires these to be set for Wayland clients to pick the correct backend, or Firefox
+    # ignores the hardware cursor. Toolkit backends are not handled here; ../wayland.nix covers every session.
     environment.sessionVariables = {
-        NIXOS_OZONE_WL = "1";
         LIBVA_DRIVER_NAME = "nvidia";
         GBM_BACKEND = "nvidia-drm";
         __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-        ELECTRON_OZONE_PLATFORM_HINT = "auto";
         MOZ_ENABLE_WAYLAND = "1";
     };
 
