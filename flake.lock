@@ -344,11 +344,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786696583,
-        "narHash": "sha256-HWduAjaOvzIHm6+F+3M4+E57WIMHIa30EOtbGMStI5U=",
+        "lastModified": 1786722379,
+        "narHash": "sha256-Pm9n5jLRfGewuqZTZVN0BPK97uuryMNsbLu/i4oHNTc=",
         "owner": "BeatLink",
         "repo": "Halon",
-        "rev": "c6c7be612084fdaf3658c8b99b75de6c5eabd56e",
+        "rev": "6528c655146aa1d8de91f7234a20f6994a068313",
         "type": "github"
       },
       "original": {
@@ -380,11 +380,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786656209,
-        "narHash": "sha256-ybGtuwGKTUCefKYsplzvw4xcCqznto0c7BaiQhgILtA=",
+        "lastModified": 1786719456,
+        "narHash": "sha256-B74DLQs/VjlqyhnnX3tguWwghqJHWSJX30TKZuAljIg=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "c554d3441f725537854e877519f01cbd60680174",
+        "rev": "83b7606dcf44abe3a94b86e8bb2b3355d22e8797",
         "type": "github"
       },
       "original": {
