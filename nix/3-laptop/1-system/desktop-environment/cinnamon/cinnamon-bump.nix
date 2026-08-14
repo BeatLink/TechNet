@@ -24,6 +24,8 @@ in
             muffin = prev.muffin.overrideAttrs (old: {
                 version = "6.7.4-unstable";
                 src = mintSrc final "muffin" "6.7.4-unstable" "sha256-saReixkvlFM8VLV7MiOj0oU577d+HYf4ckF4p1DsLo4=";
+                # 6.7's wl_drm hands Xwayland the first enumerated GPU, which is the dGPU here, and glamor dies on it
+                patches = (old.patches or [ ]) ++ [ ./patches/muffin-wl-drm-primary-gpu.patch ];
                 # 6.7 installs a udev rule and defaults its directory to systemd's own store path
                 mesonFlags = (old.mesonFlags or [ ]) ++ [
                     "-Dudev_dir=${placeholder "out"}/lib/udev"
@@ -71,7 +73,10 @@ in
                             "wrapGApp $out/share/cinnamon/applets/printers@cinnamon.org/cancel-print-dialog.py"
                         ]
                         [ ":" ":" ]
-                        old.preFixup;
+                        old.preFixup
+                    + ''
+                        gappsWrapperArgs+=(--prefix PYTHONPATH : "$program_PYTHONPATH")
+                    '';
                 # 6.7 drops the 2D session, and the display manager asserts every provided session exists
                 passthru = old.passthru // {
                     providedSessions = [
