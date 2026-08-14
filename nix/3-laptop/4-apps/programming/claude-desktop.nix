@@ -38,14 +38,14 @@ let
             nspr
             nss
             pango
-            xorg.libX11
-            xorg.libXcomposite
-            xorg.libXdamage
-            xorg.libXext
-            xorg.libXfixes
-            xorg.libXrandr
-            xorg.libxcb
-            xorg.libXtst
+            libx11
+            libxcb
+            libxcomposite
+            libxdamage
+            libxext
+            libxfixes
+            libxrandr
+            libxtst
         ];
 
         # The Electron bundle dlopens these at runtime rather than linking them.

@@ -21,7 +21,7 @@
 
     services.calibre-web-automated = {
         enable = true;
-        package = inputs.calibre-web-automated.packages.${pkgs.system}.default;
+        package = inputs.calibre-web-automated.packages.${pkgs.stdenv.hostPlatform.system}.default;
         port = 8083;
         configDir = "/Storage/Services/Calibre-Web/config";
         libraryDir = "/Storage/Files/eBooks/Calibre/Library";
