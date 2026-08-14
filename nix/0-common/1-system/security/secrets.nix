@@ -18,6 +18,12 @@ in
             description = "This host's directory under secrets/, relative to the flake root.";
         };
 
+        root = lib.mkOption {
+            type = lib.types.path;
+            readOnly = true;
+            description = "Absolute path to the secrets tree, for the rare module that reads another host's file.";
+        };
+
         path = lib.mkOption {
             type = lib.types.path;
             readOnly = true;
@@ -32,7 +38,8 @@ in
     };
 
     config.technet.secrets = {
-        path = "${inputs.self}/secrets/${cfg.directory}";
-        commonPath = "${inputs.self}/secrets/0-common";
+        root = "${inputs.self}/secrets";
+        path = "${cfg.root}/${cfg.directory}";
+        commonPath = "${cfg.root}/0-common";
     };
 }
