@@ -5,7 +5,7 @@
 # the file manually.
 #
 
-{ pkgs, ... }:
+{ inputs, pkgs, ... }:
 let
     webGreeter = pkgs.callPackage ./web-greeter.nix { };
 in
@@ -75,6 +75,7 @@ in
     '';
 
     environment.systemPackages = with pkgs; [
+        inputs.halon.packages.${pkgs.stdenv.hostPlatform.system}.halon-theme
         gnome-themes-extra
         libnotify
         ddcutil

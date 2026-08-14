@@ -8,7 +8,7 @@
 # so the session survives it.
 #
 # Cinnamon is deliberately not driven from here. Its appearance is dconf settings exported from the
-# session, its look is Mint-Y by choice, and a GTK theme set through home-manager does not override its
+# session, its look is Halon by choice, and a GTK theme set through home-manager does not override its
 # xsettings daemon anyway — so the option themes the Hyprland session and leaves Cinnamon alone.
 
 { config, lib, pkgs, ... }:
@@ -19,27 +19,7 @@ let
     rgbOf = hex: lib.concatStringsSep ", " (map (i: toString (hexToDec (builtins.substring i 2 hex))) [ 0 2 4 ]);
 
     looks = {
-        # Arc — the flat blue-grey look Budgie/Solus shipped by default. Assembled from the canonical
-        # Arc-Dark palette; the GTK side is the maintained jnsh fork of arc-theme, with Papirus icons,
-        # which is the pairing Arc desktops conventionally use.
-        arc = {
-            surface = "383c4a"; # window background
-            card = "404552"; # raised surfaces
-            border = "4b5162"; # dividers, inactive borders
-            text = "d3dae3";
-            accent = "5294e2"; # the Arc blue
-            red = "e14245";
-            yellow = "f8c146";
-            gtk = {
-                name = "Arc-Dark";
-                package = pkgs.arc-theme;
-            };
-            icons = {
-                name = "Papirus-Dark";
-                package = pkgs.papirus-icon-theme;
-            };
-        };
-        # Mint-Y with the aqua accent, matching Cinnamon — the default. nixpkgs' mint-themes tracks
+        # Mint-Y with the aqua accent — the default. nixpkgs' mint-themes tracks
         # Mint's releases, so this is whatever Mint currently ships as Mint-Y-Dark-Aqua.
         mint = {
             surface = "1e1e1e";
@@ -56,25 +36,6 @@ let
             icons = {
                 name = "Mint-Y-Aqua";
                 package = pkgs.mint-y-icons;
-            };
-        };
-        # Nord — kept as a third option so the enum is honestly an enum, and because its blue-grey is
-        # close enough to Arc's to be a reasonable alternative with a softer accent.
-        nord = {
-            surface = "2e3440";
-            card = "3b4252";
-            border = "4c566a";
-            text = "d8dee9";
-            accent = "88c0d0";
-            red = "bf616a";
-            yellow = "ebcb8b";
-            gtk = {
-                name = "Nordic";
-                package = pkgs.nordic;
-            };
-            icons = {
-                name = "Papirus-Dark";
-                package = pkgs.papirus-icon-theme;
             };
         };
     };
