@@ -2,7 +2,7 @@
 {
     environment.systemPackages = with pkgs; [ tilix ];
     home-manager.users.beatlink =
-        { pkgs, ... }:
+        { config, pkgs, ... }:
         {
             home = {
                 persistence."/Storage/Apps/Tools/Tilix" = {
@@ -10,6 +10,11 @@
                     ];
 
                 };
+            };
+            # Out-of-store symlinks, because home is wiped each boot and a store copy would freeze the schemes mid-development
+            xdg.configFile = {
+                "tilix/schemes/Halon.json".source = config.lib.file.mkOutOfStoreSymlink "/Storage/Files/Projects/Coding/Halon/tilix/Halon.json";
+                "tilix/schemes/Halon-Dark.json".source = config.lib.file.mkOutOfStoreSymlink "/Storage/Files/Projects/Coding/Halon/tilix/Halon-Dark.json";
             };
             xdg.desktopEntries."com.gexperts.Tilix" = {
                 name = "Tilix";

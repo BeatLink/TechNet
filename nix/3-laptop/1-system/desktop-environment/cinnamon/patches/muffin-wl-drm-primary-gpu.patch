@@ -1,0 +1,50 @@
+wayland/drm: advertise the primary GPU's render node, not the first one
+
+meta_wayland_drm_init takes gpus->data, which is whichever DRM device udev
+enumerated first. On a hybrid laptop that is usually the discrete card, so
+wl_drm hands Xwayland a render node the session does not render on -- while
+linux-dmabuf feedback correctly reports the primary GPU. Xwayland opens the
+advertised node for glamor's GBM EGL display, and where the two disagree it
+loses hardware acceleration entirely: with libglvnd pinned to Mesa,
+eglInitialize fails on an NVIDIA node and every X11 client falls back to
+llvmpipe.
+
+Ask the renderer for the primary GPU instead, falling back to the old
+behaviour when the native renderer is not in use.
+
+--- a/src/wayland/meta-wayland-drm.c
++++ b/src/wayland/meta-wayland-drm.c
+@@ -25,6 +25,7 @@
+
+ #include "backends/meta-backend-private.h"
+ #include "backends/native/meta-gpu-kms.h"
++#include "backends/native/meta-renderer-native.h"
+ #include "wayland/meta-wayland-private.h"
+
+ #include "wayland-drm-server-protocol.h"
+@@ -118,8 +119,9 @@ void
+ meta_wayland_drm_init (MetaWaylandCompositor *compositor)
+ {
+   MetaBackend *backend = meta_get_backend ();
++  MetaRenderer *renderer;
+   GList *gpus;
+-  MetaGpuKms *gpu_kms;
++  MetaGpuKms *gpu_kms = NULL;
+   int kms_fd;
+   char *render_node_path;
+
+@@ -127,7 +129,13 @@ meta_wayland_drm_init (MetaWaylandCompositor *compositor)
+   if (!gpus)
+     return;
+
+-  gpu_kms = META_GPU_KMS (gpus->data);
++  renderer = meta_backend_get_renderer (backend);
++  if (META_IS_RENDERER_NATIVE (renderer))
++    gpu_kms = meta_renderer_native_get_primary_gpu (META_RENDERER_NATIVE (renderer));
++
++  if (!gpu_kms)
++    gpu_kms = META_GPU_KMS (gpus->data);
++
+   kms_fd = meta_gpu_kms_get_fd (gpu_kms);
+   render_node_path = drmGetRenderDeviceNameFromFd (kms_fd);
+
