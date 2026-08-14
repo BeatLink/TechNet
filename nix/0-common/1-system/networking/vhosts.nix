@@ -1,7 +1,7 @@
 # Names for the services a host runs itself.
 #
-# `technet.vhosts.syncthing.port = 8384` on Thor gives syncthing.thor.lan,
-# served by nginx on Thor and proxied to loopback.
+# `technet.vhosts.syncthing.port = 8384` on Odin gives syncthing.odin.lan,
+# served by nginx on Odin and proxied to loopback.
 #
 # Deliberately local. Heimdall could proxy these instead, and for a service that
 # lives on Heimdall it does -- see 2-server/3-services/networking/nginx-vhosts.nix.

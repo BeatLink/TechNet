@@ -77,11 +77,6 @@
             host = "10.100.100.2";
             port = 8384;
         };
-        syncthing-thor = {
-            domain = "syncthing-thor.heimdall.technet";
-            host = "10.100.100.4";
-            port = 8384;
-        };
     };
 
     systemd.services.syncthing-vigil-api-key = {

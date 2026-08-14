@@ -139,10 +139,10 @@
                         # and reachable from other machines through these.
                         #
                         # One line per service rather than a wildcard. dnsmasq
-                        # accepts `cname=*.thor.lan,thor.lan` -- its own
+                        # accepts `cname=*.odin.lan,odin.lan` -- its own
                         # --test says the syntax is fine -- and then resolves
                         # nothing, verified against 2.93. The wildcard that
-                        # does work, `address=/thor.lan/<ip>`, takes a literal
+                        # does work, `address=/odin.lan/<ip>`, takes a literal
                         # address, and there is no DHCP reservation here to pin
                         # one, so it would break whenever a lease moved.
                         #
@@ -152,7 +152,6 @@
                         # Worth remembering that adding a technet.vhosts entry
                         # does not add one of these. The name will work on the
                         # host itself, via its own /etc/hosts, and nowhere else.
-                        "syncthing.thor.lan,thor.lan"
                         "syncthing.odin.lan,odin.lan"
                         "syncthing.ragnarok.lan,ragnarok.lan"
                     ];

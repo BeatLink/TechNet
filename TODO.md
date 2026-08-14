@@ -23,9 +23,9 @@ Built and waiting to deploy, most of it unverified on hardware.
   over ssh with remote sudo and wants an interactive password -- so it needs
   `sudo nixos-rebuild switch --flake .#Odin` locally. Dry-activate was clean, no
   display-manager restart.
-* Then check the cross-host half actually works: `curl http://syncthing.thor.lan`
-  from Odin and the reverse. Thor is deployed and serving; only the local half
-  is proven so far, on Thor itself.
+* Then check the cross-host half actually works: `curl
+  http://syncthing.ragnarok.lan` from Odin and the reverse. Only the local half
+  is proven so far.
 * Backups only cover /Storage/System, which is 7.5K
 * aarch64 now builds here under binfmt, not on Ragnarok
 
@@ -88,7 +88,6 @@ Built and waiting to deploy, most of it unverified on hardware.
 
   * Login and sync firefox
   * Setup Trilium
-  * Syncthing
   * Setup Matrix
   * Setup Discord
   * Setup Phone

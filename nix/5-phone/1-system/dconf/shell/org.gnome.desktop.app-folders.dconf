@@ -22,7 +22,7 @@ apps=['org.gnome.Calls.desktop', 'sm.puri.Chatty.desktop']
 name='Comms'
 
 [folders/f089a48d-2e2a-40c6-a6c6-17b9a668ba2b]
-apps=['waypipe-home-assistant.desktop', 'syncthing-ui.desktop', 'waypipe-syncthing-web.desktop', 'ca.andyholmes.Valent.desktop']
+apps=['waypipe-home-assistant.desktop', 'ca.andyholmes.Valent.desktop']
 name='TechNet'
 
 [folders/f78d9294-7d59-4a43-b7be-1446de0bd02a]
