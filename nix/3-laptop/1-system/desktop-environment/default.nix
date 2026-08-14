@@ -20,6 +20,7 @@
         #./theme.nix
         #./hyprland
         ./cinnamon
+        ./qt.nix
         ./wayland.nix
     ];
 }
