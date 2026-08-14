@@ -23,10 +23,9 @@ let
         wifi-security.auth-alg = "open";
     };
 
-    # DHCP on the link, but DNS pinned to Pi-hole over the tunnel.
-    dhcpViaTechNetDNS = {
+    # DHCP on the link, leaving Pi-hole to the tunnel profile so a dead tunnel never outranks the link's own resolver.
+    dhcpNoSearchDomain = {
         ipv4 = {
-            dns = "10.100.100.1";
             dns-search = "";
             method = "auto";
         };
@@ -43,9 +42,9 @@ in
         sopsFile = "${config.technet.secrets.path}/networkmanager.yaml";
 
         networks = {
-            "TechNet Wi-Fi" = wifiExtras // dhcpViaTechNetDNS;
-            "Digicel_5G_WiFi_5tDQ" = wifiExtras // dhcpViaTechNetDNS;
-            "Thor Hotspot" = wifiExtras // dhcpViaTechNetDNS;
+            "TechNet Wi-Fi" = wifiExtras // dhcpNoSearchDomain;
+            "Digicel_5G_WiFi_5tDQ" = wifiExtras // dhcpNoSearchDomain;
+            "Thor Hotspot" = wifiExtras // dhcpNoSearchDomain;
         };
 
         wireguard = {
@@ -63,8 +62,8 @@ in
             ipv4 = {
                 method = "manual";
                 dns = "10.100.100.1";
-                # Negative, so Pi-hole answers alone while the tunnel is up: a carrier resolver listed first NXDOMAINs .technet and glibc stops at the first answer
-                dns-priority = "-100";
+                # Low but positive, so Pi-hole is asked first for .technet while the link's own resolver stays listed behind it: a negative value is exclusive and suppresses that fallback, leaving nothing able to resolve the peer endpoint once the tunnel drops
+                dns-priority = 2;
                 dns-search = "";
                 addresses = "10.100.100.4/24";
             };
