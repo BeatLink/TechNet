@@ -61,7 +61,11 @@ in
         '';
 
         home-manager.users.beatlink = {
-            home.file.".config/gtk-3.0/bookmarks".text = cfg.bookmarks;
+            # nemo-desktop rewrites the file at every login, replacing the symlink, and the backup it earns collides on the next switch
+            home.file.".config/gtk-3.0/bookmarks" = {
+                text = cfg.bookmarks;
+                force = true;
+            };
         };
     };
 }

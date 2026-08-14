@@ -8,6 +8,7 @@
     home-manager.users.beatlink =
         {
             config,
+            inputs,
             pkgs,
             ...
         }:
@@ -32,9 +33,9 @@
                             # colorTheme stays declared as the fallback for when
                             # auto-detection is turned off.
                             "window.autoDetectColorScheme" = true;
-                            "workbench.preferredLightColorTheme" = "Light 2026";
-                            "workbench.preferredDarkColorTheme" = "Dark 2026";
-                            "workbench.colorTheme" = "Light 2026";
+                            "workbench.preferredLightColorTheme" = "Halon Light";
+                            "workbench.preferredDarkColorTheme" = "Halon Dark";
+                            "workbench.colorTheme" = "Halon Light";
                             "workbench.tree.indent" = 20;
                             "workbench.enableExperiments" = false;
                             "workbench.editor.enablePreview" = false;
@@ -237,7 +238,16 @@
                             fnando.linter
                             colinkiama.linter-vala
                             emeraldwalk.runonsave
-                        ]);
+                        ])
+                        # The published theme is a plain derivation, so the ids extensions.json requires are stamped on here
+                        ++ [
+                            (inputs.halon.packages.${pkgs.stdenv.hostPlatform.system}.halon-vscode-theme.overrideAttrs (old: {
+                                passthru = (old.passthru or { }) // {
+                                    vscodeExtUniqueId = "halon.halon-theme";
+                                    vscodeExtPublisher = "halon";
+                                };
+                            }))
+                        ];
                     };
                 };
             };

@@ -45,6 +45,10 @@
             url = "github:BeatLink/gmusicbrowser-nix-flake";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        halon = {
+            url = "github:BeatLink/Halon";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
         nixos-plymouth = {
             url = "github:BeatLink/nixos-plymouth";
         };
