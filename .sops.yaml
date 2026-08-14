@@ -13,6 +13,19 @@ creation_rules:
                 - *host_heimdall
                 - *host_odin
                 - *host_thor
+    # Odin reads these two so nixtool can hand the passphrase to an install; keep them ahead of the directory rules below, which match first-wins
+    - path_regex: secrets/1-backup-server/clevis\.yaml$
+      key_groups:
+          - age:
+                - *user_beatlink
+                - *host_ragnarok
+                - *host_odin
+    - path_regex: secrets/2-server/clevis\.yaml$
+      key_groups:
+          - age:
+                - *user_beatlink
+                - *host_heimdall
+                - *host_odin
     - path_regex: secrets/1-backup-server/.*
       key_groups:
           - age:
