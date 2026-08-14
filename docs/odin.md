@@ -82,14 +82,34 @@ WireGuard address then the LAN one. Thor overrides this to its USB link address.
 ## nixtool
 
 The module is imported for every host by
-[`software.nix`](../nix/0-common/1-system/software/auto-upgrade.nix), but only Odin
-enables it, in [`20-nixtool.nix`](../nix/3-laptop/1-system/20-nixtool.nix), which
+[`nixtool.nix`](../nix/0-common/1-system/software/nixtool.nix), but only Odin
+enables it, in [`nixtool.nix`](../nix/3-laptop/4-apps/technet/nixtool.nix), which
 renders `/etc/nixtool/nixtool-config.json`. Installer credentials are named as
 sops paths rather than values, so nothing sensitive reaches the Nix store.
 
 Every host is deployed from here. Its own command is under *Deploying to Odin*
 above; the others are in [Heimdall](heimdall.md), [Ragnarok](ragnarok.md) and
 [Thor](thor.md).
+
+### Install credentials
+
+Odin installs every host, so it holds every host's `ENCRYPTION_KEY`,
+`SSH_HOST_KEY` and `SSH_INITRD_KEY`. The host keys matter as much as the
+passphrase: `sops.age.sshKeyPaths` derives each host's age identity from
+`ssh_host_ed25519_key`, so a reinstall that generates a fresh one leaves the
+machine unable to decrypt its own secrets.
+
+The passphrases come from two places, deliberately:
+
+- **Heimdall and Ragnarok** reuse the `zfs_passphrase` already in their own
+  `clevis.yaml`, which Odin is now a recipient of. There is one copy, so
+  rotating it is a single edit to the host's file.
+- **Odin and Thor** keep theirs in
+  [`nixtool.yaml`](../secrets/3-laptop/nixtool.yaml). Odin runs no clevis, and
+  Thor's predates the arrangement above.
+
+`SSH_PASSWORD` is not stored. It is whatever the target's live installer was
+given that boot, so `install-nixos` prompts for it.
 
 ## Cross-architecture builds
 

@@ -11,6 +11,7 @@
         displayManager = {
             logToFile = false;
             logToJournal = false;
+            defaultSession = "cinnamon-wayland"; # Per-output scanout buffers, so losing a monitor cannot wedge every head at once
         };
         xserver = {
             enable = true; # Enables X11 Server
