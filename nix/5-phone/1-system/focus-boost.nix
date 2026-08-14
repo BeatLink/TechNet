@@ -52,9 +52,8 @@ let
         # Stays behind phosh's -5 so the compositor outranks what draws into it.
         nice = -3;
         memoryLow = "384M";
-        # Syncthing resumes mid-transfer, so a long foreground session delays a
-        # sync rather than corrupting one.
-        suspendUnits = [ "syncthing.service" ];
+        # Nothing in the session is worth freezing; only a unit that resumes cleanly mid-work belongs here.
+        suspendUnits = [ ];
         # Reached through the sudo helper below, not the session's own systemctl.
         suspendSystemUnits = [ "prewarm-watch.service" ];
         # Above the 11s an app took to cold-start here, or switching apps thaws

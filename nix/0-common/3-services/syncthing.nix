@@ -10,8 +10,10 @@
 # restated.
 #
 # ThorX is the Android phone, at thorx.technet / 10.100.100.5. Its Syncthing is configured on the device rather than through Nix, so it
-# appears here only as a peer. It used to be called Thor, which collided with the PinePhone -- a NixOS host whose networking.hostName is
-# also Thor, at thor.technet / 10.100.100.4. pi-hole's device list has always distinguished the two; the mesh had not.
+# appears here only as a peer.
+#
+# Thor, the PinePhone at thor.technet / 10.100.100.4, is not a peer. It ran Syncthing until it was deprovisioned; the config was removed
+# rather than left disabled, so nothing here should grow a Thor entry back without the host module coming with it.
 #
 {
     config,
@@ -43,13 +45,6 @@ let
                 "tcp://odin.technet:22000"
             ];
         };
-        Thor = {
-            id = "DGCLOUO-G4JS2TA-Q65LAHH-2F53VKG-SCFK5UQ-RK7HYQH-3XUEDPV-E4OA7QV";
-            addresses = [
-                "tcp://thor.lan:22000"
-                "tcp://thor.technet:22000"
-            ];
-        };
         ThorX = {
             id = "AGVZ3DQ-LX5CBXY-G6NKD4E-HOW7QNG-KAGSVOY-KRBUABG-BCDNEPU-SHJF4Q4";
             addresses = [
@@ -60,7 +55,6 @@ let
     };
 
     allPeers = lib.attrNames devices;
-    exceptThor = lib.subtractLists [ "Thor" ] allPeers;
 
     # Merged into every folder's patterns; (?d) lets peers delete what they already hold
     commonIgnorePatterns = [
@@ -75,7 +69,6 @@ let
     folders = {
         Documents = { };
         Downloads = {
-            devices = exceptThor;
             ignorePatterns = [
                 "(?d)*.!qB"
                 "(?d)*.parts"
@@ -99,9 +92,7 @@ let
                 "Odin"
             ];
         };
-        Sounds = {
-            devices = exceptThor;
-        };
+        Sounds = { };
         Videos = { };
     };
     folderIds = {

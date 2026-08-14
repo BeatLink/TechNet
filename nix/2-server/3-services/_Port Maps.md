@@ -70,7 +70,6 @@ column, and their service definition lives in that host's own directory.
 | Syncthing (Web UI)   | 8384  | syncthing.heimdall.technet |
 | Syncthing (transfer) | 22000 | Default sync ports |
 | Syncthing on Odin      | 8384 | 10.100.100.2; syncthing-odin.heimdall.technet |
-| Syncthing on Thor      | 8384 | 10.100.100.4; syncthing-thor.heimdall.technet |
 | Syncthing on Ragnarok  | 8384 | syncthing.ragnarok.lan; loopback only, no Heimdall proxy |
 | BlockURL     | 9001 | blockurl.heimdall.technet |
 

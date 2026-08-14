@@ -63,9 +63,10 @@
     # a per-pool tuning however much it reads like one.
     #
     # Unlike the ARC cap, these are a considered starting point rather than a
-    # measured win. The thing to watch is whether Syncthing's initial hashing
-    # still starves the session; if it does, the next lever is Syncthing's own
-    # concurrency rather than pushing these lower.
+    # measured win. The thing to watch is whether a sustained bulk write -- a
+    # nix copy, a large transfer onto the card -- starves the session; if it
+    # does, the next lever is that writer's own concurrency rather than pushing
+    # these lower.
     boot.extraModprobeConfig = ''
         options zfs zfs_arc_max=1610612736
         options zfs zfs_vdev_max_active=4
@@ -196,8 +197,8 @@
     # not the same freeze:
     #
     #   Nice, CPUWeight, IOWeight  help when something is competing for CPU or
-    #                              the card -- Syncthing hashing, a Waydroid
-    #                              container, a nix copy. Real here, and what
+    #                              the card -- a Waydroid container, a nix
+    #                              copy. Real here, and what
     #                              these are for.
     #
     #   MemoryMin, MemoryLow       help when the stall is memory reclaim, which
@@ -288,7 +289,7 @@
     # zstd is the better ratio and the wrong trade here. z_wr_iss -- the ZFS
     # write pipeline, where compression happens -- is the largest single CPU
     # consumer on this phone across a whole boot, 514s of cumulative time ahead
-    # of Syncthing, phosh and Firefox, and it spikes past a full core during
+    # of phosh and Firefox, and it spikes past a full core during
     # writes. Those are kernel threads in the root cgroup, so no CPUQuota,
     # CPUWeight or Nice anywhere in this file reaches them; the only way to
     # spend less CPU there is to ask for less work.
