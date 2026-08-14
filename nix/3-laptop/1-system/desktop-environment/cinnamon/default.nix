@@ -6,7 +6,12 @@
 #
 
 { pkgs, ... }:
+let
+    webGreeter = pkgs.callPackage ./web-greeter.nix { };
+in
 {
+    imports = [ ./cinnamon-bump.nix ];
+
     services = {
         displayManager = {
             logToFile = false;
@@ -24,30 +29,11 @@
                 extraConfig = ''
                     minimum-vt = 7
                 '';
-                greeters.gtk = {
-                    cursorTheme = {
-                        name = "Bibata-Modern-Classic";
-                        package = pkgs.bibata-cursors;
-                    };
-                    iconTheme = {
-                        name = "Mint-Y-Aqua";
-                        package = pkgs.mint-y-icons;
-                    };
-                    theme = {
-                        name = "Mint-Y-Aqua";
-                        package = pkgs.mint-themes;
-                    };
-                    clock-format = "%H:%M:%S`";
-                    indicators = [
-                        "~host"
-                        "~spacer"
-                        "~clock"
-                        "~spacer"
-                        "~session"
-                        "~language"
-                        "~a11y"
-                        "~power"
-                    ];
+                greeters.gtk.enable = false; # Defaults on, and its own greeter definition would collide with the one below
+                # web-greeter has no NixOS module, so the greeter is named directly
+                greeter = {
+                    package = webGreeter.xgreeters;
+                    name = "web-greeter";
                 };
             };
             desktopManager.cinnamon.enable = true; # Enables Cinnamon
@@ -56,12 +42,40 @@
         };
         libinput.enable = true; # Enables Touchpad Functionality
     };
+    # web-greeter reads this path unconditionally; it has no XDG or per-user lookup
+    environment.etc."lightdm/web-greeter.toml".text = ''
+        layouts = [ "us" ]
+
+        [greeter]
+        debug-mode = false
+        detect-theme-errors = true
+        screensaver-timeout = 300
+        secure-mode = true
+        theme = "gruvbox"
+        icon-theme = "Bibata-Modern-Classic" # Named icon-theme, but the greeter only feeds it to XCURSOR_THEME
+
+        [features.battery]
+        enabled = true
+
+        # Off because the greeter writes /sys/class/backlight directly, which the lightdm user cannot do
+        [features.backlight]
+        enabled = false
+        value = 10
+        steps = 0
+
+        [branding]
+        background-images-dir = "/run/current-system/sw/share/backgrounds"
+        logo-image = "${webGreeter}/share/icons/hicolor/scalable/apps/com.github.jezerm.web-greeter.svg"
+        user-image = "${webGreeter}/share/icons/hicolor/scalable/apps/com.github.jezerm.web-greeter.svg"
+    '';
+
     environment.systemPackages = with pkgs; [
         gnome-themes-extra
         libnotify
         ddcutil
         i2c-tools
         brightnessctl
+        bibata-cursors # The greeter resolves its cursor through XCURSOR_PATH, which covers the system profile
     ];
     environment.cinnamon.excludePackages = with pkgs; [
         onboard
