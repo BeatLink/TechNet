@@ -33,6 +33,9 @@
 #
 { pkgs, ... }:
 {
+    # The radio stays down until it is asked for, rather than drawing power on every boot.
+    hardware.bluetooth.powerOnBoot = false;
+
     systemd.services.bluetooth-firmware-rebind = {
         description = "Re-probe the Bluetooth radio once its firmware is reachable";
         wantedBy = [ "multi-user.target" ];

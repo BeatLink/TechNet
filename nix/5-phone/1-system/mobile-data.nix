@@ -36,7 +36,8 @@
             id = "FLOW";
             uuid = "3f1a6c74-9e2b-4d58-b0a7-5c8e1f2d9a43";
             type = "gsm";
-            autoconnect = true;
+            # Data is opt-in per session; the modem still registers, so calls and SMS are unaffected.
+            autoconnect = false;
         };
 
         gsm = {
