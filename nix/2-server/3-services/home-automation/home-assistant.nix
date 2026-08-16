@@ -37,6 +37,8 @@
             scene = "!include scenes.yaml";
 
             homeassistant = {
+                # VLC fetches media over HTTP, and HA only listens on loopback, so this must be a name nginx serves.
+                internal_url = "https://home-assistant.heimdall.technet";
                 allowlist_external_dirs = [
                     "/Storage/Files/Music"
                     "/Storage/Files/Sounds"
