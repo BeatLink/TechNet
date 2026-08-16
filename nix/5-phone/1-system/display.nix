@@ -95,6 +95,6 @@
     environment.gnome.excludePackages = [ pkgs.gnome-tour ];
 
     environment.etc."machine-info".text = lib.mkDefault ''
-        CHASSIS="tablet"
+        CHASSIS="phone"
     '';
 }
