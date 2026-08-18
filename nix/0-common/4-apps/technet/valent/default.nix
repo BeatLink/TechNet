@@ -2,7 +2,11 @@
 #
 # KDE Connect implementation pairing the phone and the laptop, on the port range the protocol requires.
 #
+# Started by its own XDG autostart entry, so there is no unit here: one declared alongside it raced the autostarted copy for
+# ca.andyholmes.Valent, lost, and was restarted 4819 times in a night, holding a third of a core and 10C the whole time.
+#
 
+{ config, ... }:
 {
     networking.firewall = rec {
         allowedTCPPortRanges = [
@@ -16,6 +20,9 @@
     home-manager.users.beatlink =
         { pkgs, ... }:
         {
+            # Set here rather than in the dconf export, which is one file for every host and named whichever machine it was exported from.
+            dconf.settings."ca/andyholmes/valent".name = config.networking.hostName;
+
             home = {
                 packages = [ pkgs.valent ];
                 persistence."/Storage/Apps/TechNet/Valent" = {
@@ -26,25 +33,6 @@
 
                 };
 
-            };
-            systemd.user.services.valent = {
-                Unit = {
-                    Description = "Valent - KDE Connect Implementation";
-                    After = [ "graphical-session.target" ];
-                    PartOf = [ "graphical-session.target" ];
-                };
-
-                Service = {
-                    Type = "dbus";
-                    BusName = "ca.andyholmes.Valent";
-                    ExecStart = "${pkgs.valent}/bin/valent --gapplication-service";
-                    Restart = "on-failure";
-                    RestartSec = 5;
-                };
-
-                Install = {
-                    WantedBy = [ "graphical-session.target" ];
-                };
             };
         };
 }
