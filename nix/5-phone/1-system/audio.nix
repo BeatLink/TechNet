@@ -1,11 +1,23 @@
 # Audio ##############################################################################################################################################
 { pkgs, ... }:
 let
+    # The AIF2 levels upstream's Voice Call verb omits, taken from mobile-nixos' tree with this phone's own volumes.
+    voiceCallAif2 = pkgs.writeText "voice-call-aif2.conf" ''
+        cset "name='AIF2 DAC Playback Volume' 160"
+        cset "name='AIF2 DAC Stereo Playback Route' Mix Mono"
+        cset "name='AIF2 ADC Capture Volume' 144"
+        cset "name='AIF2 Digital ADC Capture Switch' on"
+    '';
+
     # Upstream's UCM tree plus an alias matching megi's card long name.
-    ucm2 = pkgs.runCommand "alsa-ucm-conf-pinephone-longname" { } ''
+    ucm2 = pkgs.runCommand "alsa-ucm-conf-pinephone" { } ''
         cp -r --no-preserve=mode ${pkgs.alsa-ucm-conf}/share/alsa/ucm2 "$out"
         cp "$out/conf.d/simple-card/PinePhone.conf" \
             "$out/conf.d/simple-card/PINE64-PinephoneA64-.conf"
+
+        verb="$out/Allwinner/A64/PinePhone/VoiceCall.conf"
+        grep -q "AIF2 ADC Stereo Capture Route" "$verb"
+        sed -i "/AIF2 ADC Stereo Capture Route/r ${voiceCallAif2}" "$verb"
     '';
 in
 {
@@ -62,23 +74,5 @@ in
             # Leading `-` ignores failure; ExecStart has no shell, so `|| true` would be passed as arguments
             ExecStart = "-${pkgs.alsa-utils}/bin/alsactl restore";
         };
-    };
-
-    # Sets the AIF2 mixer levels the Voice Call UCM verb leaves alone.
-    systemd.services.voice-call-mixer = {
-        description = "Set the AIF2 mixer levels the Voice Call UCM verb leaves alone";
-        wantedBy = [ "multi-user.target" ];
-        after = [ "alsa-restore-late.service" ];
-        serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-        };
-        script = ''
-            amixer -c 0 cset name='AIF2 ADC Capture Volume' 144
-            amixer -c 0 cset name='AIF2 DAC Playback Volume' 160
-            amixer -c 0 cset name='AIF2 Digital ADC Capture Switch' on
-            amixer -c 0 cset name='AIF2 DAC Stereo Playback Route' 'Mix Mono'
-        '';
-        path = [ pkgs.alsa-utils ];
     };
 }
