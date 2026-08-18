@@ -95,11 +95,11 @@
         "systems": "systems_3"
       },
       "locked": {
-        "lastModified": 1786748620,
-        "narHash": "sha256-K+sJmUXFksrB7pLvrcv8jIDGKxN52QtV1sIKXhT8MZo=",
+        "lastModified": 1787000716,
+        "narHash": "sha256-OvS7Bs6A2b7GsqcLdvWJ8HWn6ppj4wVbH0J8olARNA8=",
         "owner": "sadjow",
         "repo": "claude-code-nix",
-        "rev": "fd727a3f341b079ba5387b770c5caef86bdae3e6",
+        "rev": "2a8a4d8d8f3d5d49cede737a0df1b49992ffb7e5",
         "type": "github"
       },
       "original": {
@@ -344,11 +344,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786751528,
-        "narHash": "sha256-eBkIm6d96ba1+uTxLpOfV8AoO/+4xRhynDtKnhhF994=",
+        "lastModified": 1787010966,
+        "narHash": "sha256-GcatfZec1AvCijfgyWRapQKQdy4c/dLlsluL4S3c1XU=",
         "owner": "BeatLink",
         "repo": "Halon",
-        "rev": "fe50afbbab76177ffd99af53916dcbb9e8b3f68e",
+        "rev": "c7f3caf5d8529fdf6a1e347e2c0e2847f41924d8",
         "type": "github"
       },
       "original": {
@@ -380,11 +380,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786929086,
-        "narHash": "sha256-kzpwMyT7i2fTQ41tf/WlsIHuJtf3e0leRBEPkBhUzBY=",
+        "lastModified": 1786999651,
+        "narHash": "sha256-MTGMFlLDTklsXhCp4r5GXB4VAVadPdalXLvUjd/K7h0=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "aac4965ddb7ea2ff0f3cadd9502c7042b7aa07ba",
+        "rev": "353742587cbaf079b3caee743115d037bc51fea6",
         "type": "github"
       },
       "original": {
@@ -568,11 +568,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786931087,
-        "narHash": "sha256-ROGmp36Dc47QlkANLzCMmpFOcWLRFS3VZsGar+k/M6Y=",
+        "lastModified": 1787016972,
+        "narHash": "sha256-6B98mtehXRht8nSiX+1tqm8WyeQvjCjhf8IjCKLh/dU=",
         "owner": "nix-community",
         "repo": "nix-vscode-extensions",
-        "rev": "ced710ba99b6f2d2f714765f00b4db4baa1d5844",
+        "rev": "596319216632f6e6da839787295a350c027d39be",
         "type": "github"
       },
       "original": {
@@ -657,11 +657,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1786338773,
-        "narHash": "sha256-dcIR+ysauM7Y/msHXmgdVP/fP8XURkFNq8e4JwPCvFE=",
+        "lastModified": 1787033720,
+        "narHash": "sha256-XQSSE/t5bbvjqlistCxzPnPOKzqz19bP4uU0jU3A3+E=",
         "owner": "BeatLink",
         "repo": "PinePhoneCharge",
-        "rev": "c1e79faba216f890b935dabb679ee778614375f2",
+        "rev": "02f1bd20d87900200643617ce9b7024fccb91b37",
         "type": "github"
       },
       "original": {
@@ -933,7 +933,7 @@
         "narHash": "sha256-1jn8W6zUkRhGUY2UTeKtHY6Go3YeUhsv+Xl4/kAr1YQ=",
         "owner": "BeatLink",
         "repo": "WaypipeDesktop",
-        "rev": "50ee119123ef750e9a2dd72c95464c55e69bc100",
+        "rev": "d2de90c36b3903c911b490254d0d4dd515ae276e",
         "type": "github"
       },
       "original": {
