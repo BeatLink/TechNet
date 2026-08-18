@@ -17,15 +17,24 @@ let
             hash = "sha256-xqjOn2NV6riZ6YNMdv6nLiAjLn4a2+toD0qDkUvMnyA=";
         };
 
-        # php generates the keymap header; sdcc is only needed to build the firmware itself, which this does not.
-        nativeBuildInputs = [ pkgs.php ];
+        # php generates the keymap header, sdcc builds the 8051 firmware itself. megi warns that sdcc older than 4.1 miscompiles it.
+        nativeBuildInputs = [
+            pkgs.php
+            pkgs.sdcc
+        ];
 
-        makeFlags = [ "tools" ];
+        # The firmware's own build script is /bin/bash, which the sandbox has not got.
+        postPatch = ''
+            patchShebangs firmware/build.sh
+        '';
+
+        # The Makefile stamps a version from git describe, which is not a repository here.
+        makeFlags = [ "VERSION=${"4f31294"}" ];
 
         installPhase = ''
             runHook preInstall
-            mkdir -p $out/bin
-            install -Dm755 build/ppkb-* $out/bin/
+            install -Dm755 -t $out/bin build/ppkb-*
+            install -Dm644 -t $out/share/pinephone-keyboard build/fw-stock.bin
             runHook postInstall
         '';
 
