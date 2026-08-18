@@ -6,9 +6,9 @@ apps=['waypipe-firefox-odin.desktop', 'waypipe-freetube.desktop', 'waypipe-home-
 name='Desktop'
 
 [folders/b7e2d918-4c6a-4f03-8b15-2a9d7c3e6f40]
-apps=['waydroid.com.android.calculator2.desktop', 'waydroid.com.android.deskclock.desktop', 'waydroid.com.android.documentsui.desktop', 'waydroid.com.android.gallery3d.desktop', 'waydroid.com.android.settings.desktop', 'waydroid.com.android.vending.desktop', 'waydroid.com.google.android.contacts.desktop', 'waydroid.com.jmmbgroup.moneyline.desktop', 'waydroid.com.whatsapp.desktop', 'waydroid.com.whatsapp.w4b.desktop', 'waydroid.org.lineageos.aperture.desktop', 'waydroid.org.lineageos.eleven.desktop', 'waydroid.org.lineageos.etar.desktop', 'waydroid.org.lineageos.jelly.desktop', 'waydroid.org.lineageos.recorder.desktop']
+apps=['Waydroid.desktop', 'waydroid.com.android.calculator2.desktop', 'waydroid.com.android.deskclock.desktop', 'waydroid.com.android.documentsui.desktop', 'waydroid.com.android.gallery3d.desktop', 'waydroid.com.android.settings.desktop', 'waydroid.com.android.vending.desktop', 'waydroid.com.google.android.contacts.desktop', 'waydroid.com.jmmbgroup.moneyline.desktop', 'waydroid.com.whatsapp.desktop', 'waydroid.com.whatsapp.w4b.desktop', 'waydroid.org.lineageos.aperture.desktop', 'waydroid.org.lineageos.eleven.desktop', 'waydroid.org.lineageos.etar.desktop', 'waydroid.org.lineageos.jelly.desktop', 'waydroid.org.lineageos.recorder.desktop']
 name='Waydroid'
 
 [folders/c3f8a6b1-7d24-4e59-a0c7-5b1e9f2d8a63]
-apps=['ca.andyholmes.Valent.desktop', 'htop.desktop', 'io.github.beatlink.Chargectl.desktop', 'me.gapixels.Megapixels.desktop', 'mobi.phosh.MobileSettings.desktop', 'nemo.desktop', 'org.gnome.Calls.desktop', 'org.gnome.Extensions.desktop', 'org.gnome.Settings.desktop', 'org.gnome.Terminal.desktop', 'org.x.editor.desktop', 'sm.puri.Chatty.desktop']
+apps=['ca.andyholmes.Valent.desktop', 'htop.desktop', 'io.github.beatlink.Chargectl.desktop', 'me.gapixels.Megapixels.desktop', 'mobi.phosh.MobileSettings.desktop', 'nemo.desktop', 'org.gnome.Calls.desktop', 'org.gnome.ColorProfileViewer.desktop', 'org.gnome.Extensions.desktop', 'org.gnome.Settings.desktop', 'org.gnome.Terminal.desktop', 'org.x.editor.desktop', 'rygel-preferences.desktop', 'sm.puri.Chatty.desktop']
 name='Native'
