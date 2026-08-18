@@ -59,7 +59,27 @@ let
         # Above the 11s an app took to cold-start here, or switching apps thaws
         # and refreezes in the gap between the two.
         thawDelay = 15;
+        # LXC moves the container's processes into a root-level cgroup, so Waydroid's Android has no app unit for the app_id match to find and is
+        # boosted by weight on that cgroup instead. The name follows the container's, so it is fixed for as long as Waydroid calls its container waydroid.
+        waydroidAppIdPrefix = "waydroid";
+        waydroidCgroup = "/sys/fs/cgroup/lxc.payload.waydroid";
+        # Android is a whole operating system rather than an app, and it is doing work whenever the container is up, so it keeps a share above the
+        # default 100 even unfocused. Neither value goes near cpu.weight's 10000 ceiling: phosh lives in user.slice, and starving the compositor
+        # freezes the screen no matter how much CPU Android is getting.
+        waydroidBaseWeight = 300;
+        waydroidBoostWeight = 1000;
     };
+
+    # Takes only the two weights this daemon sets, so the NOPASSWD grant cannot be widened by argument.
+    cgroupBoost = pkgs.writeShellScript "technet-focus-boost-cgroup" ''
+        weight="$1"
+        case "$weight" in
+            ${toString cfg.waydroidBoostWeight} | ${toString cfg.waydroidBaseWeight}) ;;
+            *) exit 1 ;;
+        esac
+        [ -e ${cfg.waydroidCgroup}/cpu.weight ] || exit 0
+        echo "$weight" > ${cfg.waydroidCgroup}/cpu.weight
+    '';
 
     # Takes only freeze|thaw and refuses any unit outside the list, so the
     # NOPASSWD grant cannot be widened by argument.
@@ -138,6 +158,11 @@ let
         SUSPEND_SYSTEM = ${builtins.toJSON cfg.suspendSystemUnits}
         THAW_DELAY = ${toString cfg.thawDelay}
 
+        CGROUP_BOOST = "${cgroupBoost}"
+        WAYDROID_BOOST = "${toString cfg.waydroidBoostWeight}"
+        WAYDROID_BASE = "${toString cfg.waydroidBaseWeight}"
+        WAYDROID_PREFIX = "${cfg.waydroidAppIdPrefix}"
+
         # systemd escapes "-" in unit names; ":" and "." are passed through.
         ESCAPED_DASH = chr(92) + "x2d"
 
@@ -148,6 +173,7 @@ let
         app_ids = {}
         active = set()
         boosted = None
+        boosted_cgroup = False
         frozen = False
         thaw_timer = None
         # Reentrant because the signal handler runs in the thread that may hold it.
@@ -180,6 +206,18 @@ let
                     if best is None or len(name) < len(best):
                         best = name
             return best
+
+
+        def is_waydroid(app_id):
+            return bool(app_id) and app_id.lower().startswith(WAYDROID_PREFIX)
+
+
+        def cgroup_boost(want):
+            subprocess.run(
+                ["/run/wrappers/bin/sudo", "-n", CGROUP_BOOST,
+                 WAYDROID_BOOST if want else WAYDROID_BASE],
+                capture_output=True, timeout=5,
+            )
 
 
         def apply(unit, props):
@@ -263,19 +301,25 @@ let
                 thaw_timer.start()
 
 
-        def focus(unit):
-            global boosted
-            if unit == boosted:
+        def focus(unit, waydroid=False):
+            global boosted, boosted_cgroup
+            if unit == boosted and waydroid == boosted_cgroup:
                 return
             if boosted is not None:
                 apply(boosted, RESET)
                 renice(boosted, 0)
+            if boosted_cgroup and not waydroid:
+                cgroup_boost(False)
             boosted = unit
             if boosted is not None:
                 apply(boosted, BOOST)
                 renice(boosted, NICE)
                 print("boosted " + boosted, flush=True)
-            set_frozen(boosted is not None)
+            if waydroid and not boosted_cgroup:
+                cgroup_boost(True)
+                print("boosted waydroid cgroup", flush=True)
+            boosted_cgroup = waydroid
+            set_frozen(boosted is not None or waydroid)
 
 
         def cleanup(*_):
@@ -302,6 +346,10 @@ let
                 sys.exit(1)
             os.environ["WAYLAND_DISPLAY"] = found[0]
 
+        # Establishes the unfocused share up front, so the container is above the default from the moment the session starts rather than after the
+        # first focus change. Harmless when Waydroid is not running: the helper exits quietly if the cgroup is not there.
+        cgroup_boost(False)
+
         proc = subprocess.Popen(
             ["${pkgs.coreutils}/bin/stdbuf", "-oL", "${lswt}/bin/lswt", "-w", "--debug"],
             stdout=subprocess.PIPE, text=True,
@@ -316,7 +364,8 @@ let
             if m:
                 if m.group(2) == "1":
                     active.add(m.group(1))
-                    focus(find_unit(app_ids.get(m.group(1))))
+                    app_id = app_ids.get(m.group(1))
+                    focus(find_unit(app_id), is_waydroid(app_id))
                 else:
                     active.discard(m.group(1))
                     # Nothing focused means nothing to protect, and leaving the
@@ -346,6 +395,10 @@ in
                         command = "${systemFreeze}";
                         options = [ "NOPASSWD" ];
                     }
+                    {
+                        command = "${cgroupBoost}";
+                        options = [ "NOPASSWD" ];
+                    }
                 ];
             }
         ];
@@ -368,6 +421,7 @@ in
                         for unit in ${lib.escapeShellArgs cfg.suspendSystemUnits}; do
                             /run/wrappers/bin/sudo -n ${systemFreeze} thaw "$unit" || true
                         done
+                        /run/wrappers/bin/sudo -n ${cgroupBoost} ${toString cfg.waydroidBaseWeight} || true
                     '';
                     Restart = "on-failure";
                     # The compositor may not have a socket up the instant the

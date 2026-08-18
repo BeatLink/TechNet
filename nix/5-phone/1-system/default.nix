@@ -11,11 +11,14 @@
         ./initrd-wifi.nix
         ./power.nix
         ./keyboard.nix
+        ./on-screen-keyboard.nix
+        ./keyboard-firmware.nix
         ./kernel.nix
         ./phosh-bump.nix
         ./data-drive.nix
         ./mobile-data.nix
         ./performance.nix
+        ./focus-boost.nix
         ./keyboard-layout
         ./audio.nix
         ./bluetooth.nix
@@ -27,11 +30,9 @@
         ./unl0kr.nix
         ./boot-leds.nix
         ./charging.nix
-        ./prewarm.nix
         ./arc-policy.nix
         ./theme.nix
         ./fn-lock.nix
         ./usb-networking.nix
-        ./focus-boost.nix
     ];
 }
