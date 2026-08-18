@@ -2,6 +2,7 @@
     imports = [
         ./hardware-configuration.nix
         ./filesystem.nix
+        ./performance.nix
         ./sops.nix
         ./software.nix
         ./networking.nix
