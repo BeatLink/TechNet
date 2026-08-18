@@ -9,7 +9,7 @@
 | Address | `thor.technet`, `10.100.100.4` over WireGuard |
 
 Thor runs the common configuration plus a phone-specific layer: the modem and
-SMS stack in [`3-apps/comms`](../nix/5-phone/3-apps/comms), display and sensor
+SMS stack in [`3-apps/native`](../nix/5-phone/3-apps/native), display and sensor
 setup, and NetworkManager profiles for WiFi and the WireGuard tunnel.
 
 The mobile-nixos device import in

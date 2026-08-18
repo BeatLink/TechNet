@@ -67,7 +67,7 @@
 # every WebKit application on this host is GTK4 and would crash without it, and
 # a GTK4 one added later should be safe by default rather than by memory. GTK3
 # WebKit applications opt out individually, by being wrapped with the variable
-# unset and GDK_GL set -- see 3-apps/system/toolkit-comparison.nix for the
+# unset and GDK_GL set -- see 3-apps/native/toolkit-comparison.nix for the
 # worked example.
 { ... }:
 {

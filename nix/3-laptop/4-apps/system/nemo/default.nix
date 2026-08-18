@@ -2,7 +2,7 @@
 #
 # Odin's file manager. Nemo is Cinnamon's, built for a mouse and a wide window,
 # and this is a machine that has both. Thor also runs it now
-# (5-phone/3-apps/system/nemo.nix), having gone to Nautilus and back when GTK4
+# (5-phone/3-apps/native/nemo.nix), having gone to Nautilus and back when GTK4
 # turned out to render in software on a Mali-400.
 #
 # Still under 3-laptop rather than 0-common, because the two hosts share only the

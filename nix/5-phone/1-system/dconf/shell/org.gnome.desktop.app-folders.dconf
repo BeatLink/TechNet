@@ -1,30 +1,14 @@
 [/]
-folder-children=['7e415f5d-2679-40e6-9c9a-9bb487e98e2d', 'f78d9294-7d59-4a43-b7be-1446de0bd02a', '7451c861-53ee-4053-a7aa-42910535c6e3', '248624a6-9c53-49ec-95f7-cd991e33e433', '75a2da12-9c72-4273-afdb-4e87e9dc0666', 'f089a48d-2e2a-40c6-a6c6-17b9a668ba2b', '4a488f8a-6f6c-4dbf-9f35-951cf85395ae']
+folder-children=['a1c4f0d2-3b5e-4a71-9d2c-6e8f0b1a4d37', 'b7e2d918-4c6a-4f03-8b15-2a9d7c3e6f40', 'c3f8a6b1-7d24-4e59-a0c7-5b1e9f2d8a63']
 
-[folders/248624a6-9c53-49ec-95f7-cd991e33e433]
-apps=['waypipe-vscodium-odin.desktop']
-name='Programming'
+[folders/a1c4f0d2-3b5e-4a71-9d2c-6e8f0b1a4d37]
+apps=['waypipe-firefox-odin.desktop', 'waypipe-freetube.desktop', 'waypipe-home-assistant.desktop', 'waypipe-keepassxc-odin.desktop', 'waypipe-pix-odin.desktop', 'waypipe-trilium.desktop', 'waypipe-vlc-odin.desktop', 'waypipe-vscodium-odin.desktop', 'waypipe-xviewer-odin.desktop']
+name='Desktop'
 
-[folders/4a488f8a-6f6c-4dbf-9f35-951cf85395ae]
-apps=['waypipe-xviewer-odin.desktop', 'waypipe-pix-odin.desktop', 'org.x.editor.desktop', 'me.gapixels.Megapixels.desktop', 'org.gnome.Terminal.desktop', 'htop.desktop']
-name='Tools'
+[folders/b7e2d918-4c6a-4f03-8b15-2a9d7c3e6f40]
+apps=['waydroid.com.android.calculator2.desktop', 'waydroid.com.android.deskclock.desktop', 'waydroid.com.android.documentsui.desktop', 'waydroid.com.android.gallery3d.desktop', 'waydroid.com.android.settings.desktop', 'waydroid.com.android.vending.desktop', 'waydroid.com.google.android.contacts.desktop', 'waydroid.com.jmmbgroup.moneyline.desktop', 'waydroid.com.whatsapp.desktop', 'waydroid.com.whatsapp.w4b.desktop', 'waydroid.org.lineageos.aperture.desktop', 'waydroid.org.lineageos.eleven.desktop', 'waydroid.org.lineageos.etar.desktop', 'waydroid.org.lineageos.jelly.desktop', 'waydroid.org.lineageos.recorder.desktop']
+name='Waydroid'
 
-[folders/7451c861-53ee-4053-a7aa-42910535c6e3]
-apps=['waypipe-freetube.desktop', 'waypipe-vlc-odin.desktop']
-name='Fun'
-
-[folders/75a2da12-9c72-4273-afdb-4e87e9dc0666]
-apps=['org.gnome.Settings.desktop', 'mobi.phosh.MobileSettings.desktop', 'io.github.beatlink.Chargectl.desktop', 'org.gnome.Extensions.desktop']
-name='Settings'
-
-[folders/7e415f5d-2679-40e6-9c9a-9bb487e98e2d]
-apps=['org.gnome.Calls.desktop', 'sm.puri.Chatty.desktop']
-name='Comms'
-
-[folders/f089a48d-2e2a-40c6-a6c6-17b9a668ba2b]
-apps=['waypipe-home-assistant.desktop', 'ca.andyholmes.Valent.desktop']
-name='TechNet'
-
-[folders/f78d9294-7d59-4a43-b7be-1446de0bd02a]
-apps=['waypipe-firefox-odin.desktop', 'nemo.desktop', 'waypipe-trilium.desktop', 'waypipe-keepassxc-odin.desktop']
-name='Core'
+[folders/c3f8a6b1-7d24-4e59-a0c7-5b1e9f2d8a63]
+apps=['ca.andyholmes.Valent.desktop', 'htop.desktop', 'io.github.beatlink.Chargectl.desktop', 'me.gapixels.Megapixels.desktop', 'mobi.phosh.MobileSettings.desktop', 'nemo.desktop', 'org.gnome.Calls.desktop', 'org.gnome.Extensions.desktop', 'org.gnome.Settings.desktop', 'org.gnome.Terminal.desktop', 'org.x.editor.desktop', 'sm.puri.Chatty.desktop']
+name='Native'

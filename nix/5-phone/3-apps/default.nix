@@ -1,9 +1,7 @@
 {
     imports = [
-        ./comms
-        ./core
-        ./media
-        ./system
-        ./technet
+        ./desktop
+        ./native
+        ./waydroid
     ];
 }
