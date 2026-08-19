@@ -132,5 +132,45 @@ in
                 };
             }
         )
+
+        # Thunderbird --------------------------------------------------------------------------------------------------------------------------------
+        {
+            systemd.tmpfiles.settings.PhoneApps = dirs [
+                "/Storage/PhoneApps/Thunderbird"
+                "/Storage/PhoneApps/Thunderbird/Thor"
+            ];
+        }
+
+        # Element ------------------------------------------------------------------------------------------------------------------------------------
+        {
+            systemd.tmpfiles.settings.PhoneApps = dirs [
+                "/Storage/PhoneApps/Element"
+                "/Storage/PhoneApps/Element/Thor"
+            ];
+        }
+
+        # Discord ------------------------------------------------------------------------------------------------------------------------------------
+        {
+            systemd.tmpfiles.settings.PhoneApps = dirs [
+                "/Storage/PhoneApps/Discord"
+                "/Storage/PhoneApps/Discord/Thor"
+            ];
+        }
+
+        # Quod Libet ---------------------------------------------------------------------------------------------------------------------------------
+        {
+            systemd.tmpfiles.settings.PhoneApps = dirs [
+                "/Storage/PhoneApps/QuodLibet"
+                "/Storage/PhoneApps/QuodLibet/Thor"
+            ];
+        }
+
+        # LibreOffice --------------------------------------------------------------------------------------------------------------------------------
+        {
+            systemd.tmpfiles.settings.PhoneApps = dirs [
+                "/Storage/PhoneApps/LibreOffice"
+                "/Storage/PhoneApps/LibreOffice/Thor"
+            ];
+        }
     ];
 }
