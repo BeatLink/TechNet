@@ -13,7 +13,6 @@ let
     zfs = "${config.boot.zfs.package}/sbin/zfs";
     clevis = "${clevisPackage}/bin/clevis";
     systemd = config.boot.initrd.systemd.package;
-    plymouth = "${config.boot.plymouth.package}/bin/plymouth";
 
     sssConfig = builtins.toJSON {
         t = 1;
@@ -31,11 +30,6 @@ let
     retryScript = ''
         set -u
         remaining="${lib.concatStringsSep " " clevisCfg.datasets}"
-
-        # Puts a status line on the splash, silently doing nothing when no plymouthd is listening.
-        splash() {
-            ${plymouth} display-message --text="$1" > /dev/null 2>&1 || true
-        }
 
         # Restarting an import cancels its outstanding password prompt, so it is only worth doing once something has actually unlocked.
         restart_imports() {
@@ -81,7 +75,6 @@ let
                 jwe="/etc/clevis/$ds.jwe"
                 if [ -r "$jwe" ] && ${clevis} decrypt < "$jwe" | ${zfs} load-key -L prompt "$ds" 2>/dev/null; then
                     echo "clevis-retry: unlocked $ds"
-                    splash "Unlocked $ds"
                     unlocked_this_round=true
                     continue
                 fi
@@ -94,12 +87,10 @@ let
             fi
 
             [ -n "$remaining" ] || break
-            splash "Waiting for tang to unlock: $remaining"
             sleep ${toString clevisCfg.retryInterval}
         done
 
         echo "clevis-retry: all clevis datasets unlocked"
-        splash "All drives unlocked"
 
         # Always succeed: Restart=on-failure must never turn this into a restart loop.
         exit 0
@@ -319,16 +310,7 @@ in
                         };
                         script = retryScript;
                     };
-                }
-                # One splash line as each pool starts its tang unlock and import.
-                // lib.listToAttrs (
-                    map (
-                        pool:
-                        lib.nameValuePair "zfs-import-${pool}" {
-                            serviceConfig.ExecStartPre = [ ''-${plymouth} display-message --text="Contacting tang to unlock ${pool}..."'' ];
-                        }
-                    ) pools
-                );
+                };
             };
         })
     ];

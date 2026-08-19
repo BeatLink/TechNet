@@ -7,7 +7,6 @@
 let
     interface = "wld0";
     confPath = config.sops.templates."wpa_supplicant-initrd.conf".path;
-    plymouth = "${config.boot.plymouth.package}/bin/plymouth";
 in
 {
     # Credentials ------------------------------------------------------------------------------------------------------------------------------------
@@ -53,7 +52,6 @@ in
                     Type = "simple";
                     Restart = "on-failure";
                     RestartSec = 2;
-                    ExecStartPre = ''-${plymouth} display-message --text="Connecting to Wi-Fi..."'';
                     ExecStart = "${pkgs.wpa_supplicant}/bin/wpa_supplicant -i ${interface} -c ${confPath}";
                 };
             };
