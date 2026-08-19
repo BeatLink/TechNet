@@ -154,11 +154,13 @@ hand-rolled `nix build` of `diskoScript` will hit it.
 
 Thor's firmware is built from
 [BeatLink/Tow-Boot](https://github.com/BeatLink/Tow-Boot), branch
-`pinephone-display`: stock U-Boot plus a patch series that lights the panel
-and reads the buttons, staged for submission to the U-Boot mailing list.
-The A64 boot ROM prefers the SD card, so a card carrying firmware always
-wins over what is installed in the eMMC boot partition
-(`/dev/mmcblk2boot0`).
+`consolidation`: the fork's own U-Boot tree
+([BeatLink/U-Boot](https://github.com/BeatLink/U-Boot), branch
+`tb-2026.04-dev` — Tow-Boot's patch set ported from 2023.07 to 2026.04)
+carrying the panel and button series as commits, staged for submission to
+the U-Boot mailing list. The A64 boot ROM prefers the SD card, so a card
+carrying firmware always wins over what is installed in the eMMC boot
+partition (`/dev/mmcblk2boot0`).
 
 ### Why the screen used to stay dark until Plymouth
 
@@ -194,9 +196,12 @@ The mapping comes from `u-boot,code` in a U-Boot-only device tree overlay, which
 the drivers prefer over `linux,code`, so the volume keys stay volume keys under
 Linux.
 
-The build moved from Tow-Boot's own U-Boot fork (2023.07) to a stock release,
-because the patches target current code. That drops the LED and vibrator UX, and
-with it the blind menu. Holding **volume up** at power-on still enters USB mass
+The build first moved from Tow-Boot's own U-Boot fork (2023.07) to a stock
+release, because the patches target current code — losing the LED and
+vibrator UX. The consolidation branch ends that trade-off: the fork's U-Boot
+tree is Tow-Boot's patch set ported to 2026.04 with the display series folded
+in, so one build carries the panel, the buttons, the Tow-Boot menu, and the
+LED and vibrator UX. Holding **volume up** at power-on still enters USB mass
 storage mode, which is what the install above depends on.
 
 ### Testing a new firmware safely
