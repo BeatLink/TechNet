@@ -40,4 +40,6 @@ accessories.
 - [Tow-Boot](docs/tow-boot.md) — the firmware fork Thor and Ragnarok boot
   through, and how to build and deploy it
 - [Thor — Firefox tuning](docs/thor-firefox.md)
+- [Thor — waypipe apps](docs/thor-waypipe-apps.md) — which of Odin's
+  applications are worth a launcher on the phone, and why
 - [TODO](TODO.md) — outstanding work, most blocking first
