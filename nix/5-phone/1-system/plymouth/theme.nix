@@ -4,6 +4,11 @@
     src,
     logoWidth ? 440,
     progressBarWidth ? 440,
+    screenHeight ? 1440,
+    logoAlignment ? 0.42,
+    progressBarAlignment ? 0.62,
+    progressBarHeight ? 6,
+    titleHeight ? 21,
 }:
 runCommand "plymouth-theme-nixos-mobile" { nativeBuildInputs = [ imagemagick ]; } ''
     theme=$out/share/plymouth/themes/nixos-mobile
@@ -12,6 +17,21 @@ runCommand "plymouth-theme-nixos-mobile" { nativeBuildInputs = [ imagemagick ]; 
     cp ${src}/src/resources/*.png $theme/
     chmod +w $theme/*.png
     magick mogrify -resize ${toString logoWidth}x -strip $theme/throbber-*.png
+
+    # The title sits midway between the bottom of the logo and the top of the progress bar. The frames pulse a glow around a fixed logo,
+    # so the smallest of them marks where the logo itself ends; the larger ones are halo the eye does not read as an edge.
+    logoHeight=$(magick identify -format '%h' $theme/throbber-0001.png)
+    inkBottom=$logoHeight
+    for frame in $theme/throbber-*.png; do
+        box=$(magick identify -format '%@' "$frame")
+        height=''${box#*x}
+        height=''${height%%+*}
+        offset=''${box##*+}
+        [ $((height + offset)) -lt $inkBottom ] && inkBottom=$((height + offset))
+    done
+    logoBottom=$(awk "BEGIN { print ${toString logoAlignment} * ${toString screenHeight} - $logoHeight / 2 + $inkBottom }")
+    barTop=$(awk "BEGIN { print ${toString progressBarAlignment} * (${toString screenHeight} - ${toString progressBarHeight}) }")
+    titleAlignment=$(awk "BEGIN { printf \"%.4f\", (($logoBottom + $barTop - ${toString titleHeight}) / 2) / (${toString screenHeight} - ${toString titleHeight}) }")
 
     # Each frame is written twice so the 30fps pulse plays over twelve seconds instead of six.
     n=0
@@ -40,15 +60,19 @@ runCommand "plymouth-theme-nixos-mobile" { nativeBuildInputs = [ imagemagick ]; 
     BackgroundEndColor=0x000000
 
     HorizontalAlignment=.5
-    VerticalAlignment=.42
+    VerticalAlignment=${toString logoAlignment}
     Transition=fade-over
     TransitionDuration=6.0
     MessageBelowAnimation=true
 
+    TitleFont=DejaVu Sans 16
+    TitleHorizontalAlignment=.5
+    TitleVerticalAlignment=$titleAlignment
+
     ProgressBarWidth=${toString progressBarWidth}
-    ProgressBarHeight=6
+    ProgressBarHeight=${toString progressBarHeight}
     ProgressBarHorizontalAlignment=.5
-    ProgressBarVerticalAlignment=.62
+    ProgressBarVerticalAlignment=${toString progressBarAlignment}
     ProgressBarBackgroundColor=0x606060
     ProgressBarForegroundColor=0xffffff
 
@@ -57,6 +81,7 @@ runCommand "plymouth-theme-nixos-mobile" { nativeBuildInputs = [ imagemagick ]; 
     DialogClearsFirmwareBackground=false
 
     [boot-up]
+    Title=Starting Up...
     UseAnimation=true
     UseEndAnimation=false
     UseFirmwareBackground=false
@@ -65,6 +90,7 @@ runCommand "plymouth-theme-nixos-mobile" { nativeBuildInputs = [ imagemagick ]; 
     UseProgressBar=true
 
     [shutdown]
+    Title=Shutting Down...
     UseAnimation=true
     UseEndAnimation=false
     UseFirmwareBackground=false
@@ -73,6 +99,7 @@ runCommand "plymouth-theme-nixos-mobile" { nativeBuildInputs = [ imagemagick ]; 
     UseProgressBar=true
 
     [reboot]
+    Title=Restarting...
     UseAnimation=true
     UseEndAnimation=false
     UseFirmwareBackground=false

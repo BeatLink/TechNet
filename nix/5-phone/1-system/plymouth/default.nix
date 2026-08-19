@@ -14,6 +14,8 @@
         plymouth = {
             theme = lib.mkForce "nixos-mobile";
             themePackages = [ (pkgs.callPackage ./theme.nix { src = inputs.nixos-plymouth; }) ];
+            # Volume up stands in for Esc, which toggles the splash and the boot log; plymouth takes only one such key, so volume down is unbound.
+            extraConfig = "XkbExtraEscButton=0x1008ff13";
         };
 
         initrd.systemd = {
