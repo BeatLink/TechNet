@@ -13,6 +13,7 @@
 }:
 let
     webGreeter = pkgs.callPackage ./web-greeter.nix { };
+    halonGreeterTheme = inputs.halon.packages.${pkgs.stdenv.hostPlatform.system}.halon-lightdm-theme;
 in
 {
     imports = [ ./cinnamon-bump.nix ];
@@ -67,7 +68,7 @@ in
         detect-theme-errors = true
         screensaver-timeout = 300
         secure-mode = true
-        theme = "gruvbox"
+        theme = "${halonGreeterTheme}/share/web-greeter/themes/halon" # An absolute path, since the theme lives outside web-greeter's own themes directory
         icon-theme = "Bibata-Modern-Classic" # Named icon-theme, but the greeter only feeds it to XCURSOR_THEME
 
         [features.battery]
