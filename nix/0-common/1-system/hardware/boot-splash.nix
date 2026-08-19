@@ -23,12 +23,14 @@
         }
 
         # Log Verbosity ##############################################################################################################################
+        # The console carries errors only so the splash stays clean, while udev keeps logging at info: the kernel ring buffer takes every
+        # message regardless of console level, so journald still holds a full boot to read back afterwards.
         {
-            boot.consoleLogLevel = 7; # Not 8: that paints KERN_DEBUG through fbcon, which stalls boot once drm.debug is on
-            boot.initrd.verbose = true;
+            boot.consoleLogLevel = 3; # Not lower: a silent console hides the panic that boot.shell_on_fail exists to catch
+            boot.initrd.verbose = false;
             boot.kernelParams = [
-                "systemd.show_status=true"
-                "rd.systemd.show_status=true"
+                "systemd.show_status=false"
+                "rd.systemd.show_status=false"
                 "udev.log_level=info"
                 "rd.udev.log_level=info"
             ];
