@@ -323,11 +323,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787086851,
-        "narHash": "sha256-r5DlpFS5sBnTWJiFi4w6m/f/RCevBDxQGmYZyivfrt4=",
+        "lastModified": 1787125498,
+        "narHash": "sha256-Y73aqm79RpV+1Obvw47yzn/jFBPky76AqM3u647U4dY=",
         "owner": "BeatLink",
         "repo": "gmusicbrowser-nix-flake",
-        "rev": "d071f92c3891b397f343f7a51fff12954ed124c5",
+        "rev": "12b490464d394248a76ac26cc12314065d2db935",
         "type": "github"
       },
       "original": {
