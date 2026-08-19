@@ -31,6 +31,10 @@
             Thor = "thor.technet";
         };
 
+        values = {
+            TOWBOOT_REPO = "/Storage/Files/Projects/Coding/Pinephone/Tow-Boot";
+        };
+
         hostValueFiles = {
             Heimdall.ENCRYPTION_KEY = config.sops.secrets.heimdall_zfs_passphrase.path;
             Ragnarok.ENCRYPTION_KEY = config.sops.secrets.ragnarok_zfs_passphrase.path;

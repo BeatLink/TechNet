@@ -210,7 +210,7 @@ Never write a new build to the eMMC first. The boot ROM prefers the SD card, so
 put it there instead and pull the card to fall back:
 
 ```sh
-nix-build -A pine64-pinephoneA64          # in the Tow-Boot checkout
+nix-build nix/5-phone/firmware.nix -A pine64-pinephoneA64   # personal overrides included
 sudo dd if=result/binaries/Tow-Boot.noenv.bin of=/dev/sdX bs=1024 seek=8 conv=fsync
 ```
 
