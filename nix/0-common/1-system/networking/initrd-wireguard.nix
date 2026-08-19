@@ -36,6 +36,8 @@ let
 
     keyPath = config.sops.secrets.wireguard_private_key.path;
 
+    plymouth = "${config.boot.plymouth.package}/bin/plymouth";
+
     pingArgs = lib.concatStringsSep " " (
         [ "-c1" "-W3" ]
         ++ lib.optionals (cfg.probe.interface != null) [ "-I" cfg.probe.interface ]
@@ -141,17 +143,24 @@ in
                                 ${pkgs.iputils}/bin/ping ${pingArgs} > /dev/null 2>&1
                             }
 
+                            # Puts a status line on the splash, silently doing nothing when no plymouthd is listening.
+                            splash() {
+                                ${plymouth} display-message --text="$1" > /dev/null 2>&1 || true
+                            }
+
                             if carrying; then
                                 echo "wireguard-recover: carrying traffic, nothing to do"
                                 exit 0
                             fi
 
                             echo "wireguard-recover: no traffic, restarting systemd-networkd"
+                            splash "Network is not carrying traffic, restarting it..."
                             ${initrdSystemd}/bin/systemctl restart systemd-networkd || true
                             sleep 10
 
                             if carrying; then
                                 echo "wireguard-recover: recovered after networkd restart"
+                                splash "Network restored"
                                 exit 0
                             fi
 
@@ -160,11 +169,24 @@ in
                             sleep 10
                             if carrying; then
                                 echo "wireguard-recover: recovered after reconfigure"
+                                splash "Network restored"
                             else
                                 echo "wireguard-recover: still down, will retry on next timer tick" >&2
+                                splash "Network still down, retrying shortly..."
                             fi
                             exit 0
                         '';
+                    };
+
+                    "initrd-wireguard-announce" = {
+                        description = "Tell the splash the wireguard tunnel is coming up";
+                        wantedBy = [ "initrd.target" ];
+                        after = [ "systemd-networkd.service" ];
+                        unitConfig.DefaultDependencies = "no";
+                        serviceConfig = {
+                            Type = "oneshot";
+                            ExecStart = ''-${plymouth} display-message --text="Establishing WireGuard tunnel..."'';
+                        };
                     };
 
                     "initrd-wireguard-recover-cancel" = {
