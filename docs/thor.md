@@ -154,7 +154,7 @@ hand-rolled `nix build` of `diskoScript` will hit it.
 
 Thor's firmware is built from
 [BeatLink/Tow-Boot](https://github.com/BeatLink/Tow-Boot), branch
-`consolidation`: the fork's own U-Boot tree
+`rock64-pinephone-fixes`: the fork's own U-Boot tree
 ([BeatLink/U-Boot](https://github.com/BeatLink/U-Boot), branch
 `tb-2026.04-dev` — Tow-Boot's patch set ported from 2023.07 to 2026.04)
 carrying the panel and button series as commits, staged for submission to
@@ -196,13 +196,12 @@ The mapping comes from `u-boot,code` in a U-Boot-only device tree overlay, which
 the drivers prefer over `linux,code`, so the volume keys stay volume keys under
 Linux.
 
-The build first moved from Tow-Boot's own U-Boot fork (2023.07) to a stock
-release, because the patches target current code — losing the LED and
-vibrator UX. The consolidation branch ends that trade-off: the fork's U-Boot
-tree is Tow-Boot's patch set ported to 2026.04 with the display series folded
-in, so one build carries the panel, the buttons, the Tow-Boot menu, and the
-LED and vibrator UX. Holding **volume up** at power-on still enters USB mass
-storage mode, which is what the install above depends on.
+One build carries all of it: the panel, the buttons, the Tow-Boot menu, and the
+LED and vibrator UX. That is possible because the fork keeps Tow-Boot's own
+U-Boot patch set ported forward to 2026.04, instead of having to choose between
+an old tree that has the phone UX and a current release the display patches
+apply to. Holding **volume up** at power-on enters USB mass storage mode, which
+is what the install above depends on.
 
 ### Testing a new firmware safely
 
