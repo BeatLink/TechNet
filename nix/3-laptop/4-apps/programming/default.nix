@@ -1,7 +1,6 @@
 {
     imports = [
         ./anki.nix
-        ./claude-desktop.nix
         ./gh.nix
         ./nodejs.nix
         ./sqlitebrowser.nix
