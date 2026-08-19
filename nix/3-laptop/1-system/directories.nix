@@ -1,14 +1,14 @@
 # Storage Directories ################################################################################################################################
 #
-# Odin's own directories under /Storage/Files, bind mounted onto themselves so Nemo lists them beside the drives instead of in the bookmarks.
+# Odin's own directories under /Storage/Files, bookmarked alongside the shared ones so Nemo lists them as folders rather than as drives.
 #
 
 { lib, ... }:
 let
     places = [
+        "Backups"
         "Projects"
         "VMs"
-        "Backups"
     ];
 in
 {
@@ -32,20 +32,8 @@ in
         # Sidebar ####################################################################################################################################
 
         {
-            fileSystems = lib.listToAttrs (
-                map (place: {
-                    name = "/Storage/Files/${place}";
-                    value = {
-                        device = "/Storage/Files/${place}";
-                        fsType = "none";
-                        options = [
-                            "bind"
-                            "x-gvfs-show"
-                            "x-gvfs-name=${place}"
-                            "nofail" # The mount runs before tmpfiles, so the first boot after adding a place here skips it rather than failing
-                        ];
-                    };
-                }) places
+            technet.desktop.fileManager.bookmarks = lib.mkAfter (
+                lib.concatMapStringsSep "\n" (place: "file:///Storage/Files/${place} ${place}") places
             );
         }
     ];

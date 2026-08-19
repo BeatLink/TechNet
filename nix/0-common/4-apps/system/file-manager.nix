@@ -46,7 +46,6 @@ in
     config = {
         programs.fuse.userAllowOther = true;
 
-        # Odin's Projects, VMs and Backups are absent because they are sidebar mounts instead, set up in 3-laptop/1-system/directories.nix
         technet.desktop.fileManager.bookmarks = lib.mkBefore ''
             file:///Storage/Files/Documents Documents
             file:///Storage/Files/Downloads Downloads
@@ -63,7 +62,7 @@ in
         home-manager.users.beatlink = {
             # nemo-desktop rewrites the file at every login, replacing the symlink, and the backup it earns collides on the next switch
             home.file.".config/gtk-3.0/bookmarks" = {
-                text = cfg.bookmarks;
+                text = lib.concatStringsSep "\n" (lib.filter (line: line != "") (lib.splitString "\n" cfg.bookmarks));
                 force = true;
             };
         };

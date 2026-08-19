@@ -15,8 +15,7 @@
 # The bookmarks are not here either. Both file managers read
 # ~/.config/gtk-3.0/bookmarks, and that list is shared in
 # 0-common/4-apps/system/file-manager.nix. Odin's own Projects, VMs and Backups
-# are not bookmarks at all: 3-laptop/1-system/directories.nix bind mounts them so
-# they sit with the drives in the sidebar.
+# are appended to it by 3-laptop/1-system/directories.nix.
 #
 # Settings are stored in dconf and exported into this folder by
 # `nixtool run maintenance/export-dconf`.
