@@ -37,5 +37,7 @@ accessories.
 
 - [Architecture](docs/architecture.md) — filesystem paradigm and network
   addressing, common to every host
+- [Tow-Boot](docs/tow-boot.md) — the firmware fork Thor and Ragnarok boot
+  through, and how to build and deploy it
 - [Thor — Firefox tuning](docs/thor-firefox.md)
 - [TODO](TODO.md) — outstanding work, most blocking first

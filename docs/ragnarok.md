@@ -54,8 +54,9 @@ lets the board boot any UEFI aarch64 ISO or drive, with no board-specific imagin
 or partition layout required on the target media.
 
 It builds from a fork, on the `rock64-pinephone-fixes` branch — ROCK64/RK3328
-support on the fork's own Tow-Boot U-Boot tree (2026.04), with the Tow-Boot
-menu on HDMI and USB keyboard input —
+support on the fork's own Tow-Boot U-Boot tree (2026.04), with the Tow-Boot menu
+on HDMI and USB keyboard input. [Tow-Boot](tow-boot.md) describes the fork; the
+source is
 [BeatLink/Tow-Boot](https://github.com/BeatLink/Tow-Boot/tree/rock64-pinephone-fixes):
 
 ```sh
