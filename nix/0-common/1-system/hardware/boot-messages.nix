@@ -1,6 +1,6 @@
 # Boot Messages ######################################################################################################################################
 #
-# Feeds the splash a status line at each boot milestone, shown between the logo and the progress bar.
+# Feeds the splash a status line at each boot and shutdown milestone, shown between the logo and the progress bar.
 #
 
 {
@@ -40,6 +40,19 @@ in
             system.activationScripts.splashMessage.text = ''
                 ${plymouth} display-message --text="Activating NixOS..." > /dev/null 2>&1 || true
             '';
+        }
+
+        # Shutdown ###################################################################################################################################
+        # These land as drop-ins on plymouth's own units, so each message appears with the splash it belongs to.
+        # The shutdown splash cannot start until the compositor releases the display, so nothing earlier in the teardown can be shown.
+        {
+            systemd.services = lib.mapAttrs (_: text: {
+                serviceConfig.ExecStartPost = [ ''-${plymouth} display-message --text="${text}"'' ];
+            }) {
+                plymouth-poweroff = "Powering off...";
+                plymouth-reboot = "Rebooting...";
+                plymouth-halt = "Halting...";
+            };
         }
     ];
 }
