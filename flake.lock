@@ -344,11 +344,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787010966,
-        "narHash": "sha256-GcatfZec1AvCijfgyWRapQKQdy4c/dLlsluL4S3c1XU=",
+        "lastModified": 1787117416,
+        "narHash": "sha256-FSw/ElW+KKEN0n2uiNOjL9ifKiOli2t98O7mMRK/gxU=",
         "owner": "BeatLink",
         "repo": "Halon",
-        "rev": "c7f3caf5d8529fdf6a1e347e2c0e2847f41924d8",
+        "rev": "9fdf0c7d372943757577e2567c055ee729ac5339",
         "type": "github"
       },
       "original": {

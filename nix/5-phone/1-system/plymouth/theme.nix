@@ -13,6 +13,19 @@ runCommand "plymouth-theme-nixos-mobile" { nativeBuildInputs = [ imagemagick ]; 
     chmod +w $theme/*.png
     magick mogrify -resize ${toString logoWidth}x -strip $theme/throbber-*.png
 
+    # Each frame is written twice so the 30fps pulse plays over twelve seconds instead of six.
+    n=0
+    for frame in $theme/throbber-*.png; do
+        for _ in 1 2; do
+            n=$((n + 1))
+            cp "$frame" "$theme/frame-$(printf '%04d' "$n").png"
+        done
+        rm "$frame"
+    done
+    for frame in $theme/frame-*.png; do
+        mv "$frame" "$theme/throbber-''${frame##*frame-}"
+    done
+
     cat > $theme/nixos-mobile.plymouth <<EOF
     [Plymouth Theme]
     Name=nixos-mobile
@@ -21,6 +34,7 @@ runCommand "plymouth-theme-nixos-mobile" { nativeBuildInputs = [ imagemagick ]; 
 
     [two-step]
     ImageDir=$theme
+    Font=DejaVu Sans 14
 
     BackgroundStartColor=0x000000
     BackgroundEndColor=0x000000
@@ -29,6 +43,7 @@ runCommand "plymouth-theme-nixos-mobile" { nativeBuildInputs = [ imagemagick ]; 
     VerticalAlignment=.42
     Transition=fade-over
     TransitionDuration=6.0
+    MessageBelowAnimation=true
 
     ProgressBarWidth=${toString progressBarWidth}
     ProgressBarHeight=6
@@ -45,7 +60,7 @@ runCommand "plymouth-theme-nixos-mobile" { nativeBuildInputs = [ imagemagick ]; 
     UseAnimation=true
     UseEndAnimation=false
     UseFirmwareBackground=false
-    SuppressMessages=true
+    SuppressMessages=false
     ProgressBarShowPercentComplete=false
     UseProgressBar=true
 
