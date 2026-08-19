@@ -12,23 +12,16 @@
 # 0-common plus the host's own directory, so an export here is loaded on Odin and
 # nowhere else.
 #
-# The bookmarks are not here. Both file managers read
-# ~/.config/gtk-3.0/bookmarks, so that list stays shared in
-# 0-common/4-apps/system/file-manager.nix and this only adds the three places that
-# exist on this machine and not on the phone.
+# The bookmarks are not here either. Both file managers read
+# ~/.config/gtk-3.0/bookmarks, and that list is shared in
+# 0-common/4-apps/system/file-manager.nix. Odin's own Projects, VMs and Backups
+# are not bookmarks at all: 3-laptop/1-system/directories.nix bind mounts them so
+# they sit with the drives in the sidebar.
 #
 # Settings are stored in dconf and exported into this folder by
 # `nixtool run maintenance/export-dconf`.
-{ lib, pkgs, ... }:
+{ pkgs, ... }:
 {
-    # mkAfter so these land below the shared entries in the sidebar rather than
-    # wherever module import order happens to put them.
-    technet.desktop.fileManager.bookmarks = lib.mkAfter ''
-        file:///Storage/Files/Projects Projects
-        file:///Storage/Files/VMs VMs
-        file:///Storage/Files/Backups Backups
-    '';
-
     home-manager.users.beatlink = {
         home = {
             # nemo-preview, ffmpeg-full and imagemagick are the thumbnailing and

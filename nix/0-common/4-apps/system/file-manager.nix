@@ -46,7 +46,7 @@ in
     config = {
         programs.fuse.userAllowOther = true;
 
-        # Projects, VMs and Backups are absent because they are Odin's alone, and a bookmark to a missing directory is worse than none
+        # Odin's Projects, VMs and Backups are absent because they are sidebar mounts instead, set up in 3-laptop/1-system/directories.nix
         technet.desktop.fileManager.bookmarks = lib.mkBefore ''
             file:///Storage/Files/Documents Documents
             file:///Storage/Files/Downloads Downloads
