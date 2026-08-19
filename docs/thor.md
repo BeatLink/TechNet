@@ -154,9 +154,11 @@ hand-rolled `nix build` of `diskoScript` will hit it.
 
 Thor's firmware is built from
 [BeatLink/Tow-Boot](https://github.com/BeatLink/Tow-Boot), branch
-`pinephone-display`, and lives in the eMMC boot partition
-(`/dev/mmcblk2boot0`). The A64 boot ROM prefers the SD card, so a card carrying
-firmware always wins over what is installed.
+`pinephone-display`: stock U-Boot plus a patch series that lights the panel
+and reads the buttons, staged for submission to the U-Boot mailing list.
+The A64 boot ROM prefers the SD card, so a card carrying firmware always
+wins over what is installed in the eMMC boot partition
+(`/dev/mmcblk2boot0`).
 
 ### Why the screen used to stay dark until Plymouth
 
@@ -221,12 +223,21 @@ echo 0 | sudo tee /sys/block/mmcblk2boot0/force_ro
 sudo dd if=Tow-Boot.noenv.bin of=/dev/mmcblk2boot0 bs=1024 seek=8 conv=fsync
 ```
 
-### Untested
+### Verified on hardware
 
-The display and button code has never run on hardware — Thor was offline when it
-was written. It builds, and the register sequences follow Linux's drivers, but
-every clock rate and every delay in it is unverified. Expect bring-up work, and
-keep a serial cable attached for the first attempt.
+The series went through seven silicon-found bugs before the panel lit: a
+device-tree address read that fused the D-PHY's address and size cells, a
+DCS bounce buffer too small for the longest init command, D-PHY timing
+writes landing in DSI registers, an uninterpolated backlight table driving
+196% duty, the panel's PMIC rails, the missing `s_pwm` pinmux on PL10, and
+a pipeline left streaming that the kernel's driver refused to attach to.
+All are fixed in the patch series; U-Boot and systemd-boot render on the
+panel, the buttons drive the menu, and Linux takes the display over
+cleanly at handoff.
+
+The serial console still matters for firmware work: `thor-serial.sh` in the
+Pinephone project folder keeps a picocom session in tmux, and U-Boot's
+prompt over UART is the only way in when the panel is dark.
 
 ## Recovering a deeply discharged battery
 
