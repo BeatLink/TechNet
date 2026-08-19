@@ -34,5 +34,6 @@
         ./theme.nix
         ./fn-lock.nix
         ./usb-networking.nix
+        ./wireguard-watchdog.nix
     ];
 }
