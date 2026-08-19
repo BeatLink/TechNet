@@ -7,7 +7,7 @@
 
 { pkgs, lib, ... }:
 let
-    profile = "TechNet Wireguard"; # The connection id inside the profile, which is what nmcli matches -- not the "TechNet WireGuard" attribute name the keyfile is written under.
+    profile = "TechNet Wireguard"; # The id nmcli matches on, which is not the "TechNet WireGuard" attribute name the keyfile is written under.
     peer = "10.100.100.1";
     interface = "wireguard0";
 
@@ -20,15 +20,15 @@ let
         PATH=${
           lib.makeBinPath [
               pkgs.coreutils
+              pkgs.gnugrep
               pkgs.iputils
-              pkgs.iproute2
               pkgs.networkmanager
           ]
         }:$PATH
 
-        # True while some link other than the tunnel is offering a default route.
+        # True while some link that could carry the tunnel is up, which the never-default USB gadget is not.
         have_uplink() {
-            ip route show default | grep -qv "dev ${interface}"
+            nmcli -t -f TYPE,DEVICE connection show --active | grep -qvE '^(wireguard|loopback):|:usb0$'
         }
 
         # True while Heimdall answers through the tunnel.
@@ -65,7 +65,7 @@ let
     '';
 in
 {
-    # Watchdog -----------------------------------------------------------------------------------------------------------------------------------------
+    # Watchdog ---------------------------------------------------------------------------------------------------------------------------------------
     systemd.services.wireguard-watchdog = {
         description = "Bounce the TechNet WireGuard tunnel when Heimdall stops answering";
         wantedBy = [ "multi-user.target" ];
