@@ -68,7 +68,7 @@ runCommand "plymouth-theme-nixos-mobile" { nativeBuildInputs = [ imagemagick ]; 
     UseAnimation=true
     UseEndAnimation=false
     UseFirmwareBackground=false
-    SuppressMessages=true
+    SuppressMessages=false
     ProgressBarShowPercentComplete=false
     UseProgressBar=true
 
@@ -76,7 +76,7 @@ runCommand "plymouth-theme-nixos-mobile" { nativeBuildInputs = [ imagemagick ]; 
     UseAnimation=true
     UseEndAnimation=false
     UseFirmwareBackground=false
-    SuppressMessages=true
+    SuppressMessages=false
     ProgressBarShowPercentComplete=false
     UseProgressBar=true
     EOF
