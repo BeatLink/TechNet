@@ -155,9 +155,9 @@ hand-rolled `nix build` of `diskoScript` will hit it.
 Thor's firmware is built from
 [BeatLink/Tow-Boot](https://github.com/BeatLink/Tow-Boot), branch
 `rock64-pinephone-fixes`, which carries the panel and button series in its own
-U-Boot tree — Tow-Boot's patch set ported from 2023.07 to 2026.04. That series
-is staged for submission to the U-Boot mailing list. [Tow-Boot](tow-boot.md)
-covers the fork, its branches, and the build and deploy procedures.
+U-Boot tree — Tow-Boot's patch set ported from 2023.07 to 2026.04.
+[Tow-Boot](tow-boot.md) covers the fork, its branches, and the build and deploy
+procedures.
 
 The A64 boot ROM prefers the SD card, so a card carrying firmware always wins
 over what is installed in the eMMC boot partition (`/dev/mmcblk2boot0`).

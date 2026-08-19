@@ -28,7 +28,7 @@ ported forward to **2026.04**, carrying:
 - Tow-Boot's UX: the `tb_menu` curses menu on PDCursesMod, splash and autoboot
   handling, Tow-Boot branding, the opinionated boot flow, predictable boot
   order, the vibrator uclass and the LRADC button driver.
-- The PinePhone display and button series as commits: a sun6i MIPI-DSI host,
+- The PinePhone display and button work written here: a sun6i MIPI-DSI host,
   TCON0 in DSI mode, the Xingbangda XBD599 panel, the AXP803 GPIO LDOs,
   backlight interpolation, the LRADC and AXP power keys as a keyboard, and
   volume-up at power-on entering USB mass storage.
@@ -103,18 +103,17 @@ with.
 Ragnarok has no SPI flash, so its firmware is the shared disk image written to
 its own SD card; see [Ragnarok](ragnarok.md).
 
-## Upstreaming the display series
+## Provenance
 
-The PinePhone display and button work is meant for the U-Boot mailing list. It
-is not kept as a separate branch: it is a 13-commit range inside
-`tb-2026.04-dev`, identified in
-`boards/pine64-pinephoneA64/patches/SUBMITTING.md` in the Tow-Boot checkout,
-which also carries the reviewer routing, the send procedure and the attribution
-for the LRADC driver, alongside the reviewed cover letter.
+The tree is three commits over U-Boot v2026.04, grouped by what they do:
+video, the buttons, and the Tow-Boot patch set itself. Most of that patch set
+is other people's work, cherry-picked from `Tow-Boot/U-Boot` — chiefly Samuel
+Dionne-Riel's. Squashing collapsed the individual cherry-picks, so each commit
+message lists the original commit IDs it came from and carries
+`Co-authored-by` trailers for everyone in it. That is the only remaining record
+of who wrote what; keep it intact when rewriting further.
 
-Submitting means cherry-picking that range onto current `next` and rebasing;
-the branch that used to hold the rebased version was disposable precisely
-because regenerating it is a cherry-pick. Patches 1–12 are the submission, and
-the volume-up mass-storage hook is Tow-Boot-only and stays out. The
-Tow-Boot-specific fixes sitting above the range touch code with no counterpart
-upstream, so they do not affect the series.
+The PinePhone display and button drivers were written here and were once kept
+as a patch series aimed at the U-Boot mailing list. That is no longer the plan,
+and the series has been folded into the domain commits along with everything
+else.
