@@ -303,11 +303,8 @@ let
         ${pkgs.dconf}/bin/dconf write /org/gnome/settings-daemon/peripherals/touchscreen/orientation-lock "$(${pkgs.coreutils}/bin/cat "$XDG_RUNTIME_DIR/waydroid-rotation.pref" 2>/dev/null || echo false)"
     '';
 
-    # Android's own auto-rotation is turned off because it has no sensor to rotate by: waydroid-rotation drives user_rotation instead, and the two
-    # would otherwise each apply a quarter turn. force_resizable_activities is what makes apps reflow into whatever window they are given.
-    #
-    # Android state lives in the container's userdata, so it survives reboots but not a re-init; reapplying it every session start is what makes it declarative.
-    androidConfig = pkgs.writeShellScript "waydroid-android-config" ''
+    # Nothing Android-side answers until the container finishes booting, which is minutes from cold on this hardware.
+    waitBooted = ''
         booted=
         for _ in $(seq 1 60); do
             booted=$(/run/wrappers/bin/sudo -n ${waydroidPackage}/bin/waydroid shell -- getprop sys.boot_completed 2>/dev/null | tr -dc '0-9')
@@ -315,6 +312,14 @@ let
             sleep 5
         done
         [ "$booted" = "1" ] || exit 0
+    '';
+
+    # Android's own auto-rotation is turned off because it has no sensor to rotate by: waydroid-rotation drives user_rotation instead, and the two
+    # would otherwise each apply a quarter turn. force_resizable_activities is what makes apps reflow into whatever window they are given.
+    #
+    # Android state lives in the container's userdata, so it survives reboots but not a re-init; reapplying it every session start is what makes it declarative.
+    androidConfig = pkgs.writeShellScript "waydroid-android-config" ''
+        ${waitBooted}
 
         /run/wrappers/bin/sudo -n ${waydroidPackage}/bin/waydroid shell -- sh -c '
             pm disable com.google.android.gms/.chimera.GmsIntentOperationService
@@ -333,6 +338,34 @@ let
             settings put global transition_animation_scale 0
             settings put global animator_duration_scale 0
         ' > /dev/null
+    '';
+
+    # Pinned rather than taken from f-droid.org/F-Droid.apk so the installed version is whatever this generation says it is; F-Droid updates itself
+    # afterwards, and the higher version code then makes the install step below a no-op.
+    fdroidApk = pkgs.fetchurl {
+        url = "https://f-droid.org/repo/org.fdroid.fdroid_2000040.apk";
+        hash = "sha256-zUkrotWkJa2AqiL0sT2YFbKtSH6bK232tnwxuVexnys=";
+    };
+
+    # `app install` is the user-side path: it copies the APK into the session's own data directory and hands it to Waydroid's platform service, which
+    # installs silently as system. The appop is what a sideloaded F-Droid otherwise has to be granted by hand before it can install anything itself.
+    fdroidInstall = pkgs.writeShellScript "waydroid-fdroid" ''
+        ${waitBooted}
+
+        installed() {
+            /run/wrappers/bin/sudo -n ${waydroidPackage}/bin/waydroid shell -- pm list packages org.fdroid.fdroid 2>/dev/null | tr -d '\r' | ${pkgs.gnugrep}/bin/grep -qx 'package:org.fdroid.fdroid'
+        }
+
+        if ! installed; then
+            ${waydroidPackage}/bin/waydroid app install ${fdroidApk} || exit 1
+            for _ in $(seq 1 30); do
+                installed && break
+                sleep 2
+            done
+            installed || exit 1
+        fi
+
+        /run/wrappers/bin/sudo -n ${waydroidPackage}/bin/waydroid shell -- appops set org.fdroid.fdroid REQUEST_INSTALL_PACKAGES allow > /dev/null
     '';
 
     # Android decides a device is a tablet when it finds no telephony feature, and WhatsApp then offers only companion QR pairing.
@@ -458,6 +491,20 @@ in
                     ExecStopPost = "${restoreLock}";
                     Restart = "on-failure";
                     RestartSec = 15;
+                };
+                Install.WantedBy = [ "waydroid-session.service" ];
+            };
+
+            waydroid-fdroid = {
+                Unit = {
+                    Description = "Install F-Droid into the Waydroid container";
+                    PartOf = [ "waydroid-session.service" ];
+                    After = [ "waydroid-android-config.service" ];
+                };
+                Service = {
+                    Type = "oneshot";
+                    RemainAfterExit = true;
+                    ExecStart = "${fdroidInstall}";
                 };
                 Install.WantedBy = [ "waydroid-session.service" ];
             };
