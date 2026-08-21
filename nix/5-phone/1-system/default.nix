@@ -33,6 +33,7 @@
         ./arc-policy.nix
         ./theme.nix
         ./fn-lock.nix
+        ./pine-key.nix
         ./usb-networking.nix
         ./wireguard-watchdog.nix
     ];
