@@ -98,6 +98,7 @@
                     "192.168.0.3"
                     "10.100.100.2"
                     "odin.technet"
+                    "odin.lan"
                     "odin"
                     "odin-boot"
                 ];
@@ -108,6 +109,7 @@
                     "192.168.0.3"
                     "10.100.100.2"
                     "odin.technet"
+                    "odin.lan"
                     "odin"
                     "odin-boot"
                 ];

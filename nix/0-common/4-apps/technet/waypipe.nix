@@ -19,6 +19,12 @@ let
 
     isOdin = config.networking.hostName == "Odin";
     peer = if isOdin then "thor" else "odin";
+
+    # Thor only: odin.lan is a fixed Pi-hole entry, where thor.lan is a DHCP lease that can drift onto another device
+    lanFirst = lib.optionalString (!isOdin) ''
+        Match originalhost ${peer}-waypipe exec "${pkgs.netcat}/bin/nc -z -w 1 ${peer}.lan 22 >/dev/null 2>&1"
+            HostName ${peer}.lan
+    '';
 in
 {
     imports = [ inputs.waypipe-desktop.nixosModules.default ];
@@ -81,6 +87,8 @@ in
             # A dedicated alias, so the waypipe key never displaces the agent key on a plain `ssh odin`
             programs.ssh.extraConfig = ''
 
+                ${lanFirst}
+                # ssh keeps the first value it obtains for a keyword, so this stands in only when the probe above finds no LAN path
                 Host ${peer}-waypipe
                     HostName ${peer}.technet
                     User beatlink
