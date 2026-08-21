@@ -320,51 +320,34 @@
                             grid_columns = 2;
                             children = [
                                 {
-                                    name = "CPU";
-                                    id = "ragnarok-cpu";
-                                    type = "cpu_usage";
+                                    # One monitor per host rather than six or seven. cpu, memory, load,
+                                    # temperature, interrupts and oom all read the same /proc and /sys on
+                                    # the same interval, so collecting them together is one pass over this
+                                    # host instead of six independent ones. Every module is opt-in — an
+                                    # undeclared module is not collected at all.
+                                    #
+                                    # Thresholds are carried over unchanged from the monitors this replaces.
+                                    name = "System";
+                                    id = "ragnarok-system";
+                                    type = "system_stats";
                                     interval = "1m";
-                                    cpu_warning = 70;
-                                    cpu_threshold = 85;
+                                    grid_col_span = 2;
                                     agent = "ragnarok";
-                                }
-                                {
-                                    name = "Memory";
-                                    id = "ragnarok-memory";
-                                    type = "memory_usage";
-                                    interval = "1m";
-                                    memory_warning = 75;
-                                    memory_threshold = 90;
-                                    agent = "ragnarok";
-                                }
-                                {
-                                    # An OOM kill is an event, not a level: memory
-                                    # returns to normal before the next sample, so
-                                    # memory_usage above cannot see it. Reads the
-                                    # cumulative counter, so no kill is ever missed.
-                                    name = "OOM Kills";
-                                    id = "ragnarok-oom";
-                                    type = "oom";
-                                    interval = "1m";
-                                    agent = "ragnarok";
-                                }
-                                {
-                                    name = "Temperature";
-                                    id = "ragnarok-temperature";
-                                    type = "temperature";
-                                    interval = "1m";
-                                    temp_warning = 70;
-                                    temp_threshold = 80;
-                                    agent = "ragnarok";
-                                }
-                                {
-                                    name = "Load";
-                                    id = "ragnarok-load";
-                                    type = "load_average";
-                                    interval = "1m";
-                                    load_warning = 70;
-                                    load_threshold = 100;
-                                    agent = "ragnarok";
+                                    modules = {
+                                        cpu = { warning = 70; threshold = 85; };
+                                        memory = { warning = 75; threshold = 90; };
+                                        load = { warning = 70; threshold = 100; };
+                                        temperature = { warning = 70; threshold = 80; };
+                                        interrupts = { warning = 20000; threshold = 50000; };
+
+                                        # An OOM kill is an event, not a level: memory is back to normal
+                                        # before the next sample, so the memory module above cannot see it.
+                                        # The counter read each cycle means no kill is ever missed, and over
+                                        # this host's agent the module also follows the kernel journal, so a
+                                        # kill is reported the moment it happens and names the process the
+                                        # counter can only total.
+                                        oom = { };
+                                    };
                                 }
                                 {
                                     name = "Processes";
@@ -398,16 +381,6 @@
                                     interval = "1m";
                                     total_warning = 500;
                                     total_threshold = 1000;
-                                    grid_col_span = 1;
-                                    agent = "ragnarok";
-                                }
-                                {
-                                    name = "Interrupts";
-                                    id = "ragnarok-interrupts";
-                                    type = "interrupts";
-                                    interval = "1m";
-                                    irq_warning = 20000;
-                                    irq_threshold = 50000;
                                     grid_col_span = 1;
                                     agent = "ragnarok";
                                 }
@@ -481,51 +454,34 @@
                             grid_columns = 2;
                             children = [
                                 {
-                                    name = "CPU";
-                                    id = "heimdall-cpu";
-                                    type = "cpu_usage";
+                                    # One monitor per host rather than six or seven. cpu, memory, load,
+                                    # temperature, interrupts and oom all read the same /proc and /sys on
+                                    # the same interval, so collecting them together is one pass over this
+                                    # host instead of six independent ones. Every module is opt-in — an
+                                    # undeclared module is not collected at all.
+                                    #
+                                    # Thresholds are carried over unchanged from the monitors this replaces.
+                                    name = "System";
+                                    id = "heimdall-system";
+                                    type = "system_stats";
                                     interval = "1m";
-                                    cpu_warning = 70;
-                                    cpu_threshold = 85;
+                                    grid_col_span = 2;
                                     agent = "heimdall";
-                                }
-                                {
-                                    name = "Memory";
-                                    id = "heimdall-memory";
-                                    type = "memory_usage";
-                                    interval = "1m";
-                                    memory_warning = 75;
-                                    memory_threshold = 90;
-                                    agent = "heimdall";
-                                }
-                                {
-                                    # An OOM kill is an event, not a level: memory
-                                    # returns to normal before the next sample, so
-                                    # memory_usage above cannot see it. Reads the
-                                    # cumulative counter, so no kill is ever missed.
-                                    name = "OOM Kills";
-                                    id = "heimdall-oom";
-                                    type = "oom";
-                                    interval = "1m";
-                                    agent = "heimdall";
-                                }
-                                {
-                                    name = "Temperature";
-                                    id = "heimdall-temperature";
-                                    type = "temperature";
-                                    interval = "1m";
-                                    temp_warning = 70;
-                                    temp_threshold = 80;
-                                    agent = "heimdall";
-                                }
-                                {
-                                    name = "Load";
-                                    id = "heimdall-load";
-                                    type = "load_average";
-                                    interval = "1m";
-                                    load_warning = 70;
-                                    load_threshold = 100;
-                                    agent = "heimdall";
+                                    modules = {
+                                        cpu = { warning = 70; threshold = 85; };
+                                        memory = { warning = 75; threshold = 90; };
+                                        load = { warning = 70; threshold = 100; };
+                                        temperature = { warning = 70; threshold = 80; };
+                                        interrupts = { warning = 20000; threshold = 50000; };
+
+                                        # An OOM kill is an event, not a level: memory is back to normal
+                                        # before the next sample, so the memory module above cannot see it.
+                                        # The counter read each cycle means no kill is ever missed, and over
+                                        # this host's agent the module also follows the kernel journal, so a
+                                        # kill is reported the moment it happens and names the process the
+                                        # counter can only total.
+                                        oom = { };
+                                    };
                                 }
                                 {
                                     name = "Processes";
@@ -559,16 +515,6 @@
                                     interval = "1m";
                                     total_warning = 500;
                                     total_threshold = 1000;
-                                    grid_col_span = 1;
-                                    agent = "heimdall";
-                                }
-                                {
-                                    name = "Interrupts";
-                                    id = "heimdall-interrupts";
-                                    type = "interrupts";
-                                    interval = "1m";
-                                    irq_warning = 20000;
-                                    irq_threshold = 50000;
                                     grid_col_span = 1;
                                     agent = "heimdall";
                                 }
@@ -660,51 +606,47 @@
                             grid_columns = 2;
                             children = [
                                 {
-                                    name = "CPU";
-                                    id = "odin-cpu";
-                                    type = "cpu_usage";
+                                    # One monitor per host rather than six or seven. cpu, memory, load,
+                                    # temperature, interrupts and oom all read the same /proc and /sys on
+                                    # the same interval, so collecting them together is one pass over this
+                                    # host instead of six independent ones. Every module is opt-in — an
+                                    # undeclared module is not collected at all.
+                                    #
+                                    # Thresholds are carried over unchanged from the monitors this replaces.
+                                    name = "System";
+                                    id = "odin-system";
+                                    type = "system_stats";
                                     interval = "1m";
-                                    cpu_warning = 70;
-                                    cpu_threshold = 85;
+                                    grid_col_span = 2;
                                     agent = "odin";
-                                }
-                                {
-                                    name = "Memory";
-                                    id = "odin-memory";
-                                    type = "memory_usage";
-                                    interval = "1m";
-                                    memory_warning = 75;
-                                    memory_threshold = 90;
-                                    agent = "odin";
-                                }
-                                {
-                                    # An OOM kill is an event, not a level: memory
-                                    # returns to normal before the next sample, so
-                                    # memory_usage above cannot see it. Reads the
-                                    # cumulative counter, so no kill is ever missed.
-                                    name = "OOM Kills";
-                                    id = "odin-oom";
-                                    type = "oom";
-                                    interval = "1m";
-                                    agent = "odin";
-                                }
-                                {
-                                    name = "Temperature";
-                                    id = "odin-temperature";
-                                    type = "temperature";
-                                    interval = "1m";
-                                    temp_warning = 70;
-                                    temp_threshold = 80;
-                                    agent = "odin";
-                                }
-                                {
-                                    name = "Load";
-                                    id = "odin-load";
-                                    type = "load_average";
-                                    interval = "1m";
-                                    load_warning = 70;
-                                    load_threshold = 100;
-                                    agent = "odin";
+                                    modules = {
+                                        cpu = { warning = 70; threshold = 85; };
+                                        memory = { warning = 75; threshold = 90; };
+                                        load = { warning = 70; threshold = 100; };
+                                        temperature = { warning = 70; threshold = 80; };
+                                        interrupts = { warning = 20000; threshold = 50000; };
+
+                                        # An OOM kill is an event, not a level: memory is back to normal
+                                        # before the next sample, so the memory module above cannot see it.
+                                        # The counter read each cycle means no kill is ever missed, and over
+                                        # this host's agent the module also follows the kernel journal, so a
+                                        # kill is reported the moment it happens and names the process the
+                                        # counter can only total.
+                                        oom = { };
+
+                                        # Odin's dGPU sleeps with the laptop lid and nvidia-smi can wedge
+                                        # uninterruptibly when it does. The module suspends its own probe
+                                        # after `timeout_trip` timeouts rather than stranding a process per
+                                        # cycle, and reports offline (not failed) while suspended.
+                                        gpu = {
+                                            util_warning = 85;
+                                            util_threshold = 95;
+                                            mem_warning = 85;
+                                            mem_threshold = 95;
+                                            temp_warning = 80;
+                                            temp_threshold = 90;
+                                        };
+                                    };
                                 }
                                 {
                                     name = "Processes";
@@ -734,24 +676,6 @@
                                     agent = "odin";
                                 }
                                 {
-                                    # NVIDIA dGPU (PRIME offload). With finegrained power
-                                    # management the card sleeps when idle and nvidia-smi
-                                    # can't reach it — the plugin reports `offline` in that
-                                    # case rather than `failed`, which is expected here.
-                                    name = "GPU";
-                                    id = "odin-gpu";
-                                    type = "gpu";
-                                    interval = "1m";
-                                    util_warning = 85;
-                                    util_threshold = 95;
-                                    mem_warning = 85;
-                                    mem_threshold = 95;
-                                    temp_warning = 80;
-                                    temp_threshold = 90;
-                                    grid_col_span = 2;
-                                    agent = "odin";
-                                }
-                                {
                                     name = "Disk I/O";
                                     id = "odin-diskio";
                                     type = "diskio";
@@ -766,16 +690,6 @@
                                     interval = "1m";
                                     total_warning = 500;
                                     total_threshold = 1000;
-                                    grid_col_span = 2;
-                                    agent = "odin";
-                                }
-                                {
-                                    name = "Interrupts";
-                                    id = "odin-interrupts";
-                                    type = "interrupts";
-                                    interval = "1m";
-                                    irq_warning = 20000;
-                                    irq_threshold = 50000;
                                     grid_col_span = 2;
                                     agent = "odin";
                                 }
