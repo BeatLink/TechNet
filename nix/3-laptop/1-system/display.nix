@@ -28,7 +28,7 @@
                 dynamicBoost.enable = true;
                 powerManagement = {
                     enable = true;
-                    finegrained = true;
+                    finegrained = false; # D3cold runtime resumes hang the GSP firmware, stalling the compositor
                 };
                 open = true;
                 nvidiaSettings = true;
