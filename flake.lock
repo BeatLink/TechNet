@@ -316,6 +316,24 @@
         "type": "github"
       }
     },
+    "flake-utils_8": {
+      "inputs": {
+        "systems": "systems_9"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
     "gmusicbrowser": {
       "inputs": {
         "nixpkgs": [
@@ -628,6 +646,22 @@
         "type": "github"
       }
     },
+    "nixpkgs_3": {
+      "locked": {
+        "lastModified": 1784812282,
+        "narHash": "sha256-Na4aTmdz22ovtSvcvNKaRwEWkg801hDyX6t8JqvW+sE=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "6d12004108e0e4a5cfa4bd83b14477f040b15773",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixpkgs-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixtool": {
       "inputs": {
         "flake-utils": "flake-utils_4",
@@ -689,6 +723,32 @@
         "type": "github"
       }
     },
+    "pnpm2nix": {
+      "inputs": {
+        "flake-utils": [
+          "trilium",
+          "flake-utils"
+        ],
+        "nixpkgs": [
+          "trilium",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1784968304,
+        "narHash": "sha256-NPXKyp40QNCk9r6kavSwqi/zv7OcLgrSRtPmHW+e74w=",
+        "owner": "FliegendeWurst",
+        "repo": "pnpm2nix-nzbr",
+        "rev": "9b15300b711a50bb96e553b66aad5cad94df9c7e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "FliegendeWurst",
+        "ref": "main",
+        "repo": "pnpm2nix-nzbr",
+        "type": "github"
+      }
+    },
     "prewarm": {
       "inputs": {
         "flake-utils": "flake-utils_6",
@@ -735,6 +795,7 @@
         "pinephone-kernel": "pinephone-kernel",
         "prewarm": "prewarm",
         "sops-nix": "sops-nix",
+        "trilium": "trilium",
         "vantage": "vantage",
         "vigil": "vigil",
         "waypipe-desktop": "waypipe-desktop",
@@ -881,6 +942,42 @@
         "type": "github"
       }
     },
+    "systems_9": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "trilium": {
+      "inputs": {
+        "flake-utils": "flake-utils_7",
+        "nixpkgs": "nixpkgs_3",
+        "pnpm2nix": "pnpm2nix"
+      },
+      "locked": {
+        "lastModified": 1787162243,
+        "narHash": "sha256-Kp9926+WQGbrOlvs8WIGwrP4A/+B2ujFS8MpTxGj3Qk=",
+        "owner": "TriliumNext",
+        "repo": "Trilium",
+        "rev": "a0908a6e1e1741a3c3824d803da07300183dcb0c",
+        "type": "github"
+      },
+      "original": {
+        "owner": "TriliumNext",
+        "ref": "v0.105.0",
+        "repo": "Trilium",
+        "type": "github"
+      }
+    },
     "vantage": {
       "inputs": {
         "nixpkgs": [
@@ -903,7 +1000,7 @@
     },
     "vigil": {
       "inputs": {
-        "flake-utils": "flake-utils_7",
+        "flake-utils": "flake-utils_8",
         "nixpkgs": [
           "nixpkgs"
         ]
