@@ -83,8 +83,11 @@
         };
     };
 
-    # Lets vigil-access read the control socket (owned unbound:nogroup, mode
-    # 0770-ish per the NixOS module) so Vigil's `unbound` plugin can run
-    # `unbound-control stats_noreset` over SSH with no stored credential.
+    # Lets Vigil read the control socket (owned unbound:nogroup, mode 0770-ish
+    # per the NixOS module) so its `unbound` plugin can run
+    # `unbound-control stats_noreset` with no stored credential. Granted to
+    # both transports: the agent runs the command now, and vigil-access stays
+    # as the SSH fallback.
     users.users."vigil-access".extraGroups = [ "unbound" ];
+    users.users."vigil-agent".extraGroups = [ "unbound" ];
 }

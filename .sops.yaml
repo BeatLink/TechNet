@@ -5,6 +5,24 @@ keys:
     - &host_odin age19lxeg27tf95vs67jjh6e68ukf0d9hjyj5q4pcprzrvpwnnt6j3fsvjh4rd
     - &host_thor age1pcsyypcrls76syx5zl6szzw9tmnz602jn9fcxm6d8tc3yld2492qkudxhp
 creation_rules:
+    # Each agent's token is encrypted to Heimdall (which runs the Vigil server and declares every agent) plus the one host that agent runs on, so no host can decrypt another's token; keep these ahead of the 0-common rule below, which matches first-wins
+    - path_regex: secrets/0-common/vigil-agent-heimdall\.yaml$
+      key_groups:
+          - age:
+                - *user_beatlink
+                - *host_heimdall
+    - path_regex: secrets/0-common/vigil-agent-odin\.yaml$
+      key_groups:
+          - age:
+                - *user_beatlink
+                - *host_heimdall
+                - *host_odin
+    - path_regex: secrets/0-common/vigil-agent-ragnarok\.yaml$
+      key_groups:
+          - age:
+                - *user_beatlink
+                - *host_heimdall
+                - *host_ragnarok
     - path_regex: secrets/0-common/.*
       key_groups:
           - age:

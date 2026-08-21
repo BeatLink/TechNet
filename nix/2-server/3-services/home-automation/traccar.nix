@@ -10,7 +10,8 @@
     # secrets/2-server/traccar.yaml as `vigil_password` to match.
     sops.secrets.traccar_vigil_password = {
         sopsFile = "${config.technet.secrets.path}/traccar.yaml";
-        owner = "vigil-access";
+        group = "vigil-monitor";                                        # Read by whichever Vigil transport runs the `cat` — the agent today, vigil-access as fallback
+        mode = "0440";
     };
 
     services.traccar = {
