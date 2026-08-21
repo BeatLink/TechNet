@@ -49,6 +49,10 @@
             url = "github:BeatLink/Halon";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        sidebar-scratchpad = {
+            url = "github:BeatLink/sidebar-scratchpad";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
         nixos-plymouth = {
             url = "github:BeatLink/nixos-plymouth";
         };
@@ -139,6 +143,7 @@
             claude-code,
             calibre-web-automated,
             lnxlink,
+            sidebar-scratchpad,
             ...
         }:
         {
@@ -186,6 +191,7 @@
                                     xdg-autostart.homeManagerModules.xdg-autostart
                                     gmusicbrowser.homeManagerModules.gmusicbrowser
                                     lnxlink.homeModules.default
+                                    sidebar-scratchpad.homeManagerModules.default
                                 ];
                             };
                         }
