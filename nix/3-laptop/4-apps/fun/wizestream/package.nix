@@ -15,6 +15,7 @@
     lib,
     makeDesktopItem,
     makeWrapper,
+    mpv,
     mpv-unwrapped,
     nodejs_24,
     python3,
@@ -114,9 +115,13 @@ buildNpmPackage (finalAttrs: {
         install -Dm644 ../assets/wizestream_logo_round.svg \
             $out/share/icons/hicolor/scalable/apps/wizestream.svg
 
+        # mpv runs in its own linker namespace, where the Vulkan hwdec probe segfaults in the dynamic loader, so MPV_HWDEC must not be auto-safe.
+        # Embedded playback corrupts the heap from that same namespace, so WIZESTREAM_MPV_PATH keeps the external player usable.
         makeWrapper ${lib.getExe electron_43} $out/bin/wizestream \
             --add-flags $out/share/wizestream \
             --add-flags "--ozone-platform-hint=auto --enable-features=WaylandWindowDecorations --enable-wayland-ime=true" \
+            --set-default MPV_HWDEC "vaapi,nvdec" \
+            --set-default WIZESTREAM_MPV_PATH ${lib.getExe mpv} \
             --prefix LD_LIBRARY_PATH : ${lib.getLib mpv-unwrapped}/lib
 
         runHook postInstall
