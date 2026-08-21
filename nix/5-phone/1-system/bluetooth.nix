@@ -36,6 +36,25 @@
     # The radio stays down until it is asked for, rather than drawing power on every boot.
     hardware.bluetooth.powerOnBoot = false;
 
+    # powerOnBoot only writes AutoEnable=false, which governs bluetoothd. systemd-rfkill restores the soft block saved at shutdown, and the kernel
+    # keeps its own powered setting, so a radio left on comes back unblocked and powers itself straight up with bluetoothd never consulted.
+    systemd.services.bluetooth-rfkill-block = {
+        description = "Start with the Bluetooth radio blocked, whatever state it was left in";
+        wantedBy = [ "multi-user.target" ];
+
+        # After the rebind, which replaces the rfkill device and so gets its saved state restored a second time.
+        after = [
+            "bluetooth-firmware-rebind.service"
+            "bluetooth.service"
+        ];
+
+        serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = "${pkgs.util-linux}/bin/rfkill block bluetooth";
+        };
+    };
+
     systemd.services.bluetooth-firmware-rebind = {
         description = "Re-probe the Bluetooth radio once its firmware is reachable";
         wantedBy = [ "multi-user.target" ];
