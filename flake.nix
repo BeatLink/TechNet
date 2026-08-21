@@ -106,6 +106,11 @@
             inputs.nixpkgs.follows = "nixpkgs";
         };
 
+        # nixpkgs still ships 0.104.1, so the desktop client is built from upstream's own flake, pinned to the release tag and left on its own nixpkgs because that lock pins a pnpm2nix fork and a matching Electron binary.
+        trilium = {
+            url = "github:TriliumNext/Trilium/v0.105.0";
+        };
+
         prewarm = {
             url = "github:BeatLink/Prewarm";
             inputs.nixpkgs.follows = "nixpkgs";
