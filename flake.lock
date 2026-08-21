@@ -810,11 +810,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787344993,
-        "narHash": "sha256-G4hrcgU+3mU+jzrh54c7toYPxWJvvZBfXu/OTVqxDnA=",
+        "lastModified": 1787345852,
+        "narHash": "sha256-W/IV/TNM/6xTVoOXONgcI1v9LGFT9s5N8wwcl4Q7Uuk=",
         "owner": "BeatLink",
         "repo": "sidebar-scratchpad",
-        "rev": "cc2f9b2f21062407a9098c61f5e6c1ddc0e9a8c4",
+        "rev": "4c6a8dfcc0c94a38a779cf658c7298426623007e",
         "type": "github"
       },
       "original": {
