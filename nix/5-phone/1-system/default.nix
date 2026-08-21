@@ -34,6 +34,7 @@
         ./theme.nix
         ./fn-lock.nix
         ./pine-key.nix
+        ./dock-rotation.nix
         ./usb-networking.nix
         ./wireguard-watchdog.nix
     ];

@@ -120,7 +120,4 @@ in
             Install.WantedBy = [ "graphical-session.target" ];
         };
     };
-
-    # Written here rather than read from sysfs by the session, because the bind state is only meaningful after pinephone-keyboard-sync has settled it.
-    technet.keyboardDockFlag = flag;
 }
