@@ -89,7 +89,7 @@ text-scaling-factor=1.0
 toolkit-accessibility=false
 
 [desktop/keybindings]
-custom-list=['custom0', 'custom1', '__dummy__']
+custom-list=['custom0', 'custom1', 'custom2', '__dummy__']
 looking-glass-keybinding=@as []
 
 [desktop/keybindings/custom-keybindings/custom0]
@@ -101,6 +101,11 @@ name='Xkill'
 binding=['HomePage']
 command='trilium'
 name='Trilium'
+
+[desktop/keybindings/custom-keybindings/custom2]
+binding=['<Super>z']
+command='sidebar-scratchpad --toggle'
+name='Sidebar Notes'
 
 [desktop/keybindings/media-keys]
 calculator=@as []
