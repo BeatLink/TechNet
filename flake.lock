@@ -1027,11 +1027,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787337014,
-        "narHash": "sha256-7xSUxuzXRV5uebkqxUtuIQ1t7Q9qihWyk42zkdgO5Io=",
+        "lastModified": 1787349851,
+        "narHash": "sha256-pq5Yms/jyH6Kd2QtlpHRgt3YcvQSu9VYRCYISUxpjh0=",
         "owner": "BeatLink",
         "repo": "Vigil",
-        "rev": "36f363689cada7e78f9d1745cb2cf595e83ce201",
+        "rev": "30371c8d3dc5fc9f44f81d7726e0d665303cca8f",
         "type": "github"
       },
       "original": {
