@@ -4,7 +4,7 @@
     sops.secrets.blockurl_api_key = {
         owner = "blockurl"; # must match services.blockurl.user
         group = "blockurl";
-        mode = "0440";      # allow vigil-access (in the blockurl group) to read the key
+        mode = "0440";      # allow Vigil (both transports are in the blockurl group) to read the key
         sopsFile = "${config.technet.secrets.path}/blockurl.yaml";
     };
 

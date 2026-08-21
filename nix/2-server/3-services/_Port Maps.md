@@ -21,7 +21,7 @@ column, and their service definition lives in that host's own directory.
 | Service | Port | Vhost |
 |---------|------|-------|
 | Homepage     | 9610 | homepage.heimdall.technet |
-| Vigil        | 9611 | vigil.heimdall.technet |
+| Vigil        | 9611 | vigil.heimdall.technet — also serves the agent WebSocket at `/api/agent/ws`, reachable over WireGuard so Odin and Ragnarok's agents can dial in |
 
 ## Networking / DNS
 

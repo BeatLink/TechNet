@@ -8,5 +8,6 @@
         ./ssh.nix
         ./syncthing.nix
         ./vigil-access.nix
+        ./vigil-agent.nix
     ];
 }

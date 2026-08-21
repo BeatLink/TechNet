@@ -1,12 +1,26 @@
 # Vigil
 #
-# Web-based network and systems monitor. Runs on Heimdall and pulls metrics,
-# service status and backup health from the TechNet hosts over SSH (agentless).
+# Web-based network and systems monitor. Runs on Heimdall and collects metrics,
+# service status and backup health from the TechNet hosts.
 #
-# Migrated from Vigil's config.yaml. SSH credentials for the locked-down `vigil`
-# service user are supplied once via `ssh_defaults` (username + key) and merged
-# into every monitor's `ssh_config` by the engine. Vigil logs into a dedicated
-# `vigil-access` account on each host, defined in nix/0-common/2-users/vigil.nix.
+# Heimdall, Odin and Ragnarok are reached through the Vigil agent: each runs
+# `vigil-agent` (nix/0-common/3-services/vigil-agent.nix), which dials out to
+# this host and holds one WebSocket open. Monitors name their host with
+# `agent = "<id>"`. Nothing about a monitor's commands changes — the agent runs
+# the same shell the SSH transport carried — but there is no per-host session
+# ceiling, no SSH channel per command, and monitors that subscribe to an event
+# stream hear about a change immediately instead of on their next interval.
+#
+# `ssh_defaults` below is retained as a fallback, not as the collection path.
+# No monitor sets `ssh_config` any more, so nothing uses it; it stays until the
+# agents have proven themselves, because restoring SSH access to a host you can
+# no longer see is the wrong order of operations. Drop it, and the
+# `vigil-access` account, once that is settled.
+#
+# Devices with nothing to run — the IoT sensors, lights and Thor — are still
+# reached agentlessly by ICMP/HTTP/DNS, which needs nothing installed on them.
+# That is the case the agent does not replace and is why SSH and the other
+# agentless transports remain first-class.
 #
 # Repo passphrases are per monitor, not global. Each borg monitor sets
 # `passphrase_command` pointing at the sops secret of the tool that owns its
@@ -48,6 +62,29 @@
         owner = "vigil";
     };
 
+    # Shared token each agent authenticates with, one file per agent. Heimdall
+    # is a recipient of all three (it declares every agent below); each host is
+    # a recipient only of its own, so no monitored host can impersonate
+    # another's agent. Read at runtime via `token_file`, so the tokens never
+    # enter the Nix store the way an inline `token` in `settings` would.
+    sops.secrets.vigil_agent_token_heimdall = {
+        sopsFile = "${config.technet.secrets.commonPath}/vigil-agent-heimdall.yaml";
+        key = "vigil_agent_token";
+        owner = "vigil";
+    };
+
+    sops.secrets.vigil_agent_token_odin = {
+        sopsFile = "${config.technet.secrets.commonPath}/vigil-agent-odin.yaml";
+        key = "vigil_agent_token";
+        owner = "vigil";
+    };
+
+    sops.secrets.vigil_agent_token_ragnarok = {
+        sopsFile = "${config.technet.secrets.commonPath}/vigil-agent-ragnarok.yaml";
+        key = "vigil_agent_token";
+        owner = "vigil";
+    };
+
     # FreeDNS's per-host dynamic update URL for bltechnet.mooo.com — a
     # secret, account-specific URL that updates the record to the caller's
     # apparent IP on GET. Read by the "DDNS" monitor's ddns_updater plugin
@@ -73,7 +110,34 @@
                 write_batch_seconds = 5;
             };
 
-            # Applied to every monitor's ssh_config unless overridden locally.
+            # Every agent that may dial in. A monitor's `agent = "<id>"` refers
+            # to an `id` here. `host` is a label only — Vigil never dials an
+            # agent, the agent always dials Vigil — but it is what a monitor's
+            # target shows as in the dashboard, so it stays the real hostname.
+            #
+            # An agent that is configured but not currently connected is not an
+            # error: its monitors report failed with an explicit message until
+            # it reconnects, exactly as a refused SSH dial behaved.
+            agents = [
+                {
+                    id = "heimdall";
+                    host = "heimdall.technet";
+                    token_file = config.sops.secrets.vigil_agent_token_heimdall.path;
+                }
+                {
+                    id = "odin";
+                    host = "odin.technet";
+                    token_file = config.sops.secrets.vigil_agent_token_odin.path;
+                }
+                {
+                    id = "ragnarok";
+                    host = "ragnarok.technet";
+                    token_file = config.sops.secrets.vigil_agent_token_ragnarok.path;
+                }
+            ];
+
+            # Fallback only — no monitor sets `ssh_config` any more, so nothing
+            # merges these today. See the header before removing them.
             ssh_defaults = {
                 username = "vigil-access";
                 key_path = config.sops.secrets.vigil_ssh_key.path;
@@ -95,7 +159,7 @@
             plugins = [
                 {
                     # Vigil watching itself. Runs in-process on Heimdall rather
-                    # than over SSH, so it needs no ssh_config.
+                    # than through a transport, so it names no agent.
                     #
                     # The value here is the stall check: if the engine wedges,
                     # every other monitor simply stops updating while the UI
@@ -262,9 +326,7 @@
                                     interval = "1m";
                                     cpu_warning = 70;
                                     cpu_threshold = 85;
-                                    ssh_config = {
-                                        host = "ragnarok.technet";
-                                    };
+                                    agent = "ragnarok";
                                 }
                                 {
                                     name = "Memory";
@@ -273,9 +335,7 @@
                                     interval = "1m";
                                     memory_warning = 75;
                                     memory_threshold = 90;
-                                    ssh_config = {
-                                        host = "ragnarok.technet";
-                                    };
+                                    agent = "ragnarok";
                                 }
                                 {
                                     # An OOM kill is an event, not a level: memory
@@ -286,9 +346,7 @@
                                     id = "ragnarok-oom";
                                     type = "oom";
                                     interval = "1m";
-                                    ssh_config = {
-                                        host = "ragnarok.technet";
-                                    };
+                                    agent = "ragnarok";
                                 }
                                 {
                                     name = "Temperature";
@@ -297,9 +355,7 @@
                                     interval = "1m";
                                     temp_warning = 70;
                                     temp_threshold = 80;
-                                    ssh_config = {
-                                        host = "ragnarok.technet";
-                                    };
+                                    agent = "ragnarok";
                                 }
                                 {
                                     name = "Load";
@@ -308,9 +364,7 @@
                                     interval = "1m";
                                     load_warning = 70;
                                     load_threshold = 100;
-                                    ssh_config = {
-                                        host = "ragnarok.technet";
-                                    };
+                                    agent = "ragnarok";
                                 }
                                 {
                                     name = "Processes";
@@ -319,9 +373,7 @@
                                     interval = "30s";
                                     max_processes = 20;
                                     grid_col_span = 4;
-                                    ssh_config = {
-                                        host = "ragnarok.technet";
-                                    };
+                                    agent = "ragnarok";
                                 }
                                 {
                                     name = "Network";
@@ -329,9 +381,7 @@
                                     type = "network_usage";
                                     interval = "30s";
                                     grid_col_span = 4;
-                                    ssh_config = {
-                                        host = "ragnarok.technet";
-                                    };
+                                    agent = "ragnarok";
                                 }
                                 {
                                     name = "Disk I/O";
@@ -339,9 +389,7 @@
                                     type = "diskio";
                                     interval = "30s";
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "ragnarok.technet";
-                                    };
+                                    agent = "ragnarok";
                                 }
                                 {
                                     name = "Connections";
@@ -351,9 +399,7 @@
                                     total_warning = 500;
                                     total_threshold = 1000;
                                     grid_col_span = 1;
-                                    ssh_config = {
-                                        host = "ragnarok.technet";
-                                    };
+                                    agent = "ragnarok";
                                 }
                                 {
                                     name = "Interrupts";
@@ -363,9 +409,7 @@
                                     irq_warning = 20000;
                                     irq_threshold = 50000;
                                     grid_col_span = 1;
-                                    ssh_config = {
-                                        host = "ragnarok.technet";
-                                    };
+                                    agent = "ragnarok";
                                 }
                                 {
                                     name = "SMART";
@@ -373,9 +417,7 @@
                                     type = "smart_disk";
                                     interval = "1h";
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "ragnarok.technet";
-                                    };
+                                    agent = "ragnarok";
                                 }
                                 {
                                     name = "ZFS Health";
@@ -383,9 +425,7 @@
                                     type = "zfs_health";
                                     interval = "1h";
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "ragnarok.technet";
-                                    };
+                                    agent = "ragnarok";
                                 }
                                 {
                                     name = "/";
@@ -395,9 +435,7 @@
                                     threshold = 90;
                                     interval = "10m";
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "ragnarok.technet";
-                                    };
+                                    agent = "ragnarok";
                                 }
                                 {
                                     name = "/Storage";
@@ -407,9 +445,7 @@
                                     threshold = 90;
                                     interval = "10m";
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "ragnarok.technet";
-                                    };
+                                    agent = "ragnarok";
                                 }
                                 {
                                     name = "/boot";
@@ -419,9 +455,7 @@
                                     threshold = 90;
                                     interval = "10m";
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "ragnarok.technet";
-                                    };
+                                    agent = "ragnarok";
                                 }
                                 {
                                     # Auto-discovers every mount, so it also covers
@@ -437,9 +471,7 @@
                                     inode_warning = 85;
                                     inode_threshold = 95;
                                     grid_col_span = 4;
-                                    ssh_config = {
-                                        host = "ragnarok.technet";
-                                    };
+                                    agent = "ragnarok";
                                 }
                             ];
                         }
@@ -455,9 +487,7 @@
                                     interval = "1m";
                                     cpu_warning = 70;
                                     cpu_threshold = 85;
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Memory";
@@ -466,9 +496,7 @@
                                     interval = "1m";
                                     memory_warning = 75;
                                     memory_threshold = 90;
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     # An OOM kill is an event, not a level: memory
@@ -479,9 +507,7 @@
                                     id = "heimdall-oom";
                                     type = "oom";
                                     interval = "1m";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Temperature";
@@ -490,9 +516,7 @@
                                     interval = "1m";
                                     temp_warning = 70;
                                     temp_threshold = 80;
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Load";
@@ -501,9 +525,7 @@
                                     interval = "1m";
                                     load_warning = 70;
                                     load_threshold = 100;
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Processes";
@@ -512,9 +534,7 @@
                                     interval = "30s";
                                     max_processes = 20;
                                     grid_col_span = 4;
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Network";
@@ -522,9 +542,7 @@
                                     type = "network_usage";
                                     interval = "30s";
                                     grid_col_span = 4;
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Disk I/O";
@@ -532,9 +550,7 @@
                                     type = "diskio";
                                     interval = "30s";
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Connections";
@@ -544,9 +560,7 @@
                                     total_warning = 500;
                                     total_threshold = 1000;
                                     grid_col_span = 1;
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Interrupts";
@@ -556,9 +570,7 @@
                                     irq_warning = 20000;
                                     irq_threshold = 50000;
                                     grid_col_span = 1;
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Service Reachability";
@@ -576,9 +588,7 @@
                                         { name = "Homepage"; url = "https://homepage.heimdall.technet"; }
                                         { name = "Jackett"; url = "https://jackett.heimdall.technet"; }
                                     ];
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "SMART";
@@ -586,9 +596,7 @@
                                     type = "smart_disk";
                                     interval = "1h";
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "ZFS Health";
@@ -596,9 +604,7 @@
                                     type = "zfs_health";
                                     interval = "1h";
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "/";
@@ -608,9 +614,7 @@
                                     threshold = 90;
                                     interval = "10m";
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "/Storage";
@@ -620,9 +624,7 @@
                                     threshold = 90;
                                     interval = "10m";
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "/boot";
@@ -632,9 +634,7 @@
                                     threshold = 90;
                                     interval = "10m";
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     # Auto-discovers every mount, so it also covers
@@ -650,9 +650,7 @@
                                     inode_warning = 85;
                                     inode_threshold = 95;
                                     grid_col_span = 4;
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                             ];
                         }
@@ -668,9 +666,7 @@
                                     interval = "1m";
                                     cpu_warning = 70;
                                     cpu_threshold = 85;
-                                    ssh_config = {
-                                        host = "odin.technet";
-                                    };
+                                    agent = "odin";
                                 }
                                 {
                                     name = "Memory";
@@ -679,9 +675,7 @@
                                     interval = "1m";
                                     memory_warning = 75;
                                     memory_threshold = 90;
-                                    ssh_config = {
-                                        host = "odin.technet";
-                                    };
+                                    agent = "odin";
                                 }
                                 {
                                     # An OOM kill is an event, not a level: memory
@@ -692,9 +686,7 @@
                                     id = "odin-oom";
                                     type = "oom";
                                     interval = "1m";
-                                    ssh_config = {
-                                        host = "odin.technet";
-                                    };
+                                    agent = "odin";
                                 }
                                 {
                                     name = "Temperature";
@@ -703,9 +695,7 @@
                                     interval = "1m";
                                     temp_warning = 70;
                                     temp_threshold = 80;
-                                    ssh_config = {
-                                        host = "odin.technet";
-                                    };
+                                    agent = "odin";
                                 }
                                 {
                                     name = "Load";
@@ -714,9 +704,7 @@
                                     interval = "1m";
                                     load_warning = 70;
                                     load_threshold = 100;
-                                    ssh_config = {
-                                        host = "odin.technet";
-                                    };
+                                    agent = "odin";
                                 }
                                 {
                                     name = "Processes";
@@ -725,9 +713,7 @@
                                     interval = "30s";
                                     max_processes = 20;
                                     grid_col_span = 4;
-                                    ssh_config = {
-                                        host = "odin.technet";
-                                    };
+                                    agent = "odin";
                                 }
                                 {
                                     name = "Network";
@@ -735,9 +721,7 @@
                                     type = "network_usage";
                                     interval = "30s";
                                     grid_col_span = 4;
-                                    ssh_config = {
-                                        host = "odin.technet";
-                                    };
+                                    agent = "odin";
                                 }
                                 {
                                     name = "WiFi";
@@ -747,9 +731,7 @@
                                     quality_warning = 40;
                                     quality_threshold = 20;
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "odin.technet";
-                                    };
+                                    agent = "odin";
                                 }
                                 {
                                     # NVIDIA dGPU (PRIME offload). With finegrained power
@@ -767,9 +749,7 @@
                                     temp_warning = 80;
                                     temp_threshold = 90;
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "odin.technet";
-                                    };
+                                    agent = "odin";
                                 }
                                 {
                                     name = "Disk I/O";
@@ -777,9 +757,7 @@
                                     type = "diskio";
                                     interval = "30s";
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "odin.technet";
-                                    };
+                                    agent = "odin";
                                 }
                                 {
                                     name = "Connections";
@@ -789,9 +767,7 @@
                                     total_warning = 500;
                                     total_threshold = 1000;
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "odin.technet";
-                                    };
+                                    agent = "odin";
                                 }
                                 {
                                     name = "Interrupts";
@@ -801,9 +777,7 @@
                                     irq_warning = 20000;
                                     irq_threshold = 50000;
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "odin.technet";
-                                    };
+                                    agent = "odin";
                                 }
                                 {
                                     name = "SMART";
@@ -811,9 +785,7 @@
                                     type = "smart_disk";
                                     interval = "1h";
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "odin.technet";
-                                    };
+                                    agent = "odin";
                                 }
                                 {
                                     name = "ZFS Health";
@@ -821,9 +793,7 @@
                                     type = "zfs_health";
                                     interval = "1h";
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "odin.technet";
-                                    };
+                                    agent = "odin";
                                 }
                                 {
                                     name = "/";
@@ -833,9 +803,7 @@
                                     threshold = 90;
                                     interval = "10m";
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "odin.technet";
-                                    };
+                                    agent = "odin";
                                 }
                                 {
                                     name = "/Storage";
@@ -845,9 +813,7 @@
                                     threshold = 90;
                                     interval = "10m";
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "odin.technet";
-                                    };
+                                    agent = "odin";
                                 }
                                 {
                                     name = "/boot";
@@ -857,9 +823,7 @@
                                     threshold = 90;
                                     interval = "10m";
                                     grid_col_span = 2;
-                                    ssh_config = {
-                                        host = "odin.technet";
-                                    };
+                                    agent = "odin";
                                 }
                                 {
                                     # Auto-discovers every mount, so it also covers
@@ -875,9 +839,7 @@
                                     inode_warning = 85;
                                     inode_threshold = 95;
                                     grid_col_span = 4;
-                                    ssh_config = {
-                                        host = "odin.technet";
-                                    };
+                                    agent = "odin";
                                 }
                             ];
                         }
@@ -899,9 +861,7 @@
                                     interval = "1h";
                                     service_name = "nixos-upgrade.service";
                                     max_age = "1w";
-                                    ssh_config = {
-                                        host = "ragnarok.technet";
-                                    };
+                                    agent = "ragnarok";
                                 }
                             ];
                         }
@@ -917,9 +877,7 @@
                                     interval = "1h";
                                     service_name = "nixos-upgrade.service";
                                     max_age = "1w";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     # Timer-driven oneshot (OnCalendar=daily). Monitored
@@ -932,9 +890,7 @@
                                     interval = "1h";
                                     service_name = "stremio-export.service";
                                     max_age = "2d";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Mosquitto";
@@ -942,9 +898,7 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "mosquitto.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     # Message-delivery health, as opposed to the
@@ -969,9 +923,7 @@
                                     username = "vigil";
                                     password_command = "cat /run/secrets/mosquitto_vigil_password";
                                     probe_topic = "vigil/probe/heimdall-mosquitto-delivery";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Calibre Web";
@@ -979,9 +931,7 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "calibre-web-automated.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     # Library-serving health, as opposed to the
@@ -1000,9 +950,7 @@
                                     url = "http://127.0.0.1:8083";
                                     username = "vigil";
                                     password_command = "cat /run/secrets/calibre_web_vigil_password";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Unbound";
@@ -1010,9 +958,7 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "unbound.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     # Resolution health, as opposed to the monitor
@@ -1036,9 +982,7 @@
                                     query_domain = "cloudflare.com";
                                     servfail_warning = 5;
                                     servfail_threshold = 20;
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "VLC";
@@ -1046,9 +990,7 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "vlc-audio.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Nginx";
@@ -1056,9 +998,7 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "nginx.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Pi-hole";
@@ -1066,9 +1006,7 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "pihole-ftl.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     # DNS filtering health, as opposed to the
@@ -1097,9 +1035,7 @@
                                     # flags a rebuild that silently stopped
                                     # happening without alarming on the normal cycle.
                                     gravity_max_age = "8d";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Home Assistant";
@@ -1107,9 +1043,7 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "home-assistant.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Frigate";
@@ -1117,9 +1051,7 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "frigate.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     # Camera health, as opposed to the monitor
@@ -1135,9 +1067,7 @@
                                     type = "frigate";
                                     interval = "1m";
                                     api_url = "http://127.0.0.1:5000";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     # The broker leg, which neither monitor above
@@ -1171,9 +1101,7 @@
                                             -u vigil -P "$(cat /run/secrets/mosquitto_vigil_password)" \
                                             -t frigate/available -C 1 -W 5)" = online
                                     '';
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "FreshRSS";
@@ -1181,9 +1109,7 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "phpfpm-freshrss.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     # Feed-refresh health, as opposed to the
@@ -1201,9 +1127,7 @@
                                     api_url = "http://127.0.0.1:80";
                                     username = "beatlink";
                                     api_password_command = "cat /run/secrets/freshrss_api_password";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "qBittorrent";
@@ -1211,9 +1135,7 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "qbittorrent.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     # Transfer health, as opposed to the monitor
@@ -1256,9 +1178,7 @@
                                     # storage path under /Storage disappeared,
                                     # which is worth failing on immediately.
                                     error_threshold = 1;
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Openbooks";
@@ -1266,9 +1186,7 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "openbooks.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     # IRC-bridge health, as opposed to the
@@ -1285,9 +1203,7 @@
                                     type = "openbooks";
                                     interval = "10m";
                                     ws_url = "ws://127.0.0.1:9777/ws";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Traccar";
@@ -1295,9 +1211,7 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "traccar.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     # Device-staleness health, as opposed to
@@ -1321,9 +1235,7 @@
                                     password_command = "cat /run/secrets/traccar_vigil_password";
                                     stale_warning = 24;
                                     stale_threshold = 72;
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Jackett";
@@ -1331,9 +1243,7 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "jackett.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "ESPHome";
@@ -1341,9 +1251,7 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "esphome.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Homepage";
@@ -1351,9 +1259,7 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "homepage-dashboard.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Blockurl";
@@ -1361,9 +1267,7 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "blockurl.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     # Database health, as opposed to the
@@ -1381,9 +1285,7 @@
                                     interval = "15m";
                                     api_url = "http://127.0.0.1:9001";
                                     api_key_command = "cut -d= -f2- /run/secrets/blockurl_api_key";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Radicale";
@@ -1391,9 +1293,7 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "radicale.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     # CalDAV/CardDAV health, as opposed to the
@@ -1412,9 +1312,7 @@
                                     url = "http://127.0.0.1:5232";
                                     username = "vigil";
                                     password_command = "cat /run/secrets/radicale_vigil_password";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Syncthing";
@@ -1422,9 +1320,7 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "syncthing.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     # Folder/device health, as opposed to the
@@ -1440,9 +1336,7 @@
                                     interval = "10m";
                                     api_url = "http://127.0.0.1:8384";
                                     api_key_command = "cat /Storage/Services/Syncthing/Config/vigil-api-key";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Trilium";
@@ -1450,9 +1344,7 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "trilium-server.service";
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                                 {
                                     # Write-activity health, as opposed to the
@@ -1473,9 +1365,7 @@
                                     api_url = "http://127.0.0.1:8080";
                                     token_command = "cat /run/secrets/trilium_etapi_token";
                                     stale_warning = 72;
-                                    ssh_config = {
-                                        host = "heimdall.technet";
-                                    };
+                                    agent = "heimdall";
                                 }
                             ];
                         }
@@ -1491,9 +1381,7 @@
                                     interval = "1h";
                                     service_name = "nixos-upgrade.service";
                                     max_age = "1w";
-                                    ssh_config = {
-                                        host = "odin.technet";
-                                    };
+                                    agent = "odin";
                                 }
                                 {
                                     name = "Networking";
@@ -1501,9 +1389,7 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "NetworkManager.service";
-                                    ssh_config = {
-                                        host = "odin.technet";
-                                    };
+                                    agent = "odin";
                                 }
                                 {
                                     name = "Bluetooth";
@@ -1511,9 +1397,7 @@
                                     type = "systemd_service";
                                     interval = "1m";
                                     service_name = "bluetooth.service";
-                                    ssh_config = {
-                                        host = "odin.technet";
-                                    };
+                                    agent = "odin";
                                 }
                             ];
                         }
@@ -1600,9 +1484,7 @@
                                             keep_within = "6H";
                                             keep_hourly = 12;
                                             keep_daily = 3;
-                                            ssh_config = {
-                                                host = "odin.technet";
-                                            };
+                                            agent = "odin";
                                         }
                                         {
                                             # Vorta profile "2. Heimdall Backup".
@@ -1650,9 +1532,7 @@
                                             keep_daily = 3;
                                             keep_weekly = 2;
                                             keep_monthly = 3;
-                                            ssh_config = {
-                                                host = "odin.technet";
-                                            };
+                                            agent = "odin";
                                         }
                                         {
                                             # Vorta profile "3. Ragnarok Backup" — the long-term copy.
@@ -1704,9 +1584,7 @@
                                             keep_weekly = 8;
                                             keep_monthly = 24;
                                             keep_yearly = 3;
-                                            ssh_config = {
-                                                host = "odin.technet";
-                                            };
+                                            agent = "odin";
                                         }
                                     ];
                                 }
@@ -1753,9 +1631,7 @@
                                             keep_weekly = 4;
                                             keep_monthly = 12;
                                             keep_yearly = 3;
-                                            ssh_config = {
-                                                host = "odin.technet";
-                                            };
+                                            agent = "odin";
                                         }
                                         {
                                             name = "Heimdall";
@@ -1798,9 +1674,7 @@
                                             keep_weekly = 4;
                                             keep_monthly = 12;
                                             keep_yearly = 3;
-                                            ssh_config = {
-                                                host = "odin.technet";
-                                            };
+                                            agent = "odin";
                                         }
                                         {
                                             name = "Ragnarok";
@@ -1843,9 +1717,7 @@
                                             keep_weekly = 4;
                                             keep_monthly = 12;
                                             keep_yearly = 3;
-                                            ssh_config = {
-                                                host = "odin.technet";
-                                            };
+                                            agent = "odin";
                                         }
                                     ];
                                 }
@@ -1899,9 +1771,7 @@
                                             keep_weekly = 4;
                                             keep_monthly = 3;
                                             keep_yearly = 1;
-                                            ssh_config = {
-                                                host = "heimdall.technet";
-                                            };
+                                            agent = "heimdall";
                                         }
                                         {
                                             name = "Ragnarok";
@@ -1947,9 +1817,7 @@
                                             keep_weekly = 4;
                                             keep_monthly = 3;
                                             keep_yearly = 1;
-                                            ssh_config = {
-                                                host = "heimdall.technet";
-                                            };
+                                            agent = "heimdall";
                                         }
                                     ];
                                 }
@@ -1973,6 +1841,12 @@
             mode = "0750";
         };
     };
+
+    # The agents' endpoint is served on the dashboard's own port, so Odin and
+    # Ragnarok need to reach 9611 — over WireGuard only, the same mesh their SSH
+    # collection already used. The port stays closed on every other interface;
+    # browsers keep using the TLS vhost below.
+    networking.firewall.interfaces."wireguard0".allowedTCPPorts = [ 9611 ];
 
     nginx-vhosts.vigil = {
         domain = "vigil.heimdall.technet";

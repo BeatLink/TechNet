@@ -24,7 +24,8 @@
     # Traccar's vigil account (see traccar.nix).
     sops.secrets.freshrss_api_password = {
         sopsFile = "${config.technet.secrets.path}/freshrss.yaml";
-        owner = "vigil-access";
+        group = "vigil-monitor";                                        # Read by whichever Vigil transport runs the `cat` — the agent today, vigil-access as fallback
+        mode = "0440";
     };
 
     systemd.tmpfiles.settings."FreshRSS"."/Storage/Services/FreshRSS" = {

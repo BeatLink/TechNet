@@ -87,8 +87,8 @@
             ${pkgs.libxml2}/bin/xmllint --xpath 'string(configuration/gui/apikey)' \
                 /Storage/Services/Syncthing/Config/config.xml \
                 > /Storage/Services/Syncthing/Config/.vigil-api-key.new
-            chown vigil-access:vigil-access /Storage/Services/Syncthing/Config/.vigil-api-key.new
-            chmod 0400 /Storage/Services/Syncthing/Config/.vigil-api-key.new
+            chown root:vigil-monitor /Storage/Services/Syncthing/Config/.vigil-api-key.new
+            chmod 0440 /Storage/Services/Syncthing/Config/.vigil-api-key.new
             mv -f /Storage/Services/Syncthing/Config/.vigil-api-key.new \
                 /Storage/Services/Syncthing/Config/vigil-api-key
         '';

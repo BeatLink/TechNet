@@ -7,7 +7,8 @@
     # Frigate hold their own copies, so only the hash is needed here.
     sops.secrets.mosquitto_vigil_password = {
         sopsFile = "${config.technet.secrets.path}/mosquitto.yaml";
-        owner = "vigil-access";
+        group = "vigil-monitor";                                        # Read by whichever Vigil transport runs the `cat` — the agent today, vigil-access as fallback
+        mode = "0440";
     };
 
     sops.secrets.mosquitto_homeassistant_password_hash = {
