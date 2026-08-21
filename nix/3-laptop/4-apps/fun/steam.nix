@@ -24,7 +24,7 @@
             programs.gamescope = {
                 enable = true;
                 capSysNice = true; # Lets gamescope renice itself, which is what keeps its own thread ahead of the game under load
-                enableWsi = true;
+                enableWsi = false; # The FROG WSI bypass layer kills every Vulkan client at startup with "Failed to get Wayland objects", so games never reach their first frame
                 args = [
                     "-W"
                     "1920"
