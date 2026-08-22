@@ -82,26 +82,28 @@ in
         };
     };
 
-    config.technet.theme.palette =
-        let
-            chosen = looks.${config.technet.theme.look};
-            colours = lib.filterAttrs (
-                _: v: builtins.isString v && builtins.match "[0-9a-f]{6}" v != null
-            ) chosen;
-        in
-        chosen // { rgb = lib.mapAttrs (_: rgbOf) colours; };
+    config = {
+        technet.theme.palette =
+            let
+                chosen = looks.${config.technet.theme.look};
+                colours = lib.filterAttrs (
+                    _: v: builtins.isString v && builtins.match "[0-9a-f]{6}" v != null
+                ) chosen;
+            in
+            chosen // { rgb = lib.mapAttrs (_: rgbOf) colours; };
 
-    qt = {
-        enable = true;
-        platformTheme = "qt5ct";
-    };
+        qt = {
+            enable = true;
+            platformTheme = "qt5ct";
+        };
+        environment.systemPackages = [ halon ];
 
-    environment.systemPackages = [ halon ];
-
-    home-manager.users.beatlink = {
-        xdg.configFile = {
-            "qt5ct/qt5ct.conf".text = settings "qt5ct";
-            "qt6ct/qt6ct.conf".text = settings "qt6ct";
+        home-manager.users.beatlink = {
+            xdg.configFile = {
+                "qt5ct/qt5ct.conf".text = settings "qt5ct";
+                "qt6ct/qt6ct.conf".text = settings "qt6ct";
+            };
         };
     };
+
 }
