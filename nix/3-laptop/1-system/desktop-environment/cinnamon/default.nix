@@ -12,11 +12,10 @@
     ...
 }:
 let
-    webGreeter = pkgs.callPackage ./web-greeter.nix { };
+    webGreeter = inputs.web-greeter.packages.${pkgs.stdenv.hostPlatform.system}.web-greeter;
     halonGreeterTheme = inputs.halon.packages.${pkgs.stdenv.hostPlatform.system}.halon-lightdm-theme;
 in
 {
-    imports = [ ./cinnamon-bump.nix ];
     environment.sessionVariables = {
         NIXOS_OZONE_WL = "1"; # Read by the nixpkgs Chromium and Electron wrappers, which add their Wayland flags only when WAYLAND_DISPLAY is set too
         QT_QPA_PLATFORM = "wayland;xcb"; # Qt takes the entries in turn, so Qt 5 stops defaulting to xcb while keeping it as the fallback

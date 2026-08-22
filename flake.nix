@@ -49,6 +49,11 @@
             url = "github:BeatLink/Halon";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        # git+ and submodules=1, not github:, because the stock themes are a submodule and a tarball fetch drops them
+        web-greeter = {
+            url = "git+https://github.com/BeatLink/web-greeter?ref=nix-flake&submodules=1";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
         sidebar-scratchpad = {
             url = "github:BeatLink/sidebar-scratchpad";
             inputs.nixpkgs.follows = "nixpkgs";
