@@ -98,9 +98,12 @@ in
                 src = mintSrc final "cinnamon-session" "6.7.3-unstable" "sha256-RUPxmDzFrZIDuwZ65GkElmb0J4VIGy8JXU/AKY9vHqo=";
             });
 
-            cinnamon-settings-daemon = prev.cinnamon-settings-daemon.overrideAttrs (_: {
+            cinnamon-settings-daemon = prev.cinnamon-settings-daemon.overrideAttrs (old: {
                 version = "6.7.2-unstable";
                 src = mintSrc final "cinnamon-settings-daemon" "6.7.2-unstable" "sha256-NHSqY7RpIJUu6/AHdkZsrxAxLkVBCbQyZlWY6udAyRc=";
+                # Without this csd-background paints the X11 root pixmap, which nothing composites on Wayland
+                buildInputs = (old.buildInputs or [ ]) ++ [ final.gtk-layer-shell ];
+                mesonFlags = (old.mesonFlags or [ ]) ++ [ "-Dgtk_layer_shell=true" ];
             });
 
             cinnamon-screensaver = prev.cinnamon-screensaver.overrideAttrs (_: {
