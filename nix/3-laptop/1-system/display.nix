@@ -18,47 +18,31 @@
                 enable = true;
                 enable32Bit = true;
             };
-            hardware.amdgpu.initrd.enable = true; # Loads amdgpu early so the external monitor shows the password prompt
+            hardware.amdgpu.initrd.enable = true;
         }
 
         # NVIDIA dGPU ################################################################################################################################
         {
             hardware.nvidia = {
                 modesetting.enable = true;
-                dynamicBoost.enable = true;
+                dynamicBoost.enable = false;
                 powerManagement = {
                     enable = true;
-                    finegrained = false; # D3cold runtime resumes hang the GSP firmware, stalling the compositor
+                    finegrained = true;
                 };
                 open = true;
                 nvidiaSettings = true;
-                package = config.boot.kernelPackages.nvidiaPackages.beta;
+                package = config.boot.kernelPackages.nvidiaPackages.production;
                 prime = {
                     amdgpuBusId = "PCI:6:0:0";
                     nvidiaBusId = "PCI:1:0:0";
                     offload.enable = true;
+                    offload.enableOffloadCmd = false;
                 };
             };
             services.xserver.videoDrivers = [
                 "modesetting"
                 "nvidia"
-            ];
-        }
-
-        # Render GPU Selection #######################################################################################################################
-        # libglvnd reads 10_nvidia.json before 50_mesa.json, so without this the compositor and Xwayland take the dGPU and Mesa clients lose DRI3.
-        {
-            environment.sessionVariables.__EGL_VENDOR_LIBRARY_FILENAMES = "/run/opengl-driver/share/glvnd/egl_vendor.d/50_mesa.json";
-            hardware.nvidia.prime.offload.enableOffloadCmd = false;
-            environment.systemPackages = [
-                (pkgs.writeShellScriptBin "nvidia-offload" ''
-                    export __NV_PRIME_RENDER_OFFLOAD=1
-                    export __NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0
-                    export __GLX_VENDOR_LIBRARY_NAME=nvidia
-                    export __VK_LAYER_NV_optimus=NVIDIA_only
-                    export __EGL_VENDOR_LIBRARY_FILENAMES=/run/opengl-driver/share/glvnd/egl_vendor.d/10_nvidia.json
-                    exec "$@"
-                '')
             ];
         }
 
@@ -72,12 +56,9 @@
             systemd.services.set-brightness = {
                 description = "Set default screen brightness";
                 wantedBy = [ "multi-user.target" ];
-                after = [ "multi-user.target" ];
                 serviceConfig = {
                     Type = "oneshot";
-                    ExecStart = ''
-                        /run/current-system/sw/bin/brightnessctl set 100%
-                    '';
+                    ExecStart = "${pkgs.brightnessctl}/bin/brightnessctl set 100%";
                 };
             };
         }
@@ -85,7 +66,7 @@
         # Lid Switch #################################################################################################################################
         {
             services.logind.settings.Login = {
-                HandleLidSwitch = "ignore"; # Overrides the lid switch before login, which otherwise sleeps the system on the login page
+                HandleLidSwitch = "ignore"; # The greeter suspends on lid close even when docked, so ignoring only the docked case is not enough
                 HandleLidSwitchDocked = "ignore";
             };
         }
