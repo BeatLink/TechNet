@@ -239,15 +239,7 @@
                             colinkiama.linter-vala
                             emeraldwalk.runonsave
                         ])
-                        # The published theme is a plain derivation, so the ids extensions.json requires are stamped on here
-                        ++ [
-                            (inputs.halon.packages.${pkgs.stdenv.hostPlatform.system}.halon-vscode-theme.overrideAttrs (old: {
-                                passthru = (old.passthru or { }) // {
-                                    vscodeExtUniqueId = "halon.halon-theme";
-                                    vscodeExtPublisher = "halon";
-                                };
-                            }))
-                        ];
+                        ++ [ inputs.halon.packages.${pkgs.stdenv.hostPlatform.system}.halon-vscode-theme ];
                     };
                 };
             };
