@@ -141,6 +141,7 @@
             home-manager,
             xdg-autostart,
             gmusicbrowser,
+            halon,
             blockurl,
             mobile-nixos,
             vantage,
@@ -197,6 +198,7 @@
                                     gmusicbrowser.homeManagerModules.gmusicbrowser
                                     lnxlink.homeModules.default
                                     sidebar-scratchpad.homeManagerModules.default
+                                    halon.homeManagerModules.default
                                 ];
                             };
                         }
@@ -205,6 +207,7 @@
                         impermanence.nixosModules.impermanence
                         sops-nix.nixosModules.sops
                         home-manager.nixosModules.home-manager
+                        halon.nixosModules.default
                         ./nix/0-common
                         ./nix/3-laptop
                     ];

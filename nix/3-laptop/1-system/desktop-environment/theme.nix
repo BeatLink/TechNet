@@ -32,9 +32,33 @@ let
             ]
         );
 
+    # Halon publishes its tokens as JSON precisely so this file does not transcribe them
+    token = name: lib.removePrefix "#" inputs.halon.tokens.dark.${name};
+
     looks = {
-        # Mint-Y with the aqua accent — the default. nixpkgs' mint-themes tracks
-        # Mint's releases, so this is whatever Mint currently ships as Mint-Y-Dark-Aqua.
+        # Halon's dark scheme — the default, and the same colours Cinnamon, Qt, the
+        # editor and the greeter already wear, so the two sessions stop disagreeing.
+        halon = {
+            surface = token "surface-root";
+            card = token "surface-default";
+            border = token "border-default";
+            text = token "text-body";
+            accent = token "accent";
+            red = token "status-danger";
+            yellow = token "status-warning";
+            gtk = {
+                name = "Halon-Dark";
+                package = inputs.halon.packages.${pkgs.stdenv.hostPlatform.system}.halon-theme;
+            };
+            # Halon ships no icon theme, so this is the set Cinnamon's exported dconf also names
+            icons = {
+                name = "Mint-Y-Aqua";
+                package = pkgs.mint-y-icons;
+            };
+        };
+
+        # Mint-Y with the aqua accent. nixpkgs' mint-themes tracks Mint's releases,
+        # so this is whatever Mint currently ships as Mint-Y-Dark-Aqua.
         mint = {
             surface = "1e1e1e";
             card = "2a2a2a";
@@ -53,26 +77,12 @@ let
             };
         };
     };
-    halon = inputs.halon.packages.${pkgs.stdenv.hostPlatform.system}.halon-qt-theme;
-
-    # Fusion is what the style sheet is written against; it assumes Fusion's element structure for everything it does not restyle.
-    settings = qtct: ''
-        [Appearance]
-        custom_palette=true
-        color_scheme_path=${halon}/share/${qtct}/colors/Halon.conf
-        style=Fusion
-        standard_dialogs=default
-
-        [Interface]
-        stylesheets=${halon}/share/halon/qt/Halon.qss
-    '';
-
 in
 {
     options.technet.theme = {
         look = lib.mkOption {
             type = lib.types.enum (builtins.attrNames looks);
-            default = "mint";
+            default = "halon";
             description = "Which look the Hyprland session wears.";
         };
         palette = lib.mkOption {
@@ -92,18 +102,12 @@ in
             in
             chosen // { rgb = lib.mapAttrs (_: rgbOf) colours; };
 
+        # Selecting the platform theme is this machine's call; what Halon looks like through it is Halon's
         qt = {
             enable = true;
             platformTheme = "qt5ct";
         };
-        environment.systemPackages = [ halon ];
-
-        home-manager.users.beatlink = {
-            xdg.configFile = {
-                "qt5ct/qt5ct.conf".text = settings "qt5ct";
-                "qt6ct/qt6ct.conf".text = settings "qt6ct";
-            };
-        };
+        home-manager.users.beatlink.themes.halon.qt = true;
     };
 
 }

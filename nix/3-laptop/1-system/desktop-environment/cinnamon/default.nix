@@ -71,7 +71,7 @@ in
         detect-theme-errors = true
         screensaver-timeout = 300
         secure-mode = true
-        theme = "${halonGreeterTheme}/share/web-greeter/themes/halon" # An absolute path, since the theme lives outside web-greeter's own themes directory
+        theme = "${halonGreeterTheme.themePath}" # An absolute path, since the theme lives outside web-greeter's own themes directory
         icon-theme = "Bibata-Modern-Classic" # Named icon-theme, but the greeter only feeds it to XCURSOR_THEME
 
         [features.battery]
@@ -89,8 +89,9 @@ in
         user-image = "${webGreeter}/share/icons/hicolor/scalable/apps/com.github.jezerm.web-greeter.svg"
     '';
 
+    themes.halon.enable = true; # Installs the GTK and Cinnamon theme; the exported dconf below is what selects it
+
     environment.systemPackages = with pkgs; [
-        inputs.halon.packages.${pkgs.stdenv.hostPlatform.system}.halon-theme
         gnome-themes-extra
         libnotify
         ddcutil
