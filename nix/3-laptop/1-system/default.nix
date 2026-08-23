@@ -5,6 +5,7 @@
         ./directories.nix
         ./performance.nix
         ./sops.nix
+        ./boot-splash.nix
         ./software.nix
         ./networking.nix
         ./display.nix
