@@ -1,12 +1,119 @@
 {
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
-    // for the documentation about the tasks.json format
     "version": "2.0.0",
+    "inputs": [
+        {
+            "id": "host",
+            "type": "pickString",
+            "description": "Which host?",
+            "options": [
+                "Odin",
+                "Heimdall",
+                "Ragnarok",
+                "Thor"
+            ],
+            "default": "Odin"
+        },
+        {
+            "id": "action",
+            "type": "pickString",
+            "description": "nixos-rebuild action",
+            "options": [
+                "dry-activate",
+                "switch",
+                "test",
+                "boot",
+                "build-vm",
+                "rollback"
+            ],
+            "default": "dry-activate"
+        },
+        {
+            "id": "attr",
+            "type": "promptString",
+            "description": "Attribute to evaluate, relative to the flake (e.g. nixosConfigurations.Odin.config.networking.hostName)"
+        },
+        {
+            "id": "flakeInput",
+            "type": "promptString",
+            "description": "Flake input to update (blank updates every input)"
+        }
+    ],
     "tasks": [
         {
-            "label": "echo",
+            "label": "Nix: stage new files",
+            "detail": "git add -N — a flake build cannot see untracked files",
             "type": "shell",
-            "command": "echo Hello"
+            "command": "git add --intent-to-add .",
+            "problemMatcher": []
+        },
+        {
+            "label": "Nix: build host",
+            "detail": "Build a host's system closure without activating it",
+            "type": "shell",
+            "command": "nix build .#nixosConfigurations.${input:host}.config.system.build.toplevel --no-link --print-out-paths",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "dependsOn": "Nix: stage new files",
+            "problemMatcher": []
+        },
+        {
+            "label": "Nix: build host (trace)",
+            "detail": "Same build with --show-trace and full build logs, for chasing an eval error",
+            "type": "shell",
+            "command": "nix build .#nixosConfigurations.${input:host}.config.system.build.toplevel --no-link --show-trace -L",
+            "dependsOn": "Nix: stage new files",
+            "problemMatcher": []
+        },
+        {
+            "label": "Nix: rebuild host (nixtool)",
+            "detail": "Build and activate on the chosen host, over SSH for remote ones",
+            "type": "shell",
+            "command": "nixtool run maintenance/rebuild --host ${input:host} --action ${input:action}",
+            "problemMatcher": []
+        },
+        {
+            "label": "Nix: dry-activate this machine",
+            "detail": "Read the would-start/would-stop list before switching",
+            "type": "shell",
+            "command": "sudo nixos-rebuild dry-activate --flake .#$(hostname)",
+            "problemMatcher": []
+        },
+        {
+            "label": "Nix: flake check",
+            "type": "shell",
+            "command": "nix flake check --show-trace",
+            "group": "test",
+            "dependsOn": "Nix: stage new files",
+            "problemMatcher": []
+        },
+        {
+            "label": "Nix: eval attribute",
+            "detail": "Evaluate one attribute of the flake and print it as JSON",
+            "type": "shell",
+            "command": "nix eval --json .#${input:attr} --show-trace",
+            "problemMatcher": []
+        },
+        {
+            "label": "Nix: show host option",
+            "detail": "Evaluate a config option on a host, e.g. services.openssh.enable",
+            "type": "shell",
+            "command": "nix eval .#nixosConfigurations.${input:host}.config.${input:attr} --show-trace",
+            "problemMatcher": []
+        },
+        {
+            "label": "Nix: diff host closure against running system",
+            "type": "shell",
+            "command": "nix build .#nixosConfigurations.${input:host}.config.system.build.toplevel --no-link --print-out-paths | xargs -I{} nix store diff-closures /run/current-system {}",
+            "dependsOn": "Nix: stage new files",
+            "problemMatcher": []
+        },
+        {
+            "label": "Nix: update flake input",
+            "type": "shell",
+            "command": "if [ -n '${input:flakeInput}' ]; then nix flake update ${input:flakeInput}; else nix flake update; fi",
+            "problemMatcher": []
         }
     ]
 }
