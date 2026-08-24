@@ -25,15 +25,18 @@
         };
     };
 
-    # Browsing the camera archive from the file manager instead of the Frigate web UI.
-    fileSystems."/Storage/Files/Videos/Frigate" = {
-        device = "/var/lib/frigate/recordings";
+    # The recordings live in the Videos folder and are mounted where Frigate expects to write them.
+    fileSystems."/var/lib/frigate/recordings" = {
+        device = "/Storage/Files/Videos/Frigate";
         fsType = "none";
         options = [
             "bind"
             "nofail"
         ];
-        depends = [ "/var/lib/frigate" ];
+        depends = [
+            "/Storage"
+            "/var/lib/frigate"
+        ];
     };
 
     # The recordings tree is 0750 frigate:frigate, so the mount is unreadable without this.
