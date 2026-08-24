@@ -40,7 +40,7 @@
         ];
     };
 
-    # The recordings tree is 0750 frigate:frigate, so the mount is unreadable without this.
+    # The recordings tree is 0770 frigate:frigate, so it is unreadable without this.
     users.users.beatlink.extraGroups = [ "frigate" ];
 
     services = {
