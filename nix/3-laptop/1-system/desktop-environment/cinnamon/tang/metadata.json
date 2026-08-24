@@ -1,0 +1,13 @@
+{
+    "uuid": "tang@technet",
+    "name": "Tang Server",
+    "description": "Start and stop the tang key server from the panel. The icon shows whether tangd.socket is currently listening.",
+    "author": "beatlink",
+    "max-instances": "1",
+    "version": "1.0.0",
+    "cinnamon-version": [
+        "6.0",
+        "6.2",
+        "6.4"
+    ]
+}

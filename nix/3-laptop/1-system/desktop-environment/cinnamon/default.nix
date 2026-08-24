@@ -31,6 +31,7 @@ in
     imports = [
         ./always-on-top.nix
         ./cinnamon-bump.nix
+        ./tang.nix
     ];
 
     environment.sessionVariables = {
