@@ -25,9 +25,9 @@
         };
     };
 
-    # The recordings live in the Videos folder and are mounted where Frigate expects to write them.
+    # The recordings live under /Storage/Files and are mounted where Frigate expects to write them.
     fileSystems."/var/lib/frigate/recordings" = {
-        device = "/Storage/Files/Videos/Frigate";
+        device = "/Storage/Files/Frigate";
         fsType = "none";
         options = [
             "bind"

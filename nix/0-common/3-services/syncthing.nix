@@ -93,10 +93,7 @@ let
             ];
         };
         Sounds = { };
-        Videos = {
-            # Heimdall bind-mounts the Frigate recordings in here; without this the whole archive syncs out with the Videos folder.
-            ignorePatterns = [ "/Frigate" ];
-        };
+        Videos = { };
     };
     folderIds = {
         Documents = "hz0k1-egjw9";
