@@ -93,7 +93,10 @@ let
             ];
         };
         Sounds = { };
-        Videos = { };
+        Videos = {
+            # Heimdall symlinks the Frigate recordings in here; without this it syncs out as a dangling link.
+            ignorePatterns = [ "/Frigate" ];
+        };
     };
     folderIds = {
         Documents = "hz0k1-egjw9";
