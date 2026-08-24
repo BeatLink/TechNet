@@ -33,6 +33,21 @@
             "description": "Attribute to evaluate, relative to the flake (e.g. nixosConfigurations.Odin.config.networking.hostName)"
         },
         {
+            "id": "package",
+            "type": "promptString",
+            "description": "Package attribute to check across channels (e.g. thunderbird)"
+        },
+        {
+            "id": "system",
+            "type": "pickString",
+            "description": "Which system's hydra jobs?",
+            "options": [
+                "x86_64-linux",
+                "aarch64-linux"
+            ],
+            "default": "x86_64-linux"
+        },
+        {
             "id": "flakeInput",
             "type": "promptString",
             "description": "Flake input to update (blank updates every input)"
@@ -107,6 +122,13 @@
             "type": "shell",
             "command": "nix build .#nixosConfigurations.${input:host}.config.system.build.toplevel --no-link --print-out-paths | xargs -I{} nix store diff-closures /run/current-system {}",
             "dependsOn": "Nix: stage new files",
+            "problemMatcher": []
+        },
+        {
+            "label": "Nix: package status",
+            "detail": "A package's version on master, unstable and stable, plus its hydra build status",
+            "type": "shell",
+            "command": "nixtool run package-status --package ${input:package} --system ${input:system}",
             "problemMatcher": []
         },
         {
