@@ -10,18 +10,25 @@
         group = "frigate";
     };
 
-    systemd.tmpfiles.settings."Frigate"."/Storage/Services/Frigate" = {
-        d = {
-            user = "frigate";
-            group = "frigate";
-            mode = "0750";
+    systemd.tmpfiles.settings."Frigate" = {
+        "/Storage/Services/Frigate" = {
+            d = {
+                user = "frigate";
+                group = "frigate";
+                mode = "0750";
+            };
+            Z = {
+                user = "frigate";
+                group = "frigate";
+                mode = "0750";
+            };
         };
-        Z = {
-            user = "frigate";
-            group = "frigate";
-            mode = "0750";
-        };
+        # Browsing the camera archive from the file manager instead of the Frigate web UI.
+        "/Storage/Files/Videos/Frigate".L.argument = "/var/lib/frigate/recordings";
     };
+
+    # The recordings tree is 0750 frigate:frigate, so the link is unreadable without this.
+    users.users.beatlink.extraGroups = [ "frigate" ];
 
     services = {
         udev.extraRules = ''
