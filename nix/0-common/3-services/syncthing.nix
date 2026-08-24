@@ -105,6 +105,13 @@ let
         Sounds = "kae2q-5740v";
         Videos = "4kqye-6dosm";
     };
+    # A folder whose path or sync type differs per peer keys them by device name; everything else takes the shared default.
+    perHost = folder: attr: default: let entries = folder.${attr} or { }; in entries.${cfg.self} or entries.default or default;
+
+    # Load-bearing: without it a host configures folders it is not a member of and scans them for nothing.
+    hostFolders = lib.filterAttrs (_: folder: builtins.elem cfg.self (folder.devices or allPeers)) folders;
+
+    folderPath = name: folder: perHost folder "paths" "/Storage/Files/${name}";
 in
 {
     options.syncthing-mesh = {
@@ -145,7 +152,7 @@ in
 
         folders = lib.mapAttrs' (
             name: folder:
-            lib.nameValuePair "/Storage/Files/${name}" (
+            lib.nameValuePair (folderPath name folder) (
                 # Three layers, and the order is the point. Defaults a host may
                 # replace come first; folderOptions second, so a host can; the
                 # shared contract last, because a folder id or device list that
@@ -166,13 +173,15 @@ in
                 // {
                     label = name;
                     id = folderIds.${name};
-                    type = "sendreceive";
+                    type = perHost folder "types" "sendreceive";
                     devices = lib.subtractLists [ cfg.self ] (folder.devices or allPeers);
                     ignorePerms = false;
                 }
                 // (removeAttrs folder [
                     "devices"
                     "ignorePatterns"
+                    "paths"
+                    "types"
                 ])
                 # Concatenated rather than merged: `//` would let a folder's own
                 # patterns replace the shared list instead of adding to it.
@@ -180,7 +189,6 @@ in
                     ignorePatterns = commonIgnorePatterns ++ (folder.ignorePatterns or [ ]);
                 }
             )
-            # Load-bearing: without it a host configures folders it is not a member of and scans them for nothing.
-        ) (lib.filterAttrs (_: folder: builtins.elem cfg.self (folder.devices or allPeers)) folders);
+        ) hostFolders;
     };
 }
