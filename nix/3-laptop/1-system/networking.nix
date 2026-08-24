@@ -17,6 +17,8 @@
             # Static lease on the house LAN, with Heimdall as DNS.
             "TechNet Wi-Fi" = {
                 connection.autoconnect-priority = "100";
+                # 5GHz only, to keep the shared MediaTek radio off the 2.4GHz keyboard dongle's band.
+                wifi.band = "a";
                 ipv4 = {
                     method = "manual";
                     addresses = "192.168.0.3/24";
