@@ -87,8 +87,8 @@
                     # This MUST stay true: Frigate refuses an MQTT "ON" unless the
                     # camera is enabled in the config file ("Camera must be enabled
                     # in the config to be turned on via MQTT"), so setting false
-                    # here would make the camera impossible to arm. HA should
-                    # publish OFF on startup to reach the disarmed state.
+                    # here would make the camera impossible to arm. The unit's
+                    # prestart parks a retained OFF so it starts disarmed.
                     enabled = true;
                     ffmpeg = {
                         input_args = [
@@ -152,6 +152,9 @@
     systemd.services = {
         frigate = {
             path = [ pkgs.ffmpeg-full ];
+            # The disarm prestart publishes to the broker, so it has to be up first.
+            after = [ "mosquitto.service" ];
+            wants = [ "mosquitto.service" ];
             serviceConfig = {
                 EnvironmentFile = config.sops.secrets."frigate_env".path;
                 AmbientCapabilities = "CAP_PERFMON";
@@ -175,6 +178,32 @@
                             sleep 5
                             echo -n "$usb_id" > /sys/bus/usb/drivers/usb/bind || true
                             sleep 2
+                        fi
+                    ''}"
+                    # Frigate arms every camera from its config at start; this retained OFF is what leaves the apartment camera disarmed until Home Assistant arms it.
+                    # Retained rather than plain: nothing is subscribed yet here, and Frigate applies it the moment its MQTT session connects, before the camera process starts.
+                    "${pkgs.writeShellScript "frigate-disarm-apartment" ''
+                        ${pkgs.mosquitto}/bin/mosquitto_pub \
+                            -h 127.0.0.1 -p 1883 \
+                            -u frigate -P "$FRIGATE_MQTT_PASSWORD" \
+                            -t frigate/apartment/enabled/set -m OFF -r
+                    ''}"
+                ];
+                # Clearing the retained OFF once Frigate has applied it, or every later broker reconnect would silently disarm a camera Home Assistant had armed.
+                # -R drops the retained state left by the previous run, so this only ever sees this run's own publishes and cannot clear the command before Frigate reads it.
+                ExecStartPost = [
+                    "${pkgs.writeShellScript "frigate-clear-disarm-retain" ''
+                        if ${pkgs.mosquitto}/bin/mosquitto_sub \
+                            -h 127.0.0.1 -p 1883 \
+                            -u frigate -P "$FRIGATE_MQTT_PASSWORD" \
+                            -t frigate/apartment/enabled/state -R -W 60 | grep -qx OFF
+                        then
+                            ${pkgs.mosquitto}/bin/mosquitto_pub \
+                                -h 127.0.0.1 -p 1883 \
+                                -u frigate -P "$FRIGATE_MQTT_PASSWORD" \
+                                -t frigate/apartment/enabled/set -n -r
+                        else
+                            echo "apartment camera never reported disarmed; leaving the retained OFF in place" >&2
                         fi
                     ''}"
                 ];
