@@ -53,6 +53,8 @@
             hostname = "frigate";
             checkConfig = false;
             settings = {
+                # Frigate migrates any config older than this on start, and the store path is read-only, so a stale value here means it runs un-migrated.
+                version = "0.17-0";
                 database.path = "/Storage/Services/Frigate/data/frigate.db";
                 mqtt = {
                     enabled = true;
@@ -75,17 +77,23 @@
                 };
                 record = {
                     enabled = true;
-                    retain = {
-                        days = 0;
-                        mode = "motion";
-                    };
-                    events = {
+                    # Both default to 0 days, which is what keeps the tree to review clips only rather than a rolling continuous buffer.
+                    continuous.days = 0;
+                    motion.days = 0;
+                    alerts = {
                         pre_capture = 5;
                         post_capture = 10;
                         retain = {
-                            default = 14;
+                            days = 14;
                             mode = "active_objects";
-                            objects.person = 14;
+                        };
+                    };
+                    detections = {
+                        pre_capture = 5;
+                        post_capture = 10;
+                        retain = {
+                            days = 14;
+                            mode = "active_objects";
                         };
                     };
                 };
