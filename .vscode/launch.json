@@ -19,6 +19,21 @@
             "id": "attr",
             "type": "promptString",
             "description": "Attribute to evaluate, relative to the flake (e.g. nixosConfigurations.Odin.config.networking.hostName)"
+        },
+        {
+            "id": "package",
+            "type": "promptString",
+            "description": "Package attribute to check across channels (e.g. thunderbird)"
+        },
+        {
+            "id": "system",
+            "type": "pickString",
+            "description": "Which system's hydra jobs?",
+            "options": [
+                "x86_64-linux",
+                "aarch64-linux"
+            ],
+            "default": "x86_64-linux"
         }
     ],
     "configurations": [
@@ -57,6 +72,13 @@
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "command": "nixtool run maintenance/rebuild --host ${input:host}"
+        },
+        {
+            "name": "Package status (nixtool)",
+            "type": "node-terminal",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "command": "nixtool run package-status --package ${input:package} --system ${input:system}"
         },
         {
             "name": "Nixtool TUI",
