@@ -51,7 +51,17 @@
         frigate = {
             enable = true;
             hostname = "frigate";
-            checkConfig = false;
+            # The check parses the config for real, so it needs the two things the sandbox lacks: the labelmap off /Storage and the interpolated MQTT secret.
+            preCheckConfig = ''
+                substituteInPlace $out \
+                    --replace-fail "/Storage/Services/Frigate/coco_91cl_bkgr.txt" "${config.services.frigate.package}/share/frigate/labelmap.txt"
+                export FRIGATE_MQTT_PASSWORD=placeholder
+
+                # A rejected config drops Frigate into safe mode and still exits 0, so the module's own check needs this to become a real build failure.
+                if ${config.services.frigate.package.python.interpreter} -m frigate --validate-config 2>&1 | tee /dev/stderr | grep -q "Config Validation Errors"; then
+                    exit 1
+                fi
+            '';
             settings = {
                 # Frigate migrates any config older than this on start, and the store path is read-only, so a stale value here means it runs un-migrated.
                 version = "0.17-0";
