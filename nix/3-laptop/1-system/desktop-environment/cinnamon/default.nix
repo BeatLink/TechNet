@@ -28,7 +28,10 @@ let
     '';
 in
 {
-    imports = [ ./always-on-top.nix ];
+    imports = [
+        ./always-on-top.nix
+        ./cinnamon-bump.nix
+    ];
 
     environment.sessionVariables = {
         NIXOS_OZONE_WL = "1"; # Read by the nixpkgs Chromium and Electron wrappers, which add their Wayland flags only when WAYLAND_DISPLAY is set too
