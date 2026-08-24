@@ -11,6 +11,27 @@
             }
         ]
     },
+    // Workspace settings replace the object from home-manager wholesale, so the formatting command is
+    // repeated here; only the options blocks are new.
+    "nix.serverSettings": {
+        "nixd": {
+            "formatting": {
+                "command": [
+                    "nixfmt",
+                    "--indent",
+                    "4"
+                ]
+            },
+            "options": {
+                "nixos": {
+                    "expr": "(builtins.getFlake \"/Storage/Files/Projects/TechNet\").nixosConfigurations.Odin.options"
+                },
+                "home-manager": {
+                    "expr": "(builtins.getFlake \"/Storage/Files/Projects/TechNet\").nixosConfigurations.Odin.options.home-manager.users.type.getSubOptions []"
+                }
+            }
+        }
+    },
     "cSpell.words": [
         "arion",
         "dconf",
@@ -28,5 +49,9 @@
         "wamserma",
         "warpinator",
         "xsession"
+    ],
+    "conventionalCommits.scopes": [
+        "Odin/Cinnamon",
+        "Odin/VsCodium"
     ]
 }

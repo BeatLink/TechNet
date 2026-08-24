@@ -1,0 +1,69 @@
+{
+    // Nix has no debug adapter, so these run in the built-in JS debug terminal purely to get an
+    // interactive terminal out of F5. The debugging itself is nix's own --debugger and repl.
+    "version": "0.2.0",
+    "inputs": [
+        {
+            "id": "host",
+            "type": "pickString",
+            "description": "Which host?",
+            "options": [
+                "Odin",
+                "Heimdall",
+                "Ragnarok",
+                "Thor"
+            ],
+            "default": "Odin"
+        },
+        {
+            "id": "attr",
+            "type": "promptString",
+            "description": "Attribute to evaluate, relative to the flake (e.g. nixosConfigurations.Odin.config.networking.hostName)"
+        }
+    ],
+    "configurations": [
+        {
+            "name": "Nix repl (flake)",
+            "type": "node-terminal",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "command": "nix repl ."
+        },
+        {
+            "name": "Nix repl (host config)",
+            "type": "node-terminal",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "command": "nix repl .#nixosConfigurations.${input:host}"
+        },
+        {
+            "name": "Nix eval attribute (--debugger)",
+            "type": "node-terminal",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "command": "nix eval .#${input:attr} --debugger --ignore-try --show-trace"
+        },
+        {
+            "name": "Build host (--debugger)",
+            "type": "node-terminal",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "Nix: stage new files",
+            "command": "nix build .#nixosConfigurations.${input:host}.config.system.build.toplevel --no-link --debugger --ignore-try --show-trace -L"
+        },
+        {
+            "name": "Rebuild host (nixtool)",
+            "type": "node-terminal",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "command": "nixtool run maintenance/rebuild --host ${input:host}"
+        },
+        {
+            "name": "Nixtool TUI",
+            "type": "node-terminal",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "command": "nixtool tui"
+        }
+    ]
+}
