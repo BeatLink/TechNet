@@ -17,10 +17,11 @@
                 group = "frigate";
                 mode = "0750";
             };
+            # Group-writable, not 0750: this recurses through the recordings bind mount, so a stricter mode here locks Syncthing out of the folder root.
             Z = {
                 user = "frigate";
                 group = "frigate";
-                mode = "0750";
+                mode = "0770";
             };
         };
     };
