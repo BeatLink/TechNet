@@ -20,14 +20,18 @@
 # Settings are stored in dconf and exported into this folder by
 # `nixtool run maintenance/export-dconf`.
 { pkgs, ... }:
+let
+    # nemo-preview embeds a Clutter stage through clutter-gtk, which only knows GdkX11 and segfaults on a Wayland GdkWindow
+    nemo-preview = pkgs.nemo-preview.overrideAttrs (_: {
+        preFixup = ''
+            gappsWrapperArgs+=(--set GDK_BACKEND x11)
+        '';
+    });
+in
 {
     home-manager.users.beatlink = {
         home = {
-            # nemo-preview, ffmpeg-full and imagemagick are the thumbnailing and
-            # preview helpers. They were an option back when this module was
-            # shared with a phone on an SD card, because that is a lot of
-            # closure to carry. Odin is the only host importing it now, so they
-            # are simply listed.
+            # nemo-preview, ffmpeg-full and imagemagick are the thumbnailing and preview helpers; let bindings win over with, so nemo-preview is the wrapped one
             packages = with pkgs; [
                 nemo-with-extensions
                 nemo-preview
