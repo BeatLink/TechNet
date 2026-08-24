@@ -1,59 +1,11 @@
 # Tang ###############################################################################################################################################
 #
-# The tang key server Odin hosts, tied to the desktop session lock so keys are only served while the session is unlocked.
+# The tang key server Odin hosts, started and stopped by hand from the panel applet so keys are only served on demand.
 #
 
 { config, lib, pkgs, ... }:
 let
     tangCfg = config.technet.tang;
-
-    # Session Gate -----------------------------------------------------------------------------------------------------------------------------------
-    # Starts and stops tangd.socket in step with the screensaver, and fails closed whenever the screensaver cannot be reached.
-    gate = pkgs.writeShellScript "tang-session-gate" ''
-        set -u
-
-        SYSTEMCTL=${pkgs.systemd}/bin/systemctl
-        GDBUS=${pkgs.glib}/bin/gdbus
-
-        start_tang() {
-            $SYSTEMCTL start tangd.socket 2>/dev/null || true
-        }
-
-        stop_tang() {
-            $SYSTEMCTL stop tangd.socket 2>/dev/null || true
-        }
-
-        apply() {
-            case "$1" in
-                true)  echo "tang-gate: session locked, stopping tang"; stop_tang ;;
-                false) echo "tang-gate: session unlocked, starting tang"; start_tang ;;
-            esac
-        }
-
-        active="$($GDBUS call --session \
-            --dest ${tangCfg.server.screensaver.dbusName} \
-            --object-path ${tangCfg.server.screensaver.objectPath} \
-            --method ${tangCfg.server.screensaver.dbusName}.GetActive 2>/dev/null)"
-        case "$active" in
-            *true*)  apply true ;;
-            *false*) apply false ;;
-            *)       echo "tang-gate: screensaver not reachable, failing closed"; stop_tang ;;
-        esac
-
-        $GDBUS monitor --session \
-            --dest ${tangCfg.server.screensaver.dbusName} \
-            --object-path ${tangCfg.server.screensaver.objectPath} 2>/dev/null |
-        while read -r line; do
-            case "$line" in
-                *ActiveChanged*true*)  apply true ;;
-                *ActiveChanged*false*) apply false ;;
-            esac
-        done
-
-        echo "tang-gate: monitor exited, failing closed"
-        stop_tang
-        exit 1
-    '';
 in
 {
     # Options ########################################################################################################################################
@@ -84,12 +36,12 @@ in
         };
 
         server = {
-            enable = lib.mkEnableOption "hosting the tang server, gated on an unlocked desktop session";
+            enable = lib.mkEnableOption "hosting the tang server, started on demand from the panel applet";
 
             user = lib.mkOption {
                 type = lib.types.str;
                 default = "beatlink";
-                description = "User whose desktop session gates the tang server.";
+                description = "User the polkit rule lets start and stop tangd.socket.";
             };
 
             persistenceRoot = lib.mkOption {
@@ -124,18 +76,6 @@ in
                 type = lib.types.int;
                 default = 2;
                 description = "How many tang_key_N entries sopsFile provides.";
-            };
-
-            screensaver = {
-                dbusName = lib.mkOption {
-                    type = lib.types.str;
-                    description = "D-Bus name of the screensaver to watch, e.g. org.cinnamon.ScreenSaver.";
-                };
-
-                objectPath = lib.mkOption {
-                    type = lib.types.str;
-                    description = "D-Bus object path of the screensaver to watch.";
-                };
             };
         };
     };
@@ -174,7 +114,7 @@ in
             };
 
             systemd.sockets.tangd = {
-                wantedBy = lib.mkForce [ ]; # Started by the session gate alone, never by a boot target
+                wantedBy = lib.mkForce [ ]; # Started from the panel applet alone, never by a boot target
                 unitConfig = lib.mkIf (tangCfg.server.persistenceRoot != null) {
                     RequiresMountsFor = "/var/lib/private/tang";
                 };
@@ -246,20 +186,6 @@ in
                     }
                 });
             '';
-
-            systemd.user.services.tang-session-gate = {
-                description = "Serve tang only while the desktop session is unlocked";
-                wantedBy = [ "graphical-session.target" ];
-                partOf = [ "graphical-session.target" ];
-                after = [ "graphical-session.target" ];
-                serviceConfig = {
-                    Type = "simple";
-                    ExecStart = "${gate}";
-                    ExecStopPost = "${pkgs.systemd}/bin/systemctl stop tangd.socket";
-                    Restart = "always";
-                    RestartSec = 2;
-                };
-            };
         })
     ];
 }
