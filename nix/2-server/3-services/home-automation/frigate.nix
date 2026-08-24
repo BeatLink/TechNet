@@ -51,8 +51,20 @@
         frigate = {
             enable = true;
             hostname = "frigate";
-            checkConfig = false;
+            # The check parses the config for real, so it needs the two things the sandbox lacks: the labelmap off /Storage and the interpolated MQTT secret.
+            preCheckConfig = ''
+                substituteInPlace $out \
+                    --replace-fail "/Storage/Services/Frigate/coco_91cl_bkgr.txt" "${config.services.frigate.package}/share/frigate/labelmap.txt"
+                export FRIGATE_MQTT_PASSWORD=placeholder
+
+                # A rejected config drops Frigate into safe mode and still exits 0, so the module's own check needs this to become a real build failure.
+                if ${config.services.frigate.package.python.interpreter} -m frigate --validate-config 2>&1 | tee /dev/stderr | grep -q "Config Validation Errors"; then
+                    exit 1
+                fi
+            '';
             settings = {
+                # Frigate migrates any config older than this on start, and the store path is read-only, so a stale value here means it runs un-migrated.
+                version = "0.17-0";
                 database.path = "/Storage/Services/Frigate/data/frigate.db";
                 mqtt = {
                     enabled = true;
@@ -75,17 +87,23 @@
                 };
                 record = {
                     enabled = true;
-                    retain = {
-                        days = 0;
-                        mode = "motion";
-                    };
-                    events = {
+                    # Both default to 0 days, which is what keeps the tree to review clips only rather than a rolling continuous buffer.
+                    continuous.days = 0;
+                    motion.days = 0;
+                    alerts = {
                         pre_capture = 5;
                         post_capture = 10;
                         retain = {
-                            default = 14;
+                            days = 14;
                             mode = "active_objects";
-                            objects.person = 14;
+                        };
+                    };
+                    detections = {
+                        pre_capture = 5;
+                        post_capture = 10;
+                        retain = {
+                            days = 14;
+                            mode = "active_objects";
                         };
                     };
                 };
