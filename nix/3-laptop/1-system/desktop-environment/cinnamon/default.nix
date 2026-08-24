@@ -14,6 +14,18 @@
 let
     webGreeter = inputs.web-greeter.packages.${pkgs.stdenv.hostPlatform.system}.web-greeter;
     halonGreeterTheme = inputs.halon.packages.${pkgs.stdenv.hostPlatform.system}.halon-lightdm-theme;
+    # QtWebEngine's GPU compositor cannot make a Skia representation of its Ozone backing on this iGPU, so every
+    # layer above the page background fails to paint and the greeter shows an empty screen; software compositing draws it.
+    webGreeterWrapped = pkgs.writeShellScriptBin "web-greeter" ''
+        export QTWEBENGINE_CHROMIUM_FLAGS="--disable-gpu-compositing ''${QTWEBENGINE_CHROMIUM_FLAGS:-}"
+        exec ${webGreeter}/bin/web-greeter "$@"
+    '';
+    # LightDM starts the greeter from this desktop entry's Exec, so the wrapper only takes effect once the entry names it
+    webGreeterXgreeters = pkgs.runCommand "web-greeter-xgreeters" { } ''
+        mkdir -p "$out"
+        substitute ${webGreeter.xgreeters}/web-greeter.desktop "$out/web-greeter.desktop" \
+            --replace-fail "${webGreeter}/bin/web-greeter" "${webGreeterWrapped}/bin/web-greeter"
+    '';
 in
 {
     environment.sessionVariables = {
@@ -52,7 +64,7 @@ in
                 greeters.gtk.enable = false; # Defaults on, and its own greeter definition would collide with the one below
                 # web-greeter has no NixOS module, so the greeter is named directly
                 greeter = {
-                    package = webGreeter.xgreeters;
+                    package = webGreeterXgreeters;
                     name = "web-greeter";
                 };
             };
