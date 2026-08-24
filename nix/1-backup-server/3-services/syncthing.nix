@@ -26,8 +26,9 @@
 # cost of keeping is lower than the cost of discovering a gap. Watch pool usage
 # rather than assuming; `zfs list` on the data pool is the check.
 #
-# The versions live under .stversions inside each folder, so they land on the
-# same dataset and are covered by the same snapshots and scrubs as the data.
+# The versions live under .syncthing/versions inside each folder, so they land
+# on the same dataset and are covered by the same snapshots and scrubs as the
+# data.
 #
 { config, lib, ... }:
 {
