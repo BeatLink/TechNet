@@ -246,7 +246,7 @@ horizontal-scrolling=true
 orientation-lock=true
 
 [settings-daemon/plugins/color]
-night-light-enabled=true
+night-light-enabled=false
 night-light-last-coordinates=(17.968056000000001, -76.793333000000004)
 night-light-schedule-from=21.0
 night-light-schedule-mode='manual'
