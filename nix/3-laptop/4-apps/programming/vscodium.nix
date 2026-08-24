@@ -233,6 +233,7 @@
                             ms-playwright.playwright
                             vitest.explorer
                             tomoki1207.pdf
+                            vivaxy.vscode-conventional-commits
                         ]
                         ++ (with pkgs.nix-vscode-extensions.vscode-marketplace; [
                             fnando.linter
