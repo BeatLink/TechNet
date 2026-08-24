@@ -94,6 +94,19 @@ let
         };
         Sounds = { };
         Videos = { };
+        # Frigate owns the tree and prunes it on its own retention schedule, so Heimdall only ever sends and the peers mirror it read-only.
+        Frigate = {
+            devices = [
+                "Heimdall"
+                "Odin"
+            ];
+            types = {
+                Heimdall = "sendonly";
+                default = "receiveonly";
+            };
+            # No trashcan: a peer mirroring a rolling window would keep every pruned recording for another 30 days.
+            versioning = null;
+        };
     };
     folderIds = {
         Documents = "hz0k1-egjw9";
@@ -102,6 +115,7 @@ let
         Music = "8g86n-1309l";
         Pictures = "ta09s-b2u0y";
         Projects = "xjtvv-cyqwv";
+        Frigate = "1zpxr-recdg";
         Sounds = "kae2q-5740v";
         Videos = "4kqye-6dosm";
     };
