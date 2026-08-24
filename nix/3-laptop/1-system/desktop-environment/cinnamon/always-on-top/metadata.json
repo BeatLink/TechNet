@@ -1,0 +1,8 @@
+{
+    "uuid": "always-on-top@technet",
+    "name": "Always On Top",
+    "description": "Keeps chosen applications above every other window.",
+    "url": "https://github.com/BeatLink/TechNet",
+    "cinnamon-version": ["6.0"],
+    "version": "1.0"
+}

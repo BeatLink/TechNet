@@ -187,7 +187,9 @@ in
                         # Cinnamon's muffin attach-modal-dialogs is true, so dialogs are centered on their parent
                         "match:float 1, center on"
                         "match:class ^(pavucontrol|blueman-manager|nm-connection-editor)$, float on"
-                        "match:class ^(org.keepassxc.KeePassXC)$, match:title ^(Unlock Database.*)$, float on"
+                        # Pin is what Hyprland has in place of always on top, and it only holds on a floating window
+                        "match:class ^(org.keepassxc.KeePassXC)$, float on"
+                        "match:class ^(org.keepassxc.KeePassXC)$, pin on"
                     ];
                 };
             };
