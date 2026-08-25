@@ -107,7 +107,12 @@ in
             enable = true;
             platformTheme = "qt5ct";
         };
-        home-manager.users.beatlink.themes.halon.qt = true;
+        home-manager.users.beatlink.themes.halon = {
+            qt = true;
+            # The session is dark everywhere else; a light Qt palette leaves every widget an
+            # application's own style sheet does not name painting white on it
+            qtScheme = "dark";
+        };
     };
 
 }
