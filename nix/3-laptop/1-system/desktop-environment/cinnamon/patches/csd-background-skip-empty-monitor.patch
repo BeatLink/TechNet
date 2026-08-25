@@ -1,0 +1,30 @@
+background: skip a monitor that has no geometry yet
+
+draw_background_wayland_session hands mb->width and mb->height straight to
+gnome_bg_create_and_set_gtk_image, which builds the wallpaper with
+gdk_pixbuf_new (..., width * scale, height * scale). gdk_pixbuf_new returns
+NULL for a zero-sized request, and the caller never checks: it reaches
+pixbuf_average_value with a NULL pixbuf and segfaults.
+
+mb->width comes from gdk_monitor_get_geometry when the MonitorBackground is
+built, and a GdkMonitor on Wayland reports 0x0 until its output reports a
+mode. Starting csd-background inside that window kills it twice in a row, so
+cinnamon-session declares the component "crashing too quickly" and the
+desktop stays black for the rest of the session.
+
+Skip such a monitor instead. The manager already listens for monitors-changed
+and size-changed, which GDK emits when the output finally reports its mode, so
+the wallpaper is drawn as soon as there is a size to draw it at.
+
+--- a/plugins/background/csd-background-manager.c
++++ b/plugins/background/csd-background-manager.c
+@@ -96,6 +96,9 @@
+ 
+         MonitorBackground *mb = g_ptr_array_index (manager->priv->mbs, i);
+ 
++        if (mb->width <= 0 || mb->height <= 0)
++            continue;
++
+         image = monitor_background_get_pending_image (mb);
+         gnome_bg_create_and_set_gtk_image (manager->priv->bg, image, mb->width, mb->height);
+         g_object_unref (image);

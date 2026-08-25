@@ -104,6 +104,8 @@ in
                 # Without this csd-background paints the X11 root pixmap, which nothing composites on Wayland
                 buildInputs = (old.buildInputs or [ ]) ++ [ final.gtk-layer-shell ];
                 mesonFlags = (old.mesonFlags or [ ]) ++ [ "-Dgtk_layer_shell=true" ];
+                # A monitor GDK has not sized yet segfaults csd-background, and cinnamon-session then gives up on it
+                patches = (old.patches or [ ]) ++ [ ./patches/csd-background-skip-empty-monitor.patch ];
             });
 
             cinnamon-screensaver = prev.cinnamon-screensaver.overrideAttrs (_: {
