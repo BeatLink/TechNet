@@ -362,11 +362,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787632251,
-        "narHash": "sha256-vds79TrEyl4hlGHRy0KnMPuGPumBHLJWwPvcj5yRh30=",
+        "lastModified": 1787633151,
+        "narHash": "sha256-MR+NIL3Jmw2/I7wEWa1r58TC2FlCusAzwgmvPlsl3s8=",
         "owner": "BeatLink",
         "repo": "Halon",
-        "rev": "d501b732477afd00a2718d5527bf25d98fd0feb1",
+        "rev": "798554835362e774731e04d4f0f2e17a90ecec50",
         "type": "github"
       },
       "original": {
@@ -488,6 +488,26 @@
         "owner": "webbrain-one",
         "ref": "webbrain/issue-1",
         "repo": "linux-control-centre-for-lenovo",
+        "type": "github"
+      }
+    },
+    "linux-sidebar": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1787631111,
+        "narHash": "sha256-4Ue2/wmzX50TQcTMmyCrw6UN14myJUYX41NQM/nNPMM=",
+        "owner": "BeatLink",
+        "repo": "linux-sidebar",
+        "rev": "f127507d2a94381d7d4d42466c04452cb0cd84e5",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BeatLink",
+        "repo": "linux-sidebar",
         "type": "github"
       }
     },
@@ -784,6 +804,7 @@
         "home-manager": "home-manager",
         "impermanence": "impermanence",
         "lenovo-control-center": "lenovo-control-center",
+        "linux-sidebar": "linux-sidebar",
         "lnxlink": "lnxlink",
         "mobile-nixos": "mobile-nixos",
         "nix-index-database": "nix-index-database",
@@ -794,7 +815,6 @@
         "pinephone-charge": "pinephone-charge",
         "pinephone-kernel": "pinephone-kernel",
         "prewarm": "prewarm",
-        "sidebar-scratchpad": "sidebar-scratchpad",
         "sops-nix": "sops-nix",
         "trilium": "trilium",
         "vantage": "vantage",
@@ -802,26 +822,6 @@
         "waypipe-desktop": "waypipe-desktop",
         "web-greeter": "web-greeter",
         "xdg-autostart": "xdg-autostart"
-      }
-    },
-    "sidebar-scratchpad": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1787349015,
-        "narHash": "sha256-+quS0K1m7P9j6EocQ7gEef8RskPp7BPSZKPltiEjhoo=",
-        "owner": "BeatLink",
-        "repo": "sidebar-scratchpad",
-        "rev": "7b3d434e4722984bb3a29d32090e26b036875c1d",
-        "type": "github"
-      },
-      "original": {
-        "owner": "BeatLink",
-        "repo": "sidebar-scratchpad",
-        "type": "github"
       }
     },
     "sops-nix": {
