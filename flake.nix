@@ -54,8 +54,8 @@
             url = "git+https://github.com/BeatLink/web-greeter?ref=nix-flake&submodules=1";
             inputs.nixpkgs.follows = "nixpkgs";
         };
-        sidebar-scratchpad = {
-            url = "github:BeatLink/sidebar-scratchpad";
+        linux-sidebar = {
+            url = "github:BeatLink/linux-sidebar";
             inputs.nixpkgs.follows = "nixpkgs";
         };
         nixos-plymouth = {
@@ -149,7 +149,7 @@
             claude-code,
             calibre-web-automated,
             lnxlink,
-            sidebar-scratchpad,
+            linux-sidebar,
             ...
         }:
         {
@@ -197,7 +197,7 @@
                                     xdg-autostart.homeManagerModules.xdg-autostart
                                     gmusicbrowser.homeManagerModules.gmusicbrowser
                                     lnxlink.homeModules.default
-                                    sidebar-scratchpad.homeManagerModules.default
+                                    linux-sidebar.homeManagerModules.default
                                     halon.homeManagerModules.default
                                 ];
                             };
