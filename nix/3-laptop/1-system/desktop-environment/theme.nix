@@ -33,11 +33,12 @@ let
         );
 
     # Halon publishes its tokens as JSON precisely so this file does not transcribe them
-    token = name: lib.removePrefix "#" inputs.halon.tokens.dark.${name};
+    token = name: lib.removePrefix "#" inputs.halon.tokens.light.${name};
 
     looks = {
-        # Halon's dark scheme — the default, and the same colours Cinnamon, Qt, the
-        # editor and the greeter already wear, so the two sessions stop disagreeing.
+        # Halon's light scheme — the default, and what every application wears. Cinnamon's
+        # shell theme is deliberately the dark one, set in its own exported dconf; that is the
+        # single dark surface in the session, the way a panel usually is.
         halon = {
             surface = token "surface-root";
             card = token "surface-default";
@@ -47,7 +48,7 @@ let
             red = token "status-danger";
             yellow = token "status-warning";
             gtk = {
-                name = "Halon-Dark";
+                name = "Halon";
                 package = inputs.halon.packages.${pkgs.stdenv.hostPlatform.system}.halon-theme;
             };
             # Halon ships no icon theme, so this is the set Cinnamon's exported dconf also names
@@ -109,9 +110,7 @@ in
         };
         home-manager.users.beatlink.themes.halon = {
             qt = true;
-            # The session is dark everywhere else; a light Qt palette leaves every widget an
-            # application's own style sheet does not name painting white on it
-            qtScheme = "dark";
+            qtScheme = "light";
         };
     };
 
