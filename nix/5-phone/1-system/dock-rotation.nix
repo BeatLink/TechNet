@@ -73,7 +73,7 @@ let
             if not os.path.exists(PREF):
                 with open(PREF, "w") as f:
                     f.write(lock_read() + " " + str(monitor_state()[4]))
-            # Lock first, as the Waydroid bridge does: an unlocked session re-matches the accelerometer and turns the panel straight back.
+            # Lock first: an unlocked session re-matches the accelerometer and turns the panel straight back.
             lock_write("true")
             set_transform(LANDSCAPE)
 
