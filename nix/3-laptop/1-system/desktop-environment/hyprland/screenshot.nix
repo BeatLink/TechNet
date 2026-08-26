@@ -1,7 +1,7 @@
 # Screenshots
 #
-# gnome-screenshot (configured in 4-apps/tools/screenshot.nix) cannot capture under Wayland, so grim/slurp are
-# used instead. grimblast wraps them to provide region, window and full screen capture.
+# Cinnamon's built-in screenshot tool cannot capture under Wayland, so grim/slurp are used instead. grimblast
+# wraps them to provide region, window and full screen capture.
 #
 # This laptop has no Print key, so the Super+Shift bindings are the ones that actually work; the Print bindings
 # are kept for an external keyboard. S is for snip, P for print and A for the active window.

@@ -7,7 +7,6 @@
         ./gallery-dl.nix
         ./inkscape.nix
         ./libreoffice.nix
-        ./screenshot.nix
         ./separator.nix
         ./linux-sidebar.nix
         ./universal-android-debloater.nix
