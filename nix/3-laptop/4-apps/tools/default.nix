@@ -11,7 +11,7 @@
         ./linux-sidebar.nix
         ./universal-android-debloater.nix
         ./video-downloader.nix
-        #./virt-manager.nix
+        ./virt-manager.nix
         ./wmctrl.nix
         ./xed.nix
         ./xviewer.nix
