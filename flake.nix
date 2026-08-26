@@ -61,10 +61,6 @@
         nixos-plymouth = {
             url = "github:BeatLink/nixos-plymouth";
         };
-        vantage = {
-            url = "github:nabilksabu/vantage-nix";
-            inputs.nixpkgs.follows = "nixpkgs";
-        };
         # Source only: the branch behind PR #2 packages itself, but its derivation
         # omits tkinter and crashes on launch, so nix/3-laptop builds its own.
         lenovo-control-center = {
@@ -144,7 +140,6 @@
             halon,
             blockurl,
             mobile-nixos,
-            vantage,
             app-separators,
             claude-code,
             calibre-web-automated,
