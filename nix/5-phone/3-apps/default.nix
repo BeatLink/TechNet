@@ -2,6 +2,5 @@
     imports = [
         ./desktop
         ./native
-        ./waydroid
     ];
 }

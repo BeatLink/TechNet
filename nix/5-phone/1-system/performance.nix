@@ -5,8 +5,8 @@
 # observed.
 #
 # The ZFS ARC is by far the largest single consumer on this phone. Measured on a
-# 2972MB device, 31 minutes after boot, with nothing but phosh, Firefox and a
-# waydroid init running:
+# 2972MB device, 31 minutes after boot, with nothing but phosh and Firefox
+# running:
 #
 #   ARC size 1622MB, c_max 1948MB, available 429MB
 #
@@ -17,13 +17,12 @@
 # 1-backup-server/1-system/remote-builder.nix, which caps it for the same
 # reason on a smaller board.
 #
-# 1.5GB, which is what ZFS would pick on its own at half of RAM. The 512MB this
-# started at was chosen to leave room for Waydroid, and it cost more than it
-# saved: measured on this phone, a cold nautilus took 8.0s and a cold epiphany
-# 18.8s, both entirely waiting on small random reads that a larger cache would
-# have held. Warm, the same launches are 72ms and 63ms. The ARC gives memory
-# back under pressure, and there is swap behind it if it gives it back
-# too slowly.
+# 1.5GB, which is what ZFS would pick on its own at half of RAM. A 512MB cap
+# costs more than it saves: measured on this phone, a cold nautilus took 8.0s
+# and a cold epiphany 18.8s, both entirely waiting on small random reads that a
+# larger cache would have held. Warm, the same launches are 72ms and 63ms. The
+# ARC gives memory back under pressure, and there is swap behind it if it gives
+# it back too slowly.
 #
 # A module parameter rather than a runtime write, because zfs is loaded in the
 # initrd and anything set later applies after the ARC has already grown.
@@ -197,8 +196,7 @@
     # not the same freeze:
     #
     #   Nice, CPUWeight, IOWeight  help when something is competing for CPU or
-    #                              the card -- a Waydroid container, a nix
-    #                              copy. Real here, and what
+    #                              the card -- a nix copy. Real here, and what
     #                              these are for.
     #
     #   MemoryMin, MemoryLow       help when the stall is memory reclaim, which
