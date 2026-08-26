@@ -12,7 +12,6 @@
         ./steam.nix
         ./stremio.nix
         ./vlc.nix
-        ./wizestream
         ./timestretch
     ];
 }
