@@ -10,7 +10,6 @@
         ./separator.nix
         ./linux-sidebar.nix
         ./universal-android-debloater.nix
-        #./ventoy.nix
         ./video-downloader.nix
         #./virt-manager.nix
         ./wmctrl.nix
