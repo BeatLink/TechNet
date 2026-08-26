@@ -61,12 +61,6 @@
         nixos-plymouth = {
             url = "github:BeatLink/nixos-plymouth";
         };
-        # Source only: the branch behind PR #2 packages itself, but its derivation
-        # omits tkinter and crashes on launch, so nix/3-laptop builds its own.
-        lenovo-control-center = {
-            url = "github:webbrain-one/linux-control-centre-for-lenovo/webbrain/issue-1";
-            flake = false;
-        };
         app-separators = {
             url = "github:/BeatLink/Plank-Separator";
             inputs.nixpkgs.follows = "nixpkgs";

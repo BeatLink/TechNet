@@ -474,23 +474,6 @@
         "type": "github"
       }
     },
-    "lenovo-control-center": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1785708985,
-        "narHash": "sha256-p2tmBuGXuNtNkhb0GtwqxpogwnYdclm3xMGvnrQLDo8=",
-        "owner": "webbrain-one",
-        "repo": "linux-control-centre-for-lenovo",
-        "rev": "0029c2de3ab63c298259c592ac5046eda65c4b02",
-        "type": "github"
-      },
-      "original": {
-        "owner": "webbrain-one",
-        "ref": "webbrain/issue-1",
-        "repo": "linux-control-centre-for-lenovo",
-        "type": "github"
-      }
-    },
     "linux-sidebar": {
       "inputs": {
         "nixpkgs": [
@@ -803,7 +786,6 @@
         "halon": "halon",
         "home-manager": "home-manager",
         "impermanence": "impermanence",
-        "lenovo-control-center": "lenovo-control-center",
         "linux-sidebar": "linux-sidebar",
         "lnxlink": "lnxlink",
         "mobile-nixos": "mobile-nixos",
