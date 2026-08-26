@@ -4,7 +4,6 @@
         ./nemo
         ./context.nix
         ./dconf-editor.nix
-        ./gparted.nix
         ./mission-center.nix
         ./variety.nix
         ./vorta.nix
