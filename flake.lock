@@ -817,7 +817,6 @@
         "prewarm": "prewarm",
         "sops-nix": "sops-nix",
         "trilium": "trilium",
-        "vantage": "vantage",
         "vigil": "vigil",
         "waypipe-desktop": "waypipe-desktop",
         "web-greeter": "web-greeter",
@@ -997,26 +996,6 @@
         "owner": "TriliumNext",
         "ref": "v0.105.0",
         "repo": "Trilium",
-        "type": "github"
-      }
-    },
-    "vantage": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1774234490,
-        "narHash": "sha256-gqtEF30S9WlihQu7lhprC68g6cpNJbEzO8yl6Kh4Z0o=",
-        "owner": "nabilksabu",
-        "repo": "vantage-nix",
-        "rev": "a3e4d168e16de5f7bfe887eeab45e67db41fd139",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nabilksabu",
-        "repo": "vantage-nix",
         "type": "github"
       }
     },

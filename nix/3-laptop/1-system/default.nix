@@ -9,6 +9,7 @@
         ./software.nix
         ./networking.nix
         ./display.nix
+        ./ideapad.nix
         ./sound.nix
         ./bluetooth.nix
         ./printing.nix
