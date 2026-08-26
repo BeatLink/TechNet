@@ -12,7 +12,6 @@
         ./ideapad.nix
         ./sound.nix
         ./bluetooth.nix
-        ./printing.nix
         ./fuse.nix
         ./tang.nix
         ./desktop-environment
