@@ -10,7 +10,6 @@
         ./screenshot.nix
         ./separator.nix
         ./linux-sidebar.nix
-        ./simple-scan.nix
         ./universal-android-debloater.nix
         #./ventoy.nix
         ./video-downloader.nix
