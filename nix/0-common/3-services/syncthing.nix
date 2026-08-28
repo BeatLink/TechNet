@@ -12,6 +12,9 @@
 # ThorX is the Android phone, at thorx.technet / 10.100.100.5. Its Syncthing is configured on the device rather than through Nix, so it
 # appears here only as a peer.
 #
+# ThorX rejoined under a new device ID with a fresh index over stale files, so it can resurrect what the mesh already deleted; versioning
+# on each host is the recovery path, and ThorX's own folder type -- set in the Android app -- is the only place a "hosts win" bias lives.
+#
 # Thor, the PinePhone at thor.technet / 10.100.100.4, is not a peer. It ran Syncthing until it was deprovisioned; the config was removed
 # rather than left disabled, so nothing here should grow a Thor entry back without the host module coming with it.
 #
@@ -46,7 +49,7 @@ let
             ];
         };
         ThorX = {
-            id = "AGVZ3DQ-LX5CBXY-G6NKD4E-HOW7QNG-KAGSVOY-KRBUABG-BCDNEPU-SHJF4Q4";
+            id = "RF7HAZM-3YMVS35-XDXVMV4-QIVBTY2-MHJTUMI-PYWVRVS-AIII5DI-JOITXA3";
             addresses = [
                 "tcp://thorx.lan:22000"
                 "tcp://thorx.technet:22000"
