@@ -1,14 +1,9 @@
-# BorgBackup
+# Borg Repositories ##################################################################################################################################
 #
-# Configures the Borg Server for other devices to connect
+# The receiving end of the network's backups: one repository per source host, each authorised only for that host's own borg key.
+# Vigil-triggered backups reuse the source host's key rather than one of Vigil's, so Vigil never holds write credentials to a repository.
 #
-# Only each source host's own borg key is authorized per repo. A
-# Vigil-triggered backup deliberately reuses that same key rather than one of
-# Vigil's own: Vigil logs into the source host as `vigil-access` and runs
-# `borg create` there, and borg then authenticates here as the host always has.
-# Vigil therefore triggers the host's backup instead of performing its own, and
-# never holds write credentials to a backup repository.
-#
+
 {
     services.borgbackup.repos = {
         laptop-vorta = {
