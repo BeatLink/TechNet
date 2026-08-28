@@ -1,7 +1,10 @@
+# Root Drive #########################################################################################################################################
+#
+# Points disko at the SSD holding the system, and declares the host ID the root pool is stamped with.
+#
+
 {
-    # ZFS requires a unique host ID to record pool ownership; it lives here
-    # rather than with the network config because it is a filesystem concern.
-    networking.hostId = "bed2ee51";
+    networking.hostId = "bed2ee51"; # ZFS refuses to import a pool whose recorded host ID does not match
 
     disko.devices.disk.root-drive.device = "/dev/disk/by-id/ata-SATA_SSD_22020812000605";
 }
