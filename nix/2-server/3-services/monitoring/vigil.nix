@@ -30,6 +30,16 @@
 # borgmatic use different passphrases, so a single Vigil-wide default would
 # unlock only one of them.)
 #
+# Every signal a host reports is its own monitor and its own plugin type: `cpu`,
+# `memory`, `smart`, `throughput` and the rest each collect one thing. Each
+# therefore carries its own status, interval and history — smart reads hourly
+# while cpu reads every minute, and a failing pool shows as a failing ZFS
+# monitor rather than as one degraded "Disks" roll-up.
+#
+# Under `System Stats` those monitors are grouped per host and then per domain
+# (Compute, Memory, Storage, Network), and a group reports the worst case of its
+# children, so the tree still collapses to one status per host.
+#
 # Vigil's own SSH key stays in secrets/2-server/vigil.yaml, encrypted to
 # Heimdall alone: it is only ever used to log INTO the monitored hosts, which
 # Vigil does from here, so no other host needs a copy.
@@ -310,450 +320,605 @@
                     interval = "5m";
                 }
                 {
+                    # One monitor per signal, grouped by the domain it belongs to: the monitor
+                    # that samples cpu is not the one that samples the disks, so each carries
+                    # its own status, interval and history, and a group reports the worst case
+                    # of its children. An expensive check simply gets a slower interval — smart
+                    # and zfs read hourly while cpu reads every minute.
                     name = "System Stats";
+                    id = "system-stats";
                     type = "group";
-                    grid_columns = 2;
                     children = [
                         {
                             name = "Ragnarok";
+                            id = "ragnarok-metrics";
                             type = "group";
-                            grid_columns = 2;
                             children = [
                                 {
-                                    # One monitor per host rather than six or seven. cpu, memory, load,
-                                    # temperature, interrupts and oom all read the same /proc and /sys on
-                                    # the same interval, so collecting them together is one pass over this
-                                    # host instead of six independent ones. Every module is opt-in — an
-                                    # undeclared module is not collected at all.
-                                    #
-                                    # Thresholds are carried over unchanged from the monitors this replaces.
-                                    name = "System";
-                                    id = "ragnarok-system";
-                                    type = "system_stats";
-                                    interval = "1m";
-                                    grid_col_span = 2;
-                                    agent = "ragnarok";
-                                    modules = {
-                                        cpu = { warning = 70; threshold = 85; };
-                                        memory = { warning = 75; threshold = 90; };
-                                        load = { warning = 70; threshold = 100; };
-                                        temperature = { warning = 70; threshold = 80; };
-                                        interrupts = { warning = 20000; threshold = 50000; };
-
-                                        # An OOM kill is an event, not a level: memory is back to normal
-                                        # before the next sample, so the memory module above cannot see it.
-                                        # The counter read each cycle means no kill is ever missed, and over
-                                        # this host's agent the module also follows the kernel journal, so a
-                                        # kill is reported the moment it happens and names the process the
-                                        # counter can only total.
-                                        oom = { };
-                                    };
+                                    name = "Compute";
+                                    id = "ragnarok-compute";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "CPU";
+                                            id = "ragnarok-cpu";
+                                            type = "cpu";
+                                            interval = "1m";
+                                            warning = 70;
+                                            threshold = 85;
+                                            agent = "ragnarok";
+                                        }
+                                        {
+                                            name = "Load";
+                                            id = "ragnarok-load";
+                                            type = "load";
+                                            interval = "1m";
+                                            warning = 70;
+                                            threshold = 100;
+                                            agent = "ragnarok";
+                                        }
+                                        {
+                                            name = "Temperature";
+                                            id = "ragnarok-temperature";
+                                            type = "temperature";
+                                            interval = "1m";
+                                            warning = 70;
+                                            threshold = 80;
+                                            agent = "ragnarok";
+                                        }
+                                        {
+                                            name = "Interrupts";
+                                            id = "ragnarok-interrupts";
+                                            type = "interrupts";
+                                            interval = "1m";
+                                            warning = 20000;
+                                            threshold = 50000;
+                                            agent = "ragnarok";
+                                        }
+                                        {
+                                            name = "Processes";
+                                            id = "ragnarok-processes";
+                                            type = "processes";
+                                            interval = "30s";
+                                            max_processes = 20;
+                                            grid_col_span = 2;
+                                            agent = "ragnarok";
+                                        }
+                                    ];
                                 }
                                 {
-                                    name = "Processes";
-                                    id = "ragnarok-processes";
-                                    type = "processes";
-                                    interval = "30s";
-                                    max_processes = 20;
-                                    grid_col_span = 4;
-                                    agent = "ragnarok";
+                                    name = "Memory";
+                                    id = "ragnarok-memory";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Usage";
+                                            id = "ragnarok-memory-usage";
+                                            type = "memory";
+                                            interval = "1m";
+                                            warning = 75;
+                                            threshold = 90;
+                                            agent = "ragnarok";
+                                        }
+                                        {
+                                            # An OOM kill is an event, not a level: memory is back to normal
+                                            # before the next sample, so the usage monitor beside this one cannot
+                                            # see it. The counter read each cycle means no kill is ever missed,
+                                            # and over this host's agent the module also follows the kernel
+                                            # journal, so a kill is reported the moment it happens and names the
+                                            # process the counter can only total.
+                                            name = "OOM Kills";
+                                            id = "ragnarok-oom";
+                                            type = "oom";
+                                            interval = "1m";
+                                            agent = "ragnarok";
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Storage";
+                                    id = "ragnarok-storage";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Disk I/O";
+                                            id = "ragnarok-disk-io";
+                                            type = "disk_io";
+                                            interval = "30s";
+                                            agent = "ragnarok";
+                                        }
+                                        {
+                                            # smartctl is slow and rarely changes its answer, so this reads hourly.
+                                            name = "SMART";
+                                            id = "ragnarok-smart";
+                                            type = "smart";
+                                            interval = "1h";
+                                            agent = "ragnarok";
+                                        }
+                                        {
+                                            # A pool changes state slowly and `zpool status` walks every vdev.
+                                            name = "ZFS";
+                                            id = "ragnarok-zfs";
+                                            type = "zfs";
+                                            interval = "1h";
+                                            agent = "ragnarok";
+                                        }
+                                        {
+                                            name = "/";
+                                            id = "ragnarok-disk-root";
+                                            type = "disk_space";
+                                            path = "/";
+                                            threshold = 90;
+                                            interval = "10m";
+                                            agent = "ragnarok";
+                                        }
+                                        {
+                                            name = "/Storage";
+                                            id = "ragnarok-disk-storage";
+                                            type = "disk_space";
+                                            path = "/Storage";
+                                            threshold = 90;
+                                            interval = "10m";
+                                            agent = "ragnarok";
+                                        }
+                                        {
+                                            name = "/boot";
+                                            id = "ragnarok-disk-boot";
+                                            type = "disk_space";
+                                            path = "/boot";
+                                            threshold = 90;
+                                            interval = "10m";
+                                            agent = "ragnarok";
+                                        }
+                                        {
+                                            # Auto-discovers every mount, so it also covers filesystems not listed
+                                            # explicitly above. Catches read-only remounts (which leave df reporting
+                                            # healthy usage forever) and inode exhaustion.
+                                            name = "Filesystems";
+                                            id = "ragnarok-filesystems";
+                                            type = "filesystems";
+                                            interval = "10m";
+                                            warning = 80;
+                                            threshold = 90;
+                                            inode_warning = 85;
+                                            inode_threshold = 95;
+                                            grid_col_span = 2;
+                                            agent = "ragnarok";
+                                        }
+                                    ];
                                 }
                                 {
                                     name = "Network";
                                     id = "ragnarok-network";
-                                    type = "network_usage";
-                                    interval = "30s";
-                                    grid_col_span = 4;
-                                    agent = "ragnarok";
-                                }
-                                {
-                                    name = "Disk I/O";
-                                    id = "ragnarok-diskio";
-                                    type = "diskio";
-                                    interval = "30s";
-                                    grid_col_span = 2;
-                                    agent = "ragnarok";
-                                }
-                                {
-                                    name = "Connections";
-                                    id = "ragnarok-connections";
-                                    type = "connections";
-                                    interval = "1m";
-                                    total_warning = 500;
-                                    total_threshold = 1000;
-                                    grid_col_span = 1;
-                                    agent = "ragnarok";
-                                }
-                                {
-                                    name = "SMART";
-                                    id = "ragnarok-smart";
-                                    type = "smart_disk";
-                                    interval = "1h";
-                                    grid_col_span = 2;
-                                    agent = "ragnarok";
-                                }
-                                {
-                                    name = "ZFS Health";
-                                    id = "ragnarok-zfs-health";
-                                    type = "zfs_health";
-                                    interval = "1h";
-                                    grid_col_span = 2;
-                                    agent = "ragnarok";
-                                }
-                                {
-                                    name = "/";
-                                    id = "ragnarok-disk-root";
-                                    type = "disk_space";
-                                    path = "/";
-                                    threshold = 90;
-                                    interval = "10m";
-                                    grid_col_span = 2;
-                                    agent = "ragnarok";
-                                }
-                                {
-                                    name = "/Storage";
-                                    id = "ragnarok-disk-storage";
-                                    type = "disk_space";
-                                    path = "/Storage";
-                                    threshold = 90;
-                                    interval = "10m";
-                                    grid_col_span = 2;
-                                    agent = "ragnarok";
-                                }
-                                {
-                                    name = "/boot";
-                                    id = "ragnarok-disk-boot";
-                                    type = "disk_space";
-                                    path = "/boot";
-                                    threshold = 90;
-                                    interval = "10m";
-                                    grid_col_span = 2;
-                                    agent = "ragnarok";
-                                }
-                                {
-                                    # Auto-discovers every mount, so it also covers
-                                    # filesystems not listed explicitly above. Catches
-                                    # read-only remounts (which leave df reporting
-                                    # healthy usage forever) and inode exhaustion.
-                                    name = "Filesystems";
-                                    id = "ragnarok-filesystems";
-                                    type = "filesystems";
-                                    interval = "10m";
-                                    warning = 80;
-                                    threshold = 90;
-                                    inode_warning = 85;
-                                    inode_threshold = 95;
-                                    grid_col_span = 4;
-                                    agent = "ragnarok";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Throughput";
+                                            id = "ragnarok-throughput";
+                                            type = "throughput";
+                                            interval = "30s";
+                                            agent = "ragnarok";
+                                        }
+                                        {
+                                            name = "Connections";
+                                            id = "ragnarok-connections";
+                                            type = "connections";
+                                            interval = "1m";
+                                            warning = 500;
+                                            threshold = 1000;
+                                            agent = "ragnarok";
+                                        }
+                                    ];
                                 }
                             ];
                         }
                         {
                             name = "Heimdall";
+                            id = "heimdall-metrics";
                             type = "group";
-                            grid_columns = 2;
                             children = [
                                 {
-                                    # One monitor per host rather than six or seven. cpu, memory, load,
-                                    # temperature, interrupts and oom all read the same /proc and /sys on
-                                    # the same interval, so collecting them together is one pass over this
-                                    # host instead of six independent ones. Every module is opt-in — an
-                                    # undeclared module is not collected at all.
-                                    #
-                                    # Thresholds are carried over unchanged from the monitors this replaces.
-                                    name = "System";
-                                    id = "heimdall-system";
-                                    type = "system_stats";
-                                    interval = "1m";
-                                    grid_col_span = 2;
-                                    agent = "heimdall";
-                                    modules = {
-                                        cpu = { warning = 70; threshold = 85; };
-                                        memory = { warning = 75; threshold = 90; };
-                                        load = { warning = 70; threshold = 100; };
-                                        temperature = { warning = 70; threshold = 80; };
-                                        interrupts = { warning = 20000; threshold = 50000; };
-
-                                        # An OOM kill is an event, not a level: memory is back to normal
-                                        # before the next sample, so the memory module above cannot see it.
-                                        # The counter read each cycle means no kill is ever missed, and over
-                                        # this host's agent the module also follows the kernel journal, so a
-                                        # kill is reported the moment it happens and names the process the
-                                        # counter can only total.
-                                        oom = { };
-                                    };
+                                    name = "Compute";
+                                    id = "heimdall-compute";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "CPU";
+                                            id = "heimdall-cpu";
+                                            type = "cpu";
+                                            interval = "1m";
+                                            warning = 70;
+                                            threshold = 85;
+                                            agent = "heimdall";
+                                        }
+                                        {
+                                            name = "Load";
+                                            id = "heimdall-load";
+                                            type = "load";
+                                            interval = "1m";
+                                            warning = 70;
+                                            threshold = 100;
+                                            agent = "heimdall";
+                                        }
+                                        {
+                                            name = "Temperature";
+                                            id = "heimdall-temperature";
+                                            type = "temperature";
+                                            interval = "1m";
+                                            warning = 70;
+                                            threshold = 80;
+                                            agent = "heimdall";
+                                        }
+                                        {
+                                            name = "Interrupts";
+                                            id = "heimdall-interrupts";
+                                            type = "interrupts";
+                                            interval = "1m";
+                                            warning = 20000;
+                                            threshold = 50000;
+                                            agent = "heimdall";
+                                        }
+                                        {
+                                            name = "Processes";
+                                            id = "heimdall-processes";
+                                            type = "processes";
+                                            interval = "30s";
+                                            max_processes = 20;
+                                            grid_col_span = 2;
+                                            agent = "heimdall";
+                                        }
+                                    ];
                                 }
                                 {
-                                    name = "Processes";
-                                    id = "heimdall-processes";
-                                    type = "processes";
-                                    interval = "30s";
-                                    max_processes = 20;
-                                    grid_col_span = 4;
-                                    agent = "heimdall";
+                                    name = "Memory";
+                                    id = "heimdall-memory";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Usage";
+                                            id = "heimdall-memory-usage";
+                                            type = "memory";
+                                            interval = "1m";
+                                            warning = 75;
+                                            threshold = 90;
+                                            agent = "heimdall";
+                                        }
+                                        {
+                                            # An OOM kill is an event, not a level: memory is back to normal
+                                            # before the next sample, so the usage monitor beside this one cannot
+                                            # see it. The counter read each cycle means no kill is ever missed,
+                                            # and over this host's agent the module also follows the kernel
+                                            # journal, so a kill is reported the moment it happens and names the
+                                            # process the counter can only total.
+                                            name = "OOM Kills";
+                                            id = "heimdall-oom";
+                                            type = "oom";
+                                            interval = "1m";
+                                            agent = "heimdall";
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Storage";
+                                    id = "heimdall-storage";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Disk I/O";
+                                            id = "heimdall-disk-io";
+                                            type = "disk_io";
+                                            interval = "30s";
+                                            agent = "heimdall";
+                                        }
+                                        {
+                                            # smartctl is slow and rarely changes its answer, so this reads hourly.
+                                            name = "SMART";
+                                            id = "heimdall-smart";
+                                            type = "smart";
+                                            interval = "1h";
+                                            agent = "heimdall";
+                                        }
+                                        {
+                                            # A pool changes state slowly and `zpool status` walks every vdev.
+                                            name = "ZFS";
+                                            id = "heimdall-zfs";
+                                            type = "zfs";
+                                            interval = "1h";
+                                            agent = "heimdall";
+                                        }
+                                        {
+                                            name = "/";
+                                            id = "heimdall-disk-root";
+                                            type = "disk_space";
+                                            path = "/";
+                                            threshold = 90;
+                                            interval = "10m";
+                                            agent = "heimdall";
+                                        }
+                                        {
+                                            name = "/Storage";
+                                            id = "heimdall-disk-storage";
+                                            type = "disk_space";
+                                            path = "/Storage";
+                                            threshold = 90;
+                                            interval = "10m";
+                                            agent = "heimdall";
+                                        }
+                                        {
+                                            name = "/boot";
+                                            id = "heimdall-disk-boot";
+                                            type = "disk_space";
+                                            path = "/boot";
+                                            threshold = 90;
+                                            interval = "10m";
+                                            agent = "heimdall";
+                                        }
+                                        {
+                                            # Auto-discovers every mount, so it also covers filesystems not listed
+                                            # explicitly above. Catches read-only remounts (which leave df reporting
+                                            # healthy usage forever) and inode exhaustion.
+                                            name = "Filesystems";
+                                            id = "heimdall-filesystems";
+                                            type = "filesystems";
+                                            interval = "10m";
+                                            warning = 80;
+                                            threshold = 90;
+                                            inode_warning = 85;
+                                            inode_threshold = 95;
+                                            grid_col_span = 2;
+                                            agent = "heimdall";
+                                        }
+                                    ];
                                 }
                                 {
                                     name = "Network";
                                     id = "heimdall-network";
-                                    type = "network_usage";
-                                    interval = "30s";
-                                    grid_col_span = 4;
-                                    agent = "heimdall";
-                                }
-                                {
-                                    name = "Disk I/O";
-                                    id = "heimdall-diskio";
-                                    type = "diskio";
-                                    interval = "30s";
-                                    grid_col_span = 2;
-                                    agent = "heimdall";
-                                }
-                                {
-                                    name = "Connections";
-                                    id = "heimdall-connections";
-                                    type = "connections";
-                                    interval = "1m";
-                                    total_warning = 500;
-                                    total_threshold = 1000;
-                                    grid_col_span = 1;
-                                    agent = "heimdall";
-                                }
-                                {
-                                    name = "Service Reachability";
-                                    id = "heimdall-ports";
-                                    type = "ports";
-                                    interval = "1m";
-                                    timeout = 5;
-                                    grid_col_span = 4;
-                                    checks = [
-                                        # nginx fronts every web service on Heimdall; probe the
-                                        # local front door plus a few representative app URLs.
-                                        { name = "Nginx"; host = "localhost"; port = 443; }
-                                        { name = "Home Assistant"; url = "https://home-assistant.heimdall.technet"; }
-                                        { name = "Pi-hole"; url = "https://pi-hole.heimdall.technet"; }
-                                        { name = "Homepage"; url = "https://homepage.heimdall.technet"; }
-                                        { name = "Jackett"; url = "https://jackett.heimdall.technet"; }
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Throughput";
+                                            id = "heimdall-throughput";
+                                            type = "throughput";
+                                            interval = "30s";
+                                            agent = "heimdall";
+                                        }
+                                        {
+                                            name = "Connections";
+                                            id = "heimdall-connections";
+                                            type = "connections";
+                                            interval = "1m";
+                                            warning = 500;
+                                            threshold = 1000;
+                                            agent = "heimdall";
+                                        }
+                                        {
+                                            # nginx fronts every web service on Heimdall; probe the local front
+                                            # door plus a few representative app URLs.
+                                            name = "Service Reachability";
+                                            id = "heimdall-ports";
+                                            type = "ports";
+                                            interval = "1m";
+                                            timeout = 5;
+                                            grid_col_span = 2;
+                                            checks = [
+                                                { name = "Nginx"; host = "localhost"; port = 443; }
+                                                { name = "Home Assistant"; url = "https://home-assistant.heimdall.technet"; }
+                                                { name = "Pi-hole"; url = "https://pi-hole.heimdall.technet"; }
+                                                { name = "Homepage"; url = "https://homepage.heimdall.technet"; }
+                                                { name = "Jackett"; url = "https://jackett.heimdall.technet"; }
+                                            ];
+                                            agent = "heimdall";
+                                        }
                                     ];
-                                    agent = "heimdall";
-                                }
-                                {
-                                    name = "SMART";
-                                    id = "heimdall-smart";
-                                    type = "smart_disk";
-                                    interval = "1h";
-                                    grid_col_span = 2;
-                                    agent = "heimdall";
-                                }
-                                {
-                                    name = "ZFS Health";
-                                    id = "heimdall-zfs-health";
-                                    type = "zfs_health";
-                                    interval = "1h";
-                                    grid_col_span = 2;
-                                    agent = "heimdall";
-                                }
-                                {
-                                    name = "/";
-                                    id = "heimdall-disk-root";
-                                    type = "disk_space";
-                                    path = "/";
-                                    threshold = 90;
-                                    interval = "10m";
-                                    grid_col_span = 2;
-                                    agent = "heimdall";
-                                }
-                                {
-                                    name = "/Storage";
-                                    id = "heimdall-disk-storage";
-                                    type = "disk_space";
-                                    path = "/Storage";
-                                    threshold = 90;
-                                    interval = "10m";
-                                    grid_col_span = 2;
-                                    agent = "heimdall";
-                                }
-                                {
-                                    name = "/boot";
-                                    id = "heimdall-disk-boot";
-                                    type = "disk_space";
-                                    path = "/boot";
-                                    threshold = 90;
-                                    interval = "10m";
-                                    grid_col_span = 2;
-                                    agent = "heimdall";
-                                }
-                                {
-                                    # Auto-discovers every mount, so it also covers
-                                    # filesystems not listed explicitly above. Catches
-                                    # read-only remounts (which leave df reporting
-                                    # healthy usage forever) and inode exhaustion.
-                                    name = "Filesystems";
-                                    id = "heimdall-filesystems";
-                                    type = "filesystems";
-                                    interval = "10m";
-                                    warning = 80;
-                                    threshold = 90;
-                                    inode_warning = 85;
-                                    inode_threshold = 95;
-                                    grid_col_span = 4;
-                                    agent = "heimdall";
                                 }
                             ];
                         }
                         {
                             name = "Odin";
+                            id = "odin-metrics";
                             type = "group";
-                            grid_columns = 2;
                             children = [
                                 {
-                                    # One monitor per host rather than six or seven. cpu, memory, load,
-                                    # temperature, interrupts and oom all read the same /proc and /sys on
-                                    # the same interval, so collecting them together is one pass over this
-                                    # host instead of six independent ones. Every module is opt-in — an
-                                    # undeclared module is not collected at all.
-                                    #
-                                    # Thresholds are carried over unchanged from the monitors this replaces.
-                                    name = "System";
-                                    id = "odin-system";
-                                    type = "system_stats";
-                                    interval = "1m";
-                                    grid_col_span = 2;
-                                    agent = "odin";
-                                    modules = {
-                                        cpu = { warning = 70; threshold = 85; };
-                                        memory = { warning = 75; threshold = 90; };
-                                        load = { warning = 70; threshold = 100; };
-                                        temperature = { warning = 70; threshold = 80; };
-                                        interrupts = { warning = 20000; threshold = 50000; };
-
-                                        # An OOM kill is an event, not a level: memory is back to normal
-                                        # before the next sample, so the memory module above cannot see it.
-                                        # The counter read each cycle means no kill is ever missed, and over
-                                        # this host's agent the module also follows the kernel journal, so a
-                                        # kill is reported the moment it happens and names the process the
-                                        # counter can only total.
-                                        oom = { };
-
-                                        # Odin's dGPU sleeps with the laptop lid and nvidia-smi can wedge
-                                        # uninterruptibly when it does. The module suspends its own probe
-                                        # after `timeout_trip` timeouts rather than stranding a process per
-                                        # cycle, and reports offline (not failed) while suspended.
-                                        gpu = {
+                                    name = "Compute";
+                                    id = "odin-compute";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "CPU";
+                                            id = "odin-cpu";
+                                            type = "cpu";
+                                            interval = "1m";
+                                            warning = 70;
+                                            threshold = 85;
+                                            agent = "odin";
+                                        }
+                                        {
+                                            name = "Load";
+                                            id = "odin-load";
+                                            type = "load";
+                                            interval = "1m";
+                                            warning = 70;
+                                            threshold = 100;
+                                            agent = "odin";
+                                        }
+                                        {
+                                            name = "Temperature";
+                                            id = "odin-temperature";
+                                            type = "temperature";
+                                            interval = "1m";
+                                            warning = 70;
+                                            threshold = 80;
+                                            agent = "odin";
+                                        }
+                                        {
+                                            name = "Interrupts";
+                                            id = "odin-interrupts";
+                                            type = "interrupts";
+                                            interval = "1m";
+                                            warning = 20000;
+                                            threshold = 50000;
+                                            agent = "odin";
+                                        }
+                                        {
+                                            # Odin's dGPU sleeps with the laptop lid and nvidia-smi can wedge
+                                            # uninterruptibly when it does. The module suspends its own probe
+                                            # after `timeout_trip` timeouts rather than stranding a process per
+                                            # cycle, and reports offline (not failed) while suspended.
+                                            name = "GPU";
+                                            id = "odin-gpu";
+                                            type = "gpu";
+                                            interval = "1m";
                                             util_warning = 85;
                                             util_threshold = 95;
                                             mem_warning = 85;
                                             mem_threshold = 95;
                                             temp_warning = 80;
                                             temp_threshold = 90;
-                                        };
-                                    };
+                                            agent = "odin";
+                                        }
+                                        {
+                                            name = "Processes";
+                                            id = "odin-processes";
+                                            type = "processes";
+                                            interval = "30s";
+                                            max_processes = 20;
+                                            grid_col_span = 2;
+                                            agent = "odin";
+                                        }
+                                    ];
                                 }
                                 {
-                                    name = "Processes";
-                                    id = "odin-processes";
-                                    type = "processes";
-                                    interval = "30s";
-                                    max_processes = 20;
-                                    grid_col_span = 4;
-                                    agent = "odin";
+                                    name = "Memory";
+                                    id = "odin-memory";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Usage";
+                                            id = "odin-memory-usage";
+                                            type = "memory";
+                                            interval = "1m";
+                                            warning = 75;
+                                            threshold = 90;
+                                            agent = "odin";
+                                        }
+                                        {
+                                            # An OOM kill is an event, not a level: memory is back to normal
+                                            # before the next sample, so the usage monitor beside this one cannot
+                                            # see it. The counter read each cycle means no kill is ever missed,
+                                            # and over this host's agent the module also follows the kernel
+                                            # journal, so a kill is reported the moment it happens and names the
+                                            # process the counter can only total.
+                                            name = "OOM Kills";
+                                            id = "odin-oom";
+                                            type = "oom";
+                                            interval = "1m";
+                                            agent = "odin";
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Storage";
+                                    id = "odin-storage";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Disk I/O";
+                                            id = "odin-disk-io";
+                                            type = "disk_io";
+                                            interval = "30s";
+                                            agent = "odin";
+                                        }
+                                        {
+                                            # smartctl is slow and rarely changes its answer, so this reads hourly.
+                                            name = "SMART";
+                                            id = "odin-smart";
+                                            type = "smart";
+                                            interval = "1h";
+                                            agent = "odin";
+                                        }
+                                        {
+                                            # A pool changes state slowly and `zpool status` walks every vdev.
+                                            name = "ZFS";
+                                            id = "odin-zfs";
+                                            type = "zfs";
+                                            interval = "1h";
+                                            agent = "odin";
+                                        }
+                                        {
+                                            name = "/";
+                                            id = "odin-disk-root";
+                                            type = "disk_space";
+                                            path = "/";
+                                            threshold = 90;
+                                            interval = "10m";
+                                            agent = "odin";
+                                        }
+                                        {
+                                            name = "/Storage";
+                                            id = "odin-disk-storage";
+                                            type = "disk_space";
+                                            path = "/Storage";
+                                            threshold = 90;
+                                            interval = "10m";
+                                            agent = "odin";
+                                        }
+                                        {
+                                            name = "/boot";
+                                            id = "odin-disk-boot";
+                                            type = "disk_space";
+                                            path = "/boot";
+                                            threshold = 90;
+                                            interval = "10m";
+                                            agent = "odin";
+                                        }
+                                        {
+                                            # Auto-discovers every mount, so it also covers filesystems not listed
+                                            # explicitly above. Catches read-only remounts (which leave df reporting
+                                            # healthy usage forever) and inode exhaustion.
+                                            name = "Filesystems";
+                                            id = "odin-filesystems";
+                                            type = "filesystems";
+                                            interval = "10m";
+                                            warning = 80;
+                                            threshold = 90;
+                                            inode_warning = 85;
+                                            inode_threshold = 95;
+                                            grid_col_span = 2;
+                                            agent = "odin";
+                                        }
+                                    ];
                                 }
                                 {
                                     name = "Network";
                                     id = "odin-network";
-                                    type = "network_usage";
-                                    interval = "30s";
-                                    grid_col_span = 4;
-                                    agent = "odin";
-                                }
-                                {
-                                    name = "WiFi";
-                                    id = "odin-wifi";
-                                    type = "wifi";
-                                    interval = "1m";
-                                    quality_warning = 40;
-                                    quality_threshold = 20;
-                                    grid_col_span = 2;
-                                    agent = "odin";
-                                }
-                                {
-                                    name = "Disk I/O";
-                                    id = "odin-diskio";
-                                    type = "diskio";
-                                    interval = "30s";
-                                    grid_col_span = 2;
-                                    agent = "odin";
-                                }
-                                {
-                                    name = "Connections";
-                                    id = "odin-connections";
-                                    type = "connections";
-                                    interval = "1m";
-                                    total_warning = 500;
-                                    total_threshold = 1000;
-                                    grid_col_span = 2;
-                                    agent = "odin";
-                                }
-                                {
-                                    name = "SMART";
-                                    id = "odin-smart";
-                                    type = "smart_disk";
-                                    interval = "1h";
-                                    grid_col_span = 2;
-                                    agent = "odin";
-                                }
-                                {
-                                    name = "ZFS Health";
-                                    id = "odin-zfs-health";
-                                    type = "zfs_health";
-                                    interval = "1h";
-                                    grid_col_span = 2;
-                                    agent = "odin";
-                                }
-                                {
-                                    name = "/";
-                                    id = "odin-disk-root";
-                                    type = "disk_space";
-                                    path = "/";
-                                    threshold = 90;
-                                    interval = "10m";
-                                    grid_col_span = 2;
-                                    agent = "odin";
-                                }
-                                {
-                                    name = "/Storage";
-                                    id = "odin-disk-storage";
-                                    type = "disk_space";
-                                    path = "/Storage";
-                                    threshold = 90;
-                                    interval = "10m";
-                                    grid_col_span = 2;
-                                    agent = "odin";
-                                }
-                                {
-                                    name = "/boot";
-                                    id = "odin-disk-boot";
-                                    type = "disk_space";
-                                    path = "/boot";
-                                    threshold = 90;
-                                    interval = "10m";
-                                    grid_col_span = 2;
-                                    agent = "odin";
-                                }
-                                {
-                                    # Auto-discovers every mount, so it also covers
-                                    # filesystems not listed explicitly above. Catches
-                                    # read-only remounts (which leave df reporting
-                                    # healthy usage forever) and inode exhaustion.
-                                    name = "Filesystems";
-                                    id = "odin-filesystems";
-                                    type = "filesystems";
-                                    interval = "10m";
-                                    warning = 80;
-                                    threshold = 90;
-                                    inode_warning = 85;
-                                    inode_threshold = 95;
-                                    grid_col_span = 4;
-                                    agent = "odin";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Throughput";
+                                            id = "odin-throughput";
+                                            type = "throughput";
+                                            interval = "30s";
+                                            agent = "odin";
+                                        }
+                                        {
+                                            name = "Connections";
+                                            id = "odin-connections";
+                                            type = "connections";
+                                            interval = "1m";
+                                            warning = 500;
+                                            threshold = 1000;
+                                            agent = "odin";
+                                        }
+                                        {
+                                            name = "WiFi";
+                                            id = "odin-wifi";
+                                            type = "wifi";
+                                            interval = "1m";
+                                            quality_warning = 40;
+                                            quality_threshold = 20;
+                                            agent = "odin";
+                                        }
+                                    ];
                                 }
                             ];
                         }
