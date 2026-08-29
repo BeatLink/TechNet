@@ -1024,11 +1024,16 @@
                                     # answer 200 on some routes.
                                     name = "Calibre Web Library";
                                     id = "heimdall-calibre-web-library";
-                                    type = "calibre_web";
+                                    type = "http";
                                     interval = "10m";
-                                    url = "http://127.0.0.1:8083";
+                                    url = "http://127.0.0.1:8083/opds";
                                     username = "vigil";
                                     password_command = "cat /run/secrets/calibre_web_vigil_password";
+                                    check_title = "OPDS FEED";
+                                    expect = {
+                                        body_contains = "<feed";
+                                        body_contains_any = [ "atom" "opds" ];
+                                    };
                                     agent = "heimdall";
                                 }
                                 {
@@ -1271,17 +1276,25 @@
                                     # IRC-bridge health, as opposed to the
                                     # monitor above, which only proves the web
                                     # server is running. Opens one short-lived
-                                    # WebSocket connection to confirm the IRC
+                                    # WebSocket connection (websocat, installed
+                                    # beside openbooks) to confirm the IRC
                                     # bridge to irc.irchighway.net is actually
-                                    # connected — closes immediately since
+                                    # connected — sends a connect request and
+                                    # expects the success appearance in the
+                                    # reply, then closes immediately since
                                     # OpenBooks serves only one client at a
                                     # time. 10m interval keeps this probe's
                                     # share of that single slot small.
                                     name = "Openbooks IRC Bridge";
                                     id = "heimdall-openbooks-irc";
-                                    type = "openbooks";
+                                    type = "http";
                                     interval = "10m";
-                                    ws_url = "ws://127.0.0.1:9777/ws";
+                                    url = "ws://127.0.0.1:9777/ws";
+                                    body = ''{"type":1,"payload":{}}'';
+                                    check_title = "IRC BRIDGE";
+                                    expect = {
+                                        body_contains = ''"appearance":1'';
+                                    };
                                     agent = "heimdall";
                                 }
                                 {
@@ -1386,11 +1399,21 @@
                                     # returns.
                                     name = "Radicale WebDAV";
                                     id = "heimdall-radicale-webdav";
-                                    type = "radicale";
+                                    type = "http";
                                     interval = "10m";
-                                    url = "http://127.0.0.1:5232";
+                                    url = "http://127.0.0.1:5232/";
+                                    method = "PROPFIND";
+                                    headers = {
+                                        Depth = "0";
+                                        "Content-Type" = "application/xml";
+                                    };
+                                    body = ''<?xml version="1.0"?><propfind xmlns="DAV:"><prop><current-user-principal/></prop></propfind>'';
                                     username = "vigil";
                                     password_command = "cat /run/secrets/radicale_vigil_password";
+                                    check_title = "PROPFIND";
+                                    expect = {
+                                        status = 207;
+                                    };
                                     agent = "heimdall";
                                 }
                                 {
