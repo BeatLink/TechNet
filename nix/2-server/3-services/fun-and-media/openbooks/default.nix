@@ -37,7 +37,7 @@
         mode = "2770";
     };
 
-    # websocat: Vigil's `openbooks` plugin uses it to open one short-lived
+    # websocat: Vigil's `http` monitor uses it to open one short-lived
     # WebSocket connection and confirm the IRC bridge is actually connected
     # (OpenBooks has no HTTP health endpoint of its own).
     environment.systemPackages = [ pkgs.websocat ];
