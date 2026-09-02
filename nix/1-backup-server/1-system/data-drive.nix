@@ -12,19 +12,21 @@
             # The shingled drive blocks past the 30s default while rewriting a band, and the reset the kernel then issues is what suspends the pool
             services.udev.extraRules = ''
                 ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="0583", ATTR{device/timeout}="180"
+                ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="0583", ATTR{queue/scheduler}="mq-deadline", ATTR{queue/add_random}="0"
             '';
         }
 
         # Queue Depths ###############################################################################################################################
-        # data-pool-Ragnarok is one shingled drive whose stalls these shallow queues keep short; they are global, so the root SSD gets them too.
+        # data-pool-Ragnarok is one shingled drive whose stalls these shallow queues keep short, but the scrub gets four because one outstanding read capped it at a single seek; they are global, so the root SSD gets them too.
         {
             boot.extraModprobeConfig = ''
                 options zfs zfs_vdev_max_active=16
                 options zfs zfs_vdev_async_write_max_active=2
                 options zfs zfs_vdev_async_read_max_active=2
                 options zfs zfs_vdev_sync_read_min_active=10
-                options zfs zfs_vdev_scrub_max_active=1
+                options zfs zfs_vdev_scrub_max_active=4
                 options zfs zfs_txg_timeout=15
+                options zfs zfs_vdev_aggregation_limit=524288
             '';
         }
 
