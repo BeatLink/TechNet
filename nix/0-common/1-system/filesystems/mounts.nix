@@ -21,7 +21,7 @@ in
                 "zfsutil"
                 "nofail" # nofail keeps a missing pool from stranding the boot
             ];
-            neededForBoot = false; # Must stay false: nofail cannot save a pool that imports and then hangs, and in stage 1 that blocks switch_root
+            neededForBoot = true; # Must stay true: clevis unlocks the dataset only in the initrd, so a stage 2 mount finds no key and fails to decrypt
         };
     };
 }
