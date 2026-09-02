@@ -17,14 +17,14 @@
         }
 
         # Queue Depths ###############################################################################################################################
-        # data-pool-Ragnarok is one shingled drive whose stalls these shallow queues keep short, but the scrub gets four because one outstanding read capped it at a single seek; they are global, so the root SSD gets them too.
+        # data-pool-Ragnarok is one shingled drive whose stalls these shallow queues keep short; a scrub queue deeper than one drove the UAS bridge into reset loops, so it stays at one.
         {
             boot.extraModprobeConfig = ''
                 options zfs zfs_vdev_max_active=16
                 options zfs zfs_vdev_async_write_max_active=2
                 options zfs zfs_vdev_async_read_max_active=2
                 options zfs zfs_vdev_sync_read_min_active=10
-                options zfs zfs_vdev_scrub_max_active=4
+                options zfs zfs_vdev_scrub_max_active=1
                 options zfs zfs_txg_timeout=15
                 options zfs zfs_vdev_aggregation_limit=524288
             '';
