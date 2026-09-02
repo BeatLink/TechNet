@@ -1,7 +1,21 @@
+{ inputs, pkgs, ... }:
+let
+    # WebKit divides by the DRM refresh rate, which is 0 while an output is connected but unlit, so pin it to the timer vblank monitor
+    linux-sidebar =
+        inputs.linux-sidebar.packages.${pkgs.stdenv.hostPlatform.system}.linux-sidebar.overrideAttrs
+            (old: {
+                preFixup = (old.preFixup or "") + ''
+                    gappsWrapperArgs+=(--set WEBKIT_FORCE_VBLANK_TIMER 1)
+                '';
+            });
+in
 {
     home-manager.users.beatlink =
         {
-            programs.linux-sidebar.enable = true;
+            programs.linux-sidebar = {
+                enable = true;
+                package = linux-sidebar;
+            };
             home = {
                 # The settings, the layout and the notes all live here and are written by the
                 # app, so none of them can be managed declaratively without making them
