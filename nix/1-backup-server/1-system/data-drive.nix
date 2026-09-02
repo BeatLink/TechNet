@@ -9,6 +9,9 @@
 
         # USB Transport ##############################################################################################################################
         {
+            # f is not optional: a quirks parameter replaces the kernel's built-in entry for the device rather than adding to it, and that entry is NO_REPORT_OPCODES
+            boot.kernelParams = [ "usb-storage.quirks=152d:0583:uf" ];
+
             # The shingled drive blocks past the 30s default while rewriting a band, and the reset the kernel then issues is what suspends the pool
             services.udev.extraRules = ''
                 ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="0583", ATTR{device/timeout}="180"
