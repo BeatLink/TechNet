@@ -1,3 +1,4 @@
+{ lib, ... }:
 {
     hardware.sensor.hddtemp = {
         enable = true;
@@ -12,4 +13,7 @@
             "\"Dogfish SSD 64GB\" 190 C \"Dogfish SSD 64GB\""
         ];
     };
+
+    # nixpkgs writes one `echo >> $file` per dbEntry, which trips SC2129, yet its own module also turns the strict check on
+    systemd.services.hddtemp.enableStrictShellChecks = lib.mkForce false;
 }
