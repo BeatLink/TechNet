@@ -74,8 +74,18 @@ in
         group = "esphome";
     });
 
-    systemd.services.esphome.serviceConfig = {
-        EnvironmentFile = config.sops.secrets.esphome_env.path;
+    # esphome 2026.8 moved the dashboard into esphome-device-builder and dropped the `dashboard` subcommand the nixpkgs module still calls
+    systemd.services.esphome = {
+        path = [ pkgs.esphome-device-builder ];
+        serviceConfig = {
+            EnvironmentFile = config.sops.secrets.esphome_env.path;
+            ExecStart = lib.mkForce (
+                "${pkgs.esphome-device-builder}/bin/esphome-device-builder"
+                + " --host ${config.services.esphome.address}"
+                + " --port ${toString config.services.esphome.port}"
+                + " ${stateDir}"
+            );
+        };
     };
 
     # Device secrets ---------------------------------------------------------------------------------------------------------------------------------
