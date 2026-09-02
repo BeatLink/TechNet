@@ -1,11 +1,17 @@
 # Data Drive #########################################################################################################################################
 #
-# Queue depths for the backup pool and ownership of the borg tree; the mount itself comes from the shared module in 0-common.
+# The USB transport and queue depths for the backup pool, plus ownership of the borg tree; the mount itself comes from the shared module in 0-common.
 #
 
 { lib, ... }:
 {
     config = lib.mkMerge [
+
+        # USB Transport ##############################################################################################################################
+        {
+            # The JMS583's UAS aborts on this drive's SMR stalls and suspends the pool, so the bridge is pinned to the plain BOT path instead
+            boot.kernelParams = [ "usb-storage.quirks=152d:0583:u" ];
+        }
 
         # Queue Depths ###############################################################################################################################
         # data-pool-Ragnarok is one shingled drive whose stalls these shallow queues keep short; they are global, so the root SSD gets them too.
