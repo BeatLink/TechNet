@@ -11,6 +11,11 @@
         {
             # The JMS583's UAS aborts on this drive's SMR stalls and suspends the pool, so the bridge is pinned to the plain BOT path instead
             boot.kernelParams = [ "usb-storage.quirks=152d:0583:u" ];
+
+            # The shingled drive blocks past the 30s default while rewriting a band, and the reset the kernel then issues is what suspends the pool
+            services.udev.extraRules = ''
+                ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="0583", ATTR{device/timeout}="180"
+            '';
         }
 
         # Queue Depths ###############################################################################################################################
