@@ -21,7 +21,7 @@ in
                 "zfsutil"
                 "nofail" # nofail keeps a missing pool from stranding the boot
             ];
-            neededForBoot = true;
+            neededForBoot = false; # Must stay false: nofail cannot save a pool that imports and then hangs, and in stage 1 that blocks switch_root
         };
     };
 }
