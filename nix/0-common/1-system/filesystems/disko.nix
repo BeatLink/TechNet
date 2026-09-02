@@ -1,6 +1,6 @@
 # Root Drive Disko ###################################################################################################################################
 #
-# The declarative layout of the root drive: an EFI partition and a ZFS pool holding root, nix, persistent, home and swap.
+# The declarative layout of the root drive: an EFI partition and a ZFS pool holding root, nix, persistent and home.
 #
 
 { config, ... }:
@@ -91,15 +91,6 @@ in
                         # Impermanence rolls back to this snapshot every boot; removing it strands the rollback
                         zfs snapshot ${rootPool}/root/home@blank
                     '';
-                };
-                "root/swap" = {
-                    type = "zfs_volume";
-                    size = "2G";
-                    content = {
-                        type = "swap";
-                        randomEncryption = true;
-                        discardPolicy = "both";
-                    };
                 };
             };
         };
