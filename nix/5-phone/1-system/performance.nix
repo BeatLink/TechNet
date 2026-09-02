@@ -21,17 +21,16 @@
 # costs more than it saves: measured on this phone, a cold nautilus took 8.0s
 # and a cold epiphany 18.8s, both entirely waiting on small random reads that a
 # larger cache would have held. Warm, the same launches are 72ms and 63ms. The
-# ARC gives memory back under pressure, and there is swap behind it if it gives
+# ARC gives memory back under pressure, and there is zram behind it if it gives
 # it back too slowly.
 #
 # A module parameter rather than a runtime write, because zfs is loaded in the
 # initrd and anything set later applies after the ARC has already grown.
 #
-# vm.swappiness is raised from the default 60. Swap here is zram -- compressed
-# pages in RAM, not a disk -- so paging out cold anonymous memory costs CPU
-# rather than an SD card round trip, and on four cores that is the cheaper of
-# the two. The 2GB dm-0 swap on the encrypted zvol stays at priority -2 as the
-# overflow behind it.
+# vm.swappiness is raised from the default 60. Swap here is zram and nothing
+# else -- compressed pages in RAM, not a disk -- so paging out cold anonymous
+# memory costs CPU rather than an SD card round trip, and on four cores that is
+# the cheaper of the two.
 #
 {
     config,
@@ -98,8 +97,7 @@
     # anonymous pages -- clean file pages are dropped and re-read from origin,
     # never written to swap -- so raising it does nothing for the caches above,
     # while zram costs lz4 on a phone whose measured constraint is CPU (pressure
-    # 63-72, against io at 3.44) and the 2GB zvol behind it costs ZFS write
-    # pipeline and encryption on top.
+    # 63-72, against io at 3.44).
     boot.kernel.sysctl = {
         "vm.swappiness" = 100;
         "vm.vfs_cache_pressure" = 50;
