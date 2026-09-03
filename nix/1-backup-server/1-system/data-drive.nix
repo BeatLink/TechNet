@@ -4,19 +4,23 @@
 #
 
 { lib, ... }:
+let
+    # Every JMicron bridge the data drive has been carried in; both aborted under UAS, so each one has to be named here or it comes up unquirked
+    bridges = [ "0583" "0576" ];
+in
 {
     config = lib.mkMerge [
 
         # USB Transport ##############################################################################################################################
         {
             # f is not optional: a quirks parameter replaces the kernel's built-in entry for the device rather than adding to it, and that entry is NO_REPORT_OPCODES
-            boot.kernelParams = [ "usb-storage.quirks=152d:0583:uf" ];
+            boot.kernelParams = [ "usb-storage.quirks=${lib.concatMapStringsSep "," (id: "152d:${id}:uf") bridges}" ];
 
             # The shingled drive blocks past the 30s default while rewriting a band, and the reset the kernel then issues is what suspends the pool
-            services.udev.extraRules = ''
-                ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="0583", ATTR{device/timeout}="180"
-                ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="0583", ATTR{queue/scheduler}="mq-deadline", ATTR{queue/add_random}="0"
-            '';
+            services.udev.extraRules = lib.concatMapStringsSep "\n" (id: ''
+                ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${id}", ATTR{device/timeout}="180"
+                ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${id}", ATTR{queue/scheduler}="mq-deadline", ATTR{queue/add_random}="0"
+            '') bridges;
         }
 
         # Queue Depths ###############################################################################################################################
