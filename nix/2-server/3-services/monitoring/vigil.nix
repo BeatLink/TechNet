@@ -1365,6 +1365,7 @@ in
                                             interval = "10m";
                                             api_url = "http://127.0.0.1:8384";
                                             api_key_command = "cat /Storage/Services/Syncthing/vigil-api-key";
+                                            devices = [ "Odin" "Ragnarok" ];                        # ThorX is the phone and roams by design, so its absence is not a health signal
                                             agent = "heimdall";
                                         }
                                     ];
