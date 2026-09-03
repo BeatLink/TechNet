@@ -43,6 +43,9 @@ in
                     };
                 };
             };
+
+            # frequent is 0 everywhere, and the timer still fires quarter-hourly to keep nothing; on the phone that is a wakeup for no reason
+            systemd.timers.zfs-snapshot-frequent.enable = false;
         }
     ];
 }
