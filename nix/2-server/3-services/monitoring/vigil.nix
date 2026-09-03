@@ -106,11 +106,17 @@ in
         owner = "vigil";
     };
 
-    # HTTP Basic Auth credentials gating the dashboard and REST API. The
+    # Login credentials gating the dashboard and REST API. The
     # dashboard has no `openFirewall` here, so it's reachable only over the
     # WireGuard mesh — auth is defense-in-depth against anyone else on that
     # mesh, not the internet at large.
     sops.secrets.vigil_dashboard_password = {
+        sopsFile = "${config.technet.secrets.path}/vigil.yaml";
+        owner = "vigil";
+    };
+
+    # Signs the dashboard session cookies, so a Vigil restart or redeploy does not sign every browser out.
+    sops.secrets.vigil_session_secret = {
         sopsFile = "${config.technet.secrets.path}/vigil.yaml";
         owner = "vigil";
     };
@@ -153,6 +159,7 @@ in
         dataDir = "/Storage/Services/Vigil";   # SQLite database lives here (persisted)
         authUsername = "admin";
         authPasswordFile = config.sops.secrets.vigil_dashboard_password.path;
+        authSessionSecretFile = config.sops.secrets.vigil_session_secret.path;
         settings = {
             # Batches queued metric/status/event/log writes into one commit
             # every N seconds instead of committing each individually, cutting
