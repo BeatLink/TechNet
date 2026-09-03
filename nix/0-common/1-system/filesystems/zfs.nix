@@ -32,13 +32,14 @@ in
                     autoScrub.enable = true;
 
                     # Reads the com.sun:auto-snapshot property disko already sets; without this the property is inert and nothing is ever taken
+                    # mkDefault throughout: a host whose pool runs near full lowers these in its own module
                     autoSnapshot = {
                         enable = true;
-                        frequent = 0; # These pools change in backup-sized bursts, not continuously, so quarter-hourly snapshots only add clutter
-                        hourly = 24;
-                        daily = 7;
-                        weekly = 4;
-                        monthly = 6;
+                        frequent = lib.mkDefault 0; # These pools change in backup-sized bursts, not continuously, so quarter-hourly snapshots only add clutter
+                        hourly = lib.mkDefault 24;
+                        daily = lib.mkDefault 7;
+                        weekly = lib.mkDefault 4;
+                        monthly = lib.mkDefault 6;
                     };
                 };
             };

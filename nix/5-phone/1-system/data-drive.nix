@@ -17,4 +17,12 @@
 # 0-common/1-system/filesystems/directories.nix alongside the XDG directories that
 # depend on them.
 #
-{ }
+{
+    # An SD card in a phone has no room for the shared default's history, and its contents are a mirror of the mesh rather than a sole copy
+    services.zfs.autoSnapshot = {
+        hourly = 6;
+        daily = 3;
+        weekly = 1;
+        monthly = 1;
+    };
+}
