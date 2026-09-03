@@ -435,6 +435,18 @@ in
                                             max_age = "1w";
                                             agent = "ragnarok";
                                         }
+                                        {
+                                            name = "Deployment";
+                                            id = "ragnarok-nixos-deployment";
+                                            type = "nixos_upgrade";
+                                            interval = "5m";
+                                            flake = upgradeFlake;
+                                            configuration = "Ragnarok";
+                                            eval_agent = "heimdall";                  # Evaluating the flake on the 2GB Rock64 swaps it to death within seconds
+                                            eval_interval = "6h";
+                                            rebuild_args = [ "--no-write-lock-file" "-L" ];
+                                            agent = "ragnarok";
+                                        }
                                     ];
                                 }
                             ];
