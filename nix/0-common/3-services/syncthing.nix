@@ -137,6 +137,21 @@ in
             description = "This host's device name within the mesh.";
         };
 
+        defaultType = lib.mkOption {
+            type = lib.types.enum [
+                "sendreceive"
+                "sendonly"
+                "receiveonly"
+            ];
+            default = "sendreceive";
+            description = ''
+                Folder type this host takes where the folder does not name one
+                itself. A receiveonly host still accepts everything the mesh
+                sends but never propagates its own changes, so deleting a file
+                locally cannot remove it from the other peers.
+            '';
+        };
+
         folderOptions = lib.mkOption {
             type = lib.types.attrs;
             default = { };
@@ -190,7 +205,7 @@ in
                 // {
                     label = name;
                     id = folderIds.${name};
-                    type = perHost folder "types" "sendreceive";
+                    type = perHost folder "types" cfg.defaultType;
                     devices = lib.subtractLists [ cfg.self ] (folder.devices or allPeers);
                     ignorePerms = false;
                 }
