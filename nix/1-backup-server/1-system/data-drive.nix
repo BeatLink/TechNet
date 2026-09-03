@@ -16,10 +16,11 @@ in
             # f is not optional: a quirks parameter replaces the kernel's built-in entry for the device rather than adding to it, and that entry is NO_REPORT_OPCODES
             boot.kernelParams = [ "usb-storage.quirks=${lib.concatMapStringsSep "," (id: "152d:${id}:uf") bridges}" ];
 
-            # The shingled drive blocks past the 30s default while rewriting a band, and the reset the kernel then issues is what suspends the pool
+            # The shingled drive blocks past the 30s default while rewriting a band, and the reset the kernel then issues is what suspends the pool;
+            # the drive feeds no entropy worth harvesting either. Setting a scheduler here is pointless: ZFS reopens the vdev with none.
             services.udev.extraRules = lib.concatMapStringsSep "\n" (id: ''
                 ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${id}", ATTR{device/timeout}="180"
-                ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${id}", ATTR{queue/scheduler}="mq-deadline", ATTR{queue/add_random}="0"
+                ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${id}", ATTR{queue/add_random}="0"
             '') bridges;
         }
 
