@@ -103,6 +103,9 @@
         "vm.vfs_cache_pressure" = 50;
     };
 
+    # This kernel builds only the lz4 zram backend, so the zstd 0-common asks for silently never applied
+    zramSwap.algorithm = "lz4";
+
     # ibus arrives via services.gnome.core-os-services, which the phosh module
     # turns on -- the same route as the tour and avahi. It is the largest CPU
     # consumer on the phone: ibus-extension held 63-73% across repeated samples
