@@ -16,6 +16,14 @@
 
     disko.devices.disk.root-drive.device = "/dev/disk/by-id/ata-Dogfish_SSD_64GB_5E56255506071556041";
 
+    # This pool runs near full, so it keeps a shorter snapshot history than the shared default; snapshots pin freed blocks and it has no room to spare
+    services.zfs.autoSnapshot = {
+        hourly = 12;
+        daily = 5;
+        weekly = 2;
+        monthly = 2;
+    };
+
     # Optimizations for slower hard disk drives
     boot.extraModprobeConfig = ''
         options zfs zfs_vdev_max_active=32
