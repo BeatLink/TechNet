@@ -80,6 +80,8 @@ let
         };
         eBooks = {
             ignorePatterns = [ "/OpenBooks/logs" ];
+            # Heimdall's tree is shared by several service accounts through the ebooks group, and chmod is owner-only, so it must not apply peers' mode bits.
+            ignorePerms.Heimdall = true;
         };
         Music = {
             ignorePatterns = [
@@ -122,7 +124,7 @@ let
         Sounds = "kae2q-5740v";
         Videos = "4kqye-6dosm";
     };
-    # A folder whose path or sync type differs per peer keys them by device name; everything else takes the shared default.
+    # A folder whose path, sync type or permission handling differs per peer keys them by device name; everything else takes the shared default.
     perHost = folder: attr: default: let entries = folder.${attr} or { }; in entries.${cfg.self} or entries.default or default;
 
     # Load-bearing: without it a host configures folders it is not a member of and scans them for nothing.
@@ -207,11 +209,12 @@ in
                     id = folderIds.${name};
                     type = perHost folder "types" cfg.defaultType;
                     devices = lib.subtractLists [ cfg.self ] (folder.devices or allPeers);
-                    ignorePerms = false;
+                    ignorePerms = perHost folder "ignorePerms" false;
                 }
                 // (removeAttrs folder [
                     "devices"
                     "ignorePatterns"
+                    "ignorePerms"
                     "paths"
                     "types"
                 ])

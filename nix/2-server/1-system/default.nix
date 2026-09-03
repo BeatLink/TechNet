@@ -2,6 +2,7 @@
     imports = [
         ./hardware.nix
         ./filesystem.nix
+        ./directories.nix
         ./software.nix
         ./networking.nix
         ./utilities.nix

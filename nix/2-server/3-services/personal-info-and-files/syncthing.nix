@@ -65,6 +65,7 @@
         IOSchedulingPriority = 6;
         IOWeight = 50;
         CPUWeight = 50;
+        UMask = "0002";                                                 # Files it pulls into eBooks must stay writable by the other ebooks-group services (see 1-system/directories.nix); this applies to every folder it writes
     };
 
     nginx-vhosts = {
