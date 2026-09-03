@@ -16,7 +16,7 @@
 #     - Ragnarok - ragnarok.technet
 #
 
-{ ... }:
+{ config, pkgs, lib, ... }:
 {
 
     nginx-vhosts.pi-hole = {
@@ -195,11 +195,6 @@
                 mode = "0750";
             };
         };
-        "/etc/pihole/versions".f = {
-            user = "pihole";
-            group = "pihole";
-            mode = "0644";
-        };
     };
 
     environment.persistence."/Storage/Services/PiHole".directories = [
@@ -215,6 +210,29 @@
         after = [ "unbound.service" ];
         requires = [ "unbound.service" ];
     };
+
+    # Setup ordering -----------------------------------------------------------------------------------------------------------------------------
+    # FTL serves the API before the gravity database is open, so the setup's list registration is gated on the lists endpoint returning data.
+    systemd.services.pihole-ftl-setup.serviceConfig.ExecStartPre = lib.getExe (
+        pkgs.writeShellApplication {
+            name = "pihole-wait-for-gravity";
+            runtimeInputs = [
+                pkgs.coreutils
+                pkgs.gnugrep
+                config.services.pihole-ftl.piholePackage
+            ];
+            text = ''
+                for _ in $(seq 120); do
+                    if pihole api lists 2>/dev/null | grep -q '"lists"'; then
+                        exit 0
+                    fi
+                    sleep 1
+                done
+                echo "gravity database still unavailable after 120s" >&2
+                exit 1
+            '';
+        }
+    );
 
     # DNS is on the critical path for every other machine on the network: when
     # the pool is busy, a stalled lookup does not just slow the server down, it
