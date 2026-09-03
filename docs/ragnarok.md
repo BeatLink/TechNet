@@ -119,6 +119,7 @@ raw dumps are in [`ragnarok-data-pool/`](ragnarok-data-pool).
 | `mountpoint` | `/Storage` |
 | `recordsize` | `1M` |
 | `compression` | `lz4` |
+| `copies` | `2` — a single vdev cannot repair itself otherwise |
 | `atime` | `off` |
 | `xattr` / `acltype` | `sa` / `posix` |
 | `com.sun:auto-snapshot` | `true` — inert, nothing consumes it |
@@ -130,8 +131,11 @@ Two values in the dumps read differently from the table: `failmode` shows
 because the pool was reimported after it was turned off. The table is what to
 build with.
 
-Single vdev means no redundancy: a checksum error on file data is unrecoverable,
-and only metadata survives corruption, from ZFS's own ditto copies.
+Single vdev means no vdev-level redundancy, which is why the dataset carries
+`copies=2`: every block is written twice on the one disk, so a checksum failure
+has a second copy to heal from. It doubles space -- roughly 1.9 TB for the
+940 GB this pool held -- and it does nothing for whole-drive failure, only for
+the block corruption that a healthy disk can still return.
 
 ## As a build host
 
