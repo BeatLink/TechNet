@@ -1204,7 +1204,7 @@ in
                                             id = "heimdall-traccar-devices";
                                             type = "traccar";
                                             interval = "15m";
-                                            api_url = "http://127.0.0.1:8082";
+                                            api_url = "http://127.0.0.1:9280";
                                             username = "vigil";
                                             password_command = "cat /run/secrets/traccar_vigil_password";
                                             stale_warning = 24;
