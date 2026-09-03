@@ -99,6 +99,40 @@ As a WireGuard *client*, its initrd recovery loop probes the server through the
 tunnel (`10.100.100.1` out of `wg0`) rather than probing the LAN, since for a
 client it is the tunnel itself that has to work.
 
+## Data pool layout
+
+`data-pool-Ragnarok` is created by hand at install rather than by disko, so
+these are the settings to recreate it with. Captured from the live pool; the
+raw dumps are in [`ragnarok-data-pool/`](ragnarok-data-pool).
+
+| Pool | Value |
+| ---- | ----- |
+| vdev | single disk, no redundancy — one partition, no mirror |
+| `ashift` | `12` |
+| `failmode` | `wait` |
+| `autotrim` | `off` — the USB bridges do not pass discard through |
+
+| `storage` dataset | Value |
+| ----------------- | ----- |
+| `encryption` | `aes-256-gcm`, `pbkdf2iters=350000` |
+| `keyformat` / `keylocation` | `passphrase` / `prompt`, supplied at boot by clevis |
+| `mountpoint` | `/Storage` |
+| `recordsize` | `1M` |
+| `compression` | `lz4` |
+| `atime` | `off` |
+| `xattr` / `acltype` | `sa` / `posix` |
+| `com.sun:auto-snapshot` | `true` — inert, nothing consumes it |
+
+The creation commands live in NixTool's `commands.py`, not in this repo.
+
+Two values in the dumps read differently from the table: `failmode` shows
+`continue` because a recovery import set it, and `autotrim` reads as a default
+because the pool was reimported after it was turned off. The table is what to
+build with.
+
+Single vdev means no redundancy: a checksum error on file data is unrecoverable,
+and only metadata survives corruption, from ZFS's own ditto copies.
+
 ## As a build host
 
 Ragnarok is the only native `aarch64-linux` machine in the network. Odin can
