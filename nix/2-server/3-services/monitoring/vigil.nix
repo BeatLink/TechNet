@@ -435,17 +435,6 @@ in
                                             max_age = "1w";
                                             agent = "ragnarok";
                                         }
-                                        {
-                                            name = "Deployment";
-                                            id = "ragnarok-nixos-deployment";
-                                            type = "nixos_upgrade";
-                                            interval = "5m";
-                                            flake = upgradeFlake;
-                                            eval_interval = "12h";
-                                            eval_timeout = "30m";                     # The Rock64 evaluates the whole flake in 2GB of RAM and the 10m default times out
-                                            rebuild_args = [ "--no-write-lock-file" "-L" ];
-                                            agent = "ragnarok";
-                                        }
                                     ];
                                 }
                             ];
