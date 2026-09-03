@@ -10,7 +10,11 @@
 # does not make these unnecessary — smartctl needs root either way — so the alternative to this list is a root daemon, which is worse.
 #
 
-{ lib, ... }:
+{ config, lib, ... }:
+let
+    # sudoers ends a command spec at an unescaped colon.
+    upgradeFlake = builtins.replaceStrings [ ":" ] [ "\\:" ] config.system.autoUpgrade.flake;
+in
 {
     config = lib.mkMerge [
 
@@ -61,6 +65,8 @@
                         { command = "/run/current-system/sw/bin/smartctl -H *"; options = [ "NOPASSWD" ]; }
                         { command = "/run/current-system/sw/bin/smartctl -H -d sat *"; options = [ "NOPASSWD" ]; }
                         { command = "/run/current-system/sw/bin/borg *"; options = [ "NOPASSWD" "SETENV" ]; }
+                        # Vigil's nixos_upgrade action, matched argv for argv: changing the monitor's rebuild_args stops sudo matching this
+                        { command = "/run/current-system/sw/bin/nixos-rebuild switch --flake ${upgradeFlake} --no-write-lock-file -L --refresh"; options = [ "NOPASSWD" ]; }
                     ];
                 }
             ];
