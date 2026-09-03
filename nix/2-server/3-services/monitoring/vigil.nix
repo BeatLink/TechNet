@@ -153,6 +153,9 @@ in
         owner = "vigil";
     };
 
+    # HTTP plugins run `api_password_command` here as the `vigil` user, not through the agent, so it needs the same credential group the agent holds.
+    users.users.vigil.extraGroups = [ "vigil-monitor" ];
+
     services.vigil = {
         enable = true;
         port = 9611;
@@ -1066,7 +1069,7 @@ in
                                             id = "heimdall-freshrss-feeds";
                                             type = "freshrss";
                                             interval = "15m";
-                                            api_url = "http://127.0.0.1:80";
+                                            api_url = "http://freshrss.heimdall.technet";                    # nginx's catch-all drops requests to the bare IP with 444, so the FreshRSS vhost name is required
                                             username = "beatlink";
                                             api_password_command = "cat /run/secrets/freshrss_api_password";
                                             agent = "heimdall";

@@ -24,7 +24,7 @@
     # Traccar's vigil account (see traccar.nix).
     sops.secrets.freshrss_api_password = {
         sopsFile = "${config.technet.secrets.path}/freshrss.yaml";
-        group = "vigil-monitor";                                        # Read by whichever Vigil transport runs the `cat` — the agent today, vigil-access as fallback
+        group = "vigil-monitor";                                        # Read by the `cat` the freshrss plugin runs on the Vigil host as the `vigil` user
         mode = "0440";
     };
 
