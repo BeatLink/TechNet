@@ -37,7 +37,7 @@ column, and their service definition lives in that host's own directory.
 | Home Assistant | 8123 | home-assistant.heimdall.technet |
 | Frigate        | 9310 | 127.0.0.1; frigate.heimdall.technet |
 | ESPHome        | 6052 | esphome.heimdall.technet |
-| Traccar        | 9280 | traccar.heimdall.technet |
+<!-- | Traccar        | 9280 | traccar.heimdall.technet | (switched off) -->
 | Mosquitto MQTT | 1883 | 127.0.0.1; broker |
 | Mosquitto (MQTT over TLS) | 8883 | nginx `stream`, proxied to 1883; mqtt.heimdall.technet |
 | Mosquitto (websockets) | 9320 | 127.0.0.1; proxied at /mqtt on the vhost below |
@@ -93,7 +93,7 @@ just answering:
 * Unbound (`heimdall-unbound-resolution`) - live query + SERVFAIL rate via `unbound-control`
 * Mosquitto (`heimdall-mosquitto-delivery`) - publish/subscribe round trip on a dedicated `vigil` MQTT user
 * Frigate (`heimdall-frigate-cameras`) - per-camera `connection_quality` via the internal (unauthenticated, loopback-only) API
-* Traccar (`heimdall-traccar-devices`) - device staleness via `/api/devices`, using a dedicated read-only account created once by hand
+<!-- * Traccar (`heimdall-traccar-devices`) - device staleness via `/api/devices`, using a dedicated read-only account created once by hand (switched off) -->
 * FreshRSS (`heimdall-freshrss-feeds`) - per-feed refresh staleness via the Fever API
 * Trilium (`heimdall-trilium-activity`) - note write-activity staleness via ETAPI metrics, using a token created once by hand
 * Radicale (`heimdall-radicale-webdav`) - live PROPFIND via a dedicated `vigil` htpasswd account
@@ -102,7 +102,7 @@ just answering:
 * Openbooks (`heimdall-openbooks-irc`) - IRC bridge connectivity via a brief WebSocket probe
 * Blockurl (`heimdall-blockurl-database`) - blocklist database non-emptiness via its own API
 
-A few of these (Traccar, FreshRSS, Trilium, Calibre Web) authenticate as an
+A few of these (FreshRSS, Trilium, Calibre Web) authenticate as an
 account or token that has no declarative provisioning in the underlying app —
 each has a one-time manual setup step documented in its own `.nix` file and a
 placeholder sops secret to fill in afterward.

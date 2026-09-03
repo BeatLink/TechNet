@@ -139,7 +139,7 @@
             "open_meteo"
             "vlc_telnet"
             "motioneye"
-            "traccar"
+            # "traccar"                                                 # Traccar is switched off (see traccar.nix)
         ];
         customComponents =   [
             (pkgs.home-assistant-custom-components.frigate.overrideAttrs (old: {

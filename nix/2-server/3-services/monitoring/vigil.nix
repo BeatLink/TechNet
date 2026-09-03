@@ -1174,6 +1174,8 @@ in
                                         }
                                     ];
                                 }
+                                # Traccar is switched off: no tracker protocol was ever enabled, so it never had a device to watch.
+                                /*
                                 {
                                     name = "Traccar";
                                     id = "heimdall-svc-traccar";
@@ -1213,6 +1215,7 @@ in
                                         }
                                     ];
                                 }
+                                */
                                 {
                                     name = "Jackett";
                                     id = "heimdall-svc-jackett";
