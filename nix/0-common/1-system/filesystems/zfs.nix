@@ -30,6 +30,16 @@ in
                 zfs = {
                     trim.enable = true;
                     autoScrub.enable = true;
+
+                    # Reads the com.sun:auto-snapshot property disko already sets; without this the property is inert and nothing is ever taken
+                    autoSnapshot = {
+                        enable = true;
+                        frequent = 0; # These pools change in backup-sized bursts, not continuously, so quarter-hourly snapshots only add clutter
+                        hourly = 24;
+                        daily = 7;
+                        weekly = 4;
+                        monthly = 6;
+                    };
                 };
             };
         }
