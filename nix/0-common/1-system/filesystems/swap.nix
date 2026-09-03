@@ -11,5 +11,10 @@
         {
             zramSwap.enable = true;
         }
+
+        # Paging Behaviour ###########################################################################################################################
+        {
+            boot.kernel.sysctl."vm.page-cluster" = 0; # Readahead amortises a seek that zram does not have, so the extra pages are decompression for nothing
+        }
     ];
 }
