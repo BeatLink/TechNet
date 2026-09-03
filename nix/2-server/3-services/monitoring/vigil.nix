@@ -290,8 +290,8 @@ in
                                             id = "ragnarok-memory-usage";
                                             type = "memory";
                                             interval = "1m";
-                                            warning = 75;
-                                            threshold = 90;
+                                            warning = 90;
+                                            threshold = 95;
                                             agent = "ragnarok";
                                         }
                                         {
@@ -525,8 +525,8 @@ in
                                             id = "heimdall-memory-usage";
                                             type = "memory";
                                             interval = "1m";
-                                            warning = 75;
-                                            threshold = 90;
+                                            warning = 90;
+                                            threshold = 95;
                                             agent = "heimdall";
                                         }
                                         {
@@ -1591,8 +1591,8 @@ in
                                             id = "odin-memory-usage";
                                             type = "memory";
                                             interval = "1m";
-                                            warning = 75;
-                                            threshold = 90;
+                                            warning = 90;
+                                            threshold = 95;
                                             agent = "odin";
                                         }
                                         {
