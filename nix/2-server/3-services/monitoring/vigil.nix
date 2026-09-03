@@ -91,6 +91,10 @@
 # manually from the Vigil UI, while Vorta/borgmatic keep their own schedules.
 #
 { config, inputs, ... }:
+let
+    # Every host upgrades from the same flake, so Heimdall's own value is every monitor's.
+    upgradeFlake = config.system.autoUpgrade.flake;
+in
 {
     imports = [ inputs.vigil.nixosModules.default ];
 
@@ -331,6 +335,8 @@
                                             id = "ragnarok-zfs";
                                             type = "zfs";
                                             interval = "1h";
+                                            warning = 90;
+                                            threshold = 96;
                                             agent = "ragnarok";
                                         }
                                         {
@@ -420,6 +426,17 @@
                                             interval = "1h";
                                             service_name = "nixos-upgrade.service";
                                             max_age = "1w";
+                                            agent = "ragnarok";
+                                        }
+                                        {
+                                            name = "Deployment";
+                                            id = "ragnarok-nixos-deployment";
+                                            type = "nixos_upgrade";
+                                            interval = "5m";
+                                            flake = upgradeFlake;
+                                            eval_interval = "12h";
+                                            eval_timeout = "30m";                     # The Rock64 evaluates the whole flake in 2GB of RAM and the 10m default times out
+                                            rebuild_args = [ "--no-write-lock-file" "-L" ];
                                             agent = "ragnarok";
                                         }
                                     ];
@@ -553,6 +570,8 @@
                                             id = "heimdall-zfs";
                                             type = "zfs";
                                             interval = "1h";
+                                            warning = 90;
+                                            threshold = 96;
                                             agent = "heimdall";
                                         }
                                         {
@@ -707,6 +726,16 @@
                                             interval = "1h";
                                             service_name = "nixos-upgrade.service";
                                             max_age = "1w";
+                                            agent = "heimdall";
+                                        }
+                                        {
+                                            name = "Deployment";
+                                            id = "heimdall-nixos-deployment";
+                                            type = "nixos_upgrade";
+                                            interval = "5m";
+                                            flake = upgradeFlake;
+                                            eval_interval = "6h";
+                                            rebuild_args = [ "--no-write-lock-file" "-L" ];
                                             agent = "heimdall";
                                         }
                                     ];
@@ -1607,6 +1636,8 @@
                                             id = "odin-zfs";
                                             type = "zfs";
                                             interval = "1h";
+                                            warning = 90;
+                                            threshold = 96;
                                             agent = "odin";
                                         }
                                         {
@@ -1705,6 +1736,16 @@
                                             interval = "1h";
                                             service_name = "nixos-upgrade.service";
                                             max_age = "1w";
+                                            agent = "odin";
+                                        }
+                                        {
+                                            name = "Deployment";
+                                            id = "odin-nixos-deployment";
+                                            type = "nixos_upgrade";
+                                            interval = "5m";
+                                            flake = upgradeFlake;
+                                            eval_interval = "6h";
+                                            rebuild_args = [ "--no-write-lock-file" "-L" ];
                                             agent = "odin";
                                         }
                                     ];
