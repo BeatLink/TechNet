@@ -26,9 +26,10 @@
         };
     };
 
-    # The recordings live under /Storage/Files and are mounted where Frigate expects to write them.
+    # The recordings live one level inside the Syncthing folder under /Storage/Files, so the folder marker at its root sits outside
+    # Frigate's pruning of empty directories, and are mounted where Frigate expects to write them.
     fileSystems."/var/lib/frigate/recordings" = {
-        device = "/Storage/Files/Frigate";
+        device = "/Storage/Files/Frigate/Recordings";
         fsType = "none";
         options = [
             "bind"
@@ -42,6 +43,14 @@
 
     # The recordings tree is 0770 frigate:frigate, so it is unreadable without this.
     users.users.beatlink.extraGroups = [ "frigate" ];
+
+    # tmpfiles refuses the beatlink-to-frigate ownership change below /Storage/Files, so the bind source is made here instead.
+    system.activationScripts.frigateRecordingsDir = {
+        deps = [ "users" ];
+        text = ''
+            ${pkgs.coreutils}/bin/install -d -m 0770 -o frigate -g frigate /Storage/Files/Frigate/Recordings
+        '';
+    };
 
     services = {
         udev.extraRules = ''
