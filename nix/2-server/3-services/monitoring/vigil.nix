@@ -1361,7 +1361,7 @@ in
                                             type = "syncthing";
                                             interval = "10m";
                                             api_url = "http://127.0.0.1:8384";
-                                            api_key_command = "cat /Storage/Services/Syncthing/Config/vigil-api-key";
+                                            api_key_command = "cat /Storage/Services/Syncthing/vigil-api-key";
                                             agent = "heimdall";
                                         }
                                     ];
