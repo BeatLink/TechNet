@@ -109,11 +109,7 @@ in
         lib.mapAttrs' (
             name: _:
             lib.nameValuePair "${stateDir}/${name}" {
-                f = {
-                    user = "esphome";
-                    group = "esphome";
-                    mode = "0444";
-                };
+                f = { };                                                     # Ownership stays unset: the read-only bind mount rejects chown on every re-run.
             }
         ) configFiles
         // {
