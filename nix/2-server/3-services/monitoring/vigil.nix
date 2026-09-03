@@ -374,8 +374,8 @@ in
                                             id = "ragnarok-filesystems";
                                             type = "filesystems";
                                             interval = "10m";
-                                            warning = 80;
-                                            threshold = 90;
+                                            warning = 90;
+                                            threshold = 96;
                                             inode_warning = 85;
                                             inode_threshold = 95;
                                             grid_col_span = 2;
@@ -609,8 +609,8 @@ in
                                             id = "heimdall-filesystems";
                                             type = "filesystems";
                                             interval = "10m";
-                                            warning = 80;
-                                            threshold = 90;
+                                            warning = 90;
+                                            threshold = 96;
                                             inode_warning = 85;
                                             inode_threshold = 95;
                                             grid_col_span = 2;
@@ -1675,8 +1675,8 @@ in
                                             id = "odin-filesystems";
                                             type = "filesystems";
                                             interval = "10m";
-                                            warning = 80;
-                                            threshold = 90;
+                                            warning = 90;
+                                            threshold = 96;
                                             inode_warning = 85;
                                             inode_threshold = 95;
                                             grid_col_span = 2;
