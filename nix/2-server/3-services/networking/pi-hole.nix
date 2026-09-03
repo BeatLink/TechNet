@@ -174,6 +174,7 @@
                     rapidCommit = false;
                     logging = true;
                 };
+                database.maxDBdays = 7;                                     # Every query row is scanned at startup, and 90 days of them held FTL's API for 20 s.
             };
             stateDirectory = "/Storage/Services/PiHole/state";
             logDirectory = "/Storage/Services/PiHole/logs";
