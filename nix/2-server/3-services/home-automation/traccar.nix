@@ -1,3 +1,11 @@
+# Traccar
+#
+# Switched off: no tracker protocol was ever enabled, so it never received a position and its device monitor had nothing to watch.
+# The working configuration is kept below for when a protocol and devices are set up.
+#
+{ ... }: { }
+
+/*
 { config, ... }:
 {
     # Vigil's `traccar` plugin authenticates as a dedicated read-only user to
@@ -30,3 +38,4 @@
         port = 9280;
     };
 }
+*/

@@ -187,6 +187,8 @@
                             statusStyle = "dot";
                         };
                     }
+                    # Traccar is switched off (see home-automation/traccar.nix).
+                    /*
                     {
                         "Traccar" = {
                             icon = "traccar.png";
@@ -196,6 +198,7 @@
                             statusStyle = "dot";
                         };
                     }
+                    */
                     {
                         "MQTT" = {
                             icon = "mosquitto.png";
