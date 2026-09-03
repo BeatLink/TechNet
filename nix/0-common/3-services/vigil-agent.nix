@@ -13,6 +13,7 @@
     config,
     inputs,
     lib,
+    pkgs,
     ...
 }:
 let
@@ -56,7 +57,18 @@ in
 
             # Monitors send plain shell, and over SSH they resolved against the host's system profile. Handing the agent that same profile keeps all 98
             # migrated monitors resolving exactly what they resolved before, rather than making each one's tools an explicit dependency here.
-            path = [ "/run/current-system/sw" ];
+            path = [
+                "/run/current-system/sw"
+                pkgs.git                                                    # nix shells out to git to fetch git inputs while evaluating the flake
+            ];
+        };
+
+        systemd.services.vigil-agent = {
+            environment.HOME = "/var/lib/vigil-agent";                     # nix and the detached job workdirs write under $HOME; the default /var/empty is immutable
+            serviceConfig = {
+                StateDirectory = "vigil-agent";
+                ProtectHome = lib.mkForce false;                            # true hides /home from borg source paths and makes /root read-only for the rebuild's nix cache
+            };
         };
     };
 }
