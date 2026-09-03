@@ -19,6 +19,8 @@
             }
         ];
     };
+    # libvirt's secrets key is encrypted to this host key; a root wipe without it leaves libvirtd failing at CREDENTIALS
+    environment.persistence."/persistent".files = [ "/var/lib/systemd/credential.secret" ];
     home-manager.users.beatlink = {
         home.persistence."/Storage/Apps/System/Virt-Manager" = {
 
