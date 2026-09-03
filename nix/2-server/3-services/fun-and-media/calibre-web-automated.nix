@@ -47,12 +47,14 @@
         };
         "/Storage/Files/eBooks/Calibre/Library".d = {
             user = "calibre-web";
-            group = "calibre-web";
-            mode = "0755";
+            group = "ebooks";
+            mode = "2775";
         };
     };
 
-    users.users.calibre-web.extraGroups = [ "beatlink" ];
+    # The library sits inside the Syncthing-managed eBooks folder, shared with Syncthing and openbooks through the ebooks group (see syncthing.nix).
+    users.users.calibre-web.extraGroups = [ "ebooks" ];
+    systemd.services.calibre-web-automated.serviceConfig.UMask = "0002";
 
     nginx-vhosts.calibre-web = {
         domain = "calibre-web.heimdall.technet";
