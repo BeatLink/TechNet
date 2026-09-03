@@ -44,6 +44,9 @@
             };
 
             syncthing-mesh.self = "Ragnarok";
+
+            # This host is a backup tier, not a source: receiveonly keeps a local deletion, such as clearing a file the scrub found corrupt, off the mesh
+            syncthing-mesh.defaultType = "receiveonly";
         }
 
         # Storage Locations ##########################################################################################################################
