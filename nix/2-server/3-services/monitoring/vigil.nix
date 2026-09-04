@@ -340,6 +340,26 @@ in
                                             agent = "ragnarok";
                                         }
                                         {
+                                            # smartd runs the scheduled self-tests whose verdict the monitor above
+                                            # reads. The journal tail is the point rather than the unit being
+                                            # active: a drive's own health verdict stays PASSED through thousands
+                                            # of reallocated sectors, and it is smartd that names the failing
+                                            # self-test and the LBA it could not read. Nothing else surfaces that,
+                                            # because with no MTA on the network smartd notifies by `wall`, which
+                                            # on a headless host reaches no one.
+                                            #
+                                            # Polled at 5m against smartd's own 30m check cycle, so a finding
+                                            # still surfaces promptly and a faster poll would only re-read the
+                                            # same journal.
+                                            name = "SMART Daemon";
+                                            id = "ragnarok-smartd";
+                                            type = "systemd_service";
+                                            interval = "5m";
+                                            service_name = "smartd.service";
+                                            lines = 25;
+                                            agent = "ragnarok";
+                                        }
+                                        {
                                             # A pool changes state slowly and `zpool status` walks every vdev.
                                             name = "ZFS";
                                             id = "ragnarok-zfs";
@@ -573,6 +593,26 @@ in
                                             id = "heimdall-smart";
                                             type = "smart";
                                             interval = "1h";
+                                            agent = "heimdall";
+                                        }
+                                        {
+                                            # smartd runs the scheduled self-tests whose verdict the monitor above
+                                            # reads. The journal tail is the point rather than the unit being
+                                            # active: a drive's own health verdict stays PASSED through thousands
+                                            # of reallocated sectors, and it is smartd that names the failing
+                                            # self-test and the LBA it could not read. Nothing else surfaces that,
+                                            # because with no MTA on the network smartd notifies by `wall`, which
+                                            # on a headless host reaches no one.
+                                            #
+                                            # Polled at 5m against smartd's own 30m check cycle, so a finding
+                                            # still surfaces promptly and a faster poll would only re-read the
+                                            # same journal.
+                                            name = "SMART Daemon";
+                                            id = "heimdall-smartd";
+                                            type = "systemd_service";
+                                            interval = "5m";
+                                            service_name = "smartd.service";
+                                            lines = 25;
                                             agent = "heimdall";
                                         }
                                         {
@@ -1643,6 +1683,26 @@ in
                                             id = "odin-smart";
                                             type = "smart";
                                             interval = "1h";
+                                            agent = "odin";
+                                        }
+                                        {
+                                            # smartd runs the scheduled self-tests whose verdict the monitor above
+                                            # reads. The journal tail is the point rather than the unit being
+                                            # active: a drive's own health verdict stays PASSED through thousands
+                                            # of reallocated sectors, and it is smartd that names the failing
+                                            # self-test and the LBA it could not read. Nothing else surfaces that,
+                                            # because with no MTA on the network smartd notifies by `wall`, which
+                                            # on a headless host reaches no one.
+                                            #
+                                            # Polled at 5m against smartd's own 30m check cycle, so a finding
+                                            # still surfaces promptly and a faster poll would only re-read the
+                                            # same journal.
+                                            name = "SMART Daemon";
+                                            id = "odin-smartd";
+                                            type = "systemd_service";
+                                            interval = "5m";
+                                            service_name = "smartd.service";
+                                            lines = 25;
                                             agent = "odin";
                                         }
                                         {
