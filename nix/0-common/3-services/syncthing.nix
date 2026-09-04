@@ -197,7 +197,7 @@ in
                 {
                     versioning = {
                         type = "trashcan";
-                        params.cleanoutDays = "30";
+                        params.cleanoutDays = "7";
                     };
                 }
                 // cfg.folderOptions
