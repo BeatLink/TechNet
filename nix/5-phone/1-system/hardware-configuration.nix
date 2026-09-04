@@ -14,6 +14,9 @@
         deviceTree.name = "allwinner/sun50i-a64-pinephone-1.2.dtb";
     };
 
+    # Storage ----------------------------------------------------------------------------------------------------------------------------------------
+    services.smartd.enable = false; # The eMMC and SD card expose no SMART, and smartd exits rather than start with zero devices registered
+
     # Boot -------------------------------------------------------------------------------------------------------------------------------------------
     boot = {
         kernelParams = [
