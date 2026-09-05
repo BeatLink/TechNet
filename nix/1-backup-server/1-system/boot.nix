@@ -1,7 +1,7 @@
 # Boot ###############################################################################################################################################
 #
 # Console output for a headless board: the HDMI stack loaded from the initrd, and the serial console on ttyS2.
-# Also the clock, whose RTC has no battery.
+# Also the clock, whose RTC has no battery, and the journal, which an unclean shutdown keeps corrupting.
 #
 
 { lib, ... }:
@@ -33,6 +33,16 @@
             services.journald.settings.Journal = {
                 ForwardToConsole = true;
                 TTYPath = "/dev/ttyS2";
+            };
+        }
+
+        # Journal Durability #########################################################################################################################
+        {
+            # This board keeps losing the active journal file to "corrupted or uncleanly shut down", which takes the last unsynced window of entries
+            # with it — including the record of whichever upgrade rebooted it.
+            services.journald.settings.Journal = {
+                Storage = "persistent";                                 # Write to /var/log/journal from the start rather than buffering in /run until the flush
+                SyncIntervalSec = "1min";                               # Bounds what an unclean shutdown can lose; the default leaves five minutes of entries unsynced
             };
         }
     ];
