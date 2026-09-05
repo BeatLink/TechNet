@@ -7,9 +7,11 @@
 {
     # The tmpfiles rules and the XDG pointers list the same six paths and have to agree, so they are kept together.
     systemd.tmpfiles.settings."Storage" = {
+        # Root-owned, because systemd-tmpfiles refuses to act on any path whose ownership changes under a non-root directory: with this owned by a
+        # user, every rule below /Storage/Services silently did nothing. 1777 keeps it writable by everyone, so nothing else changes.
         "/Storage".d = {
-            user = "beatlink";
-            group = "beatlink";
+            user = "root";
+            group = "root";
             mode = "1777";
         };
         "/Storage/Apps".d = {

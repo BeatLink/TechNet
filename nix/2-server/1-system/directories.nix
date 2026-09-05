@@ -10,6 +10,14 @@
     users.groups.ebooks = { };
     users.users.beatlink.extraGroups = [ "ebooks" ];
 
+    # Root-owned so the per-service rules below it apply at all: tmpfiles will not act across an ownership change under a non-root parent, and each
+    # service directory here belongs to its own account. Services own their own subdirectories, which tmpfiles creates for them.
+    systemd.tmpfiles.settings."Storage"."/Storage/Services".d = {
+        user = "root";
+        group = "root";
+        mode = "0755";
+    };
+
     systemd.tmpfiles.settings."Storage"."/Storage/Files/eBooks".d = {
         user = "beatlink";
         group = "ebooks";
