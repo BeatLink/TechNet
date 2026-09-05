@@ -21,7 +21,11 @@
                 "console=ttyS2,115200n8"
                 "console=tty0" # Last console listed becomes /dev/console, so userspace output lands on HDMI
             ];
-            services.journald.console = "/dev/ttyS2"; # Journal entries also go to serial; HDMI only sees what is written to /dev/console
+            # Journal entries also go to serial; HDMI only sees what is written to /dev/console
+            services.journald.settings.Journal = {
+                ForwardToConsole = true;
+                TTYPath = "/dev/ttyS2";
+            };
         }
     ];
 }
