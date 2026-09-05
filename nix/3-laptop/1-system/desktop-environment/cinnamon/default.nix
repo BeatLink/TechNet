@@ -7,7 +7,6 @@
 
 {
     inputs,
-    lib,
     pkgs,
     ...
 }:
@@ -43,14 +42,8 @@ in
         displayManager = {
             logToFile = false;
             logToJournal = false;
-            defaultSession = "cinnamon-wayland"; # Per-output scanout buffers, so losing a monitor cannot wedge every head at once
-            # LightDM reports a user's session from the AccountsService XSession key, and nixpkgs' set-session writes that key only for an X11
-            # default, so a Wayland one leaves the last X11 session named there and web-greeter starts it in preference to the seat default.
-            # The `|| true` matters: this runs in the pre-start script under set -e, where a failed call would leave the machine with no login at all.
-            generic.preStart = lib.mkAfter ''
-                user=/org/freedesktop/Accounts/User$(${pkgs.coreutils}/bin/id -u beatlink)
-                ${pkgs.systemd}/bin/busctl call org.freedesktop.Accounts $user org.freedesktop.Accounts.User SetXSession s cinnamon-wayland || true
-            '';
+            # X11, because no ScreenCast portal exists for Cinnamon Wayland and screen sharing needs one
+            defaultSession = "cinnamon"; # Muffin asks for an oversized framebuffer if this session loses its last output, which only an X restart clears
         };
         xserver = {
             enable = true; # Enables X11 Server
@@ -65,7 +58,7 @@ in
                 '';
                 # The seat default is only web-greeter's last fallback, behind the user's own AccountsService session, so it needs the stamp below.
                 extraSeatDefaults = ''
-                    user-session = cinnamon-wayland
+                    user-session = cinnamon
                 '';
                 greeters.gtk.enable = false; # Defaults on, and its own greeter definition would collide with the one below
                 # web-greeter has no NixOS module, so the greeter is named directly
