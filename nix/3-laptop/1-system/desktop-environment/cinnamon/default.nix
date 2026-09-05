@@ -30,6 +30,7 @@ in
     imports = [
         ./always-on-top.nix
         ./cinnamon-bump.nix
+        ./monitors.nix
         ./tang.nix
     ];
 
