@@ -40,7 +40,10 @@
                     offload.enableOffloadCmd = true;
                 };
             };
-            services.xserver.videoDrivers = [ "nvidia" ]; # The nvidia module adds the amdgpu Device itself; listing modesetting here adds an unpinned Device that claims the dGPU and kills the NVIDIA-G0 offload provider
+            services.xserver.videoDrivers = [
+                "modesetting" # Keep: without it the iGPU falls to xf86-video-amdgpu, whose output names (eDP, HDMI-A-0) differ from modesetting's and leave a black screen
+                "nvidia"
+            ];
         }
 
         # External Monitor ###########################################################################################################################
