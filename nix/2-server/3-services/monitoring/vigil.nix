@@ -1174,46 +1174,6 @@ in
                                         }
                                     ];
                                 }
-                                {
-                                    name = "Openbooks";
-                                    id = "heimdall-svc-openbooks";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "heimdall-openbooks";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "openbooks.service";
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            # IRC-bridge health, as opposed to the
-                                            # monitor above, which only proves the web
-                                            # server is running. Opens one short-lived
-                                            # WebSocket connection (websocat, installed
-                                            # beside openbooks) to confirm the IRC
-                                            # bridge to irc.irchighway.net is actually
-                                            # connected — sends a connect request and
-                                            # expects the success appearance in the
-                                            # reply, then closes immediately since
-                                            # OpenBooks serves only one client at a
-                                            # time. 10m interval keeps this probe's
-                                            # share of that single slot small.
-                                            name = "IRC Bridge";
-                                            id = "heimdall-openbooks-irc";
-                                            type = "http";
-                                            interval = "10m";
-                                            url = "ws://127.0.0.1:9777/ws";
-                                            body = ''{"type":1,"payload":{}}'';
-                                            check_title = "IRC BRIDGE";
-                                            expect = {
-                                                body_contains = ''"appearance":1'';
-                                            };
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
                                 # Traccar is switched off: no tracker protocol was ever enabled, so it never had a device to watch.
                                 /*
                                 {

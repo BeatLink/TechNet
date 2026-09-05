@@ -248,15 +248,6 @@
                             statusStyle = "dot";
                         };
                     }
-                    {
-                        "OpenBooks" = {
-                            icon = "https://raw.githubusercontent.com/evan-buss/openbooks/refs/heads/master/server/app/public/favicon-32x32.png";
-                            href = "https://openbooks.heimdall.technet";
-                            description = "eBook Download Manager";
-                            siteMonitor = "https://openbooks.heimdall.technet";
-                            statusStyle = "dot";
-                        };
-                    }
                 ];
             }
             {

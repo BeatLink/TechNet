@@ -5,7 +5,7 @@
 
 { pkgs, ... }:
 {
-    # eBooks is written by Syncthing (as beatlink), calibre-web and openbooks, each under its own account, so they share it through
+    # eBooks is written by Syncthing (as beatlink) and calibre-web, each under its own account, so they share it through
     # this group: setgid directories hand it to everything created inside, and each writer's umask keeps group write on.
     users.groups.ebooks = { };
     users.users.beatlink.extraGroups = [ "ebooks" ];

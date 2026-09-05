@@ -52,7 +52,7 @@
         };
     };
 
-    # The library sits inside the Syncthing-managed eBooks folder, shared with Syncthing and openbooks through the ebooks group (see syncthing.nix).
+    # The library sits inside the Syncthing-managed eBooks folder, shared with Syncthing through the ebooks group (see syncthing.nix).
     users.users.calibre-web.extraGroups = [ "ebooks" ];
     systemd.services.calibre-web-automated.serviceConfig.UMask = "0002";
 
