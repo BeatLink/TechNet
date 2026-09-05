@@ -2,9 +2,9 @@
 
 { config, ... }: {
     sops.secrets.blockurl_api_key = {
-        owner = "blockurl"; # must match services.blockurl.user
-        group = "blockurl";
-        mode = "0440";      # allow Vigil (both transports are in the blockurl group) to read the key
+        owner = "blockurl";                                             # must match services.blockurl.user, which reads the key as its owner
+        group = "vigil-monitor";                                        # Read by the `cut` the blockurl plugin runs on the Vigil host as the `vigil` user
+        mode = "0440";
         sopsFile = "${config.technet.secrets.path}/blockurl.yaml";
     };
 
