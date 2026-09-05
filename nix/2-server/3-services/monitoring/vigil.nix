@@ -1034,12 +1034,14 @@ in
                                         {
                                             # Camera health, as opposed to the monitor
                                             # above, which only proves the process is
-                                            # running. Reads Frigate's own precomputed
-                                            # connection_quality per camera via its
-                                            # internal (unauthenticated-by-design,
-                                            # loopback-only) API on port 5000 — no
-                                            # credential needed, no change to the real
-                                            # auth setup on the regular port.
+                                            # running. Reads stream fps and the live
+                                            # armed state via Frigate's internal
+                                            # (unauthenticated-by-design, loopback-only)
+                                            # API on port 5000 — no credential needed, no
+                                            # change to the real auth setup on the
+                                            # regular port. The camera sits disarmed
+                                            # until Home Assistant arms it, which reads
+                                            # as disarmed rather than as a fault.
                                             name = "Cameras";
                                             id = "heimdall-frigate-cameras";
                                             type = "frigate";
