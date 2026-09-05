@@ -79,7 +79,6 @@ let
             ];
         };
         eBooks = {
-            ignorePatterns = [ "/OpenBooks/logs" ];
             # Heimdall's tree is shared by several service accounts through the ebooks group, and chmod is owner-only, so it must not apply peers' mode bits.
             ignorePerms.Heimdall = true;
         };

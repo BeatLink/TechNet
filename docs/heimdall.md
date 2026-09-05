@@ -28,7 +28,7 @@ Grouped by directory under [`3-services`](../nix/2-server/3-services):
 | --- | --- |
 | `networking` | nginx, nginx-vhosts, pi-hole, unbound |
 | `personal-info-and-files` | blockurl, radicale, syncthing, trilium |
-| `fun-and-media` | calibre-web-automated, freshrss, gallery-dl, jackett, openbooks, qbittorrent, vlc |
+| `fun-and-media` | calibre-web-automated, freshrss, gallery-dl, jackett, qbittorrent, vlc |
 | `home-automation` | esphome, frigate, home-assistant, lnxlink, mosquitto |
 | `monitoring` | homepage, vigil |
 | `technet` | attic |

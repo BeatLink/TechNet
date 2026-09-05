@@ -50,7 +50,6 @@ column, and their service definition lives in that host's own directory.
 | Calibre Web  | 8083 | calibre-web.heimdall.technet |
 | FreshRSS     | —    | freshrss (php-fpm via nginx) |
 | Jackett      | 9117 | jackett.heimdall.technet |
-| Openbooks    | 9777 | openbooks.heimdall.technet |
 | qBittorrent (Web UI)   | 9050 | qbittorrent.heimdall.technet |
 | qBittorrent (torrents) | 6881 | TCP + UDP |
 | VLC (telnet)  | 4212 | 127.0.0.1; headless audio control for Home Assistant |
@@ -99,7 +98,6 @@ just answering:
 * Radicale (`heimdall-radicale-webdav`) - live PROPFIND via a dedicated `vigil` htpasswd account
 * Syncthing (`heimdall-syncthing-health`) - folder sync state + device connectivity via the REST API
 * Calibre Web (`heimdall-calibre-web-library`) - live OPDS feed request via a dedicated account created once by hand
-* Openbooks (`heimdall-openbooks-irc`) - IRC bridge connectivity via a brief WebSocket probe
 * Blockurl (`heimdall-blockurl-database`) - blocklist database non-emptiness via its own API
 
 A few of these (FreshRSS, Trilium, Calibre Web) authenticate as an
