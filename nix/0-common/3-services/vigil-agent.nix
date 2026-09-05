@@ -46,12 +46,11 @@ in
             id = agentId;
             tokenFile = config.sops.secrets.vigil_agent_token.path;
 
-            # Same memberships `vigil-access` holds, since the monitors run the same commands: borg repo reads for backup health, the journal for unit
-            # status and for the agent's own journal watchers, and blockurl's API key.
+            # Same memberships `vigil-access` holds, since the monitors run the same commands: borg repo reads for backup health, and the journal for
+            # unit status and for the agent's own journal watchers.
             extraGroups = [
                 "borg"
                 "systemd-journal"
-                "blockurl"
                 "vigil-monitor"
             ];
 

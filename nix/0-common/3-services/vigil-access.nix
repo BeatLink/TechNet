@@ -34,7 +34,6 @@ in
                     extraGroups = [
                         "borg"                                                  # Read access to borg repos for backup health checks
                         "systemd-journal"                                       # Read systemd service status and logs
-                        "blockurl"                                              # Read blockurl_api_key for the blockurl monitor
                         "vigil-monitor"                                         # Read the per-service credentials monitors cat on the target
                     ];
                     openssh.authorizedKeys.keys = [
