@@ -973,32 +973,18 @@ in
                                             agent = "heimdall";
                                         }
                                         {
-                                            # DNS filtering health, as opposed to the
-                                            # monitor above, which only proves FTL is
-                                            # running. The failure this exists to catch:
-                                            # gravity stops matching, so Pi-hole resolves
-                                            # normally while blocking nothing — invisible
-                                            # to every liveness check.
-                                            #
-                                            # Port 9018 is the pihole-web listener on
-                                            # Heimdall's loopback (see pi-hole.nix), so
-                                            # the API is read from that host over SSH.
-                                            # It answers locally without a session token,
-                                            # hence no api_password here.
                                             name = "DNS";
                                             id = "heimdall-pihole-dns";
                                             type = "pihole";
                                             interval = "5m";
                                             api_url = "http://127.0.0.1:9018";
-                                            # Steady state sits near 16%. A drop under 5%
-                                            # means filtering has degraded; under 1% it has
-                                            # effectively stopped.
-                                            block_rate_warning = 5;
-                                            block_rate_threshold = 1;
-                                            # Gravity rebuilds weekly by default, so 8d
-                                            # flags a rebuild that silently stopped
-                                            # happening without alarming on the normal cycle.
-                                            gravity_max_age = "8d";
+                                            # Percentages, not fractions: local and cached lookups dominate the denominator, so the real block rate sits near 2%.
+                                            block_rate_warning = 1;
+                                            block_rate_threshold = 0.25;
+                                            # The rate is cumulative since FTL start, so it needs ~2.5h of queries before it is representative.
+                                            min_queries = 30000;
+                                            # Wide enough that pihole-gravity.timer has to miss several weekly runs before this fires.
+                                            gravity_max_age = "30d";
                                             agent = "heimdall";
                                         }
                                     ];
