@@ -735,10 +735,10 @@ in
                                     id = "vigil-self";
                                     type = "vigil_self";
                                     interval = "1m";
-                                    # Vigil idles around 70 MB with this monitor count; these
+                                    # Vigil settles around 500 MB with this monitor count; these
                                     # leave generous headroom while still catching a real leak.
-                                    memory_warning = 256;
-                                    memory_threshold = 512;
+                                    memory_warning = 768;
+                                    memory_threshold = 1024;
                                 }
                                 {
                                     # Keeps bltechnet.mooo.com pointed at the home connection's
