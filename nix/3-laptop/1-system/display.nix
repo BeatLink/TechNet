@@ -37,13 +37,10 @@
                     amdgpuBusId = "PCI:6:0:0";
                     nvidiaBusId = "PCI:1:0:0";
                     offload.enable = true;
-                    offload.enableOffloadCmd = false;
+                    offload.enableOffloadCmd = true;
                 };
             };
-            services.xserver.videoDrivers = [
-                "modesetting"
-                "nvidia"
-            ];
+            services.xserver.videoDrivers = [ "nvidia" ]; # The nvidia module adds the amdgpu Device itself; listing modesetting here adds an unpinned Device that claims the dGPU and kills the NVIDIA-G0 offload provider
         }
 
         # External Monitor ###########################################################################################################################
