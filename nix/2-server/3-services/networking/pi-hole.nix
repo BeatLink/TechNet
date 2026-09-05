@@ -235,6 +235,64 @@
         }
     );
 
+    # Gravity refresh --------------------------------------------------------------------------------------------------------------------------------
+    # The setup service builds gravity only when the database is missing, so without this the blocklists are never refreshed again.
+    systemd.services.pihole-gravity = {
+        description = "Pi-hole gravity refresh";
+        after = [ "network-online.target" "pihole-ftl.service" ];
+        wants = [ "network-online.target" ];
+        serviceConfig = {
+            Type = "oneshot";
+            User = config.services.pihole-ftl.user;
+            Group = config.services.pihole-ftl.group;
+            ExecStart = lib.getExe (
+                pkgs.writeShellApplication {
+                    name = "pihole-gravity-refresh";
+                    runtimeInputs = [
+                        pkgs.systemd
+                        config.services.pihole-ftl.piholePackage
+                    ];
+                    text = ''
+                        pihole -g
+                        # Swapping the database leaves FTL on the old inode until it is signalled.
+                        ${lib.getExe' pkgs.procps "kill"} -s SIGRTMIN "$(systemctl show --property MainPID --value pihole-ftl.service)"
+                    '';
+                }
+            );
+            NoNewPrivileges = true;
+            PrivateTmp = true;
+            PrivateDevices = true;
+            DevicePolicy = "closed";
+            ProtectSystem = "strict";
+            ProtectHome = "read-only";
+            ProtectControlGroups = true;
+            ProtectKernelModules = true;
+            ProtectKernelTunables = true;
+            ReadWritePaths = [
+                config.services.pihole-ftl.configDirectory
+                config.services.pihole-ftl.stateDirectory
+                config.services.pihole-ftl.logDirectory
+            ];
+            RestrictAddressFamilies = "AF_UNIX AF_INET AF_INET6 AF_NETLINK";
+            RestrictNamespaces = true;
+            RestrictRealtime = true;
+            RestrictSUIDSGID = true;
+            MemoryDenyWriteExecute = true;
+            LockPersonality = true;
+        };
+    };
+
+    systemd.timers.pihole-gravity = {
+        description = "Pi-hole gravity refresh";
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+            OnCalendar = "Sun 03:00";
+            RandomizedDelaySec = "45m";
+            Persistent = true;
+            Unit = "pihole-gravity.service";
+        };
+    };
+
     # DNS is on the critical path for every other machine on the network: when
     # the pool is busy, a stalled lookup does not just slow the server down, it
     # looks like the internet is broken everywhere. So FTL and the resolver it
