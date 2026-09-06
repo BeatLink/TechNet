@@ -64,18 +64,19 @@ let
         ];
 
         # Consistency Checks
+        # Periodic rather than every run: checking on each of the eight daily runs left borgmatic working for 2h21m at a stretch.
         checks = [
             {
                 name = "repository";
-                frequency = "always";
+                frequency = "1 week";
             }
             {
                 name = "archives";
-                frequency = "always";
+                frequency = "1 week";
             }
             {
                 name = "extract";
-                frequency = "1 day";
+                frequency = "1 month";
             }
             {
                 name = "data";
