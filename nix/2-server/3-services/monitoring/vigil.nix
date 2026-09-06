@@ -2215,7 +2215,7 @@ in
                                             agent = "thor";
                                         }
                                         {
-                                            # The one host where systemd-oomd is load-bearing rather than a backstop, and a kill is invisible to the usage monitor beside it.
+                                            # An OOM kill is an event rather than a level, so the usage monitor beside this one reads normal again before it can see it.
                                             name = "OOM Kills";
                                             id = "thor-oom";
                                             type = "oom";
