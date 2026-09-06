@@ -137,6 +137,13 @@
                 MemoryHigh = "160M";
                 MemoryMax = "256M";
             };
+
+            # Go grows the heap until the GC decides otherwise and spawns a thread per blocking syscall, so on a slow USB pool it reaches 49 threads on
+            # four cores and a heap the cgroup then has to reclaim. GOMEMLIMIT makes the collector aim below MemoryHigh instead of being pushed under it.
+            systemd.services.syncthing.environment = {
+                GOMEMLIMIT = "140MiB";
+                GOMAXPROCS = "2"; # Matches the 50% CPUQuota above; more only buys threads that wait on the disk
+            };
         }
     ];
 }
