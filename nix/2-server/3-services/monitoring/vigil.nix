@@ -3,9 +3,9 @@
 # Web-based network and systems monitor. Runs on Heimdall and collects metrics,
 # service status and backup health from the TechNet hosts.
 #
-# Heimdall, Odin and Ragnarok are reached through the Vigil agent: each runs
-# `vigil-agent` (nix/0-common/3-services/vigil-agent.nix), which dials out to
-# this host and holds one WebSocket open. Monitors name their host with
+# Heimdall, Odin, Ragnarok and Thor are reached through the Vigil agent: each
+# runs `vigil-agent` (nix/0-common/3-services/vigil-agent.nix), which dials out
+# to this host and holds one WebSocket open. Monitors name their host with
 # `agent = "<id>"`. Nothing about a monitor's commands changes — the agent runs
 # the same shell the SSH transport carried — but there is no per-host session
 # ceiling, no SSH channel per command, and monitors that subscribe to an event
@@ -17,7 +17,7 @@
 # no longer see is the wrong order of operations. Drop it, and the
 # `vigil-access` account, once that is settled.
 #
-# Devices with nothing to run — the IoT sensors, lights and Thor — are still
+# Devices with nothing to run — the IoT sensors, lights and ThorX — are still
 # reached agentlessly by ICMP/HTTP/DNS, which needs nothing installed on them.
 # That is the case the agent does not replace and is why SSH and the other
 # agentless transports remain first-class.
@@ -122,7 +122,7 @@ in
     };
 
     # Shared token each agent authenticates with, one file per agent. Heimdall
-    # is a recipient of all three (it declares every agent below); each host is
+    # is a recipient of all four (it declares every agent below); each host is
     # a recipient only of its own, so no monitored host can impersonate
     # another's agent. Read at runtime via `token_file`, so the tokens never
     # enter the Nix store the way an inline `token` in `settings` would.
@@ -140,6 +140,12 @@ in
 
     sops.secrets.vigil_agent_token_ragnarok = {
         sopsFile = "${config.technet.secrets.commonPath}/vigil-agent-ragnarok.yaml";
+        key = "vigil_agent_token";
+        owner = "vigil";
+    };
+
+    sops.secrets.vigil_agent_token_thor = {
+        sopsFile = "${config.technet.secrets.commonPath}/vigil-agent-thor.yaml";
         key = "vigil_agent_token";
         owner = "vigil";
     };
@@ -197,6 +203,11 @@ in
                     host = "ragnarok.technet";
                     token_file = config.sops.secrets.vigil_agent_token_ragnarok.path;
                 }
+                {
+                    id = "thor";
+                    host = "thor.technet";
+                    token_file = config.sops.secrets.vigil_agent_token_thor.path;
+                }
             ];
 
             # Fallback only — no monitor sets `ssh_config` any more, so nothing
@@ -234,7 +245,7 @@ in
                         }
                         {
                             name = "System Stats";
-                            # Explicit id: a group id defaults to its name and every host has this group, so all three would share one key.
+                            # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
                             id = "ragnarok-metrics";
                             type = "group";
                             children = [
@@ -440,7 +451,7 @@ in
                         }
                         {
                             name = "Running Services";
-                            # Explicit id: a group id defaults to its name and every host has this group, so all three would share one key.
+                            # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
                             id = "ragnarok-services";
                             type = "group";
                             children = [
@@ -490,7 +501,7 @@ in
                         }
                         {
                             name = "System Stats";
-                            # Explicit id: a group id defaults to its name and every host has this group, so all three would share one key.
+                            # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
                             id = "heimdall-metrics";
                             type = "group";
                             children = [
@@ -714,7 +725,7 @@ in
                         }
                         {
                             name = "Running Services";
-                            # Explicit id: a group id defaults to its name and every host has this group, so all three would share one key.
+                            # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
                             id = "heimdall-services";
                             type = "group";
                             children = [
@@ -1511,7 +1522,7 @@ in
                         }
                         {
                             name = "System Stats";
-                            # Explicit id: a group id defaults to its name and every host has this group, so all three would share one key.
+                            # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
                             id = "odin-metrics";
                             type = "group";
                             children = [
@@ -1743,7 +1754,7 @@ in
                         }
                         {
                             name = "Running Services";
-                            # Explicit id: a group id defaults to its name and every host has this group, so all three would share one key.
+                            # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
                             id = "odin-services";
                             type = "group";
                             children = [
@@ -2103,6 +2114,368 @@ in
                             name = "Availability";
                             id = "thor";
                             type = "uptime";
+                            target_host = "thor.technet";
+                        }
+                        {
+                            name = "System Stats";
+                            # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
+                            id = "thor-metrics";
+                            type = "group";
+                            children = [
+                                {
+                                    name = "Compute";
+                                    id = "thor-compute";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "CPU";
+                                            id = "thor-cpu";
+                                            type = "cpu";
+                                            interval = "1m";
+                                            warning = 70;
+                                            threshold = 85;
+                                            agent = "thor";
+                                        }
+                                        {
+                                            # Deliberately thresholdless: four 1.15GHz A53s spend the weekly nixos-upgrade above capacity, so a load alarm here would only ever be noise.
+                                            name = "Load";
+                                            id = "thor-load";
+                                            type = "load";
+                                            interval = "1m";
+                                            agent = "thor";
+                                        }
+                                        {
+                                            # The kernel's own trip points, with the passive one raised to 80C by 5-phone/1-system/performance.nix: warn where the A64 throttles, fail where it calls itself hot.
+                                            name = "Temperature";
+                                            id = "thor-temperature";
+                                            type = "temperature";
+                                            interval = "1m";
+                                            warning = 80;
+                                            threshold = 90;
+                                            agent = "thor";
+                                        }
+                                        {
+                                            # 35k/s measured on the SD card during a nixos-upgrade, so the fleet's 20k/50k would sit warning through every one of them.
+                                            name = "Interrupts";
+                                            id = "thor-interrupts";
+                                            type = "interrupts";
+                                            interval = "1m";
+                                            warning = 50000;
+                                            threshold = 100000;
+                                            agent = "thor";
+                                        }
+                                        {
+                                            # ps over 600 processes is the most expensive sample the agent takes here, so it runs at a tenth of Odin's rate.
+                                            name = "Processes";
+                                            id = "thor-processes";
+                                            type = "processes";
+                                            interval = "5m";
+                                            max_processes = 20;
+                                            grid_col_span = 2;
+                                            agent = "thor";
+                                        }
+                                    ];
+                                }
+                                {
+                                    # The signal no other host has: a phone that is merely low on charge is on its way to being a phone that is not there.
+                                    name = "Power";
+                                    id = "thor-power";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            # Thresholds are upower's own percentageLow and percentageCritical from 5-phone/1-system/power.nix, so Vigil warns exactly when the phone does.
+                                            name = "Battery";
+                                            id = "thor-battery";
+                                            type = "command";
+                                            interval = "5m";
+                                            command = "cat /sys/class/power_supply/axp20x-battery/capacity";
+                                            pattern = "([0-9]+)";
+                                            invert = true;                                  # A battery is worse the lower it reads, which reverses the usual ranking
+                                            warning = 20;
+                                            threshold = 10;
+                                            value_label = "CHARGE";
+                                            value_unit = "%";
+                                            agent = "thor";
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Memory";
+                                    id = "thor-memory";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            # 3GB behind a 1.5GB ARC ceiling: unavailable memory sits high here by design, so the fleet's 90/95 would warn on a healthy phone.
+                                            name = "Usage";
+                                            id = "thor-memory-usage";
+                                            type = "memory";
+                                            interval = "1m";
+                                            warning = 93;
+                                            threshold = 97;
+                                            agent = "thor";
+                                        }
+                                        {
+                                            # The one host where systemd-oomd is load-bearing rather than a backstop, and a kill is invisible to the usage monitor beside it.
+                                            name = "OOM Kills";
+                                            id = "thor-oom";
+                                            type = "oom";
+                                            interval = "1m";
+                                            agent = "thor";
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Storage";
+                                    id = "thor-storage";
+                                    type = "group";
+                                    # No SMART pair here: the eMMC and the SD card expose none, which is why 5-phone/1-system/hardware-configuration.nix disables smartd outright.
+                                    children = [
+                                        {
+                                            name = "Disk I/O";
+                                            id = "thor-disk-io";
+                                            type = "disk_io";
+                                            interval = "1m";
+                                            agent = "thor";
+                                        }
+                                        {
+                                            name = "ZFS";
+                                            id = "thor-zfs";
+                                            type = "zfs";
+                                            interval = "1h";
+                                            warning = 90;
+                                            threshold = 96;
+                                            agent = "thor";
+                                        }
+                                        {
+                                            name = "/";
+                                            id = "thor-disk-root";
+                                            type = "disk_space";
+                                            path = "/";
+                                            threshold = 90;
+                                            interval = "10m";
+                                            agent = "thor";
+                                        }
+                                        {
+                                            # The 28GB eMMC pool's real failure mode, and the one no other host needs pinned: every generation lands in this dataset.
+                                            name = "/nix";
+                                            id = "thor-disk-nix";
+                                            type = "disk_space";
+                                            path = "/nix";
+                                            threshold = 90;
+                                            interval = "10m";
+                                            agent = "thor";
+                                        }
+                                        {
+                                            name = "/Storage";
+                                            id = "thor-disk-storage";
+                                            type = "disk_space";
+                                            path = "/Storage";
+                                            threshold = 90;
+                                            interval = "10m";
+                                            agent = "thor";
+                                        }
+                                        {
+                                            name = "/boot";
+                                            id = "thor-disk-boot";
+                                            type = "disk_space";
+                                            path = "/boot";
+                                            threshold = 90;
+                                            interval = "10m";
+                                            agent = "thor";
+                                        }
+                                        {
+                                            # Auto-discovers every mount, so it also covers the removable card going read-only, which df alone reports as healthy usage forever.
+                                            name = "Filesystems";
+                                            id = "thor-filesystems";
+                                            type = "filesystems";
+                                            interval = "10m";
+                                            warning = 90;
+                                            threshold = 96;
+                                            inode_warning = 85;
+                                            inode_threshold = 95;
+                                            grid_col_span = 2;
+                                            agent = "thor";
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Network";
+                                    id = "thor-network";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Throughput";
+                                            id = "thor-throughput";
+                                            type = "throughput";
+                                            interval = "1m";
+                                            agent = "thor";
+                                        }
+                                        {
+                                            # A phone holds a handful of sockets, not a server's hundreds, so the counts that mean something here are far lower than Odin's.
+                                            name = "Connections";
+                                            id = "thor-connections";
+                                            type = "connections";
+                                            interval = "1m";
+                                            warning = 200;
+                                            threshold = 500;
+                                            agent = "thor";
+                                        }
+                                        {
+                                            name = "WiFi";
+                                            id = "thor-wifi";
+                                            type = "wifi";
+                                            interval = "1m";
+                                            quality_warning = 40;
+                                            quality_threshold = 20;
+                                            agent = "thor";
+                                        }
+                                    ];
+                                }
+                            ];
+                        }
+                        {
+                            name = "Running Services";
+                            # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
+                            id = "thor-services";
+                            type = "group";
+                            children = [
+                                {
+                                    name = "NixOS Upgrade";
+                                    id = "thor-svc-nixos-upgrade";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Service";
+                                            id = "thor-nixos-upgrade";
+                                            type = "systemd_service";
+                                            interval = "1h";
+                                            service_name = "nixos-upgrade.service";
+                                            max_age = "1w";
+                                            agent = "thor";
+                                        }
+                                        {
+                                            name = "Deployment";
+                                            id = "thor-nixos-deployment";
+                                            type = "nixos_upgrade";
+                                            interval = "5m";
+                                            flake = upgradeFlake;
+                                            configuration = "Thor";
+                                            eval_agent = "heimdall";                        # Evaluating the flake on four 1.15GHz A53s takes the phone out of service for the duration
+                                            eval_interval = "6h";
+                                            rebuild_args = [ "--no-write-lock-file" "-L" ];
+                                            agent = "thor";
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Phosh";
+                                    id = "thor-svc-phosh";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            # A switch stops phosh and does not reliably bring it back, which leaves the phone dark with nothing on the device itself left to say so.
+                                            name = "Service";
+                                            id = "thor-phosh";
+                                            type = "systemd_service";
+                                            interval = "1m";
+                                            service_name = "phosh.service";
+                                            agent = "thor";
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Networking";
+                                    id = "thor-svc-networking";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Service";
+                                            id = "thor-networking";
+                                            type = "systemd_service";
+                                            interval = "1m";
+                                            service_name = "NetworkManager.service";
+                                            agent = "thor";
+                                        }
+                                        {
+                                            # The tunnel carries Thor's DNS and, on mobile data, its whole default route; NetworkManager cannot see a WireGuard session die, so this watchdog is what does.
+                                            name = "WireGuard Watchdog";
+                                            id = "thor-wireguard-watchdog";
+                                            type = "systemd_service";
+                                            interval = "1m";
+                                            service_name = "wireguard-watchdog.service";
+                                            agent = "thor";
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Modem";
+                                    id = "thor-svc-modem";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Service";
+                                            id = "thor-modemmanager";
+                                            type = "systemd_service";
+                                            interval = "1m";
+                                            service_name = "ModemManager.service";
+                                            agent = "thor";
+                                        }
+                                        {
+                                            # eg25-manager owns the EG25-G's power and reset lines, so ModemManager finding no modem at all starts here rather than there.
+                                            name = "Power Control";
+                                            id = "thor-eg25-manager";
+                                            type = "systemd_service";
+                                            interval = "1m";
+                                            service_name = "eg25-manager.service";
+                                            agent = "thor";
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Bluetooth";
+                                    id = "thor-svc-bluetooth";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Service";
+                                            id = "thor-bluetooth";
+                                            type = "systemd_service";
+                                            interval = "1m";
+                                            service_name = "bluetooth.service";
+                                            agent = "thor";
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Charging";
+                                    id = "thor-svc-charging";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            # chargectl holds the cell in the 75-80% maintain band; with it stopped the phone charges to full and stays there, which is the slow way to lose a battery.
+                                            name = "Service";
+                                            id = "thor-chargectl";
+                                            type = "systemd_service";
+                                            interval = "1m";
+                                            service_name = "chargectl.service";
+                                            agent = "thor";
+                                        }
+                                    ];
+                                }
+                            ];
+                        }
+                    ];
+                }
+                {
+                    # The Android phone, configured on the device rather than from here, so reachability is the whole of what Vigil can see.
+                    name = "ThorX";
+                    id = "thorx-host";
+                    type = "group";
+                    children = [
+                        {
+                            name = "Availability";
+                            id = "thorx";
+                            type = "uptime";
                             target_host = "thorx.technet";
                         }
                     ];
@@ -2190,10 +2563,10 @@ in
         };
     };
 
-    # The agents' endpoint is served on the dashboard's own port, so Odin and
-    # Ragnarok need to reach 9611 — over WireGuard only, the same mesh their SSH
-    # collection already used. The port stays closed on every other interface;
-    # browsers keep using the TLS vhost below.
+    # The agents' endpoint is served on the dashboard's own port, so Odin,
+    # Ragnarok and Thor need to reach 9611 — over WireGuard only, the same mesh
+    # their SSH collection already used. The port stays closed on every other
+    # interface; browsers keep using the TLS vhost below.
     networking.firewall.interfaces."wireguard0".allowedTCPPorts = [ 9611 ];
 
     nginx-vhosts.vigil = {

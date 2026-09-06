@@ -17,8 +17,7 @@
     ...
 }:
 let
-    # Thor is a phone: Vigil only pings it, so it has no commands to run and no agent token.
-    agentHosts = [ "Heimdall" "Odin" "Ragnarok" ];
+    agentHosts = [ "Heimdall" "Odin" "Ragnarok" "Thor" ];
     host = config.networking.hostName;
     agentId = lib.toLower host;
 

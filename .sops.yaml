@@ -23,6 +23,12 @@ creation_rules:
                 - *user_beatlink
                 - *host_heimdall
                 - *host_ragnarok
+    - path_regex: secrets/0-common/vigil-agent-thor\.yaml$
+      key_groups:
+          - age:
+                - *user_beatlink
+                - *host_heimdall
+                - *host_thor
     - path_regex: secrets/0-common/.*
       key_groups:
           - age:
