@@ -32,6 +32,12 @@
             # failed". Raised well above the current worst case (Heimdall's
             # monitor count) with headroom for future monitors.
             MaxSessions = 50;
+
+            # Unset, sshd never probes a peer, so a session whose client is gone lives forever. Vigil kills a borg monitor at its timeout and the
+            # `borg serve` it started keeps running and holding its memory; on Ragnarok's 2GB those orphans accumulated past the borg slice's
+            # MemoryHigh and squeezed the ARC. A live client answers these probes, so an in-flight backup is never cut short.
+            ClientAliveInterval = 60;
+            ClientAliveCountMax = 5;
         };
         hostKeys = [
             {
