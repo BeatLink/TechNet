@@ -1480,6 +1480,8 @@ in
                                             timeout = "5m";
                                             max_age = "1d";
                                             repo = "/Storage/Files/Backups/Server/Borgmatic";
+                                            # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
+                                            cache_dir = "/var/cache/vigil-borg";
                                             require_sudo = true;
                                             # Unlocks this repo with borgmatic's own passphrase, read on the
                                             # host borg runs on. Vorta and borgmatic use different
@@ -1520,6 +1522,8 @@ in
                                             timeout = "30m";
                                             max_age = "1d";
                                             repo = "ssh://borg@ragnarok.technet/Storage/Backups/Server/Borgmatic";
+                                            # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
+                                            cache_dir = "/var/cache/vigil-borg";
                                             require_sudo = true;
                                             # Unlocks this repo with borgmatic's own passphrase, read on the
                                             # host borg runs on. Vorta and borgmatic use different
@@ -1910,6 +1914,8 @@ in
                                             timeout = "5m";
                                             max_age = "1d";
                                             repo = "/Storage/Files/Backups/Laptop/Vorta";
+                                            # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
+                                            cache_dir = "/var/cache/vigil-borg";
                                             require_sudo = true;
                                             # Unlocks this repo with Vorta's own passphrase, read on the
                                             # host borg runs on. Vorta and borgmatic use different
@@ -1950,6 +1956,8 @@ in
                                             timeout = "30m";
                                             max_age = "1d";
                                             repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Vorta";
+                                            # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
+                                            cache_dir = "/var/cache/vigil-borg";
                                             require_sudo = true;
                                             # Unlocks this repo with Vorta's own passphrase, read on the
                                             # host borg runs on. Vorta and borgmatic use different
@@ -1998,6 +2006,8 @@ in
                                             timeout = "30m";
                                             max_age = "1d";
                                             repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Vorta";
+                                            # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
+                                            cache_dir = "/var/cache/vigil-borg";
                                             require_sudo = true;
                                             # Unlocks this repo with Vorta's own passphrase, read on the
                                             # host borg runs on. Vorta and borgmatic use different
@@ -2054,6 +2064,8 @@ in
                                             timeout = "5m";
                                             max_age = "1d";
                                             repo = "/Storage/Files/Backups/Laptop/Borgmatic";
+                                            # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
+                                            cache_dir = "/var/cache/vigil-borg";
                                             require_sudo = true;
                                             # Unlocks this repo with borgmatic's own passphrase, read on the
                                             # host borg runs on. Vorta and borgmatic use different
@@ -2091,6 +2103,8 @@ in
                                             timeout = "30m";
                                             max_age = "1d";
                                             repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Borgmatic";
+                                            # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
+                                            cache_dir = "/var/cache/vigil-borg";
                                             require_sudo = true;
                                             # Unlocks this repo with borgmatic's own passphrase, read on the
                                             # host borg runs on. Vorta and borgmatic use different
@@ -2134,6 +2148,8 @@ in
                                             timeout = "30m";
                                             max_age = "1d";
                                             repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Borgmatic";
+                                            # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
+                                            cache_dir = "/var/cache/vigil-borg";
                                             require_sudo = true;
                                             # Unlocks this repo with borgmatic's own passphrase, read on the
                                             # host borg runs on. Vorta and borgmatic use different

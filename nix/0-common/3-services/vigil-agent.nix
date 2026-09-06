@@ -65,7 +65,13 @@ in
             environment.HOME = "/var/lib/vigil-agent";                     # nix and the detached job workdirs write under $HOME; the default /var/empty is immutable
             serviceConfig = {
                 StateDirectory = "vigil-agent";
+                CacheDirectory = "vigil-borg";                              # Backs the borg monitors' cache_dir; without it each poll rebuilds the repo's chunks cache under mktemp and discards it
                 ProtectHome = lib.mkForce false;                            # true hides /home from borg source paths and makes /root read-only for the rebuild's nix cache
+
+                # The borg monitors run under sudo inside this cgroup, so a ceiling here covers them; Nice alone caps nothing on an otherwise idle host.
+                Nice = 10;
+                CPUWeight = 40;
+                CPUQuota = "200%";
             };
         };
     };
