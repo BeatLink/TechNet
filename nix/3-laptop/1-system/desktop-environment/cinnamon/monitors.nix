@@ -1,6 +1,7 @@
 # Monitors ###########################################################################################################################################
 #
 # Pins the two head layout that Cinnamon otherwise re-derives on every boot, since the rollback wipes this file.
+# The connector names are xf86-video-amdgpu's, which drives screen 0 while videoDrivers is [ "nvidia" ]; modesetting would call these eDP-1 and HDMI-1.
 #
 
 { ... }:
@@ -10,7 +11,7 @@
         text = ''
             <monitors version="2">
               <configuration>
-                <!-- eDP-1 comes first because muffin numbers monitors in file order, and the dconf panels sit on monitor 0 -->
+                <!-- eDP comes first because muffin numbers monitors in file order, and the dconf panels sit on monitor 0 -->
                 <logicalmonitor>
                   <x>0</x>
                   <y>1080</y>
@@ -18,7 +19,7 @@
                   <primary>yes</primary>
                   <monitor>
                     <monitorspec>
-                      <connector>eDP-1</connector>
+                      <connector>eDP</connector>
                       <vendor>LEN</vendor>
                       <product>0x9059</product>
                       <serial>0x00000000</serial>
@@ -36,7 +37,7 @@
                   <scale>1</scale>
                   <monitor>
                     <monitorspec>
-                      <connector>HDMI-1</connector>
+                      <connector>HDMI-A-0</connector>
                       <vendor>GSM</vendor>
                       <product>LG FULL HD</product>
                       <serial>0x00000000</serial>
@@ -58,7 +59,7 @@
                   <primary>yes</primary>
                   <monitor>
                     <monitorspec>
-                      <connector>eDP-1</connector>
+                      <connector>eDP</connector>
                       <vendor>LEN</vendor>
                       <product>0x9059</product>
                       <serial>0x00000000</serial>

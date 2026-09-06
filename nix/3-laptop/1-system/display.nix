@@ -14,6 +14,7 @@
 
         # NVIDIA dGPU ################################################################################################################################
         {
+            services.xserver.videoDrivers = [ "nvidia" ]; # Keep explicit: nixos-hardware's gpu/amd and gpu/nvidia both mkDefault this, so dropping it merges "modesetting" back in, which claims the dGPU and kills the NVIDIA-G0 offload provider
             hardware.nvidia = {
                 dynamicBoost.enable = true;
                 powerManagement = {
