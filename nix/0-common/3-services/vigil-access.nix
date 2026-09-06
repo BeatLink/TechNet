@@ -14,6 +14,9 @@
 let
     # sudoers ends a command spec at an unescaped colon.
     upgradeFlake = builtins.replaceStrings [ ":" ] [ "\\:" ] config.system.autoUpgrade.flake;
+
+    # The scheduled collection's own arguments, so Vigil's button runs the run the timer runs.
+    gcOptions = config.nix.gc.options;
 in
 {
     config = lib.mkMerge [
@@ -66,6 +69,8 @@ in
                         { command = "/run/current-system/sw/bin/borg *"; options = [ "NOPASSWD" "SETENV" ]; }
                         # Vigil's nixos_upgrade action, matched argv for argv: changing the monitor's rebuild_args stops sudo matching this
                         { command = "/run/current-system/sw/bin/nixos-rebuild switch --flake ${upgradeFlake} --no-write-lock-file -L --refresh"; options = [ "NOPASSWD" ]; }
+                        # Vigil's nix_gc action, matched the same way: it collects with nix.gc.options and nothing else
+                        { command = "/run/current-system/sw/bin/nix-collect-garbage ${gcOptions}"; options = [ "NOPASSWD" ]; }
                     ];
                 }
             ];

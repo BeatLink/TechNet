@@ -46,6 +46,14 @@
 # delivery probe, Radicale's WebDAV request, Pi-hole's resolution — so a unit
 # that is up but not working reads as a failure rather than averaging away.
 #
+# `Garbage Collection` is the one such group with no separate unit check. The
+# `nix_gc` monitor already reads nix-gc.service's result and nix-gc.timer's
+# schedule itself, and dates the last collection from the journal — which a
+# `systemd_service` in oneshot mode cannot do, because systemd drops an
+# inactive unit's own timestamps across a re-exec and every host here shows
+# them empty. Pairing the two would mean a second monitor reporting a run that
+# succeeded as one that never happened.
+#
 # The lights, sockets and sensors are not TechNet hosts and have no domains, so
 # they stay in one top-level `IoT Sensors` group of reachability checks.
 #
@@ -90,10 +98,14 @@
 # Scheduling is deliberately not represented: these backups are triggered
 # manually from the Vigil UI, while Vorta/borgmatic keep their own schedules.
 #
-{ config, inputs, ... }:
+{ config, inputs, lib, ... }:
 let
     # Every host upgrades from the same flake, so Heimdall's own value is every monitor's.
     upgradeFlake = config.system.autoUpgrade.flake;
+
+    # Likewise for garbage collection: one common module sets nix.gc.options fleet-wide, so the button
+    # on any host's monitor runs the same collection that host's weekly timer runs.
+    gcArgs = builtins.filter (a: a != "") (lib.splitString " " config.nix.gc.options);
 in
 {
     imports = [ inputs.vigil.nixosModules.default ];
@@ -483,6 +495,25 @@ in
                                         }
                                     ];
                                 }
+                                {
+                                    name = "Garbage Collection";
+                                    id = "ragnarok-svc-nix-gc";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Collection";
+                                            id = "ragnarok-nix-gc";
+                                            type = "nix_gc";
+                                            interval = "1h";
+                                            max_age = "2w";                             # nix.gc.dates is weekly, so this tolerates one missed run
+                                            warning = 90;                               # Same policy as this host's Filesystems monitor, so the store's fill alarms once rather than twice
+                                            threshold = 96;
+                                            max_generation_age = "30d";                 # --delete-older-than 7d, run weekly, should never leave one this old
+                                            gc_args = gcArgs;
+                                            agent = "ragnarok";
+                                        }
+                                    ];
+                                }
                             ];
                         }
                     ];
@@ -798,6 +829,25 @@ in
                                             flake = upgradeFlake;
                                             eval_interval = "6h";
                                             rebuild_args = [ "--no-write-lock-file" "-L" ];
+                                            agent = "heimdall";
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Garbage Collection";
+                                    id = "heimdall-svc-nix-gc";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Collection";
+                                            id = "heimdall-nix-gc";
+                                            type = "nix_gc";
+                                            interval = "1h";
+                                            max_age = "2w";                             # nix.gc.dates is weekly, so this tolerates one missed run
+                                            warning = 90;                               # Same policy as this host's Filesystems monitor, so the store's fill alarms once rather than twice
+                                            threshold = 96;
+                                            max_generation_age = "30d";                 # --delete-older-than 7d, run weekly, should never leave one this old
+                                            gc_args = gcArgs;
                                             agent = "heimdall";
                                         }
                                     ];
@@ -1785,6 +1835,25 @@ in
                                     ];
                                 }
                                 {
+                                    name = "Garbage Collection";
+                                    id = "odin-svc-nix-gc";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Collection";
+                                            id = "odin-nix-gc";
+                                            type = "nix_gc";
+                                            interval = "1h";
+                                            max_age = "2w";                             # nix.gc.dates is weekly, so this tolerates one missed run
+                                            warning = 90;                               # Same policy as this host's Filesystems monitor, so the store's fill alarms once rather than twice
+                                            threshold = 96;
+                                            max_generation_age = "30d";                 # --delete-older-than 7d, run weekly, should never leave one this old
+                                            gc_args = gcArgs;
+                                            agent = "odin";
+                                        }
+                                    ];
+                                }
+                                {
                                     name = "Networking";
                                     id = "odin-svc-networking";
                                     type = "group";
@@ -2358,6 +2427,25 @@ in
                                             eval_agent = "heimdall";                        # Evaluating the flake on four 1.15GHz A53s takes the phone out of service for the duration
                                             eval_interval = "6h";
                                             rebuild_args = [ "--no-write-lock-file" "-L" ];
+                                            agent = "thor";
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Garbage Collection";
+                                    id = "thor-svc-nix-gc";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Collection";
+                                            id = "thor-nix-gc";
+                                            type = "nix_gc";
+                                            interval = "1h";
+                                            max_age = "2w";                             # nix.gc.dates is weekly, so this tolerates one missed run
+                                            warning = 90;                               # Same policy as this host's Filesystems monitor, so the store's fill alarms once rather than twice
+                                            threshold = 96;
+                                            max_generation_age = "30d";                 # --delete-older-than 7d, run weekly, should never leave one this old
+                                            gc_args = gcArgs;
                                             agent = "thor";
                                         }
                                     ];
