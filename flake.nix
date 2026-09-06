@@ -141,6 +141,13 @@
             nixos-hardware,
             ...
         }:
+        let
+            lintSystems = [
+                "x86_64-linux"
+                "aarch64-linux"
+            ];
+            forEachSystem = f: nixpkgs.lib.genAttrs lintSystems (system: f nixpkgs.legacyPackages.${system});
+        in
         {
             nixosConfigurations = {
                 Ragnarok = nixpkgs.lib.nixosSystem {
@@ -217,5 +224,22 @@
                     ];
                 };
             };
+
+            # `nix run .#lint` warns about options this repo sets to the value they already carry by default.
+            apps = forEachSystem (pkgs: {
+                lint = {
+                    type = "app";
+                    program = nixpkgs.lib.getExe (
+                        pkgs.writeShellApplication {
+                            name = "technet-lint";
+                            runtimeInputs = [
+                                pkgs.git
+                                pkgs.jq
+                            ];
+                            text = builtins.readFile ./lint/report.sh;
+                        }
+                    );
+                };
+            });
         };
 }

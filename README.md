@@ -8,12 +8,12 @@ The TechNet is my personal network of computing devices, all connected via a Wir
 
 Configured by this repo, one flake output each:
 
-| Host | Role | Platform | Modules |
-| --- | --- | --- | --- |
-| [Heimdall](docs/heimdall.md) | Server — WireGuard hub, DNS, services, binary cache | `x86_64-linux` | [`2-server`](nix/2-server) |
-| [Odin](docs/odin.md) | Laptop — workstation, deploy host, tang server | `x86_64-linux` | [`3-laptop`](nix/3-laptop) |
-| [Ragnarok](docs/ragnarok.md) | Backup server — Rock64 SBC, off site | `aarch64-linux` | [`1-backup-server`](nix/1-backup-server) |
-| [Thor](docs/thor.md) | PinePhone | `aarch64-linux` | [`5-phone`](nix/5-phone) |
+| Host                        | Role                                                 | Platform          | Modules                                   |
+| --------------------------- | ---------------------------------------------------- | ----------------- | ----------------------------------------- |
+| [Heimdall](docs/heimdall.md) | Server — WireGuard hub, DNS, services, binary cache | `x86_64-linux`  | [`2-server`](nix/2-server)               |
+| [Odin](docs/odin.md)         | Laptop — workstation, deploy host, tang server      | `x86_64-linux`  | [`3-laptop`](nix/3-laptop)               |
+| [Ragnarok](docs/ragnarok.md) | Backup server — Rock64 SBC, off site                | `aarch64-linux` | [`1-backup-server`](nix/1-backup-server) |
+| [Thor](docs/thor.md)         | PinePhone                                            | `aarch64-linux` | [`5-phone`](nix/5-phone)                 |
 
 Every host also imports [`0-common`](nix/0-common).
 
@@ -33,6 +33,14 @@ On the network, but not configured from here:
 Off the network entirely: a tech kit of computer repair tools, peripherals and
 accessories.
 
+## Linting
+
+`nix run .#lint` scans every host for options this repo sets to a value the
+option already carries by default, and warns with the file and line of each
+one. Pass host names to narrow it, `--fail` to make findings an error in CI,
+and list anything deliberate in [`lint/allowed-defaults.nix`](lint/allowed-defaults.nix)
+to silence it.
+
 ## Documentation
 
 - [Architecture](docs/architecture.md) — filesystem paradigm and network
@@ -42,4 +50,3 @@ accessories.
 - [Thor — Firefox tuning](docs/thor-firefox.md)
 - [Thor — waypipe apps](docs/thor-waypipe-apps.md) — which of Odin's
   applications are worth a launcher on the phone, and why
-- [TODO](TODO.md) — outstanding work, most blocking first
