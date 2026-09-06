@@ -126,24 +126,23 @@
         # This host exists to receive backups, so syncing yields to them.
         {
             systemd.services.syncthing.serviceConfig = {
+                # Contention-only, deliberately: Nice, the weights and the idle I/O class cost nothing while the board is quiet and yield the moment
+                # a backup wants the CPU. A CPUQuota was here and had to go -- half a core throttled syncthing 32593 times in under an hour, and a
+                # TLS handshake that cannot be scheduled inside the peer's timeout drops as EOF, so the mesh lost its connections to this host.
                 Nice = 15;
                 IOSchedulingClass = "idle"; # ZFS issues pool I/O from its own threads, so the I/O priorities only reach what Syncthing does off-pool
                 IOWeight = 30;
                 CPUWeight = 30;
-                CPUQuota = "50%"; # The only absolute ceiling here; on an otherwise idle board Nice and CPUWeight win every contest and cap nothing
 
-                # 1.9GB of RAM shared with a 512M ARC and the borg slice, so syncing gets a budget rather than whatever is left; a restart after an
-                # OOM kill costs only a rescan, where the same kill inside borg would leave a repo locked.
-                MemoryHigh = "160M";
-                MemoryMax = "256M";
             };
 
-            # Go grows the heap until the GC decides otherwise and spawns a thread per blocking syscall, so on a slow USB pool it reaches 49 threads on
-            # four cores and a heap the cgroup then has to reclaim. GOMEMLIMIT makes the collector aim below MemoryHigh instead of being pushed under it.
-            systemd.services.syncthing.environment = {
-                GOMEMLIMIT = "140MiB";
-                GOMAXPROCS = "2"; # Matches the 50% CPUQuota above; more only buys threads that wait on the disk
-            };
+            # A ceiling the kernel enforces is the wrong tool here. MemoryHigh at 160M held syncthing at its watermark and reclaimed against it 18
+            # times while 576M of the host sat free, and a TLS handshake starved of either CPU or memory drops as EOF -- Heimdall lost the mesh
+            # connection to this host entirely until both ceilings came off, and it re-established within seconds of that.
+            #
+            # GOMEMLIMIT is the exception worth keeping: it is a target the collector aims at rather than a wall, so a heap that genuinely needs more
+            # gets it and only pays extra GC. 384MiB leaves room for a full index rebuild of the backup tree, which 140MiB did not.
+            systemd.services.syncthing.environment.GOMEMLIMIT = "384MiB";
         }
     ];
 }
