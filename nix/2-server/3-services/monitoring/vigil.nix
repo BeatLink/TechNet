@@ -280,8 +280,9 @@ in
                                             id = "ragnarok-load";
                                             type = "load";
                                             interval = "1m";
-                                            warning = 70;
-                                            threshold = 100;
+                                            # Load here counts uninterruptible sleep on a shingled USB drive, not CPU demand: four cores sit at 18-28 whenever a scan or a backup runs, with the CPU near idle. Percent of cores, so 300 is load 12 and 600 is load 24.
+                                            warning = 300;
+                                            threshold = 600;
                                             agent = "ragnarok";
                                         }
                                         {
@@ -348,10 +349,22 @@ in
                                     type = "group";
                                     children = [
                                         {
-                                            name = "Disk I/O";
+                                            # One monitor per drive, each pinned: unpinned, the plugin charts whichever disk is busiest across its two samples, which is the data drive
+                                            # every time and the root drive never. The names are the kernel's, the only thing /proc/diskstats carries, so a USB enumeration
+                                            # change would swap what these two report -- the models on the SMART monitor are what confirm which is which.
+                                            name = "Disk I/O (Data)";
                                             id = "ragnarok-disk-io";
                                             type = "disk_io";
                                             interval = "30s";
+                                            device = "sda"; # ST5000LM000, the shingled backup drive
+                                            agent = "ragnarok";
+                                        }
+                                        {
+                                            name = "Disk I/O (Root)";
+                                            id = "ragnarok-disk-io-root";
+                                            type = "disk_io";
+                                            interval = "30s";
+                                            device = "sdb"; # The SSD holding root, nix and swap
                                             agent = "ragnarok";
                                         }
                                         {
@@ -623,10 +636,29 @@ in
                                     type = "group";
                                     children = [
                                         {
-                                            name = "Disk I/O";
+                                            # One monitor per drive. Unpinned, the plugin charts whichever disk was busiest across its two samples, and the mirror's halves
+                                            # run within a kilobyte of each other, so the single monitor's identity flipped between them at random.
+                                            name = "Disk I/O (Data 1)";
                                             id = "heimdall-disk-io";
                                             type = "disk_io";
                                             interval = "30s";
+                                            device = "sda"; # TOSHIBA MQ04ABF100, one half of the data-pool mirror
+                                            agent = "heimdall";
+                                        }
+                                        {
+                                            name = "Disk I/O (Data 2)";
+                                            id = "heimdall-disk-io-data2";
+                                            type = "disk_io";
+                                            interval = "30s";
+                                            device = "sdb"; # The mirror's other half; a divergence between these two is the interesting signal
+                                            agent = "heimdall";
+                                        }
+                                        {
+                                            name = "Disk I/O (Root)";
+                                            id = "heimdall-disk-io-root";
+                                            type = "disk_io";
+                                            interval = "30s";
+                                            device = "sdc"; # Dogfish SSD, root-pool-Heimdall
                                             agent = "heimdall";
                                         }
                                         {
@@ -1684,10 +1716,20 @@ in
                                     type = "group";
                                     children = [
                                         {
-                                            name = "Disk I/O";
+                                            # Pinned so each drive has its own chart; the id stays on the root drive because that is the one auto-detect had been picking.
+                                            name = "Disk I/O (Root)";
                                             id = "odin-disk-io";
                                             type = "disk_io";
                                             interval = "30s";
+                                            device = "nvme1n1"; # WDC SN530, root-pool-Odin
+                                            agent = "odin";
+                                        }
+                                        {
+                                            name = "Disk I/O (Data)";
+                                            id = "odin-disk-io-data";
+                                            type = "disk_io";
+                                            interval = "30s";
+                                            device = "nvme0n1"; # Corsair MP600, data-pool-Odin
                                             agent = "odin";
                                         }
                                         {
@@ -2311,10 +2353,21 @@ in
                                     # No SMART pair here: the eMMC and the SD card expose none, which is why 5-phone/1-system/hardware-configuration.nix disables smartd outright.
                                     children = [
                                         {
-                                            name = "Disk I/O";
+                                            # Pinned like the other hosts; the id stays on the eMMC because that is the one auto-detect had been charting. mmcblk1 is absent:
+                                            # the numbering follows the controllers, not the slots, so the SD card is mmcblk0 and the internal eMMC is mmcblk2.
+                                            name = "Disk I/O (Root)";
                                             id = "thor-disk-io";
                                             type = "disk_io";
                                             interval = "1m";
+                                            device = "mmcblk2"; # 32GB eMMC, root-pool-Thor and /boot
+                                            agent = "thor";
+                                        }
+                                        {
+                                            name = "Disk I/O (Data)";
+                                            id = "thor-disk-io-data";
+                                            type = "disk_io";
+                                            interval = "1m";
+                                            device = "mmcblk0"; # 1TB SD card, data-pool-Thor
                                             agent = "thor";
                                         }
                                         {
