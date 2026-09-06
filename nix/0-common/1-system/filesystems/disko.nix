@@ -52,7 +52,7 @@ in
                     mountpoint = "/";
                     options = {
                         compression = "zstd";
-                        dedup = "on";
+                        # No dedup: nix store paths are unique by hash, so a dedup table costs RAM for nothing it can find, and every pool in the fleet runs without one
                         xattr = "sa";
                         acltype = "posix";
                         "com.sun:auto-snapshot" = "false";
