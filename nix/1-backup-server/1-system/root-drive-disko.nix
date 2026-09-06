@@ -14,6 +14,19 @@
             disko.devices.disk.root-drive.device = "/dev/disk/by-id/ata-SATA_SSD_22020812000605";
         }
 
+        # Swap Partition #############################################################################################################################
+        # The shared layout is the ESP then a pool sized to the remainder; disko places the ESP at priority 1000 and a 100% partition at 9001, so this sits between.
+        {
+            disko.devices.disk.root-drive.content.partitions.swap = {
+                priority = 2000;
+                size = "16G";
+                content = {
+                    type = "swap";
+                    randomEncryption = true; # A fresh dm-crypt key every boot: nothing to store or unlock, and the kernel line already carries nohibernate
+                };
+            };
+        }
+
         # Queue Tuning ###############################################################################################################################
         {
             # The JMS561U reports the SSD as rotational, so without this the kernel applies the readahead and seek heuristics meant for a spinning disk
