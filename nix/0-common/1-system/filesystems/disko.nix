@@ -42,6 +42,7 @@ in
             type = "zpool";
             options = {
                 autotrim = "on";
+                ashift = "12"; # Never auto: Ragnarok's SSD bridge reported 512-byte sectors at creation and 4096 afterwards, leaving the pool misaligned with no way back short of a rebuild
             };
             rootFsOptions = {
                 mountpoint = "none";
