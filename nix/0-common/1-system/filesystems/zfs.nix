@@ -26,9 +26,7 @@ in
         # Filesystem Maintenance #####################################################################################################################
         {
             services = {
-                fstrim.enable = true;
                 zfs = {
-                    trim.enable = true;
                     autoScrub.enable = true;
 
                     # Reads the com.sun:auto-snapshot property disko already sets; without this the property is inert and nothing is ever taken
@@ -36,9 +34,6 @@ in
                     autoSnapshot = {
                         enable = true;
                         frequent = lib.mkDefault 0; # These pools change in backup-sized bursts, not continuously, so quarter-hourly snapshots only add clutter
-                        hourly = lib.mkDefault 24;
-                        daily = lib.mkDefault 7;
-                        weekly = lib.mkDefault 4;
                         monthly = lib.mkDefault 6;
                     };
                 };
