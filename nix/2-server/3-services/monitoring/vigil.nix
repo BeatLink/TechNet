@@ -1976,11 +1976,6 @@ in
                                     type = "group";
                                     children = [
                                         {
-                                            # This repo does not exist on Odin yet: borgmatic has never completed
-                                            # a run there (its borg_repo_ssh_key fails to load — "error in
-                                            # libcrypto: unsupported"), so no repo was ever initialised. The path
-                                            # matches Odin's borgmatic config; the monitor stays red until that
-                                            # key is repaired and borgmatic runs once.
                                             name = "On Disk";
                                             id = "backup-laptop-borgmatic-on-disk";
                                             type = "borg";
