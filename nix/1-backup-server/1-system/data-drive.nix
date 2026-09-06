@@ -18,14 +18,17 @@ in
 
             # The shingled drive blocks past the 30s default while rewriting a band, and the reset the kernel then issues is what suspends the pool;
             # the drive feeds no entropy worth harvesting either. Setting a scheduler here is pointless: ZFS reopens the vdev with none.
+            # usb-storage caps a command at 120KB, so one 512KB aggregated read cost four round trips on a bridge that holds a single command; 1024 sectors matches zfs_vdev_aggregation_limit.
             services.udev.extraRules = lib.concatMapStringsSep "\n" (id: ''
                 ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${id}", ATTR{device/timeout}="180"
                 ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${id}", ATTR{queue/add_random}="0"
+                ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${id}", ATTR{device/max_sectors}="1024"
             '') bridges;
         }
 
         # Queue Depths ###############################################################################################################################
         # data-pool-Ragnarok is one shingled drive whose stalls these shallow queues keep short; a scrub queue deeper than one drove the UAS bridge into reset loops, so it stays at one.
+        # Prefetch reached 64MB per stream, and eight streams against a 512MB ARC evicted 87% of it unread; 16MB is what stays resident long enough to be used.
         {
             boot.extraModprobeConfig = ''
                 options zfs zfs_vdev_max_active=16
@@ -35,6 +38,7 @@ in
                 options zfs zfs_vdev_scrub_max_active=1
                 options zfs zfs_txg_timeout=15
                 options zfs zfs_vdev_aggregation_limit=524288
+                options zfs zfetch_max_distance=16777216
             '';
         }
 
