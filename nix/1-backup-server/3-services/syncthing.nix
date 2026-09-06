@@ -107,13 +107,17 @@
                 fsWatcherDelayS = 60;
                 hashers = 1;
                 copiers = 1;
+                pullerMaxPendingKiB = 16384;
+                scanProgressIntervalS = -1;
+                copyRangeMethod = "copy_file_range"; # Needs feature@block_cloning on the pool; falls back to standard copying without it
+                caseSensitiveFS = true; # Data loss if the pool is ever rebuilt with casesensitivity=insensitive
             };
 
             services.syncthing.settings = lib.recursiveUpdate config.syncthing-mesh.settings {
                 options = {
                     maxFolderConcurrency = 1;
                     maxConcurrentIncomingRequestKiB = 32768;
-                    progressUpdateIntervalS = 30;
+                    progressUpdateIntervalS = -1;
                 };
             };
         }

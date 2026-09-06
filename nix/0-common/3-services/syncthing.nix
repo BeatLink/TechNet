@@ -177,7 +177,7 @@ in
 
         devices = lib.mapAttrs (_: device: {
             inherit (device) id addresses;
-            numConnections = 8;
+            numConnections = 1;
         }) (lib.filterAttrs (name: _: name != cfg.self) devices);
 
         folders = lib.mapAttrs' (
