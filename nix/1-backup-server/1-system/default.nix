@@ -4,6 +4,7 @@
         ./boot.nix
         ./root-drive-disko.nix
         ./data-drive.nix
+        ./smart.nix
         ./software.nix
         ./networking.nix
         ./borg.nix
