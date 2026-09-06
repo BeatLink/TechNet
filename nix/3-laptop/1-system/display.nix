@@ -18,20 +18,19 @@
                 enable = true;
                 enable32Bit = true;
             };
-            hardware.amdgpu.initrd.enable = true;
         }
 
         # NVIDIA dGPU ################################################################################################################################
         {
+            services.xserver.videoDrivers = [
+                "nvidia"
+            ];
             hardware.nvidia = {
-                modesetting.enable = true;
-                dynamicBoost.enable = false;
+                dynamicBoost.enable = true;
                 powerManagement = {
                     enable = true;
                     finegrained = true;
                 };
-                open = true;
-                nvidiaSettings = true;
                 package = config.boot.kernelPackages.nvidiaPackages.production;
                 prime = {
                     amdgpuBusId = "PCI:6:0:0";
@@ -40,10 +39,6 @@
                     offload.enableOffloadCmd = true;
                 };
             };
-            services.xserver.videoDrivers = [
-                "modesetting" # Keep: without it the iGPU falls to xf86-video-amdgpu, whose output names (eDP, HDMI-A-0) differ from modesetting's and leave a black screen
-                "nvidia"
-            ];
         }
 
         # External Monitor ###########################################################################################################################
