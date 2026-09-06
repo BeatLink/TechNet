@@ -40,15 +40,6 @@ in
 
     security.pam.services.hyprlock = { }; # Allows hyprlock to authenticate and unlock the session
 
-    # Nvidia Optimus requires these to be set for Wayland clients to pick the correct backend, or Firefox
-    # ignores the hardware cursor. Toolkit backends are not handled here; ../wayland.nix covers every session.
-    environment.sessionVariables = {
-        LIBVA_DRIVER_NAME = "nvidia";
-        GBM_BACKEND = "nvidia-drm";
-        __GLX_VENDOR_LIBRARY_NAME = "nvidia";
-        MOZ_ENABLE_WAYLAND = "1";
-    };
-
     environment.systemPackages = with pkgs; [
         gnome-themes-extra
         libnotify
@@ -117,11 +108,19 @@ in
 
                     # Cinnamon uses a cursor-size of 5 in dconf, which is a Cinnamon specific scale rather than a
                     # pixel count. Hyprland takes pixels, so the equivalent default of 24 is used here.
+                    #
+                    # The Optimus variables belong to this session, not environment.sessionVariables, which is
+                    # system-wide: __GLX_VENDOR_LIBRARY_NAME set globally sends every GL client of every session,
+                    # Cinnamon and the LightDM greeter included, to the dGPU, and aborts the greeter under offload.
                     env = [
                         "XCURSOR_THEME,Bibata-Modern-Classic"
                         "XCURSOR_SIZE,24"
                         "HYPRCURSOR_THEME,Bibata-Modern-Classic"
                         "HYPRCURSOR_SIZE,24"
+                        "LIBVA_DRIVER_NAME,nvidia"
+                        "GBM_BACKEND,nvidia-drm"
+                        "__GLX_VENDOR_LIBRARY_NAME,nvidia"
+                        "MOZ_ENABLE_WAYLAND,1"
                     ];
 
                     general = {
