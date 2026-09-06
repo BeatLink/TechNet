@@ -131,6 +131,11 @@
                 IOWeight = 30;
                 CPUWeight = 30;
                 CPUQuota = "50%"; # The only absolute ceiling here; on an otherwise idle board Nice and CPUWeight win every contest and cap nothing
+
+                # 1.9GB of RAM shared with a 512M ARC and the borg slice, so syncing gets a budget rather than whatever is left; a restart after an
+                # OOM kill costs only a rescan, where the same kill inside borg would leave a repo locked.
+                MemoryHigh = "160M";
+                MemoryMax = "256M";
             };
         }
     ];

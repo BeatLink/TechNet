@@ -38,8 +38,8 @@
             users.users.borg.uid = 999; # Names the slice below; the upstream module leaves the uid to dynamic allocation
 
             systemd.slices."user-999".sliceConfig = {
-                MemoryHigh = "384M"; # Reclaims rather than kills, so a prune or check that needs the headroom still finishes
-                MemoryMax = "1G";
+                MemoryHigh = "256M"; # Reclaims rather than kills, so a prune or check that needs the headroom still finishes
+                MemoryMax = "512M"; # A backstop, kept well clear of High: borg killed mid-write leaves a repo needing break-lock, so reclaim must get first refusal
                 CPUQuota = "250%";
                 CPUWeight = 70;
                 TasksMax = 64;
