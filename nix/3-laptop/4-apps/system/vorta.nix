@@ -44,10 +44,24 @@
                         ".local/state/Vorta"
                     ];
                 };
-                file = {
-                    ".config/autostart/vorta.desktop".source =
-                        "${pkgs.vorta}/share/applications/com.borgbase.Vorta.desktop";
+            };
+
+            # A unit rather than an autostart .desktop, so borg inherits a cgroup with a ceiling; launched from the session scope it competed with the desktop unthrottled.
+            systemd.user.services.vorta = {
+                Unit = {
+                    Description = "Vorta backup tray";
+                    # Qt aborts outright when it starts before Cinnamon imports DISPLAY, so the restart loop is what actually gets it up, as with syncthingtray.
+                    StartLimitIntervalSec = 120;
+                    StartLimitBurst = 10;
                 };
+                Service = {
+                    ExecStart = "${pkgs.vorta}/bin/vorta";
+                    Restart = "on-failure";
+                    RestartSec = 5;
+                    Nice = 10;
+                    CPUQuota = "200%";
+                };
+                Install.WantedBy = [ "graphical-session.target" ];
             };
         };
 }
