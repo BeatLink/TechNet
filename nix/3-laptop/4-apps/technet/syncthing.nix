@@ -41,6 +41,19 @@
                 syncthingtray-minimal
                 libxcb
             ];
+            # The fake graphical-session target fires before Cinnamon imports DISPLAY into the user manager, so the
+            # first start finds no display, and Qt aborts rather than waiting once no platform plugin loads.
+            systemd.user.services.syncthingtray = {
+                Unit = {
+                    StartLimitIntervalSec = 120;
+                    StartLimitBurst = 10;
+                };
+                Service = {
+                    Restart = "on-failure";
+                    RestartSec = 5;
+                };
+            };
+
             systemd.user.targets.tray = {
                 Unit = {
                     Description = "Home Manager System Tray";
