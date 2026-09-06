@@ -3,7 +3,13 @@ let
     plymouth = lib.getExe' config.boot.plymouth.package "plymouth";
 in
 {
-    boot.initrd = {
+    # The unl0kr module warns unconditionally about Plymouth. The two are reconciled below by handing the
+    # framebuffer over for the prompt and taking it back afterwards, so drop that one line and keep the rest.
+    options.warnings = lib.mkOption {
+        apply = builtins.filter (w: w != "Upstream clearly intends unl0kr to not run with Plymouth. Good luck"); # Matched by text: a reworded warning upstream comes back
+    };
+
+    config.boot.initrd = {
         allowMissingModules = true;
 
         unl0kr = {

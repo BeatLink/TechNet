@@ -78,21 +78,18 @@
                 }
             ];
 
-            # Lovelace stays UI-managed for now; migrating it is a later phase.
+            # Lovelace is UI-managed. Every dashboard -- Overview, Map -- lives in
+            # .storage, and dashboards below stays empty because per-dashboard
+            # config declares YAML dashboards only: its schema requires mode
+            # "yaml" and a filename, so a storage dashboard cannot be named there
+            # at all. Declaring nothing is what leaves them to the UI.
             #
-            # Two separate things have to be pinned to "storage" here:
-            #
-            #   mode           - without it the dashboards in .storage (Overview
-            #                    and Map) stop rendering.
-            #   resource_mode  - the module defaults this to "yaml" whenever
-            #                    customLovelaceModules is non-empty. The resource
-            #                    list Nix generates points at versioned filenames
-            #                    ("<name>.js?version=..."), whereas the resources
-            #                    already registered in .storage use bare names.
-            #                    Flipping to "yaml" therefore swaps the URLs of
-            #                    every loaded module at once; keep it on "storage"
-            #                    until Lovelace itself is migrated and both sides
-            #                    can be changed together.
+            # resource_mode is pinned because the module defaults it to "yaml"
+            # whenever customLovelaceModules is non-empty. The resource list Nix
+            # generates points at versioned filenames ("<name>.js?version=..."),
+            # whereas the resources already registered in .storage use bare names.
+            # Flipping to "yaml" therefore swaps the URLs of every loaded module
+            # at once; keep it on "storage" until both sides can change together.
             #
             # In storage mode the generated lovelace.resources list below is
             # inert: HA reads .storage/lovelace_resources instead.
@@ -101,7 +98,6 @@
             # have never been registered as resources, so they are not loaded
             # today either. Worth resolving when Lovelace itself is migrated.
             lovelace = {
-                mode = "storage";
                 resource_mode = "storage";
             };
 

@@ -25,7 +25,7 @@
                 "udev.log_level=info"
                 "rd.udev.log_level=info"
             ];
-            services.journald.rateLimitBurst = 0; # Journald drops the bulk of this verbosity at the default burst of 10000
+            services.journald.settings.Journal.RateLimitBurst = 0; # Journald drops the bulk of this verbosity at the default burst of 10000
         }
 
         # Recovery Shell #############################################################################################################################

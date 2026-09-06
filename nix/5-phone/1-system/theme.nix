@@ -4,11 +4,10 @@
 # itself follows this -- the top bar, the lock screen, the app grid. GTK3
 # applications follow it too.
 #
-# GTK4 applications do not. libadwaita draws its own styling and deliberately
-# ignores the GTK theme, so Files, Settings and Secrets stay Adwaita
-# whatever is set here. Mint-Y ships gtk-3.0, cinnamon and gnome-shell
-# stylesheets and no gtk-4.0 one, so there is nothing for them to pick up even
-# if they looked.
+# GTK4 applications ignore gtk-theme-name outright, so home-manager instead
+# writes a gtk-4.0/gtk.css that @imports Mint-Y's own gtk-4.0 stylesheet as user
+# CSS. That reaches plain GTK4 widgets; libadwaita apps such as Files, Settings
+# and Secrets still draw most of their own styling and stay close to Adwaita.
 #
 # Set through home-manager rather than dconf directly, so gtk-3.0/settings.ini
 # is written as well as the dconf key -- applications started outside the
@@ -21,6 +20,11 @@
 
             theme = {
                 name = "Mint-Y-Aqua";
+                package = pkgs.mint-themes;
+            };
+
+            gtk4.theme = {
+                name = "Mint-Y-Aqua"; # Pinned, not inherited: home-manager's gtk4 default becomes null at stateVersion 26.05
                 package = pkgs.mint-themes;
             };
 

@@ -250,6 +250,10 @@ in
                     name = palette.gtk.name;
                     package = palette.gtk.package;
                 };
+                gtk4.theme = {
+                    name = palette.gtk.name; # Pinned, not inherited: home-manager's gtk4 default becomes null at stateVersion 26.05
+                    package = palette.gtk.package;
+                };
                 iconTheme = {
                     name = palette.icons.name;
                     package = palette.icons.package;
