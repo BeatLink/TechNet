@@ -34,7 +34,6 @@
                 cpu.amd.ryzen-smu.enable = true;
                 enableRedistributableFirmware = true;
             };
-            services.thermald.enable = true;
         }
     ];
 }
