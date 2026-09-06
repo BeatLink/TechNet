@@ -63,18 +63,19 @@ let
         ];
 
         # Consistency Checks
+        # Periodic rather than every run: the repository check alone took 17 minutes on a remote copy.
         checks = [
             {
                 name = "repository";
-                frequency = "always";
+                frequency = "1 week";
             }
             {
                 name = "archives";
-                frequency = "always";
+                frequency = "1 week";
             }
             {
                 name = "extract";
-                frequency = "1 day";
+                frequency = "1 month";
             }
             {
                 name = "data";
@@ -83,14 +84,14 @@ let
         ];
     };
 
-    # Skips one configuration when its repository host is down, leaving the others to run.
+    # Skips one configuration when its repository host is not answering SSH, leaving the others to run.
     reachable = host: [
         {
             before = "action";
             when = [ "create" ];
-            # Exit 75 is borgmatic's soft failure, which cancels this configuration alone.
+            # Reads the SSH banner rather than pinging: a host can answer ICMP while its SSH transport hangs. Exit 75 is borgmatic's soft failure.
             run = [
-                "${pkgs.iputils}/bin/ping -q -c 1 '${host}' > /dev/null || exit 75"
+                "${pkgs.netcat-openbsd}/bin/nc -w 5 '${host}' 22 < /dev/null | ${pkgs.gnugrep}/bin/grep -q '^SSH-' || exit 75"
             ];
         }
     ];
@@ -129,6 +130,10 @@ in
             };
         };
     };
+
+    # Three-hourly so a missed window is retried the same day rather than waiting for the next night.
+    # The empty first entry clears the OnCalendar=daily shipped in borgmatic's own timer, which a drop-in would otherwise append to.
+    systemd.timers.borgmatic.timerConfig.OnCalendar = [ "" "*-*-* 00/3:00:00" ];
 
     # The packaged unit omits CAP_DAC_OVERRIDE, so root cannot write the beatlink-owned 0700 repository directory.
     systemd.services.borgmatic.serviceConfig.CapabilityBoundingSet = [
