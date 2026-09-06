@@ -135,6 +135,9 @@ in
     # The empty first entry clears the OnCalendar=daily shipped in borgmatic's own timer, which a drop-in would otherwise append to.
     systemd.timers.borgmatic.timerConfig.OnCalendar = [ "" "*-*-* 00/3:00:00" ];
 
+    # A ceiling rather than a working limit: a measured 28-minute run spent 78s of CPU, so this binds only on a run that misbehaves.
+    systemd.services.borgmatic.serviceConfig.CPUQuota = "150%";
+
     # The packaged unit omits CAP_DAC_OVERRIDE, so root cannot write the beatlink-owned 0700 repository directory.
     systemd.services.borgmatic.serviceConfig.CapabilityBoundingSet = [
         "CAP_DAC_READ_SEARCH"
