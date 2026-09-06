@@ -249,6 +249,9 @@
                 # Claude Code's temp root, inside the persisted .claude below rather than on /tmp, so scratchpads and task output outlive a reboot along with the rest of its state
                 sessionVariables.CLAUDE_CODE_TMPDIR = "${config.home.homeDirectory}/.claude/tmp";
 
+                # Claude Code's config home, so .claude.json lands inside the persisted .claude instead of at the home root the rollback blanks
+                sessionVariables.CLAUDE_CONFIG_DIR = "${config.home.homeDirectory}/.claude";
+
                 packages = with pkgs; [
                     nixd
                     nixfmt
