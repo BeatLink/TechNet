@@ -59,6 +59,7 @@
                 hostNames = [
                     "10.100.100.6"
                     "ragnarok.technet"
+                    "ragnarok.lan"
                     "ragnarok"
                     "ragnarok-boot"
                 ];
@@ -68,6 +69,7 @@
                 hostNames = [
                     "10.100.100.6"
                     "ragnarok.technet"
+                    "ragnarok.lan"
                     "ragnarok"
                     "ragnarok-boot"
                 ];
@@ -78,6 +80,7 @@
                     "192.168.0.2"
                     "10.100.100.1"
                     "heimdall.technet"
+                    "heimdall.lan"
                     "heimdall"
                     "heimdall-boot"
                 ];
@@ -88,6 +91,7 @@
                     "192.168.0.2"
                     "10.100.100.1"
                     "heimdall.technet"
+                    "heimdall.lan"
                     "heimdall"
                     "heimdall-boot"
                 ];
@@ -131,6 +135,7 @@
                     "192.168.0.113"
                     "10.100.100.4"
                     "thor.technet"
+                    "thor.lan"
                     "thor"
                     "thor-boot"
                 ];
@@ -141,6 +146,7 @@
                     "192.168.0.113"
                     "10.100.100.4"
                     "thor.technet"
+                    "thor.lan"
                     "thor"
                     "thor-boot"
                 ];
