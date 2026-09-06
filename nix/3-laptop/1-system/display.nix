@@ -12,19 +12,8 @@
 {
     config = lib.mkMerge [
 
-        # Graphics Stack #############################################################################################################################
-        {
-            hardware.graphics = {
-                enable = true;
-                enable32Bit = true;
-            };
-        }
-
         # NVIDIA dGPU ################################################################################################################################
         {
-            services.xserver.videoDrivers = [
-                "nvidia"
-            ];
             hardware.nvidia = {
                 dynamicBoost.enable = true;
                 powerManagement = {
@@ -32,12 +21,6 @@
                     finegrained = true;
                 };
                 package = config.boot.kernelPackages.nvidiaPackages.production;
-                prime = {
-                    amdgpuBusId = "PCI:6:0:0";
-                    nvidiaBusId = "PCI:1:0:0";
-                    offload.enable = true;
-                    offload.enableOffloadCmd = true;
-                };
             };
         }
 

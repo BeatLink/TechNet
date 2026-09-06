@@ -18,10 +18,7 @@
                     "ideapad_laptop"
                 ];
                 kernelModules = [ "kvm-amd" ];
-                kernelParams = [
-                    "amd_pstate=active"
-                    "pcie_aspm=off"
-                ];
+                kernelParams = [ "pcie_aspm=off" ];
             };
         }
 
@@ -34,10 +31,7 @@
         {
             nixpkgs.hostPlatform = "x86_64-linux";
             hardware = {
-                cpu.amd = {
-                    updateMicrocode = true;
-                    ryzen-smu.enable = true;
-                };
+                cpu.amd.ryzen-smu.enable = true;
                 enableRedistributableFirmware = true;
             };
             services.thermald.enable = true;

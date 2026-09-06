@@ -93,6 +93,10 @@
             url = "github:BeatLink/NixTool";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        nixos-hardware = {
+            url = "github:NixOS/nixos-hardware";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
         # megi's PinePhone kernel. Deliberately does NOT follow nixpkgs: the
         # binary cache it publishes is built against its own pin, and overriding
         # nixpkgs changes the stdenv, changes the derivation, and turns a one
@@ -134,6 +138,7 @@
             calibre-web-automated,
             lnxlink,
             linux-sidebar,
+            nixos-hardware,
             ...
         }:
         {
@@ -192,6 +197,7 @@
                         sops-nix.nixosModules.sops
                         home-manager.nixosModules.home-manager
                         halon.nixosModules.default
+                        nixos-hardware.nixosModules.lenovo-ideapad-15ach6
                         ./nix/0-common
                         ./nix/3-laptop
                     ];
