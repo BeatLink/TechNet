@@ -8,6 +8,7 @@
         ./element-odin.nix
         ./firefox-odin.nix
         ./freetube.nix
+        ./gmusicbrowser-odin.nix
         ./home-assistant.nix
         ./keepassxc-odin.nix
         ./libreoffice-odin.nix

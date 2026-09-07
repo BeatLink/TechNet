@@ -172,5 +172,13 @@ in
                 "/Storage/PhoneApps/LibreOffice/Thor"
             ];
         }
+
+        # gmusicbrowser ------------------------------------------------------------------------------------------------------------------------------
+        {
+            systemd.tmpfiles.settings.PhoneApps = dirs [
+                "/Storage/PhoneApps/GMusicBrowser"
+                "/Storage/PhoneApps/GMusicBrowser/Thor"
+            ];
+        }
     ];
 }
