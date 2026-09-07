@@ -68,10 +68,12 @@ in
                 CacheDirectory = "vigil-borg";                              # Backs the borg monitors' cache_dir; without it each poll rebuilds the repo's chunks cache under mktemp and discards it
                 ProtectHome = lib.mkForce false;                            # true hides /home from borg source paths and makes /root read-only for the rebuild's nix cache
 
-                # The borg monitors run under sudo inside this cgroup, so a ceiling here covers them; Nice alone caps nothing on an otherwise idle host.
+                # Contention-only. A CPUQuota of 200% was here and had to go: it throttled the agent 679 times on Odin and 1625 on Heimdall, and every
+                # monitor command runs under a deadline, so starving this is how a healthy host starts reporting timeouts. What made the ceiling look
+                # necessary was borg polls that never terminated, and that was a Vigil bug -- an unprivileged agent cannot kill what sudo started, so
+                # the timeout it reported was never enforced. Fixed upstream in 64729f9; the deadline now sits inside the sudo.
                 Nice = 10;
                 CPUWeight = 40;
-                CPUQuota = "200%";
             };
         };
     };

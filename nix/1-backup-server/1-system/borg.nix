@@ -37,10 +37,15 @@
         {
             users.users.borg.uid = 999; # Names the slice below; the upstream module leaves the uid to dynamic allocation
 
+            # This host exists to receive backups, so borg gets priority rather than a ceiling. CPUWeight is what expresses that: it wins against
+            # syncthing's 30 whenever both want the disk and costs nothing when they do not. The CPUQuota that was here never once throttled --
+            # nr_throttled stayed at 0 -- so it bounded nothing while risking a slow restore.
+            #
+            # MemoryMax is gone too. It was added when orphaned borg sessions reached 490M, but that was a leak with two causes, both since fixed:
+            # sshd never reaped sessions whose client had gone, and Vigil's monitor timeouts were unenforceable against sudo. A hard cap would only
+            # have turned that leak into an OOM kill mid-write, which is how a repo ends up needing break-lock. MemoryHigh reclaims instead.
             systemd.slices."user-999".sliceConfig = {
-                MemoryHigh = "256M"; # Reclaims rather than kills, so a prune or check that needs the headroom still finishes
-                MemoryMax = "512M"; # A backstop, kept well clear of High: borg killed mid-write leaves a repo needing break-lock, so reclaim must get first refusal
-                CPUQuota = "250%";
+                MemoryHigh = "384M";
                 CPUWeight = 70;
                 TasksMax = 64;
             };
