@@ -1,7 +1,14 @@
 # Phone Apps #########################################################################################################################################
 #
-# The state of the applications Thor runs here over waypipe. It lives under /Storage/PhoneApps rather than in this user's home, because it
-# belongs to the phone's sessions rather than to Odin's; the launchers that name these paths are declared on Thor, under 5-phone/3-apps.
+# The applications Thor displays over waypipe, and the state they keep. Nothing here draws on this host: each launch arrives as a non-login ssh
+# session from the phone, and waypipe hands the process a Wayland display on the other end of it.
+#
+# The packages are system-wide rather than in beatlink's profile because that non-login session resolves argv on the system PATH alone, which is also
+# why every launcher on Thor names a bare command.
+#
+# Most of the state lives under /Storage/PhoneApps, on the data pool rather than in a home the initrd rolls back, and belongs to the phone's sessions
+# rather than to this host. The launchers that name these paths are declared on Thor, under 5-phone/3-apps/desktop. The few applications that offer no
+# way to move their configuration keep it in beatlink's home instead, and are persisted here one by one.
 #
 {
     config,
@@ -20,6 +27,13 @@ let
                 mode = "0755";
             };
         });
+
+    # Kept in beatlink's home because the application offers no way to move it, and so listed for the rollback to spare.
+    persist =
+        app: directories:
+        {
+            home-manager.users.beatlink.home.persistence."/Storage/Apps/PhoneApps/${app}".directories = directories;
+        };
 in
 {
     config = lib.mkMerge [
@@ -30,6 +44,7 @@ in
 
         # Firefox ------------------------------------------------------------------------------------------------------------------------------------
         {
+            environment.systemPackages = [ pkgs.firefox ]; # Also what the Home Assistant launcher opens, on a kiosk profile beside this one
             systemd.tmpfiles.settings.PhoneApps = dirs [
                 "/Storage/PhoneApps/Firefox"
                 "/Storage/PhoneApps/Firefox/Thor"
@@ -42,7 +57,7 @@ in
                 # Thor has no system tray, so anything that parks the window in one leaves that instance with no window at all
                 thorConfig = (pkgs.formats.ini { }).generate "keepassxc-thor.ini" {
                     General = {
-                        SingleInstance = false; # Otherwise the launch is handed to the instance running here and opens on this screen
+                        SingleInstance = false; # Otherwise a second launch is handed to the copy still running in an earlier waypipe session, whose display is gone
                         MinimizeAfterUnlock = false;
                         HideWindowOnCopy = false;
                         DropToBackgroundOnCopy = false;
@@ -55,11 +70,12 @@ in
                         ShowTrayIcon = false;
                     };
 
-                    SSHAgent.Enabled = false; # The instance autostarted here already adds the database's keys to gcr-ssh-agent
+                    SSHAgent.Enabled = false; # There is no agent on this host to add the database's keys to
                     Browser.Enabled = false; # One proxy socket per user, so a second server would take it from the first
                 };
             in
             {
+                environment.systemPackages = [ pkgs.keepassxc ];
                 systemd.tmpfiles.settings.PhoneApps = dirs [
                     "/Storage/PhoneApps/KeePassXC"
                     "/Storage/PhoneApps/KeePassXC/Thor"
@@ -78,6 +94,7 @@ in
 
         # Trilium ------------------------------------------------------------------------------------------------------------------------------------
         {
+            environment.systemPackages = [ pkgs.trilium-desktop ];
             systemd.tmpfiles.settings.PhoneApps = dirs [
                 "/Storage/PhoneApps/Trilium"
                 "/Storage/PhoneApps/Trilium/Thor"
@@ -85,43 +102,29 @@ in
         }
 
         # FreeTube -----------------------------------------------------------------------------------------------------------------------------------
-        (
-            let
-                # Safe because FreeTube resolves each database's realpath before opening it, so nedb compacting over the target leaves the link alone
-                shareWithThor =
-                    name:
-                    lib.nameValuePair "/Storage/PhoneApps/FreeTube/Thor/${name}.db" {
-                        "L+".argument = "/home/beatlink/.config/FreeTube/${name}.db";
-                    };
-            in
-            {
-                systemd.tmpfiles.settings.PhoneApps = dirs [
-                    "/Storage/PhoneApps/FreeTube"
-                    "/Storage/PhoneApps/FreeTube/Thor"
-                ]
-                # settings.db is left out so the phone keeps its own UI scale, and subscription-cache.db because sharing the busiest file buys nothing
-                // lib.listToAttrs (
-                    map shareWithThor [
-                        "profiles" # Subscriptions live in here, as an array on each profile rather than a database of their own
-                        "playlists"
-                        "history"
-                    ]
-                );
-            }
-        )
+        {
+            environment.systemPackages = [ pkgs.freetube ];
+            systemd.tmpfiles.settings.PhoneApps = dirs [
+                "/Storage/PhoneApps/FreeTube"
+                "/Storage/PhoneApps/FreeTube/Thor"
+            ];
+        }
 
         # VSCodium -----------------------------------------------------------------------------------------------------------------------------------
         (
             let
-                # The same settings as Odin's instance, plus the in-window file picker, because a portal dialog is drawn by Odin's session and lands on Odin's screen
+                # The same settings as Odin's instance, plus the in-window file picker, because there is no portal on this host to draw a dialog with
                 thorSettings = (pkgs.formats.json { }).generate "vscode-user-settings-thor" (
-                    config.home-manager.users.beatlink.programs.vscodium.profiles.default.userSettings
+                    config.technet.vscodium.userSettings
                     // {
                         "files.simpleDialog.enable" = true;
                     }
                 );
             in
             {
+                technet.vscodium.enable = true; # Extensions and this host's own settings, from the module Odin shares
+                environment.systemPackages = [ pkgs.vscodium ];
+
                 systemd.tmpfiles.settings.PhoneApps = dirs [
                     "/Storage/PhoneApps/VSCodium"
                     "/Storage/PhoneApps/VSCodium/Thor"
@@ -135,6 +138,7 @@ in
 
         # Thunderbird --------------------------------------------------------------------------------------------------------------------------------
         {
+            environment.systemPackages = [ pkgs.thunderbird ];
             systemd.tmpfiles.settings.PhoneApps = dirs [
                 "/Storage/PhoneApps/Thunderbird"
                 "/Storage/PhoneApps/Thunderbird/Thor"
@@ -143,6 +147,7 @@ in
 
         # Element ------------------------------------------------------------------------------------------------------------------------------------
         {
+            environment.systemPackages = [ pkgs.element-desktop ];
             systemd.tmpfiles.settings.PhoneApps = dirs [
                 "/Storage/PhoneApps/Element"
                 "/Storage/PhoneApps/Element/Thor"
@@ -151,6 +156,7 @@ in
 
         # Discord ------------------------------------------------------------------------------------------------------------------------------------
         {
+            environment.systemPackages = [ pkgs.discord ];
             systemd.tmpfiles.settings.PhoneApps = dirs [
                 "/Storage/PhoneApps/Discord"
                 "/Storage/PhoneApps/Discord/Thor"
@@ -159,6 +165,12 @@ in
 
         # Quod Libet ---------------------------------------------------------------------------------------------------------------------------------
         {
+            environment.systemPackages = [
+                (pkgs.quodlibet.override {
+                    withMusicBrainzNgs = true;
+                    withDbusPython = true;
+                })
+            ];
             systemd.tmpfiles.settings.PhoneApps = dirs [
                 "/Storage/PhoneApps/QuodLibet"
                 "/Storage/PhoneApps/QuodLibet/Thor"
@@ -167,6 +179,7 @@ in
 
         # LibreOffice --------------------------------------------------------------------------------------------------------------------------------
         {
+            environment.systemPackages = [ pkgs.libreoffice ];
             systemd.tmpfiles.settings.PhoneApps = dirs [
                 "/Storage/PhoneApps/LibreOffice"
                 "/Storage/PhoneApps/LibreOffice/Thor"
@@ -175,10 +188,55 @@ in
 
         # gmusicbrowser ------------------------------------------------------------------------------------------------------------------------------
         {
+            programs.gmusicbrowser.enable = true; # The flake's NixOS module, which is the one that installs system-wide
             systemd.tmpfiles.settings.PhoneApps = dirs [
                 "/Storage/PhoneApps/GMusicBrowser"
                 "/Storage/PhoneApps/GMusicBrowser/Thor"
             ];
         }
+
+        # VLC ----------------------------------------------------------------------------------------------------------------------------------------
+        {
+            # Hardware decoding is forced off in the wrapper rather than in Thor's launcher, so a launch from anywhere gets a picture rather than green
+            environment.systemPackages = [
+                (pkgs.symlinkJoin {
+                    name = "vlc";
+                    paths = [ pkgs.vlc ];
+                    nativeBuildInputs = [ pkgs.makeWrapper ];
+                    postBuild = ''
+                        wrapProgram $out/bin/vlc --add-flags "--avcodec-hw=none"
+                    '';
+                })
+            ];
+        }
+
+        # NewsFlash ----------------------------------------------------------------------------------------------------------------------------------
+        {
+            environment.systemPackages = [ pkgs.newsflash ];
+        }
+        (persist "NewsFlash" [
+            ".cache/news_flash"
+            ".config/news-flash"
+            ".local/share/news_flash"
+            ".local/share/news-flash"
+        ])
+
+        # Pix ----------------------------------------------------------------------------------------------------------------------------------------
+        {
+            environment.systemPackages = [ pkgs.pix ];
+        }
+        (persist "Pix" [ ".config/pix" ])
+
+        # XReader ------------------------------------------------------------------------------------------------------------------------------------
+        {
+            environment.systemPackages = [ pkgs.xreader ];
+        }
+        (persist "XReader" [ ".config/xreader" ])
+
+        # XViewer ------------------------------------------------------------------------------------------------------------------------------------
+        {
+            environment.systemPackages = [ pkgs.xviewer ];
+        }
+        (persist "XViewer" [ ".config/xviewer" ])
     ];
 }

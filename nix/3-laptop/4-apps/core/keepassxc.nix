@@ -24,8 +24,8 @@
 #
 # Laptop-only deliberately. Thor reads the same database with GNOME Secrets,
 # which is the adaptive client and the right shape for a phone; KeePassXC is Qt
-# and desktop-sized. When the phone does want this client it opens this one over
-# waypipe, on a config seeded in technet/phone-apps.nix.
+# and desktop-sized. When the phone does want this client it opens Heimdall's
+# over waypipe, on a config seeded there.
 #
 # gnome-keyring is turned off because KeePassXC can serve
 # org.freedesktop.secrets itself and two providers of one bus name is a fight

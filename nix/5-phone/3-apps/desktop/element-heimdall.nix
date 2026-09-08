@@ -1,13 +1,13 @@
-# Element on Odin, displayed here over waypipe.
+# Element on Heimdall, displayed here over waypipe.
 #
-# --profile-dir is what makes it a second process: Electron's single-instance lock is held on the
-# user data directory, so Odin's copy would otherwise adopt the launch and draw it on its own screen.
-# A separate directory means a separate device in Matrix's eyes, so this one is verified on its own.
+# --profile-dir holds Electron's single-instance lock, so keeping it here rather than at the default
+# means a second launch starts its own process instead of being handed to one whose waypipe session
+# has already ended. A separate directory is a separate device in Matrix's eyes, verified on its own.
 #
 {
-    technet.waypipe.apps.element-odin = {
-        title = "Element (Odin)";
-        host = "odin-waypipe";
+    technet.waypipe.apps.element-heimdall = {
+        title = "Element (Heimdall)";
+        host = "heimdall-waypipe";
         icon = ./element.png; # A copy, so the phone does not carry Electron in its closure for one PNG
         categories = [
             "Network"
@@ -15,7 +15,7 @@
             "Chat"
         ];
 
-        audio = true; # waypipe carries Wayland alone, so without this calls and notifications come out of Odin
+        audio = true; # waypipe carries Wayland alone, so without this calls and notifications come out of Heimdall
         audioLatency = 400; # Sized for mobile data, where the round trip has swung between 65ms and 334ms
 
         command = [

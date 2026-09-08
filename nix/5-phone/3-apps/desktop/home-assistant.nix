@@ -7,7 +7,7 @@
 {
     technet.waypipe.apps.home-assistant = {
         title = "Home Assistant";
-        host = "odin-waypipe";
+        host = "heimdall-waypipe";
         icon = ./home-assistant.png;
 
         command = [
@@ -19,7 +19,7 @@
             "https://home-assistant.heimdall.technet"
         ];
 
-        # Odin's GTK apps otherwise reach for its own session rather than waypipe's display
+        # Pinned so the toolkit takes waypipe's display rather than probing for another
         environment.GDK_BACKEND = "wayland";
     };
 }

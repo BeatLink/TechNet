@@ -1,0 +1,29 @@
+# Firefox on Heimdall, displayed here over waypipe, on a profile of its own.
+#
+# Passed by path rather than -P: a directory absent from profiles.ini gets no toolkit profile entry,
+# and so no "account already in use" refusal from Sync.
+#
+{
+    technet.waypipe.apps.firefox-heimdall = {
+        title = "Firefox (Heimdall)";
+        host = "heimdall-waypipe";
+        icon = ./firefox.png;
+        categories = [
+            "Network"
+            "WebBrowser"
+        ];
+
+        audio = true; # waypipe carries Wayland alone, so without this video and calls come out of Heimdall
+        audioLatency = 400; # Sized for mobile data, where the round trip has swung between 65ms and 334ms
+
+        # No --new-instance: with none, a second launch opens another window in the running Firefox rather than failing on the profile lock
+        command = [
+            "firefox"
+            "--profile"
+            "/Storage/PhoneApps/Firefox/Thor/Personal"
+        ];
+
+        # Pinned so the toolkit takes waypipe's display rather than probing for another
+        environment.GDK_BACKEND = "wayland";
+    };
+}

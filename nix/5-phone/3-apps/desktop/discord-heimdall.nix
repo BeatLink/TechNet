@@ -1,12 +1,13 @@
-# Discord on Odin, displayed here over waypipe.
+# Discord on Heimdall, displayed here over waypipe.
 #
-# --user-data-dir is what makes it a second process; the account is logged in per data directory, so
-# this instance signs in on its own and shows up as a second session.
+# --user-data-dir holds Electron's single-instance lock, so keeping it here rather than at the
+# default means a second launch starts its own process instead of being handed to one whose waypipe
+# session has already ended. The account is logged in per data directory, so this signs in on its own.
 #
 {
-    technet.waypipe.apps.discord-odin = {
-        title = "Discord (Odin)";
-        host = "odin-waypipe";
+    technet.waypipe.apps.discord-heimdall = {
+        title = "Discord (Heimdall)";
+        host = "heimdall-waypipe";
         icon = ./discord.png; # A copy, so the phone does not carry Electron in its closure for one PNG
         categories = [
             "Network"
@@ -14,7 +15,7 @@
             "Chat"
         ];
 
-        audio = true; # waypipe carries Wayland alone, so without this voice and notifications come out of Odin
+        audio = true; # waypipe carries Wayland alone, so without this voice and notifications come out of Heimdall
         audioLatency = 400; # Sized for mobile data, where the round trip has swung between 65ms and 334ms
 
         command = [

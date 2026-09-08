@@ -1,13 +1,14 @@
-# VSCodium on Odin, displayed here over waypipe, as a second instance.
+# VSCodium on Heimdall, displayed here over waypipe.
 #
-# --user-data-dir is what makes it a second one: without it the editor already
-# running on Odin adopts the launch and opens the window on its own screen.
-# Extensions live outside it, so both instances load the same store-managed set.
+# --user-data-dir holds the single-instance lock, so keeping it here rather than
+# at the default means a second launch starts its own process instead of being
+# handed to one whose waypipe session has already ended. Extensions live outside
+# it, on the store-managed set Heimdall shares with Odin's editor.
 #
 {
-    technet.waypipe.apps.vscodium-odin = {
-        title = "VSCodium (Odin)";
-        host = "odin-waypipe";
+    technet.waypipe.apps.vscodium-heimdall = {
+        title = "VSCodium (Heimdall)";
+        host = "heimdall-waypipe";
         icon = ./vscodium.png; # A copy, so the phone does not carry Electron in its closure for one PNG
         categories = [
             "Utility"

@@ -2,7 +2,10 @@
 #
 # Runs Wayland applications from another host inside one shared session per host, so they share a bus, a portal stack and this host's speakers.
 #
-# waypipe-desktop owns the sessions, launchers and options; this module supplies the pair of hosts, their key and the apps they trade.
+# waypipe-desktop owns the sessions, launchers and options; this module supplies the two roles, their key and the apps they trade.
+#
+# The roles are separate options rather than one enable, because they need different things: a host that only displays needs a client key and an ssh
+# alias, and a host that only runs the applications needs an sshd and the other side's public key. Thor displays; Heimdall runs.
 #
 {
     config,
@@ -14,23 +17,15 @@
 let
     cfg = config.technet.waypipe;
 
-    thorToOdin = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIE+/XKqcENe9Q3RMEdy20Oszf5jttKCZVGGqkMB255Sy waypipe-thor-to-odin";
-    odinToThor = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAqNicedrY/ZIabItsYp9G72eYwpHFNkzaN3RLaka5MO waypipe-odin-to-thor";
-
-    isOdin = config.networking.hostName == "Odin";
-    peer = if isOdin then "thor" else "odin";
-
-    # Thor only: odin.lan is a fixed Pi-hole entry, where thor.lan is a DHCP lease that can drift onto another device
-    lanFirst = lib.optionalString (!isOdin) ''
-        Match originalhost ${peer}-waypipe exec "${pkgs.netcat}/bin/nc -z -w 1 ${peer}.lan 22 >/dev/null 2>&1"
-            HostName ${peer}.lan
-    '';
+    thorToHeimdall = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKVJQ2vYs4+U7rJz4COohgtzTa5k/wXNOtJpX7k6YUjg waypipe-thor-to-heimdall";
 in
 {
     imports = [ inputs.waypipe-desktop.nixosModules.default ];
 
     options.technet.waypipe = {
         enable = lib.mkEnableOption "waypipe remote application launchers"; # Off by default because sops needs a waypipe.yaml under the host's secrets directory
+
+        serve = lib.mkEnableOption "running this host's applications on another host's screen";
 
         # Forwarded verbatim, so waypipe-desktop's own module stays the one place these are described
         apps = lib.mkOption {
@@ -40,9 +35,9 @@ in
         };
     };
 
-    config = lib.mkIf cfg.enable (lib.mkMerge [
+    config = lib.mkMerge [
         # Package ------------------------------------------------------------------------------------------------------------------------------------
-        {
+        (lib.mkIf (cfg.enable || cfg.serve) {
             nixpkgs.overlays = [
                 inputs.waypipe-desktop.overlays.default # Rebuilds the wrapper against the waypipe below, which its own flake output would miss
                 (final: prev: {
@@ -52,10 +47,10 @@ in
                     });
                 })
             ];
-        }
+        })
 
         # Launchers ----------------------------------------------------------------------------------------------------------------------------------
-        {
+        (lib.mkIf cfg.enable {
             home-manager.users.beatlink = {
                 imports = [ inputs.waypipe-desktop.homeModules.default ];
 
@@ -68,33 +63,34 @@ in
                     sessionName = lib.toLower config.networking.hostName;
                 };
             };
-        }
+        })
 
-        # Access -------------------------------------------------------------------------------------------------------------------------------------
-        {
+        # Reaching the far side ----------------------------------------------------------------------------------------------------------------------
+        (lib.mkIf cfg.enable {
             sops.secrets.waypipe_key = {
                 sopsFile = "${config.technet.secrets.path}/waypipe.yaml";
                 owner = "beatlink";
             };
 
-            # Both hosts run each other's apps, so each is also the far side of the other's sessions
-            services.waypipe-desktop = {
-                enable = true;
-                user = "beatlink";
-                authorizedKeys = [ (if isOdin then thorToOdin else odinToThor) ];
-            };
-
-            # A dedicated alias, so the waypipe key never displaces the agent key on a plain `ssh odin`
+            # A dedicated alias, so the waypipe key never displaces the agent key on a plain `ssh heimdall`
             programs.ssh.extraConfig = ''
 
-                ${lanFirst}
-                # ssh keeps the first value it obtains for a keyword, so this stands in only when the probe above finds no LAN path
-                Host ${peer}-waypipe
-                    HostName ${peer}.technet
+                # heimdall.lan and heimdall.technet resolve to one address, the tunnel's, so there is no second path worth probing for
+                Host heimdall-waypipe
+                    HostName heimdall.technet
                     User beatlink
                     IdentityFile ${config.sops.secrets.waypipe_key.path}
                     IdentitiesOnly yes
             '';
-        }
-    ]);
+        })
+
+        # Letting the near side in -------------------------------------------------------------------------------------------------------------------
+        (lib.mkIf cfg.serve {
+            services.waypipe-desktop = {
+                enable = true;
+                user = "beatlink";
+                authorizedKeys = [ thorToHeimdall ];
+            };
+        })
+    ];
 }

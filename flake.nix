@@ -176,6 +176,7 @@
                         home-manager.nixosModules.home-manager
                         arion.nixosModules.arion
                         blockurl.nixosModules.blockurl
+                        gmusicbrowser.nixosModules.default
                         calibre-web-automated.nixosModules.default
                         lnxlink.nixosModules.default
                         ./nix/0-common

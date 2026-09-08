@@ -1,12 +1,13 @@
-# FreeTube on Odin, displayed here over waypipe.
+# FreeTube on Heimdall, displayed here over waypipe.
 #
-# Its own Electron user-data dir is what makes it a second process; subscriptions, history and
-# settings live in there, so this instance keeps a set separate from Odin's.
+# Its own Electron user-data dir holds the single-instance lock, so keeping it here rather than at
+# the default means a second launch starts its own process instead of being handed to one whose
+# waypipe session has already ended. Subscriptions, history and settings live in there.
 #
 {
     technet.waypipe.apps.freetube = {
         title = "FreeTube";
-        host = "odin-waypipe";
+        host = "heimdall-waypipe";
         icon = ./freetube.png; # A copy, so the phone does not carry Electron in its closure for one PNG
         categories = [
             "AudioVideo"
@@ -14,7 +15,7 @@
             "Network"
         ];
 
-        audio = true; # waypipe carries Wayland alone, so without this the sound comes out of Odin
+        audio = true; # waypipe carries Wayland alone, so without this the sound comes out of Heimdall
         audioLatency = 400; # Sized for mobile data, where the round trip has swung between 65ms and 334ms
 
         command = [

@@ -1,7 +1,7 @@
 # Firefox
 #
-# Odin only. Thor reaches Firefox over waypipe instead of installing its own;
-# what that needs on this side is in technet/phone-apps.nix.
+# Odin only. Thor reaches Firefox over waypipe instead of installing its own,
+# and what that needs is declared on Heimdall, which runs it.
 #
 { pkgs, ... }:
 {

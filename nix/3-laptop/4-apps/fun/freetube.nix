@@ -1,7 +1,7 @@
 # FreeTube
 #
-# Thor opens a second instance of this over waypipe, running here under its own
-# Electron user data dir; what that needs on this side is in technet/phone-apps.nix.
+# Odin only. Thor displays Heimdall's copy over waypipe rather than installing
+# one of its own.
 #
 { ... }:
 {
