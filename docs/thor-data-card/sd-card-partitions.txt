@@ -1,0 +1,25 @@
+=== fdisk ===
+Disk /dev/mmcblk0: 953.55 GiB, 1023871549440 bytes, 1999749120 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: gpt
+Disk identifier: E0CA6E57-39B2-4482-9838-21E2785CD93D
+
+Device         Start        End    Sectors   Size Type
+/dev/mmcblk0p1    16       8207       8192     4M unknown
+/dev/mmcblk0p2  8208 1999749106 1999740899 953.6G Solaris root
+
+=== lsblk (bytes) ===
+NAME                 SIZE TYPE FSTYPE     PARTLABEL           PARTUUID
+mmcblk0     1023871549440 disk                                
+├─mmcblk0p1       4194304 part            Firmware (Tow-Boot) ce8f2026-17b1-4b5b-88f3-3e239f8bd3d8
+└─mmcblk0p2 1023867340288 part zfs_member zfs-data-partition  06625445-3637-49aa-bc36-f3a301616e0b
+
+=== blkid ===
+/dev/mmcblk0p1: PARTLABEL="Firmware (Tow-Boot)" PARTUUID="ce8f2026-17b1-4b5b-88f3-3e239f8bd3d8"
+/dev/mmcblk0p2: LABEL="data-pool-Thor" UUID="1620017591965800391" UUID_SUB="6374294862364934113" BLOCK_SIZE="4096" TYPE="zfs_member" PARTLABEL="zfs-data-partition" PARTUUID="06625445-3637-49aa-bc36-f3a301616e0b"
+
+=== partition GUIDs ===
+p1: 1 start=16 size=8192
+p2: 2 start=8208 size=1999740899

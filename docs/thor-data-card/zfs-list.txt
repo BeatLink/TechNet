@@ -1,0 +1,17 @@
+NAME                     USED  AVAIL  REFER  MOUNTPOINT
+data-pool-Thor          1.73G   921G   176K  none
+data-pool-Thor/storage  1.72G   921G  1.61G  /Storage
+
+NAME                                                           USED  AVAIL  REFER  MOUNTPOINT
+data-pool-Thor                                                1.73G   921G   176K  none
+data-pool-Thor/storage                                        1.72G   921G  1.61G  /Storage
+data-pool-Thor/storage@zfs-auto-snap_weekly-2026-09-07-00h00     0B      -  1.61G  -
+data-pool-Thor/storage@zfs-auto-snap_daily-2026-09-07-00h00      0B      -  1.61G  -
+data-pool-Thor/storage@zfs-auto-snap_daily-2026-09-08-17h30    456K      -  1.61G  -
+data-pool-Thor/storage@zfs-auto-snap_daily-2026-09-09-08h13    656K      -  1.61G  -
+data-pool-Thor/storage@zfs-auto-snap_hourly-2026-09-09-11h00   672K      -  1.61G  -
+data-pool-Thor/storage@zfs-auto-snap_hourly-2026-09-09-12h00     0B      -  1.61G  -
+data-pool-Thor/storage@zfs-auto-snap_hourly-2026-09-09-13h00     0B      -  1.61G  -
+data-pool-Thor/storage@zfs-auto-snap_hourly-2026-09-09-14h00     0B      -  1.61G  -
+data-pool-Thor/storage@zfs-auto-snap_hourly-2026-09-09-15h00     0B      -  1.61G  -
+data-pool-Thor/storage@zfs-auto-snap_hourly-2026-09-09-16h00   344K      -  1.61G  -

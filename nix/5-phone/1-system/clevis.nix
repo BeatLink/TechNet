@@ -5,11 +5,14 @@
         sopsFile = "${config.technet.secrets.path}/clevis.yaml";
         retryInterval = 2;
 
-        # The root pool the default would name no longer exists; the SD card is the only ZFS left on this host
-        datasets = [ "data-pool-Thor/storage" ];
+        # Nothing on this host is ZFS any more: the root drive and the SD card are both LUKS
+        datasets = [ ];
 
-        # Named by disko-btrfs-luks.nix, which is what puts it in boot.initrd.luks.devices
-        luksDevices = [ "cryptroot" ];
+        # cryptroot from disko-btrfs-luks.nix, cryptstorage from data-drive.nix
+        luksDevices = [
+            "cryptroot"
+            "cryptstorage"
+        ];
     };
 
     boot.initrd.clevis.package = pkgs.clevis.overrideAttrs (old: {
