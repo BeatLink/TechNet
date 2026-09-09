@@ -94,7 +94,7 @@
         }
 
         # Scan Throttling ############################################################################################################################
-        # A slow single-disk pool on a four-core board, so scanning is scheduled rather than continuous and every worker pool is kept to one.
+        # A slow single-disk pool on a four-core board, so scanning is scheduled rather than continuous and the hasher and copier pools are kept to one.
         {
             syncthing-mesh.folderOptions = {
                 rescanIntervalS = 86400;
@@ -110,7 +110,6 @@
 
             services.syncthing.settings = lib.recursiveUpdate config.syncthing-mesh.settings {
                 options = {
-                    maxFolderConcurrency = 1;
                     maxConcurrentIncomingRequestKiB = 32768;
                     progressUpdateIntervalS = -1;
                 };
