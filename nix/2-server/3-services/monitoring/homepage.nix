@@ -280,6 +280,24 @@
                         };
                     }
                     {
+                        "Syncthing (Odin)" = {
+                            icon = "syncthing.png";
+                            href = "https://syncthing-odin.heimdall.technet";
+                            description = "File Synchronization on Odin";
+                            siteMonitor = "https://syncthing-odin.heimdall.technet";
+                            statusStyle = "dot";
+                        };
+                    }
+                    {
+                        "Syncthing (Ragnarok)" = {
+                            icon = "syncthing.png";
+                            href = "https://syncthing-ragnarok.heimdall.technet";
+                            description = "File Synchronization on Ragnarok";
+                            siteMonitor = "https://syncthing-ragnarok.heimdall.technet";
+                            statusStyle = "dot";
+                        };
+                    }
+                    {
                         "QBittorrent" = {
                             icon = "qbittorrent.png";
                             href = "https://qbittorrent.heimdall.technet";
