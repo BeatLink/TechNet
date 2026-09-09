@@ -5,10 +5,7 @@
 {
     imports = [
         ./camera.nix
-        ./chromium.nix
-        ./epiphany.nix
         ./firefox.nix
-        ./luakit.nix
         ./nemo.nix
         ./phone.nix
         ./pix.nix
