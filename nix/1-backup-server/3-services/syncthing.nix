@@ -51,12 +51,24 @@
 
         # Storage Locations ##########################################################################################################################
         {
-            # Syncthing creates these three directories itself but not their parents, so without the tmpfiles rules the first start dies on mkdir
+            # Syncthing creates these directories itself but not their parents, so without the tmpfiles rules the first start dies on mkdir
             services.syncthing = {
-                databaseDir = "/Storage/Services/Syncthing/Database";
+                databaseDir = "/var/lib/syncthing-database";
                 dataDir = "/Storage/Services/Syncthing/Data";
                 configDir = "/Storage/Services/Syncthing/Config";
             };
+
+            # The index is SQLite writing 4K pages, which the data pool's 1M recordsize and copies=2 turn into a megabyte read-modify-write done twice;
+            # the root SSD's persistent dataset is 128K and copies=1, so the same page costs an eighth of the I/O and half the writes. Derived data, but
+            # rebuilding it means rehashing every folder, so it is persisted rather than left on the wiped root.
+            environment.persistence."/persistent".directories = [
+                {
+                    directory = "/var/lib/syncthing-database";
+                    user = "beatlink";
+                    group = "beatlink";
+                    mode = "0700";
+                }
+            ];
 
             systemd.tmpfiles.settings."Syncthing" = {
                 "/Storage/Services".d = {
