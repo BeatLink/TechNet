@@ -1,6 +1,6 @@
 # Security
 #
-# The TechNet root CA, SSH brute-force banning, the tang/clevis pair that unlocks the ZFS pools at boot, and the sops secret paths
+# The TechNet root CA, SSH brute-force banning, the tang/clevis pair that unlocks the pools and LUKS devices at boot, and the sops secret paths
 #
 
 {
@@ -9,6 +9,7 @@
         ./fail2ban.nix
         ./tang.nix
         ./clevis.nix
+        ./clevis-luks.nix
         ./secrets.nix
     ];
 }

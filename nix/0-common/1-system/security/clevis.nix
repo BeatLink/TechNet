@@ -1,6 +1,6 @@
 # Clevis #############################################################################################################################################
 #
-# Unlocks this host's ZFS datasets at boot against the tang servers, and the tool that rebinds the JWEs when those keys change.
+# Unlocks this host's ZFS datasets and LUKS devices at boot against the tang servers, and the tool that rebinds the JWEs when those keys change.
 #
 
 { config, lib, pkgs, ... }:
@@ -20,6 +20,9 @@ let
     };
 
     jweFile = ds: "${clevisCfg.stateDir}/${builtins.replaceStrings [ "/" ] [ "-" ] ds}.jwe";
+
+    # One JWE per thing that needs unlocking, whether that is a ZFS dataset or a LUKS device; only the command that consumes it differs.
+    unlockTargets = clevisCfg.datasets ++ clevisCfg.luksDevices;
 
     pools = lib.unique (map (ds: lib.head (lib.splitString "/" ds)) clevisCfg.datasets);
 
@@ -165,7 +168,7 @@ let
                 rm -f "$tmp"
                 trap - EXIT
                 echo "rebind-clevis: wrote ${jweFile ds} (${ds})"
-            '') clevisCfg.datasets}
+            '') unlockTargets}
 
             echo
             echo "rebind-clevis: all JWEs rebound and verified."
@@ -215,6 +218,22 @@ in
                 The default is the standard TechNet layout laid down by
                 3-filesystem/1-disko.nix (the root pool) plus the host's data pool.
                 Override this on a host whose pools differ from that layout.
+            '';
+        };
+
+        luksDevices = lib.mkOption {
+            type = lib.types.listOf lib.types.str;
+            default = [ ];
+            description = ''
+                LUKS devices unlocked via clevis at boot, named as they are in
+                `boot.initrd.luks.devices.<name>` -- which is what the
+                btrfs-luks layout in disko-btrfs-luks.nix calls `cryptroot`.
+
+                Empty on a host whose root is ZFS. A host may carry both kinds
+                at once: Thor's root is a LUKS device while its SD card is still
+                a ZFS dataset, so it lists one of each.
+
+                Names go into systemd unit names unescaped, so keep them plain.
             '';
         };
 
@@ -288,12 +307,12 @@ in
                 clevis = {
                     enable = true;
                     useTang = true;
-                    devices = lib.genAttrs clevisCfg.datasets (ds: {
-                        secretFile = jweFile ds;
+                    devices = lib.genAttrs unlockTargets (target: {
+                        secretFile = jweFile target;
                     });
                 };
 
-                systemd.services = {
+                systemd.services = lib.mkIf (clevisCfg.datasets != [ ]) {
                     clevis-retry = {
                         description = "Keep retrying clevis/tang unlock in the background until it succeeds";
                         # Never make this blocking or ordered-before anything: the loop can run forever and would stall the initrd sshd needed to fix that.
