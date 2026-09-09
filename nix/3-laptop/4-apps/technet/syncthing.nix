@@ -23,16 +23,8 @@
 
     syncthing-mesh.self = "Odin";
 
+    # The GUI is reached at syncthing-odin.heimdall.technet, proxied by Heimdall's nginx over WireGuard.
     networking.firewall.interfaces."wireguard0".allowedTCPPorts = [ 8384 ];
-
-    # syncthing.odin.lan, served by nginx here and proxied to loopback, so the
-    # name does not depend on Heimdall or WireGuard being up to reach a service
-    # running on this machine.
-    technet.vhosts.syncthing = {
-        port = 8384;
-        # Reachable from other machines too, via the CNAME on Heimdall.
-        openFirewall = true;
-    };
 
     home-manager.users.beatlink =
         { pkgs, ... }:

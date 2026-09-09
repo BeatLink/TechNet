@@ -73,14 +73,9 @@
         }
 
         # Web Interface ##############################################################################################################################
-        # syncthing.ragnarok.lan, served by nginx here and proxied to loopback, so the GUI survives Heimdall or WireGuard being down.
+        # syncthing-ragnarok.heimdall.technet, proxied by Heimdall's nginx over WireGuard.
         {
-            technet.vhosts.syncthing = {
-                port = 8384;
-                openFirewall = true; # Reachable from other machines too, via the CNAME on Heimdall
-            };
-
-            services.syncthing.guiAddress = "127.0.0.1:8384";
+            services.syncthing.guiAddress = "0.0.0.0:8384";                 # WireGuard and localhost only: wg0 is trusted here and the LAN interface has no 8384 rule
             services.syncthing.settings.gui = {
                 user = "beatlink";
                 insecureSkipHostcheck = true;

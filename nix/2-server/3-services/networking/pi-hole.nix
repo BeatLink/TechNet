@@ -124,36 +124,12 @@
                         # their lease -- thor.lan and ragnarok.lan work that
                         # way -- but Odin is statically addressed below the
                         # range and never appears in the lease table.
-                        #
-                        # Needed before anything can CNAME to it: dnsmasq drops
-                        # a cname whose target it does not already know, and
-                        # does so silently.
                         "192.168.0.3 odin.lan"
                         "162.159.200.1 time.cloudflare.com" # Static IP to break the DNS/NTP circular dependency
                     ];
+                    # Every other name is generated from nginx-vhosts, which emits its own cname per service.
                     cnameRecords = [
                         "trilium-sysadmin.heimdall.technet,heimdall.technet"
-
-                        # Services a host serves itself, declared as
-                        # technet.vhosts in 0-common/1-system/networking/vhosts.nix
-                        # and reachable from other machines through these.
-                        #
-                        # One line per service rather than a wildcard. dnsmasq
-                        # accepts `cname=*.odin.lan,odin.lan` -- its own
-                        # --test says the syntax is fine -- and then resolves
-                        # nothing, verified against 2.93. The wildcard that
-                        # does work, `address=/odin.lan/<ip>`, takes a literal
-                        # address, and there is no DHCP reservation here to pin
-                        # one, so it would break whenever a lease moved.
-                        #
-                        # These point at the host name rather than an address,
-                        # so they follow the lease on their own.
-                        #
-                        # Worth remembering that adding a technet.vhosts entry
-                        # does not add one of these. The name will work on the
-                        # host itself, via its own /etc/hosts, and nowhere else.
-                        "syncthing.odin.lan,odin.lan"
-                        "syncthing.ragnarok.lan,ragnarok.lan"
                     ];
                     domain = {
                         name = "lan";

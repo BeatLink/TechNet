@@ -78,6 +78,11 @@
             host = "10.100.100.2";
             port = 8384;
         };
+        syncthing-ragnarok = {
+            domain = "syncthing-ragnarok.heimdall.technet";
+            host = "10.100.100.6";
+            port = 8384;
+        };
     };
 
     systemd.services.syncthing-vigil-api-key = {
