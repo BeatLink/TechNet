@@ -332,10 +332,31 @@ let
         ${pkgs.dconf}/bin/dconf write /org/gnome/settings-daemon/peripherals/touchscreen/orientation-lock "$(${pkgs.coreutils}/bin/cat "$XDG_RUNTIME_DIR/waydroid-rotation.pref" 2>/dev/null || echo false)"
     '';
 
+    # The container unit staying active is not proof Android is up: the unit is the manager, and the LXC container inside it can die on its own,
+    # leaving `Session: RUNNING` beside `Container: STOPPED` with nothing to notice. Only the session can ask for the container back, so that is what gets restarted.
+    #
+    # Bounded to three consecutive attempts, reset the moment the container is seen RUNNING, so a container that can never start cannot loop on battery.
+    containerWatch = pkgs.writeShellScript "waydroid-container-watch" ''
+        status=$(/run/wrappers/bin/sudo -n ${waydroidPackage}/bin/waydroid status 2>/dev/null)
+        session=$(printf '%s\n' "$status" | ${pkgs.gawk}/bin/awk -F'\t' '/^Session:/ { print $2 }')
+        container=$(printf '%s\n' "$status" | ${pkgs.gawk}/bin/awk -F'\t' '/^Container:/ { print $2 }')
+        attempts="$XDG_RUNTIME_DIR/waydroid-container-watch"
+
+        [ "$container" = "RUNNING" ] && { echo 0 > "$attempts"; exit 0; }
+        [ "$session" = "RUNNING" ] || exit 0
+
+        tries=$(cat "$attempts" 2>/dev/null || echo 0)
+        case "$tries" in *[!0-9]* | "") tries=0 ;; esac
+        [ "$tries" -ge 3 ] && exit 0
+        echo $((tries + 1)) > "$attempts"
+        ${pkgs.systemd}/bin/systemctl --user restart --no-block waydroid-session
+    '';
+
     # Nothing Android-side answers until the container finishes booting, which is minutes from cold on this hardware.
     waitBooted = ''
         booted=
-        for _ in $(seq 1 60); do
+        # 36 x 5s must stay well under home-manager's 5min unit start timeout, or a container that never boots fails the whole deploy.
+        for _ in $(seq 1 36); do
             booted=$(/run/wrappers/bin/sudo -n ${waydroidPackage}/bin/waydroid shell -- getprop sys.boot_completed 2>/dev/null | tr -dc '0-9')
             [ "$booted" = "1" ] && break
             sleep 5
@@ -625,6 +646,17 @@ in
                 Install.WantedBy = [ "graphical-session.target" ];
             };
 
+            waydroid-container-watch = {
+                Unit = {
+                    Description = "Restart the Waydroid session if its container has died underneath it";
+                    After = [ "waydroid-session.service" ];
+                };
+                Service = {
+                    Type = "oneshot";
+                    ExecStart = "${containerWatch}";
+                };
+            };
+
             waydroid-rotation = {
                 Unit = {
                     Description = "Own rotation while a Waydroid window is focused";
@@ -649,6 +681,7 @@ in
                 Service = {
                     Type = "oneshot";
                     RemainAfterExit = true;
+                    TimeoutStartSec = 240;
                     ExecStart = "${fdroidInstall}";
                 };
                 Install.WantedBy = [ "waydroid-session.service" ];
@@ -663,10 +696,21 @@ in
                 Service = {
                     Type = "oneshot";
                     RemainAfterExit = true;
+                    TimeoutStartSec = 240;
                     ExecStart = "${androidConfig}";
                 };
                 Install.WantedBy = [ "waydroid-session.service" ];
             };
+        };
+
+        # Wanted by timers.target rather than the session, so a session that has died still gets checked; the script itself no-ops unless the session is up.
+        systemd.user.timers.waydroid-container-watch = {
+            Unit.Description = "Check that Waydroid's container is still alive";
+            Timer = {
+                OnStartupSec = "2min";
+                OnUnitInactiveSec = "1min";
+            };
+            Install.WantedBy = [ "timers.target" ];
         };
     };
 }
