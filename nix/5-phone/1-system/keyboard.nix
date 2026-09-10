@@ -47,11 +47,14 @@
 
                 # keyd's virtual keyboard reads as a hardware keyboard to phoc, which suppresses the on-screen keyboard, so it may only run while the case is on.
                 # The flag is what ./dock-rotation.nix watches: the bind state only means anything once this service has settled it.
-                if [ -e "$driver/3-0015" ]; then
-                    echo 1 > /run/pinephone-keyboard-docked
+                if [ -e "$driver/3-0015" ]; then docked=1; else docked=0; fi
+                # Written only on change: dock-rotation watches it with PathChanged, which fires on every write, and this runs on every power_supply uevent
+                if [ "$(${pkgs.coreutils}/bin/cat /run/pinephone-keyboard-docked 2>/dev/null)" != "$docked" ]; then
+                    echo "$docked" > /run/pinephone-keyboard-docked
+                fi
+                if [ "$docked" = 1 ]; then
                     ${pkgs.systemd}/bin/systemctl start keyd.service
                 else
-                    echo 0 > /run/pinephone-keyboard-docked
                     ${pkgs.systemd}/bin/systemctl stop keyd.service
                 fi
             '';
