@@ -3,7 +3,7 @@
 # Feeds the host's geoclue fix into Android as a mock GPS provider, so Android apps locate without Waydroid having any GPS HAL of its own.
 #
 
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
     waydroidPackage = pkgs.waydroid-nftables;
 
@@ -24,7 +24,7 @@ let
         gi.require_version("Gio", "2.0")
         from gi.repository import Gio, GLib  # noqa: E402
 
-        WAYDROID = "${waydroidPackage}/bin/waydroid"
+        WAYDROID = ["/run/wrappers/bin/sudo", "-n", "${waydroidPackage}/bin/waydroid"]
         DESKTOP_ID = "waydroid-location"
         # 8 is GeoClue's exact level; anything lower rounds the fix to the city and navigation apps cannot use it.
         ACCURACY_EXACT = 8
@@ -37,7 +37,7 @@ let
 
         def android(*args):
             """Run one command inside the container, ignoring its output."""
-            return subprocess.run([WAYDROID, "shell", "--"] + list(args), capture_output=True, text=True, timeout=60)
+            return subprocess.run(WAYDROID + ["shell", "--"] + list(args), capture_output=True, text=True, timeout=60)
 
 
         def wait_booted():
@@ -137,21 +137,27 @@ let
     '';
 in
 {
-    # Geoclue authorises by desktop id, and a system client is trusted without going through the agent phosh only runs for the graphical session.
     services.geoclue2.appConfig.waydroid-location = {
         isAllowed = true;
         isSystem = true;
     };
 
-    systemd.services.waydroid-location = {
-        description = "Feed the host's geoclue fix into Android as a mock GPS provider";
-        after = [ "waydroid-container.service" ];
-        wants = [ "waydroid-container.service" ];
-        wantedBy = [ "multi-user.target" ];
-        serviceConfig = {
+    # Geoclue hands out no client at all until an agent is registered for the asking user -- every GetClient just times out, busctl included.
+    # mkForce because the desktop module turns nixpkgs' demo agent off on the assumption the shell supplies one, and nothing here does.
+    services.geoclue2.enableDemoAgent = lib.mkForce true;
+
+    # A user service rather than a system one because that agent registers per uid, and the bridge has to be the same user to be served by it.
+    home-manager.users.beatlink.systemd.user.services.waydroid-location = {
+        Unit = {
+            Description = "Feed the host's geoclue fix into Android as a mock GPS provider";
+            PartOf = [ "waydroid-session.service" ];
+            After = [ "waydroid-session.service" ];
+        };
+        Service = {
             ExecStart = "${locationBridge}/bin/waydroid-location";
             Restart = "always";
             RestartSec = 30;
         };
+        Install.WantedBy = [ "waydroid-session.service" ];
     };
 }
