@@ -230,10 +230,25 @@ in
                 btrfs-luks layout in disko-btrfs-luks.nix calls `cryptroot`.
 
                 Empty on a host whose root is ZFS. A host may carry both kinds
-                at once: Thor's root is a LUKS device while its SD card is still
-                a ZFS dataset, so it lists one of each.
+                at once: Ragnarok's root is a LUKS device while its backup drive
+                is still a ZFS pool, so it lists one of each.
 
                 Names go into systemd unit names unescaped, so keep them plain.
+            '';
+        };
+
+        luksMaxAttempts = lib.mkOption {
+            type = lib.types.int;
+            default = 5;
+            description = ''
+                How many times clevis-luks-retry restarts the cryptsetup unit of
+                a LUKS device before it gives up, or 0 to retry forever.
+
+                Bounded by default because every restart cancels the password
+                prompt: on a host someone can type into, a loop that never stops
+                is a loop that never lets them. Set it to 0 on a headless host,
+                where there is no one at the prompt and the ZFS loop next to it
+                has always retried without limit.
             '';
         };
 

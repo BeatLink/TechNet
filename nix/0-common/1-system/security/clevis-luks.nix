@@ -21,7 +21,15 @@ let
     clevisUnit = device: "cryptsetup-clevis-${device}.service";
 
     # A wrong key unlocks nothing no matter how often it is retried, and every restart cancels the password prompt the user would type into instead
-    maxAttempts = 5;
+    maxAttempts = clevisCfg.luksMaxAttempts;
+
+    # Skipped entirely at 0, which is what a headless host sets: nobody is waiting at the prompt the bound exists to protect
+    attemptGuard = lib.optionalString (maxAttempts > 0) ''
+        if [ "$attempts" -ge ${toString maxAttempts} ]; then
+            echo "clevis-luks-retry: $dev still locked after $attempts attempts, leaving the password prompt alone"
+            continue
+        fi
+    '';
 
     # Retry Loop -------------------------------------------------------------------------------------------------------------------------------------
     retryScript = ''
@@ -53,10 +61,7 @@ ${lib.concatMapStringsSep "\n" (device: "                    ${device}) cryptuni
 
                 counter="/run/clevis-luks-retry.$dev"
                 attempts="$(cat "$counter" 2>/dev/null || echo 0)"
-                if [ "$attempts" -ge ${toString maxAttempts} ]; then
-                    echo "clevis-luks-retry: $dev still locked after $attempts attempts, leaving the password prompt alone"
-                    continue
-                fi
+                ${attemptGuard}
 
                 case "$(state "$clevisunit")" in
                     activating)
