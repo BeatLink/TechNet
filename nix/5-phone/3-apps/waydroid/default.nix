@@ -4,6 +4,7 @@
 #
 {
     imports = [
+        ./location.nix
         ./remote.nix
         ./session.nix
     ];
