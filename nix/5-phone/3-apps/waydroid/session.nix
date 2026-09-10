@@ -378,6 +378,17 @@ let
     '';
 in
 {
+    # Waydroid brings up waydroid0 at 192.168.240.1/24 with its own dnsmasq, and the firewall already trusts the interface, but nothing masquerades
+    # the subnet -- so Android's packets reach the host and die there. Verified on 2026-09-09: gateway and LAN reachable, 1.1.1.1 and DNS both failing
+    # until a masquerade existed, all four passing after.
+    #
+    # externalInterface stays null on purpose. The module only emits `-o <iface>` when it is set, so leaving it out masquerades onto whichever
+    # interface the route picks -- wifi, WireGuard or mobile data. Naming one would break Android's networking on the other two.
+    networking.nat = {
+        enable = true;
+        internalInterfaces = [ "waydroid0" ];
+    };
+
     virtualisation.waydroid.enable = true;
     virtualisation.waydroid.package = pkgs.waydroid-nftables; # Speaks to nftables directly rather than through the legacy iptables tables
 
