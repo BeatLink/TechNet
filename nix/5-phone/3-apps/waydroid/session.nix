@@ -436,7 +436,7 @@ let
             cmd appops set com.android.vending RUN_ANY_IN_BACKGROUND deny
             cmd appops set com.android.vending RUN_IN_BACKGROUND deny
             wm size reset
-            wm density 540
+            wm density 270 # 720px at 270 is the same 426dp of layout width that 1440px at 540 gave, so only the pixel count drops
             settings put global hide_error_dialogs 1
             settings put global force_resizable_activities 1
             settings put global enable_freeform_support 0
@@ -548,11 +548,16 @@ in
 
             grep -q '^\[properties\]' "$cfg" || printf '\n[properties]\n' >> "$cfg"
 
-            # Waydroid renders a buffer of width/height x1.5 (the output scale), and its viewport plus phoc's scaling rules present that buffer at a third
-            # of its pixels: fullscreen views are never scaled and scale-to-fit never shrinks below half. 960x1920 is the one value where a third of the
-            # buffer is exactly the panel, at the price of Android rendering 1440x2880 and phoc downsampling 2:1. Multi-window stays off because those
-            # windows never resize after session start either, and one app filling the screen is what this hardware wants.
-            for pair in ro.opengles.version=131072 ro.config.low_ram=true persist.waydroid.width=960 persist.waydroid.height=1920 persist.waydroid.multi_windows=false; do
+            # Logical pixels, multiplied by the 1.5 fractional scale to size the buffer. 960x1920 made the buffer 1440x2880 for a 720x1440 panel, so the
+            # Mali-400 drew 4.1MP for a 1.0MP screen and every launcher frame missed vblank on "slow issue draw commands"; halving it took the median
+            # frame from 200ms to 23ms. Native apps never had this because they size from wl_output -- only Waydroid sizes itself from a prop.
+            #
+            # This is the whole panel rather than the usable area because phoc's scale-to-fit is off in display.nix. With it on, hwcomposer's
+            # xdg_toplevel configure handler took the shrunken size as its viewport destination while the buffer kept the size set here, so the
+            # difference showed as a permanent letterbox.
+            #
+            # Multi-window stays off because those windows never resize after session start either, and one app filling the screen is what this hardware wants.
+            for pair in ro.opengles.version=131072 ro.config.low_ram=true persist.waydroid.width=480 persist.waydroid.height=960 persist.waydroid.multi_windows=false; do
                 key=''${pair%%=*}
                 value=''${pair#*=}
 
