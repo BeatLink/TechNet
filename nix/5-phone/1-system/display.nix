@@ -73,8 +73,11 @@
             settings = {
                 "org/gnome/desktop/interface".show-battery-percentage = true;
 
-                # A window that cannot shrink to the 433px usable area keeps its own size, and phoc slides the excess under the top bar rather than fitting it.
-                "sm/puri/phoc".scale-to-fit = true;
+                # Off because Waydroid scales its buffer into whatever rectangle phoc hands it instead of resizing to it, so any shrink is a permanent
+                # letterbox: at 0.951 it lost 34px and 70px of the panel, and on a fresh boot it hit the 0.5 floor and drew Android at quarter size.
+                # Native apps resize to the configure they are sent, so they fill the panel either way; the cost is a window that cannot shrink to the
+                # usable area now keeps its own size and phoc slides the excess under the top bar.
+                "sm/puri/phoc".scale-to-fit = false;
 
                 # phoc draws the focus frame at the unscaled size, so leaving it on paints a block of blue beside every scaled window.
                 "mobi/phosh/phoc".focus-frame = false;
