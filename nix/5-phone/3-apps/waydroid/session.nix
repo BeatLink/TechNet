@@ -4,7 +4,7 @@
 # `sudo waydroid init` on first run, into the persisted /var/lib/waydroid, and the session then starts with `waydroid session start`.
 #
 
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 let
     waydroidPackage = pkgs.waydroid-nftables;
 
@@ -318,16 +318,92 @@ let
     # would otherwise each apply a quarter turn. force_resizable_activities is what makes apps reflow into whatever window they are given.
     #
     # Android state lives in the container's userdata, so it survives reboots but not a re-init; reapplying it every session start is what makes it declarative.
+    # Measured on this phone before any of this: the container held 1794MB and 158% of a core, of which Play Store's four processes were ~718MB and
+    # GMS' three ~674MB -- roughly 80% between them, against 954MB free on a 2968MB device. Only six of 179 packages were disabled.
+    #
+    # Everything here is disable-user where the package allows it, so `pm enable` puts any of it back without a re-init. Google's own store and
+    # framework stay: com.android.vending, gms, gsf, webview and packageinstaller are what apps are installed and run through.
+    disabledPackages = [
+        # Superseded by the phone's own applications
+        "com.google.android.apps.messaging"
+        "com.google.android.contacts"
+        "com.google.android.dialer"
+        "com.google.android.syncadapters.calendar"
+        "com.google.android.apps.googlecamera.fishfood"
+        "com.android.cameraextensions"
+        "org.lineageos.recorder"
+        "com.android.gallery3d"
+        "com.android.deskclock"
+        "com.android.calculator2"
+
+        # No calendar application is installed, so the provider and its sync adapter have nothing to serve
+        "com.android.providers.calendar"
+
+        # Assistant and search: the largest single consumer after the store and the framework
+        "com.google.android.googlequicksearchbox"
+        "com.google.android.as"
+        "com.google.android.as.oss"
+
+        # Nothing in a container has a modem, a printer, a car or a second screen to reach
+        "com.google.android.ims"
+        "com.android.emergency"
+        "com.android.simappdialog"
+        "com.android.stk"
+        "com.android.cellbroadcastreceiver"
+        "com.android.bips"
+        "com.android.printspooler"
+        "com.google.android.printservice.recommendation"
+        "com.google.android.projection.gearhead"
+        "com.android.companiondevicemanager"
+
+        # Ran once, or never will
+        "com.google.android.setupwizard"
+        "com.google.android.onetimeinitializer"
+        "com.google.android.partnersetup"
+        "com.google.android.apps.restore"
+        "com.android.managedprovisioning"
+        "com.android.dynsystem"
+        "com.android.cts.ctsshim"
+        "com.android.cts.priv.ctsshim"
+
+        # Background telemetry, supervision and verification, none of which this device is asking for
+        "com.google.android.apps.turbo"
+        "com.google.android.feedback"
+        "com.google.android.configupdater"
+        "com.google.android.verifier"
+        "com.google.android.safetycore"
+        "com.google.android.gms.location.history"
+        "com.google.android.gms.supervision"
+
+        # Screensavers, wallpapers and an easter egg, on a screen that is a window on another host's compositor
+        "com.android.dreams.basic"
+        "com.android.dreams.phototable"
+        "com.android.wallpaper"
+        "com.android.wallpaper.livepicker"
+        "com.android.wallpaperbackup"
+        "com.android.bookmarkprovider"
+        "com.android.traceur"
+        "com.android.egg"
+    ];
+
     androidConfig = pkgs.writeShellScript "waydroid-android-config" ''
         ${waitBooted}
 
         /run/wrappers/bin/sudo -n ${waydroidPackage}/bin/waydroid shell -- sh -c '
             pm disable com.google.android.gms/.chimera.GmsIntentOperationService
-            pm disable-user --user 0 com.google.android.dialer
-            pm disable-user --user 0 com.google.android.googlequicksearchbox
-            pm disable-user --user 0 com.google.android.as
-            pm disable-user --user 0 com.google.android.as.oss
-            pm disable-user --user 0 com.google.android.apps.restore
+            for package in ${lib.concatStringsSep " " disabledPackages}; do
+                # disable-user is reversible and needs no system uid; the fallback catches the handful that are not user-disableable
+                pm disable-user --user 0 "$package" >/dev/null 2>&1 || pm disable "$package" >/dev/null 2>&1 || true
+            done
+
+            # Android 13 freezes cached processes rather than leaving them schedulable, which is the difference between idle and merely quiet
+            settings put global cached_apps_freezer enabled
+            # low_ram already trims the cache; this pins it rather than leaving it to a heuristic sized for a phone with more memory
+            settings put global activity_manager_constants max_cached_processes=4
+            settings put secure backup_enabled 0
+            # The three background processes of the store came to ~436MB on their own, and nothing here installs apps unattended
+            cmd appops set com.android.vending RUN_ANY_IN_BACKGROUND deny
+            cmd appops set com.android.vending RUN_IN_BACKGROUND deny
             wm size reset
             wm density 540
             settings put global hide_error_dialogs 1
