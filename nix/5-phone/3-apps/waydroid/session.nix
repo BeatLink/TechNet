@@ -497,6 +497,16 @@ in
     };
 
     virtualisation.waydroid.enable = true;
+
+    # nixpkgs wants the container at multi-user.target but gives it no restart policy at all, so anything that stops it leaves Android gone until
+    # something starts it by hand -- which is what a stopped container looked like here. The session unit already restarts itself this way.
+    #
+    # on-failure rather than always, deliberately: `waydroid container stop` and the stop half of a restart both exit cleanly, and always would
+    # fight them, turning a deliberate stop into a restart loop.
+    systemd.services.waydroid-container.serviceConfig = {
+        Restart = "on-failure";
+        RestartSec = 10;
+    };
     # waydroid-nftables speaks to nftables directly rather than through the legacy iptables tables; the wrapper adds the wake described above
     virtualisation.waydroid.package = waydroidWake;
 
