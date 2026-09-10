@@ -230,8 +230,8 @@ in
                 btrfs-luks layout in disko-btrfs-luks.nix calls `cryptroot`.
 
                 Empty on a host whose root is ZFS. A host may carry both kinds
-                at once: Ragnarok's root is a LUKS device while its backup drive
-                is still a ZFS pool, so it lists one of each.
+                at once, listing one of each, though none does today: Ragnarok
+                and Thor have moved both of their drives to LUKS.
 
                 Names go into systemd unit names unescaped, so keep them plain.
             '';

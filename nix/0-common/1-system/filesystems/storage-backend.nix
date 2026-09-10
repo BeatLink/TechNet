@@ -38,10 +38,11 @@
             Whether /Storage on this host is the fleet's `data-pool-<host>/storage`
             ZFS dataset, mounted by mounts.nix.
 
-            Independent of `backend`, because the two drives are independent:
-            Ragnarok's root is btrfs on LUKS while its backup drive stays a ZFS
-            pool. False on a host that describes its own data drive instead,
-            which is Thor, whose card is a LUKS container of its own.
+            Independent of `backend`, because the two drives are independent: a
+            host can move its root off ZFS and keep the pool, or the reverse.
+            False on a host that describes its own data drive instead, which is
+            Thor with its card and Ragnarok with its backup disk -- both LUKS
+            containers holding btrfs.
         '';
     };
 }

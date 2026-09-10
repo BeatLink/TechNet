@@ -20,7 +20,7 @@ in
             };
         }
 
-        # Gated on the data drive rather than on the root backend: Ragnarok's root is btrfs on LUKS while this pool stays ZFS. Thor's own card is in data-drive.nix
+        # Gated on the data drive rather than on the root backend, because the two move independently; a host that opts out describes its own /Storage in data-drive.nix
         (lib.mkIf config.technet.storage.zfsDataPool {
             fileSystems."/Storage" = {
                 device = "${dataPool}/storage"; # Created by hand at install, not by disko

@@ -1,6 +1,6 @@
 # Root Drive #########################################################################################################################################
 #
-# Points disko at the SSD holding the system, declares the host ID the backup pool is stamped with, and corrects the queue flags its bridge misreports.
+# Points disko at the SSD holding the system, carries the host ID the ZFS module still asks for, and corrects the queue flags its bridge misreports.
 #
 
 { lib, ... }:
@@ -10,11 +10,11 @@
         # Disko Target ###############################################################################################################################
         # btrfs on LUKS rather than a ZFS pool: the A53 has aes and pmull, but OpenZFS carries its own crypto and never calls the kernel crypto API, so its
         # AES-GCM runs as generic C and took 53% of this board's CPU. dm-crypt does reach the instructions -- `cryptsetup benchmark` here reads aes-xts-256
-        # at 142/92 MiB/s where aes-cbc manages 31 on the same run. The backup drive stays a ZFS pool for now, so hostId and the ZFS module stay with it.
+        # at 142/92 MiB/s where aes-cbc manages 31 on the same run. The backup drive followed in data-drive.nix, so no pool is left and hostId is now vestigial.
         {
             technet.storage.backend = "btrfs-luks";
 
-            networking.hostId = "bed2ee51"; # ZFS refuses to import a pool whose recorded host ID does not match
+            networking.hostId = "bed2ee51"; # No pool left to import, but the ZFS module is still enabled fleet-wide and asserts on a missing host ID
 
             disko.devices.disk.root-drive.device = "/dev/disk/by-id/ata-SATA_SSD_22020812000605";
         }

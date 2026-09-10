@@ -70,9 +70,10 @@ dd if=shared.disk-image.img of=/dev/XXX bs=1M oflag=direct,sync status=progress
 The root drive is btrfs subvolumes inside one LUKS container, selected by
 `technet.storage.backend = "btrfs-luks"` in
 [`root-drive-disko.nix`](../nix/1-backup-server/1-system/root-drive-disko.nix).
-The backup drive is still `data-pool-Ragnarok`, a ZFS pool, and is meant to
-stay that way for now; the two are independent, which is what
-`technet.storage.zfsDataPool` says.
+The backup drive followed a day later and is now its own LUKS container holding
+btrfs -- see [Data drive](#data-drive). Nothing on this host is ZFS any more,
+which is what `technet.storage.zfsDataPool = false` says in
+[`data-drive.nix`](../nix/1-backup-server/1-system/data-drive.nix).
 
 The root drive moved off ZFS because OpenZFS carries its own crypto and never
 calls the kernel crypto API, so its AES-GCM runs as generic C on a CPU that has
@@ -257,44 +258,159 @@ until the tunnel comes up, the way the ZFS loop beside it always has.
 
 If it never does, the initrd sshd is the way in.
 
-## Data pool layout
+## Data drive
 
-`data-pool-Ragnarok` is created by hand at install rather than by disko, so
-these are the settings to recreate it with. It is still ZFS after the root
-drive moved to btrfs on LUKS, and pays the same unaccelerated crypto for it. Captured from the live pool; the
-raw dumps are in [`ragnarok-data-pool/`](ragnarok-data-pool).
+The backup drive is a single LUKS2 container holding one btrfs filesystem with
+`dup` data *and* metadata, and a single subvolume `@storage` mounted at
+`/Storage`. It replaced `data-pool-Ragnarok`, a ZFS pool, on 2026-09-10, for the
+same reason the root drive moved: OpenZFS never calls the kernel crypto API, so
+its AES-GCM ran as generic C on a CPU whose `aes`/`pmull` instructions sat idle.
+The ZFS dumps in [`ragnarok-data-pool/`](ragnarok-data-pool) are now historical.
 
-| Pool | Value |
-| ---- | ----- |
-| vdev | single disk, no redundancy — one partition, no mirror |
-| `ashift` | `12` |
-| `failmode` | `wait` |
-| `autotrim` | `off` — the USB bridges do not pass discard through |
+`dup` is the btrfs equivalent of the `copies=2` the ZFS dataset carried, and it
+exists for the same reason: one disk, no vdev redundancy, so without a second
+copy a checksum failure is detected and *not* repairable. It halves the drive —
+2.3 TiB usable of 4.55 TiB raw — which is ample for ~970 GiB of data.
 
-| `storage` dataset | Value |
-| ----------------- | ----- |
-| `encryption` | `aes-256-gcm`, `pbkdf2iters=350000` |
-| `keyformat` / `keylocation` | `passphrase` / `prompt`, supplied at boot by clevis |
-| `mountpoint` | `/Storage` |
-| `recordsize` | `1M` |
-| `compression` | `lz4` |
-| `copies` | `2` — a single vdev cannot repair itself otherwise |
-| `atime` | `off` |
-| `xattr` / `acltype` | `sa` / `posix` |
-| `com.sun:auto-snapshot` | `true` — inert, nothing consumes it |
+| | |
+| --- | --- |
+| device | `ST5000LM000-2U8170`, serial `WCJ9HXR9`, USB via SABRENT `152d:0583` |
+| partition | GPT, one partition, partlabel `ragnarok-cryptstorage` |
+| PARTUUID | `b701e0a4-fa98-467d-afd6-36cbca0f0737` |
+| LUKS | LUKS2, `aes-xts-plain64`, 512-bit key, **4096-byte sectors** |
+| LUKS KDF | argon2id, 256 MiB memory, 4 threads, ~370k iterations |
+| LUKS UUID | `340cfb19-e5bd-479a-a9ee-f04607540e1b` |
+| mapper name | `cryptstorage` |
+| btrfs | `-d dup -m dup`, label `RagnarokStorage`, crc32c |
+| btrfs UUID | `805e41b1-8d1e-4719-a557-0218ea7154ae` |
+| subvolume | `@storage` |
+| mount options | `compress=zstd,noatime` |
+| discard | **off** — the USB bridge passes none, so `allowDiscards` would leak the free-space map for nothing |
 
-The creation commands live in NixTool's `commands.py`, not in this repo.
+### Creating it
 
-Two values in the dumps read differently from the table: `failmode` shows
-`continue` because a recovery import set it, and `autotrim` reads as a default
-because the pool was reimported after it was turned off. The table is what to
-build with.
+Run from Odin with the drive attached there, because the Rock64 only has one
+USB 3 port and its own root SSD occupies it. `152d:0583` needs its UAS quirk on
+whatever host it is plugged into or it comes up unusable:
 
-Single vdev means no vdev-level redundancy, which is why the dataset carries
-`copies=2`: every block is written twice on the one disk, so a checksum failure
-has a second copy to heal from. It doubles space -- roughly 1.9 TB for the
-940 GB this pool held -- and it does nothing for whole-drive failure, only for
-the block corruption that a healthy disk can still return.
+```sh
+echo "152d:0583:uf" | sudo tee /sys/module/usb_storage/parameters/quirks
+```
+
+The passphrase is the host's `zfs_passphrase`, and must stay that way: clevis
+binds one secret per host and feeds it to every target, so a container made with
+a different passphrase can never be unlocked at boot.
+
+```sh
+sudo sh -c 'printf "%s" "$(cat /run/secrets/ragnarok_zfs_passphrase)" > /tmp/dk.key'
+sudo chmod 600 /tmp/dk.key
+
+# Both partition ends must land on 4096-byte boundaries -- see below
+TOTAL=$(sudo blockdev --getsz /dev/sdX)
+LAST=$((TOTAL - 34)); END=$((LAST - ((LAST - 7) % 8)))
+sudo sgdisk --zap-all /dev/sdX
+sudo sgdisk --new=1:2048:$END --typecode=1:8309 --change-name=1:ragnarok-cryptstorage /dev/sdX
+sudo partprobe /dev/sdX && sudo udevadm settle
+sudo wipefs -a /dev/sdX1                      # old ZFS labels survive repartitioning at the same offset
+
+sudo cryptsetup luksFormat --type luks2 --sector-size 4096 \
+    --pbkdf argon2id --pbkdf-memory 262144 --pbkdf-parallel 4 \
+    --batch-mode --key-file /tmp/dk.key /dev/sdX1
+sudo cryptsetup open --key-file /tmp/dk.key /dev/sdX1 cryptstorage
+
+sudo mkfs.btrfs -d dup -m dup -L RagnarokStorage /dev/mapper/cryptstorage
+sudo mount /dev/mapper/cryptstorage /mnt/newstorage
+sudo btrfs subvolume create /mnt/newstorage/@storage
+sudo umount /mnt/newstorage
+sudo mount -o subvol=@storage,compress=zstd,noatime /dev/mapper/cryptstorage /mnt/newstorage
+```
+
+Three things that are not obvious:
+
+**4096-byte sectors, and the alignment arithmetic.** The drive reports
+`4096-byte physical blocks`, but `cryptsetup` defaults to 512-byte sectors,
+which makes dm-crypt read-modify-write every partial block. Asking for
+`--sector-size 4096` then fails with *"Device size is not aligned to requested
+sector size"* unless the partition is a whole number of 4 KiB blocks. `sgdisk`
+aligns the *start* to 1 MiB by default but ends the partition at the last usable
+sector, which generally is not aligned. With `start = 2048`, the size is a
+multiple of 8 sectors only when `end ≡ 7 (mod 8)` — which is what the `END`
+arithmetic above produces.
+
+**The KDF cost is capped on purpose.** `cryptsetup` benchmarks the machine it
+runs on to pick argon2 parameters, and this container is created on Odin but
+unlocked in Ragnarok's initrd — 2 GB of RAM on a Cortex-A53. `--pbkdf-memory
+262144` (256 MiB) keeps the unlock inside what that board can afford. Nothing is
+really lost: the passphrase is 50 bytes of sops-held entropy, so KDF hardening
+is not what stands between an attacker and the disk.
+
+**Verify, do not trust a chained `echo`.** `cryptsetup ... | tail` reports
+`tail`'s exit status, so a `&& echo OK` after a pipeline will happily print OK
+over a failed format. Check `$?` on the command itself, or `cryptsetup luksDump`
+afterwards.
+
+### Migrating the data
+
+There is one drive, so the data has to go somewhere else and come back. It was
+staged on a 1 TB SSD (`/Storage/Backups`, which fits with ~15 GiB spare) and on
+Odin's own pool (`/Storage/Files`, 76.5 GB), then written back after the format.
+
+```sh
+# stage, with the source imported read-only so it stays a rollback
+sudo zpool import -f -N -o readonly=on -R /mnt/src -d /dev/sdX1 data-pool-Ragnarok
+sudo zfs load-key -L file:///run/secrets/ragnarok_zfs_passphrase data-pool-Ragnarok/storage
+sudo zfs mount data-pool-Ragnarok/storage
+sudo rsync -aHAX --numeric-ids --delete-before /mnt/src/Storage/Backups/ /mnt/stage/Backups/
+sudo rsync -n -aHAX --numeric-ids --delete-before -i /mnt/src/Storage/Backups/ /mnt/stage/Backups/   # verify: no output
+sudo zpool export data-pool-Ragnarok
+# ... format per above ...
+sudo rsync -aHAX --numeric-ids /mnt/stage/Backups/ /mnt/newstorage/Backups/
+```
+
+`--numeric-ids` is not optional: `borg` is uid 999 on Ragnarok and 999 is
+`colord` on Odin, so names would rewrite ownership of the whole backup tree.
+`--delete-before` rather than the default `--delete-during`, because borg
+compacts its repo — a stale copy holds segments that no longer exist upstream,
+and on a nearly-full staging disk those have to be freed *before* the new ones
+land.
+
+### Putting it back on Ragnarok
+
+The config in `data-drive.nix` cannot be deployed before the drive's JWE exists,
+for the same reason the root drive's could not: `boot.initrd.clevis.devices`
+becomes a `boot.initrd.secrets` entry read during *activation*, so a rebuild
+without it fails. And as with `cryptroot`, no new secret is needed -- a JWE is
+just the host passphrase encrypted to tang, so any of the host's own JWEs works
+under the new name:
+
+```sh
+sudo cp /persistent/etc/clevis/cryptroot.jwe /persistent/etc/clevis/cryptstorage.jwe
+sudo rm -f /persistent/etc/clevis/data-pool-Ragnarok-storage.jwe   # its dataset is gone
+sudo nixos-rebuild boot --flake .#Ragnarok
+```
+
+Order matters: reattach the drive and boot on the *old* config first (`/Storage`
+is `nofail`, so it comes up without it), seed the JWE, then rebuild. Deploying
+first leaves a host that fails to rebuild until someone puts the file there.
+
+Two measurements worth keeping:
+
+**The staging SSD needs UAS, not for speed but for TRIM.** Under `usb-storage`
+(BOT) the bridge advertises `DISC-GRAN 0B`, so the ~150 GB `--delete-before`
+freed stayed invisible to the controller and writes collapsed to 17 MB/s
+fighting garbage collection. Quirking `152d:0576` with `f` instead of `uf` keeps
+it on `uas`, where discard works: `fstrim` released 149.8 GiB in 18 seconds and
+writes went to 195 MB/s. Note this contradicts the "both aborted under UAS"
+comment in `data-drive.nix` — `0576` is fine under UAS with `NO_REPORT_OPCODES`.
+An SSD filled past ~96% slows down again regardless, and no amount of trimming
+helps that.
+
+**`dup` on a shingled drive is not disproportionately slow.** Measured during
+the write-back: 90.7 MB/s written to the drive at 100% utilisation while the
+source SSD read 45.4 MB/s — exactly half, which is both copies going down. So
+the logical rate is ~45 MB/s and 966 GB takes ~6 hours. Reading the source over
+USB 3 on Odin managed 128 MB/s, against roughly 35-40 MB/s on the Rock64, whose
+only USB 3 port is taken by the root SSD.
 
 ## As a build host
 

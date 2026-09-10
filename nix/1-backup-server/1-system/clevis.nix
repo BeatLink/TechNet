@@ -1,8 +1,8 @@
 # Clevis #############################################################################################################################################
 #
-# Points the shared Clevis module at this host's key material so the root container and the backup pool unlock from the Tang servers at boot.
+# Points the shared Clevis module at this host's key material so both LUKS containers unlock from the Tang servers at boot.
 #
-# One secret covers both: clevis binds a single passphrase per host, so the LUKS container is installed with the same zfs_passphrase the pool already holds.
+# One secret covers both: clevis binds a single passphrase per host, so both containers are created with the same zfs_passphrase the ZFS pools used to hold.
 #
 
 { config, ... }:
@@ -11,9 +11,13 @@
         enable = true;
         sopsFile = "${config.technet.secrets.path}/clevis.yaml";
 
-        datasets = [ "data-pool-${config.networking.hostName}/storage" ]; # Only the backup drive is ZFS; the root drive is the LUKS device below
+        datasets = [ ]; # Nothing on this host is ZFS any more: the root drive and the backup drive are both LUKS
 
-        luksDevices = [ "cryptroot" ]; # Named by disko-btrfs-luks.nix
+        # cryptroot from disko-btrfs-luks.nix, cryptstorage from data-drive.nix
+        luksDevices = [
+            "cryptroot"
+            "cryptstorage"
+        ];
 
         luksMaxAttempts = 0; # Headless and off site: there is no one at the password prompt the default bound protects, and the ZFS loop never bounded it either
     };

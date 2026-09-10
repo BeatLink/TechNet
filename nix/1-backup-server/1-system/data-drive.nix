@@ -1,6 +1,9 @@
 # Data Drive #########################################################################################################################################
 #
-# The USB transport and queue depths for the backup pool, plus ownership of the borg tree; the mount itself comes from the shared module in 0-common.
+# The 5TB backup disk: one btrfs subvolume inside a LUKS container, the USB transport quirks its bridge needs, and ownership of the borg tree.
+#
+# Unlocked by clevis on the same passphrase the root drive uses, because clevis binds one secret per host and feeds it to every target in
+# technet.clevis.luksDevices; the drive cannot have one of its own. See docs/ragnarok.md for the layout and the commands that built it.
 #
 
 { lib, ... }:
@@ -11,35 +14,43 @@ in
 {
     config = lib.mkMerge [
 
+        # Storage Mount ##############################################################################################################################
+        {
+            technet.storage.zfsDataPool = false; # /Storage is this drive, not the fleet's data-pool-Ragnarok
+
+            # By partuuid because the partlabel is not unique across the fleet and the mapper name is what everything else spells out
+            boot.initrd.luks.devices.cryptstorage = {
+                device = "/dev/disk/by-partuuid/b701e0a4-fa98-467d-afd6-36cbca0f0737";
+                crypttabExtraOpts = [ "nofail" ]; # A backup drive that fails to appear must leave the host reachable rather than stranding the boot
+            };
+
+            fileSystems."/Storage" = {
+                device = "/dev/mapper/cryptstorage";
+                fsType = "btrfs";
+                options = [
+                    "subvol=@storage"
+                    "compress=zstd"
+                    "noatime"
+                    "nofail"
+                    "x-systemd.device-timeout=30s" # A spinning USB disk answers only after it has spun up, which the 10s a flash device gets is not enough for
+                ];
+                neededForBoot = true; # Must stay true: clevis unlocks the device only in the initrd, so a stage 2 mount finds no key
+            };
+        }
+
         # USB Transport ##############################################################################################################################
         {
             # f is not optional: a quirks parameter replaces the kernel's built-in entry for the device rather than adding to it, and that entry is NO_REPORT_OPCODES
             boot.kernelParams = [ "usb-storage.quirks=${lib.concatMapStringsSep "," (id: "152d:${id}:uf") bridges}" ];
 
-            # The shingled drive blocks past the 30s default while rewriting a band, and the reset the kernel then issues is what suspends the pool;
-            # the drive feeds no entropy worth harvesting either. Setting a scheduler here is pointless: ZFS reopens the vdev with none.
-            # usb-storage caps a command at 120KB, so one 512KB aggregated read cost four round trips on a bridge that holds a single command; 1024 sectors matches zfs_vdev_aggregation_limit.
+            # The shingled drive blocks past the 30s default while rewriting a band, and the reset the kernel then issues is what takes the filesystem down;
+            # the drive feeds no entropy worth harvesting either. usb-storage caps a command at 120KB, so a large read costs several round trips on a bridge
+            # that holds a single command; 1024 sectors is the most it will carry in one.
             services.udev.extraRules = lib.concatMapStringsSep "\n" (id: ''
                 ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${id}", ATTR{device/timeout}="180"
                 ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${id}", ATTR{queue/add_random}="0"
                 ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${id}", ATTR{device/max_sectors}="1024"
             '') bridges;
-        }
-
-        # Queue Depths ###############################################################################################################################
-        # data-pool-Ragnarok is one shingled drive whose stalls these shallow queues keep short; a scrub queue deeper than one drove the UAS bridge into reset loops, so it stays at one.
-        # Prefetch reached 64MB per stream, and eight streams against a 512MB ARC evicted 87% of it unread; 16MB is what stays resident long enough to be used.
-        {
-            boot.extraModprobeConfig = ''
-                options zfs zfs_vdev_max_active=16
-                options zfs zfs_vdev_async_write_max_active=2
-                options zfs zfs_vdev_async_read_max_active=2
-                options zfs zfs_vdev_sync_read_min_active=10
-                options zfs zfs_vdev_scrub_max_active=1
-                options zfs zfs_txg_timeout=15
-                options zfs zfs_vdev_aggregation_limit=524288
-                options zfs zfetch_max_distance=16777216
-            '';
         }
 
         # Backup Tree Ownership ######################################################################################################################
