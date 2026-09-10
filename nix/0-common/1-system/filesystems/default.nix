@@ -2,6 +2,7 @@
     imports = [
         ./storage-backend.nix
         ./zfs.nix
+        ./btrfs.nix
         ./disko.nix
         ./disko-btrfs-luks.nix
         ./mounts.nix
