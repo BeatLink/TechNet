@@ -8,6 +8,35 @@
 let
     waydroidPackage = pkgs.waydroid-nftables;
 
+    # Android sleeps on its own timeout and asks the host to suspend it, which freezes the container -- worth keeping, because a frozen container
+    # costs nothing at all. What upstream never supplies is the other half: maybeLaunchLater unfreezes the cgroup but nothing wakes Android's
+    # display, so no surface is ever mapped and the window looks dead. Verified here: SLEEP then WAKEUP moves mWakefulness both ways, and an
+    # unfreeze followed by a wake brings a genuinely FROZEN container back to RUNNING and Awake.
+    #
+    # The binary is wrapped rather than the launchers because waydroid writes a .desktop per installed app as it installs them, all of them calling
+    # `waydroid app launch`; there is no one file to patch. It goes on virtualisation.waydroid.package so the wrapper IS the waydroid on PATH --
+    # adding a second copy to the user profile would leave which one a launcher resolves up to PATH order.
+    wakeBeforeShowing = pkgs.writeShellScript "waydroid-wake-before-showing" ''
+        # Only the subcommands that put a window on screen. `shell` must never match: the wake below goes through it and would recurse.
+        case "''${1-}" in
+            show-full-ui | app | first-launch) ;;
+            *) exit 0 ;;
+        esac
+
+        # Both are best-effort: a container that is already thawed and awake answers these harmlessly, and a broken one must not block the launch.
+        ${waydroidPackage}/bin/waydroid container unfreeze >/dev/null 2>&1 || true
+        /run/wrappers/bin/sudo -n ${waydroidPackage}/bin/waydroid shell -- input keyevent KEYCODE_WAKEUP >/dev/null 2>&1 || true
+    '';
+
+    waydroidWake = pkgs.symlinkJoin {
+        name = "waydroid-wake";
+        paths = [ waydroidPackage ];
+        nativeBuildInputs = [ pkgs.makeWrapper ];
+        postBuild = ''
+            wrapProgram $out/bin/waydroid --run '${wakeBeforeShowing} "$@"'
+        '';
+    };
+
     # lswt binds the newer ext-foreign-toplevel-list-v1 unconditionally where both exist, and that protocol carries no state -- no activated flag, so no
     # focus events at all. The wlr protocol is the one that answers "which window is focused", so prefer it. Same patch focus-boost.nix carries.
     lswt = pkgs.lswt.overrideAttrs (old: {
@@ -401,6 +430,8 @@ let
             # low_ram already trims the cache; this pins it rather than leaving it to a heuristic sized for a phone with more memory
             settings put global activity_manager_constants max_cached_processes=4
             settings put secure backup_enabled 0
+            # Long enough not to sleep out from under a session; it still sleeps and freezes eventually, and the wrapper wakes it when it has
+            settings put system screen_off_timeout 1800000
             # The three background processes of the store came to ~436MB on their own, and nothing here installs apps unattended
             cmd appops set com.android.vending RUN_ANY_IN_BACKGROUND deny
             cmd appops set com.android.vending RUN_IN_BACKGROUND deny
@@ -466,7 +497,8 @@ in
     };
 
     virtualisation.waydroid.enable = true;
-    virtualisation.waydroid.package = pkgs.waydroid-nftables; # Speaks to nftables directly rather than through the legacy iptables tables
+    # waydroid-nftables speaks to nftables directly rather than through the legacy iptables tables; the wrapper adds the wake described above
+    virtualisation.waydroid.package = waydroidWake;
 
     # Copied rather than symlinked because a store path does not resolve inside the container, and C only creates, so editing this needs the old file deleted.
     systemd.tmpfiles.settings."waydroid-overlay" = {
