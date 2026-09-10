@@ -17,7 +17,10 @@ in
                 supportedFilesystems = [ "zfs" ];
                 initrd = {
                     supportedFilesystems = [ "zfs" ];
-                    systemd.services."zfs-import-${dataPool}".after = [ "zfs-import-${rootPool}.service" ]; # The data pool must import after root, otherwise the two race
+                    # The data pool must import after root, otherwise the two race; a btrfs-luks host has no root pool to order against
+                    systemd.services = lib.mkIf (config.technet.storage.backend == "zfs") {
+                        "zfs-import-${dataPool}".after = [ "zfs-import-${rootPool}.service" ];
+                    };
                 };
                 zfs.forceImportRoot = false;
             };

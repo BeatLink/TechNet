@@ -1,7 +1,7 @@
 # Storage Backend ####################################################################################################################################
 #
-# Which of the two root-drive implementations a host uses. The layout, the boot-time wipe and the unlock all have to agree with each other, so they
-# read one option rather than being switched independently and drifting apart.
+# Which of the two root-drive implementations a host uses, and whether /Storage is the fleet's ZFS data pool. The layout, the boot-time wipe and the
+# unlock all have to agree with each other, so they read one option rather than being switched independently and drifting apart.
 #
 
 { lib, ... }:
@@ -28,6 +28,20 @@
 
             Only worth setting on a host whose CPU lacks accelerated ZFS crypto;
             x86 hosts have AES-NI and PCLMULQDQ and are faster on ZFS as they are.
+        '';
+    };
+
+    options.technet.storage.zfsDataPool = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = ''
+            Whether /Storage on this host is the fleet's `data-pool-<host>/storage`
+            ZFS dataset, mounted by mounts.nix.
+
+            Independent of `backend`, because the two drives are independent:
+            Ragnarok's root is btrfs on LUKS while its backup drive stays a ZFS
+            pool. False on a host that describes its own data drive instead,
+            which is Thor, whose card is a LUKS container of its own.
         '';
     };
 }

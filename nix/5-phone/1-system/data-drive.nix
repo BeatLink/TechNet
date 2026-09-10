@@ -14,6 +14,8 @@
 # 0-common/1-system/filesystems/directories.nix alongside the XDG directories that depend on them.
 #
 {
+    technet.storage.zfsDataPool = false; # /Storage is this card, not the fleet's data-pool-Thor
+
     # By partuuid because the GPT is still the one the ZFS pool was made with: only p2's contents changed, so its partlabel misleadingly reads zfs-data-partition
     boot.initrd.luks.devices.cryptstorage = {
         device = "/dev/disk/by-partuuid/06625445-3637-49aa-bc36-f3a301616e0b";
