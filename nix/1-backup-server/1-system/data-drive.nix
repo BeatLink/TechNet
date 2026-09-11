@@ -24,7 +24,7 @@
                     "compress=zstd"
                     "noatime"
                     "nofail"
-                    "x-systemd.device-timeout=30s" # More time for HDD
+                    "x-systemd.device-timeout=90s" # Waits on the clevis unlock, not the disk, and that takes ~35s here
                 ];
                 neededForBoot = true;
             };
