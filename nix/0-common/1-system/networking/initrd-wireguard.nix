@@ -140,7 +140,11 @@ in
                         before = [ "initrd-switch-root.target" ];
                         conflicts = [ "initrd-switch-root.target" ];
                         unitConfig.DefaultDependencies = "no";
-                        serviceConfig.Type = "oneshot";
+                        serviceConfig = {
+                            Type = "oneshot";
+                            # A run in progress is killed by the switch-root isolate, and without this the resulting failure survives into the booted system.
+                            SuccessExitStatus = "0 SIGTERM";
+                        };
                         script = ''
                             carrying() {
                                 ${pkgs.iputils}/bin/ping ${pingArgs} > /dev/null 2>&1
