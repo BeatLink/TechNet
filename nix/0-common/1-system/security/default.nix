@@ -9,7 +9,6 @@
         ./fail2ban.nix
         ./tang.nix
         ./clevis.nix
-        ./clevis-luks.nix
         ./secrets.nix
     ];
 }

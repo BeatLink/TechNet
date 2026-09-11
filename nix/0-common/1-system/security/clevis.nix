@@ -1,6 +1,9 @@
 # Clevis #############################################################################################################################################
 #
-# Unlocks this host's ZFS datasets and LUKS devices at boot against the tang servers, and the tool that rebinds the JWEs when those keys change.
+# Unlocks this host's ZFS datasets and LUKS devices at boot against the tang servers, and the tool that rebinds them when those keys change.
+#
+# ZFS datasets are unlocked from JWE files carried into the initrd as secrets, retried by the loop below. LUKS devices carry their binding in the
+# LUKS2 header instead, and clevis-luks-askpass answers systemd's password prompt whenever tang is reachable, leaving the prompt itself intact.
 #
 
 { config, lib, pkgs, ... }:
@@ -21,14 +24,13 @@ let
 
     jweFile = ds: "${clevisCfg.stateDir}/${builtins.replaceStrings [ "/" ] [ "-" ] ds}.jwe";
 
-    # One JWE per thing that needs unlocking, whether that is a ZFS dataset or a LUKS device; only the command that consumes it differs.
-    unlockTargets = clevisCfg.datasets ++ clevisCfg.luksDevices;
+    luksDevicePath = name: config.boot.initrd.luks.devices.${name}.device;
 
     pools = lib.unique (map (ds: lib.head (lib.splitString "/" ds)) clevisCfg.datasets);
 
     importServices = map (pool: "zfs-import-${pool}.service") pools;
 
-    # Retry Loop -------------------------------------------------------------------------------------------------------------------------------------
+    # ZFS Retry Loop ---------------------------------------------------------------------------------------------------------------------------------
     # Retries every still-locked dataset until they all open, then nudges the import units that were left waiting on a prompt.
     retryScript = ''
         set -u
@@ -100,13 +102,15 @@ let
     '';
 
     # Rebind Script ----------------------------------------------------------------------------------------------------------------------------------
-    # Re-encrypts the ZFS passphrase against the current tang keys and writes one verified JWE per dataset.
+    # Re-encrypts the host passphrase against the current tang keys: one verified JWE per dataset, and one verified header binding per LUKS device.
     rebindClevis = pkgs.writeShellApplication {
         name = "rebind-clevis";
         runtimeInputs = [
             clevisPackage
+            pkgs.cryptsetup
             pkgs.curl
             pkgs.coreutils
+            pkgs.gnused
         ];
         text = ''
             set -euo pipefail
@@ -149,9 +153,12 @@ let
                 echo "rebind-clevis: unreachable addresses are still bound but unverified." >&2
             fi
 
-            install -d -m 0700 -o root -g root "${clevisCfg.stateDir}"
-
             expected="$(tr -d '\n' < "$PASSPHRASE_FILE")"
+
+            # ZFS datasets: a JWE file each, embedded into the initrd by the next rebuild -------------------------------------------------------------
+            ${lib.optionalString (clevisCfg.datasets != [ ]) ''
+                install -d -m 0700 -o root -g root "${clevisCfg.stateDir}"
+            ''}
 
             ${lib.concatMapStringsSep "\n" (ds: ''
                 tmp="$(mktemp)"
@@ -168,19 +175,65 @@ let
                 rm -f "$tmp"
                 trap - EXIT
                 echo "rebind-clevis: wrote ${jweFile ds} (${ds})"
-            '') unlockTargets}
+            '') clevisCfg.datasets}
+
+            # LUKS devices: a fresh binding in the header, verified against the device before the old bindings are removed ---------------------------
+            clevis_slots() {
+                clevis luks list -d "$1" 2>/dev/null | sed -n 's/^\([0-9]\+\):.*/\1/p'
+            }
+
+            ${lib.concatMapStringsSep "\n" (name: ''
+                dev="${luksDevicePath name}"
+                if [ ! -b "$dev" ]; then
+                    echo "rebind-clevis: ${name}: $dev is not present, cannot rebind it" >&2
+                    exit 1
+                fi
+
+                previous="$(clevis_slots "$dev" | tr '\n' ' ')"
+                printf '%s' "$expected" | clevis luks bind -y -k - -d "$dev" sss '${sssConfig}'
+
+                # The slot bind just added is the one that was not there before
+                slot=""
+                for candidate in $(clevis_slots "$dev"); do
+                    case " $previous " in
+                        *" $candidate "*) ;;
+                        *) slot="$candidate" ;;
+                    esac
+                done
+                if [ -z "$slot" ]; then
+                    echo "rebind-clevis: ${name}: bind reported success but no new slot appeared" >&2
+                    exit 1
+                fi
+
+                if ! clevis luks pass -d "$dev" -s "$slot" | cryptsetup open --test-passphrase --key-file - "$dev"; then
+                    echo "rebind-clevis: ${name}: slot $slot does not open $dev, removing it and refusing to continue" >&2
+                    clevis luks unbind -f -d "$dev" -s "$slot"
+                    exit 1
+                fi
+                echo "rebind-clevis: ${name}: bound and verified slot $slot on $dev"
+
+                for old in $previous; do
+                    clevis luks unbind -f -d "$dev" -s "$old"
+                    echo "rebind-clevis: ${name}: removed the previous binding in slot $old"
+                done
+            '') clevisCfg.luksDevices}
 
             echo
-            echo "rebind-clevis: all JWEs rebound and verified."
-            echo "Apply them to the initrd with:"
-            echo "  sudo nixos-rebuild boot --flake .#${config.networking.hostName}"
+            echo "rebind-clevis: everything rebound and verified."
+            ${lib.optionalString (clevisCfg.luksDevices != [ ]) ''
+                echo "LUKS bindings live in the headers and are used from the next boot on."
+            ''}
+            ${lib.optionalString (clevisCfg.datasets != [ ]) ''
+                echo "Apply the dataset JWEs to the initrd with:"
+                echo "  sudo nixos-rebuild boot --flake .#${config.networking.hostName}"
+            ''}
         '';
     };
 in
 {
     # Options ########################################################################################################################################
     options.technet.clevis = {
-        enable = lib.mkEnableOption "clevis/tang ZFS unlocking at boot";
+        enable = lib.mkEnableOption "clevis/tang unlocking of ZFS datasets and LUKS devices at boot";
 
         rebindTool = {
             enable = lib.mkOption {
@@ -191,10 +244,11 @@ in
                     independently of whether unlocking at boot is enabled.
 
                     Deliberately separate, because the two have a chicken-and-egg
-                    relationship: rebind-clevis is what *writes* the JWE, and
-                    unlocking at boot is what consumes it. Gating the tool behind
-                    `enable` means a freshly installed host cannot produce the JWE
-                    without first turning on a feature that has nothing to read.
+                    relationship: rebind-clevis is what *writes* the JWE or header
+                    binding, and unlocking at boot is what consumes it. Gating the
+                    tool behind `enable` means a freshly installed host cannot
+                    produce the binding without first turning on a feature that
+                    has nothing to read.
 
                     Defaults on. It costs one sops secret and one script, and
                     nothing it installs runs on its own -- rebind-clevis only does
@@ -213,11 +267,13 @@ in
                 [ "data-pool-\''${hostName}/storage" "root-pool-\''${hostName}/root" ]
             '';
             description = ''
-                ZFS datasets unlocked via clevis at boot.
+                ZFS datasets unlocked via clevis at boot, each from a JWE file
+                in stateDir that rebind-clevis writes and the initrd embeds.
 
                 The default is the standard TechNet layout laid down by
                 3-filesystem/1-disko.nix (the root pool) plus the host's data pool.
-                Override this on a host whose pools differ from that layout.
+                Override this on a host whose pools differ from that layout, and
+                set it empty on a host with no ZFS left to unlock.
             '';
         };
 
@@ -229,26 +285,18 @@ in
                 `boot.initrd.luks.devices.<name>` -- which is what the
                 btrfs-luks layout in disko-btrfs-luks.nix calls `cryptroot`.
 
+                Each carries its own binding as a LUKS2 token, written by
+                rebind-clevis with `clevis luks bind` using the host passphrase
+                from sopsFile. At boot, clevis-luks-askpass answers the device's
+                password prompt from that token whenever tang can be reached, and
+                keeps retrying while the prompt is pending; the prompt itself stays
+                open for the console and the initrd sshd the whole time. The
+                binding is read from the header, so it needs no rebuild to take
+                effect and no file has to exist before the host can be built.
+
                 Empty on a host whose root is ZFS. A host may carry both kinds
                 at once, listing one of each, though none does today: Ragnarok
                 and Thor have moved both of their drives to LUKS.
-
-                Names go into systemd unit names unescaped, so keep them plain.
-            '';
-        };
-
-        luksMaxAttempts = lib.mkOption {
-            type = lib.types.int;
-            default = 5;
-            description = ''
-                How many times clevis-luks-retry restarts the cryptsetup unit of
-                a LUKS device before it gives up, or 0 to retry forever.
-
-                Bounded by default because every restart cancels the password
-                prompt: on a host someone can type into, a loop that never stops
-                is a loop that never lets them. Set it to 0 on a headless host,
-                where there is no one at the prompt and the ZFS loop next to it
-                has always retried without limit.
             '';
         };
 
@@ -257,7 +305,8 @@ in
             default = 5;
             description = ''
                 Seconds clevis-retry waits between attempts at the datasets still
-                locked.
+                locked. Only the ZFS loop reads it: clevis-luks-askpass paces
+                itself by the tang connect timeout.
 
                 This is the pause *between* attempts, not the retry period: an
                 attempt against an unreachable tang address costs whatever curl's
@@ -271,9 +320,10 @@ in
             type = lib.types.str;
             default = "/persistent/etc/clevis";
             description = ''
-                Persistent directory holding the JWEs. These are read off the running
-                filesystem at nixos-rebuild time and embedded into the initrd, so they
-                never enter the Nix store. rebind-clevis writes here directly.
+                Persistent directory holding the dataset JWEs. These are read off
+                the running filesystem at nixos-rebuild time and embedded into the
+                initrd, so they never enter the Nix store. rebind-clevis writes
+                here directly. LUKS devices keep nothing here.
             '';
         };
 
@@ -302,11 +352,15 @@ in
                     assertion = clevisCfg.enable -> clevisCfg.sopsFile != null;
                     message = "technet.clevis.enable is on for ${config.networking.hostName} but no sopsFile is set, so there is no zfs_passphrase to unlock with.";
                 }
+                {
+                    assertion = lib.all (name: lib.hasAttr name config.boot.initrd.luks.devices) clevisCfg.luksDevices;
+                    message = "technet.clevis.luksDevices on ${config.networking.hostName} names a device that boot.initrd.luks.devices does not declare.";
+                }
             ];
         }
 
         # Rebind Tool ################################################################################################################################
-        # Available whether or not boot unlocking is on, so a new host can write its first JWE before enabling the feature that consumes it.
+        # Available whether or not boot unlocking is on, so a new host can write its first binding before enabling the feature that consumes it.
         (lib.mkIf ((clevisCfg.rebindTool.enable || clevisCfg.enable) && clevisCfg.sopsFile != null) {
             sops.secrets.zfs_passphrase = {
                 sopsFile = clevisCfg.sopsFile;
@@ -316,35 +370,47 @@ in
             environment.systemPackages = [ rebindClevis ];
         })
 
-        # Boot Unlock ################################################################################################################################
-        (lib.mkIf clevisCfg.enable {
+        # ZFS Boot Unlock ############################################################################################################################
+        (lib.mkIf (clevisCfg.enable && clevisCfg.datasets != [ ]) {
             boot.initrd = {
                 clevis = {
                     enable = true;
                     useTang = true;
-                    devices = lib.genAttrs unlockTargets (target: {
-                        secretFile = jweFile target;
+                    devices = lib.genAttrs clevisCfg.datasets (ds: {
+                        secretFile = jweFile ds;
                     });
                 };
 
-                systemd.services = lib.mkIf (clevisCfg.datasets != [ ]) {
-                    clevis-retry = {
-                        description = "Keep retrying clevis/tang unlock in the background until it succeeds";
-                        # Never make this blocking or ordered-before anything: the loop can run forever and would stall the initrd sshd needed to fix that.
-                        wantedBy = [ "initrd.target" ];
-                        after = [ "systemd-modules-load.service" ];
-                        unitConfig = {
-                            DefaultDependencies = "no";
-                            ConditionPathExists = "/etc/clevis";
-                        };
-                        serviceConfig = {
-                            Type = "simple";
-                            Restart = "on-failure";
-                            RestartSec = 15;
-                        };
-                        script = retryScript;
+                systemd.services.clevis-retry = {
+                    description = "Keep retrying clevis/tang unlock in the background until it succeeds";
+                    # Never make this blocking or ordered-before anything: the loop can run forever and would stall the initrd sshd needed to fix that.
+                    wantedBy = [ "initrd.target" ];
+                    after = [ "systemd-modules-load.service" ];
+                    unitConfig = {
+                        DefaultDependencies = "no";
+                        ConditionPathExists = "/etc/clevis";
                     };
+                    serviceConfig = {
+                        Type = "simple";
+                        Restart = "on-failure";
+                        RestartSec = 15;
+                    };
+                    script = retryScript;
                 };
+            };
+        })
+
+        # LUKS Boot Unlock ###########################################################################################################################
+        # nixpkgs' module installs clevis' own askpass path and service units; the only local addition is clevis on the initrd shell's PATH.
+        (lib.mkIf (clevisCfg.enable && clevisCfg.luksDevices != [ ]) {
+            boot.initrd = {
+                clevisLuksAskpass = {
+                    enable = true;
+                    useTang = true;
+                    package = clevisPackage;
+                };
+
+                systemd.extraBin.clevis = clevis; # So `clevis luks list -d ...` works from the initrd sshd when a boot needs looking at
             };
         })
     ];

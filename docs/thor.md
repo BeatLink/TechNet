@@ -121,17 +121,18 @@ needs no temporary edit.
 
 ### 4. After first boot
 
-Clevis is deliberately disabled during installation, because
-`boot.initrd.clevis.devices` reads the JWE at **build** time and it does not
-exist yet. Once Thor boots:
+Clevis can stay enabled through the install: a LUKS container carries its tang
+binding in its own header, so nothing is read at build time and nothing has to
+exist before the first boot. Until the binding is written the phone prompts on
+unl0kr and boots on the typed passphrase. Once Thor boots:
 
 ```sh
 sops secrets/5-phone/clevis.yaml          # zfs_passphrase, same value as thor_encryption_key
-sudo rebind-clevis                        # needs tang reachable
+sudo rebind-clevis                        # needs tang reachable; binds both containers
 ```
 
-then set `enable = true` in
-[`clevis.nix`](../nix/5-phone/1-system/clevis.nix) and `nixos-rebuild boot`.
+From the next boot on, clevis-luks-askpass answers the prompts from those
+bindings whenever tang is reachable, and typing once still unlocks both.
 
 ### Troubleshooting
 

@@ -14,7 +14,6 @@
                 "phy_rockchip_inno_hdmi" # Must load before rockchipdrm or the HDMI probe defers and the screen stays blank
                 "rockchipdrm"
             ];
-            boot.initrd.systemd.network.wait-online.extraArgs = [ "--interface=end0:routable" ];
         }
 
         # Clock ######################################################################################################################################

@@ -59,11 +59,15 @@
 
         # Ethernet ###################################################################################################################################
         {
-            systemd.network.networks."end0" = {
+            # Numbered so it sorts before nixpkgs' 99-ethernet-default-dhcp.network, which otherwise matches end0 first and silently wins
+            systemd.network.networks."01-end0" = {
                 matchConfig.Name = "end0";
                 networkConfig.DHCP = "ipv4";
                 linkConfig.RequiredForOnline = "routable";
             };
+
+            # wg0 is "routable" the moment it has its static address, so without this the initrd counts the network as online before end0 has a lease
+            boot.initrd.systemd.network.wait-online.extraArgs = [ "--interface=end0:routable" ];
         }
 
         # DNS ########################################################################################################################################

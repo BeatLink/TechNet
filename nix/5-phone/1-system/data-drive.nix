@@ -4,8 +4,8 @@
 # for it, and is never rewritten; partition 2 is a LUKS container holding one btrfs subvolume, mounted
 # at /Storage like every other host's. See docs/thor-data-card for the ZFS layout it replaced.
 #
-# Unlocked by clevis on the same passphrase the root drive uses, because clevis binds one secret per
-# host and feeds it to every target in technet.clevis.luksDevices; the card cannot have one of its own.
+# Made with the same passphrase as the root drive, so one entry at the prompt opens both, and carrying
+# its own clevis binding in the header, written by rebind-clevis from that passphrase.
 #
 # No snapshots. ZFS gave them free through com.sun:auto-snapshot and btrfs has no scheduler of its own,
 # and the folders worth keeping are going into the syncthing mesh instead.

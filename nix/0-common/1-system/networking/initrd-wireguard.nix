@@ -10,6 +10,8 @@
 # The recovery loop exists because a link reports "routable" as soon as it has
 # an address, even when it carries no traffic at all -- so link state is not a
 # usable health check and the tunnel has to be probed by pinging through it.
+# It runs on a timer from 45s into the initrd until switch-root, which stops
+# every initrd unit; nothing has to cancel it by hand.
 # The usual failure is the interface coming up before DNS, so a peer endpoint
 # never resolves and is silently dropped; `networkctl reconfigure` does NOT
 # re-resolve it, only a full networkd restart does. Hence restart first,
@@ -134,6 +136,9 @@ in
 
                     "initrd-wireguard-recover" = {
                         description = "Bounce the wireguard tunnel if it is not carrying traffic";
+                        # Stopped by the switch-root isolate like every other initrd unit; the conflict only makes sure a restart never lands mid-handover.
+                        before = [ "initrd-switch-root.target" ];
+                        conflicts = [ "initrd-switch-root.target" ];
                         unitConfig.DefaultDependencies = "no";
                         serviceConfig.Type = "oneshot";
                         script = ''
@@ -167,17 +172,6 @@ in
                         '';
                     };
 
-                    "initrd-wireguard-recover-cancel" = {
-                        description = "Stop the wireguard recovery loop once unlocked";
-                        wantedBy = [ "initrd.target" ];
-                        before = [ "initrd-cleanup.service" ];
-                        unitConfig.DefaultDependencies = "no";
-                        serviceConfig = {
-                            Type = "oneshot";
-                            RemainAfterExit = true;
-                            ExecStart = "${initrdSystemd}/bin/systemctl stop initrd-wireguard-recover.timer";
-                        };
-                    };
                 };
 
                 timers."initrd-wireguard-recover" = {
@@ -187,6 +181,8 @@ in
                         OnUnitActiveSec = "60s";
                         Unit = "initrd-wireguard-recover.service";
                     };
+                    before = [ "initrd-switch-root.target" ];
+                    conflicts = [ "initrd-switch-root.target" ];
                     unitConfig.DefaultDependencies = "no";
                     wantedBy = [ "timers.target" ];
                 };

@@ -2,8 +2,8 @@
 #
 # The 5TB backup disk: one btrfs subvolume inside a LUKS container, the USB transport quirks its bridge needs, and ownership of the borg tree.
 #
-# Unlocked by clevis on the same passphrase the root drive uses, because clevis binds one secret per host and feeds it to every target in
-# technet.clevis.luksDevices; the drive cannot have one of its own. See docs/ragnarok.md for the layout and the commands that built it.
+# Made with the same passphrase as the root drive, so that one console entry opens both, and carries its own clevis binding in the header, written
+# by rebind-clevis from that passphrase. See docs/ragnarok.md for the layout and the commands that built it.
 #
 
 { lib, ... }:

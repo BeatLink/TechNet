@@ -107,7 +107,7 @@ below is how this lands, and nothing before it should be deployed with
 
 Installed from Odin, the same way Thor is: the root SSD is USB-attached, so it
 can simply be moved. These are `install/install-local`'s own steps, split apart
-because one thing has to happen in the middle of them — step 2 says why. The
+because one thing has to happen in the middle of them — step 3 says what. The
 board's own installer path still works and is described at the end, but it
 builds on a 2 GB Rock64.
 
@@ -138,27 +138,22 @@ fresh install can allocate `borg` a different uid, at which point the `Z` rule i
 [`data-drive.nix`](../nix/1-backup-server/1-system/data-drive.nix) recursively
 chowns 1.9 TB to repair it.
 
-### 2. Keep clevis on, and seed the JWE
+### 2. Nothing to seed
 
-Thor's install turns `technet.clevis.enable` off, because the JWEs become
-`boot.initrd.secrets` entries copied during *activation* and a fresh
-`/persistent` holds none. Ragnarok does not have to: a JWE is nothing but the
-host passphrase encrypted to tang, and clevis binds one passphrase per host, so
-the JWE rescued from the old *root pool* is already a valid secret for the new
-`cryptroot`. Copy it under the new name before `nixos-install` runs and the
-first boot unlocks unattended, with no rebuild afterwards on a board that takes
-20 minutes to switch.
+A LUKS container carries its clevis binding inside its own header, written by
+`clevis luks bind`, so unlike the ZFS install nothing has to be copied into
+`/persistent` and no rebuild waits on a file existing first, which is what
+used to force clevis off during an install.
 
-Confirm it decrypts to what LUKS is about to be given, before relying on it:
+The binding can be added at either end: from Odin right after partitioning,
+while disko still has the container open and tang is local (step 3), or after
+the first boot with `sudo rebind-clevis` on Ragnarok, which needs tang
+reachable and otherwise leaves the board sitting on a prompt it can answer
+over the initrd sshd.
 
-```sh
-sudo clevis decrypt < ./ragnarok-persistent/etc/clevis/root-pool-Ragnarok-root.jwe \
-  | cmp - /run/secrets/ragnarok_zfs_passphrase && echo match
-```
+### 3. Partition, bind, install
 
-### 3. Partition, seed, install
-
-That seeding has to land between partitioning and `nixos-install`, which
+The header work has to land between partitioning and `nixos-install`, which
 `install/install-local` runs as one command, so these are its own steps. They
 are otherwise exactly what the tool does.
 
@@ -183,13 +178,29 @@ from Ragnarok's own platform the script carries aarch64 binaries. The disk is
 identified by serial — `SATA_SSD`, `22020812000605` — and it is a local disk on
 Odin, so a wrong path destroys Odin's data.
 
-disko leaves everything mounted under `/mnt`. Restore into it, rename the JWE,
-and install:
+disko leaves everything mounted under `/mnt` and `cryptroot` open. Two header
+operations belong here, before the drive goes back to the board. Both
+`cryptsetup` and `clevis` size their key derivation for the machine they run
+on: the passphrase slot disko just made is argon2id at 1 GiB and five passes,
+which is two seconds on Odin and nineteen on a Rock64 with 2 GB of RAM, so
+retune it with the memory capped -- `luksConvertKey` keeps the passphrase and
+re-derives the slot, and the iteration count is still a benchmark, so run it
+on the board afterwards if it was done here. Clevis' own slot is pbkdf2 at a
+fixed 1000 iterations and costs nothing anywhere.
+
+```sh
+sudo cryptsetup luksConvertKey --key-slot 0 --key-file /tmp/encryption.key --pbkdf argon2id --pbkdf-memory 262144 /dev/sdX2
+sudo clevis luks bind -y -k /tmp/encryption.key -d /dev/sdX2 sss \
+  '{"t":1,"pins":{"tang":[{"url":"http://10.100.100.2:7654"},{"url":"http://192.168.0.3:7654"}]}}'
+sudo clevis luks list -d /dev/sdX2
+```
+
+The pin JSON is what `technet.tang.urls` expands to; `rebind-clevis` writes the
+same thing, so binding here or there gives the same header. Then restore and
+install:
 
 ```sh
 sudo cp -a --preserve=all ./ragnarok-persistent/. /mnt/persistent/
-sudo cp -a /mnt/persistent/etc/clevis/root-pool-Ragnarok-root.jwe /mnt/persistent/etc/clevis/cryptroot.jwe
-sudo rm -f /mnt/persistent/etc/clevis/root-pool-Ragnarok-root.jwe
 
 sudo nixos-install --root /mnt --no-root-passwd --system /nix/store/…-nixos-system-Ragnarok-…
 sudo umount -R /mnt && sudo cryptsetup close cryptroot && sudo rm -f /tmp/encryption.key
@@ -201,30 +212,30 @@ install does.
 
 ### 4. Check the initrd before unplugging
 
-The whole unattended boot rests on four files having been appended to the
-initrd, so look rather than hope:
+Remote unlock rests on two files having been appended to the initrd, so look
+rather than hope:
 
 ```sh
 zstd -dc /mnt/boot/EFI/nixos/*-initrd.efi | strings | grep -oE "\.initrd-secrets/[a-zA-Z0-9/_.-]+"
 ```
 
-`etc/clevis/cryptroot.jwe`, `etc/clevis/data-pool-Ragnarok/storage.jwe`,
 `persistent/etc/ssh/ssh_initrd_host_ed25519_key` and
-`run/secrets/wireguard_private_key` all have to be there. The last two are
-decrypted by sops during the install, which only works because the host key was
-restored in step 3 — the file in `/boot` being named by hash rather than by
-store path is what says the append ran at all.
+`run/secrets/wireguard_private_key` both have to be there. They are decrypted
+by sops during the install, which only works because the host key was restored
+in step 3 — the file in `/boot` being named by hash rather than by store path
+is what says the append ran at all. The clevis bindings are not files; `clevis
+luks list` on each container is their check.
 
 ### 5. First boot
 
 Reattach the drive to the Rock64 and power it on. Nothing should need typing:
-clevis unlocks `cryptroot` from the seeded JWE and the backup pool from its own.
-Then check that `/Storage` came back, that `borg` still owns it by name *and* by
-number, and that `btrfs-scrub-root.timer` is armed.
+clevis-luks-askpass answers both password prompts from the header bindings once
+tang is reachable. Then check that `/Storage` came back, that `borg` still owns
+it by name *and* by number, and that `btrfs-scrub-root.timer` is armed.
 
 If it does sit on a password prompt, the tang servers were unreachable. The
-initrd sshd is the way in, and `luksMaxAttempts = 0` means the retry loop is
-still trying behind it.
+prompt is on HDMI and serial, `ssh ragnarok-boot` lands on it too, and askpass
+keeps retrying behind it — see [Unlocking](#unlocking).
 
 ### The installer path
 
@@ -243,20 +254,81 @@ hosts push to it; the `borg` group on each client grants repo access.
 
 ## Unlocking
 
-Clevis against Odin's tang, enabled in
-[`clevis.nix`](../nix/1-backup-server/1-system/clevis.nix), passphrase in
-`secrets/1-backup-server/clevis.yaml`. Two targets, one secret: the `cryptroot`
-LUKS container and the `data-pool-Ragnarok/storage` dataset.
+Both containers are made with the same passphrase, `zfs_passphrase` in
+`secrets/1-backup-server/clevis.yaml`, and each carries a clevis binding to
+Odin's tang server in its LUKS2 header, written by `sudo rebind-clevis` from
+[`clevis.nix`](../nix/1-backup-server/1-system/clevis.nix). At boot,
+systemd-cryptsetup puts up a password prompt for each container as its disk
+appears, and three things can answer it:
 
-As a WireGuard *client*, its initrd recovery loop probes the server through the
-tunnel (`10.100.100.1` out of `wg0`) rather than probing the LAN, since for a
-client it is the tunnel itself that has to work. That is also why
-`luksMaxAttempts = 0` here: the shared LUKS retry stops after five attempts by
-default so it cannot keep cancelling the password prompt of someone trying to
-type, and on a headless host off site there is no one to protect. It retries
-until the tunnel comes up, the way the ZFS loop beside it always has.
+- **The console.** Plymouth shows the prompt on HDMI and on the serial console.
+- **The initrd sshd.** `ssh ragnarok-boot` reaches it over WireGuard at
+  `10.100.100.6`, or on the LAN at whatever DHCP handed out; logging in runs
+  the password agent first and drops to bash once nothing is pending.
+- **Tang.** nixpkgs' `boot.initrd.clevisLuksAskpass` runs clevis' own
+  askpass loop, which watches the prompts and answers them from the header
+  bindings. It retries for as long as a prompt is pending, paced by the tang
+  connect timeout, and reaches Odin over the LAN at `192.168.0.3` or through
+  the tunnel at `10.100.100.2`, whichever answers first. It never touches the
+  cryptsetup unit, so the prompt stays open for the other two the whole time.
 
-If it never does, the initrd sshd is the way in.
+Typing the passphrase once is enough: systemd-cryptsetup caches an entered
+passphrase in the kernel keyring for 2.5 minutes, and the other container's
+prompt re-checks the keyring the moment the first is answered.
+
+Because tang runs on Odin and stops when Odin's session locks, Ragnarok
+**will not unlock on its own** unless Odin is up and unlocked, or someone
+types. The WireGuard recovery loop from the shared module restarts networkd
+from 45s into the initrd if the tunnel is not carrying traffic, so a tunnel
+that came up before DNS did is not a dead end.
+
+If the boot is stuck with no prompt pending, the root SSD is probably the
+reason: on 2026-09-10 its bridge came up at 5 Gbps but never accepted its USB
+configuration (`usb 5-1: can't set config #1, error -71`), so there was no
+disk to prompt for and cryptroot timed out at 99s. From the initrd sshd this
+brought it back and finished the boot; `--no-block` matters, because a
+blocking `systemctl start` attaches the password prompt to the SSH terminal and
+eats whatever is typed next as passphrase attempts:
+
+```sh
+echo 1 > /sys/bus/usb/devices/5-1/remove
+echo 1 > /sys/bus/usb/devices/usb5/5-0:1.0/usb5-port1/disable; sleep 3
+echo 0 > /sys/bus/usb/devices/usb5/5-0:1.0/usb5-port1/disable; sleep 10
+ls /dev/disk/by-partlabel/                      # disk-root-drive-cryptroot should be back
+systemctl reset-failed
+systemctl start --no-block systemd-cryptsetup@cryptroot.service   # askpass answers it
+systemctl start --no-block initrd.target                          # re-runs rollback, mounts, switch-root
+```
+
+`sudo rebind-clevis` rebinds both headers against the current tang keys, and
+is also how a fresh container gets its first binding; it needs tang reachable.
+`clevis luks list -d <device>` shows the binding, and
+`journalctl -b -u clevis-luks-askpass` shows what askpass did during the boot.
+
+Two hardware notes that shape the timing. The passphrase slots were re-derived
+on the board itself with the argon2id memory capped at 256 MiB, because a slot
+derived on Odin took nineteen seconds and half the RAM here; redo that with
+`cryptsetup luksConvertKey --pbkdf-memory 262144` after any `luksChangeKey`.
+And the root SSD's JMS561U bridge aborts and resets under UAS on about half the
+boots, which is 30s before the disk exists at all. Forcing it to usb-storage
+would cost only throughput: measured 237 MB/s in 1 MiB reads under UAS against
+135 MB/s in the 120 KiB commands usb-storage defaults to, recoverable in part by
+the same `max_sectors` rule the data drive carries. It would not have saved the
+boot above, which failed at USB enumeration before either driver was involved.
+
+TRIM through that bridge needs help, in
+[`root-drive-disko.nix`](../nix/1-backup-server/1-system/root-drive-disko.nix).
+Its firmware (0204) clears the provisioning bit in READ CAPACITY(16) while the
+VPD pages advertise UNMAP with a 65535-block limit, and the kernel trusts the
+capacity bit: provisioning mode stays `full`, `fstrim` reports discard
+unsupported, and the unmap limit is never recorded. A udev rule forces the mode
+to `unmap` and caps `discard_max_bytes` at 8191 × 4 KiB, the largest granular
+value under that limit -- without the cap the kernel sends 64 MiB descriptors
+and the bridge answers ILLEGAL REQUEST. Verified 2026-09-10: a 16 MiB discard
+inside the swap partition succeeded, a 64 MiB one was refused, and `fstrim`
+then released 90 GiB from the root filesystem with a clean scrub afterwards.
+The rule runs in both stages because dm-crypt stacks the discard limits when
+the container is opened, and the SSD passes no TRIM at all without it.
 
 ## Data drive
 
@@ -278,7 +350,7 @@ copy a checksum failure is detected and *not* repairable. It halves the drive �
 | partition | GPT, one partition, partlabel `ragnarok-cryptstorage` |
 | PARTUUID | `b701e0a4-fa98-467d-afd6-36cbca0f0737` |
 | LUKS | LUKS2, `aes-xts-plain64`, 512-bit key, **4096-byte sectors** |
-| LUKS KDF | argon2id, 256 MiB memory, 4 threads, ~370k iterations |
+| LUKS KDF | argon2id, 4 passes, ~83 MiB, 4 threads -- re-derived on the board, see [Unlocking](#unlocking) |
 | LUKS UUID | `340cfb19-e5bd-479a-a9ee-f04607540e1b` |
 | mapper name | `cryptstorage` |
 | btrfs | `-d dup -m dup`, label `RagnarokStorage`, crc32c |
@@ -297,9 +369,9 @@ whatever host it is plugged into or it comes up unusable:
 echo "152d:0583:uf" | sudo tee /sys/module/usb_storage/parameters/quirks
 ```
 
-The passphrase is the host's `zfs_passphrase`, and must stay that way: clevis
-binds one secret per host and feeds it to every target, so a container made with
-a different passphrase can never be unlocked at boot.
+The passphrase is the host's `zfs_passphrase`, and should stay that way: it is
+what `rebind-clevis` presents when it adds the tang binding, and what lets one
+typed passphrase open both containers at the console.
 
 ```sh
 sudo sh -c 'printf "%s" "$(cat /run/secrets/ragnarok_zfs_passphrase)" > /tmp/dk.key'
@@ -340,9 +412,11 @@ arithmetic above produces.
 **The KDF cost is capped on purpose.** `cryptsetup` benchmarks the machine it
 runs on to pick argon2 parameters, and this container is created on Odin but
 unlocked in Ragnarok's initrd — 2 GB of RAM on a Cortex-A53. `--pbkdf-memory
-262144` (256 MiB) keeps the unlock inside what that board can afford. Nothing is
-really lost: the passphrase is 50 bytes of sops-held entropy, so KDF hardening
-is not what stands between an attacker and the disk.
+262144` (256 MiB) keeps the memory inside what that board can afford, but the
+pass count is still Odin's two seconds, which was 32 on this drive and half a
+minute at boot; `luksConvertKey` on the board itself brought it to four. Nothing
+is really lost: the passphrase is 50 bytes of sops-held entropy, so KDF
+hardening is not what stands between an attacker and the disk.
 
 **Verify, do not trust a chained `echo`.** `cryptsetup ... | tail` reports
 `tail`'s exit status, so a `&& echo OK` after a pipeline will happily print OK
@@ -376,22 +450,19 @@ land.
 
 ### Putting it back on Ragnarok
 
-The config in `data-drive.nix` cannot be deployed before the drive's JWE exists,
-for the same reason the root drive's could not: `boot.initrd.clevis.devices`
-becomes a `boot.initrd.secrets` entry read during *activation*, so a rebuild
-without it fails. And as with `cryptroot`, no new secret is needed -- a JWE is
-just the host passphrase encrypted to tang, so any of the host's own JWEs works
-under the new name:
+The binding lives in the header, so it can be written on Odin while the drive
+is still attached there, exactly as for the root drive:
 
 ```sh
-sudo cp /persistent/etc/clevis/cryptroot.jwe /persistent/etc/clevis/cryptstorage.jwe
-sudo rm -f /persistent/etc/clevis/data-pool-Ragnarok-storage.jwe   # its dataset is gone
-sudo nixos-rebuild boot --flake .#Ragnarok
+sudo cryptsetup luksConvertKey --key-slot 0 --key-file /tmp/dk.key --pbkdf argon2id --pbkdf-memory 262144 /dev/sdX1
+sudo clevis luks bind -y -k /tmp/dk.key -d /dev/sdX1 sss \
+  '{"t":1,"pins":{"tang":[{"url":"http://10.100.100.2:7654"},{"url":"http://192.168.0.3:7654"}]}}'
 ```
 
-Order matters: reattach the drive and boot on the *old* config first (`/Storage`
-is `nofail`, so it comes up without it), seed the JWE, then rebuild. Deploying
-first leaves a host that fails to rebuild until someone puts the file there.
+or afterwards on Ragnarok with `sudo rebind-clevis`, which does both containers
+at once. Nothing in `data-drive.nix` depends on the binding existing, so the
+config can be deployed in either order: an unbound drive simply prompts, and
+`/Storage` is `nofail`, so the host comes up without it rather than stalling.
 
 Two measurements worth keeping:
 

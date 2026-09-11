@@ -2,7 +2,8 @@
 #
 # Points the shared Clevis module at this host's key material so both LUKS containers unlock from the Tang servers at boot.
 #
-# One secret covers both: clevis binds a single passphrase per host, so both containers are created with the same zfs_passphrase the ZFS pools used to hold.
+# One secret covers both: rebind-clevis binds each container from the same zfs_passphrase the ZFS pools used to hold, and that passphrase also opens
+# either one at the console, where typing it once unlocks both because systemd-cryptsetup caches it in the kernel keyring.
 #
 
 { config, ... }:
@@ -18,7 +19,5 @@
             "cryptroot"
             "cryptstorage"
         ];
-
-        luksMaxAttempts = 0; # Headless and off site: there is no one at the password prompt the default bound protects, and the ZFS loop never bounded it either
     };
 }

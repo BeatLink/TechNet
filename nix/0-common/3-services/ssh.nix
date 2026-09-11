@@ -8,11 +8,21 @@
 #   - Disable all except public key authentication
 #   - Enable SSH in initrd for drive decryption
 #   - Set initrd ssh authentication to my client key
-#   - Set the initrd login command to the ask password agent
+#   - Set the initrd login shell to answer pending password prompts, then drop to bash
 #   - Add initrd and main ssh public keys for identification
 #   - Add configuration to login as root when accessing initrd and my user when accessing main ssh
 #
 
+{ pkgs, config, ... }:
+let
+    # An interactive login answers the pending prompts first and then drops to a shell; `ssh host cmd` has no terminal and runs the command as is
+    initrdLogin = pkgs.writeShellScript "initrd-login" ''
+        if [ -t 0 ]; then
+            ${config.boot.initrd.systemd.package}/bin/systemd-tty-ask-password-agent --query
+        fi
+        exec /bin/bash "$@"
+    '';
+in
 {
     services.openssh = {
         enable = true;
@@ -56,7 +66,10 @@
                 "/persistent/etc/ssh/ssh_initrd_host_ed25519_key"
             ];
         };
-        systemd.users.root.shell = "/bin/bash";
+        systemd = {
+            users.root.shell = "${initrdLogin}";
+            storePaths = [ initrdLogin ];
+        };
     };
     programs.ssh = {
         knownHosts = {
