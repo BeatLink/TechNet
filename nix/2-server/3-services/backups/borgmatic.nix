@@ -63,8 +63,11 @@ let
             }
         ];
 
+        # A check holds borg's exclusive repo lock, so a backup that lands mid-check waits rather than failing outright.
+        lock_wait = 900;
+
         # Consistency Checks
-        # Periodic rather than every run: checking on each of the eight daily runs left borgmatic working for 2h21m at a stretch.
+        # Run from borgmatic-check.timer rather than the backup run; these frequencies are what actually decide when each check happens.
         checks = [
             {
                 name = "repository";
@@ -146,7 +149,42 @@ in
         IOSchedulingPriority = 7;
         IOWeight = 10;
         CPUWeight = 10;
+        # Naming the actions drops `check` from the run, which borgmatic would otherwise include by default.
+        # The empty first entry clears the packaged ExecStart, which a drop-in would otherwise append to.
+        ExecStart = [
+            ""
+            "${pkgs.systemd}/bin/systemd-inhibit --who=borgmatic --what=sleep:shutdown --why=\"Prevent interrupting scheduled backup\" ${pkgs.borgmatic}/bin/borgmatic --verbosity -2 --syslog-verbosity 1 create prune compact"
+        ];
     };
+
+    # Checks run out of band because they take hours: inline they blocked the 3-hourly backup for the length of the check,
+    # and a check that fails never records a completion time, so every following run retried it.
+    # Daily firing with the per-check `frequency` above as the real gate; Ragnarok checks the same remote repo on Sundays.
+    systemd.services.borgmatic-check = {
+        description = "borgmatic consistency checks";
+        serviceConfig = {
+            Type = "oneshot";
+            StateDirectory = "borgmatic"; # Shares the check-time records with borgmatic.service, which is the whole point of the frequency gate
+            Nice = 19;
+            IOSchedulingClass = "idle";
+            IOSchedulingPriority = 7;
+            IOWeight = 10;
+            CPUWeight = 10;
+            ExecStart = "${pkgs.systemd}/bin/systemd-inhibit --who=borgmatic-check --what=sleep:shutdown --why=\"Prevent interrupting a repository check\" ${pkgs.borgmatic}/bin/borgmatic --verbosity -2 --syslog-verbosity 1 check";
+        };
+    };
+    systemd.timers.borgmatic-check = {
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+            OnCalendar = "*-*-* 04:00:00";
+            RandomizedDelaySec = "30m";
+            Persistent = true;
+        };
+    };
+
+    # borgmatic records when each check last ran under its systemd StateDirectory; without this the impermanence
+    # rollback discards those records and the first run after every reboot redoes the full multi-hour check.
+    environment.persistence."/persistent".directories = [ "/var/lib/borgmatic" ];
 
     # borgmatic runs as root, so the on-disk repo is created root-owned and
     # (before `umask` above) 0700 — unreadable by the Vigil monitor account.

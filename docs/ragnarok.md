@@ -331,6 +331,24 @@ with the repository living on the data drive from
 [`data-drive.nix`](../nix/1-backup-server/1-system/data-drive.nix). Other
 hosts push to it; the `borg` group on each client grants repo access.
 
+### Integrity checks
+
+`borg-check.timer` verifies the server repository every Sunday, and
+`borg-check-data.timer` adds `--verify-data` on the first Sunday of the month.
+Both run here rather than only on Heimdall because a check takes hours on this
+board, and run inline it held Heimdall's backup service open across its own
+3-hourly schedule. Heimdall still checks the same repository from its side on
+weekdays; the Sunday slot keeps the two off each other's exclusive repo lock.
+
+These need the repository passphrase, so `borg_repo_encryption_key` in
+`secrets/1-backup-server/borg-check.yaml` is the same value Heimdall keeps in
+`secrets/2-server/borgmatic.yaml`. Changing it means changing both.
+
+btrfs cannot stand in for this. A segment whose bytes were already wrong when
+borg handed them over checksums clean at the filesystem layer, which is how a
+`Segment entry checksum mismatch` sat undetected in this repository from
+2026-09-06 until a borg check found it.
+
 ## Unlocking
 
 Both containers are made with the same passphrase, `zfs_passphrase` in
