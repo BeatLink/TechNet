@@ -52,6 +52,7 @@
     ],
     "conventionalCommits.scopes": [
         "Odin/Cinnamon",
-        "Odin/VsCodium"
+        "Odin/VsCodium",
+        "Ragnarok",
     ]
 }
