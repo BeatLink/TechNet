@@ -41,6 +41,20 @@ them the firmware stops at `distro_bootcmd not defined` and ESC finds no menu.
 Anything upstream fixed on its own between 2023.07 and 2026.04 was dropped
 rather than ported.
 
+Three fixes on top are not Tow-Boot's own and would stand upstream:
+
+- **A keyboard silent while idle is kept.** Probing asks for the device's
+  state and dropped the keyboard when nothing came back, which is what plenty
+  of keyboards and wireless dongles do until a key is pressed. Upstream
+  already carries a quirk saying so for Apple and Keychron; this treats the
+  timeout itself as the answer.
+- **USB boot tries every block device.** `usb_boot` asked for device 0 alone,
+  so a disk numbered anything else failed with `Device 0: unknown device`
+  while plainly present.
+- **EHCI honours non-blocking interrupt transfers.** The flag was ignored, so
+  every idle keyboard poll waited out a full second and printed `Timeout poll
+  on interrupt endpoint`.
+
 `modules/tow-boot/src.nix` pins the tree by revision and hash. **Changing the
 tree means pushing it and bumping both**, or the build silently keeps using the
 old revision.
