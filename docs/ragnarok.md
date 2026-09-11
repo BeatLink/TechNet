@@ -1,8 +1,8 @@
 # Ragnarok — backup server
 
-|          |                                                                                       |
-| -------- | ------------------------------------------------------------------------------------- |
-| Device   | Pine64 Rock64 SBC, Rockchip RK3328                                                    |
+|          |                                                                                     |
+| -------- | ----------------------------------------------------------------------------------- |
+| Device   | Pine64 Rock64 SBC, Rockchip RK3328                                                  |
 | Platform | `aarch64-linux`                                                                     |
 | Modules  | [`nix/0-common`](../nix/0-common) + [`nix/1-backup-server`](../nix/1-backup-server) |
 | Address  | `ragnarok.technet` over WireGuard                                                   |
@@ -161,10 +161,10 @@ calls the kernel crypto API, so its AES-GCM runs as generic C on a CPU that has
 reach those instructions. `cryptsetup benchmark` on Ragnarok, under a load
 average of 5:
 
-| cipher | encryption | decryption |
-| ------ | ---------- | ---------- |
+| cipher       | encryption  | decryption |
+| ------------ | ----------- | ---------- |
 | aes-xts 256b | 142.4 MiB/s | 91.9 MiB/s |
-| aes-cbc 256b | 31.5 MiB/s | 31.3 MiB/s |
+| aes-cbc 256b | 31.5 MiB/s  | 31.3 MiB/s |
 
 `/proc/crypto` here offers `xts-aes-ce`, which is the driver doing the work —
 `aes-cbc` in the same run shows what the same CPU manages without it. Thor
@@ -428,20 +428,20 @@ exists for the same reason: one disk, no vdev redundancy, so without a second
 copy a checksum failure is detected and *not* repairable. It halves the drive —
 2.3 TiB usable of 4.55 TiB raw — which is ample for ~970 GiB of data.
 
-| | |
-| --- | --- |
-| device | `ST5000LM000-2U8170`, serial `WCJ9HXR9`, USB via SABRENT `152d:0583` |
-| partition | GPT, one partition, partlabel `ragnarok-cryptstorage` |
-| PARTUUID | `b701e0a4-fa98-467d-afd6-36cbca0f0737` |
-| LUKS | LUKS2, `aes-xts-plain64`, 512-bit key, **4096-byte sectors** |
-| LUKS KDF | argon2id, 4 passes, ~83 MiB, 4 threads -- re-derived on the board, see [Unlocking](#unlocking) |
-| LUKS UUID | `340cfb19-e5bd-479a-a9ee-f04607540e1b` |
-| mapper name | `cryptstorage` |
-| btrfs | `-d dup -m dup`, label `RagnarokStorage`, crc32c |
-| btrfs UUID | `805e41b1-8d1e-4719-a557-0218ea7154ae` |
-| subvolume | `@storage` |
-| mount options | `compress=zstd,noatime` |
-| discard | **off** — the USB bridge passes none, so `allowDiscards` would leak the free-space map for nothing |
+|               |                                                                                                    |
+| ------------- | -------------------------------------------------------------------------------------------------- |
+| device        | `ST5000LM000-2U8170`, serial `WCJ9HXR9`, USB via SABRENT `152d:0583`                               |
+| partition     | GPT, one partition, partlabel `ragnarok-cryptstorage`                                              |
+| PARTUUID      | `b701e0a4-fa98-467d-afd6-36cbca0f0737`                                                             |
+| LUKS          | LUKS2, `aes-xts-plain64`, 512-bit key, **4096-byte sectors**                                       |
+| LUKS KDF      | argon2id, 4 passes, ~83 MiB, 4 threads -- re-derived on the board, see [Unlocking](#unlocking)     |
+| LUKS UUID     | `340cfb19-e5bd-479a-a9ee-f04607540e1b`                                                             |
+| mapper name   | `cryptstorage`                                                                                     |
+| btrfs         | `-d dup -m dup`, label `RagnarokStorage`, crc32c                                                   |
+| btrfs UUID    | `805e41b1-8d1e-4719-a557-0218ea7154ae`                                                             |
+| subvolume     | `@storage`                                                                                         |
+| mount options | `compress=zstd,noatime`                                                                            |
+| discard       | **off** — the USB bridge passes none, so `allowDiscards` would leak the free-space map for nothing |
 
 ### Creating it
 
