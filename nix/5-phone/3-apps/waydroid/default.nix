@@ -4,6 +4,7 @@
 #
 {
     imports = [
+        ./camera.nix
         ./location.nix
         ./remote.nix
         ./session.nix
