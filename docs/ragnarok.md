@@ -113,29 +113,36 @@ The same preboot carries the rest of this board's firmware policy, in order:
 
 - **Scan USB**, so a keyboard is a console device before the boot prompt and
   the root disk is there to boot from.
-- **Power-cycle USB and rescan, but only if the root disk is missing.** GPIO
-  `A2` gates the 5V rail for every port on this board, so driving it high and
-  low again is the same as unplugging every device. That is what revives the
-  root SSD's bridge when it comes up wedged, which it does on some boots and
-  which no amount of `usb reset` fixes. A healthy bridge is left alone,
-  because the backup drive is on the same rail and does not deserve a power
-  cut on every boot.
-- **Cut the boot targets down to eMMC, SD and USB.** PXE and DHCP cost about a
-  minute of TFTP timeouts before failing, and this board boots its own disks.
-  They remain as `bootcmd_pxe` and `bootcmd_dhcp` for anyone who wants them by
-  hand.
+- **Ask DHCP for an address**, which is what netconsole needs. Nothing is
+  downloaded and a silent LAN does not stall the boot.
+
+The boot order itself is not set here. `TOW_BOOT_NETWORK_BOOT = no` drops PXE
+and DHCP from the order the firmware is built with, leaving eMMC, SD and USB,
+because a board that boots its own disks otherwise spends about a minute
+timing out on TFTP before the menu appears. Both commands are still there to
+be run by hand.
 
 ### When the root disk is not found
 
 The bridge sometimes trains its USB 3 link and sometimes falls back to USB 2,
 where it appears on the EHCI controller instead. U-Boot's EHCI here fails to
 re-reset after a few `usb reset` cycles, so a fallback that lands there can be
-invisible to the firmware. The power cycle above is the reliable way out, and
-it can be driven by hand from the firmware console:
+invisible to the firmware. It also refuses its USB configuration outright on
+some boots and enumerates nothing at all; the kernel side of that is the
+`usbcore` startup delay quirk in
+[`hardware-configuration.nix`](../nix/1-backup-server/1-system/hardware-configuration.nix),
+which the firmware has no equivalent for.
+
+Power-cycling the port is the reliable way out, and the firmware console can
+do it because GPIO `A2` gates the 5V rail for every USB port on this board:
 
 ```sh
 gpio set A2; sleep 2; gpio clear A2; sleep 2; usb reset; usb storage
 ```
+
+The firmware does not do this on its own. It cuts power to the backup drive
+along with everything else, which is too blunt to run unattended on every
+boot that is merely slow to find a disk.
 
 ## Storage
 
