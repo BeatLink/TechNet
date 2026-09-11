@@ -33,9 +33,13 @@ ported forward to **2026.04**, carrying:
   backlight interpolation, the LRADC and AXP power keys as a keyboard, and
   volume-up at power-on entering USB mass storage.
 
-Rockchip's predictable boot order is implemented against bootstd `BOOT_TARGETS`
-rather than the removed distro-boot macros. Anything upstream fixed on its own
-between 2023.07 and 2026.04 was dropped rather than ported.
+Upstream moved Rockchip to bootstd and dropped its distro-boot environment,
+but Tow-Boot's boot flow and menu are distro-boot scripts, so the tree carries
+its own distro boot targets for Rockchip, ordered by the predictable-boot
+preference, beside the bootstd `BOOT_TARGETS` the stock builds use. Without
+them the firmware stops at `distro_bootcmd not defined` and ESC finds no menu.
+Anything upstream fixed on its own between 2023.07 and 2026.04 was dropped
+rather than ported.
 
 `modules/tow-boot/src.nix` pins the tree by revision and hash. **Changing the
 tree means pushing it and bumping both**, or the build silently keeps using the
@@ -57,7 +61,9 @@ what Thor's install procedure depends on.
 SD-layout install path, HDMI output with USB keyboard input and a
 serial/vidconsole mux, and an LPDDR3-666 memory timing fix. The bootstd
 `bootflow scan` overrides apply only to stock builds, so this build keeps the
-Tow-Boot boot flow.
+Tow-Boot boot flow. USB is started in preboot, because a keyboard only
+registers as a console device once a scan has probed it; without that the
+prompt on HDMI can only be answered from serial.
 
 ## Building
 
@@ -74,6 +80,13 @@ one from this repo, through
 
 ```sh
 nix-build nix/5-phone/firmware.nix -A pine64-pinephoneA64
+```
+
+Ragnarok's adds netconsole, through
+[`nix/1-backup-server/firmware.nix`](../nix/1-backup-server/firmware.nix):
+
+```sh
+nix-build nix/1-backup-server/firmware.nix -A pine64-rock64
 ```
 
 NixTool's `formatting/flash-towboot` builds from the same checkout, via its

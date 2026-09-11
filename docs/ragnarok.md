@@ -55,14 +55,86 @@ or partition layout required on the target media.
 
 It builds from a fork, on the `rock64-pinephone-fixes` branch — ROCK64/RK3328
 support on the fork's own Tow-Boot U-Boot tree (2026.04), with the Tow-Boot menu
-on HDMI and USB keyboard input. [Tow-Boot](tow-boot.md) describes the fork; the
-source is
-[BeatLink/Tow-Boot](https://github.com/BeatLink/Tow-Boot/tree/rock64-pinephone-fixes):
+on HDMI and USB keyboard input. [Tow-Boot](tow-boot.md) describes the fork.
+Ragnarok's build adds netconsole on top, through
+[`nix/1-backup-server/firmware.nix`](../nix/1-backup-server/firmware.nix):
 
 ```sh
-git clone https://github.com/BeatLink/Tow-Boot -b rock64-pinephone-fixes
-nix-build --arg src ./Tow-Boot -A pine64-rock64
-dd if=shared.disk-image.img of=/dev/XXX bs=1M oflag=direct,sync status=progress
+nix-build nix/1-backup-server/firmware.nix -A pine64-rock64
+```
+
+A fresh card takes the whole image, from NixTool's `formatting/flash-towboot`
+or by hand:
+
+```sh
+dd if=result/shared.disk-image.img of=/dev/XXX bs=1M oflag=direct,sync status=progress
+```
+
+A card that already carries Tow-Boot only needs its firmware partition
+rewritten. That works on the running board — the card is not mounted once
+Linux is up — and the write is bounded by the kernel to the partition. The
+firmware fills partition 1, sectors 64 to 24639:
+
+```sh
+dd if=result/shared.disk-image.img of=part1.bin bs=512 skip=64 count=24576
+scp part1.bin ragnarok:/tmp/
+ssh ragnarok 'sudo dd if=/tmp/part1.bin of=/dev/mmcblk1p1 bs=1M oflag=direct conv=fsync'
+```
+
+It takes effect at the next reboot.
+
+### Firmware console
+
+The Tow-Boot prompt and menu are on HDMI and serial, and USB is started before
+the prompt so a keyboard works from power-on. Because the board is off site,
+the firmware also opens U-Boot's netconsole: preboot asks DHCP for a lease and,
+if one arrives, adds `nc` to stdin, stdout and stderr. With `ncip` unset it
+broadcasts, so any host on the LAN Ragnarok is plugged into can follow it and
+type at it. WireGuard does not exist yet at that point, so nothing reaches it
+from Odin's side of the tunnel. From a machine on that LAN:
+
+```sh
+nc -u -l -p 6666                 # output, in one terminal
+nc -u <ragnarok-lan-ip> 6666     # input, in another
+```
+
+U-Boot's `tools/netconsole` script does both at once. Anyone on that LAN can
+drive the firmware console this way; both disks are LUKS, so what it exposes
+is the boot menu and the console, not data. If DHCP does not answer, preboot
+falls back to HDMI and serial once the single attempt times out.
+
+The DHCP lease is the firmware's own, not the one the booted system holds, so
+the address changes between boots. Broadcasting to the LAN reaches it whatever
+it got.
+
+### What preboot does
+
+The same preboot carries the rest of this board's firmware policy, in order:
+
+- **Scan USB**, so a keyboard is a console device before the boot prompt and
+  the root disk is there to boot from.
+- **Power-cycle USB and rescan, but only if the root disk is missing.** GPIO
+  `A2` gates the 5V rail for every port on this board, so driving it high and
+  low again is the same as unplugging every device. That is what revives the
+  root SSD's bridge when it comes up wedged, which it does on some boots and
+  which no amount of `usb reset` fixes. A healthy bridge is left alone,
+  because the backup drive is on the same rail and does not deserve a power
+  cut on every boot.
+- **Cut the boot targets down to eMMC, SD and USB.** PXE and DHCP cost about a
+  minute of TFTP timeouts before failing, and this board boots its own disks.
+  They remain as `bootcmd_pxe` and `bootcmd_dhcp` for anyone who wants them by
+  hand.
+
+### When the root disk is not found
+
+The bridge sometimes trains its USB 3 link and sometimes falls back to USB 2,
+where it appears on the EHCI controller instead. U-Boot's EHCI here fails to
+re-reset after a few `usb reset` cycles, so a fallback that lands there can be
+invisible to the firmware. The power cycle above is the reliable way out, and
+it can be driven by hand from the firmware console:
+
+```sh
+gpio set A2; sleep 2; gpio clear A2; sleep 2; usb reset; usb storage
 ```
 
 ## Storage
@@ -309,15 +381,20 @@ Two hardware notes that shape the timing. The passphrase slots were re-derived
 on the board itself with the argon2id memory capped at 256 MiB, because a slot
 derived on Odin took nineteen seconds and half the RAM here; redo that with
 `cryptsetup luksConvertKey --pbkdf-memory 262144` after any `luksChangeKey`.
-And the root SSD's JMS561U bridge aborts and resets under UAS on about half the
-boots, which is 30s before the disk exists at all. Forcing it to usb-storage
-would cost only throughput: measured 237 MB/s in 1 MiB reads under UAS against
-135 MB/s in the 120 KiB commands usb-storage defaults to, recoverable in part by
-the same `max_sectors` rule the data drive carries. It would not have saved the
-boot above, which failed at USB enumeration before either driver was involved.
+And the root SSD's JMS561U bridge is the weak part of the machine. On about half
+the boots it aborts and resets under UAS, 30s before the disk exists; twice on
+2026-09-10 it came up at SuperSpeed and refused `SET_CONFIGURATION` with
+`error -71` 15ms later, after which nothing retries and the boot above is the
+result. `usbcore.quirks=152d:1561:gn` in
+[`hardware-configuration.nix`](../nix/1-backup-server/1-system/hardware-configuration.nix)
+delays descriptor fetching and every control message for that device; set live
+through `/sys/module/usbcore/parameters/quirks` and followed by the
+re-enumeration above, it configured the bridge first time. Forcing the bridge to
+usb-storage instead would cost only throughput -- 237 MB/s in 1 MiB reads under
+UAS against 135 MB/s in the 120 KiB commands usb-storage defaults to -- and
+would not touch the enumeration failure, which happens before either driver.
 
-TRIM through that bridge needs help, in
-[`root-drive-disko.nix`](../nix/1-backup-server/1-system/root-drive-disko.nix).
+TRIM through that bridge needs help too, in the same file.
 Its firmware (0204) clears the provisioning bit in READ CAPACITY(16) while the
 VPD pages advertise UNMAP with a 65535-block limit, and the kernel trusts the
 capacity bit: provisioning mode stays `full`, `fstrim` reports discard
