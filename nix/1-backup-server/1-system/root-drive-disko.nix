@@ -1,17 +1,9 @@
 # Root Drive #########################################################################################################################################
 #
-# Points disko at the SSD holding the system, carries the host ID the ZFS module still asks for, and corrects the queue flags its bridge misreports.
+# Points disko at the SSD holding the system and carries the host ID the ZFS module still asks for; the bridge's quirks live in hardware-configuration.nix.
 #
 
 { lib, ... }:
-let
-    # One UNMAP descriptor per request, the bridge rejects a descriptor above 0xffff blocks of 512 bytes, and the kernel wants a multiple of the 4 KiB granularity
-    maxDiscardBytes = toString (8191 * 4096);
-
-    bridgeRules = ''
-        ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="1561", ATTR{queue/rotational}="0", ATTR{queue/add_random}="0", RUN+="/bin/sh -c 'echo unmap > /sys%p/device/scsi_disk/*/provisioning_mode && echo ${maxDiscardBytes} > /sys%p/queue/discard_max_bytes'"
-    '';
-in
 {
     config = lib.mkMerge [
 
@@ -38,16 +30,6 @@ in
                     randomEncryption = true; # A fresh dm-crypt key every boot: nothing to store or unlock, and the kernel line already carries nohibernate
                 };
             };
-        }
-
-        # Queue Tuning ###############################################################################################################################
-        # The JMS561U reports the SSD as rotational, so without this the kernel applies the readahead and seek heuristics meant for a spinning disk.
-        # It also clears the provisioning bit in READ CAPACITY(16) while advertising UNMAP in its VPD pages, so the kernel never enables discard and
-        # never records the bridge's 65535-block UNMAP limit; the mode is forced and the limit set by hand, in that order, because the kernel refuses a
-        # discard size while the mode is still "full". Both stages carry the rule so the LUKS mapping stacks the right limits when it is first opened.
-        {
-            services.udev.extraRules = bridgeRules;
-            boot.initrd.services.udev.rules = bridgeRules;
         }
     ];
 }
