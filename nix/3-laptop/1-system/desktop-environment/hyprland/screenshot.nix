@@ -98,7 +98,8 @@ in
                         "Graphics"
                     ];
                 };
-            } // builtins.listToAttrs (
+            }
+            // builtins.listToAttrs (
                 map (mode: {
                     name = mode.id;
                     value = {

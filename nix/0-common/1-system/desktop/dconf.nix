@@ -114,7 +114,8 @@ in
 
             dconfImports = {
                 enable = true;
-                roots = [ # Narrower than the flake root because the importer walks the filesystem and would otherwise load every host's exports onto every host
+                roots = [
+                    # Narrower than the flake root because the importer walks the filesystem and would otherwise load every host's exports onto every host
                     "${flakeRoot}/nix/0-common"
                     "${flakeRoot}/nix/${config.technet.secrets.directory}"
                 ];

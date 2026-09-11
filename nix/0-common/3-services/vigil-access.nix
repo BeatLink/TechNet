@@ -33,11 +33,11 @@ in
                     isSystemUser = true;
                     description = "Vigil monitor (remote login account)";
                     group = "vigil-access";
-                    shell = "/run/current-system/sw/bin/bash";                  # borg and systemctl run over SSH exec, which needs a shell
+                    shell = "/run/current-system/sw/bin/bash"; # borg and systemctl run over SSH exec, which needs a shell
                     extraGroups = [
-                        "borg"                                                  # Read access to borg repos for backup health checks
-                        "systemd-journal"                                       # Read systemd service status and logs
-                        "vigil-monitor"                                         # Read the per-service credentials monitors cat on the target
+                        "borg" # Read access to borg repos for backup health checks
+                        "systemd-journal" # Read systemd service status and logs
+                        "vigil-monitor" # Read the per-service credentials monitors cat on the target
                     ];
                     openssh.authorizedKeys.keys = [
                         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID6oDtIndxb2aJJFhl3+xU+4nuVUQQrzcWOLX+RslJU/ vigil@technet"
@@ -51,26 +51,72 @@ in
             security.sudo.extraRules = [
                 {
                     users = [
-                        "vigil-access"                                          # SSH transport (fallback)
-                        "vigil-agent"                                           # Agent transport (primary)
+                        "vigil-access" # SSH transport (fallback)
+                        "vigil-agent" # Agent transport (primary)
                     ];
-                    commands = [                                                # Never add the python3 heredoc helper, since sudoers matches argv rather than the script body and it would grant arbitrary root
-                        { command = "/run/current-system/sw/bin/systemctl start *"; options = [ "NOPASSWD" ]; }
-                        { command = "/run/current-system/sw/bin/systemctl stop *"; options = [ "NOPASSWD" ]; }
-                        { command = "/run/current-system/sw/bin/systemctl restart *"; options = [ "NOPASSWD" ]; }
-                        { command = "/run/current-system/sw/bin/systemctl enable *"; options = [ "NOPASSWD" ]; }
-                        { command = "/run/current-system/sw/bin/systemctl disable *"; options = [ "NOPASSWD" ]; }
-                        { command = "/run/current-system/sw/bin/systemctl daemon-reload"; options = [ "NOPASSWD" ]; }
-                        { command = "/run/current-system/sw/bin/systemctl cat *"; options = [ "NOPASSWD" ]; }
-                        { command = "/run/current-system/sw/bin/systemctl status *"; options = [ "NOPASSWD" ]; }
-                        { command = "/run/current-system/sw/bin/systemctl show *"; options = [ "NOPASSWD" ]; }
-                        { command = "/run/current-system/sw/bin/smartctl -H *"; options = [ "NOPASSWD" ]; }
-                        { command = "/run/current-system/sw/bin/smartctl -H -d sat *"; options = [ "NOPASSWD" ]; }
-                        { command = "/run/current-system/sw/bin/borg *"; options = [ "NOPASSWD" "SETENV" ]; }
+                    commands = [
+                        # Never add the python3 heredoc helper, since sudoers matches argv rather than the script body and it would grant arbitrary root
+                        {
+                            command = "/run/current-system/sw/bin/systemctl start *";
+                            options = [ "NOPASSWD" ];
+                        }
+                        {
+                            command = "/run/current-system/sw/bin/systemctl stop *";
+                            options = [ "NOPASSWD" ];
+                        }
+                        {
+                            command = "/run/current-system/sw/bin/systemctl restart *";
+                            options = [ "NOPASSWD" ];
+                        }
+                        {
+                            command = "/run/current-system/sw/bin/systemctl enable *";
+                            options = [ "NOPASSWD" ];
+                        }
+                        {
+                            command = "/run/current-system/sw/bin/systemctl disable *";
+                            options = [ "NOPASSWD" ];
+                        }
+                        {
+                            command = "/run/current-system/sw/bin/systemctl daemon-reload";
+                            options = [ "NOPASSWD" ];
+                        }
+                        {
+                            command = "/run/current-system/sw/bin/systemctl cat *";
+                            options = [ "NOPASSWD" ];
+                        }
+                        {
+                            command = "/run/current-system/sw/bin/systemctl status *";
+                            options = [ "NOPASSWD" ];
+                        }
+                        {
+                            command = "/run/current-system/sw/bin/systemctl show *";
+                            options = [ "NOPASSWD" ];
+                        }
+                        {
+                            command = "/run/current-system/sw/bin/smartctl -H *";
+                            options = [ "NOPASSWD" ];
+                        }
+                        {
+                            command = "/run/current-system/sw/bin/smartctl -H -d sat *";
+                            options = [ "NOPASSWD" ];
+                        }
+                        {
+                            command = "/run/current-system/sw/bin/borg *";
+                            options = [
+                                "NOPASSWD"
+                                "SETENV"
+                            ];
+                        }
                         # Vigil's nixos_upgrade action, matched argv for argv: changing the monitor's rebuild_args stops sudo matching this
-                        { command = "/run/current-system/sw/bin/nixos-rebuild switch --flake ${upgradeFlake} --no-write-lock-file -L --refresh"; options = [ "NOPASSWD" ]; }
+                        {
+                            command = "/run/current-system/sw/bin/nixos-rebuild switch --flake ${upgradeFlake} --no-write-lock-file -L --refresh";
+                            options = [ "NOPASSWD" ];
+                        }
                         # Vigil's nix_gc action, matched the same way: it collects with nix.gc.options and nothing else
-                        { command = "/run/current-system/sw/bin/nix-collect-garbage ${gcOptions}"; options = [ "NOPASSWD" ]; }
+                        {
+                            command = "/run/current-system/sw/bin/nix-collect-garbage ${gcOptions}";
+                            options = [ "NOPASSWD" ];
+                        }
                     ];
                 }
             ];

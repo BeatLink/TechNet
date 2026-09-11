@@ -16,7 +16,7 @@
 {
     sops.secrets.vorta_ssh_key = {
         sopsFile = "${config.technet.secrets.path}/vorta.yaml";
-        mode = "0400";   # root-only; borg reads it via sudo
+        mode = "0400"; # root-only; borg reads it via sudo
     };
 
     # Passphrase for the encrypted Vorta repos, likewise for Vigil's use: its
@@ -24,7 +24,7 @@
     # takes the passphrase from the system keyring, not from here.
     sops.secrets.vorta_backup_passphrase = {
         sopsFile = "${config.technet.secrets.path}/vorta.yaml";
-        mode = "0400";   # root-only; borg reads it via sudo
+        mode = "0400"; # root-only; borg reads it via sudo
     };
 
     home-manager.users.beatlink =

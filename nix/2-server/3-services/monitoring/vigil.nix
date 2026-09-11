@@ -98,7 +98,12 @@
 # Scheduling is deliberately not represented: these backups are triggered
 # manually from the Vigil UI, while Vorta/borgmatic keep their own schedules.
 #
-{ config, inputs, lib, ... }:
+{
+    config,
+    inputs,
+    lib,
+    ...
+}:
 let
     # Every host upgrades from the same flake, so Heimdall's own value is every monitor's.
     upgradeFlake = config.system.autoUpgrade.flake;
@@ -177,7 +182,7 @@ in
     services.vigil = {
         enable = true;
         port = 9611;
-        dataDir = "/Storage/Services/Vigil";   # SQLite database lives here (persisted)
+        dataDir = "/Storage/Services/Vigil"; # SQLite database lives here (persisted)
         authUsername = "admin";
         authPasswordFile = config.sops.secrets.vigil_dashboard_password.path;
         authSessionSecretFile = config.sops.secrets.vigil_session_secret.path;
@@ -501,9 +506,12 @@ in
                                             interval = "5m";
                                             flake = upgradeFlake;
                                             configuration = "Ragnarok";
-                                            eval_agent = "heimdall";                  # Evaluating the flake on the 2GB Rock64 swaps it to death within seconds
+                                            eval_agent = "heimdall"; # Evaluating the flake on the 2GB Rock64 swaps it to death within seconds
                                             eval_interval = "6h";
-                                            rebuild_args = [ "--no-write-lock-file" "-L" ];
+                                            rebuild_args = [
+                                                "--no-write-lock-file"
+                                                "-L"
+                                            ];
                                             agent = "ragnarok";
                                         }
                                     ];
@@ -518,10 +526,10 @@ in
                                             id = "ragnarok-nix-gc";
                                             type = "nix_gc";
                                             interval = "1h";
-                                            max_age = "2w";                             # nix.gc.dates is weekly, so this tolerates one missed run
-                                            warning = 90;                               # Same policy as this host's Filesystems monitor, so the store's fill alarms once rather than twice
+                                            max_age = "2w"; # nix.gc.dates is weekly, so this tolerates one missed run
+                                            warning = 90; # Same policy as this host's Filesystems monitor, so the store's fill alarms once rather than twice
                                             threshold = 96;
-                                            max_generation_age = "30d";                 # --delete-older-than 7d, run weekly, should never leave one this old
+                                            max_generation_age = "30d"; # --delete-older-than 7d, run weekly, should never leave one this old
                                             gc_args = gcArgs;
                                             agent = "ragnarok";
                                         }
@@ -774,11 +782,27 @@ in
                                             timeout = 5;
                                             grid_col_span = 2;
                                             checks = [
-                                                { name = "Nginx"; host = "localhost"; port = 443; }
-                                                { name = "Home Assistant"; url = "https://home-assistant.heimdall.technet"; }
-                                                { name = "Pi-hole"; url = "https://pi-hole.heimdall.technet"; }
-                                                { name = "Homepage"; url = "https://homepage.heimdall.technet"; }
-                                                { name = "Jackett"; url = "https://jackett.heimdall.technet"; }
+                                                {
+                                                    name = "Nginx";
+                                                    host = "localhost";
+                                                    port = 443;
+                                                }
+                                                {
+                                                    name = "Home Assistant";
+                                                    url = "https://home-assistant.heimdall.technet";
+                                                }
+                                                {
+                                                    name = "Pi-hole";
+                                                    url = "https://pi-hole.heimdall.technet";
+                                                }
+                                                {
+                                                    name = "Homepage";
+                                                    url = "https://homepage.heimdall.technet";
+                                                }
+                                                {
+                                                    name = "Jackett";
+                                                    url = "https://jackett.heimdall.technet";
+                                                }
                                             ];
                                             agent = "heimdall";
                                         }
@@ -860,7 +884,10 @@ in
                                             interval = "5m";
                                             flake = upgradeFlake;
                                             eval_interval = "6h";
-                                            rebuild_args = [ "--no-write-lock-file" "-L" ];
+                                            rebuild_args = [
+                                                "--no-write-lock-file"
+                                                "-L"
+                                            ];
                                             agent = "heimdall";
                                         }
                                     ];
@@ -875,10 +902,10 @@ in
                                             id = "heimdall-nix-gc";
                                             type = "nix_gc";
                                             interval = "1h";
-                                            max_age = "2w";                             # nix.gc.dates is weekly, so this tolerates one missed run
-                                            warning = 90;                               # Same policy as this host's Filesystems monitor, so the store's fill alarms once rather than twice
+                                            max_age = "2w"; # nix.gc.dates is weekly, so this tolerates one missed run
+                                            warning = 90; # Same policy as this host's Filesystems monitor, so the store's fill alarms once rather than twice
                                             threshold = 96;
-                                            max_generation_age = "30d";                 # --delete-older-than 7d, run weekly, should never leave one this old
+                                            max_generation_age = "30d"; # --delete-older-than 7d, run weekly, should never leave one this old
                                             gc_args = gcArgs;
                                             agent = "heimdall";
                                         }
@@ -977,7 +1004,10 @@ in
                                             check_title = "OPDS FEED";
                                             expect = {
                                                 body_contains = "<feed";
-                                                body_contains_any = [ "atom" "opds" ];
+                                                body_contains_any = [
+                                                    "atom"
+                                                    "opds"
+                                                ];
                                             };
                                             agent = "heimdall";
                                         }
@@ -1190,7 +1220,7 @@ in
                                             id = "heimdall-freshrss-feeds";
                                             type = "freshrss";
                                             interval = "15m";
-                                            api_url = "http://freshrss.heimdall.technet";                    # nginx's catch-all drops requests to the bare IP with 444, so the FreshRSS vhost name is required
+                                            api_url = "http://freshrss.heimdall.technet"; # nginx's catch-all drops requests to the bare IP with 444, so the FreshRSS vhost name is required
                                             username = "beatlink";
                                             api_password_command = "cat /run/secrets/freshrss_api_password";
                                             agent = "heimdall";
@@ -1257,45 +1287,45 @@ in
                                 }
                                 # Traccar is switched off: no tracker protocol was ever enabled, so it never had a device to watch.
                                 /*
-                                {
-                                    name = "Traccar";
-                                    id = "heimdall-svc-traccar";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "heimdall-traccar";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "traccar.service";
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            # Device-staleness health, as opposed to
-                                            # the monitor above, which only proves the
-                                            # server is running. Authenticates as a
-                                            # dedicated read-only "vigil" user created
-                                            # once by hand (see traccar.nix, which has
-                                            # no declarative user provisioning at all)
-                                            # and computes staleness itself from each
-                                            # device's lastUpdate, rather than
-                                            # trusting Traccar's own status field —
-                                            # that field doesn't reliably reach
-                                            # "offline" on its own for a tracker that
-                                            # has simply gone silent.
-                                            name = "Devices";
-                                            id = "heimdall-traccar-devices";
-                                            type = "traccar";
-                                            interval = "15m";
-                                            api_url = "http://127.0.0.1:9280";
-                                            username = "vigil";
-                                            password_command = "cat /run/secrets/traccar_vigil_password";
-                                            stale_warning = 24;
-                                            stale_threshold = 72;
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
+                                  {
+                                      name = "Traccar";
+                                      id = "heimdall-svc-traccar";
+                                      type = "group";
+                                      children = [
+                                          {
+                                              name = "Service";
+                                              id = "heimdall-traccar";
+                                              type = "systemd_service";
+                                              interval = "1m";
+                                              service_name = "traccar.service";
+                                              agent = "heimdall";
+                                          }
+                                          {
+                                              # Device-staleness health, as opposed to
+                                              # the monitor above, which only proves the
+                                              # server is running. Authenticates as a
+                                              # dedicated read-only "vigil" user created
+                                              # once by hand (see traccar.nix, which has
+                                              # no declarative user provisioning at all)
+                                              # and computes staleness itself from each
+                                              # device's lastUpdate, rather than
+                                              # trusting Traccar's own status field —
+                                              # that field doesn't reliably reach
+                                              # "offline" on its own for a tracker that
+                                              # has simply gone silent.
+                                              name = "Devices";
+                                              id = "heimdall-traccar-devices";
+                                              type = "traccar";
+                                              interval = "15m";
+                                              api_url = "http://127.0.0.1:9280";
+                                              username = "vigil";
+                                              password_command = "cat /run/secrets/traccar_vigil_password";
+                                              stale_warning = 24;
+                                              stale_threshold = 72;
+                                              agent = "heimdall";
+                                          }
+                                      ];
+                                  }
                                 */
                                 {
                                     name = "Jackett";
@@ -1446,7 +1476,10 @@ in
                                             interval = "10m";
                                             api_url = "http://127.0.0.1:8384";
                                             api_key_command = "cat /Storage/Services/Syncthing/vigil-api-key";
-                                            devices = [ "Odin" "Ragnarok" ];                        # ThorX is the phone and roams by design, so its absence is not a health signal
+                                            devices = [
+                                                "Odin"
+                                                "Ragnarok"
+                                            ]; # ThorX is the phone and roams by design, so its absence is not a health signal
                                             agent = "heimdall";
                                         }
                                     ];
@@ -1875,7 +1908,10 @@ in
                                             interval = "5m";
                                             flake = upgradeFlake;
                                             eval_interval = "6h";
-                                            rebuild_args = [ "--no-write-lock-file" "-L" ];
+                                            rebuild_args = [
+                                                "--no-write-lock-file"
+                                                "-L"
+                                            ];
                                             agent = "odin";
                                         }
                                     ];
@@ -1890,10 +1926,10 @@ in
                                             id = "odin-nix-gc";
                                             type = "nix_gc";
                                             interval = "1h";
-                                            max_age = "2w";                             # nix.gc.dates is weekly, so this tolerates one missed run
-                                            warning = 90;                               # Same policy as this host's Filesystems monitor, so the store's fill alarms once rather than twice
+                                            max_age = "2w"; # nix.gc.dates is weekly, so this tolerates one missed run
+                                            warning = 90; # Same policy as this host's Filesystems monitor, so the store's fill alarms once rather than twice
                                             threshold = 96;
-                                            max_generation_age = "30d";                 # --delete-older-than 7d, run weekly, should never leave one this old
+                                            max_generation_age = "30d"; # --delete-older-than 7d, run weekly, should never leave one this old
                                             gc_args = gcArgs;
                                             agent = "odin";
                                         }
@@ -2312,7 +2348,7 @@ in
                                             interval = "5m";
                                             command = "cat /sys/class/power_supply/axp20x-battery/capacity";
                                             pattern = "([0-9]+)";
-                                            invert = true;                                  # A battery is worse the lower it reads, which reverses the usual ranking
+                                            invert = true; # A battery is worse the lower it reads, which reverses the usual ranking
                                             warning = 20;
                                             threshold = 10;
                                             value_label = "CHARGE";
@@ -2493,9 +2529,12 @@ in
                                             interval = "5m";
                                             flake = upgradeFlake;
                                             configuration = "Thor";
-                                            eval_agent = "heimdall";                        # Evaluating the flake on four 1.15GHz A53s takes the phone out of service for the duration
+                                            eval_agent = "heimdall"; # Evaluating the flake on four 1.15GHz A53s takes the phone out of service for the duration
                                             eval_interval = "6h";
-                                            rebuild_args = [ "--no-write-lock-file" "-L" ];
+                                            rebuild_args = [
+                                                "--no-write-lock-file"
+                                                "-L"
+                                            ];
                                             agent = "thor";
                                         }
                                     ];
@@ -2510,10 +2549,10 @@ in
                                             id = "thor-nix-gc";
                                             type = "nix_gc";
                                             interval = "1h";
-                                            max_age = "2w";                             # nix.gc.dates is weekly, so this tolerates one missed run
-                                            warning = 90;                               # Same policy as this host's Filesystems monitor, so the store's fill alarms once rather than twice
+                                            max_age = "2w"; # nix.gc.dates is weekly, so this tolerates one missed run
+                                            warning = 90; # Same policy as this host's Filesystems monitor, so the store's fill alarms once rather than twice
                                             threshold = 96;
-                                            max_generation_age = "30d";                 # --delete-older-than 7d, run weekly, should never leave one this old
+                                            max_generation_age = "30d"; # --delete-older-than 7d, run weekly, should never leave one this old
                                             gc_args = gcArgs;
                                             agent = "thor";
                                         }

@@ -137,7 +137,7 @@
             "motioneye"
             # "traccar"                                                 # Traccar is switched off (see traccar.nix)
         ];
-        customComponents =   [
+        customComponents = [
             (pkgs.home-assistant-custom-components.frigate.overrideAttrs (old: {
                 pytestFlagsArray = (old.pytestFlagsArray or [ ]) ++ [
                     "--deselect=tests/test_integration_services.py::test_review_summarize_service_version_check"

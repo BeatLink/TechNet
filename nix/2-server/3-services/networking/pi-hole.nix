@@ -16,7 +16,12 @@
 #     - Ragnarok - ragnarok.technet
 #
 
-{ config, pkgs, lib, ... }:
+{
+    config,
+    pkgs,
+    lib,
+    ...
+}:
 {
 
     nginx-vhosts.pi-hole = {
@@ -150,7 +155,7 @@
                     rapidCommit = false;
                     logging = true;
                 };
-                database.maxDBdays = 7;                                     # Every query row is scanned at startup, and 90 days of them held FTL's API for 20 s.
+                database.maxDBdays = 7; # Every query row is scanned at startup, and 90 days of them held FTL's API for 20 s.
             };
             stateDirectory = "/Storage/Services/PiHole/state";
             logDirectory = "/Storage/Services/PiHole/logs";
@@ -188,7 +193,7 @@
         requires = [ "unbound.service" ];
     };
 
-    # Setup ordering -----------------------------------------------------------------------------------------------------------------------------
+    # Setup ordering ---------------------------------------------------------------------------------------------------------------------------------
     # FTL serves the API before the gravity database is open, so the setup's list registration is gated on the lists endpoint returning data.
     systemd.services.pihole-ftl-setup.serviceConfig.ExecStartPre = lib.getExe (
         pkgs.writeShellApplication {
@@ -215,7 +220,10 @@
     # The setup service builds gravity only when the database is missing, so without this the blocklists are never refreshed again.
     systemd.services.pihole-gravity = {
         description = "Pi-hole gravity refresh";
-        after = [ "network-online.target" "pihole-ftl.service" ];
+        after = [
+            "network-online.target"
+            "pihole-ftl.service"
+        ];
         wants = [ "network-online.target" ];
         serviceConfig = {
             Type = "oneshot";

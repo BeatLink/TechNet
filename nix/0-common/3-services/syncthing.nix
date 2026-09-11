@@ -121,10 +121,17 @@ let
         Videos = "4kqye-6dosm";
     };
     # A folder whose path, sync type or permission handling differs per peer keys them by device name; everything else takes the shared default.
-    perHost = folder: attr: default: let entries = folder.${attr} or { }; in entries.${cfg.self} or entries.default or default;
+    perHost =
+        folder: attr: default:
+        let
+            entries = folder.${attr} or { };
+        in
+        entries.${cfg.self} or entries.default or default;
 
     # Load-bearing: without it a host configures folders it is not a member of and scans them for nothing.
-    hostFolders = lib.filterAttrs (_: folder: builtins.elem cfg.self (folder.devices or allPeers)) folders;
+    hostFolders = lib.filterAttrs (
+        _: folder: builtins.elem cfg.self (folder.devices or allPeers)
+    ) folders;
 
     folderPath = name: folder: perHost folder "paths" "/Storage/Files/${name}";
 in

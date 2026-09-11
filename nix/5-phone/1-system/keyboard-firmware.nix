@@ -1,4 +1,4 @@
-# Keyboard firmware tools #############################################################################################################################
+# Keyboard firmware tools ############################################################################################################################
 #
 # megi's host-side tools for the case's MCU. Only `info` and the user-firmware slot are reachable over i2c from the phone; replacing the stock firmware
 # needs a USB cable soldered to the controller board, so nothing here can flash the power-consumption fix on its own.

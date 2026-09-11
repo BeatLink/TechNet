@@ -17,7 +17,12 @@
     ...
 }:
 let
-    agentHosts = [ "Heimdall" "Odin" "Ragnarok" "Thor" ];
+    agentHosts = [
+        "Heimdall"
+        "Odin"
+        "Ragnarok"
+        "Thor"
+    ];
     host = config.networking.hostName;
     agentId = lib.toLower host;
 
@@ -57,16 +62,16 @@ in
             # migrated monitors resolving exactly what they resolved before, rather than making each one's tools an explicit dependency here.
             path = [
                 "/run/current-system/sw"
-                pkgs.git                                                    # nix shells out to git to fetch git inputs while evaluating the flake
+                pkgs.git # nix shells out to git to fetch git inputs while evaluating the flake
             ];
         };
 
         systemd.services.vigil-agent = {
-            environment.HOME = "/var/lib/vigil-agent";                     # nix and the detached job workdirs write under $HOME; the default /var/empty is immutable
+            environment.HOME = "/var/lib/vigil-agent"; # nix and the detached job workdirs write under $HOME; the default /var/empty is immutable
             serviceConfig = {
                 StateDirectory = "vigil-agent";
-                CacheDirectory = "vigil-borg";                              # Backs the borg monitors' cache_dir; without it each poll rebuilds the repo's chunks cache under mktemp and discards it
-                ProtectHome = lib.mkForce false;                            # true hides /home from borg source paths and makes /root read-only for the rebuild's nix cache
+                CacheDirectory = "vigil-borg"; # Backs the borg monitors' cache_dir; without it each poll rebuilds the repo's chunks cache under mktemp and discards it
+                ProtectHome = lib.mkForce false; # true hides /home from borg source paths and makes /root read-only for the rebuild's nix cache
 
                 # Contention-only. A CPUQuota of 200% was here and had to go: it throttled the agent 679 times on Odin and 1625 on Heimdall, and every
                 # monitor command runs under a deadline, so starving this is how a healthy host starts reporting timeouts. What made the ceiling look

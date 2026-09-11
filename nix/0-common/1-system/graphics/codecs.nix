@@ -22,27 +22,30 @@ in
 {
     options.technet.codecs.enable = lib.mkEnableOption "the gstreamer and ffmpeg codec set";
 
-    config = lib.mkIf cfg.enable (lib.mkMerge [
+    config = lib.mkIf cfg.enable (
+        lib.mkMerge [
 
-        # Codec Set ##################################################################################################################################
-        {
-            environment.systemPackages =
-                gstPlugins
-                ++ (with pkgs; [
-                    ffmpegthumbnailer
-                    ffmpeg
-                    ffmpeg-full
-                ]);
+            # Codec Set ##############################################################################################################################
+            {
+                environment.systemPackages =
+                    gstPlugins
+                    ++ (with pkgs; [
+                        ffmpegthumbnailer
+                        ffmpeg
+                        ffmpeg-full
+                    ]);
 
-            environment.sessionVariables.GST_PLUGIN_SYSTEM_PATH_1_0 =
-                lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0" ([ pkgs.gst_all_1.gstreamer ] ++ gstPlugins);
-        }
+                environment.sessionVariables.GST_PLUGIN_SYSTEM_PATH_1_0 =
+                    lib.makeSearchPathOutput "lib" "lib/gstreamer-1.0"
+                        ([ pkgs.gst_all_1.gstreamer ] ++ gstPlugins);
+            }
 
-        # Thumbnail Cache ############################################################################################################################
-        {
-            home-manager.users.beatlink.home.persistence."/Storage/Apps/System/Codecs".directories = [
-                ".cache/thumbnails/"
-            ];
-        }
-    ]);
+            # Thumbnail Cache ########################################################################################################################
+            {
+                home-manager.users.beatlink.home.persistence."/Storage/Apps/System/Codecs".directories = [
+                    ".cache/thumbnails/"
+                ];
+            }
+        ]
+    );
 }

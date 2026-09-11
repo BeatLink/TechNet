@@ -20,7 +20,8 @@ let
         # Fetch JSON once and save to both files
         ${pkgs.curl}/bin/curl -sS "$url" -o "$datedFile" && cp "$datedFile" "$latestFile"
     '';
-in {
+in
+{
     systemd.services.stremio-export = {
         description = "Fetch Stremio export JSON";
         serviceConfig = {

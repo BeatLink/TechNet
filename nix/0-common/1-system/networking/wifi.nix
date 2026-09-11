@@ -182,7 +182,9 @@ in
                 assertion = lib.all (n: networks ? ${n}) (lib.attrNames cfg.networks);
                 message =
                     "technet.wifi.networks has unknown network(s): "
-                    + lib.concatStringsSep ", " (lib.subtractLists (lib.attrNames networks) (lib.attrNames cfg.networks))
+                    + lib.concatStringsSep ", " (
+                        lib.subtractLists (lib.attrNames networks) (lib.attrNames cfg.networks)
+                    )
                     + ". Known networks: "
                     + lib.concatStringsSep ", " (lib.attrNames networks)
                     + ".";
@@ -196,11 +198,9 @@ in
                 enable = true;
                 wifi.powersave = true;
                 ensureProfiles = {
-                    profiles =
-                        lib.mapAttrs (name: _: wifiProfile name) cfg.networks
-                        // {
-                            "TechNet WireGuard" = wgProfile;
-                        };
+                    profiles = lib.mapAttrs (name: _: wifiProfile name) cfg.networks // {
+                        "TechNet WireGuard" = wgProfile;
+                    };
                     environmentFiles = [
                         config.sops.secrets.networkmanager_env_file.path
                     ];

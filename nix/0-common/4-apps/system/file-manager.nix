@@ -12,8 +12,7 @@ let
     cfg = config.technet.desktop.fileManager;
 
     remoteStorage =
-        lib.concatMapStringsSep "\n"
-            (host: "sftp://beatlink@${lib.toLower host}.technet/Storage ${host}")
+        lib.concatMapStringsSep "\n" (host: "sftp://beatlink@${lib.toLower host}.technet/Storage ${host}")
             (
                 lib.filter (host: host != config.networking.hostName) [
                     "Odin"
@@ -62,7 +61,9 @@ in
         home-manager.users.beatlink = {
             # nemo-desktop rewrites the file at every login, replacing the symlink, and the backup it earns collides on the next switch
             home.file.".config/gtk-3.0/bookmarks" = {
-                text = lib.concatStringsSep "\n" (lib.filter (line: line != "") (lib.splitString "\n" cfg.bookmarks));
+                text = lib.concatStringsSep "\n" (
+                    lib.filter (line: line != "") (lib.splitString "\n" cfg.bookmarks)
+                );
                 force = true;
             };
         };

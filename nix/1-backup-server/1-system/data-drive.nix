@@ -13,7 +13,7 @@
 
             boot.initrd.luks.devices.cryptstorage = {
                 device = "/dev/disk/by-partuuid/b701e0a4-fa98-467d-afd6-36cbca0f0737";
-                crypttabExtraOpts = [ "nofail" ]; 
+                crypttabExtraOpts = [ "nofail" ];
             };
 
             fileSystems."/Storage" = {

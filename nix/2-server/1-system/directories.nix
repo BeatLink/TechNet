@@ -1,4 +1,4 @@
-# Shared Directories ##################################################################################################################################
+# Shared Directories #################################################################################################################################
 #
 # Directories under /Storage/Files that more than one account writes on this host, and the groups that let them share.
 #

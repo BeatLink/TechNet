@@ -11,11 +11,11 @@ let
     setupGadget = pkgs.writeShellScript "usb-gadget-setup" ''
         set -eu
         PATH=${
-          lib.makeBinPath [
-              pkgs.coreutils
-              pkgs.kmod
-              pkgs.util-linux
-          ]
+            lib.makeBinPath [
+                pkgs.coreutils
+                pkgs.kmod
+                pkgs.util-linux
+            ]
         }:$PATH
 
         udc=$(ls /sys/class/udc 2>/dev/null | head -1 || true)

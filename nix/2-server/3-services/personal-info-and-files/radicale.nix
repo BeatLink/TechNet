@@ -8,7 +8,12 @@
 #   - Tasks
 #
 
-{ pkgs, inputs, config, ... }:
+{
+    pkgs,
+    inputs,
+    config,
+    ...
+}:
 {
     # Owned by `vigil`, not `vigil-access`, unlike the probe credentials that
     # are read on the target host over SSH. Vigil's HTTP-style plugins resolve

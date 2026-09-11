@@ -3,7 +3,12 @@
 # The tang key server Odin hosts, started and stopped by hand from the panel applet so keys are only served on demand.
 #
 
-{ config, lib, pkgs, ... }:
+{
+    config,
+    lib,
+    pkgs,
+    ...
+}:
 let
     tangCfg = config.technet.tang;
 in
@@ -87,7 +92,6 @@ in
         {
             technet.tang.urls = map (addr: "http://${addr}:${toString tangCfg.port}") tangCfg.addresses;
         }
-
 
         # Server #####################################################################################################################################
         (lib.mkIf tangCfg.server.enable {

@@ -1,4 +1,4 @@
-# Waydroid on Odin #################################################################################################################################
+# Waydroid on Odin ###################################################################################################################################
 #
 # Hands this phone's Waydroid session to a waypipe display, so Android runs on this hardware and its windows appear on the other host. One container
 # means one session: the phone gives Waydroid up for as long as the remote one holds it, and takes it back when that link ends.

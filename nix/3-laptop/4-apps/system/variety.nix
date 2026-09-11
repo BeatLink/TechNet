@@ -7,7 +7,12 @@
 {
     environment.systemPackages = with pkgs; [ variety ];
     home-manager.users.beatlink =
-        { config, lib, pkgs, ... }:
+        {
+            config,
+            lib,
+            pkgs,
+            ...
+        }:
         let
             # Cinnamon's lock screen reuses the desktop background and exposes no key aiming it elsewhere
             setLockScreen = pkgs.writeShellScript "variety-set-lock-screen" ''

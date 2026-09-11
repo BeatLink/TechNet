@@ -11,88 +11,91 @@ let
 
     flag = "/run/pinephone-keyboard-docked";
 
-    dockRotation = pkgs.writers.writePython3Bin "keyboard-dock-rotation" {
-        libraries = [ pkgs.python3Packages.pygobject3 ];
-        flakeIgnore = [ "E501" ];
-    } ''
-        import os
-        import subprocess
-        import gi
-        gi.require_version("Gio", "2.0")
-        from gi.repository import Gio, GLib  # noqa: E402
+    dockRotation =
+        pkgs.writers.writePython3Bin "keyboard-dock-rotation"
+            {
+                libraries = [ pkgs.python3Packages.pygobject3 ];
+                flakeIgnore = [ "E501" ];
+            }
+            ''
+                import os
+                import subprocess
+                import gi
+                gi.require_version("Gio", "2.0")
+                from gi.repository import Gio, GLib  # noqa: E402
 
-        LOCK_KEY = "/org/gnome/settings-daemon/peripherals/touchscreen/orientation-lock"
-        FLAG = "${flag}"
-        # Holds the pre-dock lock and transform, in the runtime directory so a reboot starts from the session's own state rather than a stale one.
-        PREF = os.environ.get("XDG_RUNTIME_DIR", "/tmp") + "/keyboard-dock.pref"
-        LANDSCAPE = ${toString landscape}
-        DCONF = "${pkgs.dconf}/bin/dconf"
+                LOCK_KEY = "/org/gnome/settings-daemon/peripherals/touchscreen/orientation-lock"
+                FLAG = "${flag}"
+                # Holds the pre-dock lock and transform, in the runtime directory so a reboot starts from the session's own state rather than a stale one.
+                PREF = os.environ.get("XDG_RUNTIME_DIR", "/tmp") + "/keyboard-dock.pref"
+                LANDSCAPE = ${toString landscape}
+                DCONF = "${pkgs.dconf}/bin/dconf"
 
-        session = Gio.bus_get_sync(Gio.BusType.SESSION)
-        display_config = Gio.DBusProxy.new_sync(
-            session, Gio.DBusProxyFlags.NONE, None,
-            "org.gnome.Mutter.DisplayConfig", "/org/gnome/Mutter/DisplayConfig",
-            "org.gnome.Mutter.DisplayConfig", None,
-        )
-
-
-        def monitor_state():
-            serial, monitors, logical, _props = display_config.call_sync("GetCurrentState", None, Gio.DBusCallFlags.NONE, -1, None).unpack()
-            connector = monitors[0][0][0]
-            mode = next(m[0] for m in monitors[0][1] if m[6].get("is-current"))
-            return serial, connector, mode, logical[0][2], logical[0][3]
+                session = Gio.bus_get_sync(Gio.BusType.SESSION)
+                display_config = Gio.DBusProxy.new_sync(
+                    session, Gio.DBusProxyFlags.NONE, None,
+                    "org.gnome.Mutter.DisplayConfig", "/org/gnome/Mutter/DisplayConfig",
+                    "org.gnome.Mutter.DisplayConfig", None,
+                )
 
 
-        def set_transform(transform):
-            serial, connector, mode, scale, current = monitor_state()
-            if current == transform:
-                return
-            # Method 2 (persistent) is the only one phosh acts on: temporary configs are parsed and then dropped without being applied.
-            args = GLib.Variant("(uua(iiduba(ssa{sv}))a{sv})", (serial, 2, [(0, 0, scale, transform, True, [(connector, mode, {})])], {}))
-            display_config.call_sync("ApplyMonitorsConfig", args, Gio.DBusCallFlags.NONE, -1, None)
+                def monitor_state():
+                    serial, monitors, logical, _props = display_config.call_sync("GetCurrentState", None, Gio.DBusCallFlags.NONE, -1, None).unpack()
+                    connector = monitors[0][0][0]
+                    mode = next(m[0] for m in monitors[0][1] if m[6].get("is-current"))
+                    return serial, connector, mode, logical[0][2], logical[0][3]
 
 
-        def lock_read():
-            out = subprocess.run([DCONF, "read", LOCK_KEY], capture_output=True, text=True, timeout=10).stdout.strip()
-            return out if out else "false"
+                def set_transform(transform):
+                    serial, connector, mode, scale, current = monitor_state()
+                    if current == transform:
+                        return
+                    # Method 2 (persistent) is the only one phosh acts on: temporary configs are parsed and then dropped without being applied.
+                    args = GLib.Variant("(uua(iiduba(ssa{sv}))a{sv})", (serial, 2, [(0, 0, scale, transform, True, [(connector, mode, {})])], {}))
+                    display_config.call_sync("ApplyMonitorsConfig", args, Gio.DBusCallFlags.NONE, -1, None)
 
 
-        def lock_write(value):
-            subprocess.run([DCONF, "write", LOCK_KEY, value], capture_output=True, timeout=10)
+                def lock_read():
+                    out = subprocess.run([DCONF, "read", LOCK_KEY], capture_output=True, text=True, timeout=10).stdout.strip()
+                    return out if out else "false"
 
 
-        def docked():
-            try:
-                with open(FLAG) as f:
-                    return f.read().strip() == "1"
-            except OSError:
-                return False
+                def lock_write(value):
+                    subprocess.run([DCONF, "write", LOCK_KEY, value], capture_output=True, timeout=10)
 
 
-        def dock():
-            if not os.path.exists(PREF):
-                with open(PREF, "w") as f:
-                    f.write(lock_read() + " " + str(monitor_state()[4]))
-            # Lock first: an unlocked session re-matches the accelerometer and turns the panel straight back.
-            lock_write("true")
-            set_transform(LANDSCAPE)
+                def docked():
+                    try:
+                        with open(FLAG) as f:
+                            return f.read().strip() == "1"
+                    except OSError:
+                        return False
 
 
-        def undock():
-            if not os.path.exists(PREF):
-                return
-            with open(PREF) as f:
-                lock, transform = f.read().split()
-            os.remove(PREF)
-            if lock == "true":
-                set_transform(int(transform))
-            else:
-                # Releasing the lock is enough for the transform: phosh re-runs its own orientation match on unlock.
-                lock_write("false")
+                def dock():
+                    if not os.path.exists(PREF):
+                        with open(PREF, "w") as f:
+                            f.write(lock_read() + " " + str(monitor_state()[4]))
+                    # Lock first: an unlocked session re-matches the accelerometer and turns the panel straight back.
+                    lock_write("true")
+                    set_transform(LANDSCAPE)
 
 
-        dock() if docked() else undock()
-    '';
+                def undock():
+                    if not os.path.exists(PREF):
+                        return
+                    with open(PREF) as f:
+                        lock, transform = f.read().split()
+                    os.remove(PREF)
+                    if lock == "true":
+                        set_transform(int(transform))
+                    else:
+                        # Releasing the lock is enough for the transform: phosh re-runs its own orientation match on unlock.
+                        lock_write("false")
+
+
+                dock() if docked() else undock()
+            '';
 in
 {
     home-manager.users.beatlink = {

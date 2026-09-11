@@ -33,24 +33,42 @@ let
     # positions the report is keyed by.
     #
 
-    moduleArgs =
-        { modulesPath = "${flake.inputs.nixpkgs}/nixos/modules"; }
-        // system._module.args
-        // {
-            inherit lib;
-            inherit (system) config options;
-            pkgs = system.pkgs;
-            inputs = flake.inputs // { self = flake; };
+    moduleArgs = {
+        modulesPath = "${flake.inputs.nixpkgs}/nixos/modules";
+    }
+    // system._module.args
+    // {
+        inherit lib;
+        inherit (system) config options;
+        pkgs = system.pkgs;
+        inputs = flake.inputs // {
+            self = flake;
         };
+    };
 
     # Evaluates a value, yielding null instead of propagating a throw.
-    safe = expression: let attempt = tryEval expression; in if attempt.success then attempt.value else null;
+    safe =
+        expression:
+        let
+            attempt = tryEval expression;
+        in
+        if attempt.success then attempt.value else null;
 
     # Calls a module function with the arguments it declares.
-    applyModule = f: let declared = functionArgs f; in if declared == { } then f moduleArgs else f (intersectAttrs declared moduleArgs);
+    applyModule =
+        f:
+        let
+            declared = functionArgs f;
+        in
+        if declared == { } then f moduleArgs else f (intersectAttrs declared moduleArgs);
 
     # Imports a module file, applying it if it is a function.
-    loadModule = file: let module = import file; in if isFunction module then applyModule module else module;
+    loadModule =
+        file:
+        let
+            module = import file;
+        in
+        if isFunction module then applyModule module else module;
 
     # Resolves an import entry to the file that backs it.
     moduleFile =
@@ -73,7 +91,9 @@ let
                 system.options.system.stateVersion
             ];
             inside = builtins.filter (file: lib.hasPrefix (source + "/nix/") (toString file)) declaring;
-            topLevel = map (file: builtins.head (lib.splitString "/" (lib.removePrefix (source + "/nix/") (toString file)))) inside;
+            topLevel = map (
+                file: builtins.head (lib.splitString "/" (lib.removePrefix (source + "/nix/") (toString file)))
+            ) inside;
         in
         map (directory: source + "/nix/" + directory) (lib.unique topLevel);
 
@@ -122,7 +142,12 @@ let
         else
             [ ];
 
-    unwrapSafe = value: let attempt = tryEval (unwrap value); in if attempt.success then attempt.value else [ ];
+    unwrapSafe =
+        value:
+        let
+            attempt = tryEval (unwrap value);
+        in
+        if attempt.success then attempt.value else [ ];
 
     # Options declared inside a submodule, so a warning can reach settings written under one.
     subOptionsOf =
@@ -133,22 +158,38 @@ let
             isSubmodule = name: name == "submodule" || name == "submoduleWith";
         in
         if isSubmodule (type.name or "") then
-            { kind = "submodule"; options = safe (type.getSubOptions [ ]); }
+            {
+                kind = "submodule";
+                options = safe (type.getSubOptions [ ]);
+            }
         else if (type.name or "") == "attrsOf" || (type.name or "") == "lazyAttrsOf" then
             (
                 if isSubmodule (elemType.name or "") then
-                    { kind = "attrsOfSubmodule"; options = safe (elemType.getSubOptions [ ]); }
+                    {
+                        kind = "attrsOfSubmodule";
+                        options = safe (elemType.getSubOptions [ ]);
+                    }
                 else
-                    { kind = "leaf"; options = null; }
+                    {
+                        kind = "leaf";
+                        options = null;
+                    }
             )
         else
-            { kind = "leaf"; options = null; };
+            {
+                kind = "leaf";
+                options = null;
+            };
 
     # True when the report should stay quiet about this option, per lint/allowed-defaults.nix.
     isAllowed =
         option:
         let
-            toRegex = pattern: lib.concatMapStrings (c: if c == "*" then ".*" else lib.escapeRegex c) (lib.stringToCharacters pattern);
+            toRegex =
+                pattern:
+                lib.concatMapStrings (c: if c == "*" then ".*" else lib.escapeRegex c) (
+                    lib.stringToCharacters pattern
+                );
         in
         lib.any (pattern: builtins.match (toRegex pattern) option != null) allowed;
 
@@ -238,8 +279,24 @@ let
                 else if module ? config then
                     safe module.config
                 else
-                    safe (builtins.removeAttrs module [ "imports" "options" "config" "_file" "key" "meta" "freeformType" "disabledModules" "class" ]);
-            walked = if definitions == null then { success = false; } else tryEval (walk 0 system.options [ ] definitions);
+                    safe (
+                        builtins.removeAttrs module [
+                            "imports"
+                            "options"
+                            "config"
+                            "_file"
+                            "key"
+                            "meta"
+                            "freeformType"
+                            "disabledModules"
+                            "class"
+                        ]
+                    );
+            walked =
+                if definitions == null then
+                    { success = false; }
+                else
+                    tryEval (walk 0 system.options [ ] definitions);
         in
         if walked.success or false then
             walked.value

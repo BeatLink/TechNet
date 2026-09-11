@@ -6,7 +6,12 @@
 # LUKS2 header instead, and clevis-luks-askpass answers systemd's password prompt whenever tang is reachable, leaving the prompt itself intact.
 #
 
-{ config, lib, pkgs, ... }:
+{
+    config,
+    lib,
+    pkgs,
+    ...
+}:
 let
     tangCfg = config.technet.tang;
     clevisCfg = config.technet.clevis;
@@ -155,7 +160,7 @@ let
 
             expected="$(tr -d '\n' < "$PASSPHRASE_FILE")"
 
-            # ZFS datasets: a JWE file each, embedded into the initrd by the next rebuild -------------------------------------------------------------
+            # ZFS datasets: a JWE file each, embedded into the initrd by the next rebuild ------------------------------------------------------------
             ${lib.optionalString (clevisCfg.datasets != [ ]) ''
                 install -d -m 0700 -o root -g root "${clevisCfg.stateDir}"
             ''}

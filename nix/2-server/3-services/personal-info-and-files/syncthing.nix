@@ -7,7 +7,13 @@
 # here is Heimdall-specific -- where the data lives, the web UI, and the tuning that exists because this host's storage is a spinning
 # mirror.
 #
-{ config, lib, pkgs, inputs, ... }:
+{
+    config,
+    lib,
+    pkgs,
+    inputs,
+    ...
+}:
 {
     sops.secrets.syncthing_cert = {
         sopsFile = "${config.technet.secrets.path}/syncthing.yaml";
@@ -49,7 +55,7 @@
 
     services.syncthing.settings = lib.recursiveUpdate config.syncthing-mesh.settings {
         options = {
-           maxFolderConcurrency = 1;
+            maxFolderConcurrency = 1;
             maxConcurrentIncomingRequestKiB = 32768;
             progressUpdateIntervalS = 30;
         };
@@ -65,7 +71,7 @@
         IOSchedulingPriority = 6;
         IOWeight = 50;
         CPUWeight = 50;
-        UMask = "0002";                                                 # Files it pulls into eBooks must stay writable by the other ebooks-group services (see 1-system/directories.nix); this applies to every folder it writes
+        UMask = "0002"; # Files it pulls into eBooks must stay writable by the other ebooks-group services (see 1-system/directories.nix); this applies to every folder it writes
     };
 
     nginx-vhosts = {

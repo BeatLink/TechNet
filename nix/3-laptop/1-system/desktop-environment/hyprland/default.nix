@@ -12,7 +12,12 @@
 # workspace with floating windows, while this configuration uses five workspaces with dwindle tiling.
 #
 
-{ config, lib, pkgs, ... }:
+{
+    config,
+    lib,
+    pkgs,
+    ...
+}:
 let
     palette = config.technet.theme.palette;
     # mkForce because the home-manager modules set the Wayland check alone, which Cinnamon also satisfies
@@ -61,19 +66,24 @@ in
         {
             # Cinnamon 6.7 reaches graphical-session.target too, so every unit of this session names the compositor
             systemd.user = {
-                services = lib.genAttrs [
-                    "hypr-edge-snap"
-                    "hypr-event-sounds"
-                    "hypr-session-sounds"
-                    "hypridle"
-                    "hyprpaper"
-                    "hyprpaper-variety"
-                    "hyprsunset"
-                    "swaync"
-                    "swayosd"
-                    "waybar"
-                    "waycorner"
-                ] (_: { Unit.ConditionEnvironment = sessionOnly; });
+                services =
+                    lib.genAttrs
+                        [
+                            "hypr-edge-snap"
+                            "hypr-event-sounds"
+                            "hypr-session-sounds"
+                            "hypridle"
+                            "hyprpaper"
+                            "hyprpaper-variety"
+                            "hyprsunset"
+                            "swaync"
+                            "swayosd"
+                            "waybar"
+                            "waycorner"
+                        ]
+                        (_: {
+                            Unit.ConditionEnvironment = sessionOnly;
+                        });
                 paths.hyprpaper-variety.Unit.ConditionEnvironment = sessionOnly;
             };
 

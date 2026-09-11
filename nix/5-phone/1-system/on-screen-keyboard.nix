@@ -1,4 +1,4 @@
-# On-screen keyboard ################################################################################################################################
+# On-screen keyboard #################################################################################################################################
 #
 # phosh shows its keyboard whenever screen-keyboard-enabled is set, with no notion of a physical one being attached, so this follows the input devices
 # and toggles that key. The keyboard case, a USB keyboard and a 2.4GHz dongle all look the same from here: a device that reports letter keys.

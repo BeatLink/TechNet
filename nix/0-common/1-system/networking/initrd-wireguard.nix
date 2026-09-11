@@ -39,8 +39,14 @@ let
     keyPath = config.sops.secrets.wireguard_private_key.path;
 
     pingArgs = lib.concatStringsSep " " (
-        [ "-c1" "-W3" ]
-        ++ lib.optionals (cfg.probe.interface != null) [ "-I" cfg.probe.interface ]
+        [
+            "-c1"
+            "-W3"
+        ]
+        ++ lib.optionals (cfg.probe.interface != null) [
+            "-I"
+            cfg.probe.interface
+        ]
         ++ [ cfg.probe.address ]
     );
 

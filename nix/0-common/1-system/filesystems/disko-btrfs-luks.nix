@@ -45,19 +45,35 @@
                                 subvolumes = {
                                     "@root" = {
                                         mountpoint = "/";
-                                        mountOptions = [ "compress=zstd" "noatime" "discard=async" ];
+                                        mountOptions = [
+                                            "compress=zstd"
+                                            "noatime"
+                                            "discard=async"
+                                        ];
                                     };
                                     "@nix" = {
                                         mountpoint = "/nix";
-                                        mountOptions = [ "compress=zstd" "noatime" "discard=async" ];
+                                        mountOptions = [
+                                            "compress=zstd"
+                                            "noatime"
+                                            "discard=async"
+                                        ];
                                     };
                                     "@persistent" = {
                                         mountpoint = "/persistent";
-                                        mountOptions = [ "compress=zstd" "noatime" "discard=async" ];
+                                        mountOptions = [
+                                            "compress=zstd"
+                                            "noatime"
+                                            "discard=async"
+                                        ];
                                     };
                                     "@home" = {
                                         mountpoint = "/home";
-                                        mountOptions = [ "compress=zstd" "noatime" "discard=async" ];
+                                        mountOptions = [
+                                            "compress=zstd"
+                                            "noatime"
+                                            "discard=async"
+                                        ];
                                     };
                                 };
 

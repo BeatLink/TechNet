@@ -29,11 +29,10 @@ let
         });
 
     # Kept in beatlink's home because the application offers no way to move it, and so listed for the rollback to spare.
-    persist =
-        app: directories:
-        {
-            home-manager.users.beatlink.home.persistence."/Storage/Apps/PhoneApps/${app}".directories = directories;
-        };
+    persist = app: directories: {
+        home-manager.users.beatlink.home.persistence."/Storage/Apps/PhoneApps/${app}".directories =
+            directories;
+    };
 in
 {
     config = lib.mkMerge [
@@ -76,19 +75,20 @@ in
             in
             {
                 environment.systemPackages = [ pkgs.keepassxc ];
-                systemd.tmpfiles.settings.PhoneApps = dirs [
-                    "/Storage/PhoneApps/KeePassXC"
-                    "/Storage/PhoneApps/KeePassXC/Thor"
-                ]
-                // {
-                    # Copied rather than linked, because KeePassXC rewrites its config on startup and would replace a store symlink with a file
-                    "/Storage/PhoneApps/KeePassXC/Thor/keepassxc.ini".C = {
-                        argument = "${thorConfig}";
-                        user = "beatlink";
-                        group = "beatlink";
-                        mode = "0644";
+                systemd.tmpfiles.settings.PhoneApps =
+                    dirs [
+                        "/Storage/PhoneApps/KeePassXC"
+                        "/Storage/PhoneApps/KeePassXC/Thor"
+                    ]
+                    // {
+                        # Copied rather than linked, because KeePassXC rewrites its config on startup and would replace a store symlink with a file
+                        "/Storage/PhoneApps/KeePassXC/Thor/keepassxc.ini".C = {
+                            argument = "${thorConfig}";
+                            user = "beatlink";
+                            group = "beatlink";
+                            mode = "0644";
+                        };
                     };
-                };
             }
         )
 
@@ -125,14 +125,15 @@ in
                 technet.vscodium.enable = true; # Extensions and this host's own settings, from the module Odin shares
                 environment.systemPackages = [ pkgs.vscodium ];
 
-                systemd.tmpfiles.settings.PhoneApps = dirs [
-                    "/Storage/PhoneApps/VSCodium"
-                    "/Storage/PhoneApps/VSCodium/Thor"
-                    "/Storage/PhoneApps/VSCodium/Thor/User"
-                ]
-                // {
-                    "/Storage/PhoneApps/VSCodium/Thor/User/settings.json"."L+".argument = "${thorSettings}";
-                };
+                systemd.tmpfiles.settings.PhoneApps =
+                    dirs [
+                        "/Storage/PhoneApps/VSCodium"
+                        "/Storage/PhoneApps/VSCodium/Thor"
+                        "/Storage/PhoneApps/VSCodium/Thor/User"
+                    ]
+                    // {
+                        "/Storage/PhoneApps/VSCodium/Thor/User/settings.json"."L+".argument = "${thorSettings}";
+                    };
             }
         )
 

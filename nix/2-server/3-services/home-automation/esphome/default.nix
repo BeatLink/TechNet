@@ -48,7 +48,11 @@ let
     # keys are wanted -- `sops:` is the encryption metadata, not a secret.
     deviceSecretKeys = lib.filter (k: k != "sops") (
         lib.concatMap (
-            line: let m = builtins.match "^([a-zA-Z0-9_-]+):.*" line; in lib.optionals (m != null) m
+            line:
+            let
+                m = builtins.match "^([a-zA-Z0-9_-]+):.*" line;
+            in
+            lib.optionals (m != null) m
         ) (lib.splitString "\n" (builtins.readFile deviceSecretsFile))
     );
 in
@@ -109,12 +113,11 @@ in
         lib.mapAttrs' (
             name: _:
             lib.nameValuePair "${stateDir}/${name}" {
-                f = { };                                                     # Ownership stays unset: the read-only bind mount rejects chown on every re-run.
+                f = { }; # Ownership stays unset: the read-only bind mount rejects chown on every re-run.
             }
         ) configFiles
         // {
-            "${stateDir}/secrets.yaml"."L+".argument =
-                config.sops.templates."esphome-secrets.yaml".path;
+            "${stateDir}/secrets.yaml"."L+".argument = config.sops.templates."esphome-secrets.yaml".path;
         };
 
     systemd.mounts = lib.mapAttrsToList (name: drv: {

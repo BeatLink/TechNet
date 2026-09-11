@@ -189,15 +189,15 @@
                     }
                     # Traccar is switched off (see home-automation/traccar.nix).
                     /*
-                    {
-                        "Traccar" = {
-                            icon = "traccar.png";
-                            description = "Vehicle Tracking Server";
-                            href = "https://traccar.heimdall.technet";
-                            siteMonitor = "https://traccar.heimdall.technet";
-                            statusStyle = "dot";
-                        };
-                    }
+                      {
+                          "Traccar" = {
+                              icon = "traccar.png";
+                              description = "Vehicle Tracking Server";
+                              href = "https://traccar.heimdall.technet";
+                              siteMonitor = "https://traccar.heimdall.technet";
+                              statusStyle = "dot";
+                          };
+                      }
                     */
                     {
                         "MQTT" = {

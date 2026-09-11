@@ -133,7 +133,10 @@ in
 
     # Three-hourly so a missed window is retried the same day rather than waiting for the next night.
     # The empty first entry clears the OnCalendar=daily shipped in borgmatic's own timer, which a drop-in would otherwise append to.
-    systemd.timers.borgmatic.timerConfig.OnCalendar = [ "" "*-*-* 00/3:00:00" ];
+    systemd.timers.borgmatic.timerConfig.OnCalendar = [
+        ""
+        "*-*-* 00/3:00:00"
+    ];
 
     # A ceiling rather than a working limit: a measured 28-minute run spent 78s of CPU, so this binds only on a run that misbehaves.
     systemd.services.borgmatic.serviceConfig.CPUQuota = "150%";

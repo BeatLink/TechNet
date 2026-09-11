@@ -8,7 +8,7 @@
     # account (see traccar.nix).
     sops.secrets.trilium_etapi_token = {
         sopsFile = "${config.technet.secrets.path}/trilium.yaml";
-        group = "vigil-monitor";                                        # Read by whichever Vigil transport runs the `cat` — the agent today, vigil-access as fallback
+        group = "vigil-monitor"; # Read by whichever Vigil transport runs the `cat` — the agent today, vigil-access as fallback
         mode = "0440";
     };
 

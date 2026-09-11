@@ -1,3 +1,3 @@
 {
-    home-manager.users.beatlink = {};
+    home-manager.users.beatlink = { };
 }

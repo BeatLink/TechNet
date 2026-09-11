@@ -234,38 +234,40 @@ in
                         profiles.default = {
                             enableExtensionUpdateCheck = true;
                             inherit (cfg) userSettings;
-                            extensions = with pkgs.nix-vscode-extensions.open-vsx; [
-                                hediet.vscode-drawio
-                                anthropic.claude-code
-                                ms-python.python
-                                ms-python.black-formatter
-                                brainytech.pycacheclear
-                                signageos.signageos-vscode-sops
-                                editorconfig.editorconfig
-                                usernamehw.errorlens
-                                tobermory.es6-string-html
-                                dbaeumer.vscode-eslint
-                                lokalise.i18n-ally
-                                ms-vscode.live-server
-                                jnoortheen.nix-ide
-                                prince781.vala
-                                tyriar.sort-lines
-                                hex-ci.stylelint-plus
-                                gruntfuggly.todo-tree
-                                redhat.vscode-yaml
-                                yzhang.markdown-all-in-one
-                                cweijan.vscode-office
-                                ms-playwright.playwright
-                                vitest.explorer
-                                tomoki1207.pdf
-                                vivaxy.vscode-conventional-commits
-                            ]
-                            ++ (with pkgs.nix-vscode-extensions.vscode-marketplace; [
-                                fnando.linter
-                                colinkiama.linter-vala
-                                emeraldwalk.runonsave
-                            ])
-                            ++ [ inputs.halon.packages.${pkgs.stdenv.hostPlatform.system}.halon-vscode-theme ];
+                            extensions =
+                                with pkgs.nix-vscode-extensions.open-vsx;
+                                [
+                                    hediet.vscode-drawio
+                                    anthropic.claude-code
+                                    ms-python.python
+                                    ms-python.black-formatter
+                                    brainytech.pycacheclear
+                                    signageos.signageos-vscode-sops
+                                    editorconfig.editorconfig
+                                    usernamehw.errorlens
+                                    tobermory.es6-string-html
+                                    dbaeumer.vscode-eslint
+                                    lokalise.i18n-ally
+                                    ms-vscode.live-server
+                                    jnoortheen.nix-ide
+                                    prince781.vala
+                                    tyriar.sort-lines
+                                    hex-ci.stylelint-plus
+                                    gruntfuggly.todo-tree
+                                    redhat.vscode-yaml
+                                    yzhang.markdown-all-in-one
+                                    cweijan.vscode-office
+                                    ms-playwright.playwright
+                                    vitest.explorer
+                                    tomoki1207.pdf
+                                    vivaxy.vscode-conventional-commits
+                                ]
+                                ++ (with pkgs.nix-vscode-extensions.vscode-marketplace; [
+                                    fnando.linter
+                                    colinkiama.linter-vala
+                                    emeraldwalk.runonsave
+                                ])
+                                ++ [ inputs.halon.packages.${pkgs.stdenv.hostPlatform.system}.halon-vscode-theme ];
                         };
                     };
                 };

@@ -56,7 +56,7 @@
                     "127.0.0.1/32 allow"
                     "0.0.0.0/0 refuse"
                 ];
-                
+
                 # Cache
                 cache-min-ttl = 3600;
                 cache-max-ttl = 86400;

@@ -122,7 +122,10 @@ in
 
     # Ragnarok is up only sporadically, so the remote copy needs repeated attempts rather than one nightly window.
     # The empty first entry clears the OnCalendar=daily shipped in borgmatic's own timer, which a drop-in would otherwise append to.
-    systemd.timers.borgmatic.timerConfig.OnCalendar = [ "" "*-*-* 00/3:00:00" ];
+    systemd.timers.borgmatic.timerConfig.OnCalendar = [
+        ""
+        "*-*-* 00/3:00:00"
+    ];
 
     # Backups are throughput jobs with no deadline, so they should yield to
     # anything interactive. Reading /Storage on a 2-disk HDD mirror otherwise

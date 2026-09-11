@@ -10,7 +10,12 @@
 # SearchPluginManager::pluginsLocation() in qBittorrent's source.
 #
 
-{ pkgs, config, inputs, ... }:
+{
+    pkgs,
+    config,
+    inputs,
+    ...
+}:
 let
     # Pinned to a commit (rather than tracking master) so the derivation
     # stays reproducible; bump commit + hash together to update the plugin.
@@ -186,46 +191,55 @@ in
                 # this the password key would be wiped each restart and
                 # qBittorrent would print a new temporary password to the
                 # journal. Appends the key if absent, replaces it if present.
-                (pkgs.lib.getExe (pkgs.writeShellApplication {
-                    name = "qbittorrent-set-webui-password";
-                    runtimeInputs = [ pkgs.gawk pkgs.coreutils ];
-                    text = ''
-                        conf=/Storage/Services/Qbittorrent/profile/qBittorrent/config/qBittorrent.conf
-                        hash=$(cat "$CREDENTIALS_DIRECTORY/webui_password_hash")
+                (pkgs.lib.getExe (
+                    pkgs.writeShellApplication {
+                        name = "qbittorrent-set-webui-password";
+                        runtimeInputs = [
+                            pkgs.gawk
+                            pkgs.coreutils
+                        ];
+                        text = ''
+                            conf=/Storage/Services/Qbittorrent/profile/qBittorrent/config/qBittorrent.conf
+                            hash=$(cat "$CREDENTIALS_DIRECTORY/webui_password_hash")
 
-                        # Inserted directly under [Preferences] rather than
-                        # appended, so it lands in the right section even if a
-                        # later-sorting one is ever added to serverConfig. awk
-                        # rather than sed because the base64 hash contains / and
-                        # & , which sed's s/// would interpret.
-                        awk -v hash="$hash" '
-                            /^WebUI\\Password_PBKDF2=/ { next }
-                            { print }
-                            /^\[Preferences\]$/ { print "WebUI\\Password_PBKDF2=" hash }
-                        ' "$conf" > "$conf.new"
-                        mv -f "$conf.new" "$conf"
-                        chmod 600 "$conf"
-                    '';
-                }))
-                (pkgs.lib.getExe (pkgs.writeShellApplication {
-                    name = "qbittorrent-install-jackett-plugin";
-                    runtimeInputs = [ pkgs.coreutils ];
-                    text = ''
-                        install -Dm644 ${jackettPlugin} \
-                            /Storage/Services/Qbittorrent/profile/data/nova3/engines/jackett.py
-                    '';
-                }))
-                (pkgs.lib.getExe (pkgs.writeShellApplication {
-                    name = "qbittorrent-render-jackett-config";
-                    runtimeInputs = [ pkgs.jq ];
-                    text = ''
-                        jq -n \
-                            --arg api_key "$(cat "$CREDENTIALS_DIRECTORY/jackett_api_key")" \
-                            --arg url "http://127.0.0.1:9117" \
-                            '{api_key: $api_key, url: $url, tracker_first: false, thread_count: 20}' \
-                            > /Storage/Services/Qbittorrent/profile/data/nova3/engines/jackett.json
-                    '';
-                }))
+                            # Inserted directly under [Preferences] rather than
+                            # appended, so it lands in the right section even if a
+                            # later-sorting one is ever added to serverConfig. awk
+                            # rather than sed because the base64 hash contains / and
+                            # & , which sed's s/// would interpret.
+                            awk -v hash="$hash" '
+                                /^WebUI\\Password_PBKDF2=/ { next }
+                                { print }
+                                /^\[Preferences\]$/ { print "WebUI\\Password_PBKDF2=" hash }
+                            ' "$conf" > "$conf.new"
+                            mv -f "$conf.new" "$conf"
+                            chmod 600 "$conf"
+                        '';
+                    }
+                ))
+                (pkgs.lib.getExe (
+                    pkgs.writeShellApplication {
+                        name = "qbittorrent-install-jackett-plugin";
+                        runtimeInputs = [ pkgs.coreutils ];
+                        text = ''
+                            install -Dm644 ${jackettPlugin} \
+                                /Storage/Services/Qbittorrent/profile/data/nova3/engines/jackett.py
+                        '';
+                    }
+                ))
+                (pkgs.lib.getExe (
+                    pkgs.writeShellApplication {
+                        name = "qbittorrent-render-jackett-config";
+                        runtimeInputs = [ pkgs.jq ];
+                        text = ''
+                            jq -n \
+                                --arg api_key "$(cat "$CREDENTIALS_DIRECTORY/jackett_api_key")" \
+                                --arg url "http://127.0.0.1:9117" \
+                                '{api_key: $api_key, url: $url, tracker_first: false, thread_count: 20}' \
+                                > /Storage/Services/Qbittorrent/profile/data/nova3/engines/jackett.json
+                        '';
+                    }
+                ))
             ];
         };
     };

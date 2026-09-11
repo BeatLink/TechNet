@@ -126,262 +126,265 @@ let
         '';
     });
 
-    boostd = pkgs.writers.writePython3Bin "technet-focus-boostd" {
-        flakeIgnore = [
-            "E501" # line length
-            "W503" # line break before a binary operator, which black prefers
-        ];
-    } ''
-        import re
-        import subprocess
-        import sys
-        import os
-        import json
-        import signal
-        import threading
+    boostd =
+        pkgs.writers.writePython3Bin "technet-focus-boostd"
+            {
+                flakeIgnore = [
+                    "E501" # line length
+                    "W503" # line break before a binary operator, which black prefers
+                ];
+            }
+            ''
+                import re
+                import subprocess
+                import sys
+                import os
+                import json
+                import signal
+                import threading
 
-        BOOST = {
-            "CPUWeight": "${toString cfg.cpuWeight}",
-            "IOWeight": "${toString cfg.ioWeight}",
-            "MemoryLow": "${cfg.memoryLow}",
-        }
+                BOOST = {
+                    "CPUWeight": "${toString cfg.cpuWeight}",
+                    "IOWeight": "${toString cfg.ioWeight}",
+                    "MemoryLow": "${cfg.memoryLow}",
+                }
 
-        # Not the values that were there before, but the defaults for an app unit.
-        # Only units this daemon boosted are ever reset, so the two are the same
-        # thing in practice, and reading the old values back would race with the
-        # unit exiting.
-        RESET = {"CPUWeight": "100", "IOWeight": "100", "MemoryLow": "0"}
+                # Not the values that were there before, but the defaults for an app unit.
+                # Only units this daemon boosted are ever reset, so the two are the same
+                # thing in practice, and reading the old values back would race with the
+                # unit exiting.
+                RESET = {"CPUWeight": "100", "IOWeight": "100", "MemoryLow": "0"}
 
-        NICE = ${toString cfg.nice}
+                NICE = ${toString cfg.nice}
 
-        SUSPEND = ${builtins.toJSON cfg.suspendUnits}
-        SUSPEND_SYSTEM = ${builtins.toJSON cfg.suspendSystemUnits}
-        THAW_DELAY = ${toString cfg.thawDelay}
+                SUSPEND = ${builtins.toJSON cfg.suspendUnits}
+                SUSPEND_SYSTEM = ${builtins.toJSON cfg.suspendSystemUnits}
+                THAW_DELAY = ${toString cfg.thawDelay}
 
-        CGROUP_BOOST = "${cgroupBoost}"
-        WAYDROID_BOOST = "${toString cfg.waydroidBoostWeight}"
-        WAYDROID_BASE = "${toString cfg.waydroidBaseWeight}"
-        WAYDROID_PREFIX = "${cfg.waydroidAppIdPrefix}"
+                CGROUP_BOOST = "${cgroupBoost}"
+                WAYDROID_BOOST = "${toString cfg.waydroidBoostWeight}"
+                WAYDROID_BASE = "${toString cfg.waydroidBaseWeight}"
+                WAYDROID_PREFIX = "${cfg.waydroidAppIdPrefix}"
 
-        # systemd escapes "-" in unit names; ":" and "." are passed through.
-        ESCAPED_DASH = chr(92) + "x2d"
+                # systemd escapes "-" in unit names; ":" and "." are passed through.
+                ESCAPED_DASH = chr(92) + "x2d"
 
-        RE_APPID = re.compile(r"^toplevel (\d+): set app-id: '[^']*' -> '([^']*)'")
-        RE_ACTIVE = re.compile(r"^\[toplevel (\d+): set activated: ([01])\]")
-        RE_GONE = re.compile(r"^toplevel (\d+): destroyed")
+                RE_APPID = re.compile(r"^toplevel (\d+): set app-id: '[^']*' -> '([^']*)'")
+                RE_ACTIVE = re.compile(r"^\[toplevel (\d+): set activated: ([01])\]")
+                RE_GONE = re.compile(r"^toplevel (\d+): destroyed")
 
-        app_ids = {}
-        active = set()
-        boosted = None
-        boosted_cgroup = False
-        frozen = False
-        thaw_timer = None
-        # Reentrant because the signal handler runs in the thread that may hold it.
-        freeze_lock = threading.RLock()
-
-
-        def app_units():
-            try:
-                out = subprocess.run(
-                    ["systemctl", "--user", "list-units", "--all", "--plain",
-                     "--no-legend", "--output=json", "app-*"],
-                    capture_output=True, text=True, timeout=5,
-                )
-                return [u["unit"] for u in json.loads(out.stdout or "[]")]
-            except Exception:
-                return []
+                app_ids = {}
+                active = set()
+                boosted = None
+                boosted_cgroup = False
+                frozen = False
+                thaw_timer = None
+                # Reentrant because the signal handler runs in the thread that may hold it.
+                freeze_lock = threading.RLock()
 
 
-        def find_unit(app_id):
-            if not app_id:
-                return None
-            needle = app_id.lower()
-            best = None
-            for name in app_units():
-                if not name.startswith("app-"):
-                    continue
-                if needle in name.replace(ESCAPED_DASH, "-").lower():
-                    # Shortest wins: for a d-bus activated app that is the
-                    # app-*.slice, which covers the service inside it.
-                    if best is None or len(name) < len(best):
-                        best = name
-            return best
+                def app_units():
+                    try:
+                        out = subprocess.run(
+                            ["systemctl", "--user", "list-units", "--all", "--plain",
+                             "--no-legend", "--output=json", "app-*"],
+                            capture_output=True, text=True, timeout=5,
+                        )
+                        return [u["unit"] for u in json.loads(out.stdout or "[]")]
+                    except Exception:
+                        return []
 
 
-        def is_waydroid(app_id):
-            return bool(app_id) and app_id.lower().startswith(WAYDROID_PREFIX)
+                def find_unit(app_id):
+                    if not app_id:
+                        return None
+                    needle = app_id.lower()
+                    best = None
+                    for name in app_units():
+                        if not name.startswith("app-"):
+                            continue
+                        if needle in name.replace(ESCAPED_DASH, "-").lower():
+                            # Shortest wins: for a d-bus activated app that is the
+                            # app-*.slice, which covers the service inside it.
+                            if best is None or len(name) < len(best):
+                                best = name
+                    return best
 
 
-        def cgroup_boost(want):
-            subprocess.run(
-                ["/run/wrappers/bin/sudo", "-n", CGROUP_BOOST,
-                 WAYDROID_BOOST if want else WAYDROID_BASE],
-                capture_output=True, timeout=5,
-            )
+                def is_waydroid(app_id):
+                    return bool(app_id) and app_id.lower().startswith(WAYDROID_PREFIX)
 
 
-        def apply(unit, props):
-            if unit is None:
-                return
-            subprocess.run(
-                ["systemctl", "--user", "set-property", "--runtime", unit]
-                + [k + "=" + v for k, v in props.items()],
-                capture_output=True, timeout=5,
-            )
+                def cgroup_boost(want):
+                    subprocess.run(
+                        ["/run/wrappers/bin/sudo", "-n", CGROUP_BOOST,
+                         WAYDROID_BOOST if want else WAYDROID_BASE],
+                        capture_output=True, timeout=5,
+                    )
 
 
-        def unit_pids(unit):
-            try:
-                out = subprocess.run(
-                    ["systemctl", "--user", "show", "-p", "ControlGroup",
-                     "--value", unit],
-                    capture_output=True, text=True, timeout=5,
-                )
-                path = out.stdout.strip()
-            except Exception:
-                return []
-            if not path:
-                return []
-            root = "/sys/fs/cgroup" + path
-            pids = []
-            # A slice keeps its processes in child cgroups, not its own cgroup.procs.
-            for dirpath, _, _ in os.walk(root):
-                try:
-                    with open(os.path.join(dirpath, "cgroup.procs")) as f:
-                        pids += [int(line) for line in f if line.strip()]
-                except OSError:
-                    continue
-            return pids
+                def apply(unit, props):
+                    if unit is None:
+                        return
+                    subprocess.run(
+                        ["systemctl", "--user", "set-property", "--runtime", unit]
+                        + [k + "=" + v for k, v in props.items()],
+                        capture_output=True, timeout=5,
+                    )
 
 
-        def renice(unit, value):
-            for pid in unit_pids(unit):
-                try:
-                    os.setpriority(os.PRIO_PROCESS, pid, value)
-                except OSError:
-                    # Exited between listing the cgroup and setting priority.
-                    pass
+                def unit_pids(unit):
+                    try:
+                        out = subprocess.run(
+                            ["systemctl", "--user", "show", "-p", "ControlGroup",
+                             "--value", unit],
+                            capture_output=True, text=True, timeout=5,
+                        )
+                        path = out.stdout.strip()
+                    except Exception:
+                        return []
+                    if not path:
+                        return []
+                    root = "/sys/fs/cgroup" + path
+                    pids = []
+                    # A slice keeps its processes in child cgroups, not its own cgroup.procs.
+                    for dirpath, _, _ in os.walk(root):
+                        try:
+                            with open(os.path.join(dirpath, "cgroup.procs")) as f:
+                                pids += [int(line) for line in f if line.strip()]
+                        except OSError:
+                            continue
+                    return pids
 
 
-        def freeze(want):
-            verb = "freeze" if want else "thaw"
-            for unit in SUSPEND:
-                subprocess.run(
-                    ["systemctl", "--user", verb, unit],
-                    capture_output=True, timeout=5,
-                )
-            for unit in SUSPEND_SYSTEM:
-                subprocess.run(
-                    ["/run/wrappers/bin/sudo", "-n", "${systemFreeze}", verb, unit],
-                    capture_output=True, timeout=5,
-                )
-            print(verb + " background units", flush=True)
+                def renice(unit, value):
+                    for pid in unit_pids(unit):
+                        try:
+                            os.setpriority(os.PRIO_PROCESS, pid, value)
+                        except OSError:
+                            # Exited between listing the cgroup and setting priority.
+                            pass
 
 
-        def set_frozen(want, now=False):
-            global frozen, thaw_timer
-            if not (SUSPEND or SUSPEND_SYSTEM):
-                return
-            with freeze_lock:
-                if thaw_timer is not None:
-                    thaw_timer.cancel()
-                    thaw_timer = None
-                if want == frozen:
-                    return
-                if want or now:
-                    frozen = want
-                    freeze(want)
-                    return
-                # Thawing waits, so switching apps does not resume the background
-                # units for the seconds the next one takes to appear.
-                thaw_timer = threading.Timer(
-                    THAW_DELAY, lambda: set_frozen(False, True)
-                )
-                thaw_timer.daemon = True
-                thaw_timer.start()
+                def freeze(want):
+                    verb = "freeze" if want else "thaw"
+                    for unit in SUSPEND:
+                        subprocess.run(
+                            ["systemctl", "--user", verb, unit],
+                            capture_output=True, timeout=5,
+                        )
+                    for unit in SUSPEND_SYSTEM:
+                        subprocess.run(
+                            ["/run/wrappers/bin/sudo", "-n", "${systemFreeze}", verb, unit],
+                            capture_output=True, timeout=5,
+                        )
+                    print(verb + " background units", flush=True)
 
 
-        def focus(unit, waydroid=False):
-            global boosted, boosted_cgroup
-            if unit == boosted and waydroid == boosted_cgroup:
-                return
-            if boosted is not None:
-                apply(boosted, RESET)
-                renice(boosted, 0)
-            if boosted_cgroup and not waydroid:
-                cgroup_boost(False)
-            boosted = unit
-            if boosted is not None:
-                apply(boosted, BOOST)
-                renice(boosted, NICE)
-                print("boosted " + boosted, flush=True)
-            if waydroid and not boosted_cgroup:
-                cgroup_boost(True)
-                print("boosted waydroid cgroup", flush=True)
-            boosted_cgroup = waydroid
-            set_frozen(boosted is not None or waydroid)
+                def set_frozen(want, now=False):
+                    global frozen, thaw_timer
+                    if not (SUSPEND or SUSPEND_SYSTEM):
+                        return
+                    with freeze_lock:
+                        if thaw_timer is not None:
+                            thaw_timer.cancel()
+                            thaw_timer = None
+                        if want == frozen:
+                            return
+                        if want or now:
+                            frozen = want
+                            freeze(want)
+                            return
+                        # Thawing waits, so switching apps does not resume the background
+                        # units for the seconds the next one takes to appear.
+                        thaw_timer = threading.Timer(
+                            THAW_DELAY, lambda: set_frozen(False, True)
+                        )
+                        thaw_timer.daemon = True
+                        thaw_timer.start()
 
 
-        def cleanup(*_):
-            focus(None)
-            set_frozen(False, True)
-            sys.exit(0)
+                def focus(unit, waydroid=False):
+                    global boosted, boosted_cgroup
+                    if unit == boosted and waydroid == boosted_cgroup:
+                        return
+                    if boosted is not None:
+                        apply(boosted, RESET)
+                        renice(boosted, 0)
+                    if boosted_cgroup and not waydroid:
+                        cgroup_boost(False)
+                    boosted = unit
+                    if boosted is not None:
+                        apply(boosted, BOOST)
+                        renice(boosted, NICE)
+                        print("boosted " + boosted, flush=True)
+                    if waydroid and not boosted_cgroup:
+                        cgroup_boost(True)
+                        print("boosted waydroid cgroup", flush=True)
+                    boosted_cgroup = waydroid
+                    set_frozen(boosted is not None or waydroid)
 
 
-        signal.signal(signal.SIGTERM, cleanup)
-        signal.signal(signal.SIGINT, cleanup)
-
-        # lswt refuses to start without WAYLAND_DISPLAY, and a user service does
-        # not always inherit it -- it depends on the session having imported its
-        # environment before this unit started. Fall back to whatever socket is
-        # actually in the runtime directory.
-        if "WAYLAND_DISPLAY" not in os.environ:
-            rundir = os.environ.get("XDG_RUNTIME_DIR", "")
-            found = sorted(
-                f for f in os.listdir(rundir)
-                if f.startswith("wayland-") and not f.endswith(".lock")
-            ) if rundir else []
-            if not found:
-                print("no wayland socket found", file=sys.stderr)
-                sys.exit(1)
-            os.environ["WAYLAND_DISPLAY"] = found[0]
-
-        # Establishes the unfocused share up front, so the container is above the default from the moment the session starts rather than after the
-        # first focus change. Harmless when Waydroid is not running: the helper exits quietly if the cgroup is not there.
-        cgroup_boost(False)
-
-        proc = subprocess.Popen(
-            ["${pkgs.coreutils}/bin/stdbuf", "-oL", "${lswt}/bin/lswt", "-w", "--debug"],
-            stdout=subprocess.PIPE, text=True,
-        )
-
-        for line in proc.stdout:
-            m = RE_APPID.match(line)
-            if m:
-                app_ids[m.group(1)] = m.group(2)
-                continue
-            m = RE_ACTIVE.match(line)
-            if m:
-                if m.group(2) == "1":
-                    active.add(m.group(1))
-                    app_id = app_ids.get(m.group(1))
-                    focus(find_unit(app_id), is_waydroid(app_id))
-                else:
-                    active.discard(m.group(1))
-                    # Nothing focused means nothing to protect, and leaving the
-                    # suspended units frozen would stop them for good.
-                    if not active:
-                        focus(None)
-                continue
-            m = RE_GONE.match(line)
-            if m:
-                app_ids.pop(m.group(1), None)
-                active.discard(m.group(1))
-                if not active:
+                def cleanup(*_):
                     focus(None)
+                    set_frozen(False, True)
+                    sys.exit(0)
 
-        cleanup()
-    '';
+
+                signal.signal(signal.SIGTERM, cleanup)
+                signal.signal(signal.SIGINT, cleanup)
+
+                # lswt refuses to start without WAYLAND_DISPLAY, and a user service does
+                # not always inherit it -- it depends on the session having imported its
+                # environment before this unit started. Fall back to whatever socket is
+                # actually in the runtime directory.
+                if "WAYLAND_DISPLAY" not in os.environ:
+                    rundir = os.environ.get("XDG_RUNTIME_DIR", "")
+                    found = sorted(
+                        f for f in os.listdir(rundir)
+                        if f.startswith("wayland-") and not f.endswith(".lock")
+                    ) if rundir else []
+                    if not found:
+                        print("no wayland socket found", file=sys.stderr)
+                        sys.exit(1)
+                    os.environ["WAYLAND_DISPLAY"] = found[0]
+
+                # Establishes the unfocused share up front, so the container is above the default from the moment the session starts rather than after the
+                # first focus change. Harmless when Waydroid is not running: the helper exits quietly if the cgroup is not there.
+                cgroup_boost(False)
+
+                proc = subprocess.Popen(
+                    ["${pkgs.coreutils}/bin/stdbuf", "-oL", "${lswt}/bin/lswt", "-w", "--debug"],
+                    stdout=subprocess.PIPE, text=True,
+                )
+
+                for line in proc.stdout:
+                    m = RE_APPID.match(line)
+                    if m:
+                        app_ids[m.group(1)] = m.group(2)
+                        continue
+                    m = RE_ACTIVE.match(line)
+                    if m:
+                        if m.group(2) == "1":
+                            active.add(m.group(1))
+                            app_id = app_ids.get(m.group(1))
+                            focus(find_unit(app_id), is_waydroid(app_id))
+                        else:
+                            active.discard(m.group(1))
+                            # Nothing focused means nothing to protect, and leaving the
+                            # suspended units frozen would stop them for good.
+                            if not active:
+                                focus(None)
+                        continue
+                    m = RE_GONE.match(line)
+                    if m:
+                        app_ids.pop(m.group(1), None)
+                        active.discard(m.group(1))
+                        if not active:
+                            focus(None)
+
+                cleanup()
+            '';
 in
 {
     config = {

@@ -34,7 +34,9 @@ in
 
             cinnamon = prev.cinnamon.overrideAttrs (old: {
                 version = "6.7.4-unstable";
-                src = mintSrc final "cinnamon" "6.7.4-unstable" "sha256-g47YAJG/NOK+RzxBdiFKbuxOYe6TD2l0NtjJMVoHelg=";
+                src =
+                    mintSrc final "cinnamon" "6.7.4-unstable"
+                        "sha256-g47YAJG/NOK+RzxBdiFKbuxOYe6TD2l0NtjJMVoHelg=";
                 # 6.7 adds cinnamon-hover-click (libxdo) and authenticates the Wayland lock screen itself (pam)
                 buildInputs = (old.buildInputs or [ ]) ++ [
                     final.xdotool
@@ -88,19 +90,25 @@ in
 
             cinnamon-desktop = prev.cinnamon-desktop.overrideAttrs (old: {
                 version = "6.7.2-unstable";
-                src = mintSrc final "cinnamon-desktop" "6.7.2-unstable" "sha256-DZzLXiPLDN+WWmChvGdndz1QgRnmD9R/yg8d2T9HgFo=";
+                src =
+                    mintSrc final "cinnamon-desktop" "6.7.2-unstable"
+                        "sha256-DZzLXiPLDN+WWmChvGdndz1QgRnmD9R/yg8d2T9HgFo=";
                 # New in 6.7, and overrideAttrs carries only what it is given
                 buildInputs = (old.buildInputs or [ ]) ++ [ final.libseccomp ];
             });
 
             cinnamon-session = prev.cinnamon-session.overrideAttrs (_: {
                 version = "6.7.3-unstable";
-                src = mintSrc final "cinnamon-session" "6.7.3-unstable" "sha256-RUPxmDzFrZIDuwZ65GkElmb0J4VIGy8JXU/AKY9vHqo=";
+                src =
+                    mintSrc final "cinnamon-session" "6.7.3-unstable"
+                        "sha256-RUPxmDzFrZIDuwZ65GkElmb0J4VIGy8JXU/AKY9vHqo=";
             });
 
             cinnamon-settings-daemon = prev.cinnamon-settings-daemon.overrideAttrs (old: {
                 version = "6.7.2-unstable";
-                src = mintSrc final "cinnamon-settings-daemon" "6.7.2-unstable" "sha256-NHSqY7RpIJUu6/AHdkZsrxAxLkVBCbQyZlWY6udAyRc=";
+                src =
+                    mintSrc final "cinnamon-settings-daemon" "6.7.2-unstable"
+                        "sha256-NHSqY7RpIJUu6/AHdkZsrxAxLkVBCbQyZlWY6udAyRc=";
                 # Without this csd-background paints the X11 root pixmap, which nothing composites on Wayland
                 buildInputs = (old.buildInputs or [ ]) ++ [ final.gtk-layer-shell ];
                 mesonFlags = (old.mesonFlags or [ ]) ++ [ "-Dgtk_layer_shell=true" ];
@@ -110,17 +118,23 @@ in
 
             cinnamon-screensaver = prev.cinnamon-screensaver.overrideAttrs (_: {
                 version = "6.7.1-unstable";
-                src = mintSrc final "cinnamon-screensaver" "6.7.1-unstable" "sha256-l+LYKKTrKPCNa4iZ8XD1oOVndJDYHhcQNy2fMhJI47U=";
+                src =
+                    mintSrc final "cinnamon-screensaver" "6.7.1-unstable"
+                        "sha256-l+LYKKTrKPCNa4iZ8XD1oOVndJDYHhcQNy2fMhJI47U=";
             });
 
             cinnamon-menus = prev.cinnamon-menus.overrideAttrs (_: {
                 version = "6.7.0-unstable";
-                src = mintSrc final "cinnamon-menus" "6.7.0-unstable" "sha256-BD+2hS5i3fmDja1aSmX1MZiUk3YY5pUxbveq1zwNOds=";
+                src =
+                    mintSrc final "cinnamon-menus" "6.7.0-unstable"
+                        "sha256-BD+2hS5i3fmDja1aSmX1MZiUk3YY5pUxbveq1zwNOds=";
             });
 
             cinnamon-control-center = prev.cinnamon-control-center.overrideAttrs (old: {
                 version = "6.7.2-unstable";
-                src = mintSrc final "cinnamon-control-center" "6.7.2-unstable" "sha256-7zVmRIVrOwmU2qAr1QU1pha0Gf2nQjnIiVIK0H+xDNg=";
+                src =
+                    mintSrc final "cinnamon-control-center" "6.7.2-unstable"
+                        "sha256-7zVmRIVrOwmU2qAr1QU1pha0Gf2nQjnIiVIK0H+xDNg=";
                 # 6.7.2 drops the display panel's desktop file but still symlinks it, and nixpkgs rejects dangling symlinks
                 postInstall = (old.postInstall or "") + ''
                     rm -f $out/share/cinnamon-control-center/panels/cinnamon-display-panel.desktop

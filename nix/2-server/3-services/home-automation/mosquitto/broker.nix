@@ -7,7 +7,7 @@
     # Frigate hold their own copies, so only the hash is needed here.
     sops.secrets.mosquitto_vigil_password = {
         sopsFile = "${config.technet.secrets.path}/mosquitto.yaml";
-        group = "vigil-monitor";                                        # Read by whichever Vigil transport runs the `cat` — the agent today, vigil-access as fallback
+        group = "vigil-monitor"; # Read by whichever Vigil transport runs the `cat` — the agent today, vigil-access as fallback
         mode = "0440";
     };
 
@@ -57,13 +57,11 @@
                             # entities appear and then never update.
                             "readwrite lnxlink/#"
                         ];
-                        hashedPasswordFile =
-                            config.sops.secrets.mosquitto_homeassistant_password_hash.path;
+                        hashedPasswordFile = config.sops.secrets.mosquitto_homeassistant_password_hash.path;
                     };
                     frigate = {
                         acl = [ "readwrite frigate/#" ];
-                        hashedPasswordFile =
-                            config.sops.secrets.mosquitto_frigate_password_hash.path;
+                        hashedPasswordFile = config.sops.secrets.mosquitto_frigate_password_hash.path;
                     };
 
                     vigil = {

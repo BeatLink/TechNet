@@ -4,7 +4,12 @@
 #
 # https://github.com/crocodilestick/Calibre-Web-Automated
 
-{ config, inputs, pkgs, ... }:
+{
+    config,
+    inputs,
+    pkgs,
+    ...
+}:
 {
     # Vigil's `calibre_web` plugin authenticates to /opds as this account to
     # confirm the DB layer actually serves a real book feed, not just that
@@ -16,7 +21,7 @@
     # traccar.nix).
     sops.secrets.calibre_web_vigil_password = {
         sopsFile = "${config.technet.secrets.path}/calibre-web.yaml";
-        group = "vigil-monitor";                                        # Read by whichever Vigil transport runs the `cat` — the agent today, vigil-access as fallback
+        group = "vigil-monitor"; # Read by whichever Vigil transport runs the `cat` — the agent today, vigil-access as fallback
         mode = "0440";
     };
 

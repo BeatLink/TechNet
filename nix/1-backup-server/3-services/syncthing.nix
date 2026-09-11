@@ -87,7 +87,7 @@
         # Web Interface ##############################################################################################################################
         # syncthing-ragnarok.heimdall.technet, proxied by Heimdall's nginx over WireGuard.
         {
-            services.syncthing.guiAddress = "0.0.0.0:8384";                 # WireGuard and localhost only: wg0 is trusted here and the LAN interface has no 8384 rule
+            services.syncthing.guiAddress = "0.0.0.0:8384"; # WireGuard and localhost only: wg0 is trusted here and the LAN interface has no 8384 rule
             services.syncthing.settings.gui = {
                 user = "beatlink";
                 insecureSkipHostcheck = true;

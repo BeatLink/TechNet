@@ -57,7 +57,9 @@
 
         # Persistence ################################################################################################################################
         {
-            home-manager.users.beatlink.home.persistence."/Storage/Apps/Fun/Steam".directories = [ ".local/share/Steam" ];
+            home-manager.users.beatlink.home.persistence."/Storage/Apps/Fun/Steam".directories = [
+                ".local/share/Steam"
+            ];
         }
     ];
 }
