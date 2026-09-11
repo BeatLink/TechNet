@@ -50,6 +50,13 @@ creation_rules:
                 - *user_beatlink
                 - *host_heimdall
                 - *host_odin
+    # Odin reads this so Nemo's Trilium action can hand the token to the ETAPI; keep it ahead of the directory rules below, which match first-wins
+    - path_regex: secrets/2-server/trilium\.yaml$
+      key_groups:
+          - age:
+                - *user_beatlink
+                - *host_heimdall
+                - *host_odin
     - path_regex: secrets/1-backup-server/.*
       key_groups:
           - age:

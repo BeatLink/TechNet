@@ -528,6 +528,26 @@
         "type": "github"
       }
     },
+    "nemo-trilium": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789152392,
+        "narHash": "sha256-V3qJy0BM2IVOk+aMhjDLwhu/8FEcNM+mrn/fTncXYF0=",
+        "owner": "BeatLink",
+        "repo": "nemo-trilium",
+        "rev": "d65cd5329e9bc01d274b0a4a75114ff218424841",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BeatLink",
+        "repo": "nemo-trilium",
+        "type": "github"
+      }
+    },
     "nix-flake-tests": {
       "locked": {
         "lastModified": 1677844186,
@@ -749,6 +769,7 @@
         "linux-sidebar": "linux-sidebar",
         "lnxlink": "lnxlink",
         "mobile-nixos": "mobile-nixos",
+        "nemo-trilium": "nemo-trilium",
         "nix-index-database": "nix-index-database",
         "nix-vscode-extensions": "nix-vscode-extensions",
         "nixos-hardware": "nixos-hardware",

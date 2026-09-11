@@ -58,6 +58,10 @@
             url = "github:BeatLink/linux-sidebar";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        nemo-trilium = {
+            url = "github:BeatLink/nemo-trilium";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
         nixos-plymouth = {
             url = "github:BeatLink/nixos-plymouth";
         };
@@ -138,6 +142,7 @@
             calibre-web-automated,
             lnxlink,
             linux-sidebar,
+            nemo-trilium,
             nixos-hardware,
             ...
         }:
@@ -196,6 +201,7 @@
                                     lnxlink.homeModules.default
                                     linux-sidebar.homeManagerModules.default
                                     halon.homeManagerModules.default
+                                    nemo-trilium.homeManagerModules.default
                                 ];
                             };
                         }

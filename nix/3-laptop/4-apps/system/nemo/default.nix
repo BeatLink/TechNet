@@ -29,6 +29,10 @@ let
     });
 in
 {
+    imports = [
+        ./trilium.nix
+    ];
+
     home-manager.users.beatlink = {
         home = {
             # nemo-preview, ffmpeg-full and imagemagick are the thumbnailing and preview helpers; let bindings win over with, so nemo-preview is the wrapped one
