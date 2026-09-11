@@ -51,8 +51,10 @@
         "xsession"
     ],
     "conventionalCommits.scopes": [
+        "Ragnarok",
+        "Heimdall",
         "Odin/Cinnamon",
         "Odin/VsCodium",
-        "Ragnarok",
+        "Thor"
     ]
 }
