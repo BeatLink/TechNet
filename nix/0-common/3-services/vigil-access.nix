@@ -17,6 +17,25 @@ let
 
     # The scheduled collection's own arguments, so Vigil's button runs the run the timer runs.
     gcOptions = config.nix.gc.options;
+
+    # A borg poll carries its deadline inside the sudo, so sudo matches `timeout` rather than `borg` and the plain borg rule below never fires. One spec
+    # per digit count, because a `*` in place of the seconds would span the space after them and let any command follow.
+    borgDeadlineRules =
+        map
+            (seconds: {
+                command = "/run/current-system/sw/bin/timeout -k 5 ${seconds} borg *";
+                options = [
+                    "NOPASSWD"
+                    "SETENV"
+                ];
+            })
+            [
+                "[0-9]"
+                "[0-9][0-9]"
+                "[0-9][0-9][0-9]"
+                "[0-9][0-9][0-9][0-9]"
+                "[0-9][0-9][0-9][0-9][0-9]"
+            ];
 in
 {
     config = lib.mkMerge [
@@ -100,6 +119,7 @@ in
                             command = "/run/current-system/sw/bin/smartctl -H -d sat *";
                             options = [ "NOPASSWD" ];
                         }
+                        # Covers the unbounded runs only — a poll arrives wrapped in a deadline and matches borgDeadlineRules instead
                         {
                             command = "/run/current-system/sw/bin/borg *";
                             options = [
@@ -117,7 +137,8 @@ in
                             command = "/run/current-system/sw/bin/nix-collect-garbage ${gcOptions}";
                             options = [ "NOPASSWD" ];
                         }
-                    ];
+                    ]
+                    ++ borgDeadlineRules;
                 }
             ];
         }
