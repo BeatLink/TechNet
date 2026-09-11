@@ -73,9 +73,7 @@ let
         Documents = { };
         Downloads = {
             ignorePatterns = [
-                "(?d)*.!qB"
                 "(?d)*.parts"
-                "(?d)/Torrents/Downloading"
             ];
         };
         eBooks = {
@@ -97,6 +95,17 @@ let
             ];
         };
         Sounds = { };
+        # Heimdall seeds and Ragnarok keeps a versioned copy; Odin and the phone have no use for the tree and would pay for it in disk.
+        Torrents = {
+            devices = [
+                "Heimdall"
+                "Ragnarok"
+            ];
+            ignorePatterns = [
+                "(?d)*.!qB"
+                "(?d)/Downloading"
+            ];
+        };
         Videos = { };
         # Frigate on Heimdall owns the tree and prunes it on its own retention schedule; the recordings sit one level down so its
         # pruning of empty directories never reaches the folder marker.
@@ -118,6 +127,7 @@ let
         Projects = "xjtvv-cyqwv";
         Frigate = "1zpxr-recdg";
         Sounds = "kae2q-5740v";
+        Torrents = "rsvib-eb6yb";
         Videos = "4kqye-6dosm";
     };
     # A folder whose path, sync type or permission handling differs per peer keys them by device name; everything else takes the shared default.

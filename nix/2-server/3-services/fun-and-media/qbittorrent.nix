@@ -47,7 +47,7 @@ in
         enable = true;
         # Runs as beatlink so completed downloads land already owned by the
         # account Syncthing runs as. Syncthing syncs permission bits on the
-        # Downloads folder (ignorePerms = false), and chmod is owner-restricted,
+        # Torrents folder (ignorePerms = false), and chmod is owner-restricted,
         # so a separate qbittorrent account would stall that folder no matter
         # what group memberships were arranged.
         user = "beatlink";
@@ -79,26 +79,23 @@ in
             TrustedReverseProxiesList = "127.0.0.1";
         };
 
-        # Matches the Downloading/Seeding split that already exists under
-        # Torrents/: in-progress torrents go to Downloading, and qBittorrent
-        # moves them to Seeding on completion. Keeping partials out of the
-        # completed directory matters here because Downloads is a sendreceive
-        # Syncthing folder -- otherwise every partial file syncs out and then
-        # re-syncs repeatedly as it grows.
+        # Matches the Downloading/Seeding split under /Storage/Files/Torrents:
+        # in-progress torrents go to Downloading, and qBittorrent moves them to
+        # Seeding on completion. Keeping partials out of the completed directory
+        # matters here because Torrents is a sendreceive Syncthing folder --
+        # otherwise every partial file syncs out and then re-syncs repeatedly as
+        # it grows.
         #
-        # The config previously held the upstream container defaults
-        # (/downloads/, /downloads/incomplete/), which are not paths on this
-        # host; downloads were landing in the Downloads root instead. Both key
-        # pairs are set because qBittorrent migrated Downloads\* to Session\*
-        # and reads whichever its config version calls for.
+        # Both key pairs are set because qBittorrent migrated Downloads\* to
+        # Session\* and reads whichever its config version calls for.
         serverConfig.BitTorrent.Session = {
-            DefaultSavePath = "/Storage/Files/Downloads/Torrents/Seeding";
-            TempPath = "/Storage/Files/Downloads/Torrents/Downloading";
+            DefaultSavePath = "/Storage/Files/Torrents/Seeding";
+            TempPath = "/Storage/Files/Torrents/Downloading";
             TempPathEnabled = true;
         };
         serverConfig.Preferences.Downloads = {
-            SavePath = "/Storage/Files/Downloads/Torrents/Seeding";
-            TempPath = "/Storage/Files/Downloads/Torrents/Downloading";
+            SavePath = "/Storage/Files/Torrents/Seeding";
+            TempPath = "/Storage/Files/Torrents/Downloading";
             TempPathEnabled = true;
         };
     };
@@ -111,14 +108,12 @@ in
         port = 9050;
     };
 
-    # Downloads and profile state created while qbittorrent ran under its own
+    # Torrent data and profile state created while qbittorrent ran under its own
     # account are still owned by a uid that no longer has a name, which leaves
     # Syncthing unable to chmod them now that it syncs permission bits. Targeted
-    # at those paths only: a blanket chown over /Storage/Files/Downloads would
-    # rewrite metadata on all ~42k entries there, almost all of which are
-    # beatlink's already.
+    # at those paths only, so nothing walks the rest of /Storage/Files.
     system.activationScripts.qbittorrentChownToBeatlink = ''
-        for dir in /Storage/Files/Downloads /Storage/Services/Qbittorrent; do
+        for dir in /Storage/Files/Torrents /Storage/Services/Qbittorrent; do
             if [ -d "$dir" ]; then
                 ${pkgs.findutils}/bin/find "$dir" \! -user beatlink \
                     -exec ${pkgs.coreutils}/bin/chown beatlink:beatlink {} + 2>/dev/null || true
@@ -127,13 +122,19 @@ in
     '';
 
     systemd.tmpfiles.settings."Qbittorrent" = {
+        # Owned by beatlink so Syncthing, which owns this folder in the mesh, can write into it; tmpfiles would otherwise leave the parent root-owned
+        "/Storage/Files/Torrents".d = {
+            user = "beatlink";
+            group = "beatlink";
+            mode = "0755";
+        };
         # setgid keeps the group on anything created below these, matching both the service and Syncthing
-        "/Storage/Files/Downloads/Torrents/Seeding".d = {
+        "/Storage/Files/Torrents/Seeding".d = {
             user = "beatlink";
             group = "beatlink";
             mode = "2775";
         };
-        "/Storage/Files/Downloads/Torrents/Downloading".d = {
+        "/Storage/Files/Torrents/Downloading".d = {
             user = "beatlink";
             group = "beatlink";
             mode = "2775";
@@ -163,7 +164,7 @@ in
         path = [ pkgs.python3 ];
 
         serviceConfig = {
-            # Completed downloads land in /Storage/Files/Downloads, a
+            # Completed downloads land in /Storage/Files/Torrents, a
             # sendreceive Syncthing folder that now syncs permission bits.
             # Keeping group write on new downloads means the modes qbittorrent
             # creates already match what the setgid directories above imply, so

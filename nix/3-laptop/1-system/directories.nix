@@ -7,6 +7,7 @@
 let
     places = [
         "Backups"
+        "ISOs"
         "Projects"
         "VMs"
     ];
