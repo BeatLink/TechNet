@@ -1104,11 +1104,13 @@ in
                                             type = "pihole";
                                             interval = "5m";
                                             api_url = "http://127.0.0.1:9018";
-                                            # Percentages, not fractions: local and cached lookups dominate the denominator, so the real block rate sits near 2%.
-                                            block_rate_warning = 1;
-                                            block_rate_threshold = 0.25;
-                                            # The rate is cumulative since FTL start, so it needs ~2.5h of queries before it is representative.
-                                            min_queries = 30000;
+                                            # Both zero, which no percentage can fall below, so the rate is still charted but never sets the status. It
+                                            # measures what clients happened to ask for, not whether Pi-hole is still blocking -- a quiet stretch of
+                                            # cached and local lookups drags it down with nothing wrong. Blocking being enabled and the gravity list
+                                            # being non-empty are the checks that answer that, and both stay. min_queries went with these: it gated
+                                            # nothing else.
+                                            block_rate_warning = 0;
+                                            block_rate_threshold = 0;
                                             # Wide enough that pihole-gravity.timer has to miss several weekly runs before this fires.
                                             gravity_max_age = "30d";
                                             agent = "heimdall";
