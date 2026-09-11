@@ -659,11 +659,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788654066,
-        "narHash": "sha256-sWFAZqcuo+InayeMXj/epigtoXhOhgMXeMMr5Rmszvc=",
+        "lastModified": 1789149339,
+        "narHash": "sha256-RKqp5wsMezLP7EQd+xGZykmJuyNXIfo+1SQImNBYIC0=",
         "owner": "BeatLink",
         "repo": "NixTool",
-        "rev": "ef087fe66fc04bc9588988ac6b2b15ef54dd72f1",
+        "rev": "6d3b7f896530bdf11239b91beac8e96dce8f19d7",
         "type": "github"
       },
       "original": {
