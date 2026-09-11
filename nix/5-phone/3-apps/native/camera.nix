@@ -1,13 +1,16 @@
 # Camera
 #
 # megapixels, which is the only application known to work with this phone's
-# cameras. Both the front GC2145 and the rear OV5640 are driven through
-# libcamera rather than a plain V4L2 device, and a generic camera app opening
-# /dev/video0 gets a raw sensor stream it cannot debayer or scale.
+# cameras. It drives them through libmegapixels, which walks the media graph and
+# the sensor subdevices itself rather than going through libcamera, and a
+# generic camera app opening /dev/video1 gets a raw sensor stream it cannot
+# debayer or scale.
 #
-# The sensors are already visible without it -- PipeWire enumerates
-# `libcamera_input._base_i2c-csi_front-camera_3c` -- so what is missing is
-# something that can drive the pipeline rather than any kernel support.
+# Both sensors work: the rear OV5640 at 2592x1944 and the front GC2145 at
+# 1280x720, verified by capturing frames from each.
+#
+# It needs write access to the flash LED to open either camera at all, which
+# nix/5-phone/1-system/camera.nix arranges.
 #
 # Autofocus on the rear camera is not supported, which is a limitation of the
 # driver rather than of this application.

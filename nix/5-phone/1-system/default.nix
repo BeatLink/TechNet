@@ -6,6 +6,7 @@
         ./networking.nix
         ./display.nix
         ./sensors.nix
+        ./camera.nix
         ./modem.nix
         ./clevis.nix
         ./initrd-wifi.nix
