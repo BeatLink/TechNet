@@ -5,10 +5,15 @@
 
 { lib, ... }:
 {
-    boot.initrd.availableKernelModules = [
-        "uas"
-        "dwmac_rk" # Ethernet in the initrd, so remote unlock has a link to run over
+    boot.initrd.availableKernelModules = [ "uas" ];
+
+    # Force-loaded rather than left for udev to match: on demand the ethernet probed 50s into one boot, long after clevis had failed against an
+    # unreachable tang and put a password prompt on a headless console. Listed in dependency order, innermost first.
+    boot.initrd.kernelModules = [
         "stmmac"
+        "stmmac_platform"
+        "dwmac_rk"
     ];
+
     nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
 }

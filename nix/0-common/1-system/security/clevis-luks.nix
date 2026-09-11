@@ -20,6 +20,10 @@ let
     cryptsetupUnit = device: "systemd-cryptsetup@${utils.escapeSystemdPath device}.service";
     clevisUnit = device: "cryptsetup-clevis-${device}.service";
 
+    # The unit systemd tracks the backing disk by. systemd-cryptsetup is BoundTo this, so restarting it while the disk is still being waited for
+    # cancels that wait and fails the unit outright -- which on a USB root drive is most of the first half-minute of the boot.
+    backingUnit = device: "${utils.escapeSystemdPath config.boot.initrd.luks.devices.${device}.device}.device";
+
     # A wrong key unlocks nothing no matter how often it is retried, and every restart cancels the password prompt the user would type into instead
     maxAttempts = clevisCfg.luksMaxAttempts;
 
@@ -44,7 +48,7 @@ let
             still_locked=""
             for dev in $remaining; do
                 case "$dev" in
-${lib.concatMapStringsSep "\n" (device: "                    ${device}) cryptunit=\"${cryptsetupUnit device}\"; clevisunit=\"${clevisUnit device}\" ;;") clevisCfg.luksDevices}
+${lib.concatMapStringsSep "\n" (device: "                    ${device}) cryptunit=\"${cryptsetupUnit device}\"; clevisunit=\"${clevisUnit device}\"; backingunit=\"${backingUnit device}\" ;;") clevisCfg.luksDevices}
                     *) echo "clevis-luks-retry: no units known for $dev"; continue ;;
                 esac
 
@@ -56,6 +60,13 @@ ${lib.concatMapStringsSep "\n" (device: "                    ${device}) cryptuni
                 # Once initrd.target is active the boot has moved on to switch-root, where restarting cryptsetup takes sysroot.mount down with it.
                 if [ "$(state initrd.target)" = active ]; then
                     echo "clevis-luks-retry: initrd.target is already active, leaving $dev alone"
+                    continue
+                fi
+
+                # A disk that has not been announced yet is one systemd is still waiting for, and that wait is worth more than this retry.
+                if [ "$(state "$backingunit")" != active ]; then
+                    echo "clevis-luks-retry: $dev's disk ($backingunit) is not ready, leaving the wait alone"
+                    still_locked="$still_locked''${still_locked:+ }$dev"
                     continue
                 fi
 
