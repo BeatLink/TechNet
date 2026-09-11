@@ -14,7 +14,6 @@
         }
 
         # Zswap ######################################################################################################################################
-        # No zswap.zpool: 6.18 has no such parameter, zsmalloc being the only allocator left, and it would log as unknown.
         {
             boot.kernelParams = [
                 "zswap.enabled=1"
@@ -25,11 +24,10 @@
         }
 
         # Paging Behaviour ###########################################################################################################################
-        # vm.page-cluster=0 comes from the shared module and suits zswap for the same reason it suited zram.
         {
             boot.kernel.sysctl = {
                 "vm.swappiness" = 100;
-                "vm.watermark_scale_factor" = 200;                      # kswapd starts at 2% free rather than 0.1%, so reclaim runs ahead of allocation instead of stalling it
+                "vm.watermark_scale_factor" = 200;
             };
         }
     ];
