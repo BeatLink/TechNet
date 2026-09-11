@@ -401,11 +401,14 @@ in
                                             agent = "ragnarok";
                                         }
                                         {
-                                            # A pool changes state slowly and `zpool status` walks every vdev.
-                                            name = "ZFS";
-                                            id = "ragnarok-zfs";
-                                            type = "zfs";
-                                            interval = "1h";
+                                            # Both containers here are btrfs: the root SSD and the 5TB backup disk. Btrfs
+                                            # publishes no pool health word, so the verdict comes from the per-device error
+                                            # counters it keeps in the filesystem itself, which is why this reads more often
+                                            # than the `zpool status` it replaced -- the whole probe costs a third of a second.
+                                            name = "Btrfs";
+                                            id = "ragnarok-btrfs";
+                                            type = "btrfs";
+                                            interval = "10m";
                                             warning = 90;
                                             threshold = 96;
                                             agent = "ragnarok";
@@ -2407,10 +2410,12 @@ in
                                             agent = "thor";
                                         }
                                         {
-                                            name = "ZFS";
-                                            id = "thor-zfs";
-                                            type = "zfs";
-                                            interval = "1h";
+                                            # Both containers here are btrfs: the eMMC root and the SD card. The verdict is the per-device error counters btrfs keeps in the
+                                            # filesystem itself, since it publishes no pool health word -- and unlike the SMART pair, these counters exist on media that has none.
+                                            name = "Btrfs";
+                                            id = "thor-btrfs";
+                                            type = "btrfs";
+                                            interval = "10m";
                                             warning = 90;
                                             threshold = 96;
                                             agent = "thor";
