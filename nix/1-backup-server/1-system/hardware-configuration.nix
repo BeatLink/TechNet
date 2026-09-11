@@ -30,14 +30,29 @@ in
             nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
         }
 
-        # Early Drivers ##############################################################################################################################
+        # HDMI Output ################################################################################################################################
+        {
+            boot.initrd.kernelModules = [
+                "phy_rockchip_inno_hdmi" # Must load before rockchipdrm or the HDMI probe defers and the screen stays blank
+                "rockchipdrm"
+            ];
+        }
+
+        # Network ####################################################################################################################################
+        {
+            # Loaded at the very start of boot so the disks and the network are ready when the unlock needs them
+            boot.initrd.kernelModules = [
+                "stmmac"
+                "stmmac_platform"
+                "dwmac_rk"
+            ];
+        }
+
+        # Storage ####################################################################################################################################
         {
             # Loaded at the very start of boot so the disks and the network are ready when the unlock needs them
             boot.initrd.kernelModules = [
                 "uas"
-                "stmmac"
-                "stmmac_platform"
-                "dwmac_rk"
             ];
         }
 
@@ -60,17 +75,21 @@ in
             '') dataBridges;
         }
 
-        # Root Drive Adapter: Startup ################################################################################################################
+        # Root Drive Adapter #########################################################################################################################
         {
             # Slow down the first moments of USB setup for this adapter; without it, it sometimes rejects the setup and the root drive never appears
             boot.kernelParams = [ "usbcore.quirks=152d:1561:gn" ];
-        }
 
-        # Root Drive Adapter: Disk Settings ##########################################################################################################
-        {
             # Applied in early boot as well, because the encrypted root copies these settings from the drive at the moment it is opened
             services.udev.extraRules = rootBridgeRules;
             boot.initrd.services.udev.rules = rootBridgeRules;
         }
+
+        # Clock ######################################################################################################################################
+        {
+            # Loads RTC drivers early, enables clock sync for accurate logs
+            boot.initrd.kernelModules = [ "rtc_rk808" ];
+        }
+
     ];
 }
