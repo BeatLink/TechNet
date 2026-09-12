@@ -10,8 +10,6 @@
                 thor_wifi_password.sopsFile = "${config.technet.secrets.commonPath}/networkmanager.yaml";
                 wireguard_private_key.sopsFile = "${config.technet.secrets.path}/networkmanager.yaml";
             };
-
-            # NetworkManager asks nm-file-secret-agent for these when it activates a profile, so no secret is written into a keyfile.
             networking.networkmanager.ensureProfiles.secrets.entries =
                 lib.mkIf config.networking.networkmanager.enable
                     [
