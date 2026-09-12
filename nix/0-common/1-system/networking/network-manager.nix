@@ -5,9 +5,9 @@
         # Load Wi-Fi Credentials #####################################################################################################################
         {
             sops.secrets = lib.mkIf config.networking.networkmanager.enable {
-                technet_wifi_password.sopsFile = "${config.technet.secrets.path}/networkmanager.yaml";
-                family_home_wifi_password.sopsFile = "${config.technet.secrets.path}/networkmanager.yaml";
-                thor_wifi_password.sopsFile = "${config.technet.secrets.path}/networkmanager.yaml";
+                technet_wifi_password.sopsFile = "${config.technet.secrets.commonPath}/networkmanager.yaml";
+                family_home_wifi_password.sopsFile = "${config.technet.secrets.commonPath}/networkmanager.yaml";
+                thor_wifi_password.sopsFile = "${config.technet.secrets.commonPath}/networkmanager.yaml";
                 wireguard_private_key.sopsFile = "${config.technet.secrets.path}/networkmanager.yaml";
             };
 

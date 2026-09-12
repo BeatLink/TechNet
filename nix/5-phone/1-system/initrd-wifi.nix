@@ -11,7 +11,7 @@ in
 {
     # Credentials ------------------------------------------------------------------------------------------------------------------------------------
     sops.secrets.technet_wifi_password = {
-        sopsFile = "${config.technet.secrets.path}/networkmanager.yaml";
+        sopsFile = "${config.technet.secrets.commonPath}/networkmanager.yaml";
     };
 
     # Might be a security risk, PSK in initrd, consider certificate based auth
