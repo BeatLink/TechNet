@@ -1,0 +1,2974 @@
+diff --git a/tools/actions/session_manager.py b/tools/actions/session_manager.py
+index d2701842..a3276d36 100644
+--- a/tools/actions/session_manager.py
++++ b/tools/actions/session_manager.py
+@@ -107,12 +107,14 @@ def sigusr_handler(data):
+     services.user_manager.start(args, session, unlocked_cb)
+     services.clipboard_manager.start(args)
+     services.notification_manager.start(args, session)
++    services.gnss.start(args)
+     service(args, mainloop)
+ 
+ def do_stop(args, looper):
+     services.user_manager.stop(args)
+     services.clipboard_manager.stop(args)
+     services.notification_manager.stop(args)
++    services.gnss.stop(args)
+     looper.quit()
+ 
+ def stop(args):
+diff --git a/tools/config/__init__.py b/tools/config/__init__.py
+index fd9f4dfb..98ace3a6 100644
+--- a/tools/config/__init__.py
++++ b/tools/config/__init__.py
+@@ -23,7 +23,10 @@
+                "vendor_datetime",
+                "suspend_action",
+                "mount_overlays",
+-               "auto_adb"]
++               "auto_adb",
++               "gnss_provider",
++               "gnss_latitude",
++               "gnss_longitude"]
+ 
+ # Config file/commandline default values
+ # $WORK gets replaced with the actual value for args.work (which may be
+@@ -41,6 +44,7 @@
+     "suspend_action": "freeze",
+     "mount_overlays": "True",
+     "auto_adb": "False",
++    "gnss_provider": "auto",
+     "container_xdg_runtime_dir": "/run/xdg",
+     "container_wayland_display": "wayland-0",
+ }
+diff --git a/tools/interfaces/gnss/IGnss.py b/tools/interfaces/gnss/IGnss.py
+new file mode 100644
+index 00000000..093ef330
+--- /dev/null
++++ b/tools/interfaces/gnss/IGnss.py
+@@ -0,0 +1,519 @@
++"""
++GNSS AIDL HAL V2 Skeleton Implementation
++
++Implements android.hardware.gnss.IGnss V2 interface using libgbinder-python.
++Registers on /dev/binder as android.hardware.gnss.IGnss/default.
++
++"""
++
++import gbinder
++import logging
++from gi.repository import GLib
++
++from .IGnssCallback import IGnssCallbackClient
++
++# Interface constants
++INTERFACE = "android.hardware.gnss.IGnss"
++SERVICE_NAME = "android.hardware.gnss.IGnss/default"
++
++# AIDL uses FIRST_CALL_TRANSACTION = 1
++FIRST_CALL_TRANSACTION = 1
++
++# IGnss Transaction codes (from AIDL generated header)
++TRANSACTION_setCallback = FIRST_CALL_TRANSACTION + 0  # 1
++TRANSACTION_close = FIRST_CALL_TRANSACTION + 1        # 2
++TRANSACTION_getExtensionPsds = FIRST_CALL_TRANSACTION + 2  # 3
++TRANSACTION_getExtensionGnssConfiguration = FIRST_CALL_TRANSACTION + 3  # 4
++TRANSACTION_getExtensionGnssMeasurement = FIRST_CALL_TRANSACTION + 4    # 5
++TRANSACTION_getExtensionGnssPowerIndication = FIRST_CALL_TRANSACTION + 5  # 6
++TRANSACTION_getExtensionGnssBatching = FIRST_CALL_TRANSACTION + 6
++TRANSACTION_getExtensionGnssGeofence = FIRST_CALL_TRANSACTION + 7
++TRANSACTION_getExtensionGnssNavigationMessage = FIRST_CALL_TRANSACTION + 8
++TRANSACTION_getExtensionAGnss = FIRST_CALL_TRANSACTION + 9
++TRANSACTION_getExtensionAGnssRil = FIRST_CALL_TRANSACTION + 10
++TRANSACTION_getExtensionGnssDebug = FIRST_CALL_TRANSACTION + 11
++TRANSACTION_getExtensionGnssVisibilityControl = FIRST_CALL_TRANSACTION + 12
++TRANSACTION_start = FIRST_CALL_TRANSACTION + 13  # 14
++TRANSACTION_stop = FIRST_CALL_TRANSACTION + 14   # 15
++TRANSACTION_injectTime = FIRST_CALL_TRANSACTION + 15  # 16
++TRANSACTION_injectLocation = FIRST_CALL_TRANSACTION + 16  # 17
++TRANSACTION_injectBestLocation = FIRST_CALL_TRANSACTION + 17  # 18
++TRANSACTION_deleteAidingData = FIRST_CALL_TRANSACTION + 18  # 19
++TRANSACTION_setPositionMode = FIRST_CALL_TRANSACTION + 19  # 20
++TRANSACTION_getExtensionGnssAntennaInfo = FIRST_CALL_TRANSACTION + 20  # 21
++TRANSACTION_getExtensionMeasurementCorrections = FIRST_CALL_TRANSACTION + 21  # 22
++TRANSACTION_startSvStatus = FIRST_CALL_TRANSACTION + 22  # 23
++TRANSACTION_stopSvStatus = FIRST_CALL_TRANSACTION + 23   # 24
++TRANSACTION_startNmea = FIRST_CALL_TRANSACTION + 24  # 25
++TRANSACTION_stopNmea = FIRST_CALL_TRANSACTION + 25   # 26
++
++# AIDL interface meta-transactions
++TRANSACTION_getInterfaceVersion = 16777215
++TRANSACTION_getInterfaceHash = 16777214
++
++# IGnss interface hash for V2
++INTERFACE_HASH = "fc957f1d3d261d065ff5e5415f2d21caa79c310f"
++INTERFACE_VERSION = 2
++
++
++class IGnss:
++    """
++    GNSS HAL V2 Skeleton.
++
++    Implements the android.hardware.gnss.IGnss V2 interface.
++    """
++
++    def __init__(self):
++        """
++        Initialize the GNSS HAL interface.
++
++        Note: Provider should be set in subclass (e.g. GnssService).
++        """
++        self.callback_client = None
++        self.callback_binder = None
++        self.local = None
++        self.service_manager = None
++        self.loop = None
++
++        # Extension interfaces
++        self.gnss_configuration = None
++        self.gnss_measurement = None
++        self.gnss_power_indication = None
++        self.gnss_psds = None
++
++        # Extension interface binder objects
++        self.gnss_configuration_local = None
++        self.gnss_measurement_local = None
++        self.gnss_power_indication_local = None
++        self.gnss_psds_local = None
++
++    def add_service(self, binder_device, protocol="aidl3"):
++        """
++        Register the AIDL HAL service on the binder.
++
++        Args:
++            binder_device: Path to binder device
++            protocol: Optional binder protocol version (defaults to aidl3)
++
++        Returns:
++            True if registration succeeded, False otherwise.
++        """
++        try:
++            # ServiceManager(device, sm_protocol, binder_protocol)
++            self.service_manager = gbinder.ServiceManager(
++                binder_device, protocol, protocol
++            )
++        except TypeError:
++            # Fallback for older gbinder versions
++            try:
++                self.service_manager = gbinder.ServiceManager(binder_device, sm_protocol)
++            except TypeError:
++                self.service_manager = gbinder.ServiceManager(binder_device)
++
++        self.local = self.service_manager.new_local_object(
++            INTERFACE,
++            self._handle_transaction
++        )
++
++        # Set VINTF stability for HAL services (required for Android to accept)
++        try:
++            self.local.set_stability(gbinder.STABILITY_VINTF)
++        except (AttributeError, TypeError):
++            logging.warning("IGnss: Could not set VINTF stability (older gbinder?)")
++
++        status = self.service_manager.add_service_sync(SERVICE_NAME, self.local)
++        if status:
++            logging.error(f"Failed to add service {SERVICE_NAME}: {status}")
++            return False
++
++        logging.debug(f"Registered service: {SERVICE_NAME}")
++
++        # Create extension interfaces
++        self._create_extension_interfaces()
++
++        return True
++
++    def _handle_transaction(self, req, code, flags):
++        """
++        Handle incoming binder transactions.
++
++        Args:
++            req: The incoming request (RemoteRequest)
++            code: Transaction code
++            flags: Transaction flags
++
++        Returns:
++            Tuple of (response, status_code)
++        """
++        logging.debug(f"IGnss: Received transaction: {code}")
++        response = self.local.new_reply()
++
++        if code == TRANSACTION_setCallback:
++            return self._on_set_callback(req, response)
++        elif code == TRANSACTION_close:
++            return self._on_close(response)
++        elif code == TRANSACTION_getExtensionPsds:
++            return self._on_get_extension_psds(response)
++        elif code == TRANSACTION_getExtensionGnssConfiguration:
++            return self._on_get_extension_gnss_configuration(response)
++        elif code == TRANSACTION_getExtensionGnssMeasurement:
++            return self._on_get_extension_gnss_measurement(response)
++        elif code == TRANSACTION_getExtensionGnssPowerIndication:
++            return self._on_get_extension_gnss_power_indication(response)
++        elif code == TRANSACTION_getExtensionGnssBatching:
++            return self._on_get_extension_null(response)
++        elif code == TRANSACTION_getExtensionGnssGeofence:
++            return self._on_get_extension_null(response)
++        elif code == TRANSACTION_getExtensionGnssNavigationMessage:
++            return self._on_get_extension_null(response)
++        elif code == TRANSACTION_getExtensionAGnss:
++            return self._on_get_extension_null(response)
++        elif code == TRANSACTION_getExtensionAGnssRil:
++            return self._on_get_extension_null(response)
++        elif code == TRANSACTION_getExtensionGnssDebug:
++            return self._on_get_extension_null(response)
++        elif code == TRANSACTION_getExtensionGnssVisibilityControl:
++            return self._on_get_extension_null(response)
++        elif code == TRANSACTION_getExtensionGnssAntennaInfo:
++            return self._on_get_extension_null(response)
++        elif code == TRANSACTION_getExtensionMeasurementCorrections:
++            return self._on_get_extension_null(response)
++        elif code == TRANSACTION_start:
++            return self._on_start(response)
++        elif code == TRANSACTION_stop:
++            return self._on_stop(response)
++        elif code == TRANSACTION_injectTime:
++            return self._on_inject_time(req, response)
++        elif code == TRANSACTION_injectLocation:
++            return self._on_inject_location(req, response)
++        elif code == TRANSACTION_injectBestLocation:
++            return self._on_inject_location(req, response)
++        elif code == TRANSACTION_deleteAidingData:
++            return self._on_delete_aiding_data(req, response)
++        elif code == TRANSACTION_setPositionMode:
++            return self._on_set_position_mode(req, response)
++        elif code == TRANSACTION_startSvStatus:
++            return self._on_start_sv_status(response)
++        elif code == TRANSACTION_stopSvStatus:
++            return self._on_stop_sv_status(response)
++        elif code == TRANSACTION_startNmea:
++            return self._on_start_nmea(response)
++        elif code == TRANSACTION_stopNmea:
++            return self._on_stop_nmea(response)
++        elif code == TRANSACTION_getInterfaceVersion:
++            return self._on_get_interface_version(response)
++        elif code == TRANSACTION_getInterfaceHash:
++            return self._on_get_interface_hash(response)
++        else:
++            logging.warning(f"IGnss: Unknown transaction code: {code}")
++            response.append_int32(0)  # Status OK even for unknown
++            return response, 0
++
++    def _on_set_callback(self, req, response):
++        """
++        Handle setCallback(IGnssCallback callback).
++
++        Stores the callback and calls on_callback_set() hook.
++        """
++        logging.debug("IGnss: setCallback")
++        reader = req.init_reader()
++
++        # Read the callback binder object
++        callback_binder = reader.read_object()
++
++        if callback_binder:
++            self.callback = IGnssCallbackClient(callback_binder)
++            logging.debug("IGnss: Callback registered")
++            # Call hook for subclasses
++            if hasattr(self, 'on_callback_set'):
++                self.on_callback_set()
++        else:
++            logging.warning("IGnss: setCallback received null callback")
++            self.callback = None
++        # Return void (just status)
++        response.append_int32(0)  # Status OK
++        return response, 0
++
++    def _on_close(self, response):
++        """
++        Handle close().
++
++        Clears callback and calls on_close() hook.
++        """
++        logging.debug("IGnss: close")
++        self.callback_client = None
++        self.callback_binder = None
++
++        if hasattr(self, 'on_close'):
++            self.on_close()
++
++        response.append_int32(0)  # Status OK
++        return response, 0
++
++    def _on_get_extension_psds(self, response):
++        """
++        Handle getExtensionPsds() -> @nullable IGnssPsds.
++        """
++        logging.debug("IGnss: getExtensionPsds")
++        response.append_int32(0)  # Status OK
++        if self.gnss_psds_local:
++            response.append_local_object(self.gnss_psds_local)
++        else:
++            response.append_int32(0)  # null binder
++        return response, 0
++
++    def _on_get_extension_gnss_configuration(self, response):
++        """
++        Handle getExtensionGnssConfiguration() -> IGnssConfiguration.
++        """
++        logging.debug("IGnss: getExtensionGnssConfiguration")
++        response.append_int32(0)  # Status OK
++        if self.gnss_configuration_local:
++            response.append_local_object(self.gnss_configuration_local)
++        else:
++            response.append_int32(0)  # null binder
++        return response, 0
++
++    def _on_get_extension_gnss_measurement(self, response):
++        """
++        Handle getExtensionGnssMeasurement() -> IGnssMeasurementInterface.
++        """
++        logging.debug("IGnss: getExtensionGnssMeasurement")
++        response.append_int32(0)  # Status OK
++        if self.gnss_measurement_local:
++            response.append_local_object(self.gnss_measurement_local)
++        else:
++            response.append_int32(0)  # null binder
++        return response, 0
++
++    def _on_get_extension_gnss_power_indication(self, response):
++        """
++        Handle getExtensionGnssPowerIndication() -> IGnssPowerIndication.
++        """
++        logging.debug("IGnss: getExtensionGnssPowerIndication")
++        response.append_int32(0)  # Status OK
++        if self.gnss_power_indication_local:
++            response.append_local_object(self.gnss_power_indication_local)
++        else:
++            response.append_int32(0)  # null binder
++        return response, 0
++
++    def _on_get_extension_null(self, response):
++        """Handle getExtension* calls that return null (unsupported interfaces)."""
++        response.append_int32(0)  # Status OK
++        response.append_int32(0)  # null binder (no remote object)
++        return response, 0
++
++    def _on_start(self, response):
++        """Handle start() -> bool."""
++        logging.debug("IGnss: start")
++        if hasattr(self, 'on_start'):
++            self.on_start()
++        response.append_int32(0)  # Status OK
++        return response, 0
++
++    def _on_stop(self, response):
++        """Handle stop() -> bool."""
++        logging.debug("IGnss: stop")
++        if hasattr(self, 'on_stop'):
++            self.on_stop()
++        response.append_int32(0)  # Status OK
++        return response, 0
++
++    def _on_inject_time(self, req, response):
++        """Handle injectTime(timeMs, timeReferenceMs, uncertaintyMs)."""
++        logging.debug("IGnss: injectTime")
++        reader = req.init_reader()
++        try:
++            _, time_ms = reader.read_int64()
++            _, time_ref_ms = reader.read_int64()
++            _, uncertainty = reader.read_int32()
++            if hasattr(self, 'on_inject_time'):
++                self.on_inject_time(time_ms, time_ref_ms, uncertainty)
++        except Exception as e:
++            logging.warning(f"IGnss: Failed to parse injectTime: {e}")
++        response.append_int32(0)  # Status OK
++        return response, 0
++
++    def _on_inject_location(self, req, response):
++        """Handle injectLocation/injectBestLocation (GnssLocation parcelable)."""
++        logging.debug("IGnss: injectLocation")
++        reader = req.init_reader()
++        try:
++            # Read parcelable marker and size
++            _, marker = reader.read_int32()
++            _, size = reader.read_int32()
++            if marker != 0:  # Non-null parcelable
++                # Read GnssLocation fields
++                _, flags = reader.read_int32()
++                _, lat = reader.read_double()
++                _, lon = reader.read_double()
++                # Skip to accuracy (alt, speed, bearing, then accuracy)
++                reader.read_double()  # altitude
++                reader.read_double()  # speed
++                reader.read_double()  # bearing
++                _, accuracy = reader.read_double()
++                if hasattr(self, 'on_inject_location'):
++                    self.on_inject_location(lat, lon, accuracy)
++        except Exception as e:
++            logging.warning(f"IGnss: Failed to parse injectLocation: {e}")
++        response.append_int32(0)  # Status OK
++        return response, 0
++
++    def _on_delete_aiding_data(self, req, response):
++        """Handle deleteAidingData(flags)."""
++        logging.debug("IGnss: deleteAidingData")
++        reader = req.init_reader()
++        try:
++            _, flags = reader.read_int32()
++            if hasattr(self, 'on_delete_aiding_data'):
++                self.on_delete_aiding_data(flags)
++        except Exception as e:
++            logging.warning(f"IGnss: Failed to parse deleteAidingData: {e}")
++        response.append_int32(0)  # Status OK
++        return response, 0
++
++    def _on_set_position_mode(self, req, response):
++        """Handle setPositionMode(PositionModeOptions parcelable)."""
++        logging.debug("IGnss: setPositionMode")
++        reader = req.init_reader()
++        try:
++            # Read parcelable marker and size
++            _, marker = reader.read_int32()
++            _, size = reader.read_int32()
++            if marker != 0:  # Non-null parcelable
++                _, mode = reader.read_int32()
++                _, recurrence = reader.read_int32()
++                _, min_interval = reader.read_int32()
++                _, pref_accuracy = reader.read_int32()
++                _, pref_time = reader.read_int32()
++                if hasattr(self, 'on_set_position_mode'):
++                    self.on_set_position_mode(mode, recurrence, min_interval, pref_accuracy, pref_time)
++        except Exception as e:
++            logging.warning(f"IGnss: Failed to parse setPositionMode: {e}")
++        response.append_int32(0)  # Status OK
++        return response, 0
++
++    def _on_start_sv_status(self, response):
++        """Handle startSvStatus()."""
++        logging.debug("IGnss: startSvStatus")
++        if hasattr(self, 'on_start_sv_status'):
++            self.on_start_sv_status()
++        response.append_int32(0)  # Status OK
++        return response, 0
++
++    def _on_stop_sv_status(self, response):
++        """Handle stopSvStatus()."""
++        logging.debug("IGnss: stopSvStatus")
++        if hasattr(self, 'on_stop_sv_status'):
++            self.on_stop_sv_status()
++        response.append_int32(0)  # Status OK
++        return response, 0
++
++    def _on_start_nmea(self, response):
++        """Handle startNmea()."""
++        logging.debug("IGnss: startNmea")
++        if hasattr(self, 'on_start_nmea'):
++            self.on_start_nmea()
++        response.append_int32(0)  # Status OK
++        return response, 0
++
++    def _on_stop_nmea(self, response):
++        """Handle stopNmea()."""
++        logging.debug("IGnss: stopNmea")
++        if hasattr(self, 'on_stop_nmea'):
++            self.on_stop_nmea()
++        response.append_int32(0)  # Status OK
++        return response, 0
++
++    def _on_get_interface_version(self, response):
++        """Handle getInterfaceVersion() -> int."""
++        logging.debug("IGnss: getInterfaceVersion")
++        response.append_int32(0)  # Status OK
++        response.append_int32(INTERFACE_VERSION)
++        return response, 0
++
++    def _on_get_interface_hash(self, response):
++        """Handle getInterfaceHash() -> String."""
++        logging.debug("IGnss: getInterfaceHash")
++        response.append_int32(0)  # Status OK
++        response.append_string16(INTERFACE_HASH)
++        return response, 0
++
++    def _create_extension_interfaces(self):
++        """Create extension interface objects."""
++        from .IGnssConfiguration import IGnssConfiguration
++        from .IGnssMeasurementInterface import IGnssMeasurementInterface
++        from .IGnssPowerIndication import IGnssPowerIndication
++        from .IGnssPsds import IGnssPsds
++
++        # Create interface handlers
++        self.gnss_configuration = IGnssConfiguration()
++        self.gnss_measurement = IGnssMeasurementInterface()
++        self.gnss_power_indication = IGnssPowerIndication()
++        self.gnss_psds = IGnssPsds()
++
++        # Create binder objects
++        self.gnss_configuration_local = self.gnss_configuration.create_local_object(self.service_manager)
++        self.gnss_measurement_local = self.gnss_measurement.create_local_object(self.service_manager)
++        self.gnss_power_indication_local = self.gnss_power_indication.create_local_object(self.service_manager)
++        self.gnss_psds_local = self.gnss_psds.create_local_object(self.service_manager)
++
++        logging.debug("IGnss: Created extension interfaces")
++
++    def _report_capabilities(self):
++        """Report HAL capabilities to the Android framework via callback."""
++        if not self.callback:
++            logging.warning("IGnss: Cannot report capabilities, no callback")
++            return
++
++        # Get capabilities (can be overridden by subclass)
++        if hasattr(self, 'get_capabilities'):
++            capabilities = self.get_capabilities()
++        else:
++            # Import capability flags from IGnssCallback
++            from .IGnssCallback import (
++                CAPABILITY_SCHEDULING,
++                CAPABILITY_SINGLE_SHOT,
++                CAPABILITY_ON_DEMAND_TIME
++            )
++            # Default capabilities if not overridden
++            capabilities = (
++                CAPABILITY_SCHEDULING |
++                CAPABILITY_SINGLE_SHOT |
++                CAPABILITY_ON_DEMAND_TIME
++            )
++
++        self.callback.report_capabilities(capabilities)
++
++    def send_location(self, gnss_location):
++        """
++        Send location to Android via gnssLocationCb callback.
++
++        Args:
++            gnss_location: GnssLocation object (from tools.interfaces.gnss.structs)
++
++        Returns:
++            True if successful, False otherwise
++        """
++        if not self.callback:
++            logging.warning("IGnss: Cannot send location, no callback")
++            return False
++
++        return self.callback.send_location(gnss_location)
++
++    def send_sv_status(self, sv_info_list):
++        """
++        Send satellite visibility info via gnssSvStatusCb callback.
++
++        Args:
++            sv_info_list: List of GnssSvInfo objects
++
++        Returns:
++            True if successful, False otherwise
++        """
++        if not self.callback:
++            logging.warning("IGnss: Cannot send SV status, no callback")
++            return False
++
++        return self.callback.send_sv_status(sv_info_list)
+\ No newline at end of file
+diff --git a/tools/interfaces/gnss/IGnssCallback.py b/tools/interfaces/gnss/IGnssCallback.py
+new file mode 100644
+index 00000000..13376749
+--- /dev/null
++++ b/tools/interfaces/gnss/IGnssCallback.py
+@@ -0,0 +1,185 @@
++"""
++IGnssCallback interface constants and helpers.
++
++Contains transaction codes, capability flags, and helper methods
++for interacting with android.hardware.gnss.IGnssCallback.
++"""
++
++import gbinder
++import logging
++
++# Interface constants
++CALLBACK_INTERFACE = "android.hardware.gnss.IGnssCallback"
++
++# AIDL uses FIRST_CALL_TRANSACTION = 1
++FIRST_CALL_TRANSACTION = 1
++
++# IGnssCallback V2 transaction codes
++CALLBACK_gnssSetCapabilitiesCb = FIRST_CALL_TRANSACTION + 0  # 1
++CALLBACK_gnssStatusCb = FIRST_CALL_TRANSACTION + 1           # 2
++CALLBACK_gnssSvStatusCb = FIRST_CALL_TRANSACTION + 2         # 3
++CALLBACK_gnssLocationCb = FIRST_CALL_TRANSACTION + 3         # 4
++CALLBACK_gnssNmeaCb = FIRST_CALL_TRANSACTION + 4             # 5
++
++# Capability flags from IGnssCallback.h
++CAPABILITY_SCHEDULING = 1 << 0
++CAPABILITY_MSB = 1 << 1
++CAPABILITY_MSA = 1 << 2
++CAPABILITY_SINGLE_SHOT = 1 << 3
++CAPABILITY_ON_DEMAND_TIME = 1 << 4
++CAPABILITY_GEOFENCING = 1 << 5
++CAPABILITY_MEASUREMENTS = 1 << 6
++CAPABILITY_NAV_MESSAGES = 1 << 7
++CAPABILITY_LOW_POWER_MODE = 1 << 8
++CAPABILITY_SATELLITE_BLOCKLIST = 1 << 9
++CAPABILITY_MEASUREMENT_CORRECTIONS = 1 << 10
++CAPABILITY_ANTENNA_INFO = 1 << 11
++CAPABILITY_CORRELATION_VECTOR = 1 << 12
++CAPABILITY_SATELLITE_PVT = 1 << 13
++
++
++class IGnssCallbackClient:
++    """
++    Client for interacting with IGnssCallback.
++
++    Provides methods to send callbacks to the Android framework.
++    """
++
++    def __init__(self, callback_binder):
++        """
++        Initialize callback helper.
++
++        Args:
++            callback_binder: The binder object received from setCallback()
++        """
++        self.callback_binder = callback_binder
++        self.callback_client = None
++
++        if callback_binder:
++            self.callback_client = gbinder.Client(
++                callback_binder,
++                CALLBACK_INTERFACE
++            )
++
++    def is_valid(self):
++        """Check if callback is valid and ready to use."""
++        return self.callback_client is not None
++
++    def report_capabilities(self, capabilities):
++        """
++        Report HAL capabilities to the Android framework.
++
++        Args:
++            capabilities: Bitmask of CAPABILITY_* flags
++
++        Returns:
++            True if successful, False otherwise
++        """
++        if not self.callback_client:
++            logging.warning("IGnssCallback: Cannot report capabilities, no callback")
++            return False
++
++        try:
++            request = self.callback_client.new_request()
++            request.append_int32(capabilities)
++
++            self.callback_client.transact_sync_reply(
++                CALLBACK_gnssSetCapabilitiesCb,
++                request
++            )
++            logging.debug(f"IGnssCallback: Reported capabilities: {capabilities:#x}")
++            return True
++        except Exception as e:
++            logging.error(f"IGnssCallback: Failed to report capabilities: {e}")
++            return False
++
++    def send_location(self, gnss_location):
++        """
++        Send location to Android via gnssLocationCb callback.
++
++        Args:
++            gnss_location: GnssLocation object (from tools.interfaces.gnss.structs)
++
++        Returns:
++            True if successful, False otherwise
++        """
++        if not self.callback_client:
++            logging.warning("IGnssCallback: Cannot send location, no callback")
++            return False
++
++        try:
++            request = self.callback_client.new_request()
++            writer = request.init_writer()
++            gnss_location.write_to_parcel(writer)
++
++            self.callback_client.transact_sync_reply(
++                CALLBACK_gnssLocationCb,
++                request
++            )
++            return True
++        except Exception as e:
++            logging.error(f"IGnssCallback: Failed to send location: {e}")
++            return False
++
++    def send_sv_status(self, sv_info_list):
++        """
++        Send satellite visibility info via gnssSvStatusCb callback.
++
++        Args:
++            sv_info_list: List of GnssSvInfo objects
++
++        Returns:
++            True if successful, False otherwise
++        """
++        if not self.callback_client:
++            logging.warning("IGnssCallback: Cannot send SV status, no callback")
++            return False
++
++        try:
++            request = self.callback_client.new_request()
++
++            # Write array length
++            request.append_int32(len(sv_info_list))
++
++            # Write each GnssSvInfo (write_to_parcel includes header)
++            writer = request.init_writer()
++            for sv_info in sv_info_list:
++                sv_info.write_to_parcel(writer)
++
++            self.callback_client.transact_sync_reply(
++                CALLBACK_gnssSvStatusCb,
++                request
++            )
++            return True
++        except Exception as e:
++            logging.error(f"IGnssCallback: Failed to send SV status: {e}")
++            return False
++
++    def send_nmea(self, timestamp, nmea):
++        """
++        Send NMEA sentence via gnssNmeaCb callback.
++
++        Args:
++            timestamp: Timestamp in milliseconds
++            nmea: NMEA sentence string
++
++        Returns:
++            True if successful, False otherwise
++        """
++        if not self.callback_client:
++            logging.warning("IGnssCallback: Cannot send NMEA, no callback")
++            return False
++
++        try:
++            request = self.callback_client.new_request()
++            request.append_int64(timestamp)
++            request.append_string16(nmea)
++
++            self.callback_client.transact_sync_reply(
++                CALLBACK_gnssNmeaCb,
++                request
++            )
++            return True
++        except Exception as e:
++            logging.error(f"IGnssCallback: Failed to send NMEA: {e}")
++            return False
+diff --git a/tools/interfaces/gnss/IGnssConfiguration.py b/tools/interfaces/gnss/IGnssConfiguration.py
+new file mode 100644
+index 00000000..c3d2210a
+--- /dev/null
++++ b/tools/interfaces/gnss/IGnssConfiguration.py
+@@ -0,0 +1,155 @@
++"""
++IGnssConfiguration AIDL HAL skeleton.
++
++Implements android.hardware.gnss.IGnssConfiguration V1 interface.
++"""
++
++import gbinder
++import logging
++
++INTERFACE = "android.hardware.gnss.IGnssConfiguration"
++
++# Transaction codes (FIRST_CALL_TRANSACTION = 1)
++FIRST_CALL_TRANSACTION = 1
++TRANSACTION_setSuplVersion = FIRST_CALL_TRANSACTION + 0
++TRANSACTION_setSuplMode = FIRST_CALL_TRANSACTION + 1
++TRANSACTION_setLppProfile = FIRST_CALL_TRANSACTION + 2
++TRANSACTION_setGlonassPositioningProtocol = FIRST_CALL_TRANSACTION + 3
++TRANSACTION_setEmergencySuplPdn = FIRST_CALL_TRANSACTION + 4
++TRANSACTION_setEsExtensionSec = FIRST_CALL_TRANSACTION + 5
++TRANSACTION_setBlocklist = FIRST_CALL_TRANSACTION + 6
++
++# AIDL interface meta-transactions
++TRANSACTION_getInterfaceVersion = 16777215
++TRANSACTION_getInterfaceHash = 16777214
++
++# IGnssConfiguration V2 interface hash
++INTERFACE_HASH = "fc957f1d3d261d065ff5e5415f2d21caa79c310f"
++INTERFACE_VERSION = 2
++
++# Constants from header
++SUPL_MODE_MSB = 1
++SUPL_MODE_MSA = 2
++LPP_PROFILE_USER_PLANE = 1
++LPP_PROFILE_CONTROL_PLANE = 2
++GLONASS_POS_PROTOCOL_RRC_CPLANE = 1
++GLONASS_POS_PROTOCOL_RRLP_UPLANE = 2
++GLONASS_POS_PROTOCOL_LPP_UPLANE = 4
++
++
++class IGnssConfiguration:
++    """
++    GNSS Configuration interface skeleton.
++
++    Handles GNSS configuration settings from the Android framework.
++    """
++
++    def __init__(self):
++        pass
++
++    def create_local_object(self, service_manager):
++        """Create a local binder object for this interface."""
++        self.local = service_manager.new_local_object(
++            INTERFACE,
++            self._handle_transaction
++        )
++        # Set VINTF stability for HAL services
++        try:
++            self.local.set_stability(gbinder.STABILITY_VINTF)
++        except (AttributeError, TypeError):
++            pass
++        return self.local
++
++    def _handle_transaction(self, req, code, flags):
++        """Handle incoming binder transactions."""
++        logging.debug(f"IGnssConfiguration: Transaction {code}")
++        response = self.local.new_reply()
++
++        if code == TRANSACTION_setSuplVersion:
++            return self._on_set_supl_version(req, response)
++        elif code == TRANSACTION_setSuplMode:
++            return self._on_set_supl_mode(req, response)
++        elif code == TRANSACTION_setLppProfile:
++            return self._on_set_lpp_profile(req, response)
++        elif code == TRANSACTION_setGlonassPositioningProtocol:
++            return self._on_set_glonass_protocol(req, response)
++        elif code == TRANSACTION_setEmergencySuplPdn:
++            return self._on_set_emergency_supl_pdn(req, response)
++        elif code == TRANSACTION_setEsExtensionSec:
++            return self._on_set_es_extension_sec(req, response)
++        elif code == TRANSACTION_setBlocklist:
++            return self._on_set_blocklist(req, response)
++        elif code == TRANSACTION_getInterfaceVersion:
++            response.append_int32(0)  # Status OK
++            response.append_int32(INTERFACE_VERSION)
++            return response, 0
++        elif code == TRANSACTION_getInterfaceHash:
++            response.append_int32(0)  # Status OK
++            response.append_string16(INTERFACE_HASH)
++            return response, 0
++        else:
++            logging.warning(f"IGnssConfiguration: Unknown transaction {code}")
++            response.append_int32(0)  # Status OK
++            return response, 0
++
++    def _on_set_supl_version(self, req, response):
++        reader = req.init_reader()
++        status, version = reader.read_int32()
++        logging.debug(f"IGnssConfiguration: setSuplVersion({version})")
++        if hasattr(self, 'set_supl_version'):
++            self.set_supl_version(version)
++        response.append_int32(0)  # Status OK
++        return response, 0
++
++    def _on_set_supl_mode(self, req, response):
++        reader = req.init_reader()
++        status, mode = reader.read_int32()
++        logging.debug(f"IGnssConfiguration: setSuplMode({mode})")
++        if hasattr(self, 'set_supl_mode'):
++            self.set_supl_mode(mode)
++        response.append_int32(0)
++        return response, 0
++
++    def _on_set_lpp_profile(self, req, response):
++        reader = req.init_reader()
++        status, profile = reader.read_int32()
++        logging.debug(f"IGnssConfiguration: setLppProfile({profile})")
++        if hasattr(self, 'set_lpp_profile'):
++            self.set_lpp_profile(profile)
++        response.append_int32(0)
++        return response, 0
++
++    def _on_set_glonass_protocol(self, req, response):
++        reader = req.init_reader()
++        status, protocol = reader.read_int32()
++        logging.debug(f"IGnssConfiguration: setGlonassPositioningProtocol({protocol})")
++        if hasattr(self, 'set_glonass_positioning_protocol'):
++            self.set_glonass_positioning_protocol(protocol)
++        response.append_int32(0)
++        return response, 0
++
++    def _on_set_emergency_supl_pdn(self, req, response):
++        reader = req.init_reader()
++        status, enable = reader.read_int32()  # bool as int
++        logging.debug(f"IGnssConfiguration: setEmergencySuplPdn({enable})")
++        if hasattr(self, 'set_emergency_supl_pdn'):
++            self.set_emergency_supl_pdn(enable != 0)
++        response.append_int32(0)
++        return response, 0
++
++    def _on_set_es_extension_sec(self, req, response):
++        reader = req.init_reader()
++        status, seconds = reader.read_int32()
++        logging.debug(f"IGnssConfiguration: setEsExtensionSec({seconds})")
++        if hasattr(self, 'set_es_extension_sec'):
++            self.set_es_extension_sec(seconds)
++        response.append_int32(0)
++        return response, 0
++
++    def _on_set_blocklist(self, req, response):
++        # TODO: Parse BlocklistedSource parcelable array
++        logging.debug("IGnssConfiguration: setBlocklist")
++        if hasattr(self, 'set_blocklist'):
++            self.set_blocklist([])
++        response.append_int32(0)
++        return response, 0
+diff --git a/tools/interfaces/gnss/IGnssMeasurementInterface.py b/tools/interfaces/gnss/IGnssMeasurementInterface.py
+new file mode 100644
+index 00000000..5c37856c
+--- /dev/null
++++ b/tools/interfaces/gnss/IGnssMeasurementInterface.py
+@@ -0,0 +1,174 @@
++"""
++IGnssMeasurementInterface AIDL HAL skeleton.
++
++Implements android.hardware.gnss.IGnssMeasurementInterface V1 interface.
++"""
++
++import gbinder
++import logging
++
++INTERFACE = "android.hardware.gnss.IGnssMeasurementInterface"
++CALLBACK_INTERFACE = "android.hardware.gnss.IGnssMeasurementCallback"
++
++# Transaction codes
++FIRST_CALL_TRANSACTION = 1
++TRANSACTION_setCallback = FIRST_CALL_TRANSACTION + 0
++TRANSACTION_close = FIRST_CALL_TRANSACTION + 1
++TRANSACTION_setCallbackWithOptions = FIRST_CALL_TRANSACTION + 2
++
++# AIDL interface meta-transactions
++TRANSACTION_getInterfaceVersion = 16777215
++TRANSACTION_getInterfaceHash = 16777214
++
++# IGnssMeasurementInterface V2 interface hash
++INTERFACE_HASH = "fc957f1d3d261d065ff5e5415f2d21caa79c310f"
++INTERFACE_VERSION = 2
++
++
++class IGnssMeasurementInterface:
++    """
++    GNSS Measurement interface skeleton.
++
++    Provides raw GNSS measurements (pseudoranges, etc.) to the framework.
++    """
++
++    def __init__(self):
++        self.callback_client = None
++        self.callback_binder = None
++
++    def create_local_object(self, service_manager):
++        """Create a local binder object for this interface."""
++        self.local = service_manager.new_local_object(
++            INTERFACE,
++            self._handle_transaction
++        )
++        # Set VINTF stability for HAL services
++        try:
++            self.local.set_stability(gbinder.STABILITY_VINTF)
++        except (AttributeError, TypeError):
++            pass
++        return self.local
++
++    def _handle_transaction(self, req, code, flags):
++        """Handle incoming binder transactions."""
++        logging.debug(f"IGnssMeasurementInterface: Transaction {code}")
++        response = self.local.new_reply()
++
++        if code == TRANSACTION_setCallback:
++            return self._on_set_callback(req, response)
++        elif code == TRANSACTION_close:
++            return self._on_close(response)
++        elif code == TRANSACTION_setCallbackWithOptions:
++            return self._on_set_callback_with_options(req, response)
++        elif code == TRANSACTION_getInterfaceVersion:
++            response.append_int32(0)  # Status OK
++            response.append_int32(INTERFACE_VERSION)
++            return response, 0
++        elif code == TRANSACTION_getInterfaceHash:
++            response.append_int32(0)  # Status OK
++            response.append_string16(INTERFACE_HASH)
++            return response, 0
++        else:
++            logging.warning(f"IGnssMeasurementInterface: Unknown transaction {code}")
++            response.append_int32(0)  # Status OK
++            return response, 0
++
++    def _on_set_callback(self, req, response):
++        """
++        Handle setCallback(callback, enableFullTracking, enableCorrVecOutputs).
++        """
++        reader = req.init_reader()
++
++        self.callback_binder = reader.read_object()
++        status, full_tracking = reader.read_int32()  # bool
++        status, corr_vec = reader.read_int32()  # bool
++
++        self.full_tracking = (full_tracking != 0)
++        self.corr_vec_outputs = (corr_vec != 0)
++
++        if self.callback_binder:
++            self.callback_client = gbinder.Client(
++                self.callback_binder,
++                CALLBACK_INTERFACE
++            )
++            logging.debug(f"IGnssMeasurementInterface: setCallback (fullTracking={full_tracking != 0})")
++            # Call hook for subclasses
++            if hasattr(self, 'on_callback_set'):
++                self.on_callback_set(full_tracking != 0, corr_vec != 0)
++        else:
++            logging.warning("IGnssMeasurementInterface: setCallback with null callback")
++
++        response.append_int32(0)  # Status OK
++        return response, 0
++
++    def _on_set_callback_with_options(self, req, response):
++        """
++        Handle setCallbackWithOptions(callback, options).
++        """
++        reader = req.init_reader()
++
++        self.callback_binder = reader.read_object()
++
++        # Options is a parcelable: marker(4) + size(4) + fields
++        status, marker = reader.read_int32()
++        status, size = reader.read_int32()
++
++        status, full_tracking = reader.read_int32()
++        status, corr_vec = reader.read_int32()
++        status, interval_ms = reader.read_int32()
++
++        self.full_tracking = (full_tracking != 0)
++        self.corr_vec_outputs = (corr_vec != 0)
++        self.interval_ms = interval_ms
++
++        if self.callback_binder:
++            self.callback_client = gbinder.Client(
++                self.callback_binder,
++                CALLBACK_INTERFACE
++            )
++            logging.debug(f"IGnssMeasurementInterface: setCallbackWithOptions (fullTracking={self.full_tracking}, interval={interval_ms}ms)")
++            # Call hook for subclasses
++            if hasattr(self, 'on_callback_set'):
++                self.on_callback_set(self.full_tracking, self.corr_vec_outputs)
++        else:
++            logging.warning("IGnssMeasurementInterface: setCallbackWithOptions with null callback")
++
++        response.append_int32(0)  # Status OK
++        return response, 0
++
++    def _on_close(self, response):
++        """Handle close()."""
++        logging.debug("IGnssMeasurementInterface: close")
++        self.callback_client = None
++        self.callback_binder = None
++
++        # Call hook
++        if hasattr(self, 'on_close'):
++            self.on_close()
++
++        response.append_int32(0)
++        return response, 0
++
++    def send_gnss_data(self, gnss_data):
++        """
++        Send GnssData to the registered callback.
++
++        Args:
++            gnss_data: GnssData object (from tools.interfaces.gnss.structs)
++        """
++        if not self.callback_client:
++            logging.warning("IGnssMeasurementInterface: Cannot send data, no callback")
++            return False
++
++        try:
++            # CALLBACK_gnssMeasurementCb = 1 (FIRST_CALL_TRANSACTION + 0)
++            CALLBACK_gnssMeasurementCb = 1
++            req = self.callback_client.new_request()
++            writer = req.init_writer()
++            gnss_data.write_to_parcel(writer)
++
++            self.callback_client.transact_sync_reply(CALLBACK_gnssMeasurementCb, req)
++            return True
++        except Exception as e:
++            logging.error(f"IGnssMeasurementInterface: Failed to send data: {e}")
++            return False
+diff --git a/tools/interfaces/gnss/IGnssPowerIndication.py b/tools/interfaces/gnss/IGnssPowerIndication.py
+new file mode 100644
+index 00000000..edd33c4b
+--- /dev/null
++++ b/tools/interfaces/gnss/IGnssPowerIndication.py
+@@ -0,0 +1,121 @@
++"""
++IGnssPowerIndication AIDL HAL skeleton.
++
++Implements android.hardware.gnss.IGnssPowerIndication V1 interface.
++"""
++
++import gbinder
++import logging
++
++INTERFACE = "android.hardware.gnss.IGnssPowerIndication"
++CALLBACK_INTERFACE = "android.hardware.gnss.IGnssPowerIndicationCallback"
++
++# Transaction codes
++FIRST_CALL_TRANSACTION = 1
++TRANSACTION_setCallback = FIRST_CALL_TRANSACTION + 0
++TRANSACTION_requestGnssPowerStats = FIRST_CALL_TRANSACTION + 1
++
++# AIDL interface meta-transactions
++TRANSACTION_getInterfaceVersion = 16777215
++TRANSACTION_getInterfaceHash = 16777214
++
++# IGnssPowerIndication V2 interface hash
++INTERFACE_HASH = "fc957f1d3d261d065ff5e5415f2d21caa79c310f"
++INTERFACE_VERSION = 2
++
++# Callback transaction codes
++CALLBACK_setCapabilitiesCb = FIRST_CALL_TRANSACTION + 0
++CALLBACK_gnssPowerStatsCb = FIRST_CALL_TRANSACTION + 1
++
++
++class IGnssPowerIndication:
++    """
++    GNSS Power Indication interface skeleton.
++
++    Reports GNSS power consumption statistics to the framework.
++    """
++
++    def __init__(self):
++        self.callback_client = None
++        self.callback_binder = None
++
++    def create_local_object(self, service_manager):
++        """Create a local binder object for this interface."""
++        self.local = service_manager.new_local_object(
++            INTERFACE,
++            self._handle_transaction
++        )
++        # Set VINTF stability for HAL services
++        try:
++            self.local.set_stability(gbinder.STABILITY_VINTF)
++        except (AttributeError, TypeError):
++            pass
++        return self.local
++
++    def _handle_transaction(self, req, code, flags):
++        """Handle incoming binder transactions."""
++        logging.debug(f"IGnssPowerIndication: Transaction {code}")
++        response = self.local.new_reply()
++
++        if code == TRANSACTION_setCallback:
++            return self._on_set_callback(req, response)
++        elif code == TRANSACTION_requestGnssPowerStats:
++            return self._on_request_power_stats(response)
++        elif code == TRANSACTION_getInterfaceVersion:
++            response.append_int32(0)  # Status OK
++            response.append_int32(INTERFACE_VERSION)
++            return response, 0
++        elif code == TRANSACTION_getInterfaceHash:
++            response.append_int32(0)  # Status OK
++            response.append_string16(INTERFACE_HASH)
++            return response, 0
++        else:
++            logging.warning(f"IGnssPowerIndication: Unknown transaction {code}")
++            response.append_int32(0)  # Status OK
++            return response, 0
++
++    def _on_set_callback(self, req, response):
++        """Handle setCallback(IGnssPowerIndicationCallback callback)."""
++        reader = req.init_reader()
++
++        self.callback_binder = reader.read_object()
++
++        if self.callback_binder:
++            self.callback_client = gbinder.Client(
++                self.callback_binder,
++                CALLBACK_INTERFACE
++            )
++            logging.debug("IGnssPowerIndication: setCallback")
++
++            # Call hook for subclasses
++            if hasattr(self, 'on_callback_set'):
++                self.on_callback_set()
++        else:
++            logging.warning("IGnssPowerIndication: setCallback with null callback")
++
++        response.append_int32(0)  # Status OK
++        return response, 0
++
++    def _on_request_power_stats(self, response):
++        """Handle requestGnssPowerStats()."""
++        logging.debug("IGnssPowerIndication: requestGnssPowerStats")
++
++        # Call hook
++        if hasattr(self, 'request_power_stats'):
++            self.request_power_stats()
++
++        response.append_int32(0)  # Status OK
++        return response, 0
++
++    def _report_capabilities(self):
++        """Report power indication capabilities via callback."""
++        if not self.callback_client:
++            return
++
++        try:
++            request = self.callback_client.new_request()
++            # Capabilities = 0 (no power stats supported yet)
++            request.append_int32(0)
++            self.callback_client.transact_sync_reply(CALLBACK_setCapabilitiesCb, request)
++        except Exception as e:
++            logging.error(f"IGnssPowerIndication: Failed to report capabilities: {e}")
+diff --git a/tools/interfaces/gnss/IGnssPsds.py b/tools/interfaces/gnss/IGnssPsds.py
+new file mode 100644
+index 00000000..a585f31d
+--- /dev/null
++++ b/tools/interfaces/gnss/IGnssPsds.py
+@@ -0,0 +1,141 @@
++"""
++IGnssPsds AIDL HAL skeleton.
++
++Implements android.hardware.gnss.IGnssPsds V1 interface.
++PSDS = Predicted Satellite Data Service (formerly XTRA).
++"""
++
++import gbinder
++import logging
++
++INTERFACE = "android.hardware.gnss.IGnssPsds"
++CALLBACK_INTERFACE = "android.hardware.gnss.IGnssPsdsCallback"
++
++# Transaction codes
++FIRST_CALL_TRANSACTION = 1
++TRANSACTION_injectPsdsData = FIRST_CALL_TRANSACTION + 0
++TRANSACTION_setCallback = FIRST_CALL_TRANSACTION + 1
++
++# AIDL interface meta-transactions
++TRANSACTION_getInterfaceVersion = 16777215
++TRANSACTION_getInterfaceHash = 16777214
++
++# Interface hash for V2
++INTERFACE_HASH = "fc957f1d3d261d065ff5e5415f2d21caa79c310f"
++INTERFACE_VERSION = 2
++
++# Callback transaction codes
++CALLBACK_downloadRequestCb = FIRST_CALL_TRANSACTION + 0
++
++# PsdsType enum from PsdsType.h
++PSDS_TYPE_UNKNOWN = 0
++PSDS_TYPE_1 = 1
++PSDS_TYPE_2 = 2
++PSDS_TYPE_3 = 3
++PSDS_TYPE_REALTIME = 4
++PSDS_TYPE_LONG_TERM = 5
++
++
++class IGnssPsds:
++    """
++    GNSS PSDS (Predicted Satellite Data Service) interface skeleton.
++
++    Handles injection of assistance data for faster GPS acquisition.
++    """
++
++    def __init__(self):
++        self.callback_client = None
++        self.callback_binder = None
++
++    def create_local_object(self, service_manager):
++        """Create a local binder object for this interface."""
++        self.local = service_manager.new_local_object(
++            INTERFACE,
++            self._handle_transaction
++        )
++        # Set VINTF stability for HAL services
++        try:
++            self.local.set_stability(gbinder.STABILITY_VINTF)
++        except (AttributeError, TypeError):
++            pass
++        return self.local
++
++    def _handle_transaction(self, req, code, flags):
++        """Handle incoming binder transactions."""
++        logging.debug(f"IGnssPsds: Transaction {code}")
++        response = self.local.new_reply()
++
++        if code == TRANSACTION_injectPsdsData:
++            return self._on_inject_psds_data(req, response)
++        elif code == TRANSACTION_setCallback:
++            return self._on_set_callback(req, response)
++        elif code == TRANSACTION_getInterfaceVersion:
++            response.append_int32(0)  # Status OK
++            response.append_int32(INTERFACE_VERSION)
++            return response, 0
++        elif code == TRANSACTION_getInterfaceHash:
++            response.append_int32(0)  # Status OK
++            response.append_string16(INTERFACE_HASH)
++            return response, 0
++        else:
++            logging.warning(f"IGnssPsds: Unknown transaction {code}")
++            response.append_int32(0)  # Status OK
++            return response, 0
++
++    def _on_inject_psds_data(self, req, response):
++        """Handle injectPsdsData(PsdsType psdsType, byte[] psdsData)."""
++        reader = req.init_reader()
++
++        status, psds_type = reader.read_int32()
++        # TODO: Read byte array properly
++
++        logging.debug(f"IGnssPsds: injectPsdsData (type={psds_type})")
++
++        # Read byte array from reader (Need to check gbinder-python API for byte/blob array)
++        # For now assuming it's consumable
++
++        # Call hook
++        if hasattr(self, 'on_inject_psds_data'):
++            self.on_inject_psds_data(psds_type, None)
++
++        response.append_int32(0)  # Status OK
++        return response, 0
++
++    def _on_set_callback(self, req, response):
++        """Handle setCallback(IGnssPsdsCallback callback)."""
++        reader = req.init_reader()
++
++        self.callback_binder = reader.read_object()
++
++        if self.callback_binder:
++            self.callback_client = gbinder.Client(
++                self.callback_binder,
++                CALLBACK_INTERFACE
++            )
++            logging.debug("IGnssPsds: setCallback")
++            # Call hook
++            if hasattr(self, 'on_callback_set'):
++                self.on_callback_set()
++        else:
++            logging.warning("IGnssPsds: setCallback with null callback")
++
++        response.append_int32(0)  # Status OK
++        return response, 0
++
++    def request_download(self, psds_type=PSDS_TYPE_1):
++        """
++        Request PSDS data download via callback.
++
++        Framework should respond by calling injectPsdsData() with the data.
++        """
++        if not self.callback_client:
++            logging.warning("IGnssPsds: Cannot request download, no callback")
++            return
++
++        try:
++            request = self.callback_client.new_request()
++            request.append_int32(psds_type)
++            self.callback_client.transact_sync_reply(CALLBACK_downloadRequestCb, request)
++            logging.debug(f"IGnssPsds: Requested download (type={psds_type})")
++        except Exception as e:
++            logging.error(f"IGnssPsds: Failed to request download: {e}")
+diff --git a/tools/interfaces/gnss/__init__.py b/tools/interfaces/gnss/__init__.py
+new file mode 100644
+index 00000000..40972461
+--- /dev/null
++++ b/tools/interfaces/gnss/__init__.py
+@@ -0,0 +1,19 @@
++"""
++GNSS HAL package for waydroid.
++
++Provides android.hardware.gnss AIDL HAL implementation using libgbinder-python.
++"""
++
++from .IGnss import IGnss
++from .IGnssConfiguration import IGnssConfiguration
++from .IGnssMeasurementInterface import IGnssMeasurementInterface
++from .IGnssPowerIndication import IGnssPowerIndication
++from .IGnssPsds import IGnssPsds
++
++__all__ = [
++    'IGnss',
++    'IGnssConfiguration',
++    'IGnssMeasurementInterface',
++    'IGnssPowerIndication',
++    'IGnssPsds',
++]
+diff --git a/tools/interfaces/gnss/structs.py b/tools/interfaces/gnss/structs.py
+new file mode 100644
+index 00000000..92d287ae
+--- /dev/null
++++ b/tools/interfaces/gnss/structs.py
+@@ -0,0 +1,411 @@
++# Copyright 2024
++# SPDX-License-Identifier: GPL-3.0-or-later
++"""
++GNSS AIDL Data Structures.
++
++Implements serialization for Parcelable objects defined in android.hardware.gnss definitions.
++
++AIDL parcelable serialization format:
++1. Non-null marker (int32 = 1)
++2. Size placeholder (int32, will be patched after)
++3. Parcelable fields
++4. Patch size with actual bytes written
++"""
++
++import logging
++
++
++class GnssConstellationType:
++    """android.hardware.gnss.GnssConstellationType"""
++    UNKNOWN = 0
++    GPS = 1
++    SBAS = 2
++    GLONASS = 3
++    QZSS = 4
++    BEIDOU = 5
++    GALILEO = 6
++    IRNSS = 7
++
++
++class GnssSvFlags:
++    """IGnssCallback.GnssSvFlags"""
++    NONE = 0
++    HAS_EPHEMERIS_DATA = 1
++    HAS_ALMANAC_DATA = 2
++    USED_IN_FIX = 4
++    HAS_CARRIER_FREQUENCY = 8
++
++
++class GnssSvInfo:
++    """
++    IGnssCallback.GnssSvInfo
++
++    Satellite vehicle info for gnssSvStatusCb callback.
++    """
++    def __init__(self):
++        self.svid = 0
++        self.constellation = GnssConstellationType.UNKNOWN
++        self.cN0Dbhz = 0.0
++        self.basebandCN0DbHz = 0.0
++        self.elevationDegrees = 0.0
++        self.azimuthDegrees = 0.0
++        self.carrierFrequencyHz = 0
++        self.svFlag = GnssSvFlags.NONE
++
++    def write_to_parcel(self, writer):
++        """Write as AIDL parcelable: non-null marker + size + fields."""
++        writer.append_int32(1)  # Non-null marker
++        size_pos = writer.bytes_written()
++        writer.append_int32(0)  # Placeholder for size
++
++        writer.append_int32(self.svid)
++        writer.append_int32(self.constellation)
++        writer.append_float(self.cN0Dbhz)
++        writer.append_float(self.basebandCN0DbHz)
++        writer.append_float(self.elevationDegrees)
++        writer.append_float(self.azimuthDegrees)
++        writer.append_int64(self.carrierFrequencyHz)
++        writer.append_int32(self.svFlag)
++
++        # Patch size
++        size = writer.bytes_written() - size_pos
++        writer.overwrite_int32(size_pos, size)
++
++
++class GnssSignalType:
++    """
++    android.hardware.gnss.GnssSignalType
++    """
++    def write_to_parcel(self, writer):
++        """Write as AIDL parcelable: non-null marker + size + fields."""
++        writer.append_int32(1)  # Non-null marker
++        size_pos = writer.bytes_written()
++        writer.append_int32(0)  # Placeholder for size
++
++        writer.append_int32(self.constellation)
++        writer.append_double(self.carrierFrequencyHz)
++        writer.append_string16(self.codeType)
++
++        size = writer.bytes_written() - size_pos
++        writer.overwrite_int32(size_pos, size)
++
++
++class GnssClock:
++    """
++    android.hardware.gnss.GnssClock
++    """
++    # Flags
++    HAS_LEAP_SECOND = 1 << 0
++    HAS_TIME_UNCERTAINTY = 1 << 1
++    HAS_FULL_BIAS = 1 << 2
++    HAS_BIAS = 1 << 3
++    HAS_BIAS_UNCERTAINTY = 1 << 4
++    HAS_DRIFT = 1 << 5
++    HAS_DRIFT_UNCERTAINTY = 1 << 6
++
++    def __init__(self):
++        self.gnssClockFlags = 0
++        self.leapSecond = 0
++        self.timeNs = 0
++        self.timeUncertaintyNs = 0.0
++        self.fullBiasNs = 0
++        self.biasNs = 0.0
++        self.biasUncertaintyNs = 0.0
++        self.driftNsps = 0.0
++        self.driftUncertaintyNsps = 0.0
++        self.hwClockDiscontinuityCount = 0
++        self.referenceSignalTypeForIsb = GnssSignalType()
++
++    def write_to_parcel(self, writer):
++        """Write as AIDL parcelable: non-null marker + size + fields."""
++        writer.append_int32(1)  # Non-null marker
++        size_pos = writer.bytes_written()
++        writer.append_int32(0)  # Placeholder for size
++
++        writer.append_int32(self.gnssClockFlags)
++        writer.append_int32(self.leapSecond)
++        writer.append_int64(self.timeNs)
++        writer.append_double(self.timeUncertaintyNs)
++        writer.append_int64(self.fullBiasNs)
++        writer.append_double(self.biasNs)
++        writer.append_double(self.biasUncertaintyNs)
++        writer.append_double(self.driftNsps)
++        writer.append_double(self.driftUncertaintyNsps)
++        writer.append_int32(self.hwClockDiscontinuityCount)
++        self.referenceSignalTypeForIsb.write_to_parcel(writer)
++
++        size = writer.bytes_written() - size_pos
++        writer.overwrite_int32(size_pos, size)
++
++
++class ElapsedRealtime:
++    """
++    android.hardware.gnss.ElapsedRealtime
++    """
++    HAS_TIMESTAMP_NS = 1 << 0
++    HAS_TIME_UNCERTAINTY_NS = 1 << 1
++
++    def __init__(self):
++        self.flags = 0
++        self.timestampNs = 0
++        self.timeUncertaintyNs = 0.0
++
++    def write_to_parcel(self, writer):
++        """Write as AIDL parcelable: non-null marker + size + fields."""
++        writer.append_int32(1)  # Non-null marker
++        size_pos = writer.bytes_written()
++        writer.append_int32(0)  # Placeholder for size
++
++        writer.append_int64(self.timestampNs)
++        writer.append_double(self.timeUncertaintyNs)
++        writer.append_int32(self.flags)
++
++        size = writer.bytes_written() - size_pos
++        writer.overwrite_int32(size_pos, size)
++
++
++class GnssLocation:
++    """
++    android.hardware.gnss.GnssLocation
++
++    AIDL parcelable structure for location callbacks.
++    """
++    HAS_LAT_LONG = 0x0001
++    HAS_ALTITUDE = 0x0002
++    HAS_SPEED = 0x0004
++    HAS_BEARING = 0x0008
++    HAS_HORIZONTAL_ACCURACY = 0x0010
++    HAS_VERTICAL_ACCURACY = 0x0020
++    HAS_SPEED_ACCURACY = 0x0040
++    HAS_BEARING_ACCURACY = 0x0080
++
++    def __init__(self):
++        self.gnssLocationFlags = 0
++        self.latitudeDegrees = 0.0
++        self.longitudeDegrees = 0.0
++        self.altitudeMeters = 0.0
++        self.speedMetersPerSec = 0.0
++        self.bearingDegrees = 0.0
++        self.horizontalAccuracyMeters = 0.0
++        self.verticalAccuracyMeters = 0.0
++        self.speedAccuracyMetersPerSecond = 0.0
++        self.bearingAccuracyDegrees = 0.0
++        self.timestampMillis = 0
++        self.elapsedRealtime = ElapsedRealtime()
++
++    def write_to_parcel(self, writer):
++        """Write as AIDL parcelable: non-null marker + size + fields."""
++        writer.append_int32(1)  # Non-null marker
++        size_pos = writer.bytes_written()
++        writer.append_int32(0)  # Placeholder for size
++
++        writer.append_int32(self.gnssLocationFlags)
++        writer.append_double(self.latitudeDegrees)
++        writer.append_double(self.longitudeDegrees)
++        writer.append_double(self.altitudeMeters)
++        writer.append_double(self.speedMetersPerSec)
++        writer.append_double(self.bearingDegrees)
++        writer.append_double(self.horizontalAccuracyMeters)
++        writer.append_double(self.verticalAccuracyMeters)
++        writer.append_double(self.speedAccuracyMetersPerSecond)
++        writer.append_double(self.bearingAccuracyDegrees)
++        writer.append_int64(self.timestampMillis)
++        self.elapsedRealtime.write_to_parcel(writer)
++
++        size = writer.bytes_written() - size_pos
++        writer.overwrite_int32(size_pos, size)
++
++
++class GnssMultipathIndicator:
++    UNKNOWN = 0
++    PRESENT = 1
++    NOT_PRESENT = 2
++
++class SatellitePvt:
++    """
++    android.hardware.gnss.SatellitePvt
++    """
++    HAS_POSITION_VELOCITY_CLOCK_INFO = 1 << 0
++    HAS_IONO = 1 << 1
++    HAS_TROPO = 1 << 2
++
++    def __init__(self):
++        self.flags = 0
++        self.satPosEcef = [0.0, 0.0, 0.0] # 3 doubles
++        self.satVelEcef = [0.0, 0.0, 0.0] # 3 doubles
++        self.satClockInfo = [0.0, 0.0, 0.0] # 3 doubles (bias, drift, driftRate)
++        self.ionoDelayMeters = 0.0
++        self.tropoDelayMeters = 0.0
++
++    def write_to_parcel(self, writer):
++        """Write as AIDL parcelable: non-null marker + size + fields."""
++        writer.append_int32(1)  # Non-null marker
++        size_pos = writer.bytes_written()
++        writer.append_int32(0)  # Placeholder for size
++
++        writer.append_int32(self.flags)
++        # Position
++        for val in self.satPosEcef:
++            writer.append_double(val)
++        # Velocity
++        for val in self.satVelEcef:
++            writer.append_double(val)
++        # Clock Info
++        for val in self.satClockInfo:
++            writer.append_double(val)
++        writer.append_double(self.ionoDelayMeters)
++        writer.append_double(self.tropoDelayMeters)
++
++        size = writer.bytes_written() - size_pos
++        writer.overwrite_int32(size_pos, size)
++
++
++class CorrelationVector:
++    """
++    android.hardware.gnss.CorrelationVector
++    """
++    def __init__(self):
++        self.frequencyOffsetMps = 0.0
++        self.samplingWidthM = 0.0
++        self.samplingStartM = 0.0
++        self.magnitude = [] # int[]
++
++    def write_to_parcel(self, writer):
++        """Write as AIDL parcelable: non-null marker + size + fields."""
++        writer.append_int32(1)  # Non-null marker
++        size_pos = writer.bytes_written()
++        writer.append_int32(0)  # Placeholder for size
++
++        writer.append_double(self.frequencyOffsetMps)
++        writer.append_double(self.samplingWidthM)
++        writer.append_double(self.samplingStartM)
++        # int[] magnitude
++        writer.append_int32(len(self.magnitude))
++        for val in self.magnitude:
++            writer.append_int32(val)
++
++        size = writer.bytes_written() - size_pos
++        writer.overwrite_int32(size_pos, size)
++
++
++class GnssMeasurement:
++    """
++    android.hardware.gnss.GnssMeasurement
++    """
++    def __init__(self):
++        self.flags = 0
++        self.svid = 0
++        self.signalType = GnssSignalType()
++        self.timeOffsetNs = 0.0
++        self.state = 0
++        self.receivedSvTimeInNs = 0
++        self.receivedSvTimeUncertaintyInNs = 0
++        self.antennaCN0DbHz = 0.0
++        self.basebandCN0DbHz = 0.0
++        self.pseudorangeRateMps = 0.0
++        self.pseudorangeRateUncertaintyMps = 0.0
++        self.accumulatedDeltaRangeState = 0
++        self.accumulatedDeltaRangeM = 0.0
++        self.accumulatedDeltaRangeUncertaintyM = 0.0
++        self.carrierCycles = 0
++        self.carrierPhase = 0.0
++        self.carrierPhaseUncertainty = 0.0
++        self.multipathIndicator = GnssMultipathIndicator.UNKNOWN
++        self.snrDb = 0.0
++        self.agcLevelDb = 0.0
++        self.fullInterSignalBiasNs = 0.0
++        self.fullInterSignalBiasUncertaintyNs = 0.0
++        self.satelliteInterSignalBiasNs = 0.0
++        self.satelliteInterSignalBiasUncertaintyNs = 0.0
++        self.satellitePvt = SatellitePvt()
++        self.correlationVectors = [] # List[CorrelationVector]
++
++    def write_to_parcel(self, writer):
++        """Write as AIDL parcelable: non-null marker + size + fields."""
++        writer.append_int32(1)  # Non-null marker
++        size_pos = writer.bytes_written()
++        writer.append_int32(0)  # Placeholder for size
++
++        writer.append_int32(self.flags)
++        writer.append_int32(self.svid)
++        self.signalType.write_to_parcel(writer)
++        writer.append_double(self.timeOffsetNs)
++        writer.append_int32(self.state)
++        writer.append_int64(self.receivedSvTimeInNs)
++        writer.append_int64(self.receivedSvTimeUncertaintyInNs)
++        writer.append_double(self.antennaCN0DbHz)
++        writer.append_double(self.basebandCN0DbHz)
++        writer.append_double(self.pseudorangeRateMps)
++        writer.append_double(self.pseudorangeRateUncertaintyMps)
++        writer.append_int32(self.accumulatedDeltaRangeState)
++        writer.append_double(self.accumulatedDeltaRangeM)
++        writer.append_double(self.accumulatedDeltaRangeUncertaintyM)
++        writer.append_int64(self.carrierCycles)
++        writer.append_double(self.carrierPhase)
++        writer.append_double(self.carrierPhaseUncertainty)
++        writer.append_int32(self.multipathIndicator)
++        writer.append_double(self.snrDb)
++        writer.append_double(self.agcLevelDb)
++        writer.append_double(self.fullInterSignalBiasNs)
++        writer.append_double(self.fullInterSignalBiasUncertaintyNs)
++        writer.append_double(self.satelliteInterSignalBiasNs)
++        writer.append_double(self.satelliteInterSignalBiasUncertaintyNs)
++        self.satellitePvt.write_to_parcel(writer)
++        writer.append_int32(len(self.correlationVectors))
++        for cv in self.correlationVectors:
++            cv.write_to_parcel(writer)
++
++        size = writer.bytes_written() - size_pos
++        writer.overwrite_int32(size_pos, size)
++
++
++class GnssAgc:
++    """
++    android.hardware.gnss.GnssData.GnssAgc
++    """
++    def __init__(self):
++        self.agcLevelDb = 0.0
++        self.constellation = 0 # GnssConstellationType
++        self.carrierFrequencyHz = 0
++
++    def write_to_parcel(self, writer):
++        """Write as AIDL parcelable: non-null marker + size + fields."""
++        writer.append_int32(1)  # Non-null marker
++        size_pos = writer.bytes_written()
++        writer.append_int32(0)  # Placeholder for size
++
++        writer.append_double(self.agcLevelDb)
++        writer.append_int32(self.constellation)
++        writer.append_int64(self.carrierFrequencyHz)
++
++        size = writer.bytes_written() - size_pos
++        writer.overwrite_int32(size_pos, size)
++
++
++class GnssData:
++    """
++    android.hardware.gnss.GnssData
++    """
++    def __init__(self):
++        self.measurements = [] # List[GnssMeasurement]
++        self.clock = GnssClock()
++        self.elapsedRealtime = ElapsedRealtime()
++        self.gnssAgcs = [] # List[GnssAgc]
++
++    def write_to_parcel(self, writer):
++        """Write as AIDL parcelable: non-null marker + size + fields."""
++        writer.append_int32(1)  # Non-null marker
++        size_pos = writer.bytes_written()
++        writer.append_int32(0)  # Placeholder for size
++
++        writer.append_int32(len(self.measurements))
++        for m in self.measurements:
++            m.write_to_parcel(writer)
++        self.clock.write_to_parcel(writer)
++        self.elapsedRealtime.write_to_parcel(writer)
++        writer.append_int32(len(self.gnssAgcs))
++        for agc in self.gnssAgcs:
++            agc.write_to_parcel(writer)
++
++        size = writer.bytes_written() - size_pos
++        writer.overwrite_int32(size_pos, size)
+diff --git a/tools/services/__init__.py b/tools/services/__init__.py
+index 57d1032d..d982a007 100644
+--- a/tools/services/__init__.py
++++ b/tools/services/__init__.py
+@@ -4,3 +4,4 @@
+ from tools.services.clipboard_manager import start, stop
+ from tools.services.hardware_manager import start, stop
+ from tools.services.notification_manager import start, stop
++from tools.services.gnss import start, stop
+diff --git a/tools/services/gnss/__init__.py b/tools/services/gnss/__init__.py
+new file mode 100644
+index 00000000..fb030782
+--- /dev/null
++++ b/tools/services/gnss/__init__.py
+@@ -0,0 +1,3 @@
++from .gnss_manager import start, stop
++
++__all__ = ['start', 'stop']
+diff --git a/tools/services/gnss/gnss_configuration.py b/tools/services/gnss/gnss_configuration.py
+new file mode 100644
+index 00000000..709956d6
+--- /dev/null
++++ b/tools/services/gnss/gnss_configuration.py
+@@ -0,0 +1,57 @@
++import logging
++from tools.interfaces.gnss.IGnssConfiguration import IGnssConfiguration
++
++
++class GnssConfiguration(IGnssConfiguration):
++
++    def __init__(self):
++        super().__init__()
++        self.supl_version = 0
++        self.supl_mode = 0
++        self.lpp_profile = 0
++        self.glonass_protocol = 0
++        self.emergency_supl_pdn = False
++        self.es_extension_sec = 0
++        self.blocklist = []
++
++    def set_supl_version(self, version):
++        """Handle setSuplVersion request."""
++        self.supl_version = version
++        logging.debug(f"GnssConfiguration: SUPL version set to {version}")
++        return True
++
++    def set_supl_mode(self, mode):
++        """Handle setSuplMode request."""
++        self.supl_mode = mode
++        logging.debug(f"GnssConfiguration: SUPL mode set to {mode}")
++        return True
++
++    def set_lpp_profile(self, profile):
++        """Handle setLppProfile request."""
++        self.lpp_profile = profile
++        logging.debug(f"GnssConfiguration: LPP profile set to {profile}")
++        return True
++
++    def set_glonass_positioning_protocol(self, protocol):
++        """Handle setGlonassPositioningProtocol request."""
++        self.glonass_protocol = protocol
++        logging.debug(f"GnssConfiguration: GLONASS protocol set to {protocol}")
++        return True
++
++    def set_emergency_supl_pdn(self, enable):
++        """Handle setEmergencySuplPdn request."""
++        self.emergency_supl_pdn = enable
++        logging.debug(f"GnssConfiguration: Emergency SUPL PDN set to {enable}")
++        return True
++
++    def set_es_extension_sec(self, seconds):
++        """Handle setEsExtensionSec request."""
++        self.es_extension_sec = seconds
++        logging.debug(f"GnssConfiguration: ES extension set to {seconds}s")
++        return True
++
++    def set_blocklist(self, blocklist):
++        """Handle setBlocklist request."""
++        self.blocklist = blocklist
++        logging.debug(f"GnssConfiguration: Blocklist set (size={len(blocklist)})")
++        return True
+diff --git a/tools/services/gnss/gnss_manager.py b/tools/services/gnss/gnss_manager.py
+new file mode 100644
+index 00000000..4ce8f985
+--- /dev/null
++++ b/tools/services/gnss/gnss_manager.py
+@@ -0,0 +1,323 @@
++"""
++GNSS HAL service for waydroid.
++
++Provides android.hardware.gnss AIDL HAL to Android by:
++1. Extending IGnss with provider integration (Gnss class)
++2. Managing service lifecycle (start/stop functions)
++"""
++
++import gbinder
++import logging
++import threading
++from gi.repository import GLib
++from tools import helpers
++from tools.interfaces.gnss import IGnss
++from tools.interfaces.gnss.IGnssCallback import (
++    CAPABILITY_SCHEDULING,
++    CAPABILITY_SINGLE_SHOT,
++    CAPABILITY_ON_DEMAND_TIME,
++    CAPABILITY_MEASUREMENTS,
++)
++import tools.config
++from tools.services.gnss.providers import DummyLocationProvider, LomiriLocationProvider
++
++
++class Gnss(IGnss):
++    """
++    GNSS HAL implementation for IGnss interface.
++
++    Extends IGnss (binder interface) with provider integration.
++    """
++
++    def __init__(self, provider=None):
++        super().__init__()
++        self.provider = provider
++        self._location_started = False
++        self._nmea_started = False
++
++    def _create_extension_interfaces(self):
++        """Create extension interface objects (service implementations)."""
++        from tools.services.gnss.gnss_configuration import GnssConfiguration
++        from tools.services.gnss.gnss_measurement import GnssMeasurementInterface
++        from tools.services.gnss.gnss_power_indication import GnssPowerIndication
++        from tools.services.gnss.gnss_psds import GnssPsds
++
++        # Create service implementations
++        self.gnss_configuration = GnssConfiguration()
++        self.gnss_measurement = GnssMeasurementInterface()
++        self.gnss_power_indication = GnssPowerIndication()
++        self.gnss_psds = GnssPsds()
++
++        # Create binder objects from these implementations
++        self.gnss_configuration_local = self.gnss_configuration.create_local_object(self.service_manager)
++        self.gnss_measurement_local = self.gnss_measurement.create_local_object(self.service_manager)
++        self.gnss_power_indication_local = self.gnss_power_indication.create_local_object(self.service_manager)
++        self.gnss_psds_local = self.gnss_psds.create_local_object(self.service_manager)
++
++        logging.debug("Gnss: Created extension services")
++
++    def get_capabilities(self):
++        """Override to report capabilities based on provider."""
++        caps = CAPABILITY_SCHEDULING | CAPABILITY_SINGLE_SHOT | CAPABILITY_ON_DEMAND_TIME
++        if self.provider:
++            caps |= CAPABILITY_MEASUREMENTS
++        return caps
++
++    def on_callback_set(self):
++        """Called when Android sets the callback."""
++        logging.debug("Gnss: Callback set")
++        self._report_capabilities()
++
++    def on_start(self):
++        """Called when Android requests GNSS start."""
++        logging.debug("Gnss: start requested")
++        if self.provider and not self._location_started:
++            self._start_provider()
++
++    def on_stop(self):
++        """Called when Android requests GNSS stop."""
++        logging.debug("Gnss: stop requested")
++        if self.provider and self._location_started:
++            self.provider.stop()
++            self._location_started = False
++
++    def _start_provider(self):
++        """Start the location provider."""
++        if not self.provider:
++            return
++
++        def on_location(location):
++            # Send location via IGnssCallback.gnssLocationCb
++            self._send_location(location)
++
++        def on_satellites(sv_list):
++            # Send satellite visibility via gnssSvStatusCb
++            self._send_satellites(sv_list)
++
++        def on_nmea(timestamp, nmea):
++            # TODO: NMEA can be forwarded to gnssNmeaCb
++            pass
++
++        success = self.provider.start(on_location, on_nmea, on_satellites)
++        if success:
++            self._location_started = True
++            logging.debug("Gnss: Provider started")
++        else:
++            logging.warning("Gnss: Failed to start provider")
++
++    def _send_satellites(self, sv_list):
++        """Convert provider satellite list to GnssSvInfo[] and send via callback."""
++        from tools.interfaces.gnss.structs import GnssSvInfo, GnssConstellationType, GnssSvFlags
++
++        constellation_map = {
++            'unknown': GnssConstellationType.UNKNOWN,
++            'gps': GnssConstellationType.GPS,
++            'glonass': GnssConstellationType.GLONASS,
++            'galileo': GnssConstellationType.GALILEO,
++            'beidou': GnssConstellationType.BEIDOU,
++            'qzss': GnssConstellationType.QZSS,
++            'irnss': GnssConstellationType.IRNSS,
++            'sbas': GnssConstellationType.SBAS,
++        }
++
++        gnss_sv_list = []
++
++        for sv in sv_list:
++            info = GnssSvInfo()
++            info.svid = sv.get('svid', 0)
++            info.constellation = constellation_map.get(sv.get('constellation', 'unknown'), GnssConstellationType.UNKNOWN)
++            info.cN0Dbhz = sv.get('snr', 0.0)
++            info.basebandCN0DbHz = info.cN0Dbhz
++            info.azimuthDegrees = sv.get('azimuth', 0.0)
++            info.elevationDegrees = sv.get('elevation', 0.0)
++
++            # Set flags
++            flags = GnssSvFlags.NONE
++            if sv.get('has_ephemeris', False):
++                flags |= GnssSvFlags.HAS_EPHEMERIS_DATA
++            if sv.get('has_almanac', False):
++                flags |= GnssSvFlags.HAS_ALMANAC_DATA
++            if sv.get('used_in_fix', False):
++                flags |= GnssSvFlags.USED_IN_FIX
++            info.svFlag = flags
++
++            gnss_sv_list.append(info)
++
++        if gnss_sv_list:
++            self.send_sv_status(gnss_sv_list)
++
++    def _send_location(self, location):
++        """Convert provider location dict to GnssLocation and send via callback."""
++        import time
++        from tools.interfaces.gnss.structs import GnssLocation, ElapsedRealtime
++
++        gnss_loc = GnssLocation()
++
++        # Set flags based on available data
++        flags = 0
++
++        lat = location.get('latitude')
++        lon = location.get('longitude')
++        if lat is not None and lon is not None:
++            gnss_loc.latitudeDegrees = float(lat)
++            gnss_loc.longitudeDegrees = float(lon)
++            flags |= GnssLocation.HAS_LAT_LONG
++
++        alt = location.get('altitude')
++        if alt is not None:
++            gnss_loc.altitudeMeters = float(alt)
++            flags |= GnssLocation.HAS_ALTITUDE
++
++        speed = location.get('speed')
++        if speed is not None:
++            gnss_loc.speedMetersPerSec = float(speed)
++            flags |= GnssLocation.HAS_SPEED
++
++        bearing = location.get('bearing')
++        if bearing is not None:
++            gnss_loc.bearingDegrees = float(bearing)
++            flags |= GnssLocation.HAS_BEARING
++
++        accuracy = location.get('accuracy')
++        if accuracy is not None:
++            gnss_loc.horizontalAccuracyMeters = float(accuracy)
++            flags |= GnssLocation.HAS_HORIZONTAL_ACCURACY
++
++        gnss_loc.gnssLocationFlags = flags
++
++        # Timestamp
++        ts = location.get('timestamp', 0)
++        if ts > 0:
++            gnss_loc.timestampMillis = int(ts)
++        else:
++            gnss_loc.timestampMillis = int(time.time() * 1000)
++
++        # ElapsedRealtime
++        gnss_loc.elapsedRealtime.flags = ElapsedRealtime.HAS_TIMESTAMP_NS
++        gnss_loc.elapsedRealtime.timestampNs = time.monotonic_ns()
++
++        logging.debug(f"Gnss: Sending location: lat={gnss_loc.latitudeDegrees}, lon={gnss_loc.longitudeDegrees}, flags={gnss_loc.gnssLocationFlags:#x}")
++
++        # Send via callback
++        result = self.send_location(gnss_loc)
++
++    def on_close(self):
++        """Called when Android closes the HAL."""
++        logging.debug("Gnss: Closing")
++        if self.provider and self._location_started:
++            self.provider.stop()
++            self._location_started = False
++        self._nmea_started = False
++
++
++# Service lifecycle management
++_stopping = False
++_gnss_instance = None
++
++
++def start(args):
++    global _stopping, _gnss_instance
++
++    # Set up D-Bus main loop for providers that need it (e.g., LomiriLocationProvider)
++    from dbus.mainloop.glib import DBusGMainLoop
++    DBusGMainLoop(set_as_default=True)
++
++    def service_thread():
++        global _gnss_instance
++
++        # Load config once
++        cfg = tools.config.load(args)
++
++        # Select provider
++        provider = _create_provider(cfg)
++
++        # Create GNSS Service
++        _gnss_instance = Gnss(provider=provider)
++
++        # Register on binder
++        helpers.drivers.loadBinderNodes(args)
++        binder_device = "/dev/" + args.BINDER_DRIVER
++
++        # Get protocol settings
++        sm_protocol = getattr(args, 'SERVICE_MANAGER_PROTOCOL', None)
++        binder_protocol = getattr(args, 'BINDER_PROTOCOL', None)
++
++        # Create service manager
++        try:
++            if sm_protocol and binder_protocol:
++                service_manager = gbinder.ServiceManager(binder_device, sm_protocol, binder_protocol)
++            elif sm_protocol:
++                service_manager = gbinder.ServiceManager(binder_device, sm_protocol)
++            else:
++                service_manager = gbinder.ServiceManager(binder_device)
++        except TypeError:
++            service_manager = gbinder.ServiceManager(binder_device)
++
++        def binder_presence():
++            """Called when service manager presence changes."""
++            if _stopping:
++                return
++
++            if service_manager.is_present():
++                success = _gnss_instance.add_service(binder_device, sm_protocol)
++                if success:
++                    logging.debug("Gnss: Running on %s", binder_device)
++                else:
++                    logging.error("Gnss: Failed to register service")
++                    args.gnss_loop.quit()
++
++        # Check if already present, and register presence handler
++        binder_presence()
++        presence_id = service_manager.add_presence_handler(binder_presence)
++
++        if presence_id:
++            args.gnss_loop = GLib.MainLoop()
++            try:
++                args.gnss_loop.run()
++            except KeyboardInterrupt:
++                pass
++            service_manager.remove_handler(presence_id)
++        else:
++            logging.error("Gnss: Failed to add presence handler")
++
++    _stopping = False
++    args.gnss_manager = threading.Thread(target=service_thread, daemon=True)
++    args.gnss_manager.start()
++    logging.debug("Gnss: Thread started")
++
++
++def stop(args):
++    global _stopping, _gnss_instance
++
++    _stopping = True
++
++    try:
++        if hasattr(args, 'gnss_loop') and args.gnss_loop:
++            args.gnss_loop.quit()
++            logging.debug("Gnss: Stopped")
++    except AttributeError:
++        logging.debug("Gnss: Was not running")
++
++    _gnss_instance = None
++
++
++def _create_provider(cfg):
++    provider_type = cfg["waydroid"].get("gnss_provider", "auto")
++
++    if provider_type == "lomiri":
++        provider = LomiriLocationProvider(cfg)
++        logging.info("Gnss: Using Lomiri location provider")
++        return provider
++
++    if provider_type == "dummy":
++        logging.info("Gnss: Using dummy location provider")
++        return DummyLocationProvider(cfg)
++
++    if provider_type == "auto":
++        if LomiriLocationProvider.is_available():
++            provider = LomiriLocationProvider(cfg)
++            logging.info("Gnss: Using Lomiri location provider (auto)")
++            return provider
++
++    # provider_type == "none"
++    return None
+diff --git a/tools/services/gnss/gnss_measurement.py b/tools/services/gnss/gnss_measurement.py
+new file mode 100644
+index 00000000..edd0e4ce
+--- /dev/null
++++ b/tools/services/gnss/gnss_measurement.py
+@@ -0,0 +1,22 @@
++import logging
++import time
++from tools.interfaces.gnss.IGnssMeasurementInterface import IGnssMeasurementInterface
++from tools.interfaces.gnss.structs import GnssData, GnssClock, ElapsedRealtime
++
++
++class GnssMeasurementInterface(IGnssMeasurementInterface):
++
++    def __init__(self):
++        super().__init__()
++        self.callback = None
++
++    def on_callback_set(self, full_tracking, corr_vec_outputs):
++        """Hook called when callback is set."""
++        logging.debug("GnssMeasurementInterface: Callback set "
++                      f"(full_tracking={full_tracking}, "
++                      f"corr_vec_outputs={corr_vec_outputs})")
++        # FIXME: need a way to get the necessary data from the provider
++
++    def on_close(self):
++        """Hook called when interface is closed."""
++        logging.debug("GnssMeasurementInterface: Closed")
+diff --git a/tools/services/gnss/gnss_power_indication.py b/tools/services/gnss/gnss_power_indication.py
+new file mode 100644
+index 00000000..8252ceac
+--- /dev/null
++++ b/tools/services/gnss/gnss_power_indication.py
+@@ -0,0 +1,17 @@
++import logging
++from tools.interfaces.gnss.IGnssPowerIndication import IGnssPowerIndication
++
++
++class GnssPowerIndication(IGnssPowerIndication):
++
++    def __init__(self):
++        super().__init__()
++
++    def on_callback_set(self):
++        """Hook called when callback is set."""
++        logging.debug("GnssPowerIndication: Callback set")
++        self._report_capabilities()
++
++    def request_power_stats(self):
++        """Hook called when power stats are requested."""
++        logging.debug("GnssPowerIndication: Power stats requested (not implemented)")
+diff --git a/tools/services/gnss/gnss_psds.py b/tools/services/gnss/gnss_psds.py
+new file mode 100644
+index 00000000..9822dfc9
+--- /dev/null
++++ b/tools/services/gnss/gnss_psds.py
+@@ -0,0 +1,17 @@
++import logging
++from tools.interfaces.gnss.IGnssPsds import IGnssPsds
++
++
++class GnssPsds(IGnssPsds):
++
++    def __init__(self):
++        super().__init__()
++
++    def on_inject_psds_data(self, psds_type, data):
++        """Hook called when PSDS data is injected."""
++        logging.debug(f"GnssPsds: Injected data type={psds_type}, size={len(data) if data else 0}")
++        return True
++
++    def on_callback_set(self):
++        """Hook called when callback is set."""
++        logging.debug("GnssPsds: Callback set")
+diff --git a/tools/services/gnss/providers/__init__.py b/tools/services/gnss/providers/__init__.py
+new file mode 100644
+index 00000000..d9bd2d4c
+--- /dev/null
++++ b/tools/services/gnss/providers/__init__.py
+@@ -0,0 +1,5 @@
++from .base import LocationProvider
++from .dummy import DummyLocationProvider
++from .lomiri import LomiriLocationProvider
++
++__all__ = ['LocationProvider', 'DummyLocationProvider', 'LomiriLocationProvider']
+diff --git a/tools/services/gnss/providers/base.py b/tools/services/gnss/providers/base.py
+new file mode 100644
+index 00000000..091476ea
+--- /dev/null
++++ b/tools/services/gnss/providers/base.py
+@@ -0,0 +1,60 @@
++"""
++Abstract base class for location providers.
++
++Location providers are pluggable backends that supply location data
++to the GNSS HAL skeleton.
++"""
++
++from abc import ABC, abstractmethod
++from typing import Callable, Optional, Dict, Any
++
++
++class LocationProvider(ABC):
++    """
++    Abstract base class for location providers.
++
++    Subclasses must implement start() and stop() methods.
++    """
++
++    def __init__(self, config=None):
++        self.config = config
++
++    @abstractmethod
++    def start(self,
++              on_location: Callable[[Dict[str, Any]], None],
++              on_nmea: Optional[Callable[[int, str], None]] = None,
++              on_satellites: Optional[Callable[[list], None]] = None) -> bool:
++        """
++        Start providing location updates.
++
++        Args:
++            on_location: Callback for location updates. Called with dict containing:
++                - latitude: float (degrees)
++                - longitude: float (degrees)
++                - altitude: float (meters, optional)
++                - accuracy: float (meters, optional)
++                - speed: float (m/s, optional)
++                - bearing: float (degrees, optional)
++                - timestamp: int (milliseconds since epoch)
++            on_nmea: Optional callback for NMEA sentences.
++                Called with (timestamp_ms, nmea_sentence).
++            on_satellites: Optional callback for satellite visibility updates.
++                Called with list of dicts, each containing:
++                - svid: int
++                - constellation: str ('gps', 'glonass', 'galileo', 'beidou', etc.)
++                - snr: float
++                - azimuth: float (degrees)
++                - elevation: float (degrees)
++                - has_almanac: bool
++                - has_ephemeris: bool
++                - used_in_fix: bool
++
++        Returns:
++            True if started successfully, False otherwise.
++        """
++        pass
++
++    @abstractmethod
++    def stop(self) -> None:
++        """Stop providing location updates."""
++        pass
+diff --git a/tools/services/gnss/providers/dummy.py b/tools/services/gnss/providers/dummy.py
+new file mode 100644
+index 00000000..4a985521
+--- /dev/null
++++ b/tools/services/gnss/providers/dummy.py
+@@ -0,0 +1,199 @@
++"""
++Dummy location provider for testing.
++
++Emits a fixed location periodically for testing the GNSS HAL.
++"""
++
++import logging
++import random
++import time
++from typing import Callable, Optional, Dict, Any
++from gi.repository import GLib
++
++from .base import LocationProvider
++
++
++class DummyLocationProvider(LocationProvider):
++    """
++    Dummy provider that emits fixed test locations.
++
++    Useful for testing the HAL without a real GPS source.
++    """
++
++    # Test location: Helsinki, Finland
++    DEFAULT_LATITUDE = 60.1699
++    DEFAULT_LONGITUDE = 24.9384
++    DEFAULT_ALTITUDE = 26.0
++    DEFAULT_ACCURACY = 20.0
++
++    def __init__(self, config=None, interval_seconds: int = 2):
++        """
++        Initialize the dummy provider.
++
++        Args:
++            config: Waydroid config object
++            interval_seconds: Interval between location updates.
++        """
++        super().__init__(config)
++        self.interval_seconds = interval_seconds
++        self.timer_id = None
++        self.on_location = None
++        self.on_nmea = None
++        self.on_satellites = None
++        self.update_count = 0
++        self.satellites = []
++
++        # Load coordinates from config
++        self.latitude = self.DEFAULT_LATITUDE
++        self.longitude = self.DEFAULT_LONGITUDE
++        if self.config:
++            try:
++                self.latitude = float(self.config["waydroid"].get("gnss_latitude", self.DEFAULT_LATITUDE))
++                self.longitude = float(self.config["waydroid"].get("gnss_longitude", self.DEFAULT_LONGITUDE))
++            except Exception as e:
++                logging.warning(f"DummyLocationProvider: Failed to load location from config: {e}")
++
++        logging.info(f"DummyLocationProvider: Using location: {self.latitude}, {self.longitude}")
++
++    def start(self,
++              on_location: Callable[[Dict[str, Any]], None],
++              on_nmea: Optional[Callable[[int, str], None]] = None,
++              on_satellites: Optional[Callable[[list], None]] = None) -> bool:
++        """Start emitting test location."""
++        logging.debug(f"DummyLocationProvider: Starting (interval={self.interval_seconds}s)")
++
++        self.on_location = on_location
++        self.on_nmea = on_nmea
++        self.on_satellites = on_satellites  # Not used in dummy provider
++        self.update_count = 0
++
++        # Start periodic timer
++        self.timer_id = GLib.timeout_add_seconds(
++            self.interval_seconds,
++            self._emit_location
++        )
++
++        # Initialize satellites with some random state
++        self._init_satellites()
++
++        # Emit first location immediately
++        self._emit_location()
++
++        return True
++
++    def stop(self) -> None:
++        """Stop emitting locations."""
++        logging.debug("DummyLocationProvider: Stopping")
++
++        if self.timer_id:
++            GLib.source_remove(self.timer_id)
++            self.timer_id = None
++
++        self.on_location = None
++        self.on_nmea = None
++        self.on_satellites = None
++
++    def _emit_location(self) -> bool:
++        """Emit a test location update."""
++        if not self.on_location:
++            return False
++
++        self.update_count += 1
++        timestamp = GLib.get_real_time() // 1000  # microseconds to milliseconds
++
++        # Add slight variation to make it look more real
++        lat_offset = (self.update_count % 10) * 0.0001
++        lon_offset = (self.update_count % 7) * 0.0001
++
++        location = {
++            'latitude': self.latitude + lat_offset,
++            'longitude': self.longitude + lon_offset,
++            'altitude': self.DEFAULT_ALTITUDE,
++            'accuracy': self.DEFAULT_ACCURACY,
++            'speed': 0.0,
++            'bearing': 0.0,
++            'timestamp': timestamp
++        }
++
++        logging.debug(f"DummyLocationProvider: Emitting location #{self.update_count}")
++
++        try:
++            self.on_location(location)
++        except Exception as e:
++            logging.error(f"DummyLocationProvider: Error in location callback: {e}")
++
++        # Emit NMEA
++        if self.on_nmea:
++            self._emit_nmea(timestamp, location)
++
++        # Emit satellites
++        if self.on_satellites:
++            self._emit_satellites()
++
++        return True  # Continue timer
++
++    def _init_satellites(self):
++        """Initialize a random set of satellites."""
++        self.satellites = []
++        constellations = ['gps', 'glonass', 'galileo', 'beidou']
++
++        # Pick 12-30 satellites
++        count = random.randint(12, 30)
++        for i in range(count):
++            const = random.choice(constellations)
++            # svid ranges (simplified)
++            if const == 'gps': svid = random.randint(1, 32)
++            elif const == 'glonass': svid = random.randint(65, 96)
++            elif const == 'galileo': svid = random.randint(301, 336)
++            else: svid = random.randint(201, 237) # beidou
++
++            self.satellites.append({
++                'svid': svid,
++                'constellation': const,
++                'snr': random.uniform(20.0, 40.0),
++                'azimuth': random.uniform(0.0, 360.0),
++                'elevation': random.uniform(10.0, 80.0),
++                'has_almanac': True,
++                'has_ephemeris': True,
++                'used_in_fix': random.choice([True, True, False]) # Mostly used in fix
++            })
++
++    def _emit_satellites(self):
++        """Emit updated satellite status."""
++        if not self.on_satellites:
++            return
++
++        # Update satellite data slightly to make it look active
++        for sv in self.satellites:
++            sv['snr'] += random.uniform(-0.5, 0.5)
++            sv['snr'] = max(10, min(50, sv['snr']))
++            sv['azimuth'] = (sv['azimuth'] + random.uniform(-0.1, 0.1)) % 360
++            sv['elevation'] += random.uniform(-0.05, 0.05)
++            sv['elevation'] = max(5, min(90, sv['elevation']))
++
++        try:
++            self.on_satellites(self.satellites)
++        except Exception as e:
++            logging.error(f"DummyLocationProvider: Error in satellite callback: {e}")
++
++    def _emit_nmea(self, timestamp: int, location: Dict[str, Any]) -> None:
++        """Emit a test NMEA sentence."""
++        # Generate a simple GGA sentence
++        lat = location['latitude']
++        lon = location['longitude']
++
++        lat_deg = int(abs(lat))
++        lat_min = (abs(lat) - lat_deg) * 60
++        lat_dir = 'N' if lat >= 0 else 'S'
++
++        lon_deg = int(abs(lon))
++        lon_min = (abs(lon) - lon_deg) * 60
++        lon_dir = 'E' if lon >= 0 else 'W'
++
++        # Simple GGA sentence (not checksum validated)
++        nmea = f"$GPGGA,120000.00,{lat_deg:02d}{lat_min:07.4f},{lat_dir},{lon_deg:03d}{lon_min:07.4f},{lon_dir},1,08,1.0,{location['altitude']:.1f},M,0.0,M,,*00"
++
++        try:
++            self.on_nmea(timestamp, nmea)
++        except Exception as e:
++            logging.error(f"DummyLocationProvider: Error in NMEA callback: {e}")
+diff --git a/tools/services/gnss/providers/lomiri.py b/tools/services/gnss/providers/lomiri.py
+new file mode 100644
+index 00000000..1bf77e93
+--- /dev/null
++++ b/tools/services/gnss/providers/lomiri.py
+@@ -0,0 +1,385 @@
++"""
++Lomiri location service D-Bus provider.
++
++Connects to lomiri-location-service via D-Bus to get location updates.
++
++The lomiri-location-service uses a bidirectional D-Bus pattern:
++1. Client creates a session via CreateSessionForCriteria()
++2. Client exports a D-Bus object that implements UpdatePosition/UpdateHeading/UpdateVelocity methods
++3. Server calls these methods on the client when location changes
++"""
++
++import logging
++from typing import Callable, Optional, Dict, Any
++
++import dbus
++import dbus.service
++
++from .base import LocationProvider
++
++
++class SessionCallback(dbus.service.Object):
++    """
++    D-Bus object that receives location updates from lomiri-location-service.
++
++    The server calls UpdatePosition/UpdateHeading/UpdateVelocity methods on this object.
++
++    Update<Position> D-Bus format (variable length due to Optional):
++    - double latitude (radians)
++    - double longitude (radians)
++    - bool has_altitude, [double altitude if true]
++    - bool has_h_accuracy, [double h_accuracy if true]
++    - bool has_v_accuracy, [double v_accuracy if true]
++    - int64 timestamp (nanoseconds since epoch)
++    """
++
++    SESSION_IFACE = "com.lomiri.location.Service.Session"
++
++    def __init__(self, bus, path, provider):
++        self._provider = provider
++        # Use low-level message handling to accept variable signatures
++        self._connection = bus.get_connection()
++        bus.add_message_filter(self._message_filter)
++        self._path = path
++        self._bus = bus
++        dbus.service.Object.__init__(self, bus, path)
++        logging.debug(f"SessionCallback: Registered at {path}")
++
++    def _message_filter(self, connection, message):
++        """Filter D-Bus messages to handle UpdatePosition with variable signature."""
++        if message.get_type() != 1:  # METHOD_CALL = 1
++            return dbus.lowlevel.HANDLER_RESULT_NOT_YET_HANDLED
++
++        if message.get_path() != self._path:
++            return dbus.lowlevel.HANDLER_RESULT_NOT_YET_HANDLED
++
++        member = message.get_member()
++        if member == "UpdatePosition":
++            self._handle_update_position(message)
++            return dbus.lowlevel.HANDLER_RESULT_HANDLED
++        elif member == "UpdateHeading":
++            self._handle_update_heading(message)
++            return dbus.lowlevel.HANDLER_RESULT_HANDLED
++        elif member == "UpdateVelocity":
++            self._handle_update_velocity(message)
++            return dbus.lowlevel.HANDLER_RESULT_HANDLED
++
++        return dbus.lowlevel.HANDLER_RESULT_NOT_YET_HANDLED
++
++    def _handle_update_position(self, message):
++        """Handle UpdatePosition with variable D-Bus signature."""
++        try:
++            args = message.get_args_list()
++            logging.info(f"SessionCallback: UpdatePosition raw args ({len(args)}): {args}")
++
++            if len(args) < 2:
++                logging.warning("SessionCallback: Not enough arguments for UpdatePosition")
++                return
++
++            # Parse variable-length Optional fields
++            idx = 0
++            lat = float(args[idx]); idx += 1
++            lon = float(args[idx]); idx += 1
++
++            # Optional altitude
++            has_alt = bool(args[idx]); idx += 1
++            alt = None
++            if has_alt:
++                alt = float(args[idx]); idx += 1
++
++            # Optional horizontal accuracy
++            has_h_acc = bool(args[idx]); idx += 1
++            h_acc = None
++            if has_h_acc:
++                h_acc = float(args[idx]); idx += 1
++
++            # Optional vertical accuracy
++            has_v_acc = bool(args[idx]); idx += 1
++            v_acc = None
++            if has_v_acc:
++                v_acc = float(args[idx]); idx += 1
++
++            # Timestamp
++            timestamp = int(args[idx]) if idx < len(args) else 0
++            timestamp = timestamp // 1000000  # Convert nanoseconds to milliseconds
++
++            # Coordinates are already in degrees (not radians as expected)
++            location = {
++                'latitude': lat,
++                'longitude': lon,
++                'timestamp': timestamp,
++            }
++            if alt is not None:
++                location['altitude'] = alt
++            if h_acc is not None:
++                location['accuracy'] = h_acc
++
++            logging.info(f"SessionCallback: Parsed position: lat={location['latitude']:.6f}, lon={location['longitude']:.6f}")
++            self._provider._handle_position_update(location)
++
++            # Send reply
++            reply = dbus.lowlevel.MethodReturnMessage(message)
++            self._bus.get_connection().send_message(reply)
++
++        except Exception as e:
++            logging.error(f"SessionCallback: Error parsing UpdatePosition: {e}")
++            import traceback
++            traceback.print_exc()
++
++    def _handle_update_heading(self, message):
++        """Handle UpdateHeading."""
++        try:
++            args = message.get_args_list()
++            logging.debug(f"SessionCallback: UpdateHeading args: {args}")
++            reply = dbus.lowlevel.MethodReturnMessage(message)
++            self._bus.get_connection().send_message(reply)
++        except Exception as e:
++            logging.error(f"SessionCallback: Error in UpdateHeading: {e}")
++
++    def _handle_update_velocity(self, message):
++        """Handle UpdateVelocity."""
++        try:
++            args = message.get_args_list()
++            logging.debug(f"SessionCallback: UpdateVelocity args: {args}")
++            reply = dbus.lowlevel.MethodReturnMessage(message)
++            self._bus.get_connection().send_message(reply)
++        except Exception as e:
++            logging.error(f"SessionCallback: Error in UpdateVelocity: {e}")
++
++
++class LomiriLocationProvider(LocationProvider):
++    """
++    Location provider using lomiri-location-service D-Bus interface.
++
++    Connects to com.lomiri.location.Service and subscribes to location
++    and NMEA updates.
++    """
++
++    SERVICE_NAME = "com.lomiri.location.Service"
++    SERVICE_PATH = "/com/lomiri/location/Service"
++    SERVICE_IFACE = "com.lomiri.location.Service"
++
++    @classmethod
++    def is_available(cls) -> bool:
++        """Check if lomiri-location-service is available on D-Bus."""
++        try:
++            bus = dbus.SystemBus()
++            bus.get_object(cls.SERVICE_NAME, cls.SERVICE_PATH)
++            return True
++        except dbus.DBusException:
++            return False
++
++    def __init__(self, config=None):
++        """Initialize the Lomiri provider."""
++        super().__init__(config)
++        self.bus = None
++        self.proxy = None
++        self.session_path = None
++        self.session_proxy = None
++        self.session_callback = None
++        self.on_location = None
++        self.on_nmea = None
++        self.on_satellites = None
++        self._nmea_signal = None
++        self._sv_signal = None
++
++    def start(self,
++              on_location: Callable[[Dict[str, Any]], None],
++              on_nmea: Optional[Callable[[int, str], None]] = None,
++              on_satellites: Optional[Callable[[list], None]] = None) -> bool:
++        """
++        Start receiving location updates from lomiri-location-service.
++        """
++        logging.info("LomiriProvider: Starting")
++
++        self.on_location = on_location
++        self.on_nmea = on_nmea
++        self.on_satellites = on_satellites
++
++        try:
++            self.bus = dbus.SystemBus()
++
++            self.proxy = self.bus.get_object(
++                self.SERVICE_NAME,
++                self.SERVICE_PATH
++            )
++
++            # Create a session for position updates
++            service_iface = dbus.Interface(self.proxy, self.SERVICE_IFACE)
++
++            # CreateSessionForCriteria expects a Criteria struct
++            self.session_path = service_iface.CreateSessionForCriteria(
++                dbus.Boolean(True),    # requires.position
++                dbus.Boolean(False),   # requires.altitude
++                dbus.Boolean(False),   # requires.heading
++                dbus.Boolean(False),   # requires.velocity
++                dbus.Double(100.0),    # accuracy.horizontal (meters)
++                dbus.Boolean(False),   # accuracy.vertical (empty optional)
++                dbus.Boolean(False),   # accuracy.velocity (empty optional)
++                dbus.Boolean(False),   # accuracy.heading (empty optional)
++            )
++
++            if self.session_path:
++                logging.info(f"LomiriProvider: Created session at {self.session_path}")
++
++                # Export our callback object at the SESSION PATH
++                # The server will call UpdatePosition/UpdateHeading/UpdateVelocity
++                # methods on this object
++                self.session_callback = SessionCallback(self.bus, str(self.session_path), self)
++                logging.info(f"LomiriProvider: Exported callback at {self.session_path}")
++
++                self.session_proxy = self.bus.get_object(
++                    self.SERVICE_NAME,
++                    self.session_path
++                )
++
++                session_iface = dbus.Interface(
++                    self.session_proxy,
++                    "com.lomiri.location.Service.Session"
++                )
++                logging.info("LomiriProvider: Starting position updates...")
++                session_iface.StartPositionUpdates()
++                logging.info("LomiriProvider: Position updates started")
++            else:
++                logging.error("LomiriProvider: Failed to create session (no session path)")
++                return False
++
++            # Subscribe to satellite visibility if callback provided
++            if on_satellites:
++                self._subscribe_satellites()
++
++            logging.info("LomiriProvider: Connected to lomiri-location-service")
++            return True
++
++        except dbus.DBusException as e:
++            logging.error(f"LomiriProvider: D-Bus error: {e}")
++            return False
++        except Exception as e:
++            logging.error(f"LomiriProvider: Failed to start: {e}")
++            import traceback
++            traceback.print_exc()
++            return False
++
++    def _handle_position_update(self, location):
++        """Handle position update from D-Bus callback."""
++        logging.info(f"LomiriProvider: Position update: {location}")
++        if self.on_location:
++            self.on_location(location)
++
++    def stop(self) -> None:
++        """Stop receiving location updates."""
++        logging.info("LomiriProvider: Stopping")
++
++        try:
++            if self.session_proxy:
++                session_iface = dbus.Interface(
++                    self.session_proxy,
++                    "com.lomiri.location.Service.Session"
++                )
++                session_iface.StopPositionUpdates()
++        except Exception as e:
++            logging.warning(f"LomiriProvider: Error stopping session: {e}")
++
++        # Clean up callback object
++        if self.session_callback:
++            try:
++                self.session_callback.remove_from_connection()
++            except:
++                pass
++            self.session_callback = None
++
++        if self._sv_signal:
++            self._sv_signal.remove()
++            self._sv_signal = None
++
++        self.session_proxy = None
++        self.session_path = None
++        self.proxy = None
++        self.bus = None
++        self.on_location = None
++        self.on_satellites = None
++
++    def _subscribe_satellites(self):
++        """Subscribe to VisibleSpaceVehicles property changes via PropertiesChanged signal."""
++        try:
++            logging.info("LomiriProvider: Subscribing to satellite property changes")
++
++            # Subscribe to PropertiesChanged signal
++            self._sv_signal = self.proxy.connect_to_signal(
++                "PropertiesChanged",
++                self._on_properties_changed,
++                dbus_interface="org.freedesktop.DBus.Properties"
++            )
++
++            logging.info("LomiriProvider: Subscribed to PropertiesChanged signal")
++
++        except Exception as e:
++            logging.warning(f"LomiriProvider: Failed to subscribe to satellite updates: {e}")
++            import traceback
++            traceback.print_exc()
++
++    def _on_properties_changed(self, interface, changed, invalidated):
++        """Handle D-Bus properties changed signal."""
++        logging.debug(f"LomiriProvider: PropertiesChanged on {interface}: {list(changed.keys())}")
++
++        if "VisibleSpaceVehicles" in changed:
++            logging.info(f"LomiriProvider: VisibleSpaceVehicles changed, count: {len(changed['VisibleSpaceVehicles'])}")
++            self._on_space_vehicles(changed["VisibleSpaceVehicles"])
++
++    def _on_space_vehicles(self, svs):
++        """Handle space vehicle visibility update."""
++        if not self.on_satellites:
++            return
++
++        try:
++            logging.info(f"LomiriProvider: Received satellite array with {len(svs)} satellites")
++            sv_list = []
++
++            # svs is a D-Bus array of structs from VisibleSpaceVehicles property
++            # array[struct{uint32 type, uint32 id, double snr, bool has_almanac, bool has_ephemeris, bool used_in_fix, double azimuth, double elevation}]
++
++            type_map = {
++                0: 'unknown',
++                1: 'beidou',
++                2: 'galileo',
++                3: 'glonass',
++                4: 'gps',
++                5: 'compass',
++                6: 'irnss',
++                7: 'qzss'
++            }
++
++            for sv_struct in svs:
++                # Each sv_struct is a tuple/list from D-Bus array element
++                if isinstance(sv_struct, (tuple, list)) and len(sv_struct) >= 8:
++                    sv_type = int(sv_struct[0])
++                    sv_id = int(sv_struct[1])
++                    snr = float(sv_struct[2])
++                    has_almanac = bool(sv_struct[3])
++                    has_ephemeris = bool(sv_struct[4])
++                    used_in_fix = bool(sv_struct[5])
++                    azimuth = float(sv_struct[6])
++                    elevation = float(sv_struct[7])
++
++                    sv_info = {
++                        'svid': sv_id,
++                        'constellation': type_map.get(sv_type, 'unknown'),
++                        'snr': snr,
++                        'has_almanac': has_almanac,
++                        'has_ephemeris': has_ephemeris,
++                        'used_in_fix': used_in_fix,
++                        'azimuth': azimuth,
++                        'elevation': elevation,
++                    }
++                    sv_list.append(sv_info)
++                else:
++                    logging.debug(f"LomiriProvider: Unexpected SV struct format: {sv_struct}")
++
++            if sv_list:
++                logging.info(f"LomiriProvider: Parsed {len(sv_list)} satellites, sending to callback")
++                self.on_satellites(sv_list)
++
++        except Exception as e:
++            logging.error(f"LomiriProvider: Error processing satellites: {e}")
++            import traceback
++            traceback.print_exc()

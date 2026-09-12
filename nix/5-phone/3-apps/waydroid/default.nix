@@ -5,7 +5,7 @@
 {
     imports = [
         ./camera.nix
-        ./location.nix
+        ./gnss
         ./remote.nix
         ./session.nix
     ];
