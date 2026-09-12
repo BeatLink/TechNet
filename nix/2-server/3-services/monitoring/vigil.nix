@@ -38,8 +38,16 @@
 #
 # The tree is one group per host, then per domain. Each host holds
 # `Availability`, `System Stats` (Compute, Memory, Storage, Network),
-# `Running Services`, and `Backups` where it owns source data. A group reports
-# the worst case of its children, so a host still collapses to one status.
+# `Running Services`, `Backups` where it owns source data, and `Security`. A
+# group reports the worst case of its children, so a host still collapses to
+# one status.
+#
+# `Security` is one `vuln_scan` per host: a daily `nmap --script vuln` sweep
+# run from another host over WireGuard, the path everything reaches it by. A
+# host scanning itself would go over loopback, which the firewall trusts, and
+# would list every listening socket instead of what a peer can reach. Heimdall
+# scans the others and Ragnarok scans Heimdall. fail2ban ignores the WireGuard
+# subnet, so a sweep never bans its scanner.
 #
 # Under `Running Services` each service is its own group holding its unit check
 # and whatever functional check proves it is actually serving — Mosquitto's
@@ -537,6 +545,22 @@ in
                                             agent = "ragnarok";
                                         }
                                     ];
+                                }
+                            ];
+                        }
+                        {
+                            name = "Security";
+                            id = "ragnarok-security";
+                            type = "group";
+                            children = [
+                                {
+                                    name = "Vulnerability Scan";
+                                    id = "ragnarok-vuln-scan";
+                                    type = "vuln_scan";
+                                    interval = "1d";
+                                    timeout = "30m"; # A full -sV sweep with every vuln script takes a few minutes; this only bounds a host that stops answering mid-scan
+                                    scan_host = "ragnarok.technet";
+                                    agent = "heimdall";
                                 }
                             ];
                         }
@@ -1630,6 +1654,23 @@ in
                                 }
                             ];
                         }
+                        {
+                            name = "Security";
+                            id = "heimdall-security";
+                            type = "group";
+                            children = [
+                                {
+                                    # Ragnarok is the one other always-on host, so it is the vantage point for the server.
+                                    name = "Vulnerability Scan";
+                                    id = "heimdall-vuln-scan";
+                                    type = "vuln_scan";
+                                    interval = "1d";
+                                    timeout = "30m"; # A full -sV sweep with every vuln script takes a few minutes; this only bounds a host that stops answering mid-scan
+                                    scan_host = "heimdall.technet";
+                                    agent = "ragnarok";
+                                }
+                            ];
+                        }
                     ];
                 }
                 {
@@ -2266,6 +2307,22 @@ in
                                 }
                             ];
                         }
+                        {
+                            name = "Security";
+                            id = "odin-security";
+                            type = "group";
+                            children = [
+                                {
+                                    name = "Vulnerability Scan";
+                                    id = "odin-vuln-scan";
+                                    type = "vuln_scan";
+                                    interval = "1d";
+                                    timeout = "30m"; # A full -sV sweep with every vuln script takes a few minutes; this only bounds a host that stops answering mid-scan
+                                    scan_host = "odin.technet";
+                                    agent = "heimdall";
+                                }
+                            ];
+                        }
                     ];
                 }
                 {
@@ -2662,6 +2719,23 @@ in
                                 }
                             ];
                         }
+                        {
+                            name = "Security";
+                            id = "thor-security";
+                            type = "group";
+                            children = [
+                                {
+                                    # Offline whenever the phone is asleep; a day's interval means it catches the next wake.
+                                    name = "Vulnerability Scan";
+                                    id = "thor-vuln-scan";
+                                    type = "vuln_scan";
+                                    interval = "1d";
+                                    timeout = "30m"; # A full -sV sweep with every vuln script takes a few minutes; this only bounds a host that stops answering mid-scan
+                                    scan_host = "thor.technet";
+                                    agent = "heimdall";
+                                }
+                            ];
+                        }
                     ];
                 }
                 {
@@ -2675,6 +2749,23 @@ in
                             id = "thorx";
                             type = "uptime";
                             target_host = "thorx.technet";
+                        }
+                        {
+                            name = "Security";
+                            id = "thorx-security";
+                            type = "group";
+                            children = [
+                                {
+                                    # Nothing runs on the Android phone, so the exposed ports are the whole of what can be checked.
+                                    name = "Vulnerability Scan";
+                                    id = "thorx-vuln-scan";
+                                    type = "vuln_scan";
+                                    interval = "1d";
+                                    timeout = "30m"; # A full -sV sweep with every vuln script takes a few minutes; this only bounds a host that stops answering mid-scan
+                                    scan_host = "thorx.technet";
+                                    agent = "heimdall";
+                                }
+                            ];
                         }
                     ];
                 }

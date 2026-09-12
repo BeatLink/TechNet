@@ -63,6 +63,7 @@ in
             path = [
                 "/run/current-system/sw"
                 pkgs.git # nix shells out to git to fetch git inputs while evaluating the flake
+                pkgs.nmap # The vuln_scan monitors sweep the other hosts from here
             ];
         };
 
