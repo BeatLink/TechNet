@@ -3,7 +3,7 @@
         ./hardware-configuration.nix
         ./root-drive-disko.nix
         ./software.nix
-        ./networking.nix
+        ./network-manager.nix
         ./display.nix
         ./sensors.nix
         ./camera.nix

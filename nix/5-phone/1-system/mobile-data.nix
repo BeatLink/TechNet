@@ -38,6 +38,13 @@
 #
 { config, pkgs, ... }:
 {
+    sops.secrets.networkmanager_env_file.sopsFile = "${config.technet.secrets.path}/networkmanager.yaml";
+
+    # The SIM PIN is the only value still substituted into a profile, so this file is read for it alone.
+    networking.networkmanager.ensureProfiles.environmentFiles = [
+        config.sops.secrets.networkmanager_env_file.path
+    ];
+
     networking.networkmanager.ensureProfiles.profiles."FLOW" = {
         connection = {
             id = "FLOW";
