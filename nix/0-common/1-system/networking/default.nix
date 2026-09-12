@@ -7,5 +7,6 @@
     imports = [
         ./firewall.nix
         ./initrd-wireguard.nix
+        ./network-manager.nix
     ];
 }

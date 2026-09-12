@@ -1,4 +1,10 @@
 # Enable the Firewall
 {
-    networking.firewall.enable = true;
+    # Configures Firewall ############################################################################################################################
+    networking.firewall = {
+        enable = true;
+        allowedUDPPorts = [ 51820 ];
+        trustedInterfaces = [ "wireguard0" ];
+        checkReversePath = false;
+    };
 }
