@@ -66,6 +66,28 @@ desktop.
 - Stale processes survive a rebuild. After changing how a component is launched,
   kill the old one — a rebuild will not do it, and you get two bars.
 
+## Packet Tracer
+
+[`tools/packet-tracer.nix`](../nix/3-laptop/4-apps/tools/packet-tracer.nix)
+installs `cisco-packet-tracer_9` from nixpkgs, but Cisco only serves the
+installer behind a NetAcad login, so nixpkgs cannot fetch it and the build stops
+with `Unfortunately, we cannot download file ...` until the `.deb` is in the
+store. Once, before the first deploy and again after any version bump:
+
+1. Sign in at <https://www.netacad.com/resources/lab-downloads> and download
+   `CiscoPacketTracer_901_Ubuntu_64bit.deb` (the name and hash the package
+   expects are in its nixpkgs `package.nix`).
+2. Add it to the store, then deploy as usual:
+
+```sh
+nix-store --add-fixed sha256 ~/Downloads/CiscoPacketTracer_901_Ubuntu_64bit.deb
+```
+
+The built system does not reference the `.deb`, so a garbage collection can
+drop it again; keep the download under `/Storage` for the next rebuild. The
+command is `packettracer9`; the AppImage forces `xcb`, so it runs under Xwayland
+on Wayland sessions.
+
 ## Tang server
 
 Odin hosts the tang server that unlocks Heimdall, Ragnarok and Thor, configured
