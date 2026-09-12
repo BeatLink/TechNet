@@ -78,7 +78,7 @@
             networking.networkmanager.ensureProfiles.profiles = {
                 "TechNet WireGuard (Split Tunnel)" = {
                     connection = {
-                        id = "TechNet Wireguard";
+                        id = "TechNet Wireguard (Split Tunnel)";
                         type = "wireguard";
                         interface-name = "wireguard0";
                     };
