@@ -1723,8 +1723,8 @@ in
                                             id = "odin-temperature";
                                             type = "temperature";
                                             interval = "1m";
-                                            warning = 70;
-                                            threshold = 80;
+                                            warning = 95;
+                                            threshold = 100;
                                             agent = "odin";
                                         }
                                         {
