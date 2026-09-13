@@ -28,9 +28,6 @@ let
     cacheKey = "pinephone-kernel-1:Bh9JYKdNDBNwefy+ZrjHKjVUR453bPDXRMZ+kO9K33w=";
 in
 {
-    # Push token for the `technet` cache, minted once by hand with `atticd-atticadm` -- see docs/heimdall.md.
-    sops.secrets.attic_push_token.sopsFile = "${config.technet.secrets.path}/attic.yaml";
-
     # The attic client only reads this, so `token-file` keeps the token itself out of the store.
     environment.etc."attic-mirror/attic/config.toml".text = ''
         default-server = "technet"
