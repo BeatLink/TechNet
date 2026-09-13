@@ -1,11 +1,17 @@
 # Minimal recovery/bootstrap image: flashed onto a bare ESP8285 to get it
 # talking on wifi with OTA enabled, before handing it its real device config.
 # Deliberately standalone -- it predates the device even having a name, so it
-# doesn't pull in `1-common.yaml` (HA API key, dual wifi networks, etc).
+# doesn't pull in `common.yaml` (HA API key, dual wifi networks, etc).
 {
     esphome = {
         name = "esphome-ota-update";
         name_add_mac_suffix = true;
+        # Same 2MB layout as the athom profiles, or a full image can never be flashed over this one.
+        platformio_options = {
+            "board_upload.flash_size" = "2MB";
+            "board_upload.maximum_size" = 2097152;
+            "board_build.ldscript" = "eagle.flash.2m.ld";
+        };
     };
     esp8266.board = "esp8285";
     # Networking -------------------------------------------------------------------------------------------------------------------------------------
