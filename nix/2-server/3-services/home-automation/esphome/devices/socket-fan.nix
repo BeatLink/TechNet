@@ -1,11 +1,8 @@
 # Fan wall socket -- Athom smart plug v2.
 #
-# Polled once a second by `ir-fan`, which mirrors this socket's state, so the
-# sensor interval is deliberately tighter than the default.
+# Powers the bedroom ceiling fan; the Home Assistant `bedroom-fan` package
+# switches it as part of setting a speed.
 {
-    substitutions = {
-        name = "socket-fan";
-        sensor_update_interval = "1s";
-    };
+    substitutions.name = "socket-fan";
     packages.common = "!include .base-socket.yaml";
 }
