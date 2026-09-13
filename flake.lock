@@ -344,11 +344,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1788958669,
-        "narHash": "sha256-wL5zd6cuiG7UKzbjD9zXy/bcBX9dhBCxBr4L3muZO/Q=",
+        "lastModified": 1789337748,
+        "narHash": "sha256-FCs7kF9+lEC2UGePFlmZ3ZIoYwePxlPXjCgKA/YJNMQ=",
         "owner": "BeatLink",
         "repo": "Halon",
-        "rev": "f99e2002c93db57d4feb47d942eb9fc3a52311c2",
+        "rev": "d204f14d7fe5254ca81985c8e0d55938ea08af22",
         "type": "github"
       },
       "original": {
@@ -493,6 +493,46 @@
       "original": {
         "owner": "BeatLink",
         "repo": "lnxlink",
+        "type": "github"
+      }
+    },
+    "millennium": {
+      "inputs": {
+        "millennium-src": "millennium-src",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "dir": "packages/nix",
+        "lastModified": 1789326337,
+        "narHash": "sha256-FWRCpoKQ8TywKkcCFleTSZRQhbL12JmbFdisaeIRIJU=",
+        "owner": "SteamClientHomebrew",
+        "repo": "Millennium",
+        "rev": "41f7356df31043e8c1429382dda95445530da987",
+        "type": "github"
+      },
+      "original": {
+        "dir": "packages/nix",
+        "owner": "SteamClientHomebrew",
+        "repo": "Millennium",
+        "type": "github"
+      }
+    },
+    "millennium-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1787082953,
+        "narHash": "sha256-zgr4cdJfye4qunpD3ClNnZ9D1WPGQAXV0CnYwEbB52s=",
+        "owner": "SteamClientHomebrew",
+        "repo": "Millennium",
+        "rev": "513b02e809b0eb120ecf0ae12e548798dd756323",
+        "type": "github"
+      },
+      "original": {
+        "owner": "SteamClientHomebrew",
+        "repo": "Millennium",
+        "rev": "513b02e809b0eb120ecf0ae12e548798dd756323",
         "type": "github"
       }
     },
@@ -768,6 +808,7 @@
         "impermanence": "impermanence",
         "linux-sidebar": "linux-sidebar",
         "lnxlink": "lnxlink",
+        "millennium": "millennium",
         "mobile-nixos": "mobile-nixos",
         "nemo-trilium": "nemo-trilium",
         "nix-index-database": "nix-index-database",

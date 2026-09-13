@@ -3,7 +3,15 @@
 # Steam, GameMode, and the gamescope compositor that games render inside.
 #
 
-{ lib, pkgs, ... }:
+{
+    lib,
+    pkgs,
+    inputs,
+    ...
+}:
+let
+    halonSteamTheme = inputs.halon.packages.${pkgs.stdenv.hostPlatform.system}.halon-steam-theme;
+in
 {
     config = lib.mkMerge [
 
@@ -11,6 +19,7 @@
         {
             programs.steam = {
                 enable = true;
+                package = pkgs.millennium-steam; # Stock Steam plus Millennium's loader, which is what reads the theme below
                 remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
                 dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
                 localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
@@ -53,6 +62,19 @@
         # GameMode ###################################################################################################################################
         {
             programs.gamemode.enable = true;
+        }
+
+        # Millennium #################################################################################################################################
+        # The loader that lets the Steam client wear a CSS theme, and Halon as the theme it wears.
+        {
+            nixpkgs.overlays = [ inputs.millennium.overlays.default ];
+
+            # Millennium reads themes from inside steamui, a directory the Steam client replaces
+            # wholesale whenever it updates itself, so the link is a tmpfiles rule that re-asserts
+            # itself at every login rather than something written once.
+            systemd.user.tmpfiles.rules = [
+                "L+ %h/.local/share/Steam/steamui/skins/Halon - - - - ${halonSteamTheme}/share/halon/steam"
+            ];
         }
 
         # Persistence ################################################################################################################################

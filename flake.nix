@@ -49,6 +49,11 @@
             url = "github:BeatLink/Halon";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        # Patches the Steam client so it loads CSS themes; Odin's Steam package comes from here
+        millennium = {
+            url = "github:SteamClientHomebrew/Millennium?dir=packages/nix";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
         # git+ and submodules=1, not github:, because the stock themes are a submodule and a tarball fetch drops them
         web-greeter = {
             url = "git+https://github.com/BeatLink/web-greeter?ref=nix-flake&submodules=1";
