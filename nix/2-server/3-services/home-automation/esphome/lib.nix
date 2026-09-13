@@ -9,7 +9,7 @@
 # In Nix you therefore write secrets and includes as plain strings:
 #
 #     password = "!secret wifi_password";
-#     packages.common = "!include 1-common.yaml";
+#     packages.common = "!include .common.yaml";
 #
 # and multi-line C++ / lambda bodies as ordinary multi-line strings.
 

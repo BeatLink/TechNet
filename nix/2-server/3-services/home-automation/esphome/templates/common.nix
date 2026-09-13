@@ -1,6 +1,6 @@
 # Configuration common to every device.
 #
-# Included by each `2-base-*` hardware profile, so everything here lands on all
+# Included by each `base-*` hardware profile, so everything here lands on all
 # devices: wifi, the Home Assistant API, the onboard web server, OTA and logging.
 {
     substitutions = {

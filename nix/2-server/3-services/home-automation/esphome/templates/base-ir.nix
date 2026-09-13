@@ -8,11 +8,11 @@
 {
     packages = {
         athom = "github://athom-tech/athom-configs/athom-ir-remote.yaml";
-        common = "!include .1-common.yaml";
+        common = "!include .common.yaml";
     };
 
     substitutions = {
-        # `1-common.yaml` addresses devices as `<name>.lan`; athom defaults to
+        # `common.yaml` addresses devices as `<name>.lan`; athom defaults to
         # `.local`.
         dns_domain = ".lan";
         log_level = "INFO";
