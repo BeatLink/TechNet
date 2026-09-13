@@ -3,7 +3,19 @@
 # Home Assistant is the home automation server. It manages lighting and energy management, safety and security.
 #
 
-{ pkgs, ... }:
+{
+    config,
+    lib,
+    pkgs,
+    ...
+}:
+let
+    fanSpeedButtons = ./fan-speed-buttons.js;
+    # The store hash in the URL makes browsers refetch the script whenever it changes.
+    fanSpeedButtonsUrl = "/local/fan-speed-buttons.js?${
+        builtins.substring 0 8 (baseNameOf "${fanSpeedButtons}")
+    }";
+in
 {
     services.home-assistant = {
         enable = true;
@@ -101,6 +113,9 @@
                 resource_mode = "storage";
             };
 
+            # The stock dialog gives the four-speed bedroom fan a slider; this script keeps the speed buttons.
+            frontend.extra_module_url = [ fanSpeedButtonsUrl ];
+
             # Inline theme definitions. These stay in config rather than using the
             # services.home-assistant.themes option, which takes theme *packages*
             # (pkgs.home-assistant-themes.*) and not inline colour definitions.
@@ -156,6 +171,11 @@
         ];
 
     };
+
+    # Linked into www the same way the module links its Lovelace modules, so /local serves it.
+    systemd.services.home-assistant.preStart = lib.mkAfter ''
+        ln -fns ${fanSpeedButtons} "${config.services.home-assistant.configDir}/www/fan-speed-buttons.js"
+    '';
 
     systemd.tmpfiles.settings."Home-Assistant" = {
         "/Storage/Services/Home-Assistant" = {
