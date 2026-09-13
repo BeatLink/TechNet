@@ -27,6 +27,13 @@
                     interface = "wg0"; # Pinned, so recovery tests the tunnel itself rather than whatever route happens to be up
                 };
                 reconfigureLinks = [ "wg0" ];
+
+                # Heimdall, whose endpoint is the home connection's dynamic-DNS name: the module renders the peer from sops so the name stays out of the store.
+                peer = {
+                    netdev = "wg0";
+                    publicKey = "SLW2DFKk+Cf5K5KZl0OLYrEGyqTCqYHBKV2mTA3W2hQ=";
+                    allowedIPs = [ "10.100.100.0/24" ];
+                };
             };
 
             networking.firewall.trustedInterfaces = [ "wg0" ];
@@ -40,15 +47,6 @@
                     PrivateKeyFile = config.sops.secrets.wireguard_private_key.path;
                     ListenPort = 51820;
                 };
-                wireguardPeers = [
-                    {
-                        # Heimdall
-                        PublicKey = "SLW2DFKk+Cf5K5KZl0OLYrEGyqTCqYHBKV2mTA3W2hQ=";
-                        AllowedIPs = [ "10.100.100.0/24" ];
-                        Endpoint = "bltechnet.mooo.com:51820";
-                        PersistentKeepalive = 25;
-                    }
-                ];
             };
 
             systemd.network.networks."wg0" = {

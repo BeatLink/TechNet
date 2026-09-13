@@ -24,6 +24,15 @@
 }:
 {
 
+    # Read by FTL's dnsmasq as an addn-hosts file, wired up in the settings below.
+    sops.templates."pihole-ddns-hosts" = {
+        content = ''
+            192.168.0.2 ${config.sops.placeholder.ddns_hostname}
+        '';
+        owner = config.services.pihole-ftl.user;
+        group = config.services.pihole-ftl.group;
+    };
+
     nginx-vhosts.pi-hole = {
         domain = "pi-hole.heimdall.technet";
         port = 9018;
@@ -122,7 +131,6 @@
                         "10.100.100.5  thorx.technet"
                         "10.100.100.6  ragnarok.technet"
                         "10.100.100.18 socket-ragnarok.technet"
-                        "192.168.0.2 bltechnet.mooo.com"
 
                         # Odin's LAN address, so odin.lan resolves at all.
                         # Hosts inside the DHCP range get a .lan name from
@@ -155,6 +163,12 @@
                     rapidCommit = false;
                     logging = true;
                 };
+                # The home connection's dynamic-DNS name is pinned to its LAN address so internal clients never route out to the internet and back for it.
+                # The name is a secret, so it arrives as an extra hosts file rendered by sops rather than as a `dns.hosts` entry baked into the store.
+                misc.dnsmasq_lines = [
+                    "addn-hosts=${config.sops.templates."pihole-ddns-hosts".path}"
+                ];
+
                 database.maxDBdays = 7; # Every query row is scanned at startup, and 90 days of them held FTL's API for 20 s.
             };
             stateDirectory = "/Storage/Services/PiHole/state";

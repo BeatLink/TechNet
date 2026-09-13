@@ -175,12 +175,16 @@ in
         owner = "vigil";
     };
 
-    # FreeDNS's per-host dynamic update URL for bltechnet.mooo.com — a
-    # secret, account-specific URL that updates the record to the caller's
-    # apparent IP on GET. Read by the "DDNS" monitor's ddns_updater plugin
-    # (update_url_file) below. Replaces the standalone ddns-updater service.
+    # FreeDNS's per-host dynamic update URL — a secret, account-specific URL that updates the record to the caller's apparent IP on GET. Read by the
+    # "DDNS" monitor's ddns_updater plugin (update_url_file) below. Replaces the standalone ddns-updater service.
     sops.secrets.freedns_update_url = {
         sopsFile = "${config.technet.secrets.path}/vigil.yaml";
+        owner = "vigil";
+    };
+
+    # The domain that monitor keeps current, handed over as a file (domain_file) for the same reason the update URL is: it names the home connection.
+    sops.templates."vigil-ddns-domain" = {
+        content = config.sops.placeholder.ddns_hostname;
         owner = "vigil";
     };
 
@@ -866,14 +870,14 @@ in
                                     memory_threshold = 1024;
                                 }
                                 {
-                                    # Keeps bltechnet.mooo.com pointed at the home connection's
-                                    # current public IP — this is also the WireGuard endpoint for
-                                    # the laptop, phone, and backup server (see their networking.nix
-                                    # files), so a stale record breaks remote access to all three.
-                                    # Replaces the standalone ddns-updater service: Vigil now both
-                                    # performs the update and reports on whether it's in sync,
-                                    # instead of a separate opaque container doing the former with
-                                    # no visibility into the latter.
+                                    # Keeps the home connection's dynamic-DNS record pointed at its
+                                    # current public IP — that record is also the WireGuard endpoint
+                                    # for the laptop, phone, and backup server (see their
+                                    # networking.nix files), so a stale record breaks remote access
+                                    # to all three. Replaces the standalone ddns-updater service:
+                                    # Vigil now both performs the update and reports on whether
+                                    # it's in sync, instead of a separate opaque container doing the
+                                    # former with no visibility into the latter.
                                     #
                                     # Checked against 8.8.8.8 rather than the local Pi-hole/Unbound
                                     # resolver: Pi-hole has a hosts-file override for this exact
@@ -882,9 +886,9 @@ in
                                     # 8.8.8.8 matches the old ddns-updater's own RESOLVER_ADDRESS,
                                     # for the same reason.
                                     name = "DDNS";
-                                    id = "ddns-bltechnet";
+                                    id = "ddns-home";
                                     type = "ddns_updater";
-                                    domain = "bltechnet.mooo.com";
+                                    domain_file = config.sops.templates."vigil-ddns-domain".path;
                                     record_type = "A";
                                     resolver = "8.8.8.8";
                                     update_url_file = config.sops.secrets.freedns_update_url.path;

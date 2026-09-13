@@ -38,6 +38,11 @@ let
 
     keyPath = config.sops.secrets.wireguard_private_key.path;
 
+    peer = cfg.peer;
+    peerTemplate = "${peer.netdev}-peer.conf";
+    peerRelPath = "systemd/network/${peer.netdev}.netdev.d/50-peer.conf";
+    peerPath = "/etc/${peerRelPath}";
+
     pingArgs = lib.concatStringsSep " " (
         [
             "-c1"
@@ -95,6 +100,54 @@ in
             '';
         };
 
+        peer = lib.mkOption {
+            type = lib.types.nullOr (
+                lib.types.submodule {
+                    options = {
+                        netdev = lib.mkOption {
+                            type = lib.types.str;
+                            example = "wg0";
+                            description = "Name of the systemd.network netdev this peer belongs to.";
+                        };
+
+                        publicKey = lib.mkOption {
+                            type = lib.types.str;
+                            description = "The peer's wireguard public key.";
+                        };
+
+                        port = lib.mkOption {
+                            type = lib.types.port;
+                            default = 51820;
+                            description = "Port the peer listens on.";
+                        };
+
+                        allowedIPs = lib.mkOption {
+                            type = lib.types.listOf lib.types.str;
+                            description = "Traffic routed into the tunnel.";
+                        };
+
+                        persistentKeepalive = lib.mkOption {
+                            type = lib.types.int;
+                            default = 25;
+                            description = "Seconds between keepalives, which a NATed client needs to stay reachable.";
+                        };
+                    };
+                }
+            );
+            default = null;
+            description = ''
+                The peer this host dials out to, declared here instead of in
+                systemd.network.netdevs because its endpoint is the home
+                connection's dynamic-DNS name and that name is a secret. The
+                whole [WireGuardPeer] section is rendered from sops into a
+                netdev drop-in rather than into the nix store, and copied into
+                the initrd the same way the private key is.
+
+                Leave this null on the host that peers dial in to, which has no
+                endpoint of its own to point at.
+            '';
+        };
+
         kernelModules = lib.mkOption {
             type = lib.types.listOf lib.types.str;
             default = [ ];
@@ -115,13 +168,37 @@ in
             group = "systemd-network";
         };
 
+        # Netdev drop-ins are parsed after the main file, so this is the only [WireGuardPeer] section wg0 has and the endpoint stays out of the store.
+        sops.templates = lib.optionalAttrs (cfg.peer != null) {
+            ${peerTemplate} = {
+                content = ''
+                    [WireGuardPeer]
+                    PublicKey=${cfg.peer.publicKey}
+                    AllowedIPs=${lib.concatStringsSep "," cfg.peer.allowedIPs}
+                    Endpoint=${config.sops.placeholder.ddns_hostname}:${toString cfg.peer.port}
+                    PersistentKeepalive=${toString cfg.peer.persistentKeepalive}
+                '';
+                owner = "systemd-network";
+                group = "systemd-network";
+            };
+        };
+
+        environment.etc = lib.optionalAttrs (cfg.peer != null) {
+            ${peerRelPath}.source = config.sops.templates.${peerTemplate}.path;
+        };
+
         systemd.network.enable = true;
 
         boot.initrd = {
             availableKernelModules = [ "wireguard" ] ++ cfg.kernelModules;
 
             # Sops doesn't work in initrd so we use boot.initrd.secrets
-            secrets."${keyPath}" = keyPath;
+            secrets = {
+                "${keyPath}" = keyPath;
+            }
+            // lib.optionalAttrs (cfg.peer != null) {
+                "${peerPath}" = config.sops.templates.${peerTemplate}.path;
+            };
 
             systemd = {
                 # ping is used by initrd-wireguard-recover to tell a genuinely working
@@ -129,15 +206,20 @@ in
                 storePaths = [ "${pkgs.iputils}/bin/ping" ];
 
                 services = {
-                    # The Wireguard privatekey must be owned by systemd-network to be used.
+                    # The initrd appender copies secrets in as root, but networkd reads them as systemd-network.
                     fix_wireguard_key_perms = {
-                        description = "Set permissions for wireguard private key";
+                        description = "Set permissions for the wireguard secrets copied into the initrd";
                         wantedBy = [ "initrd.target" ];
                         after = [ "initrd-nixos-copy-secrets.service" ];
                         before = [ "systemd-networkd.service" ];
                         unitConfig.DefaultDependencies = "no";
                         serviceConfig.Type = "oneshot";
-                        script = ''chown systemd-network:systemd-network "${keyPath}"'';
+                        script = ''
+                            chown systemd-network:systemd-network "${keyPath}"
+                        ''
+                        + lib.optionalString (cfg.peer != null) ''
+                            chown systemd-network:systemd-network "${peerPath}"
+                        '';
                     };
 
                     "initrd-wireguard-recover" = {

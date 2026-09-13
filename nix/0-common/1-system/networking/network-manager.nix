@@ -100,6 +100,19 @@
 
         # Setup Wireguard NM PRofile #################################################################################################################
         {
+            # The peer endpoint is the home connection's dynamic-DNS name, which the profiles pick up as $TECHNET_DDNS_HOSTNAME rather than a literal.
+            sops.templates."networkmanager-ddns.env" = lib.mkIf config.networking.networkmanager.enable {
+                content = ''
+                    TECHNET_DDNS_HOSTNAME=${config.sops.placeholder.ddns_hostname}
+                '';
+            };
+
+            networking.networkmanager.ensureProfiles.environmentFiles =
+                lib.mkIf config.networking.networkmanager.enable
+                    [
+                        config.sops.templates."networkmanager-ddns.env".path
+                    ];
+
             networking.networkmanager.ensureProfiles.profiles = {
                 "TechNet WireGuard (Split Tunnel)" = {
                     connection = {
@@ -115,7 +128,7 @@
                         peer-routes = "yes";
                     };
                     "wireguard-peer.SLW2DFKk+Cf5K5KZl0OLYrEGyqTCqYHBKV2mTA3W2hQ=" = {
-                        endpoint = "bltechnet.mooo.com:51820";
+                        endpoint = "$TECHNET_DDNS_HOSTNAME:51820";
                         persistent-keepalive = 25;
                         allowed-ips = "10.100.100.0/24";
                     };
@@ -140,7 +153,7 @@
                         peer-routes = "yes";
                     };
                     "wireguard-peer.SLW2DFKk+Cf5K5KZl0OLYrEGyqTCqYHBKV2mTA3W2hQ=" = {
-                        endpoint = "bltechnet.mooo.com:51820";
+                        endpoint = "$TECHNET_DDNS_HOSTNAME:51820";
                         persistent-keepalive = 25;
                         allowed-ips = "0.0.0.0/0";
                     };
