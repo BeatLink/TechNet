@@ -25,7 +25,13 @@
             allowed-hosts = [ "attic.heimdall.technet" ];
             api-endpoint = "https://attic.heimdall.technet/";
             compression.type = "zstd";
-            garbage-collection.interval = "12 hours";
+            garbage-collection = {
+                interval = "12 hours";
+
+                # Without this the collector runs and deletes nothing, because the default is to keep every path forever. What the fleet actually
+                # substitutes is the last couple of nixpkgs bumps, and the pool this sits on has no redundancy left to spare.
+                default-retention-period = "30 days";
+            };
         };
     };
 
