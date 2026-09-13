@@ -15,14 +15,13 @@
 # of which is this SIM. FLOW is Cable & Wireless rebranded onto a newer network
 # code the database has not caught up with.
 #
-# The SIM PIN comes from the same sops environment file the WiFi PSKs and the
-# WireGuard key use -- NetworkManager substitutes $VARIABLES in profile values
-# from `ensureProfiles.environmentFiles`, so the PIN is never written into the
-# nix store or the repo. Add it with:
+# The SIM PIN is a sops secret rendered into an environment file -- NetworkManager
+# substitutes $VARIABLES in profile values from `ensureProfiles.environmentFiles`,
+# so the PIN is never written into the nix store or the repo. Change it with:
 #
 #     sops secrets/5-phone/networkmanager.yaml
-#     # under networkmanager_env_file, alongside the others:
-#     THOR_SIM_PIN=<pin>
+#     # the thor_sim_pin key:
+#     thor_sim_pin: <pin>
 #
 # NetworkManager only offers that PIN when it activates this profile, and the
 # profile is `autoconnect = false`, so at boot nothing presents it: the modem
@@ -38,11 +37,15 @@
 #
 { config, pkgs, ... }:
 {
-    sops.secrets.networkmanager_env_file.sopsFile = "${config.technet.secrets.path}/networkmanager.yaml";
+    sops.secrets.thor_sim_pin.sopsFile = "${config.technet.secrets.path}/networkmanager.yaml";
 
-    # The SIM PIN is the only value still substituted into a profile, so this file is read for it alone.
+    # The profile below carries the PIN as $THOR_SIM_PIN, which ensureProfiles substitutes with envsubst from this file.
+    sops.templates."networkmanager-sim-pin.env".content = ''
+        THOR_SIM_PIN=${config.sops.placeholder.thor_sim_pin}
+    '';
+
     networking.networkmanager.ensureProfiles.environmentFiles = [
-        config.sops.secrets.networkmanager_env_file.path
+        config.sops.templates."networkmanager-sim-pin.env".path
     ];
 
     networking.networkmanager.ensureProfiles.profiles."FLOW" = {
@@ -87,16 +90,16 @@
             Type = "oneshot";
             RemainAfterExit = true;
             ExecStart = pkgs.writeShellScript "sim-unlock" ''
-                # Sourced rather than declared as an EnvironmentFile, so this reads the file exactly as NetworkManager and the manual unlock do.
-                env_file=${config.sops.secrets.networkmanager_env_file.path}
-                if [ -r "$env_file" ]; then
-                    set -a
-                    . "$env_file"
-                    set +a
+                # Read straight from the secret rather than the rendered environment file, so the PIN never sits in this service's environment.
+                pin_file=${config.sops.secrets.thor_sim_pin.path}
+                if [ ! -r "$pin_file" ]; then
+                    echo "sim-unlock: $pin_file is not readable, nothing to send"
+                    exit 0
                 fi
 
-                if [ -z "''${THOR_SIM_PIN:-}" ]; then
-                    echo "sim-unlock: THOR_SIM_PIN is not in the environment file, nothing to send"
+                THOR_SIM_PIN=$(${pkgs.coreutils}/bin/cat "$pin_file")
+                if [ -z "$THOR_SIM_PIN" ]; then
+                    echo "sim-unlock: the stored PIN is empty, nothing to send"
                     exit 0
                 fi
 
