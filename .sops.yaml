@@ -29,6 +29,13 @@ creation_rules:
                 - *user_beatlink
                 - *host_heimdall
                 - *host_thor
+    # Only the two hosts that build push into the cache; every other host pulls from it without a token, so none of them needs this one
+    - path_regex: secrets/0-common/attic-push\.yaml$
+      key_groups:
+          - age:
+                - *user_beatlink
+                - *host_heimdall
+                - *host_odin
     - path_regex: secrets/0-common/.*
       key_groups:
           - age:
