@@ -10,39 +10,22 @@
                 thor_wifi_password.sopsFile = "${config.technet.secrets.commonPath}/networkmanager.yaml";
                 wireguard_private_key.sopsFile = "${config.technet.secrets.path}/networkmanager.yaml";
             };
-            networking.networkmanager.ensureProfiles.secrets.entries =
+
+            # The profiles carry these as $VARIABLES that ensureProfiles substitutes with envsubst, so no credential lands in the nix store.
+            sops.templates."networkmanager-credentials.env" = lib.mkIf config.networking.networkmanager.enable {
+                content = ''
+                    TECHNET_WIFI_PASSWORD=${config.sops.placeholder.technet_wifi_password}
+                    FAMILY_HOME_WIFI_PASSWORD=${config.sops.placeholder.family_home_wifi_password}
+                    THOR_WIFI_PASSWORD=${config.sops.placeholder.thor_wifi_password}
+                    WIREGUARD_PRIVATE_KEY=${config.sops.placeholder.wireguard_private_key}
+                '';
+            };
+
+            # An unset variable is substituted with nothing, leaving a profile that authenticates with an empty key, so this file has to be present.
+            networking.networkmanager.ensureProfiles.environmentFiles =
                 lib.mkIf config.networking.networkmanager.enable
                     [
-                        {
-                            matchId = "TechNet Wi-Fi";
-                            matchSetting = "wifi-security";
-                            key = "psk";
-                            file = config.sops.secrets.technet_wifi_password.path;
-                        }
-                        {
-                            matchId = "Digicel_5G_WiFi_5tDQ";
-                            matchSetting = "wifi-security";
-                            key = "psk";
-                            file = config.sops.secrets.family_home_wifi_password.path;
-                        }
-                        {
-                            matchId = "Thor Hotspot";
-                            matchSetting = "wifi-security";
-                            key = "psk";
-                            file = config.sops.secrets.thor_wifi_password.path;
-                        }
-                        {
-                            matchId = "TechNet Wireguard (Split Tunnel)";
-                            matchSetting = "wireguard";
-                            key = "private-key";
-                            file = config.sops.secrets.wireguard_private_key.path;
-                        }
-                        {
-                            matchId = "TechNet Wireguard (Full Tunnel)";
-                            matchSetting = "wireguard";
-                            key = "private-key";
-                            file = config.sops.secrets.wireguard_private_key.path;
-                        }
+                        config.sops.templates."networkmanager-credentials.env".path
                     ];
         }
 
@@ -69,7 +52,7 @@
                     };
                     wifi-security = {
                         key-mgmt = "wpa-psk";
-                        psk-flags = 1; # Agent-owned: served by nm-file-secret-agent, never stored in the profile
+                        psk = "$TECHNET_WIFI_PASSWORD";
                     };
                     ipv4 = {
                         method = lib.mkDefault "auto";
@@ -89,7 +72,7 @@
                     wifi.ssid = "Digicel_5G_WiFi_5tDQ";
                     wifi-security = {
                         key-mgmt = "wpa-psk";
-                        psk-flags = 1; # Agent-owned: served by nm-file-secret-agent, never stored in the profile
+                        psk = "$FAMILY_HOME_WIFI_PASSWORD";
                     };
                     ipv4.method = "auto";
                     ipv6.method = "disabled";
@@ -105,7 +88,7 @@
                     wifi.ssid = "Thor";
                     wifi-security = {
                         key-mgmt = "wpa-psk";
-                        psk-flags = 1; # Agent-owned: served by nm-file-secret-agent, never stored in the profile
+                        psk = "$THOR_WIFI_PASSWORD";
                     };
                     ipv4.method = "auto";
                     ipv6.method = "disabled";
@@ -127,7 +110,7 @@
                     };
 
                     wireguard = {
-                        private-key-flags = 1; # Agent-owned: served by nm-file-secret-agent, never stored in the profile
+                        private-key = "$WIREGUARD_PRIVATE_KEY";
                         listen-port = "51820";
                         peer-routes = "yes";
                     };
@@ -152,7 +135,7 @@
                     };
 
                     wireguard = {
-                        private-key-flags = 1; # Agent-owned: served by nm-file-secret-agent, never stored in the profile
+                        private-key = "$WIREGUARD_PRIVATE_KEY";
                         listen-port = "51820";
                         peer-routes = "yes";
                     };
