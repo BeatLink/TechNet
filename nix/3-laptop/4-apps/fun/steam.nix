@@ -69,11 +69,11 @@ in
         {
             nixpkgs.overlays = [ inputs.millennium.overlays.default ];
 
-            # Millennium reads themes from inside steamui, a directory the Steam client replaces
-            # wholesale whenever it updates itself, so the link is a tmpfiles rule that re-asserts
-            # itself at every login rather than something written once.
+            # Millennium creates its themes directory itself on first run, so the link is a tmpfiles
+            # rule that re-asserts itself at every login rather than something written once.
+            # Millennium's own docs still give the 2.x location, steamui/skins; 3.x reads this one.
             systemd.user.tmpfiles.rules = [
-                "L+ %h/.local/share/Steam/steamui/skins/Halon - - - - ${halonSteamTheme}/share/halon/steam"
+                "L+ %h/.local/share/Steam/millennium/themes/Halon - - - - ${halonSteamTheme}/share/halon/steam"
             ];
         }
 
