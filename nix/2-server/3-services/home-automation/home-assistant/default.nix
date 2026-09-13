@@ -59,6 +59,8 @@ in
                     music = "/Storage/Files/Music";
                     sounds = "/Storage/Files/Sounds";
                 };
+                # Packages hold whole features as one unit; each is its own file beside this one.
+                packages.bedroom_fan = import ./bedroom-fan.nix;
             };
 
             sensor = [
