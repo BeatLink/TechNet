@@ -3,9 +3,9 @@
     hardware.sensor.hddtemp = {
         enable = true;
         drives = [
-            "/dev/sda"
-            "/dev/sdb"
-            "/dev/sdc"
+            "/dev/disk/by-id/ata-TOSHIBA_MQ04ABF100_28AEP8F6T"
+            "/dev/disk/by-id/ata-TOSHIBA_MQ04ABF100_18BPSDA3S"
+            "/dev/disk/by-id/ata-Dogfish_SSD_64GB_5E56255506071556041"
         ];
         dbEntries = [
             "\"TOSHIBA MQ04ABF100\" 194 C \"TOSHIBA MQ04ABF100\""

@@ -373,7 +373,7 @@ in
                                             id = "ragnarok-disk-io";
                                             type = "disk_io";
                                             interval = "30s";
-                                            device = "sda"; # ST5000LM000, the shingled backup drive
+                                            device = "/dev/disk/by-id/wwn-0x5000c500e81e231d"; # ST5000LM000, the shingled backup drive
                                             agent = "ragnarok";
                                         }
                                         {
@@ -381,7 +381,7 @@ in
                                             id = "ragnarok-disk-io-root";
                                             type = "disk_io";
                                             interval = "30s";
-                                            device = "sdb"; # The SSD holding root, nix and swap
+                                            device = "/dev/disk/by-id/ata-SATA_SSD_22020812000605"; # The SSD holding root, nix and swap
                                             agent = "ragnarok";
                                         }
                                         {
@@ -681,7 +681,7 @@ in
                                             id = "heimdall-disk-io";
                                             type = "disk_io";
                                             interval = "30s";
-                                            device = "sda"; # TOSHIBA MQ04ABF100, one half of the data-pool mirror
+                                            device = "/dev/disk/by-id/ata-TOSHIBA_MQ04ABF100_28AEP8F6T"; # One half of the data-pool mirror
                                             agent = "heimdall";
                                         }
                                         {
@@ -689,7 +689,7 @@ in
                                             id = "heimdall-disk-io-data2";
                                             type = "disk_io";
                                             interval = "30s";
-                                            device = "sdb"; # The mirror's other half; a divergence between these two is the interesting signal
+                                            device = "/dev/disk/by-id/ata-TOSHIBA_MQ04ABF100_18BPSDA3S"; # The mirror's other half; a divergence between these two is the interesting signal
                                             agent = "heimdall";
                                         }
                                         {
@@ -697,7 +697,7 @@ in
                                             id = "heimdall-disk-io-root";
                                             type = "disk_io";
                                             interval = "30s";
-                                            device = "sdc"; # Dogfish SSD, root-pool-Heimdall
+                                            device = "/dev/disk/by-id/ata-Dogfish_SSD_64GB_5E56255506071556041"; # root-pool-Heimdall
                                             agent = "heimdall";
                                         }
                                         {
@@ -1804,7 +1804,7 @@ in
                                             id = "odin-disk-io";
                                             type = "disk_io";
                                             interval = "30s";
-                                            device = "nvme1n1"; # WDC SN530, root-pool-Odin
+                                            device = "/dev/disk/by-id/nvme-WDC_PC_SN530_SDBPMPZ-256G-1101_22215C456623"; # root-pool-Odin
                                             agent = "odin";
                                         }
                                         {
@@ -1812,7 +1812,7 @@ in
                                             id = "odin-disk-io-data";
                                             type = "disk_io";
                                             interval = "30s";
-                                            device = "nvme0n1"; # Corsair MP600, data-pool-Odin
+                                            device = "/dev/disk/by-id/nvme-Corsair_MP600_MICRO_A828B42710C0GL"; # data-pool-Odin
                                             agent = "odin";
                                         }
                                         {
@@ -2461,7 +2461,7 @@ in
                                             id = "thor-disk-io";
                                             type = "disk_io";
                                             interval = "1m";
-                                            device = "mmcblk2"; # 32GB eMMC, root-pool-Thor and /boot
+                                            device = "/dev/disk/by-id/mmc-ASTCXX_0xd1002721"; # 32GB eMMC, root-pool-Thor and /boot
                                             agent = "thor";
                                         }
                                         {
@@ -2469,7 +2469,7 @@ in
                                             id = "thor-disk-io-data";
                                             type = "disk_io";
                                             interval = "1m";
-                                            device = "mmcblk0"; # 1TB SD card, data-pool-Thor
+                                            device = "/dev/disk/by-id/mmc-SN01T_0x8ade202e"; # 1TB SD card, data-pool-Thor
                                             agent = "thor";
                                         }
                                         {
