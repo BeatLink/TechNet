@@ -5,6 +5,7 @@
 {
     imports = [
         ./camera.nix
+        ./maps.nix
         ./phone.nix
         ./sms.nix
     ];
