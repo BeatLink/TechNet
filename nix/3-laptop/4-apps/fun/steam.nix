@@ -60,8 +60,19 @@ in
         }
 
         # GameMode ###################################################################################################################################
+        # Proton replaces LD_LIBRARY_PATH inside the container, so the preloaded library is given its own directory as an rpath to dlopen from.
         {
             programs.gamemode.enable = true;
+
+            nixpkgs.overlays = [
+                (final: prev: {
+                    gamemode = prev.gamemode.overrideAttrs (old: {
+                        postFixup = (old.postFixup or "") + ''
+                            patchelf --add-rpath "$lib/lib" "$lib/lib/libgamemodeauto.so.0.0.0"
+                        '';
+                    });
+                })
+            ];
         }
 
         # Millennium #################################################################################################################################
