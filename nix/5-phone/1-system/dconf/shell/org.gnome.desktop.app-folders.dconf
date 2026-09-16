@@ -6,7 +6,7 @@ apps=['waypipe-discord-heimdall.desktop', 'waypipe-element-heimdall.desktop', 'w
 name='Desktop'
 
 [folders/c3f8a6b1-7d24-4e59-a0c7-5b1e9f2d8a63]
-apps=['ca.andyholmes.Valent.desktop', 'htop.desktop', 'io.github.beatlink.Chargectl.desktop', 'me.gapixels.Megapixels.desktop', 'mobi.phosh.MobileSettings.desktop', 'nemo.desktop', 'org.gnome.Calls.desktop', 'org.gnome.ColorProfileViewer.desktop', 'org.gnome.Extensions.desktop', 'org.gnome.Settings.desktop', 'org.gnome.Terminal.desktop', 'org.x.editor.desktop', 'rygel-preferences.desktop', 'sm.puri.Chatty.desktop']
+apps=['ca.andyholmes.Valent.desktop', 'codium.desktop', 'firefox.desktop', 'htop.desktop', 'io.github.beatlink.Chargectl.desktop', 'me.gapixels.Megapixels.desktop', 'mobi.phosh.MobileSettings.desktop', 'nemo.desktop', 'org.gnome.Calls.desktop', 'org.gnome.ColorProfileViewer.desktop', 'org.gnome.Extensions.desktop', 'org.gnome.Settings.desktop', 'org.gnome.Terminal.desktop', 'org.x.editor.desktop', 'pix.desktop', 'rygel-preferences.desktop', 'sm.puri.Chatty.desktop']
 name='Native'
 
 [folders/b7e2d4a9-8c61-4f30-95ab-2d7c6e0f3b18]
