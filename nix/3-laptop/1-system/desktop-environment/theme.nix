@@ -51,10 +51,10 @@ let
                 name = "Halon";
                 package = inputs.halon.packages.${pkgs.stdenv.hostPlatform.system}.halon-theme;
             };
-            # Halon ships no icon theme, so this is the set Cinnamon's exported dconf also names
+            # Halon's own icon theme, a Colloid overlay; Cinnamon's exported dconf selects the same one
             icons = {
-                name = "Mint-Y-Aqua";
-                package = pkgs.mint-y-icons;
+                name = "Halon";
+                package = inputs.halon.packages.${pkgs.stdenv.hostPlatform.system}.halon-icon-theme;
             };
         };
 
