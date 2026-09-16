@@ -25,6 +25,7 @@
         ./audio.nix
         ./bluetooth.nix
         ./location.nix
+        ./traccar-client.nix
         ./gpu-meter.nix
         ./webkit.nix
         ./launchapp.nix

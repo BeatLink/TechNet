@@ -1318,48 +1318,45 @@ in
                                         }
                                     ];
                                 }
-                                # Traccar is switched off: no tracker protocol was ever enabled, so it never had a device to watch.
-                                /*
-                                  {
-                                      name = "Traccar";
-                                      id = "heimdall-svc-traccar";
-                                      type = "group";
-                                      children = [
-                                          {
-                                              name = "Service";
-                                              id = "heimdall-traccar";
-                                              type = "systemd_service";
-                                              interval = "1m";
-                                              service_name = "traccar.service";
-                                              agent = "heimdall";
-                                          }
-                                          {
-                                              # Device-staleness health, as opposed to
-                                              # the monitor above, which only proves the
-                                              # server is running. Authenticates as a
-                                              # dedicated read-only "vigil" user created
-                                              # once by hand (see traccar.nix, which has
-                                              # no declarative user provisioning at all)
-                                              # and computes staleness itself from each
-                                              # device's lastUpdate, rather than
-                                              # trusting Traccar's own status field —
-                                              # that field doesn't reliably reach
-                                              # "offline" on its own for a tracker that
-                                              # has simply gone silent.
-                                              name = "Devices";
-                                              id = "heimdall-traccar-devices";
-                                              type = "traccar";
-                                              interval = "15m";
-                                              api_url = "http://127.0.0.1:9280";
-                                              username = "vigil";
-                                              password_command = "cat /run/secrets/traccar_vigil_password";
-                                              stale_warning = 24;
-                                              stale_threshold = 72;
-                                              agent = "heimdall";
-                                          }
-                                      ];
-                                  }
-                                */
+                                {
+                                    name = "Traccar";
+                                    id = "heimdall-svc-traccar";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Service";
+                                            id = "heimdall-traccar";
+                                            type = "systemd_service";
+                                            interval = "1m";
+                                            service_name = "traccar.service";
+                                            agent = "heimdall";
+                                        }
+                                        {
+                                            # Device-staleness health, as opposed to
+                                            # the monitor above, which only proves the
+                                            # server is running. Authenticates as a
+                                            # dedicated read-only "vigil" user created
+                                            # once by hand (see traccar.nix, which has
+                                            # no declarative user provisioning at all)
+                                            # and computes staleness itself from each
+                                            # device's lastUpdate, rather than
+                                            # trusting Traccar's own status field —
+                                            # that field doesn't reliably reach
+                                            # "offline" on its own for a tracker that
+                                            # has simply gone silent.
+                                            name = "Devices";
+                                            id = "heimdall-traccar-devices";
+                                            type = "traccar";
+                                            interval = "15m";
+                                            api_url = "http://127.0.0.1:9280";
+                                            username = "vigil";
+                                            password_command = "cat /run/secrets/traccar_vigil_password";
+                                            stale_warning = 24;
+                                            stale_threshold = 72;
+                                            agent = "heimdall";
+                                        }
+                                    ];
+                                }
                                 {
                                     name = "Jackett";
                                     id = "heimdall-svc-jackett";

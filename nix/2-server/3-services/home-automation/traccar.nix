@@ -1,42 +1,41 @@
-# Traccar
+# Traccar ############################################################################################################################################
 #
-# Switched off: no tracker protocol was ever enabled, so it never received a position and its device monitor had nothing to watch.
-# The working configuration is kept below for when a protocol and devices are set up.
+# The GPS tracking server, receiving over the OsmAnd protocol alone: Thor posts its geoclue fix to port 5055, and no other decoder is started.
 #
-{ ... }:
-{ }
+# 5055 is deliberately not in `allowedTCPPorts`. It is reachable because wireguard0 is a trusted interface, so every peer in the TechNet can post to
+# it; the device id in each report is what Traccar matches against a device, not the firewall.
+#
+# Devices and users live only in the database -- there is no declarative provisioning of either. Two things therefore have to be done once in the web
+# UI: add a device whose identifier is `thor`, and add a read-only `vigil` user whose password matches secrets/2-server/traccar.yaml, which is what the
+# device-staleness monitor authenticates as.
+#
+{ config, ... }:
+{
+    # Read by whichever Vigil transport runs the `cat` -- the agent today, vigil-access as fallback
+    sops.secrets.traccar_vigil_password = {
+        sopsFile = "${config.technet.secrets.path}/traccar.yaml";
+        group = "vigil-monitor";
+        mode = "0440";
+    };
 
-/*
-  { config, ... }:
-  {
-      # Vigil's `traccar` plugin authenticates as a dedicated read-only user to
-      # check device staleness via /api/devices. Traccar has no declarative
-      # user provisioning (no config-file user list, no CLI, users live only in
-      # its database) — unlike the other services' vigil accounts, this one
-      # must be created once by hand in the Traccar UI (Settings > Users > add
-      # "vigil", uncheck Administrator, grant it read access to the devices to
-      # monitor), with its password then stored at
-      # secrets/2-server/traccar.yaml as `vigil_password` to match.
-      sops.secrets.traccar_vigil_password = {
-          sopsFile = "${config.technet.secrets.path}/traccar.yaml";
-          group = "vigil-monitor";                                        # Read by whichever Vigil transport runs the `cat` — the agent today, vigil-access as fallback
-          mode = "0440";
-      };
+    services.traccar = {
+        enable = true;
+        settings = {
+            web = {
+                port = "9280";
+                url = "traccar.heimdall.technet";
+            };
 
-      services.traccar = {
-          enable = true;
-          settings = {
-              web = {
-                  port = "9280";
-                  url = "traccar.heimdall.technet";
-              };
-              protocols.enable = "";
-          };
-      };
-      environment.persistence."/Storage/Services/Traccar".directories = [ "/var/lib/private/traccar" ];
-      nginx-vhosts.traccar = {
-          domain = "traccar.heimdall.technet";
-          port = 9280;
-      };
-  }
-*/
+            # An allow-list rather than the whole decoder set, so the only port this listens on is the one Thor reports to
+            protocols.enable = "osmand";
+            osmand.port = "5055";
+        };
+    };
+
+    environment.persistence."/Storage/Services/Traccar".directories = [ "/var/lib/private/traccar" ];
+
+    nginx-vhosts.traccar = {
+        domain = "traccar.heimdall.technet";
+        port = 9280;
+    };
+}
