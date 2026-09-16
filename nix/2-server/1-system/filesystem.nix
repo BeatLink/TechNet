@@ -1,12 +1,7 @@
 # Filesystem
 #
-# This module points disko at the root drive and manages the mounting of the data drive that stores user files,
-# software data and other information.
-# The data drive consists of 2 1TB Hard Drives configured for encrypted ZFS RAID 1. These settings decrypt and mount that
-# storage during boot
-#
-# The mount itself comes from the shared module in 0-common; what is left here is the queue-depth tuning, which exists
-# because this host's data pool is a pair of spinning disks.
+# Points disko at the root drive and tunes the ZFS queue depths for this host's data pool, a mirror of one SSD and one
+# shingled hard disk. The mount itself comes from the shared module in 0-common.
 #
 
 {
@@ -24,12 +19,16 @@
         monthly = 2;
     };
 
-    # Optimizations for slower hard disk drives
+    # Deep queues let the disks sort requests by head position, which is the only thing that makes the shingled drive keep up
     boot.extraModprobeConfig = ''
         options zfs zfs_vdev_max_active=32
-        options zfs zfs_vdev_async_write_max_active=4
-        options zfs zfs_vdev_async_read_max_active=2
-        options zfs zfs_vdev_sync_read_min_active=16
-        options zfs zfs_vdev_scrub_max_active=1
+        options zfs zfs_vdev_async_write_min_active=12
+        options zfs zfs_vdev_async_write_max_active=24
+        options zfs zfs_vdev_async_read_max_active=8
+        options zfs zfs_vdev_sync_read_min_active=10
+        options zfs zfs_vdev_sync_read_max_active=16
+        options zfs zfs_vdev_scrub_min_active=8
+        options zfs zfs_vdev_scrub_max_active=24
+        options zfs zfs_resilver_min_time_ms=6000
     '';
 }
