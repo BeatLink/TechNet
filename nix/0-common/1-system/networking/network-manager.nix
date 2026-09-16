@@ -56,7 +56,6 @@
                     };
                     ipv4 = {
                         method = lib.mkDefault "auto";
-                        gateway = "192.168.0.1";
                         dns = "192.168.0.2";
                     };
                     ipv6.method = "disabled";
@@ -119,13 +118,13 @@
                         id = "TechNet Wireguard (Split Tunnel)";
                         type = "wireguard";
                         interface-name = "wireguard0";
-                        autoconnect = "yes";
+                        autoconnect = "true";
                     };
 
                     wireguard = {
                         private-key = "$WIREGUARD_PRIVATE_KEY";
                         listen-port = "51820";
-                        peer-routes = "yes";
+                        peer-routes = "true";
                     };
                     "wireguard-peer.SLW2DFKk+Cf5K5KZl0OLYrEGyqTCqYHBKV2mTA3W2hQ=" = {
                         endpoint = "$TECHNET_DDNS_HOSTNAME:51820";
@@ -150,7 +149,7 @@
                     wireguard = {
                         private-key = "$WIREGUARD_PRIVATE_KEY";
                         listen-port = "51820";
-                        peer-routes = "yes";
+                        peer-routes = "true";
                     };
                     "wireguard-peer.SLW2DFKk+Cf5K5KZl0OLYrEGyqTCqYHBKV2mTA3W2hQ=" = {
                         endpoint = "$TECHNET_DDNS_HOSTNAME:51820";
