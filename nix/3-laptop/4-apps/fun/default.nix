@@ -7,6 +7,7 @@
         ./itch.nix
         ./lmms.nix
         ./newsflash.nix
+        ./nitrox.nix
         ./picard.nix
         ./quodlibet.nix
         ./steam.nix
