@@ -23,6 +23,10 @@
         # Custom Config for Thor #####################################################################################################################
         {
             networking.networkmanager.ensureProfiles.profiles = {
+                "TechNet Wi-Fi" = {
+                    wifi.band = "bg"; # Thor's rtl8723cs is 2.4GHz only, so the shared 5GHz default matches no AP it can see.
+                    wifi.hidden = lib.mkForce false;
+                };
                 "TechNet WireGuard (Split Tunnel)" = {
                     ipv4.addresses = "10.100.100.4/24";
                 };
