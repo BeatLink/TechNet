@@ -1,5 +1,5 @@
 [/]
-folder-children=['a1c4f0d2-3b5e-4a71-9d2c-6e8f0b1a4d37', 'c3f8a6b1-7d24-4e59-a0c7-5b1e9f2d8a63']
+folder-children=['a1c4f0d2-3b5e-4a71-9d2c-6e8f0b1a4d37', 'c3f8a6b1-7d24-4e59-a0c7-5b1e9f2d8a63', 'b7e2d4a9-8c61-4f30-95ab-2d7c6e0f3b18']
 
 [folders/a1c4f0d2-3b5e-4a71-9d2c-6e8f0b1a4d37]
 apps=['waypipe-discord-heimdall.desktop', 'waypipe-element-heimdall.desktop', 'waypipe-firefox-heimdall.desktop', 'waypipe-freetube.desktop', 'waypipe-gmusicbrowser-heimdall.desktop', 'waypipe-home-assistant.desktop', 'waypipe-keepassxc-heimdall.desktop', 'waypipe-libreoffice-heimdall.desktop', 'waypipe-newsflash-heimdall.desktop', 'waypipe-pix-heimdall.desktop', 'waypipe-quodlibet-heimdall.desktop', 'waypipe-thunderbird-heimdall.desktop', 'waypipe-trilium.desktop', 'waypipe-vlc-heimdall.desktop', 'waypipe-vscodium-heimdall.desktop', 'waypipe-xreader-heimdall.desktop', 'waypipe-xviewer-heimdall.desktop']
@@ -8,3 +8,8 @@ name='Desktop'
 [folders/c3f8a6b1-7d24-4e59-a0c7-5b1e9f2d8a63]
 apps=['ca.andyholmes.Valent.desktop', 'htop.desktop', 'io.github.beatlink.Chargectl.desktop', 'me.gapixels.Megapixels.desktop', 'mobi.phosh.MobileSettings.desktop', 'nemo.desktop', 'org.gnome.Calls.desktop', 'org.gnome.ColorProfileViewer.desktop', 'org.gnome.Extensions.desktop', 'org.gnome.Settings.desktop', 'org.gnome.Terminal.desktop', 'org.x.editor.desktop', 'rygel-preferences.desktop', 'sm.puri.Chatty.desktop']
 name='Native'
+
+[folders/b7e2d4a9-8c61-4f30-95ab-2d7c6e0f3b18]
+apps=['Waydroid.desktop', 'waydroid.com.android.documentsui.desktop', 'waydroid.com.android.gpstest.osmdroid.desktop', 'waydroid.com.android.settings.desktop', 'waydroid.com.android.vending.desktop', 'waydroid.com.grindrapp.android.desktop', 'waydroid.com.tinder.desktop', 'waydroid.com.whatsapp.desktop', 'waydroid.io.appium.settings.desktop', 'waydroid.org.fdroid.fdroid.desktop', 'waydroid.org.lineageos.aperture.desktop', 'waydroid.org.lineageos.eleven.desktop', 'waydroid.org.lineageos.etar.desktop', 'waydroid.org.lineageos.jelly.desktop', 'waydroid.org.mozilla.firefox.desktop']
+categories=['X-WayDroid-App']
+name='Android'
