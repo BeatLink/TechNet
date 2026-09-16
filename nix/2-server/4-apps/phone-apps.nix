@@ -56,25 +56,29 @@ in
                 # Thor has no system tray, so anything that parks the window in one leaves that instance with no window at all
                 thorConfig = (pkgs.formats.ini { }).generate "keepassxc-thor.ini" {
                     General = {
-                        SingleInstance = false; # Otherwise a second launch is handed to the copy still running in an earlier waypipe session, whose display is gone
+                        SingleInstance = true; # The session holds one copy, so a launch from the grid raises its window instead of starting a second
                         MinimizeAfterUnlock = false;
                         HideWindowOnCopy = false;
                         DropToBackgroundOnCopy = false;
                     };
 
                     GUI = {
-                        MinimizeOnStartup = false;
+                        MinimizeOnStartup = true; # Started with the session, so it comes up out of the way of whichever app the launch was actually for
                         MinimizeOnClose = false;
                         MinimizeToTray = false;
                         ShowTrayIcon = false;
                     };
 
-                    SSHAgent.Enabled = false; # There is no agent on this host to add the database's keys to
-                    Browser.Enabled = false; # One proxy socket per user, so a second server would take it from the first
+                    SSHAgent.Enabled = true; # Keys from the database go to the agent below, which every launcher points SSH_AUTH_SOCK at
+                    Browser.Enabled = true; # One proxy socket per user, and the session's own copy is the one instance that holds it
+                    FdoSecrets.Enabled = true; # org.freedesktop.secrets on the session bus, which is the phone's own bus and nothing else's
                 };
             in
             {
                 environment.systemPackages = [ pkgs.keepassxc ];
+
+                # There is no desktop session here to run one, and KeePassXC serves no agent of its own -- it only adds keys to whatever it is pointed at
+                home-manager.users.beatlink.services.ssh-agent.enable = true;
                 systemd.tmpfiles.settings.PhoneApps =
                     dirs [
                         "/Storage/PhoneApps/KeePassXC"
@@ -91,6 +95,8 @@ in
                     };
             }
         )
+        # Written by the browser integration into the home rather than into the profile it serves, so the rollback has to be told to spare it
+        (persist "KeePassXC" [ ".mozilla/native-messaging-hosts" ])
 
         # Trilium ------------------------------------------------------------------------------------------------------------------------------------
         {

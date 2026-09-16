@@ -25,7 +25,9 @@
             "--ozone-platform=wayland"
         ];
 
-        # The codium wrapper reads this to add Wayland decorations and text-input v3, which is what the phone's keyboard needs
-        environment.NIXOS_OZONE_WL = "1";
+        environment = {
+            NIXOS_OZONE_WL = "1"; # The codium wrapper reads this to add Wayland decorations and text-input v3, which is what the phone's keyboard needs
+            SSH_AUTH_SOCK = "/run/user/1000/ssh-agent"; # beatlink's agent on Heimdall, which is where git over ssh finds the keys KeePassXC loaded
+        };
     };
 }
