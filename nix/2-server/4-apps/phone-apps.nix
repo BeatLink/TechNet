@@ -187,6 +187,28 @@ in
             ];
         }
 
+        # Nemo ---------------------------------------------------------------------------------------------------------------------------------------
+        {
+            # Deliberately lean: no nemo-with-extensions and no thumbnailer stack, because every preview it would draw crosses the link as pixels
+            environment.systemPackages = [ pkgs.nemo ];
+        }
+        (persist "Nemo" [
+            ".config/nemo"
+            ".local/share/nemo"
+        ])
+
+        # Xed ----------------------------------------------------------------------------------------------------------------------------------------
+        {
+            environment.systemPackages = [ pkgs.xed-editor ]; # xed-editor, not xed, which is the attribute for Intel's X86 Encoder Decoder
+        }
+        (persist "Xed" [ ".config/xed" ])
+
+        # Valent -------------------------------------------------------------------------------------------------------------------------------------
+        {
+            # 0-common/4-apps/technet/valent already installs this in beatlink's profile and persists its pairings; system-wide is what the ssh session resolves
+            environment.systemPackages = [ pkgs.valent ];
+        }
+
         # gmusicbrowser ------------------------------------------------------------------------------------------------------------------------------
         {
             programs.gmusicbrowser.enable = true; # The flake's NixOS module, which is the one that installs system-wide

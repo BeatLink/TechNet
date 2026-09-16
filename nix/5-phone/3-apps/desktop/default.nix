@@ -12,13 +12,16 @@
         ./home-assistant.nix
         ./keepassxc-heimdall.nix
         ./libreoffice-heimdall.nix
+        ./nemo-heimdall.nix
         ./newsflash-heimdall.nix
         ./pix-heimdall.nix
         ./quodlibet-heimdall.nix
         ./thunderbird-heimdall.nix
         ./trilium.nix
+        ./valent-heimdall.nix
         ./vlc-heimdall.nix
         ./vscodium-heimdall.nix
+        ./xed-heimdall.nix
         ./xreader-heimdall.nix
         ./xviewer-heimdall.nix
     ];

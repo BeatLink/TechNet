@@ -1,13 +1,13 @@
 # Nemo
 #
 # Odin's file manager. Nemo is Cinnamon's, built for a mouse and a wide window,
-# and this is a machine that has both. Thor also runs it now
-# (5-phone/3-apps/native/nemo.nix), having gone to Nautilus and back when GTK4
-# turned out to render in software on a Mali-400.
+# and this is a machine that has both. Thor reaches one too, but the copy it
+# shows is Heimdall's over waypipe (2-server/4-apps/phone-apps.nix), because GTK4
+# rendered in software on a Mali-400 and GTK3 was not worth the card either.
 #
-# Still under 3-laptop rather than 0-common, because the two hosts share only the
+# Still under 3-laptop rather than 0-common, because the hosts share only the
 # package name. Odin's is the full Cinnamon-shaped install with the thumbnailer
-# stack behind it; the phone's is deliberately lean. Keeping them apart also
+# stack behind it; Heimdall's is deliberately lean. Keeping them apart also
 # scopes the dconf export in this directory: 0-common/1-system/desktop/dconf.nix walks
 # 0-common plus the host's own directory, so an export here is loaded on Odin and
 # nowhere else.
