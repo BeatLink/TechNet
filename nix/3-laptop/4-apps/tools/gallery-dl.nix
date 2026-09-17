@@ -41,18 +41,24 @@ let
 
 
         def page_url(kwdict):
-            """Return the page a file is browsable at, or None when the site exposes no such field."""
-            for key in ("post_url", "webpage_url", "gallery_url"):
-                url = kwdict.get(key)
-                if url:
-                    return url
+            """Return the page a file is browsable at, or None when nothing identifies one."""
+            # Site rules come first: they match the address bar, while a site's own post_url can carry a slug the browser drops.
             category = kwdict.get("category")
+            identifier = kwdict.get("id")
             if category == "reddit" and kwdict.get("permalink"):
                 return "https://www.reddit.com" + kwdict["permalink"]
+            if category == "redgifs" and identifier:
+                return "https://www.redgifs.com/watch/%s" % identifier
+            if category == "tumblr" and kwdict.get("blog_name") and identifier:
+                return "https://%s.tumblr.com/post/%s" % (kwdict["blog_name"], identifier)
             if category == "twitter" and kwdict.get("tweet_id"):
                 author = kwdict.get("author") or kwdict.get("user") or {}
                 if author.get("name"):
                     return "https://x.com/%s/status/%s" % (author["name"], kwdict["tweet_id"])
+            for key in ("post_url", "webpage_url", "gallery_url"):
+                url = kwdict.get(key)
+                if url:
+                    return url
             return None
 
 
@@ -61,6 +67,9 @@ let
             url = page_url(kwdict)
             if not url:
                 return
+            # The addon strips one trailing slash before both blocking and checking, so a stored URL keeping one never matches.
+            if url.endswith("/"):
+                url = url[:-1]
             con = connection()
             con.execute("INSERT OR IGNORE INTO urls (url) VALUES (?)", (url,))
             con.commit()
