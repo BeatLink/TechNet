@@ -47,8 +47,8 @@ in
         Service = {
             ExecStart = "${pkgs.waypipe-desktop}/bin/waypipe-desktop run keepassxc-heimdall";
 
-            # The session ending is what stops this, so the ssh it runs being terminated is the ordinary path rather than a failure
-            SuccessExitStatus = "SIGTERM";
+            # The session ending is what stops this, and the ssh it runs reports that as 255 rather than dying of the signal
+            SuccessExitStatus = "SIGTERM 255";
 
             # sshd leaves a remote command running when its link drops, and a copy with a dead display would answer the next session's launch
             ExecStopPost = "-${pkgs.openssh}/bin/ssh -o BatchMode=yes heimdall-waypipe pkill -f KeePassXC/Thor/keepassxc.ini";
