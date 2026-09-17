@@ -5,7 +5,6 @@
 
 {
     imports = [
-        ./hyprland
         ./cinnamon
         ./theme.nix
     ];
