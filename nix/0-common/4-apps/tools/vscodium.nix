@@ -231,6 +231,11 @@ in
             home-manager.users.beatlink =
                 { pkgs, ... }:
                 {
+                    # The tab delete button runs ccm, so the tool travels with the editor rather than only with Odin's own package list.
+                    home.packages = [
+                        inputs.claude-chat-manager.packages.${pkgs.stdenv.hostPlatform.system}.default
+                    ];
+
                     programs.vscodium = {
                         enable = true;
                         mutableExtensionsDir = false;
@@ -271,7 +276,11 @@ in
                                     colinkiama.linter-vala
                                     emeraldwalk.runonsave
                                 ])
-                                ++ [ inputs.halon.packages.${pkgs.stdenv.hostPlatform.system}.halon-vscode-theme ];
+                                ++ [
+                                    inputs.halon.packages.${pkgs.stdenv.hostPlatform.system}.halon-vscode-theme
+                                    # Puts a delete button on a Claude Code conversation's tab; it shells out to the ccm in home.packages above.
+                                    inputs.claude-chat-manager.packages.${pkgs.stdenv.hostPlatform.system}.vscode-extension
+                                ];
                         };
                     };
                 };
