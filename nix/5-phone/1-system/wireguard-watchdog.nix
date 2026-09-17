@@ -7,7 +7,7 @@
 
 { pkgs, lib, ... }:
 let
-    profile = "TechNet Wireguard"; # The id nmcli matches on, which is not the "TechNet WireGuard" attribute name the keyfile is written under.
+    fallbackProfile = "TechNet Wireguard (Split Tunnel)"; # The connection.id nmcli matches on, not the "TechNet WireGuard ..." attribute name the keyfile is written under.
     peer = "10.100.100.1";
     interface = "wireguard0";
 
@@ -34,6 +34,11 @@ let
             nmcli -t -f TYPE,DEVICE connection show --active | grep -qvE '^(wireguard|loopback):|:usb0$'
         }
 
+        # The id of whichever tunnel profile is up, empty when none is.
+        tunnel_profile() {
+            nmcli -t -f TYPE,NAME connection show --active | awk -F: '$1 == "wireguard" { print $2; exit }'
+        }
+
         # True while the kernel reports a handshake recent enough to prove Heimdall answered.
         session_alive() {
             local stamp
@@ -49,10 +54,13 @@ let
 
         # Re-activates the profile, which re-resolves the endpoint's dynamic DNS on the way back up; capped waits so a dispatcher run cannot hang NM.
         bounce() {
-            echo "wireguard-watchdog: bouncing ${profile}"
-            nmcli -w 10 connection down "${profile}" > /dev/null 2>&1 || true
+            local profile
+            profile=$(tunnel_profile)
+            [ -n "$profile" ] || profile="${fallbackProfile}"
+            echo "wireguard-watchdog: bouncing $profile"
+            nmcli -w 10 connection down "$profile" > /dev/null 2>&1 || true
             sleep 2
-            nmcli -w 20 connection up "${profile}" > /dev/null 2>&1 || echo "wireguard-watchdog: bring-up failed"
+            nmcli -w 20 connection up "$profile" > /dev/null 2>&1 || echo "wireguard-watchdog: bring-up failed"
         }
     '';
 
@@ -96,7 +104,7 @@ let
 
         # The tunnel roams across links on its own, so this is only for the cases it cannot: a profile that never came up, and an endpoint whose
         # address belongs to the network just left.
-        nmcli -t -f NAME connection show --active | grep -qxF "${profile}" && session_alive && exit 0
+        [ -n "$(tunnel_profile)" ] && session_alive && exit 0
 
         echo "wireguard-watchdog: $1 came up without a live tunnel"
         bounce
