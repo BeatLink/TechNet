@@ -9,6 +9,5 @@
         ./auto-upgrade.nix
         ./garbage-collection.nix
         ./packages.nix
-        ./overlay-lint.nix
     ];
 }
