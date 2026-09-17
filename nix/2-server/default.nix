@@ -6,6 +6,5 @@
         ./1-system
         ./3-services
         ./4-apps
-        ./overlays.nix
     ];
 }
