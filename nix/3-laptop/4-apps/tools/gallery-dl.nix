@@ -13,16 +13,51 @@ let
     apiKeyFile = config.sops.secrets.blockurl_api_key.path;
 
     stateDir = "/Storage/Apps/Tools/Gallery-DL/blockurl"; # Beside the archives the hand-written config.json already keeps there
-    pendingLog = "${stateDir}/pending.txt";
-    cursorFile = "${stateDir}/cursor";
+    database = "${stateDir}/urls.sqlite3";
+    seenMarker = "${stateDir}/posts-seen";
+    resolvedMarker = "${stateDir}/urls-resolved";
 
     # Resolves the browsable page a downloaded post came from; extend the per-site rules as new sites come up.
     recorder = pkgs.writeText "blockurl-record.py" ''
-        """Append the page URL of each post gallery-dl downloads to the BlockURL pending log."""
+        """Record the page URL of each post gallery-dl downloads, as a gallery-dl hook or as a script taking URLs."""
 
         import os
+        import sqlite3
 
-        LOG = "${pendingLog}"
+        DB = "${database}"
+        SEEN = "${seenMarker}"
+        RESOLVED = "${resolvedMarker}"
+
+        _connection = None
+
+
+        def connection():
+            """Open the URL database once per run, creating it on first use."""
+            global _connection
+            if _connection is None:
+                os.makedirs(os.path.dirname(DB), exist_ok=True)
+                _connection = sqlite3.connect(DB, timeout=60)
+                _connection.execute(
+                    "CREATE TABLE IF NOT EXISTS urls (url TEXT PRIMARY KEY, sent INTEGER NOT NULL DEFAULT 0)"
+                )
+                _connection.commit()
+            return _connection
+
+
+        def touch(path):
+            """Rewrite a marker so the wrapper can see this run reached it."""
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w", encoding="utf-8") as handle:
+                handle.write("\n")
+
+
+        def remember(url):
+            """Add a URL to the database, and mark that this run resolved one."""
+            con = connection()
+            con.execute("INSERT OR IGNORE INTO urls (url) VALUES (?)", (url,))
+            con.commit()
+            # Touched even for a URL already held, so a repeat run still counts as having resolved one.
+            touch(RESOLVED)
 
 
         def page_url(kwdict):
@@ -42,35 +77,44 @@ let
 
 
         def record(kwdict):
-            """Post hook: log the post's page URL, leaving the sync timer to send it on."""
+            """Post hook: note the post's page URL, leaving the sync timer to send it on."""
+            touch(SEEN)
             url = page_url(kwdict)
-            if not url:
-                return
-            os.makedirs(os.path.dirname(LOG), exist_ok=True)
-            with open(LOG, "a", encoding="utf-8") as log:
-                log.write(url + "\n")
+            if url:
+                remember(url)
+
+
+        if __name__ == "__main__":
+            import sys
+
+            for argument in sys.argv[1:]:
+                remember(argument)
     '';
 
-    # Falls back to the URL handed to gallery-dl when the run recorded no page of its own, which is the only URL a booru or a forum offers.
+    # Falls back to the URL handed to gallery-dl when posts were downloaded but none exposed a page, which is all a booru or a forum offers.
     galleryDl = pkgs.writeShellApplication {
         name = "gallery-dl";
         runtimeInputs = [ pkgs.coreutils ];
         text = ''
-            log=${lib.escapeShellArg pendingLog}
+            seen=${lib.escapeShellArg seenMarker}
+            resolved=${lib.escapeShellArg resolvedMarker}
 
-            size() {
-                if [ -e "$log" ]; then stat -c %s "$log"; else echo 0; fi
+            stamp() {
+                if [ -e "$1" ]; then stat -c %y "$1"; else echo none; fi
             }
 
-            before=$(size)
+            # Both markers are needed: --simulate and --dump-json exit 0 without running a single hook, and must not block the page.
+            seen_before=$(stamp "$seen")
+            resolved_before=$(stamp "$resolved")
             status=0
             ${pkgs.gallery-dl}/bin/gallery-dl "$@" || status=$?
 
-            if [ "$status" -eq 0 ] && [ "$(size)" = "$before" ]; then
-                mkdir -p "$(dirname "$log")"
+            if [ "$status" -eq 0 ] &&
+               [ "$(stamp "$seen")" != "$seen_before" ] &&
+               [ "$(stamp "$resolved")" = "$resolved_before" ]; then
                 for argument in "$@"; do
                     case "$argument" in
-                        http://*|https://*) printf '%s\n' "$argument" >>"$log" ;;
+                        http://*|https://*) ${pkgs.python3}/bin/python3 ${recorder} "$argument" ;;
                         *) ;;
                     esac
                 done
@@ -83,14 +127,14 @@ let
     sync = pkgs.writers.writePython3Bin "gallery-dl-blockurl-sync" { flakeIgnore = [ "E501" ]; } ''
         import json
         import os
+        import sqlite3
         import sys
         import urllib.error
         import urllib.request
 
         API = "${apiUrl}"
         KEY_FILE = "${apiKeyFile}"
-        LOG = "${pendingLog}"
-        CURSOR = "${cursorFile}"
+        DB = "${database}"
         BATCH = 1000
 
 
@@ -98,29 +142,6 @@ let
             """Read the key out of the NAME=value line the secret is stored as."""
             line = open(KEY_FILE, encoding="utf-8").read().strip()
             return line.partition("=")[2] if "=" in line else line
-
-
-        def cursor():
-            """Byte offset in the log up to which URLs have already been sent."""
-            try:
-                return int(open(CURSOR, encoding="utf-8").read().strip() or 0)
-            except (OSError, ValueError):
-                return 0
-
-
-        def pending(start):
-            """URLs written to the log since 'start', and the offset they end at."""
-            with open(LOG, "rb") as log:
-                log.seek(start)
-                data = log.read()
-            # Stop at the last newline, so a line gallery-dl is midway through writing is left for tomorrow.
-            data = data[: data.rfind(b"\n") + 1]
-            urls = []
-            for line in data.decode("utf-8", "replace").splitlines():
-                line = line.strip()
-                if line.startswith(("http://", "https://")) and line not in urls:
-                    urls.append(line)
-            return urls, start + len(data)
 
 
         def block(key, urls):
@@ -136,27 +157,26 @@ let
 
 
         def main():
-            if not os.path.exists(LOG):
+            if not os.path.exists(DB):
                 print("nothing downloaded yet", flush=True)
                 return
-            start = cursor()
-            if os.path.getsize(LOG) < start:
-                start = 0
-            urls, end = pending(start)
-            if urls:
-                key = api_key()
-                for index in range(0, len(urls), BATCH):
-                    block(key, urls[index:index + BATCH])
-            if end != start:
-                with open(CURSOR, "w", encoding="utf-8") as handle:
-                    handle.write(str(end))
-            print("blocked", len(urls), "new URLs", flush=True)
+            con = sqlite3.connect(DB, timeout=60)
+            urls = [row[0] for row in con.execute("SELECT url FROM urls WHERE sent = 0")]
+            sent = 0
+            for index in range(0, len(urls), BATCH):
+                batch = urls[index:index + BATCH]
+                block(api_key(), batch)
+                # Marked a batch at a time, so a failure part way through does not resend what BlockURL already took.
+                con.executemany("UPDATE urls SET sent = 1 WHERE url = ?", [(url,) for url in batch])
+                con.commit()
+                sent += len(batch)
+            con.close()
+            print("blocked", sent, "new URLs", flush=True)
 
 
         try:
             main()
-        except (urllib.error.URLError, OSError) as error:
-            # The cursor is left where it was, so an unreachable server just means tomorrow's run sends today's URLs too.
+        except (urllib.error.URLError, OSError, sqlite3.Error) as error:
             print("blockurl sync failed:", error, file=sys.stderr, flush=True)
             sys.exit(1)
     '';
