@@ -14,19 +14,15 @@ let
 
     stateDir = "/Storage/Apps/Tools/Gallery-DL/blockurl"; # Beside the archives the hand-written config.json already keeps there
     database = "${stateDir}/urls.sqlite3";
-    downloadedMarker = "${stateDir}/files-downloaded";
-    resolvedMarker = "${stateDir}/urls-resolved";
 
-    # Resolves the browsable page a downloaded post came from; extend the per-site rules as new sites come up.
+    # Resolves the browsable page a downloaded file came from; extend the per-site rules as new sites come up.
     recorder = pkgs.writeText "blockurl-record.py" ''
-        """Record the page URL behind each file gallery-dl downloads, as a gallery-dl hook or as a script taking URLs."""
+        """Record the page URL behind each file gallery-dl has downloaded."""
 
         import os
         import sqlite3
 
         DB = "${database}"
-        DOWNLOADED = "${downloadedMarker}"
-        RESOLVED = "${resolvedMarker}"
 
         _connection = None
 
@@ -44,24 +40,8 @@ let
             return _connection
 
 
-        def touch(path):
-            """Rewrite a marker so the wrapper can see this run reached it."""
-            os.makedirs(os.path.dirname(path), exist_ok=True)
-            with open(path, "w", encoding="utf-8") as handle:
-                handle.write("\n")
-
-
-        def remember(url):
-            """Add a URL to the database, and mark that this run resolved one."""
-            con = connection()
-            con.execute("INSERT OR IGNORE INTO urls (url) VALUES (?)", (url,))
-            con.commit()
-            # Touched even for a URL already held, so a repeat run still counts as having resolved one.
-            touch(RESOLVED)
-
-
         def page_url(kwdict):
-            """Return the page a post is browsable at, or None when the site exposes no such field."""
+            """Return the page a file is browsable at, or None when the site exposes no such field."""
             for key in ("post_url", "webpage_url", "gallery_url"):
                 url = kwdict.get(key)
                 if url:
@@ -77,52 +57,14 @@ let
 
 
         def record(kwdict):
-            """Download hook: note the page behind a finished file, leaving the sync timer to send it on."""
-            touch(DOWNLOADED)
+            """Download hook: note the page behind a file that is on disk, leaving the sync timer to send it on."""
             url = page_url(kwdict)
-            if url:
-                remember(url)
-
-
-        if __name__ == "__main__":
-            import sys
-
-            for argument in sys.argv[1:]:
-                remember(argument)
+            if not url:
+                return
+            con = connection()
+            con.execute("INSERT OR IGNORE INTO urls (url) VALUES (?)", (url,))
+            con.commit()
     '';
-
-    # Falls back to the URL handed to gallery-dl when files were downloaded but none exposed a page, which is all a booru or a forum offers.
-    galleryDl = pkgs.writeShellApplication {
-        name = "gallery-dl";
-        runtimeInputs = [ pkgs.coreutils ];
-        text = ''
-            downloaded=${lib.escapeShellArg downloadedMarker}
-            resolved=${lib.escapeShellArg resolvedMarker}
-
-            stamp() {
-                if [ -e "$1" ]; then stat -c %y "$1"; else echo none; fi
-            }
-
-            # Both markers are needed: --simulate and --dump-json exit 0 without running a single hook, and must not block the page.
-            downloaded_before=$(stamp "$downloaded")
-            resolved_before=$(stamp "$resolved")
-            status=0
-            ${pkgs.gallery-dl}/bin/gallery-dl "$@" || status=$?
-
-            if [ "$status" -eq 0 ] &&
-               [ "$(stamp "$downloaded")" != "$downloaded_before" ] &&
-               [ "$(stamp "$resolved")" = "$resolved_before" ]; then
-                for argument in "$@"; do
-                    case "$argument" in
-                        http://*|https://*) ${pkgs.python3}/bin/python3 ${recorder} "$argument" ;;
-                        *) ;;
-                    esac
-                done
-            fi
-
-            exit "$status"
-        '';
-    };
 
     sync = pkgs.writers.writePython3Bin "gallery-dl-blockurl-sync" { flakeIgnore = [ "E501" ]; } ''
         import json
@@ -201,17 +143,15 @@ in
                 extractor.postprocessors = [
                     {
                         name = "python";
-                        event = "after"; # Only this hook runs past finalize(); "post" fires before a byte is downloaded
+                        # Both hooks run only for a file that is on disk; a failed download goes to the error hook instead.
+                        event = "after,skip";
                         function = "${recorder}:record";
                     }
                 ];
             };
 
             home-manager.users.beatlink = {
-                programs.gallery-dl = {
-                    enable = true;
-                    package = galleryDl;
-                };
+                programs.gallery-dl.enable = true;
 
                 home.persistence."/Storage/Apps/Tools/Gallery-DL".directories = [
                     ".config/gallery-dl"
