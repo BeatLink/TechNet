@@ -17,8 +17,9 @@
 let
     cfg = config.technet.waypipe;
 
-    # The audio socket is the only forwarding a session needs, so the key is denied everything else a shell on the far side would reach
-    thorToHeimdall = "restrict,port-forwarding ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKVJQ2vYs4+U7rJz4COohgtzTa5k/wXNOtJpX7k6YUjg waypipe-thor-to-heimdall";
+    thorConfig = inputs.self.nixosConfigurations.Thor.config;
+
+    thorToHeimdall = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKVJQ2vYs4+U7rJz4COohgtzTa5k/wXNOtJpX7k6YUjg waypipe-thor-to-heimdall";
 in
 {
     imports = [ inputs.waypipe-desktop.nixosModules.default ];
@@ -91,6 +92,13 @@ in
                 enable = true;
                 user = "beatlink";
                 authorizedKeys = [ thorToHeimdall ];
+
+                # Read from the host that displays them, so the key allows exactly the apps that host offers and nothing is written out twice
+                sessions = [ (lib.toLower thorConfig.networking.hostName) ];
+                apps = lib.mapAttrsToList (_: app: {
+                    inherit (app) command;
+                    environment = lib.attrNames (app.environment or { });
+                }) thorConfig.technet.waypipe.apps;
             };
         })
     ];
