@@ -26,6 +26,7 @@
                     ipv4 = {
                         method = "manual";
                         addresses = "192.168.0.3/24";
+                        gateway = "192.168.0.1"; # Static addressing runs no DHCP, so without this nothing gives the main table a default route.
                     };
                 };
                 "TechNet WireGuard (Split Tunnel)" = {
