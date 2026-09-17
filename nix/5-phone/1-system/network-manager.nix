@@ -32,7 +32,7 @@
                 };
                 "TechNet WireGuard (Full Tunnel)" = {
                     ipv4.addresses = "10.100.100.4/24";
-
+                    connection.autoconnect = "false"; # Both profiles claim wireguard0, so only the split tunnel comes up on its own.
                 };
             };
         }
