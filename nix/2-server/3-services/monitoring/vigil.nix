@@ -1438,6 +1438,8 @@ in
                                             interval = "15m";
                                             api_url = "http://127.0.0.1:9001";
                                             api_key_command = "cut -d= -f2- /run/secrets/blockurl_api_key";
+                                            # The write probe lands on the data-pool mirror, where a cold write outlasts the 10s default.
+                                            api_timeout = 30;
                                             agent = "heimdall";
                                         }
                                     ];
