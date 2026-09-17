@@ -74,9 +74,10 @@
             url = "github:/BeatLink/Plank-Separator";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        # Deliberately does NOT follow nixpkgs: its CI builds this package against its own pin and pushes the result to claude-code.cachix.org, and
+        # overriding nixpkgs changes the derivation and turns a substitution back into a local build of a 216MB closure on every bump.
         claude-code = {
             url = "github:sadjow/claude-code-nix";
-            inputs.nixpkgs.follows = "nixpkgs";
         };
         calibre-web-automated = {
             url = "github:BeatLink/Calibre-Web-Automated/nix-packing-final";
