@@ -21,10 +21,15 @@
         # the profile is the only durable knob. power-saver holds the ceiling at the 3.3GHz base clock, which is boost off in all but name.
         #
         # Nothing here binds a game: selecting performance restores the full 4.28GHz ceiling and the performance governor, overriding this outright.
+        # Upstream orders the daemon after multi-user.target, and a target is implicitly ordered after everything it wants, so asking for this from
+        # multi-user.target is a cycle systemd breaks by dropping this job -- hooking it to the later graphical.target is what lets it run at all.
         systemd.services.default-power-profile = {
             description = "Select the power-saver profile at boot";
-            wantedBy = [ "multi-user.target" ];
-            after = [ "power-profiles-daemon.service" ];
+            wantedBy = [ "graphical.target" ];
+            after = [
+                "multi-user.target"
+                "power-profiles-daemon.service"
+            ];
             requires = [ "power-profiles-daemon.service" ];
             serviceConfig = {
                 Type = "oneshot";
