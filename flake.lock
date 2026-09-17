@@ -997,11 +997,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789677270,
-        "narHash": "sha256-9vv+5cNcorrh7Y9wIi3JdjvFwoEL0YeitPrjVYpI3OM=",
+        "lastModified": 1789678436,
+        "narHash": "sha256-OXjR8avfbGxHm1m4kft2TCACJEF/ZvjE8pl//LOC6gA=",
         "owner": "BeatLink",
         "repo": "WaypipeDesktop",
-        "rev": "7d6426bf131555f14fef3addd12dc95005402c0d",
+        "rev": "379d91835a8bcd6c9b0c1013a8804785a66e2024",
         "type": "github"
       },
       "original": {
