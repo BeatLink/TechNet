@@ -49,6 +49,10 @@
             url = "github:BeatLink/Halon";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        claude-chat-manager = {
+            url = "github:BeatLink/claude-chat-manager";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
         # Patches the Steam client so it loads CSS themes; Odin's Steam package comes from here
         millennium = {
             url = "github:SteamClientHomebrew/Millennium?dir=packages/nix";

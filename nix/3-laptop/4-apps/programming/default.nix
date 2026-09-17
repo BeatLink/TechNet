@@ -1,5 +1,6 @@
 {
     imports = [
+        ./claude-chat-manager.nix
         ./claude-desktop.nix
         ./gh.nix
         ./nodejs.nix

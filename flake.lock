@@ -108,6 +108,26 @@
         "type": "github"
       }
     },
+    "claude-chat-manager": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789657118,
+        "narHash": "sha256-iEQbyBoh6APGy/OQpphZzYwLdGbar7shja+XIok6enw=",
+        "owner": "BeatLink",
+        "repo": "claude-chat-manager",
+        "rev": "2ee5400f2e929500ff21eb8905e6bdb992e62cbd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BeatLink",
+        "repo": "claude-chat-manager",
+        "type": "github"
+      }
+    },
     "claude-code": {
       "inputs": {
         "nixpkgs": "nixpkgs",
@@ -796,6 +816,7 @@
         "atuin-web": "atuin-web",
         "blockurl": "blockurl",
         "calibre-web-automated": "calibre-web-automated",
+        "claude-chat-manager": "claude-chat-manager",
         "claude-code": "claude-code",
         "context": "context",
         "disko": "disko",
