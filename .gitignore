@@ -8,3 +8,5 @@ id_rsa
 
 result
 result-*
+
+startup-metrics.log
