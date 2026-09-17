@@ -52,7 +52,8 @@ let
         after = [ "network-online.target" ];
         path = [ pkgs.atuin ];
         script = ''
-            if [ -s "$HOME/.local/share/atuin/session" ]; then exit 0; fi
+            # Atuin keeps the session in meta.db, not a session file, so its exit code is the only login check
+            if atuin status >/dev/null 2>&1; then exit 0; fi
             atuin login --username "$ATUIN_USERNAME" --password "$ATUIN_PASSWORD" --key "$ATUIN_KEY"
         '';
         serviceConfig = {

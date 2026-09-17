@@ -119,8 +119,19 @@ sops secrets/0-common/atuin.yaml
 ```
 
 `atuin-login-beatlink` and `atuin-login-root` read that file on every host and
-log in once per install, skipping the call when a session already exists. Until
-the placeholders are replaced both units sit in `failed` and retry every minute.
+log in once per install, skipping the call when `atuin status` already reports a
+login. Until the placeholders are replaced both units sit in `failed` and retry
+every minute.
+
+A host's pre-existing `HISTFILE` is folded in once, per host and per user:
+
+```sh
+atuin import bash                 # reads $HISTFILE
+atuin sync
+```
+
+Bash writes no timestamps here, so the imported commands are spread over
+synthetic times before the import; searching is unaffected.
 
 ## Mirroring the PinePhone kernel
 
