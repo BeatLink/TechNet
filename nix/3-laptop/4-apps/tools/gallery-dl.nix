@@ -14,18 +14,18 @@ let
 
     stateDir = "/Storage/Apps/Tools/Gallery-DL/blockurl"; # Beside the archives the hand-written config.json already keeps there
     database = "${stateDir}/urls.sqlite3";
-    seenMarker = "${stateDir}/posts-seen";
+    downloadedMarker = "${stateDir}/files-downloaded";
     resolvedMarker = "${stateDir}/urls-resolved";
 
     # Resolves the browsable page a downloaded post came from; extend the per-site rules as new sites come up.
     recorder = pkgs.writeText "blockurl-record.py" ''
-        """Record the page URL of each post gallery-dl downloads, as a gallery-dl hook or as a script taking URLs."""
+        """Record the page URL behind each file gallery-dl downloads, as a gallery-dl hook or as a script taking URLs."""
 
         import os
         import sqlite3
 
         DB = "${database}"
-        SEEN = "${seenMarker}"
+        DOWNLOADED = "${downloadedMarker}"
         RESOLVED = "${resolvedMarker}"
 
         _connection = None
@@ -77,8 +77,8 @@ let
 
 
         def record(kwdict):
-            """Post hook: note the post's page URL, leaving the sync timer to send it on."""
-            touch(SEEN)
+            """Download hook: note the page behind a finished file, leaving the sync timer to send it on."""
+            touch(DOWNLOADED)
             url = page_url(kwdict)
             if url:
                 remember(url)
@@ -91,12 +91,12 @@ let
                 remember(argument)
     '';
 
-    # Falls back to the URL handed to gallery-dl when posts were downloaded but none exposed a page, which is all a booru or a forum offers.
+    # Falls back to the URL handed to gallery-dl when files were downloaded but none exposed a page, which is all a booru or a forum offers.
     galleryDl = pkgs.writeShellApplication {
         name = "gallery-dl";
         runtimeInputs = [ pkgs.coreutils ];
         text = ''
-            seen=${lib.escapeShellArg seenMarker}
+            downloaded=${lib.escapeShellArg downloadedMarker}
             resolved=${lib.escapeShellArg resolvedMarker}
 
             stamp() {
@@ -104,13 +104,13 @@ let
             }
 
             # Both markers are needed: --simulate and --dump-json exit 0 without running a single hook, and must not block the page.
-            seen_before=$(stamp "$seen")
+            downloaded_before=$(stamp "$downloaded")
             resolved_before=$(stamp "$resolved")
             status=0
             ${pkgs.gallery-dl}/bin/gallery-dl "$@" || status=$?
 
             if [ "$status" -eq 0 ] &&
-               [ "$(stamp "$seen")" != "$seen_before" ] &&
+               [ "$(stamp "$downloaded")" != "$downloaded_before" ] &&
                [ "$(stamp "$resolved")" = "$resolved_before" ]; then
                 for argument in "$@"; do
                     case "$argument" in
@@ -201,7 +201,7 @@ in
                 extractor.postprocessors = [
                     {
                         name = "python";
-                        event = "post";
+                        event = "after"; # Only this hook runs past finalize(); "post" fires before a byte is downloaded
                         function = "${recorder}:record";
                     }
                 ];
