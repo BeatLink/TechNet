@@ -119,10 +119,6 @@
             inputs.nixpkgs.follows = "nixpkgs";
         };
 
-        prewarm = {
-            url = "github:BeatLink/Prewarm";
-            inputs.nixpkgs.follows = "nixpkgs";
-        };
         waypipe-desktop = {
             url = "github:BeatLink/WaypipeDesktop";
             inputs.nixpkgs.follows = "nixpkgs";

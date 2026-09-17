@@ -55,7 +55,7 @@ let
         # Nothing in the session is worth freezing; only a unit that resumes cleanly mid-work belongs here.
         suspendUnits = [ ];
         # Reached through the sudo helper below, not the session's own systemctl.
-        suspendSystemUnits = [ "prewarm-watch.service" ];
+        suspendSystemUnits = [ ];
         # Above the 11s an app took to cold-start here, or switching apps thaws
         # and refreezes in the gap between the two.
         thawDelay = 15;
