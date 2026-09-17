@@ -5,5 +5,6 @@
         ./git.nix
         ./borg.nix
         ./vscodium.nix
+        ./claude-code.nix
     ];
 }
