@@ -177,6 +177,7 @@ Both halves are now fixed; see *Work done*.
 | 3b | Heimdall emulates aarch64 and preseeds all four hosts nightly | `nix/2-server/3-services/technet/cache-preseed.nix` |
 | 4 | Overlay no-op warning, raised during every rebuild | `nix/0-common/1-system/software/overlay-lint.nix` |
 | 5 | `claude-code` no longer follows nixpkgs, and is taken from its own flake | `flake.nix`, `nix/0-common/4-apps/tools/claude-code.nix` |
+| 6 | Dropped `apps.lint`, whose script `0faafb6b` deleted, so the flake's outputs evaluate again | `flake.nix` |
 
 ### The overlay no-op warning
 
@@ -215,11 +216,6 @@ still build it. Nothing on Thor or Ragnarok does.
 
 ## Still open
 
-- `flake.nix` still defines `apps.lint` from `./lint/report.sh`, which commit `0faafb6b`
-  ("Remove unnecessary files") deleted. Anything that evaluates the flake's `apps` —
-  `nix flake check`, `nix flake show`, `nix run .#lint` — fails with
-  `Path 'lint/report.sh' does not exist in Git repository`. The host configurations are
-  unaffected.
 - `cinnamon-bump` and `phosh-bump` remain the two standing multi-package rebuilds. They are
   correct today; re-check them on each nixpkgs bump, which the warning above will not do for
   you, because a version bump is a real change rather than a no-op.
