@@ -5,6 +5,14 @@
 
 { lib, pkgs, ... }:
 let
+    # Persists one of root's data directories, unreadable by anyone else at its source path under /persistent.
+    rootState = directory: {
+        inherit directory;
+        user = "root";
+        group = "root";
+        mode = "0700";
+    };
+
     powerlineModules = [
         "user"
         "host"
@@ -47,6 +55,8 @@ in
                 historyControl = [ "ignoreboth" ];
                 historyFile = "/root/.local/share/bash/history";
             };
+
+            environment.persistence."/persistent".directories = [ (rootState "/root/.local/share/bash") ];
         }
 
         # Shell Aliases ##############################################################################################################################
