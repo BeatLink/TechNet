@@ -175,10 +175,11 @@ in
         owner = "vigil";
     };
 
-    # FreeDNS's per-host dynamic update URL — a secret, account-specific URL that updates the record to the caller's apparent IP on GET. Read by the
-    # "DDNS" monitor's ddns_updater plugin (update_url_file) below. Replaces the standalone ddns-updater service.
-    sops.secrets.freedns_update_url = {
-        sopsFile = "${config.technet.secrets.path}/vigil.yaml";
+    # The record's own update URL — a secret, account-specific URL that points it at the caller's apparent IP on GET. It sits beside the hostname in
+    # ddns.yaml because the two are reissued together whenever the record is rotated.
+    sops.secrets.ddns_sync_url = {
+        sopsFile = "${config.technet.secrets.commonPath}/ddns.yaml";
+        key = "sync_url";
         owner = "vigil";
     };
 
@@ -898,7 +899,7 @@ in
                                     domain_file = config.sops.templates."vigil-ddns-domain".path;
                                     record_type = "A";
                                     resolver = "8.8.8.8";
-                                    update_url_file = config.sops.secrets.freedns_update_url.path;
+                                    update_url_file = config.sops.secrets.ddns_sync_url.path;
                                     interval = "5m";
                                 }
                                 {
