@@ -140,10 +140,17 @@ history at `https://atuin-web.heimdall.technet/`. It is read-only and keeps no
 account of its own — it proxies to the atuin server on loopback, and a visitor
 signs in with the same credentials the hosts use.
 
-The package comes from a fork pinned in `flake.nix`, because the Nix packaging
-is still in review as
-[josegonzalez/atuin-web#81](https://github.com/josegonzalez/atuin-web/pull/81).
-Repoint the input at `github:josegonzalez/atuin-web` once it merges.
+The package comes from a fork pinned in `flake.nix`, carrying two changes still
+in review upstream: the Nix packaging
+([josegonzalez/atuin-web#81](https://github.com/josegonzalez/atuin-web/pull/81))
+and a fix for the records page showing only one host's records
+([#82](https://github.com/josegonzalez/atuin-web/pull/82)). Repoint the input at
+`github:josegonzalez/atuin-web` once both merge.
+
+Records are decrypted in the browser, never on the server, so the history reads
+as PASETO ciphertext until the atuin encryption key from
+`secrets/0-common/atuin.yaml` is entered in the UI. It is held in `sessionStorage`
+and never sent to the server.
 
 Setting `ATUIN_WEB_TOKEN` through the module's `environmentFile` would drop the
 login prompt and show the history to anyone who can reach the vhost; it is

@@ -49,11 +49,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1789654398,
-        "narHash": "sha256-C9CcdJhI8zl6iRnWHqL1bsuPbPckhNaCfzSg7WEaMho=",
+        "lastModified": 1789662850,
+        "narHash": "sha256-Hi0g3hV1dC/tM53jVnoIlBtvoUsUORhSVrM8MEtfu50=",
         "owner": "BeatLink",
         "repo": "atuin-web",
-        "rev": "7df7335409133c20091886a51e41a8eae427b6d7",
+        "rev": "568e894e212f89e544b209f30eccec0cd3fff0ba",
         "type": "github"
       },
       "original": {
