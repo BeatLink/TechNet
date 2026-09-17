@@ -262,6 +262,7 @@ in
                                     vitest.explorer
                                     tomoki1207.pdf
                                     vivaxy.vscode-conventional-commits
+                                    jackiotyu.git-worktree-manager
                                 ]
                                 ++ (with pkgs.nix-vscode-extensions.vscode-marketplace; [
                                     fnando.linter
