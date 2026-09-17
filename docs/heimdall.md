@@ -31,7 +31,7 @@ Grouped by directory under [`3-services`](../nix/2-server/3-services):
 | `fun-and-media` | calibre-web-automated, freshrss, gallery-dl, jackett, qbittorrent, vlc |
 | `home-automation` | esphome, frigate, home-assistant, lnxlink, mosquitto |
 | `monitoring` | homepage, vigil |
-| `technet` | attic |
+| `technet` | attic, atuin |
 | `backups` | borg, borgmatic, stremio-export |
 
 Port assignments are tracked in
@@ -87,6 +87,40 @@ dominate the repo. The persisted path is `/var/lib/private/atticd`, not
 `/var/lib/atticd`: atticd runs under `DynamicUser`, so systemd owns the private
 path and leaves the shorter one as a symlink. Binding over `/var/lib/atticd`
 makes systemd try to migrate a mountpoint and the unit dies with `EBUSY`.
+
+## Shell history
+
+Heimdall runs [Atuin](../nix/2-server/3-services/technet/atuin.nix) at
+`https://atuin.heimdall.technet/` as the fleet's shell history store. Every host
+records `beatlink` and `root` shell commands into it end-to-end encrypted, so
+Ctrl-R on any host searches the whole fleet's history. Plain `HISTFILE` is left
+in place alongside it and still backs the up-arrow.
+
+Registration is not declarative, and the server refuses it by default. Open it
+for one call, register, then take the override away:
+
+```sh
+# On Heimdall.
+sudo mkdir -p /run/systemd/system/atuin.service.d
+printf '[Service]\nEnvironment=ATUIN_OPEN_REGISTRATION=true\n' \
+    | sudo tee /run/systemd/system/atuin.service.d/register.conf
+sudo systemctl daemon-reload && sudo systemctl restart atuin
+atuin register -u beatlink -e <email> -p <password>
+atuin key                         # prints the encryption key
+sudo rm -r /run/systemd/system/atuin.service.d
+sudo systemctl daemon-reload && sudo systemctl restart atuin
+```
+
+The password and key then go into `secrets/0-common/atuin.yaml`, which ships
+with `CHANGEME` placeholders:
+
+```sh
+sops secrets/0-common/atuin.yaml
+```
+
+`atuin-login-beatlink` and `atuin-login-root` read that file on every host and
+log in once per install, skipping the call when a session already exists. Until
+the placeholders are replaced both units sit in `failed` and retry every minute.
 
 ## Mirroring the PinePhone kernel
 

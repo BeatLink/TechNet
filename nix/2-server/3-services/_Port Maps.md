@@ -59,6 +59,7 @@ column, and their service definition lives in that host's own directory.
 | Service | Port | Vhost / Notes |
 |---------|------|---------------|
 | Attic (binary cache) | 9400 | 127.0.0.1; attic.heimdall.technet |
+| Atuin (shell history sync) | 9410 | 127.0.0.1; atuin.heimdall.technet — API only, no web UI |
 
 ## Personal Info & Files
 
@@ -82,6 +83,7 @@ from Heimdall to confirm the web stack is reachable:
 * Pi-hole - https://pi-hole.heimdall.technet
 * Homepage - https://homepage.heimdall.technet
 * Jackett - https://jackett.heimdall.technet
+* Atuin - https://atuin.heimdall.technet/healthz
 
 Beyond that generic reachability probe, a few services get a dedicated
 app-aware Vigil plugin that checks the service is actually doing its job, not

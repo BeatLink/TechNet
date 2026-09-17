@@ -3,7 +3,12 @@
 # The interactive shell for beatlink and root, plus the command line tools every host carries.
 #
 
-{ lib, pkgs, ... }:
+{
+    config,
+    lib,
+    pkgs,
+    ...
+}:
 let
     # Persists one of root's data directories, unreadable by anyone else at its source path under /persistent.
     rootState = directory: {
@@ -26,6 +31,39 @@ let
         "jobs"
         "root"
     ];
+
+    atuinClient = {
+        enable = true;
+        forceOverwriteSettings = true;
+        flags = [ "--disable-up-arrow" ];
+        settings = {
+            auto_sync = true;
+            sync_address = "https://atuin.heimdall.technet";
+            sync_frequency = "5m";
+            update_check = false;
+        };
+    };
+
+    # Claims this host's shell for the shared history account, once per user per install.
+    atuinLogin = user: {
+        description = "Log ${user} in to the TechNet shell history server";
+        wantedBy = [ "multi-user.target" ];
+        wants = [ "network-online.target" ];
+        after = [ "network-online.target" ];
+        path = [ pkgs.atuin ];
+        script = ''
+            if [ -s "$HOME/.local/share/atuin/session" ]; then exit 0; fi
+            atuin login --username "$ATUIN_USERNAME" --password "$ATUIN_PASSWORD" --key "$ATUIN_KEY"
+        '';
+        serviceConfig = {
+            Type = "oneshot";
+            User = user;
+            RemainAfterExit = true;
+            EnvironmentFile = config.sops.secrets.atuin_login.path;
+            Restart = "on-failure"; # Allowed for oneshot, unlike always, and the only retry a host that booted off-network gets
+            RestartSec = 60;
+        };
+    };
 in
 {
     config = lib.mkMerge [
@@ -57,6 +95,27 @@ in
             };
 
             environment.persistence."/persistent".directories = [ (rootState "/root/.local/share/bash") ];
+        }
+
+        # Shell History Sync #########################################################################################################################
+        {
+            sops.secrets.atuin_login = {
+                sopsFile = "${config.technet.secrets.commonPath}/atuin.yaml";
+                owner = "beatlink";
+            };
+
+            home-manager.users.beatlink = {
+                programs.atuin = atuinClient;
+                home.persistence."/Storage/Apps/System/Atuin".directories = [ ".local/share/atuin" ];
+            };
+
+            home-manager.users.root.programs.atuin = atuinClient;
+            environment.persistence."/persistent".directories = [ (rootState "/root/.local/share/atuin") ];
+
+            systemd.services = {
+                atuin-login-beatlink = atuinLogin "beatlink";
+                atuin-login-root = atuinLogin "root";
+            };
         }
 
         # Shell Aliases ##############################################################################################################################
