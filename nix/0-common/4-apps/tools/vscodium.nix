@@ -205,6 +205,7 @@ in
 
                 # Other extensions -------------------------------------------------------------------------------------------------------------------
                 "claudeCode.preferredLocation" = "panel";
+                "claudeCode.hideOnboarding" = true;
                 "chat.extensionUnification.enabled" = false;
                 "liveServer.settings.donotShowInfoMsg" = true;
                 "vscode-office.openOutline" = true;
