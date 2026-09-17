@@ -675,13 +675,12 @@ in
                                     type = "group";
                                     children = [
                                         {
-                                            # One monitor per drive. Unpinned, the plugin charts whichever disk was busiest across its two samples, and the mirror's halves
-                                            # run within a kilobyte of each other, so the single monitor's identity flipped between them at random.
+                                            # One monitor per drive, because the plugin charts a single device and an unpinned one picks whichever is busiest.
                                             name = "Disk I/O (Data 1)";
                                             id = "heimdall-disk-io";
                                             type = "disk_io";
                                             interval = "30s";
-                                            device = "/dev/disk/by-id/ata-TOSHIBA_MQ04ABF100_28AEP8F6T"; # One half of the data-pool mirror
+                                            device = "/dev/disk/by-id/ata-TOSHIBA_MQ04ABF100_18BPSDNPS"; # One half of the data-pool mirror
                                             agent = "heimdall";
                                         }
                                         {
@@ -689,7 +688,7 @@ in
                                             id = "heimdall-disk-io-data2";
                                             type = "disk_io";
                                             interval = "30s";
-                                            device = "/dev/disk/by-id/ata-TOSHIBA_MQ04ABF100_18BPSDA3S"; # The mirror's other half; a divergence between these two is the interesting signal
+                                            device = "/dev/disk/by-id/ata-ADATA_SU720_2K442LSNKEEX"; # The mirror's other half, an SSD, so reads land here and not on the spinning half
                                             agent = "heimdall";
                                         }
                                         {
