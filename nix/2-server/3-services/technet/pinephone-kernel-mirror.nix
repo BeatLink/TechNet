@@ -28,15 +28,6 @@ let
     cacheKey = "pinephone-kernel-1:Bh9JYKdNDBNwefy+ZrjHKjVUR453bPDXRMZ+kO9K33w=";
 in
 {
-    # The attic client only reads this, so `token-file` keeps the token itself out of the store.
-    environment.etc."attic-mirror/attic/config.toml".text = ''
-        default-server = "technet"
-
-        [servers.technet]
-        endpoint = "https://attic.heimdall.technet/"
-        token-file = "${config.sops.secrets.attic_push_token.path}"
-    '';
-
     systemd.services.pinephone-kernel-mirror = {
         description = "Mirror the PinePhone kernel into the Attic binary cache";
         after = [
@@ -52,7 +43,7 @@ in
             nix
             zstd
         ];
-        environment.XDG_CONFIG_HOME = "/etc/attic-mirror";
+        environment.XDG_CONFIG_HOME = config.technet.atticPush.configDir;
         serviceConfig = {
             Type = "oneshot";
             CacheDirectory = "pinephone-kernel-mirror";

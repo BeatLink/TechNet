@@ -23,9 +23,19 @@ let
     '';
 in
 {
-    options.technet.atticPush.enable = lib.mkEnableOption "uploading locally built paths to Heimdall's Attic cache";
+    options.technet.atticPush = {
+        enable = lib.mkEnableOption "uploading locally built paths to Heimdall's Attic cache";
+
+        configDir = lib.mkOption {
+            type = lib.types.path;
+            readOnly = true;
+            description = "XDG_CONFIG_HOME for any service on this host that pushes to the cache, so they share one endpoint and token.";
+        };
+    };
 
     config = lib.mkIf cfg.enable {
+        technet.atticPush.configDir = atticConfig;
+
         # The same token for every pusher: Attic scopes by cache, not by who is writing, so a per-host token would buy nothing.
         sops.secrets.attic_push_token.sopsFile = "${config.technet.secrets.commonPath}/attic-push.yaml";
 
@@ -40,7 +50,7 @@ in
 
             serviceConfig = {
                 ExecStart = "${pkgs.attic-client}/bin/attic watch-store technet";
-                Environment = [ "XDG_CONFIG_HOME=${atticConfig}" ];
+                Environment = [ "XDG_CONFIG_HOME=${cfg.configDir}" ];
 
                 # Heimdall being unreachable is ordinary here, so the watcher retries forever rather than giving up and leaving the cache cold.
                 Restart = "always";

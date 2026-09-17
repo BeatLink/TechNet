@@ -197,6 +197,7 @@ in
                 "${keyPath}" = keyPath;
             }
             // lib.optionalAttrs (cfg.peer != null) {
+                # The bootloader installs before activation renders this, so the first switch that adds it fails; run `test` once, then `switch`.
                 "${peerPath}" = config.sops.templates.${peerTemplate}.path;
             };
 
