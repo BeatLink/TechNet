@@ -206,6 +206,8 @@ in
                 # Other extensions -------------------------------------------------------------------------------------------------------------------
                 "claudeCode.preferredLocation" = "panel";
                 "claudeCode.hideOnboarding" = true;
+                # 0 means never; the sidebar otherwise hides sessions idle for 14 days.
+                "claudeCode.archiveInactiveSessions" = 0;
                 "chat.extensionUnification.enabled" = false;
                 "liveServer.settings.donotShowInfoMsg" = true;
                 "vscode-office.openOutline" = true;
