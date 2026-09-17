@@ -17,7 +17,8 @@
 let
     cfg = config.technet.waypipe;
 
-    thorToHeimdall = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKVJQ2vYs4+U7rJz4COohgtzTa5k/wXNOtJpX7k6YUjg waypipe-thor-to-heimdall";
+    # The audio socket is the only forwarding a session needs, so the key is denied everything else a shell on the far side would reach
+    thorToHeimdall = "restrict,port-forwarding ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKVJQ2vYs4+U7rJz4COohgtzTa5k/wXNOtJpX7k6YUjg waypipe-thor-to-heimdall";
 in
 {
     imports = [ inputs.waypipe-desktop.nixosModules.default ];
