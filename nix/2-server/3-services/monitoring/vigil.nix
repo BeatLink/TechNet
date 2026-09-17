@@ -838,6 +838,10 @@ in
                                                     name = "Atuin";
                                                     url = "https://atuin.heimdall.technet/healthz"; # No web UI to hit, so the health endpoint is the only 200 on this vhost
                                                 }
+                                                {
+                                                    name = "Atuin Web";
+                                                    url = "https://atuin-web.heimdall.technet/healthz";
+                                                }
                                             ];
                                             agent = "heimdall";
                                         }

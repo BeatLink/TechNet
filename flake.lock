@@ -42,6 +42,27 @@
         "type": "github"
       }
     },
+    "atuin-web": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789654398,
+        "narHash": "sha256-C9CcdJhI8zl6iRnWHqL1bsuPbPckhNaCfzSg7WEaMho=",
+        "owner": "BeatLink",
+        "repo": "atuin-web",
+        "rev": "7df7335409133c20091886a51e41a8eae427b6d7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BeatLink",
+        "ref": "nix-packaging",
+        "repo": "atuin-web",
+        "type": "github"
+      }
+    },
     "blockurl": {
       "inputs": {
         "flake-utils": "flake-utils",
@@ -772,6 +793,7 @@
       "inputs": {
         "app-separators": "app-separators",
         "arion": "arion",
+        "atuin-web": "atuin-web",
         "blockurl": "blockurl",
         "calibre-web-automated": "calibre-web-automated",
         "claude-code": "claude-code",

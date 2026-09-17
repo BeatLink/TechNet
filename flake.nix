@@ -103,6 +103,11 @@
             url = "github:BeatLink/NixTool";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        # Points at the fork's branch until josegonzalez/atuin-web#81 lands upstream
+        atuin-web = {
+            url = "github:BeatLink/atuin-web/nix-packaging";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
         nixos-hardware = {
             url = "github:NixOS/nixos-hardware";
             inputs.nixpkgs.follows = "nixpkgs";

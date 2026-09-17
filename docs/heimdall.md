@@ -31,7 +31,7 @@ Grouped by directory under [`3-services`](../nix/2-server/3-services):
 | `fun-and-media` | calibre-web-automated, freshrss, jackett, qbittorrent, vlc |
 | `home-automation` | esphome, frigate, home-assistant, lnxlink, mosquitto |
 | `monitoring` | homepage, vigil |
-| `technet` | attic, atuin |
+| `technet` | attic, atuin, atuin-web |
 | `backups` | borg, borgmatic, stremio-export |
 
 Port assignments are tracked in
@@ -132,6 +132,22 @@ atuin sync
 
 Bash writes no timestamps here, so the imported commands are spread over
 synthetic times before the import; searching is unaffected.
+
+## Shell history in a browser
+
+[atuin-web](../nix/2-server/3-services/technet/atuin-web.nix) serves the same
+history at `https://atuin-web.heimdall.technet/`. It is read-only and keeps no
+account of its own — it proxies to the atuin server on loopback, and a visitor
+signs in with the same credentials the hosts use.
+
+The package comes from a fork pinned in `flake.nix`, because the Nix packaging
+is still in review as
+[josegonzalez/atuin-web#81](https://github.com/josegonzalez/atuin-web/pull/81).
+Repoint the input at `github:josegonzalez/atuin-web` once it merges.
+
+Setting `ATUIN_WEB_TOKEN` through the module's `environmentFile` would drop the
+login prompt and show the history to anyone who can reach the vhost; it is
+deliberately left unset.
 
 ## Mirroring the PinePhone kernel
 
