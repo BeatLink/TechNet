@@ -15,7 +15,7 @@ in
         room = "Bedroom";
     };
 
-    packages.common = "!include .base-ir.yaml";
+    packages.common = "!include base-ir.yaml";
 
     esphome.name = "ir-fan";
 

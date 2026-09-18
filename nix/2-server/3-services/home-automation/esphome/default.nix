@@ -32,14 +32,47 @@ let
     stateDir = "/var/lib/esphome";
 
     # `{ "<name>.yaml" = <derivation>; }` for every device and hardware profile.
-    # Hardware profiles are `!include`-only building blocks, not standalone
-    # devices -- dot-prefixing their filenames hides them from the dashboard's
-    # listing (it skips dotfiles) while leaving them resolvable as same-directory
-    # `!include`s. Without this, the dashboard lets you compile/flash a profile
-    # directly, which registers under the upstream package's default hostname
-    # instead of any of the real devices' names and can never be reached by OTA.
-    dotPrefix = lib.mapAttrs' (name: value: lib.nameValuePair ".${name}" value);
-    configFiles = dotPrefix (esphomeLib.renderDir ./templates) // esphomeLib.renderDir ./devices;
+    # Profiles are `!include`-only building blocks that the dashboard lists like
+    # devices; the labels below tell them apart. Compiling a profile directly
+    # registers under the upstream package's default hostname, so do not.
+    templateFiles = esphomeLib.renderDir ./templates;
+    deviceFiles = esphomeLib.renderDir ./devices;
+    configFiles = templateFiles // deviceFiles;
+
+    # Dashboard labels, seeded into its metadata sidecar before every start.
+    labels = [
+        {
+            id = "template";
+            name = "Template";
+            color = "#7e57c2";
+            files = lib.attrNames templateFiles;
+        }
+        {
+            id = "device";
+            name = "Device";
+            color = "#26a69a";
+            files = lib.attrNames deviceFiles;
+        }
+    ];
+    labelSeed = pkgs.writeText "esphome-labels.json" (
+        builtins.toJSON {
+            labels = map (l: { inherit (l) id name color; }) labels;
+            files = lib.foldl' (
+                acc: l: acc // lib.genAttrs l.files (f: (acc.${f} or [ ]) ++ [ l.name ])
+            ) { } labels;
+        }
+    );
+    # Merges the seed into the sidecar by label name, keeping ids the dashboard already gave and any labels a person added.
+    labelMerge = pkgs.writeText "esphome-labels.jq" ''
+        ($seed[0]) as $s
+        | (._labels // []) as $have
+        | ($s.labels | map(. as $l | (first($have[] | select((.name | ascii_downcase) == ($l.name | ascii_downcase))) // $l) | .color = $l.color)) as $mine
+        | ._labels = ($have | map(select(.id as $i | $mine | any(.id == $i) | not))) + $mine
+        | reduce ($s.files | to_entries[]) as $f (
+            .;
+            .[$f.key].labels = ((.[$f.key].labels // []) + ($f.value | map(. as $n | $mine[] | select((.name | ascii_downcase) == ($n | ascii_downcase)) | .id)) | unique)
+          )
+    '';
 
     deviceSecretsFile = "${config.technet.secrets.path}/esphome-secrets.yaml";
 
@@ -103,6 +136,15 @@ in
             key: "${key}: ${config.sops.placeholder.${key}}"
         ) deviceSecretKeys;
     };
+
+    # Dashboard labels -------------------------------------------------------------------------------------------------------------------------------
+    # The sidecar is the dashboard's own mutable file, so it is merged in place rather than mounted from the store.
+    systemd.services.esphome.preStart = ''
+        sidecar="${stateDir}/.device-builder.json"
+        [ -s "$sidecar" ] || echo '{}' > "$sidecar"
+        ${pkgs.jq}/bin/jq --slurpfile seed ${labelSeed} -f ${labelMerge} "$sidecar" > "$sidecar.tmp"
+        mv "$sidecar.tmp" "$sidecar"
+    '';
 
     # Device configurations --------------------------------------------------------------------------------------------------------------------------
     # Rendered YAML lives in the store and is bind-mounted onto an empty

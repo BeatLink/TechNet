@@ -8,7 +8,7 @@
 {
     packages = {
         athom = "github://athom-tech/athom-configs/athom-ir-remote.yaml";
-        common = "!include .common.yaml";
+        common = "!include common.yaml";
     };
 
     substitutions = {

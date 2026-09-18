@@ -4,5 +4,5 @@
 # switches it as part of setting a speed.
 {
     substitutions.name = "socket-fan";
-    packages.common = "!include .base-socket.yaml";
+    packages.common = "!include base-socket.yaml";
 }
