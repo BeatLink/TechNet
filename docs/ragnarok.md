@@ -439,7 +439,6 @@ The backup drive is a single LUKS2 container holding one btrfs filesystem with
 `/Storage`. It replaced `data-pool-Ragnarok`, a ZFS pool, on 2026-09-10, for the
 same reason the root drive moved: OpenZFS never calls the kernel crypto API, so
 its AES-GCM ran as generic C on a CPU whose `aes`/`pmull` instructions sat idle.
-The ZFS dumps in [`ragnarok-data-pool/`](ragnarok-data-pool) are now historical.
 
 `dup` is the btrfs equivalent of the `copies=2` the ZFS dataset carried, and it
 exists for the same reason: one disk, no vdev redundancy, so without a second
@@ -578,12 +577,15 @@ comment in `data-drive.nix` — `0576` is fine under UAS with `NO_REPORT_OPCODES
 An SSD filled past ~96% slows down again regardless, and no amount of trimming
 helps that.
 
-**`dup` on a shingled drive is not disproportionately slow.** Measured during
-the write-back: 90.7 MB/s written to the drive at 100% utilisation while the
-source SSD read 45.4 MB/s — exactly half, which is both copies going down. So
-the logical rate is ~45 MB/s and 966 GB takes ~6 hours. Reading the source over
-USB 3 on Odin managed 128 MB/s, against roughly 35-40 MB/s on the Rock64, whose
-only USB 3 port is taken by the root SSD.
+**`dup` on a shingled drive is not disproportionately slow, but it does decay.**
+The drive writes both copies, so the logical rate is always half the disk rate.
+It started at 90.7 MB/s to the disk (45 MB/s logical) and ended near 34 MB/s
+(17 MB/s logical) as the platter filled, because a filling disk writes nearer
+the spindle and the shingled bands need rewriting. Budget **~11 hours** for
+966 GB, not the ~6 the opening rate suggests. The instantaneous figure swings
+between roughly 2 and 50 MB/s, so pace it off bytes written over elapsed time.
+Reading the source over USB 3 on Odin managed 128 MB/s, against roughly
+35-40 MB/s on the Rock64, whose only USB 3 port is taken by the root SSD.
 
 ## As a build host
 
