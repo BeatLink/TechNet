@@ -5,6 +5,7 @@
 
 {
     imports = [
+        ./borg-compact.nix
         ./ssh.nix
         ./syncthing.nix
         ./vigil-access.nix

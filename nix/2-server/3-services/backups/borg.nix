@@ -27,6 +27,11 @@
         };
     };
 
+    borg-compact.laptop-vorta = {
+        path = "/Storage/Files/Backups/Laptop/Vorta";
+        user = "borg";
+    };
+
     systemd.tmpfiles.settings."Borg"."/Storage/Files/Backups/Laptop".Z = {
         user = "borg";
         group = "borg";

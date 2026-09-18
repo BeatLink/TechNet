@@ -86,6 +86,15 @@ in
             };
         }
 
+        # Compaction #################################################################################################################################
+        # Vorta pushes here but never compacts, so the space its prunes free is reclaimed on this side instead.
+        {
+            borg-compact.laptop-vorta = {
+                path = "/Storage/Backups/Laptop/Vorta";
+                user = "borg";
+            };
+        }
+
         # Repository Integrity Checks ################################################################################################################
         # A checksum mismatch inside a segment is invisible to btrfs, which sees only the bytes it was handed, so borg has to look for itself.
         # Heimdall checks this repo too; these run on Sundays to stay clear of its weekday schedule, since a check locks the repo exclusively.

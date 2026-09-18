@@ -27,6 +27,11 @@
         mode = "0400"; # root-only; borg reads it via sudo
     };
 
+    borg-compact.vorta = {
+        path = "/Storage/Files/Backups/Laptop/Vorta";
+        user = "beatlink";
+    };
+
     home-manager.users.beatlink =
         { pkgs, ... }:
         {
