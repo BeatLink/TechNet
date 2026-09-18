@@ -92,7 +92,7 @@ let
                     Service = {
                         ExecStart = "${pkgs.bash}/bin/bash -c '${pkgs.dconf}/bin/dconf load ${configData.targetPath} < ${configData.sourceFile}'";
                         Type = "oneshot";
-                        RemainOnExit = true;
+                        RemainAfterExit = true;
                     };
                     Install = {
                         WantedBy = [ "default.target" ];
