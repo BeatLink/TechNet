@@ -137,7 +137,6 @@ in
                         name = "tang_key_${toString i}";
                         value = {
                             sopsFile = tangCfg.server.sopsFile;
-                            mode = "0400";
                         };
                     }) (lib.range 1 tangCfg.server.keyCount)
                 )

@@ -141,7 +141,6 @@ in
             sops.secrets.blockurl_api_key = {
                 sopsFile = "${config.technet.secrets.root}/2-server/blockurl.yaml";
                 owner = "beatlink";
-                mode = "0400";
             };
         }
 

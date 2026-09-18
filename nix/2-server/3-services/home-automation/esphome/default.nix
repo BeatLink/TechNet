@@ -131,7 +131,6 @@ in
     sops.templates."esphome-secrets.yaml" = {
         owner = "esphome";
         group = "esphome";
-        mode = "0400";
         content = lib.concatMapStringsSep "\n" (
             key: "${key}: ${config.sops.placeholder.${key}}"
         ) deviceSecretKeys;

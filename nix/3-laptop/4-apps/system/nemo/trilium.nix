@@ -6,7 +6,6 @@
     sops.secrets.trilium_etapi_token = {
         sopsFile = "${config.technet.secrets.root}/2-server/trilium.yaml";
         owner = "beatlink";
-        mode = "0400";
     };
 
     home-manager.users.beatlink = {

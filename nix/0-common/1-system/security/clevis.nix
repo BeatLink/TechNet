@@ -369,7 +369,6 @@ in
         (lib.mkIf ((clevisCfg.rebindTool.enable || clevisCfg.enable) && clevisCfg.sopsFile != null) {
             sops.secrets.zfs_passphrase = {
                 sopsFile = clevisCfg.sopsFile;
-                mode = "0400";
             };
 
             environment.systemPackages = [ rebindClevis ];
