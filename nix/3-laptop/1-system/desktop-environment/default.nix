@@ -6,6 +6,7 @@
 {
     imports = [
         ./cinnamon
+        ./display-wait.nix
         ./theme.nix
     ];
 }

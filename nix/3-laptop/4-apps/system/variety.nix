@@ -22,8 +22,6 @@
         in
         {
             home = {
-                file.".config/autostart/variety.desktop".source =
-                    "${pkgs.variety}/share/applications/variety.desktop";
                 # Variety chmods this folder at startup, so the script has to be a writable copy rather than a store symlink
                 activation.varietySetLockScreen = lib.hm.dag.entryAfter [ "linkGeneration" ] ''
                     run rm -f ${lib.escapeShellArg lockScreen}
@@ -35,6 +33,23 @@
                     ];
 
                 };
+            };
+
+            # A unit rather than an autostart .desktop, so its fetching and scaling run niced in a cgroup of their own.
+            systemd.user.services.variety = {
+                Unit = {
+                    Description = "Variety wallpaper changer";
+                    PartOf = [ "graphical-session.target" ];
+                    Requires = [ "display.target" ];
+                    After = [ "display.target" ];
+                };
+                Service = {
+                    ExecStart = "${pkgs.variety}/bin/variety";
+                    Restart = "on-failure";
+                    RestartSec = 5;
+                    Nice = 10;
+                };
+                Install.WantedBy = [ "display.target" ];
             };
         };
 }

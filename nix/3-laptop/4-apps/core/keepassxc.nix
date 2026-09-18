@@ -57,9 +57,26 @@
                         ".mozilla/native-messaging-hosts"
                     ];
                 };
+            };
 
-                file.".config/autostart/org.keepassxc.KeePassXC.desktop".source =
-                    "${pkgs.keepassxc}/share/applications/org.keepassxc.KeePassXC.desktop";
+            # A unit rather than an autostart .desktop, so the agent socket it adds the database's keys to is ordered before it.
+            systemd.user.services.keepassxc = {
+                Unit = {
+                    Description = "KeePassXC password manager";
+                    PartOf = [ "graphical-session.target" ];
+                    Requires = [ "display.target" ];
+                    Wants = [ "gcr-ssh-agent.socket" ];
+                    After = [
+                        "display.target"
+                        "gcr-ssh-agent.socket"
+                    ];
+                };
+                Service = {
+                    ExecStart = "${pkgs.keepassxc}/bin/keepassxc";
+                    Restart = "on-failure";
+                    RestartSec = 5;
+                };
+                Install.WantedBy = [ "display.target" ];
             };
         };
 }

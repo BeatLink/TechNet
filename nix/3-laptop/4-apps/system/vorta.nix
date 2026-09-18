@@ -55,9 +55,9 @@
             systemd.user.services.vorta = {
                 Unit = {
                     Description = "Vorta backup tray";
-                    # Qt aborts outright when it starts before Cinnamon imports DISPLAY, so the restart loop is what actually gets it up, as with syncthingtray.
-                    StartLimitIntervalSec = 120;
-                    StartLimitBurst = 10;
+                    PartOf = [ "graphical-session.target" ];
+                    Requires = [ "display.target" ];
+                    After = [ "display.target" ];
                 };
                 Service = {
                     ExecStart = "${pkgs.vorta}/bin/vorta";
@@ -66,7 +66,7 @@
                     Nice = 10;
                     CPUQuota = "200%";
                 };
-                Install.WantedBy = [ "graphical-session.target" ];
+                Install.WantedBy = [ "display.target" ];
             };
         };
 }

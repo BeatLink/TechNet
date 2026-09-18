@@ -14,6 +14,22 @@ in
         programs.linux-sidebar = {
             enable = true;
             package = linux-sidebar;
+            autostart = false; # The unit below starts it instead, once the display answers
+        };
+
+        systemd.user.services.linux-sidebar = {
+            Unit = {
+                Description = "Linux Sidebar";
+                PartOf = [ "graphical-session.target" ];
+                Requires = [ "display.target" ];
+                After = [ "display.target" ];
+            };
+            Service = {
+                ExecStart = "${linux-sidebar}/bin/linux-sidebar";
+                Restart = "on-failure";
+                RestartSec = 5;
+            };
+            Install.WantedBy = [ "display.target" ];
         };
         home = {
             # The settings, the layout and the notes all live here and are written by the

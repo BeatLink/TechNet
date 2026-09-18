@@ -20,11 +20,23 @@ in
                     ".config/trilium-37840" # Electron userData; Trilium names it after its port, so TRILIUM_PORT changes this path
                 ];
             };
-            file = {
-                # Electron takes both the wm_class and the userData name from the asar's package.json, so a build handing it a loose main.cjs instead breaks the panel match and the persisted path at once
-                ".config/autostart/trilium-next.desktop".source =
-                    "${trilium-desktop}/share/applications/Trilium.desktop";
+        };
+
+        # A unit rather than an autostart .desktop, so this Electron app runs in a cgroup of its own.
+        # Electron takes both the wm_class and the userData name from the asar's package.json, so a build handing it a loose main.cjs instead breaks the panel match and the persisted path at once
+        systemd.user.services.trilium = {
+            Unit = {
+                Description = "Trilium Notes";
+                PartOf = [ "graphical-session.target" ];
+                Requires = [ "display.target" ];
+                After = [ "display.target" ];
             };
+            Service = {
+                ExecStart = "${trilium-desktop}/bin/trilium";
+                Restart = "on-failure";
+                RestartSec = 5;
+            };
+            Install.WantedBy = [ "display.target" ];
         };
     };
 }

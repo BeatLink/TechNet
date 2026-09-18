@@ -16,6 +16,8 @@ let
         "syncthing.service"
         "syncthingtray.service"
         "vorta.service"
+        "variety.service"
+        "linux-sidebar.service"
         "gallery-dl-blockurl-sync.timer"
     ];
 
@@ -39,8 +41,6 @@ let
     killedApps = [
         "gmusicbrowser"
         "quodlibet"
-        "variety"
-        "linux-sidebar"
     ];
 
     systemctl = "${pkgs.systemd}/bin/systemctl";
@@ -115,7 +115,7 @@ in
                     general = {
                         renice = 10; # Defaults to 0, which leaves the game at the same priority as everything else
                         inhibit_screensaver = 1;
-                        script_timeout = 30; # The hooks below stop seventeen units, which does not fit the ten second default
+                        script_timeout = 30; # The hooks below stop nineteen units, which does not fit the ten second default
                     };
 
                     custom = {

@@ -27,23 +27,23 @@
     networking.firewall.interfaces."wireguard0".allowedTCPPorts = [ 8384 ];
 
     home-manager.users.beatlink =
-        { pkgs, ... }:
+        { lib, pkgs, ... }:
         {
             home.packages = with pkgs; [
                 syncthingtray-minimal
                 libxcb
             ];
-            # The fake graphical-session target fires before Cinnamon imports DISPLAY into the user manager, so the
-            # first start finds no display, and Qt aborts rather than waiting once no platform plugin loads.
+            # Qt aborts rather than waiting when no platform plugin loads, so this starts on display.target instead of graphical-session.target.
             systemd.user.services.syncthingtray = {
                 Unit = {
-                    StartLimitIntervalSec = 120;
-                    StartLimitBurst = 10;
+                    Requires = [ "display.target" ];
+                    After = [ "display.target" ];
                 };
                 Service = {
                     Restart = "on-failure";
                     RestartSec = 5;
                 };
+                Install.WantedBy = lib.mkForce [ "display.target" ];
             };
 
             systemd.user.targets.tray = {
