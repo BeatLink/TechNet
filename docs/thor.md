@@ -244,6 +244,149 @@ The serial console still matters for firmware work: `thor-serial.sh` in the
 Pinephone project folder keeps a picocom session in tmux, and U-Boot's
 prompt over UART is the only way in when the panel is dark.
 
+## Sleep
+
+The A64 has a real suspend-to-RAM state, not just s2idle. Tow-Boot ships crust
+as the SCP firmware, so the ARISC coprocessor holds DRAM in self-refresh while
+the main cluster is powered down, and the kernel offers both states:
+
+```console
+$ cat /sys/power/mem_sleep
+s2idle [deep]
+```
+
+`deep` is already selected, and a forced `rtcwake -m mem` suspends and resumes
+cleanly with the network back on its own. None of the capability needed fixing.
+
+What was broken was that **nothing ever asked for it**. The kernel's own counter
+is the quickest way to see that:
+
+```console
+$ cat /sys/power/suspend_stats/success /sys/power/suspend_stats/fail
+0
+0
+```
+
+Zero successes *and* zero failures after hours of uptime means no suspend was
+ever attempted, which rules out wakelocks and device drivers before looking at
+any of them.
+
+### gsd-power cannot do it
+
+The obvious mechanism is gnome-settings-daemon's `sleep-inactive-*` timeouts,
+and they are wrong to reach for here — gsd-power's idle timer never starts,
+because gnome-session never gets an idle monitor under phosh:
+
+```
+gnome-session-service: Failed to acquire idle monitor proxy:
+  GDBus.Error:org.freedesktop.DBus.Error.NoReply: Remote peer disconnected
+```
+
+`org.gnome.Mutter.IdleMonitor GetIdletime` answers `Not supported` on this
+session, so no value of `sleep-inactive-battery-timeout` would ever have fired.
+Setting those keys looks like a fix and is inert.
+
+What *does* work is the logind session idle hint, which phosh sets, so
+[`sleep.nix`](../nix/5-phone/1-system/sleep.nix) drives suspend from logind:
+
+```
+IdleAction=suspend
+IdleActionSec=5min
+```
+
+An SSH or serial session is a session too, and its own idle time gates this, so
+a silent long job still wants `systemd-inhibit --what=sleep` — a closure copy
+cut off mid-way surfaces as `Broken pipe` rather than as a sleeping phone.
+
+### Caffeine is a trap
+
+Phosh's caffeine quick setting takes a GNOME session inhibitor covering idle and
+suspend together, which holds the session idle hint low and so blocks the
+suspend above:
+
+```console
+$ busctl --user call org.gnome.SessionManager /org/gnome/SessionManager \
+    org.gnome.SessionManager IsInhibited u 8
+b true
+```
+
+`GetInhibitors` names it — appid `mobi.phosh.Shell`, reason `Phosh on caffeine`,
+flags 12, which is 4 (suspend) plus 8 (idle).
+
+The trap is the interval. The plugin's stock `intervals` are
+`[120, 300, 900, 4294967295]` with `selected-index` defaulting to **3**, and that
+last entry is not a duration — it is forever. Tapping the toggle once with the
+default selection stops the phone sleeping until phosh restarts, with nothing on
+screen to say so. `sleep.nix` replaces the list with `[300, 900, 1800, 3600]` and
+selects 900s, so every option expires on its own. The on/off state itself lives
+only in the running shell — there is no key for it in the schema — so
+`systemctl restart phosh` clears it. It has been found back on after a reboot
+even so, which is the reason the intervals matter: the toggle cannot be relied
+on to be off, only to expire.
+
+With it off, the whole path works. logind says so in as many words:
+
+```
+systemd-logind: System idle. Will suspend now.
+systemd-logind: Suspending...
+kernel: PM: suspend entry (deep)
+kernel: PM: suspend exit
+```
+
+### What keeps the screen awake
+
+Suspend only arrives once the panel has been off long enough for phosh to mark
+the session idle, so anything that lights the panel resets the clock. phoc logs
+both edges, which makes the pattern easy to read:
+
+```sh
+journalctl --since -70min | grep -E "Modesetting|Turning off"
+```
+
+Read those rather than `/sys/class/drm/card*/card*-DSI-1/dpms`, which sits at
+`On` whatever phoc has done to the output and will have you chasing a blanking
+bug that is not there.
+
+A notification wakes the panel for almost exactly 15 seconds and lets it go
+again. Those arrive on a regular cadence and are preceded in the journal by
+feedbackd reaching for the notification LED, which it cannot open:
+
+```
+feedbackd: Failed to set led pattern: Failed to open
+  /sys/devices/platform/leds/leds/blue:indicator/pattern: Permission denied
+```
+
+A Waydroid window is the other one, and it does not let go — the launch wrapper
+sends `KEYCODE_WAKEUP` and the panel then stays lit indefinitely rather than for
+15 seconds. A run of `Modesetting` with no matching `Turning off` after it is
+that case, and it is worth checking before concluding the timer is broken.
+
+### Checking it
+
+```sh
+cat /sys/power/suspend_stats/success   # does the counter move at all
+systemd-inhibit --list                 # nothing on `sleep` in `block` mode
+loginctl show-session <id> -p IdleHint # phosh's hint, the input logind acts on
+```
+
+An SSH session keeps the manager hint low for as long as it is open, so the
+counter cannot be watched over SSH — log to a file from a `systemd-run` unit,
+disconnect, and read it afterwards.
+
+To force one without waiting, `rtcwake` suspends and comes back on its own,
+which is the safe way to test remotely since a resume failure otherwise needs
+the power button:
+
+```sh
+sudo rtcwake -m mem -s 120
+```
+
+`rtcwake -m no -s 900` arms only the alarm, which is the way to make a test that
+ends in a real idle suspend recover by itself. Run either under `systemd-run
+--unit=… --no-block` so it survives the SSH session dropping, and give the script
+an absolute shebang: `systemd-run` starts with a minimal `PATH` where `env bash`,
+`cat` and `date` are all missing.
+
 ## Recovering a deeply discharged battery
 
 The radios run off the battery rail, not off USB — `vmmc-supply = <&reg_vbat_wifi>`

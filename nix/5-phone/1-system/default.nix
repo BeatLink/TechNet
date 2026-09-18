@@ -11,6 +11,7 @@
         ./clevis.nix
         ./initrd-wifi.nix
         ./power.nix
+        ./sleep.nix
         ./keyboard.nix
         ./on-screen-keyboard.nix
         ./keyboard-firmware.nix

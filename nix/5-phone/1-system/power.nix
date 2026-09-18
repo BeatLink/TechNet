@@ -34,8 +34,7 @@
         criticalPowerAction = "PowerOff";
     };
 
-    # Suspend on idle is left to the desktop rather than logind, so that a long
-    # running task over the serial console or SSH is not cut off mid-way.
+    # Suspend on idle is set in sleep.nix, which overrides the default below.
     services.logind.settings.Login = {
         HandlePowerKey = lib.mkDefault "suspend";
         IdleAction = lib.mkDefault "ignore";
