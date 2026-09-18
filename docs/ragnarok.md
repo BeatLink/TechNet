@@ -5,14 +5,9 @@
 | Device   | Pine64 Rock64 SBC, Rockchip RK3328                                                  |
 | Platform | `aarch64-linux`                                                                     |
 | Modules  | [`nix/0-common`](../nix/0-common) + [`nix/1-backup-server`](../nix/1-backup-server) |
-| Address  | `ragnarok.technet` over WireGuard                                                   |
 
 Ragnarok is a low-power SBC whose job is to hold backups. It is a WireGuard
 client, dialling in to Heimdall.
-
-It lives off site, at family's home, so that the backups survive physical damage
-to or destruction of the house the rest of the network is in. That placement is
-why it dials in over WireGuard rather than sitting on the LAN.
 
 Despite both being quad Cortex-A53 aarch64, it shares no silicon with Thor:
 Ragnarok is Rockchip RK3328, Thor is Allwinner A64. Nothing vendor-specific
@@ -572,10 +567,8 @@ Two measurements worth keeping:
 freed stayed invisible to the controller and writes collapsed to 17 MB/s
 fighting garbage collection. Quirking `152d:0576` with `f` instead of `uf` keeps
 it on `uas`, where discard works: `fstrim` released 149.8 GiB in 18 seconds and
-writes went to 195 MB/s. Note this contradicts the "both aborted under UAS"
-comment in `data-drive.nix` — `0576` is fine under UAS with `NO_REPORT_OPCODES`.
-An SSD filled past ~96% slows down again regardless, and no amount of trimming
-helps that.
+writes went to 195 MB/s. An SSD filled past ~96% slows down again regardless,
+and no amount of trimming helps that.
 
 **`dup` on a shingled drive is not disproportionately slow, but it does decay.**
 The drive writes both copies, so the logical rate is always half the disk rate.
