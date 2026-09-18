@@ -78,7 +78,7 @@ in
                     "-r"
                     "120"
                     "-f"
-                ]; # Nested gamescope defaults to 1280x720, so the output size and the panel's 120Hz have to be stated
+                ]; # Nested gamescope defaults to 1280x720, and the refresh is the faster panel's, since each display still presents at its own rate
                 env = {
                     __NV_PRIME_RENDER_OFFLOAD = "1";
                     __NV_PRIME_RENDER_OFFLOAD_PROVIDER = "NVIDIA-G0";

@@ -45,7 +45,7 @@
                     <mode>
                       <width>1920</width>
                       <height>1080</height>
-                      <rate>60</rate>
+                      <rate>74.972503662109375</rate>
                     </mode>
                   </monitor>
                 </logicalmonitor>
