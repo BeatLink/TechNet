@@ -138,7 +138,6 @@ in
 
         };
 
-        lovelaceConfig = null;
         configDir = "/Storage/Services/Home-Assistant/config";
         extraComponents = [
             "esphome"
