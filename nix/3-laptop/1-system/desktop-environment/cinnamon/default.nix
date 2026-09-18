@@ -73,6 +73,12 @@ in
             excludePackages = with pkgs; [ xterm ];
         };
         libinput.enable = true; # Enables Touchpad Functionality
+
+        # This writes AccelProfile into xorg.conf.d, which beats the matching dconf keys, so the pointer is set here rather than there.
+        libinput.mouse = {
+            accelProfile = "flat";
+            accelSpeed = "0.417607";
+        };
     };
     # web-greeter reads this path unconditionally; it has no XDG or per-user lookup
     environment.etc."lightdm/web-greeter.toml".text = ''
