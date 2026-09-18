@@ -35,11 +35,21 @@ let
         "nixos-upgrade.timer"
     ];
 
+    # Plain autostart programs rather than units, so they are signalled by name and not brought back afterwards.
+    killedApps = [
+        "gmusicbrowser"
+        "quodlibet"
+        "variety"
+        "linux-sidebar"
+    ];
+
     systemctl = "${pkgs.systemd}/bin/systemctl";
+    pkill = "${pkgs.procps}/bin/pkill";
 
     quietStart = pkgs.writeShellScript "gamemode-quiet-start" ''
         ${systemctl} --user stop ${lib.concatStringsSep " " pausedUserUnits} || true
         ${systemctl} stop ${lib.concatStringsSep " " pausedSystemUnits} || true
+        ${lib.concatMapStringsSep "\n" (app: "${pkill} -f ${app} || true") killedApps}
     '';
 
     # A game that dies without gamemode running this hook leaves these stopped until the next boot starts them again.
