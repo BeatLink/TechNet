@@ -33,14 +33,6 @@ On the network, but not configured from here:
 Off the network entirely: a tech kit of computer repair tools, peripherals and
 accessories.
 
-## Linting
-
-`nix run .#lint` scans every host for options this repo sets to a value the
-option already carries by default, and warns with the file and line of each
-one. Pass host names to narrow it, `--fail` to make findings an error in CI,
-and list anything deliberate in [`lint/allowed-defaults.nix`](lint/allowed-defaults.nix)
-to silence it.
-
 ## Documentation
 
 - [Architecture](docs/architecture.md) — filesystem paradigm and network
