@@ -87,8 +87,9 @@ in
 
         # Clock ######################################################################################################################################
         {
-            # Loads RTC drivers early, enables clock sync for accurate logs
-            boot.initrd.kernelModules = [ "rtc_rk808" ];
+            # This RTC has no battery, so after a power cut it reads 2016 and RTC_HCTOSYS sets the clock backwards to it, which journald answers by
+            # rotating the log it is writing. Keeping the driver out means nothing reads it; timesyncd's persisted clock file is the floor instead.
+            boot.blacklistedKernelModules = [ "rtc_rk808" ];
         }
 
     ];
