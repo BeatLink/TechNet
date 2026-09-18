@@ -40,7 +40,7 @@
                       <connector>HDMI-A-0</connector>
                       <vendor>GSM</vendor>
                       <product>LG FULL HD</product>
-                      <serial>0x00000000</serial>
+                      <serial>0x00001364</serial>
                     </monitorspec>
                     <mode>
                       <width>1920</width>
