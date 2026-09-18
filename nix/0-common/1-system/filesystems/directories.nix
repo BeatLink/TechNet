@@ -19,10 +19,11 @@
             group = "root";
             mode = "0755";
         };
+        # Root-owned for the same reason as /Storage above, so the backup rules below it apply; 1777 keeps Syncthing able to make new folder roots here.
         "/Storage/Files".d = {
-            user = "beatlink";
-            group = "beatlink";
-            mode = "0755";
+            user = "root";
+            group = "root";
+            mode = "1777";
         };
         "/Storage/Files/Desktop".d = {
             user = "beatlink";
