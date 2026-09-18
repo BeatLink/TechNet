@@ -54,13 +54,13 @@ toolbar-style='both-horiz'
 toolkit-accessibility=false
 
 [peripherals/mouse]
-accel-profile='default'
+accel-profile='flat'
 double-click=400
 drag-threshold=8
 left-handed=false
 middle-click-emulation=true
 natural-scroll=false
-speed=0.0
+speed=0.41760722347629797
 
 [privacy]
 disable-camera=false
