@@ -5,6 +5,7 @@
 #
 
 {
+    lib,
     pkgs,
     config,
     ...
@@ -64,6 +65,7 @@ let
 
         # Consistency Checks
         # Periodic rather than every run: the repository check alone took 17 minutes on a remote copy.
+        # The frequencies still decide whether a check is due; the timers below decide the hour it may run in.
         checks = [
             {
                 name = "repository";
@@ -82,6 +84,45 @@ let
                 frequency = "1 month";
             }
         ];
+
+        # Checks are left to the timers below, so a slow one lands at a known hour instead of on whichever three-hourly backup run first passes its deadline.
+        skip_actions = [ "check" ];
+    };
+
+    # Builds a oneshot that runs the named checks against every configured repository.
+    mkCheck = description: onlyChecks: {
+        inherit description;
+        serviceConfig = {
+            Type = "oneshot";
+            Nice = 19;
+            IOSchedulingClass = "idle";
+            CPUWeight = 10;
+            # Same capabilities the backup run needs, since a check writes its cache and lock into the beatlink-owned repository directory.
+            CapabilityBoundingSet = [
+                "CAP_DAC_READ_SEARCH"
+                "CAP_DAC_OVERRIDE"
+                "CAP_FOWNER"
+                "CAP_NET_RAW"
+            ];
+            ExecStart = lib.concatStringsSep " " (
+                [
+                    "${pkgs.systemd}/bin/systemd-inhibit"
+                    "--who=borgmatic"
+                    "--what=sleep:shutdown"
+                    "--why=\"Prevent interrupting a repository check\""
+                    "${pkgs.borgmatic}/bin/borgmatic"
+                    "--verbosity"
+                    "-2"
+                    "--syslog-verbosity"
+                    "1"
+                    "check"
+                ]
+                ++ lib.concatMap (name: [
+                    "--only"
+                    name
+                ]) onlyChecks
+            );
+        };
     };
 
     # Skips one configuration when its repository host is not answering SSH, leaving the others to run.
@@ -148,6 +189,37 @@ in
         "CAP_FOWNER"
         "CAP_NET_RAW"
     ];
+
+    # Repository Checks
+    #
+    # Ragnarok stores these repositories on a four-core, 2GB board, so the checks stay clear of its own Sunday 02:00 and 03:00 check windows and its Wednesday 04:00 compaction.
+    systemd.services.borgmatic-check = mkCheck "Check the laptop's borg repositories" [
+        "repository"
+        "archives"
+        "extract"
+    ];
+    systemd.timers.borgmatic-check = {
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+            OnCalendar = "Sun *-*-* 05:00:00";
+            RandomizedDelaySec = "30m";
+            Persistent = true;
+        };
+    };
+
+    # The data check re-reads and re-hashes every chunk and streams the whole repository back over WireGuard, so it gets a night of its own.
+    # Fired weekly on purpose: the configured monthly frequency is what decides which Saturday it actually runs, so the two never have to agree on a date.
+    systemd.services.borgmatic-check-data =
+        mkCheck "Verify the data in the laptop's borg repositories"
+            [ "data" ];
+    systemd.timers.borgmatic-check-data = {
+        wantedBy = [ "timers.target" ];
+        timerConfig = {
+            OnCalendar = "Sat *-*-* 05:00:00";
+            RandomizedDelaySec = "30m";
+            Persistent = true;
+        };
+    };
 
     # Notifications
     #
