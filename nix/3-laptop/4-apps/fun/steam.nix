@@ -11,6 +11,42 @@
 }:
 let
     halonSteamTheme = inputs.halon.packages.${pkgs.stdenv.hostPlatform.system}.halon-steam-theme;
+
+    pausedUserUnits = [
+        "syncthing.service"
+        "syncthingtray.service"
+        "vorta.service"
+        "gallery-dl-blockurl-sync.timer"
+    ];
+
+    pausedSystemUnits = [
+        "borgmatic.timer"
+        "borgmatic-check.timer"
+        "borgmatic-check-data.timer"
+        "borg-compact-vorta.timer"
+        "zfs-scrub.timer"
+        "zfs-snapshot-hourly.timer"
+        "zfs-snapshot-daily.timer"
+        "zfs-snapshot-weekly.timer"
+        "zfs-snapshot-monthly.timer"
+        "zpool-trim.timer"
+        "fstrim.timer"
+        "nix-gc.timer"
+        "nixos-upgrade.timer"
+    ];
+
+    systemctl = "${pkgs.systemd}/bin/systemctl";
+
+    quietStart = pkgs.writeShellScript "gamemode-quiet-start" ''
+        ${systemctl} --user stop ${lib.concatStringsSep " " pausedUserUnits} || true
+        ${systemctl} stop ${lib.concatStringsSep " " pausedSystemUnits} || true
+    '';
+
+    # A game that dies without gamemode running this hook leaves these stopped until the next boot starts them again.
+    quietEnd = pkgs.writeShellScript "gamemode-quiet-end" ''
+        ${systemctl} --user start ${lib.concatStringsSep " " pausedUserUnits} || true
+        ${systemctl} start ${lib.concatStringsSep " " pausedSystemUnits} || true
+    '';
 in
 {
     config = lib.mkMerge [
@@ -62,7 +98,25 @@ in
         # GameMode ###################################################################################################################################
         # Proton replaces LD_LIBRARY_PATH inside the container, so the preloaded library is given its own directory as an rpath to dlopen from.
         {
-            programs.gamemode.enable = true;
+            programs.gamemode = {
+                enable = true;
+
+                settings = {
+                    general = {
+                        renice = 10; # Defaults to 0, which leaves the game at the same priority as everything else
+                        inhibit_screensaver = 1;
+                        script_timeout = 30; # The hooks below stop seventeen units, which does not fit the ten second default
+                    };
+
+                    custom = {
+                        start = "${quietStart}";
+                        end = "${quietEnd}";
+                    };
+                };
+            };
+
+            # gamemode's own polkit rule grants the governor and split lock helpers to this group and nothing else.
+            users.users.beatlink.extraGroups = [ "gamemode" ];
 
             nixpkgs.overlays = [
                 (final: prev: {
@@ -86,6 +140,21 @@ in
             systemd.user.tmpfiles.rules = [
                 "L+ %h/.local/share/Steam/millennium/themes/Halon - - - - ${halonSteamTheme}/share/halon/steam"
             ];
+        }
+
+        # Quiet Hours ################################################################################################################################
+        # Lets the hooks above stop the maintenance timers, which systemd otherwise only takes from root.
+        {
+            security.polkit.extraConfig = ''
+                polkit.addRule(function (action, subject) {
+                    var paused = ${builtins.toJSON pausedSystemUnits};
+                    if (action.id == "org.freedesktop.systemd1.manage-units" &&
+                        subject.user == "beatlink" &&
+                        paused.indexOf(action.lookup("unit")) >= 0) {
+                        return polkit.Result.YES;
+                    }
+                });
+            '';
         }
 
         # Persistence ################################################################################################################################
