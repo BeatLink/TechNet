@@ -4,7 +4,7 @@
         powerOnBoot = true; # powers up the default Bluetooth controller on boot
         settings = {
             General = {
-                ControllerMode = "bredr"; # Disables bluetooth low energy. Fixes a current bug in mediatek wifi drivers
+                ControllerMode = "dual"; # Enables both classic bluetooth and bluetooth low energy
                 Experimental = true; # Show battery charge of Bluetooth devices
                 DiscoverableTimeout = "0"; # Always discoverable
                 PairableTimeout = "0"; # Always pairable
