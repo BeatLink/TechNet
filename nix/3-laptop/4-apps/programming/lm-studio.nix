@@ -6,31 +6,35 @@
 { lib, ... }:
 let
     # Load Setups ####################################################################################################################################
-    # The 3050 Ti holds 3.68GiB. What fits in it is the whole question, so both setups below were measured on this host rather than guessed.
+    # The 3050 Ti holds 3.68GiB. What fits in it is the whole question, so both setups below were measured on this host rather than guessed, and they
+    # carry only the keys that were observed to reach llama.cpp -- the cache quantisation fields are flagged experimental in this build and are
+    # silently dropped, so the contexts here are sized for an f16 cache.
     #
-    # Speed: a 4B at Q4 leaves just enough room for a 32k cache at Q8, so weights and cache are both resident and nothing crosses the PCIe bus per
-    # token. Quantising the cache is free here -- a smaller cache is less to read each token, so it measured faster than f16 at half the size.
-    # Measured 47.3 tok/s at 32k, filling 3654MiB of the 3762MiB available.
+    # Speed: a 4B at Q4 with its weights and cache resident, nothing crossing the PCIe bus per token. 46.6 tok/s, filling 3722MiB of the 3762MiB
+    # available. The context stops at 8k because this build also loads the model's 675MiB vision projector; text-only it would reach about 16k.
     #
     # Quality: a 26B mixture-of-experts activates only 4B parameters per token, so the experts sit in system RAM while attention and the cache stay on
-    # the GPU. That is worth 23.2 tok/s against 5.5 on the CPU alone, and beats the 8.9 tok/s a dense 9B manages half-offloaded -- a bigger model that
-    # runs faster, because what moves per token is what counts. It asks 14.4GiB of RAM and only 2950MiB of VRAM.
+    # the GPU. 20.3 tok/s against 5.5 on the CPU alone, and against 8.9 for a dense 9B half-offloaded -- a bigger model that runs faster, because what
+    # moves per token is what counts. It asks 14.4GiB of RAM and 3064MiB of VRAM.
+    #
+    # autoFit has to be off for the offload ratio to be read at all, and the runtime's strict VRAM cap has to be off with it: the cap sizes a layer by
+    # its experts too, which on the 26B leaves 6 layers on the GPU when all 41 belong there.
     setups = {
-        "lmstudio-community/Qwen3.5-4B-GGUF/Qwen3.5-4B-Q4_K_M.gguf" = {
-            "llm.load.contextLength" = 32768;
+        "qwen/qwen3.5-4b" = {
+            "llm.load.contextLength" = 8192;
             "llm.load.offloadKVCacheToGpu" = true;
-            "llm.load.llama.flashAttention" = true;
-            "llm.load.llama.kCacheQuantizationType" = "q8_0";
-            "llm.load.llama.vCacheQuantizationType" = "q8_0";
+            "llm.load.llama.autoFit" = false;
             "llm.load.llama.acceleration.offloadRatio" = 1;
+            "llm.load.numParallelSessions" = 1; # Four sessions split the cache four ways and cost VRAM for parallelism nobody here uses
+            "llm.load.llama.cpuThreadPoolSize" = 6; # The six physical cores; 12 oversubscribes them and measured 1.3 tok/s
         };
         "lmstudio-community/gemma-4-26B-A4B-it-QAT-GGUF/gemma-4-26B-A4B-it-QAT-Q4_0.gguf" = {
             "llm.load.contextLength" = 32768;
             "llm.load.offloadKVCacheToGpu" = true;
-            "llm.load.llama.flashAttention" = true;
-            "llm.load.llama.kCacheQuantizationType" = "q8_0";
-            "llm.load.llama.vCacheQuantizationType" = "q8_0";
+            "llm.load.llama.autoFit" = false;
             "llm.load.llama.acceleration.offloadRatio" = 1;
+            "llm.load.numParallelSessions" = 1;
+            "llm.load.llama.cpuThreadPoolSize" = 6;
             "llm.load.numCpuExpertLayersRatio" = 1; # Every expert on the CPU, which is what leaves the GPU for attention and the cache
             "llm.load.llama.tryMmap" = false; # 14.4GiB read into RAM outright, rather than paged in against a desktop already holding 12GiB
             "llm.load.llama.keepModelInMemory" = false;
@@ -61,20 +65,25 @@ in
                 activation.lmStudioSetups = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
                     internal="$HOME/.lmstudio/.internal"
                     jq=${lib.getExe pkgs.jq}
-                    kv="llm.load.offloadKVCacheToGpu"
                     [ -d "$internal" ] || exit 0
 
-                    # Restates the runtime default for every installed engine, so a newly added model starts out right and a runtime update cannot
-                    # bring the old answer back.
+                    # Restates the runtime defaults for every installed engine, so a newly added model starts out right and a runtime update
+                    # cannot bring the old answers back.
                     if [ -f "$internal/hardware-config.json" ]; then
-                        "$jq" --arg k "$kv" '.json |= map(.[1].fields |= (map(select(.key != $k)) + [{ key: $k, value: true }]))' \
+                        kv="llm.load.offloadKVCacheToGpu"
+                        cap="load.gpuStrictVramCap"
+                        "$jq" --arg kv "$kv" --arg cap "$cap" \
+                            '.json |= map(.[1].fields |= (
+                                 map(select(.key != $kv and .key != $cap))
+                                 + [{ key: $kv, value: true }, { key: $cap, value: false }]
+                             ))' \
                             "$internal/hardware-config.json" > "$internal/hardware-config.json.new" \
                             && run mv "$internal/hardware-config.json.new" "$internal/hardware-config.json"
                     fi
 
                     # A per-model file saved from the GUI outranks the runtime default, so every one of them is swept too, not just the setups below.
                     find "$internal/user-concrete-model-default-config" -name '*.json' -print0 2>/dev/null | while IFS= read -r -d "" cfg; do
-                        "$jq" --arg k "$kv" 'walk(if type == "object" and .key == $k then .value = true else . end)' \
+                        "$jq" --arg k "llm.load.offloadKVCacheToGpu" 'walk(if type == "object" and .key == $k then .value = true else . end)' \
                             "$cfg" > "$cfg.new" && mv "$cfg.new" "$cfg"
                     done
 
