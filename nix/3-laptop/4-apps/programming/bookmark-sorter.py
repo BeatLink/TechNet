@@ -57,9 +57,17 @@ def propose_folders(args, bookmarks):
         "folder names to file them under. Folders should be about subject matter, roughly balanced in size, and "
         "named in two words or fewer. Do not include a catch-all folder; one is added separately.\n\n" + listing
     )
+    # Bounded both ways: an unbounded array lets the model keep emitting until it fills the context.
     schema = {
         "type": "object",
-        "properties": {"folders": {"type": "array", "items": {"type": "string"}}},
+        "properties": {
+            "folders": {
+                "type": "array",
+                "items": {"type": "string"},
+                "minItems": args.min_folders,
+                "maxItems": args.max_folders,
+            }
+        },
         "required": ["folders"],
     }
     folders = [f.strip() for f in ask(args.endpoint, args.model, prompt, schema, args.timeout)["folders"] if f.strip()]
@@ -76,31 +84,27 @@ def assign(args, bookmarks, folders):
         prompt = (
             "File each bookmark under exactly one of these folders:\n"
             + "\n".join(f"- {f}" for f in choices)
-            + f"\n\nUse {args.fallback} only when nothing else fits. Answer with the folder for every number.\n\n"
+            + f"\n\nUse {args.fallback} only when nothing else fits. Answer with exactly {len(batch)} folder"
+            " names, one per bookmark, in the same order as the list.\n\n"
             + listing
         )
+        # One name per bookmark in order, fixed length: asking for numbered objects instead let the model
+        # run past the batch and generate until it filled the context.
         schema = {
             "type": "object",
             "properties": {
-                "assignments": {
+                "folders": {
                     "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "index": {"type": "integer"},
-                            "folder": {"type": "string", "enum": choices},
-                        },
-                        "required": ["index", "folder"],
-                    },
+                    "items": {"type": "string", "enum": choices},
+                    "minItems": len(batch),
+                    "maxItems": len(batch),
                 }
             },
-            "required": ["assignments"],
+            "required": ["folders"],
         }
         reply = ask(args.endpoint, args.model, prompt, schema, args.timeout)
-        for item in reply["assignments"]:
-            index = item["index"]
-            if 0 <= index < len(batch):
-                assignments[batch[index]["id"]] = item["folder"]
+        for index, folder in enumerate(reply["folders"][:len(batch)]):
+            assignments[batch[index]["id"]] = folder
         done = min(start + args.batch, len(bookmarks))
         print(f"  filed {done}/{len(bookmarks)}", file=sys.stderr)
     return assignments
