@@ -29,6 +29,7 @@ in
 {
     imports = [
         ./always-on-top.nix
+        ./battery-guardian.nix
         ./cinnamon-bump.nix
         ./monitors.nix
         ./tang.nix

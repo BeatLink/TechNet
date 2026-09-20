@@ -132,6 +132,10 @@
             url = "github:BeatLink/WaypipeDesktop";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        battery-guardian = {
+            url = "github:BeatLink/BatteryGuardian";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
     };
     outputs =
         inputs@{

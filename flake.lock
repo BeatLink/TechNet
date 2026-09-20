@@ -63,6 +63,26 @@
         "type": "github"
       }
     },
+    "battery-guardian": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789866187,
+        "narHash": "sha256-0qGu6XUs7FQI3I2J8RoCTHMow7Ll30pF3OHqk1VH38A=",
+        "owner": "BeatLink",
+        "repo": "BatteryGuardian",
+        "rev": "d2d6d0cc60916617a5060da1f1ceb8732e246aad",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BeatLink",
+        "repo": "BatteryGuardian",
+        "type": "github"
+      }
+    },
     "blockurl": {
       "inputs": {
         "flake-utils": "flake-utils",
@@ -814,6 +834,7 @@
         "app-separators": "app-separators",
         "arion": "arion",
         "atuin-web": "atuin-web",
+        "battery-guardian": "battery-guardian",
         "blockurl": "blockurl",
         "calibre-web-automated": "calibre-web-automated",
         "claude-chat-manager": "claude-chat-manager",
