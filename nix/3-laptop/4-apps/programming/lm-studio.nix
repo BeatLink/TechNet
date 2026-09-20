@@ -10,8 +10,8 @@ let
     # carry only the keys that were observed to reach llama.cpp -- the cache quantisation fields are flagged experimental in this build and are
     # silently dropped, so the contexts here are sized for an f16 cache.
     #
-    # Speed: a 4B at Q4 with its weights and cache resident, nothing crossing the PCIe bus per token. 46.6 tok/s, filling 3722MiB of the 3762MiB
-    # available. The context stops at 8k because this build also loads the model's 675MiB vision projector; text-only it would reach about 16k.
+    # Speed: a 4B at Q4 with its weights and cache resident, nothing crossing the PCIe bus per token. Its vision projector was moved to
+    # ~/.lmstudio/disabled-mmproj so the model loads text-only, which is what buys the 24k context; restoring the file caps it back at 8k.
     #
     # Quality: a 26B mixture-of-experts activates only 4B parameters per token, so the experts sit in system RAM while attention and the cache stay on
     # the GPU. 18 tok/s once warm, against 5.5 on the CPU alone and 8.9 for a dense 9B half-offloaded -- a bigger model that runs faster, because
@@ -22,12 +22,25 @@ let
     # its experts too, which on the 26B leaves 6 layers on the GPU when all 41 belong there.
     setups = {
         "qwen/qwen3.5-4b" = {
-            "llm.load.contextLength" = 8192;
+            "llm.load.contextLength" = 24576;
             "llm.load.offloadKVCacheToGpu" = true;
             "llm.load.llama.autoFit" = false;
             "llm.load.llama.acceleration.offloadRatio" = 1;
             "llm.load.numParallelSessions" = 1; # Four sessions split the cache four ways and cost VRAM for parallelism nobody here uses
             "llm.load.llama.cpuThreadPoolSize" = 6; # The six physical cores; 12 oversubscribes them and measured 1.3 tok/s
+        };
+        # The lighter of the two mixture-of-experts models: near enough the same rate as the 26B for 2.4GiB less RAM, which is the difference
+        # between 8GiB free and 14GiB while it runs. Reach for it when the desktop is busy.
+        "lmstudio-community/gpt-oss-20b-GGUF/gpt-oss-20b-MXFP4.gguf" = {
+            "llm.load.contextLength" = 32768;
+            "llm.load.offloadKVCacheToGpu" = true;
+            "llm.load.llama.autoFit" = false;
+            "llm.load.llama.acceleration.offloadRatio" = 1;
+            "llm.load.numParallelSessions" = 1;
+            "llm.load.llama.cpuThreadPoolSize" = 6;
+            "llm.load.numCpuExpertLayersRatio" = 1;
+            "llm.load.llama.tryMmap" = true;
+            "llm.load.llama.keepModelInMemory" = false;
         };
         "lmstudio-community/gemma-4-26B-A4B-it-QAT-GGUF/gemma-4-26B-A4B-it-QAT-Q4_0.gguf" = {
             "llm.load.contextLength" = 32768;
