@@ -1,0 +1,271 @@
+# Bookmark Sorter
+#
+# Sorts Firefox's unfiled bookmarks into folders a local LLM proposes.
+# "plan" writes a plan to review and edit; "apply" carries it out.
+#
+import argparse
+import json
+import os
+import random
+import shutil
+import sqlite3
+import subprocess
+import sys
+import time
+import urllib.error
+import urllib.request
+
+UNFILED_PARENT = 5
+GUID_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_"
+
+
+# Model ##############################################################################################################################################
+
+
+def ask(endpoint, model, prompt, schema, timeout):
+    """Sends one prompt to the LM Studio server and returns the parsed JSON reply."""
+    body = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.2,
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {"name": "reply", "strict": True, "schema": schema},
+        },
+    }
+    request = urllib.request.Request(
+        endpoint.rstrip("/") + "/v1/chat/completions",
+        json.dumps(body).encode(),
+        {"Content-Type": "application/json"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as reply:
+            text = json.load(reply)["choices"][0]["message"]["content"]
+    except urllib.error.URLError as error:
+        sys.exit(f"cannot reach the model at {endpoint}: {error}\nIs LM Studio's server running? (lms server start)")
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        sys.exit(f"the model did not return JSON:\n{text[:400]}")
+
+
+def propose_folders(args, bookmarks):
+    """Asks the model for a folder scheme covering the whole collection."""
+    listing = "\n".join(f"- {b['title'][:110]}" for b in bookmarks)
+    prompt = (
+        f"Below are {len(bookmarks)} browser bookmarks. Propose between {args.min_folders} and {args.max_folders} "
+        "folder names to file them under. Folders should be about subject matter, roughly balanced in size, and "
+        "named in two words or fewer. Do not include a catch-all folder; one is added separately.\n\n" + listing
+    )
+    schema = {
+        "type": "object",
+        "properties": {"folders": {"type": "array", "items": {"type": "string"}}},
+        "required": ["folders"],
+    }
+    folders = [f.strip() for f in ask(args.endpoint, args.model, prompt, schema, args.timeout)["folders"] if f.strip()]
+    return list(dict.fromkeys(folders))
+
+
+def assign(args, bookmarks, folders):
+    """Files each bookmark under one of the folders, a batch at a time."""
+    choices = folders + [args.fallback]
+    assignments = {}
+    for start in range(0, len(bookmarks), args.batch):
+        batch = bookmarks[start:start + args.batch]
+        listing = "\n".join(f"{i}. {b['title'][:110]}  <{b['host']}>" for i, b in enumerate(batch))
+        prompt = (
+            "File each bookmark under exactly one of these folders:\n"
+            + "\n".join(f"- {f}" for f in choices)
+            + f"\n\nUse {args.fallback} only when nothing else fits. Answer with the folder for every number.\n\n"
+            + listing
+        )
+        schema = {
+            "type": "object",
+            "properties": {
+                "assignments": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "index": {"type": "integer"},
+                            "folder": {"type": "string", "enum": choices},
+                        },
+                        "required": ["index", "folder"],
+                    },
+                }
+            },
+            "required": ["assignments"],
+        }
+        reply = ask(args.endpoint, args.model, prompt, schema, args.timeout)
+        for item in reply["assignments"]:
+            index = item["index"]
+            if 0 <= index < len(batch):
+                assignments[batch[index]["id"]] = item["folder"]
+        done = min(start + args.batch, len(bookmarks))
+        print(f"  filed {done}/{len(bookmarks)}", file=sys.stderr)
+    return assignments
+
+
+# Database ###########################################################################################################################################
+
+
+def read_unfiled(path):
+    """Reads the bookmarks sitting loose in Firefox's unfiled root."""
+    connection = sqlite3.connect(f"file:{path}?immutable=1", uri=True)
+    rows = connection.execute(
+        "select b.id, b.title, p.url from moz_bookmarks b join moz_places p on p.id = b.fk"
+        " where b.type = 1 and b.parent = ? order by b.position",
+        (UNFILED_PARENT,),
+    ).fetchall()
+    connection.close()
+    bookmarks = []
+    for identifier, title, url in rows:
+        host = url.split("/")[2] if "://" in url else url[:40]
+        bookmarks.append({"id": identifier, "title": title or url, "url": url, "host": host})
+    return bookmarks
+
+
+def new_guid():
+    """Makes a bookmark guid in the 12-character form Firefox uses."""
+    return "".join(random.choice(GUID_ALPHABET) for _ in range(12))
+
+
+def firefox_is_running():
+    """Reports whether a Firefox process is holding the profile open."""
+    return subprocess.run(["pgrep", "-x", "firefox"], capture_output=True).returncode == 0
+
+
+def apply_plan(path, plan, backup_dir):
+    """Creates the planned folders and moves each bookmark into its own."""
+    stamp = time.strftime("%Y%m%dT%H%M%S")
+    os.makedirs(backup_dir, exist_ok=True)
+    backup = os.path.join(backup_dir, f"places.sqlite.{stamp}")
+    shutil.copy2(path, backup)
+    print(f"backed up the profile to {backup}")
+
+    now = int(time.time() * 1_000_000)
+    wanted = sorted({a["folder"] for a in plan["assignments"]})
+    connection = sqlite3.connect(path)
+    try:
+        existing = {
+            title: identifier
+            for identifier, title in connection.execute(
+                "select id, title from moz_bookmarks where type = 2 and parent = ?", (UNFILED_PARENT,)
+            )
+        }
+        position = connection.execute(
+            "select coalesce(max(position), -1) + 1 from moz_bookmarks where parent = ?", (UNFILED_PARENT,)
+        ).fetchone()[0]
+
+        folders = {}
+        for title in wanted:
+            if title in existing:
+                folders[title] = existing[title]
+                continue
+            cursor = connection.execute(
+                "insert into moz_bookmarks (type, fk, parent, position, title, dateAdded, lastModified, guid,"
+                " syncStatus, syncChangeCounter) values (2, NULL, ?, ?, ?, ?, ?, ?, 2, 1)",
+                (UNFILED_PARENT, position, title, now, now, new_guid()),
+            )
+            folders[title] = cursor.lastrowid
+            position += 1
+
+        moved = 0
+        for folder_title in wanted:
+            folder_id = folders[folder_title]
+            slot = connection.execute(
+                "select coalesce(max(position), -1) + 1 from moz_bookmarks where parent = ?", (folder_id,)
+            ).fetchone()[0]
+            for entry in plan["assignments"]:
+                if entry["folder"] != folder_title:
+                    continue
+                changed = connection.execute(
+                    "update moz_bookmarks set parent = ?, position = ?, lastModified = ?,"
+                    " syncChangeCounter = syncChangeCounter + 1 where id = ? and parent = ? and type = 1",
+                    (folder_id, slot, now, entry["id"], UNFILED_PARENT),
+                ).rowcount
+                if changed:
+                    slot += 1
+                    moved += 1
+        connection.commit()
+    finally:
+        connection.close()
+    print(f"filed {moved} bookmarks into {len(wanted)} folders")
+    print("Firefox reads the database at startup, so start it again to see them.")
+
+
+# Commands ###########################################################################################################################################
+
+
+def do_plan(args):
+    """Writes a plan pairing every unfiled bookmark with a proposed folder."""
+    bookmarks = read_unfiled(args.profile)
+    if not bookmarks:
+        sys.exit("no unfiled bookmarks to sort")
+    print(f"read {len(bookmarks)} unfiled bookmarks", file=sys.stderr)
+
+    folders = args.folder or propose_folders(args, bookmarks)
+    print("proposed folders: " + ", ".join(folders), file=sys.stderr)
+
+    assignments = assign(args, bookmarks, folders)
+    plan = {
+        "profile": args.profile,
+        "model": args.model,
+        "folders": folders + [args.fallback],
+        "assignments": [
+            {
+                "id": b["id"],
+                "title": b["title"],
+                "url": b["url"],
+                "folder": assignments.get(b["id"], args.fallback),
+            }
+            for b in bookmarks
+        ],
+    }
+    with open(args.plan, "w") as handle:
+        json.dump(plan, handle, indent=2, ensure_ascii=False)
+    counts = {}
+    for entry in plan["assignments"]:
+        counts[entry["folder"]] = counts.get(entry["folder"], 0) + 1
+    print(f"\nwrote {args.plan}\n")
+    for title, count in sorted(counts.items(), key=lambda kv: -kv[1]):
+        print(f"  {count:4d}  {title}")
+    print("\nEdit that file to taste, then run: bookmark-sorter apply")
+
+
+def do_apply(args):
+    """Carries out a reviewed plan against the live profile."""
+    with open(args.plan) as handle:
+        plan = json.load(handle)
+    if firefox_is_running():
+        sys.exit("Firefox is running; close it first or it will overwrite these changes on exit")
+    apply_plan(plan.get("profile", args.profile), plan, args.backup_dir)
+
+
+def main():
+    """Parses the arguments and runs the requested command."""
+    home = os.path.expanduser("~")
+    parser = argparse.ArgumentParser(prog="bookmark-sorter", description=__doc__)
+    parser.add_argument("--profile", default=f"{home}/.config/mozilla/firefox/Personal/places.sqlite")
+    parser.add_argument("--plan", default=f"{home}/bookmark-plan.json")
+    parser.add_argument("--backup-dir", default=f"{home}/.local/state/bookmark-sorter")
+    parser.add_argument("--endpoint", default="http://127.0.0.1:1234")
+    parser.add_argument("--model", default="gemma-4-26b-a4b-it-qat")
+    parser.add_argument("--folder", action="append", help="use these folders instead of asking the model")
+    parser.add_argument("--fallback", default="Misc")
+    parser.add_argument("--min-folders", type=int, default=8)
+    parser.add_argument("--max-folders", type=int, default=16)
+    parser.add_argument("--batch", type=int, default=25)
+    parser.add_argument("--timeout", type=int, default=900)
+    commands = parser.add_subparsers(dest="command", required=True)
+    commands.add_parser("plan", help="propose folders and write a plan to review")
+    commands.add_parser("apply", help="carry out a reviewed plan")
+
+    args = parser.parse_args()
+    if not os.path.exists(args.profile):
+        sys.exit(f"no Firefox profile database at {args.profile}")
+    (do_plan if args.command == "plan" else do_apply)(args)
+
+
+if __name__ == "__main__":
+    main()
