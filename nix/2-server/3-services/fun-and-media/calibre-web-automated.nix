@@ -29,6 +29,10 @@
         enable = true;
         package = inputs.calibre-web-automated.packages.${pkgs.stdenv.hostPlatform.system}.default;
         port = 8083;
+        extraArgs = [
+            "-i"
+            "127.0.0.1"
+        ]; # Only nginx reaches it; exposed directly over WireGuard it holds half-open requests forever
         configDir = "/Storage/Services/Calibre-Web/config";
         libraryDir = "/Storage/Files/eBooks/Calibre/Library";
         ingestDir = "/Storage/Services/Calibre-Web/Uploads";
