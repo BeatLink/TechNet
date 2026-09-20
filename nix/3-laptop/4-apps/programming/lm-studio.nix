@@ -14,8 +14,9 @@ let
     # available. The context stops at 8k because this build also loads the model's 675MiB vision projector; text-only it would reach about 16k.
     #
     # Quality: a 26B mixture-of-experts activates only 4B parameters per token, so the experts sit in system RAM while attention and the cache stay on
-    # the GPU. 20.3 tok/s against 5.5 on the CPU alone, and against 8.9 for a dense 9B half-offloaded -- a bigger model that runs faster, because what
-    # moves per token is what counts. It asks 14.4GiB of RAM and 3064MiB of VRAM.
+    # the GPU. 18 tok/s once warm, against 5.5 on the CPU alone and 8.9 for a dense 9B half-offloaded -- a bigger model that runs faster, because
+    # what moves per token is what counts. It asks 14.4GiB of RAM against a desktop that already holds 12, so it is mapped rather than read in: the
+    # first reply after a load is slow while pages fault in, and read in outright it puts 12GiB into zram and halves the rate.
     #
     # autoFit has to be off for the offload ratio to be read at all, and the runtime's strict VRAM cap has to be off with it: the cap sizes a layer by
     # its experts too, which on the 26B leaves 6 layers on the GPU when all 41 belong there.
@@ -36,7 +37,7 @@ let
             "llm.load.numParallelSessions" = 1;
             "llm.load.llama.cpuThreadPoolSize" = 6;
             "llm.load.numCpuExpertLayersRatio" = 1; # Every expert on the CPU, which is what leaves the GPU for attention and the cache
-            "llm.load.llama.tryMmap" = false; # 14.4GiB read into RAM outright, rather than paged in against a desktop already holding 12GiB
+            "llm.load.llama.tryMmap" = true; # Mapped, so the kernel can drop pages under pressure; read in outright it lands in zram instead
             "llm.load.llama.keepModelInMemory" = false;
         };
     };
