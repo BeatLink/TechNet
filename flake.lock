@@ -618,13 +618,13 @@
       "locked": {
         "lastModified": 1789859741,
         "narHash": "sha256-ace8DgD/dpU7GbEa1kkOmjEpVk/Vkdt6zjOg/1HAq9w=",
-        "owner": "BeatLink",
+        "owner": "Trilium-Community",
         "repo": "nemo-trilium",
         "rev": "01ffc0962ec35e9accda071b9d2c52d118b55f31",
         "type": "github"
       },
       "original": {
-        "owner": "BeatLink",
+        "owner": "Trilium-Community",
         "repo": "nemo-trilium",
         "type": "github"
       }

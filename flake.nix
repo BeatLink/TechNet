@@ -68,7 +68,7 @@
             inputs.nixpkgs.follows = "nixpkgs";
         };
         nemo-trilium = {
-            url = "github:BeatLink/nemo-trilium";
+            url = "github:Trilium-Community/nemo-trilium";
             inputs.nixpkgs.follows = "nixpkgs";
         };
         nixos-plymouth = {
