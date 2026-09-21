@@ -89,7 +89,7 @@ type at it. WireGuard does not exist yet at that point, so nothing reaches it
 from Odin's side of the tunnel. From a machine on that LAN:
 
 ```sh
-nc -u -l -p 6666                 # output, in one terminal
+nc -u -l 6666                    # output, in one terminal
 nc -u <ragnarok-lan-ip> 6666     # input, in another
 ```
 
@@ -97,6 +97,10 @@ U-Boot's `tools/netconsole` script does both at once. Anyone on that LAN can
 drive the firmware console this way; both disks are LUKS, so what it exposes
 is the boot menu and the console, not data. If DHCP does not answer, preboot
 falls back to HDMI and serial once the single attempt times out.
+
+A board that is wedged rather than waiting ignores anything typed at it, so
+capture the output rather than expecting to drive it. `tcpdump -A udp port
+6666` on a LAN host catches the broadcast whatever the firewall there does.
 
 The DHCP lease is the firmware's own, not the one the booted system holds, so
 the address changes between boots. Broadcasting to the LAN reaches it whatever
@@ -138,6 +142,23 @@ gpio set A2; sleep 2; gpio clear A2; sleep 2; usb reset; usb storage
 The firmware does not do this on its own. It cuts power to the backup drive
 along with everything else, which is too blunt to run unattended on every
 boot that is merely slow to find a disk.
+
+### When the root disk stalls
+
+The other way the same drive fails: the firmware finds it and prints its
+capacity, then wedges, repeating `WARN endpoint is halted` with an occasional
+`Resetting EP 3...` and never reaching the EFI loader. The bridge stalls a
+bulk endpoint during the partition scan -- Linux clears that and carries on,
+and U-Boot 2026.04 could not, because it reset the halted endpoint and then
+judged the result from the endpoint context it had read before the reset,
+which on this CPU is a stale cache line. The fork's U-Boot tree carries the
+fix; see [Tow-Boot](tow-boot.md).
+
+Whether a failed boot reached Linux at all can be read from Heimdall without
+going near the board. U-Boot's preboot `dhcp` sends no hostname and the
+initrd's networkd sends `Ragnarok`, so in
+`/Storage/Services/PiHole/logs/pihole.log` a nameless lease with no named one
+after it means the firmware ran and the kernel never started.
 
 ## Storage
 

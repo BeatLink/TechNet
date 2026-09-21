@@ -41,7 +41,7 @@ them the firmware stops at `distro_bootcmd not defined` and ESC finds no menu.
 Anything upstream fixed on its own between 2023.07 and 2026.04 was dropped
 rather than ported.
 
-Three fixes on top are not Tow-Boot's own and would stand upstream:
+Four fixes on top are not Tow-Boot's own and would stand upstream:
 
 - **A keyboard silent while idle is kept.** Probing asks for the device's
   state and dropped the keyboard when nothing came back, which is what plenty
@@ -54,6 +54,12 @@ Three fixes on top are not Tow-Boot's own and would stand upstream:
 - **EHCI honours non-blocking interrupt transfers.** The flag was ignored, so
   every idle keyboard poll waited out a full second and printed `Timeout poll
   on interrupt endpoint`.
+- **A halted bulk endpoint recovers.** Upstream resets such an endpoint before
+  the next transfer, then decides whether it worked from the endpoint context
+  it read before the reset. The controller writes that state to memory, so on
+  any CPU with dcache the check reads a stale cache line, rejects every
+  transfer after a stall as halted, and a disk that stalls once wedges the
+  boot for good.
 
 `modules/tow-boot/src.nix` pins the tree by revision and hash. **Changing the
 tree means pushing it and bumping both**, or the build silently keeps using the
