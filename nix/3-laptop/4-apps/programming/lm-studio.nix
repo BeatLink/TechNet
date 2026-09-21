@@ -101,6 +101,18 @@ in
                             "$cfg" > "$cfg.new" && mv "$cfg.new" "$cfg"
                     done
 
+                    # With the strict cap off, a model with no context of its own reaches for its full native window -- 128k on a 3B is
+                    # 14GiB of cache -- and fails to load. Every installed model without one is given a modest default instead.
+                    find "$HOME/.lmstudio/models" -name '*.gguf' ! -name 'mmproj*' -print0 2>/dev/null | while IFS= read -r -d "" model; do
+                        rel="''${model#$HOME/.lmstudio/models/}"
+                        cfg="$internal/user-concrete-model-default-config/$rel.json"
+                        [ -f "$cfg" ] && "$jq" -e '.load.fields[]? | select(.key == "llm.load.contextLength")' "$cfg" >/dev/null 2>&1 && continue
+                        mkdir -p "$(dirname "$cfg")"
+                        [ -f "$cfg" ] || echo '{"preset":"","operation":{"fields":[]},"load":{"fields":[]}}' > "$cfg"
+                        "$jq" '.load.fields += [{ key: "llm.load.contextLength", value: 8192 }]' "$cfg" > "$cfg.new" \
+                            && mv "$cfg.new" "$cfg"
+                    done
+
                     # Each setup above is then merged into its own file, leaving any key not named there as the app left it.
                     apply_setup() {
                         cfg="$internal/user-concrete-model-default-config/$1.json"
