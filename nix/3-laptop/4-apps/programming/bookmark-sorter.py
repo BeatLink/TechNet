@@ -22,12 +22,17 @@ GUID_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-
 # Model ##############################################################################################################################################
 
 
-def ask(endpoint, model, prompt, schema, timeout):
+class Truncated(Exception):
+    """Raised when the model used its whole budget without finishing the answer."""
+
+
+def ask(endpoint, model, prompt, schema, timeout, budget):
     """Sends one prompt to the LM Studio server and returns the parsed JSON reply."""
     body = {
         "model": model,
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.2,
+        "max_tokens": budget,
         "response_format": {
             "type": "json_schema",
             "json_schema": {"name": "reply", "strict": True, "schema": schema},
@@ -40,13 +45,16 @@ def ask(endpoint, model, prompt, schema, timeout):
     )
     try:
         with urllib.request.urlopen(request, timeout=timeout) as reply:
-            text = json.load(reply)["choices"][0]["message"]["content"]
+            choice = json.load(reply)["choices"][0]
     except urllib.error.URLError as error:
         sys.exit(f"cannot reach the model at {endpoint}: {error}\nIs LM Studio's server running? (lms server start)")
+    # These models reason before answering and the JSON grammar does not constrain that, so a budget is the only stop.
+    if choice["finish_reason"] == "length":
+        raise Truncated(f"spent all {budget} tokens before answering")
     try:
-        return json.loads(text)
-    except json.JSONDecodeError:
-        sys.exit(f"the model did not return JSON:\n{text[:400]}")
+        return json.loads(choice["message"]["content"])
+    except (json.JSONDecodeError, TypeError):
+        raise Truncated("did not return usable JSON")
 
 
 def propose_folders(args, bookmarks):
@@ -70,41 +78,60 @@ def propose_folders(args, bookmarks):
         },
         "required": ["folders"],
     }
-    folders = [f.strip() for f in ask(args.endpoint, args.model, prompt, schema, args.timeout)["folders"] if f.strip()]
+    try:
+        reply = ask(args.endpoint, args.model, prompt, schema, args.timeout, args.reason_budget)
+    except Truncated as error:
+        sys.exit(f"the model {error} while proposing folders.\nRaise --reason-budget, or name the folders with --folder.")
+    folders = [f.strip() for f in reply["folders"] if f.strip()]
     return list(dict.fromkeys(folders))
 
 
+def assign_batch(args, batch, choices):
+    """Files one batch, halving it and retrying if the model runs out of budget."""
+    listing = "\n".join(f"{i}. {b['title'][:110]}  <{b['host']}>" for i, b in enumerate(batch))
+    prompt = (
+        "File each bookmark under exactly one of these folders:\n"
+        + "\n".join(f"- {f}" for f in choices)
+        + f"\n\nUse {args.fallback} only when nothing else fits. Answer with exactly {len(batch)} folder"
+        " names, one per bookmark, in the same order as the list.\n\n"
+        + listing
+    )
+    # One name per bookmark in order, fixed length: asking for numbered objects instead let the model
+    # run past the batch and generate until it filled the context.
+    schema = {
+        "type": "object",
+        "properties": {
+            "folders": {
+                "type": "array",
+                "items": {"type": "string", "enum": choices},
+                "minItems": len(batch),
+                "maxItems": len(batch),
+            }
+        },
+        "required": ["folders"],
+    }
+    # Reasoning grows with the batch, so a batch that overruns its budget is split rather than abandoned.
+    budget = args.per_bookmark * len(batch) + args.answer_budget
+    try:
+        reply = ask(args.endpoint, args.model, prompt, schema, args.timeout, budget)
+    except Truncated as error:
+        if len(batch) == 1:
+            print(f"  '{batch[0]['title'][:60]}' {error}; leaving it in {args.fallback}", file=sys.stderr)
+            return {batch[0]["id"]: args.fallback}
+        half = len(batch) // 2
+        print(f"  batch of {len(batch)} {error}; splitting", file=sys.stderr)
+        filed = assign_batch(args, batch[:half], choices)
+        filed.update(assign_batch(args, batch[half:], choices))
+        return filed
+    return {batch[index]["id"]: folder for index, folder in enumerate(reply["folders"][:len(batch)])}
+
+
 def assign(args, bookmarks, folders):
-    """Files each bookmark under one of the folders, a batch at a time."""
+    """Files every bookmark under one of the folders, a batch at a time."""
     choices = folders + [args.fallback]
     assignments = {}
     for start in range(0, len(bookmarks), args.batch):
-        batch = bookmarks[start:start + args.batch]
-        listing = "\n".join(f"{i}. {b['title'][:110]}  <{b['host']}>" for i, b in enumerate(batch))
-        prompt = (
-            "File each bookmark under exactly one of these folders:\n"
-            + "\n".join(f"- {f}" for f in choices)
-            + f"\n\nUse {args.fallback} only when nothing else fits. Answer with exactly {len(batch)} folder"
-            " names, one per bookmark, in the same order as the list.\n\n"
-            + listing
-        )
-        # One name per bookmark in order, fixed length: asking for numbered objects instead let the model
-        # run past the batch and generate until it filled the context.
-        schema = {
-            "type": "object",
-            "properties": {
-                "folders": {
-                    "type": "array",
-                    "items": {"type": "string", "enum": choices},
-                    "minItems": len(batch),
-                    "maxItems": len(batch),
-                }
-            },
-            "required": ["folders"],
-        }
-        reply = ask(args.endpoint, args.model, prompt, schema, args.timeout)
-        for index, folder in enumerate(reply["folders"][:len(batch)]):
-            assignments[batch[index]["id"]] = folder
+        assignments.update(assign_batch(args, bookmarks[start:start + args.batch], choices))
         done = min(start + args.batch, len(bookmarks))
         print(f"  filed {done}/{len(bookmarks)}", file=sys.stderr)
     return assignments
@@ -259,8 +286,11 @@ def main():
     parser.add_argument("--fallback", default="Misc")
     parser.add_argument("--min-folders", type=int, default=8)
     parser.add_argument("--max-folders", type=int, default=16)
-    parser.add_argument("--batch", type=int, default=25)
-    parser.add_argument("--timeout", type=int, default=900)
+    parser.add_argument("--batch", type=int, default=10)
+    parser.add_argument("--per-bookmark", type=int, default=200, help="token budget per bookmark, mostly its reasoning")
+    parser.add_argument("--answer-budget", type=int, default=400)
+    parser.add_argument("--reason-budget", type=int, default=6000, help="token budget for the folder proposal")
+    parser.add_argument("--timeout", type=int, default=1800)
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("plan", help="propose folders and write a plan to review")
     commands.add_parser("apply", help="carry out a reviewed plan")
