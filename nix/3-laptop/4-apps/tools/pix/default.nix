@@ -3,6 +3,26 @@
     # Pix reads WebP through gdk-pixbuf, so the loader has to be in the system cache.
     programs.gdk-pixbuf.modulePackages = [ pkgs.webp-pixbuf-loader ];
 
+    # Pix's wrapper pins its own loader cache, so the extra loaders go in before the wrapper is built.
+    nixpkgs.overlays = [
+        (final: prev: {
+            pix = prev.pix.overrideAttrs (old: {
+                postInstall = (old.postInstall or "") + ''
+                    export GDK_PIXBUF_MODULE_FILE="${
+                        final.gnome._gdkPixbufCacheBuilder_DO_NOT_USE {
+                            extraLoaders = [
+                                final.libheif.lib
+                                final.libjxl
+                                final.librsvg
+                                final.webp-pixbuf-loader
+                            ];
+                        }
+                    }"
+                '';
+            });
+        })
+    ];
+
     home-manager.users.beatlink =
         { pkgs, ... }:
         {
