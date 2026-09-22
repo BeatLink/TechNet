@@ -36,12 +36,28 @@ function say(text, kind) {
 }
 
 // Asks the server which model is loaded, since that is the one the chat should address.
+//
+// A fetch that never reaches the server throws TypeError, which here means the host permission was not
+// granted and the request was held to the cross-origin rules rather than the server being down.
 async function findModel() {
-    const reply = await fetch(`${ENDPOINT}/v1/models`);
+    let reply;
+    try {
+        reply = await fetch(`${ENDPOINT}/v1/models`);
+    } catch (error) {
+        const probe = await browser.permissions.contains({ origins: ["http://127.0.0.1/*"] }).catch(() => null);
+        throw new Error(
+            probe === false
+                ? "the extension has no permission for 127.0.0.1, so the request was blocked before it left the browser"
+                : `nothing answered at ${ENDPOINT} (${error.message}); start it with: lms server start`,
+        );
+    }
+    if (!reply.ok) {
+        throw new Error(`the server answered ${reply.status} ${reply.statusText}`);
+    }
     const body = await reply.json();
     const first = (body.data || [])[0];
     if (!first) {
-        throw new Error("no model loaded");
+        throw new Error("the server is up but has no model loaded");
     }
     return first.id;
 }
