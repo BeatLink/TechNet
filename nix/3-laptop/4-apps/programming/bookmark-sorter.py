@@ -120,17 +120,6 @@ def assign_batch(args, batch, choices):
     return {b["guid"]: args.fallback for b in batch}
 
 
-def assign(args, bookmarks, folders):
-    """Files every bookmark under one of the folders, a batch at a time."""
-    choices = folders + [args.fallback]
-    assignments = {}
-    for start in range(0, len(bookmarks), args.batch):
-        assignments.update(assign_batch(args, bookmarks[start:start + args.batch], choices))
-        done = min(start + args.batch, len(bookmarks))
-        print(f"  filed {done}/{len(bookmarks)}", file=sys.stderr)
-    return assignments
-
-
 # Bookmarks ##########################################################################################################################################
 
 
@@ -158,11 +147,49 @@ def read_unfiled(path):
     return bookmarks
 
 
+def read_plan(path):
+    """Reads the folders an earlier run already settled on, so a stopped run can pick up where it left off."""
+    if not os.path.exists(path):
+        return {}
+    try:
+        with open(path) as handle:
+            saved = json.load(handle)
+    except (json.JSONDecodeError, OSError):
+        return {}
+    return {
+        entry["guid"]: {"folder": entry["folder"], "model": entry.get("model", "")}
+        for entry in saved.get("assignments", [])
+        if entry.get("guid") and entry.get("folder")
+    }
+
+
+def write_plan(args, bookmarks, folders, filed):
+    """Writes the plan in place of any earlier one, leaving the old file alone until the new one is whole."""
+    plan = {
+        "profile": args.profile,
+        "folders": folders + [args.fallback],
+        "assignments": [
+            {
+                "guid": b["guid"],
+                "title": b["title"],
+                "url": b["url"],
+                "folder": filed[b["guid"]]["folder"],
+                "model": filed[b["guid"]]["model"],
+            }
+            for b in bookmarks
+            if b["guid"] in filed
+        ],
+    }
+    with open(f"{args.plan}.new", "w") as handle:
+        json.dump(plan, handle, indent=2, ensure_ascii=False)
+    os.replace(f"{args.plan}.new", args.plan)
+
+
 # Commands ###########################################################################################################################################
 
 
 def do_plan(args):
-    """Writes a plan pairing every unfiled bookmark with a proposed folder."""
+    """Writes a plan pairing every unfiled bookmark with a folder, a batch at a time."""
     bookmarks = read_unfiled(args.profile)
     if not bookmarks:
         sys.exit("no unfiled bookmarks to sort")
@@ -171,25 +198,22 @@ def do_plan(args):
     folders = args.folder or read_folders_file(args.folders_file) or propose_folders(args, bookmarks)
     print("folders: " + ", ".join(folders), file=sys.stderr)
 
-    assignments = assign(args, bookmarks, folders)
-    plan = {
-        "profile": args.profile,
-        "model": args.model,
-        "folders": folders + [args.fallback],
-        "assignments": [
-            {
-                "guid": b["guid"],
-                "title": b["title"],
-                "url": b["url"],
-                "folder": assignments.get(b["guid"], args.fallback),
-            }
-            for b in bookmarks
-        ],
-    }
-    with open(args.plan, "w") as handle:
-        json.dump(plan, handle, indent=2, ensure_ascii=False)
+    filed = {} if args.restart else read_plan(args.plan)
+    pending = [b for b in bookmarks if b["guid"] not in filed]
+    if filed:
+        print(f"resuming: {len(filed)} already filed, {len(pending)} to go", file=sys.stderr)
+
+    choices = folders + [args.fallback]
+    for start in range(0, len(pending), args.batch):
+        batch = pending[start:start + args.batch]
+        for guid, folder in assign_batch(args, batch, choices).items():
+            filed[guid] = {"folder": folder, "model": args.model}
+        # Written after every batch, so stopping the run costs only the batch in flight.
+        write_plan(args, bookmarks, folders, filed)
+        print(f"  filed {min(start + args.batch, len(pending))}/{len(pending)}", file=sys.stderr)
+
     counts = {}
-    for entry in plan["assignments"]:
+    for entry in filed.values():
         counts[entry["folder"]] = counts.get(entry["folder"], 0) + 1
     print(f"\nwrote {args.plan}\n")
     for title, count in sorted(counts.items(), key=lambda kv: -kv[1]):
@@ -215,6 +239,7 @@ def main():
         "per_bookmark": 250,
         "answer_budget": 500,
         "attempts": 3,
+        "restart": False,
         "reason_budget": 6000,
         "timeout": 1800,
     }
@@ -236,6 +261,7 @@ def main():
     common.add_argument("--per-bookmark", type=int, default=argparse.SUPPRESS, help="token budget per bookmark, mostly its reasoning")
     common.add_argument("--answer-budget", type=int, default=argparse.SUPPRESS)
     common.add_argument("--attempts", type=int, default=argparse.SUPPRESS, help="tries per batch, each on twice the budget")
+    common.add_argument("--restart", action="store_true", default=argparse.SUPPRESS, help="ignore an existing plan and start over")
     common.add_argument("--reason-budget", type=int, default=argparse.SUPPRESS, help="token budget for the folder proposal")
     common.add_argument("--timeout", type=int, default=argparse.SUPPRESS)
 
