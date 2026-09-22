@@ -51,7 +51,14 @@ in
 
             serviceConfig = {
                 ExecStart = "${pkgs.attic-client}/bin/attic watch-store technet";
-                Environment = [ "XDG_CONFIG_HOME=${cfg.configDir}" ];
+                # Setting either threshold by hand also stops glibc raising them on the fly, which is what otherwise moves large blocks off
+                # mmap and onto the heap, where freeing them returns nothing. Capping the arenas keeps 19 threads from each holding a free list.
+                Environment = [
+                    "XDG_CONFIG_HOME=${cfg.configDir}"
+                    "MALLOC_ARENA_MAX=2"
+                    "MALLOC_MMAP_THRESHOLD_=131072"
+                    "MALLOC_TRIM_THRESHOLD_=131072"
+                ];
 
                 # Heimdall being unreachable is ordinary here, so the watcher retries forever rather than giving up and leaving the cache cold.
                 Restart = "always";
@@ -68,7 +75,8 @@ in
         # free lists, so the pages remain mapped and dirty and the kernel can only move them to swap. One host was found holding 6.6GiB of swap
         # against 18MiB resident, which is half its zram, and a full swap is what stops anything else being paged out.
         #
-        # Restarting is the only thing that returns it, and the watcher is stateless between paths, so an hourly bounce costs only what is uploading.
+        # The allocator settings above should hold the growth down; this stays as a backstop, since the watcher keeps no state between paths and a
+        # bounce costs only whatever is uploading at the time.
         systemd.services.attic-watch-store-recycle = {
             description = "Restart the Attic watcher so it returns its heap";
             serviceConfig = {
