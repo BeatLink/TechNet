@@ -140,6 +140,14 @@ def assign(args, bookmarks, folders):
 # Database ###########################################################################################################################################
 
 
+def read_folders_file(path):
+    """Reads the standing folder list, one name per line, and returns nothing if there is no such file."""
+    if not path or not os.path.exists(path):
+        return []
+    with open(path) as handle:
+        return [line.strip() for line in handle if line.strip()]
+
+
 def read_unfiled(path):
     """Reads the bookmarks sitting loose in Firefox's unfiled root."""
     connection = sqlite3.connect(f"file:{path}?immutable=1", uri=True)
@@ -235,8 +243,8 @@ def do_plan(args):
         sys.exit("no unfiled bookmarks to sort")
     print(f"read {len(bookmarks)} unfiled bookmarks", file=sys.stderr)
 
-    folders = args.folder or propose_folders(args, bookmarks)
-    print("proposed folders: " + ", ".join(folders), file=sys.stderr)
+    folders = args.folder or read_folders_file(args.folders_file) or propose_folders(args, bookmarks)
+    print("folders: " + ", ".join(folders), file=sys.stderr)
 
     assignments = assign(args, bookmarks, folders)
     plan = {
@@ -285,6 +293,11 @@ def main():
     common.add_argument("--endpoint", default="http://127.0.0.1:1234")
     common.add_argument("--model", default="gemma-4-26b-a4b-it-qat")
     common.add_argument("--folder", action="append", help="use these folders instead of asking the model")
+    common.add_argument(
+        "--folders-file",
+        default=os.environ.get("BOOKMARK_FOLDERS_FILE", ""),
+        help="a file of folder names, one per line, used as the scheme instead of asking the model",
+    )
     common.add_argument("--fallback", default="Misc")
     common.add_argument("--min-folders", type=int, default=8)
     common.add_argument("--max-folders", type=int, default=16)
