@@ -10,3 +10,4 @@ result
 result-*
 
 startup-metrics.log
+__pycache__/
