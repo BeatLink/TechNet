@@ -35,7 +35,11 @@ in
         home = {
             packages = [ bookmark-sorter ];
 
-            # The extension moves bookmarks through Firefox's own API, so the browser stays open and nothing writes to places.sqlite behind it.
+            # The extension moves bookmarks through Firefox's own API, so the browser stays open and nothing writes to places.sqlite behind it. Its
+            # sidebar chats to the model on the LM Studio server and gives it four tools -- list, search, create a folder, move into one -- so the
+            # long tail can be sorted by asking rather than by another whole-collection pass. It may not delete, and a move of more than ten is
+            # confirmed first.
+            #
             # Release Firefox installs only signed add-ons, so this is loaded from about:debugging, which lasts until the browser restarts.
             file.".local/share/bookmark-sorter/extension".source = ./bookmark-sorter-extension;
 
