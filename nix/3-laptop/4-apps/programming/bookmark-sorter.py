@@ -201,33 +201,49 @@ def do_plan(args):
 def main():
     """Parses the arguments and runs the requested command."""
     home = os.path.expanduser("~")
-    # Shared as a parent so the options read the same before or after the subcommand; on the main parser alone,
-    # "bookmark-sorter plan --batch 6" hands --batch to the subparser, which has never heard of it.
+    defaults = {
+        "profile": f"{home}/.config/mozilla/firefox/Personal/places.sqlite",
+        "plan": f"{home}/bookmark-plan.json",
+        "endpoint": "http://127.0.0.1:1234",
+        "model": "gemma-4-26b-a4b-it-qat",
+        "folder": None,
+        "folders_file": os.environ.get("BOOKMARK_FOLDERS_FILE", ""),
+        "fallback": "Misc",
+        "min_folders": 8,
+        "max_folders": 16,
+        "batch": 18,
+        "per_bookmark": 450,
+        "answer_budget": 500,
+        "reason_budget": 6000,
+        "timeout": 1800,
+    }
+
+    # Every option is declared with no default of its own, so a value given before the subcommand survives it: sharing a
+    # parent otherwise means parsing the subcommand re-applies its defaults over whatever came earlier.
     common = argparse.ArgumentParser(add_help=False)
-    common.add_argument("--profile", default=f"{home}/.config/mozilla/firefox/Personal/places.sqlite")
-    common.add_argument("--plan", default=f"{home}/bookmark-plan.json")
-    common.add_argument("--endpoint", default="http://127.0.0.1:1234")
-    common.add_argument("--model", default="gemma-4-26b-a4b-it-qat")
-    common.add_argument("--folder", action="append", help="use these folders instead of asking the model")
-    common.add_argument(
-        "--folders-file",
-        default=os.environ.get("BOOKMARK_FOLDERS_FILE", ""),
-        help="a file of folder names, one per line, used as the scheme instead of asking the model",
-    )
-    common.add_argument("--fallback", default="Misc")
-    common.add_argument("--min-folders", type=int, default=8)
-    common.add_argument("--max-folders", type=int, default=16)
-    common.add_argument("--batch", type=int, default=6)
-    common.add_argument("--per-bookmark", type=int, default=450, help="token budget per bookmark, mostly its reasoning")
-    common.add_argument("--answer-budget", type=int, default=500)
-    common.add_argument("--reason-budget", type=int, default=6000, help="token budget for the folder proposal")
-    common.add_argument("--timeout", type=int, default=1800)
+    common.add_argument("--profile", default=argparse.SUPPRESS)
+    common.add_argument("--plan", default=argparse.SUPPRESS)
+    common.add_argument("--endpoint", default=argparse.SUPPRESS)
+    common.add_argument("--model", default=argparse.SUPPRESS)
+    common.add_argument("--folder", action="append", default=argparse.SUPPRESS, help="use these folders instead of the list")
+    common.add_argument("--folders-file", default=argparse.SUPPRESS, help="a file of folder names, one per line")
+    common.add_argument("--fallback", default=argparse.SUPPRESS)
+    common.add_argument("--min-folders", type=int, default=argparse.SUPPRESS)
+    common.add_argument("--max-folders", type=int, default=argparse.SUPPRESS)
+    common.add_argument("--batch", type=int, default=argparse.SUPPRESS)
+    common.add_argument("--per-bookmark", type=int, default=argparse.SUPPRESS, help="token budget per bookmark, mostly its reasoning")
+    common.add_argument("--answer-budget", type=int, default=argparse.SUPPRESS)
+    common.add_argument("--reason-budget", type=int, default=argparse.SUPPRESS, help="token budget for the folder proposal")
+    common.add_argument("--timeout", type=int, default=argparse.SUPPRESS)
 
     parser = argparse.ArgumentParser(prog="bookmark-sorter", description=__doc__, parents=[common])
     commands = parser.add_subparsers(dest="command", required=True)
     commands.add_parser("plan", parents=[common], help="write a plan for the Bookmark Sorter extension to apply")
 
     args = parser.parse_args()
+    for name, value in defaults.items():
+        if not hasattr(args, name):
+            setattr(args, name, value)
     if not os.path.exists(args.profile):
         sys.exit(f"no Firefox profile database at {args.profile}")
     do_plan(args)
