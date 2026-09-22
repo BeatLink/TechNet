@@ -82,7 +82,7 @@ def propose_folders(args, bookmarks):
 
 
 def assign_batch(args, batch, choices):
-    """Files one batch, halving it and retrying if the model runs out of budget."""
+    """Files one batch, retrying on a larger budget when the model runs out of one."""
     listing = "\n".join(f"{i}. {b['title'][:110]}  <{b['host']}>" for i, b in enumerate(batch))
     prompt = (
         "File each bookmark under exactly one of these folders:\n"
@@ -105,20 +105,19 @@ def assign_batch(args, batch, choices):
         },
         "required": ["folders"],
     }
-    # Reasoning grows with the batch, so a batch that overruns its budget is split rather than abandoned.
-    budget = args.per_bookmark * len(batch) + args.answer_budget
-    try:
-        reply = ask(args.endpoint, args.model, prompt, schema, args.timeout, budget)
-    except Truncated as error:
-        if len(batch) == 1:
-            print(f"  '{batch[0]['title'][:60]}' {error}; leaving it in {args.fallback}", file=sys.stderr)
-            return {batch[0]["guid"]: args.fallback}
-        half = len(batch) // 2
-        print(f"  batch of {len(batch)} {error}; splitting", file=sys.stderr)
-        filed = assign_batch(args, batch[:half], choices)
-        filed.update(assign_batch(args, batch[half:], choices))
-        return filed
-    return {batch[index]["guid"]: folder for index, folder in enumerate(reply["folders"][:len(batch)])}
+    # Most of the reasoning is spent per bookmark but a good slice of it is fixed, so a smaller batch buys
+    # proportionally less room than it gives up: an overrun is answered with more budget, never a split.
+    budget = args.reason_fixed + args.per_bookmark * len(batch) + args.answer_budget
+    for attempt in range(args.attempts):
+        try:
+            reply = ask(args.endpoint, args.model, prompt, schema, args.timeout, budget)
+        except Truncated as error:
+            print(f"  batch of {len(batch)} {error}; retrying on {budget * 2}", file=sys.stderr)
+            budget *= 2
+            continue
+        return {batch[index]["guid"]: folder for index, folder in enumerate(reply["folders"][:len(batch)])}
+    print(f"  batch of {len(batch)} never answered; leaving them in {args.fallback}", file=sys.stderr)
+    return {b["guid"]: args.fallback for b in batch}
 
 
 def assign(args, bookmarks, folders):
@@ -212,8 +211,10 @@ def main():
         "min_folders": 8,
         "max_folders": 16,
         "batch": 18,
-        "per_bookmark": 450,
+        "reason_fixed": 1500,
+        "per_bookmark": 250,
         "answer_budget": 500,
+        "attempts": 3,
         "reason_budget": 6000,
         "timeout": 1800,
     }
@@ -231,8 +232,10 @@ def main():
     common.add_argument("--min-folders", type=int, default=argparse.SUPPRESS)
     common.add_argument("--max-folders", type=int, default=argparse.SUPPRESS)
     common.add_argument("--batch", type=int, default=argparse.SUPPRESS)
+    common.add_argument("--reason-fixed", type=int, default=argparse.SUPPRESS, help="token budget every call spends on reasoning")
     common.add_argument("--per-bookmark", type=int, default=argparse.SUPPRESS, help="token budget per bookmark, mostly its reasoning")
     common.add_argument("--answer-budget", type=int, default=argparse.SUPPRESS)
+    common.add_argument("--attempts", type=int, default=argparse.SUPPRESS, help="tries per batch, each on twice the budget")
     common.add_argument("--reason-budget", type=int, default=argparse.SUPPRESS, help="token budget for the folder proposal")
     common.add_argument("--timeout", type=int, default=argparse.SUPPRESS)
 
