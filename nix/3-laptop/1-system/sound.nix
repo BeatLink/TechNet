@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 {
     security.rtkit.enable = true;
     services = {
@@ -12,6 +12,9 @@
             wireplumber.enable = true;
         };
     };
+
+    # PipeWire's pulse server has no client tools of its own, and Steam shells out to pactl to find the audio devices.
+    environment.systemPackages = [ pkgs.pulseaudio ];
 
     home-manager.users.beatlink =
         { pkgs, ... }:
