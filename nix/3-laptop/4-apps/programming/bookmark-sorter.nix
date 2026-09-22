@@ -1,7 +1,7 @@
 # Bookmark Sorter
 #
-# Files Firefox's loose bookmarks into folders a local LLM proposes, in two
-# steps: `bookmark-sorter plan` writes a plan, `apply` carries it out.
+# `bookmark-sorter plan` sorts Firefox's loose bookmarks into a standing set of
+# folders with a local model; the extension beside it applies the result.
 #
 { config, pkgs, ... }:
 let
@@ -33,12 +33,13 @@ in
 
     home-manager.users.beatlink = {
         home = {
-            packages = [
-                bookmark-sorter
-                pkgs.procps # pgrep, which the apply step uses to refuse to run while Firefox is open
-            ];
+            packages = [ bookmark-sorter ];
 
-            # The plan is written to the home directory and the profile backups to state, both of which persist already; nothing to add here.
+            # The extension moves bookmarks through Firefox's own API, so the browser stays open and nothing writes to places.sqlite behind it.
+            # Release Firefox installs only signed add-ons, so this is loaded from about:debugging, which lasts until the browser restarts.
+            file.".local/share/bookmark-sorter/extension".source = ./bookmark-sorter-extension;
+
+            # The plan is written to the home directory, which persists already; nothing to add here.
         };
     };
 }

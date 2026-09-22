@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            body { font: 13px system-ui, sans-serif; width: 22em; margin: 0; padding: 1em; }
+            h1 { font-size: 14px; margin: 0 0 0.75em; }
+            #summary { margin: 0.75em 0; max-height: 14em; overflow-y: auto; }
+            #summary div { display: flex; justify-content: space-between; padding: 1px 0; }
+            #summary span:last-child { color: #666; }
+            button { width: 100%; padding: 0.5em; margin-top: 0.5em; }
+            button:disabled { opacity: 0.5; }
+            #status { margin-top: 0.75em; white-space: pre-wrap; }
+            .bad { color: #b00; }
+        </style>
+    </head>
+    <body>
+        <h1>Bookmark Sorter</h1>
+        <input type="file" id="plan" accept=".json">
+        <div id="summary"></div>
+        <button id="apply" disabled>Apply to bookmarks</button>
+        <div id="status"></div>
+        <script src="popup.js"></script>
+    </body>
+</html>

@@ -1,0 +1,18 @@
+{
+    "manifest_version": 2,
+    "name": "Bookmark Sorter",
+    "version": "1.0",
+    "description": "Applies a bookmark-sorter plan to the live bookmark tree.",
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "bookmark-sorter@technet.local"
+        }
+    },
+    "permissions": [
+        "bookmarks"
+    ],
+    "browser_action": {
+        "default_title": "Bookmark Sorter",
+        "default_popup": "popup.html"
+    }
+}
