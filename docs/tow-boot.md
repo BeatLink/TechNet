@@ -41,7 +41,7 @@ them the firmware stops at `distro_bootcmd not defined` and ESC finds no menu.
 Anything upstream fixed on its own between 2023.07 and 2026.04 was dropped
 rather than ported.
 
-Four fixes on top are not Tow-Boot's own and would stand upstream:
+Five fixes on top are not Tow-Boot's own and would stand upstream:
 
 - **A keyboard silent while idle is kept.** Probing asks for the device's
   state and dropped the keyboard when nothing came back, which is what plenty
@@ -54,12 +54,18 @@ Four fixes on top are not Tow-Boot's own and would stand upstream:
 - **EHCI honours non-blocking interrupt transfers.** The flag was ignored, so
   every idle keyboard poll waited out a full second and printed `Timeout poll
   on interrupt endpoint`.
-- **A halted bulk endpoint recovers.** Upstream resets such an endpoint before
-  the next transfer, then decides whether it worked from the endpoint context
-  it read before the reset. The controller writes that state to memory, so on
-  any CPU with dcache the check reads a stale cache line, rejects every
-  transfer after a stall as halted, and a disk that stalls once wedges the
-  boot for good.
+- **A dead USB device is given up on, not retried forever.** The RK3328's
+  USB 3 PHY never reports a disconnect, so a bridge that drops off the bus
+  after enumeration leaves the controller talking to a ghost: every transfer
+  halts its endpoint, and the storage layer's bounded retries add up to
+  minutes. Endpoint reset now checks its completion codes and its success is
+  trusted over the cached context, a halted control endpoint is reset like a
+  bulk one, and a storage device that fails eight transports in a row is
+  refused further commands.
+- **USB boot scans twice.** `usb_boot` runs the device scan a second time
+  after `usb_rescan`, a plain `usb reset` by default, because the only thing
+  that brings such a bridge back is a fresh enumeration. Ragnarok overrides
+  the hook with a power cut of its USB rail; see [Ragnarok](ragnarok.md).
 
 `modules/tow-boot/src.nix` pins the tree by revision and hash. **Changing the
 tree means pushing it and bumping both**, or the build silently keeps using the

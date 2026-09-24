@@ -20,8 +20,9 @@ import /Storage/Files/Projects/Coding/Pinephone/Tow-Boot {
 
                     # Netconsole broadcasts on the LAN when ncip is unset, so any host there can listen; usb start comes first so the keyboard reaches the menu.
                     # The DHCP call is only for that address: autoload keeps it from fetching a boot file and netretry keeps a silent LAN from stalling the boot.
+                    # The root SSD's bridge can die on its first read after enumeration and only a power cut brings it back, so the boot flow's second scan cycles GPIO A2, the 5V rail for every USB port.
                     PREBOOT = lib.mkForce (
-                        freeform ''"usb start; setenv autoload no; setenv netretry no; if dhcp; then setenv stdout serial,vidconsole,nc; setenv stderr serial,vidconsole,nc; setenv stdin serial,usbkbd,nc; else setenv stdout serial,vidconsole; setenv stderr serial,vidconsole; fi"''
+                        freeform ''"usb start; setenv usb_rescan 'gpio set A2; sleep 2; gpio clear A2; sleep 2; usb reset'; setenv autoload no; setenv netretry no; if dhcp; then setenv stdout serial,vidconsole,nc; setenv stderr serial,vidconsole,nc; setenv stdin serial,usbkbd,nc; else setenv stdout serial,vidconsole; setenv stderr serial,vidconsole; fi"''
                     );
                 }
             )

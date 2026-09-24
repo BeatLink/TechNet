@@ -121,38 +121,43 @@ because a board that boots its own disks otherwise spends about a minute
 timing out on TFTP before the menu appears. Both commands are still there to
 be run by hand.
 
-### When the root disk is not found
+### When the root disk is not found, or stops answering
 
-The bridge sometimes trains its USB 3 link and sometimes falls back to USB 2,
-where it appears on the EHCI controller instead. U-Boot's EHCI here fails to
-re-reset after a few `usb reset` cycles, so a fallback that lands there can be
-invisible to the firmware. It also refuses its USB configuration outright on
-some boots and enumerates nothing at all; the kernel side of that is the
-`usbcore` startup delay quirk in
-[`hardware-configuration.nix`](../nix/1-backup-server/1-system/hardware-configuration.nix),
-which the firmware has no equivalent for.
+The RK3328's USB 3 PHY has a known erratum: it never tells the controller
+that a device has disconnected, and mainline Linux has no driver for the
+polling workaround Rockchip's vendor kernel uses. The Sabrent bridge trips it
+in two ways, both of which the firmware console shows:
 
-Power-cycling the port is the reliable way out, and the firmware console can
-do it because GPIO `A2` gates the 5V rail for every USB port on this board:
+- After a warm reboot it is often invisible to the firmware: `usb start`
+  finds it on no bus, or it has fallen back to USB 2, where U-Boot's EHCI
+  fails to re-reset after a few `usb reset` cycles and once crashed the
+  firmware outright with a Synchronous Abort during that teardown.
+- On a cold boot it sometimes drops off the bus right after enumeration: the
+  firmware prints its capacity, then the first partition read fails and every
+  transfer after it halts an endpoint. Linux sees the same drop on its own
+  first enumeration every boot and re-enumerates; that is what the
+  `usbcore.quirks` entry in
+  [`hardware-configuration.nix`](../nix/1-backup-server/1-system/hardware-configuration.nix)
+  is for.
+
+Neither is a stall the firmware can clear. What works is cutting power to the
+bridge, which GPIO `A2` can do because it gates the 5V rail for every USB port
+on this board. The boot flow does this itself: the fork's `usb_boot` scans
+twice and runs `usb_rescan` between the passes, and this board's preboot sets
+that to
 
 ```sh
-gpio set A2; sleep 2; gpio clear A2; sleep 2; usb reset; usb storage
+gpio set A2; sleep 2; gpio clear A2; sleep 2; usb reset
 ```
 
-The firmware does not do this on its own. It cuts power to the backup drive
-along with everything else, which is too blunt to run unattended on every
-boot that is merely slow to find a disk.
+The fork's storage layer also gives up on a device after eight failed
+transports in a row, so the first pass ends in seconds rather than the twelve
+minutes of bounded retries it used to cost. A warm reboot now takes the
+second pass and boots in about forty seconds; see [Tow-Boot](tow-boot.md).
 
-### When the root disk stalls
-
-The other way the same drive fails: the firmware finds it and prints its
-capacity, then wedges, repeating `WARN endpoint is halted` with an occasional
-`Resetting EP 3...` and never reaching the EFI loader. The bridge stalls a
-bulk endpoint during the partition scan -- Linux clears that and carries on,
-and U-Boot 2026.04 could not, because it reset the halted endpoint and then
-judged the result from the endpoint context it had read before the reset,
-which on this CPU is a stale cache line. The fork's U-Boot tree carries the
-fix; see [Tow-Boot](tow-boot.md).
+The same sequence, followed by `usb storage` and `run bootcmd`, recovers a
+board by hand from the firmware console, which netconsole reaches from the
+LAN once the Tow-Boot menu's *Firmware Console* entry is chosen.
 
 Whether a failed boot reached Linux at all can be read from Heimdall without
 going near the board. U-Boot's preboot `dhcp` sends no hostname and the
