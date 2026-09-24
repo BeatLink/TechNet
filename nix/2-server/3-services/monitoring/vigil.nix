@@ -257,7 +257,7 @@ in
                 status_online = "lime";
                 status_warning = "gold";
                 status_failed = "red";
-                status_offline = "lightgray";
+                status_unavailable = "lightgray";
             };
 
             plugins = [
@@ -1747,7 +1747,7 @@ in
                                             # Odin's dGPU sleeps with the laptop lid and nvidia-smi can wedge
                                             # uninterruptibly when it does. The module suspends its own probe
                                             # after `timeout_trip` timeouts rather than stranding a process per
-                                            # cycle, and reports offline (not failed) while suspended.
+                                            # cycle, and reports unavailable (not failed) while suspended.
                                             name = "GPU";
                                             id = "odin-gpu";
                                             type = "gpu";
