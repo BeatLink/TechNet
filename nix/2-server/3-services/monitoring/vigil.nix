@@ -118,13 +118,33 @@ let
     # on any host's monitor runs the same collection that host's weekly timer runs.
     gcArgs = builtins.filter (a: a != "") (lib.splitString " " config.nix.gc.options);
 
-    # Passes when every named unit in beatlink's user manager is active with a successful last result; a short-lived oneshot needs only the result.
-    userUnitCheck = units: ''
-        sudo -n systemctl show --user -M beatlink@ -p Id,ActiveState,SubState,Result,Type,RemainAfterExit ${lib.concatStringsSep " " units} |
-            awk -F= -v n=${toString (builtins.length units)} 'function done() { if (id == "") return; seen++; up = a == "active" || (t == "oneshot" && k == "no" && a != "failed"); print id " " a "/" s " " r; if (!up || r != "success") bad = 1; id = "" }
-                NF == 0 { done(); next } $1 == "Id" { id = $2 } $1 == "ActiveState" { a = $2 } $1 == "SubState" { s = $2 } $1 == "Result" { r = $2 } $1 == "Type" { t = $2 } $1 == "RemainAfterExit" { k = $2 }
-                END { done(); exit bad || seen != n }'
-    '';
+    # Ranks beatlink's user units as 0 up, 1 still starting and 2 failed, where a start that has run past ten minutes counts as failed.
+    userUnitCheck = units: {
+        type = "command";
+        timeout = 30;
+        command = ''
+            sudo -n systemctl show --user -M beatlink@ -p Id,ActiveState,SubState,Result,Type,RemainAfterExit,Job,StateChangeTimestampMonotonic ${lib.concatStringsSep " " units} |
+                awk -F= -v n=${toString (builtins.length units)} -v now="$(cut -d' ' -f1 /proc/uptime)" '
+                    function done() {
+                        if (id == "") return
+                        seen++
+                        if (r == "success" && (a == "active" || (t == "oneshot" && k == "no" && a != "failed"))) v = 0
+                        else if (r == "success" && (a == "activating" || (a == "inactive" && j != ""))) v = (now - m / 1000000 > 600) ? 2 : 1
+                        else v = 2
+                        print id " " a "/" s " " r (j == "" ? "" : " queued")
+                        if (v > worst) worst = v
+                        id = ""
+                    }
+                    NF == 0 { done(); next }
+                    $1 == "Id" { id = $2 } $1 == "ActiveState" { a = $2 } $1 == "SubState" { s = $2 } $1 == "Result" { r = $2 }
+                    $1 == "Type" { t = $2 } $1 == "RemainAfterExit" { k = $2 } $1 == "Job" { j = $2 } $1 == "StateChangeTimestampMonotonic" { m = $2 }
+                    END { done(); if (seen != n) worst = 2; print "state=" worst + 0 }'
+        '';
+        pattern = "state=([0-9])";
+        warning = 1;
+        threshold = 2;
+        value_label = "STATE";
+    };
 in
 {
     imports = [ inputs.vigil.nixosModules.default ];
@@ -2761,54 +2781,89 @@ in
                                             agent = "thor";
                                         }
                                         {
-                                            name = "Session";
-                                            id = "thor-waydroid-session";
+                                            # Published by waydroid-boot-state on Thor for the waydroid group; a missing file means that publisher is down.
+                                            name = "Android Boot";
+                                            id = "thor-waydroid-boot";
                                             type = "command";
                                             interval = "5m";
                                             timeout = 30;
-                                            command = userUnitCheck [ "waydroid-session.service" ];
+                                            command = ''
+                                                if ! read -r s pid since 2>/dev/null < /run/waydroid-state/android; then
+                                                    echo "no boot state published"
+                                                    echo state=2
+                                                    exit 0
+                                                fi
+                                                case "$s" in
+                                                    booted)
+                                                        echo "booted $(( $(date +%s) - since ))s ago, container init $pid"
+                                                        echo state=0
+                                                        ;;
+                                                    booting)
+                                                        age=$(( $(date +%s) - since ))
+                                                        echo "booting for $age s, container init $pid"
+                                                        if [ "$age" -lt 600 ]; then echo state=1; else echo state=2; fi
+                                                        ;;
+                                                    *)
+                                                        echo "container $s"
+                                                        echo state=2
+                                                        ;;
+                                                esac
+                                            '';
+                                            pattern = "state=([0-9])";
+                                            warning = 1;
+                                            threshold = 2;
+                                            value_label = "STATE";
                                             agent = "thor";
                                         }
-                                        {
-                                            # A dead bridge leaves every Android app drawn sideways whenever the phone is not held upright.
-                                            name = "Rotation Bridge";
-                                            id = "thor-waydroid-rotation";
-                                            type = "command";
-                                            interval = "5m";
-                                            timeout = 30;
-                                            command = userUnitCheck [ "waydroid-rotation.service" ];
-                                            agent = "thor";
-                                        }
-                                        {
-                                            name = "Android Settings";
-                                            id = "thor-waydroid-android-config";
-                                            type = "command";
-                                            interval = "5m";
-                                            timeout = 30;
-                                            command = userUnitCheck [ "waydroid-android-config.service" ];
-                                            agent = "thor";
-                                        }
-                                        {
-                                            name = "F-Droid Install";
-                                            id = "thor-waydroid-fdroid";
-                                            type = "command";
-                                            interval = "5m";
-                                            timeout = 30;
-                                            command = userUnitCheck [ "waydroid-fdroid.service" ];
-                                            agent = "thor";
-                                        }
-                                        {
-                                            name = "Container Watchdog";
-                                            id = "thor-waydroid-container-watch";
-                                            type = "command";
-                                            interval = "5m";
-                                            timeout = 30;
-                                            command = userUnitCheck [
+                                        (
+                                            {
+                                                name = "Session";
+                                                id = "thor-waydroid-session";
+                                                interval = "5m";
+                                                agent = "thor";
+                                            }
+                                            // userUnitCheck [ "waydroid-session.service" ]
+                                        )
+                                        (
+                                            {
+                                                # A dead bridge leaves every Android app drawn sideways whenever the phone is not held upright.
+                                                name = "Rotation Bridge";
+                                                id = "thor-waydroid-rotation";
+                                                interval = "5m";
+                                                agent = "thor";
+                                            }
+                                            // userUnitCheck [ "waydroid-rotation.service" ]
+                                        )
+                                        (
+                                            {
+                                                name = "Android Settings";
+                                                id = "thor-waydroid-android-config";
+                                                interval = "5m";
+                                                agent = "thor";
+                                            }
+                                            // userUnitCheck [ "waydroid-android-config.service" ]
+                                        )
+                                        (
+                                            {
+                                                name = "F-Droid Install";
+                                                id = "thor-waydroid-fdroid";
+                                                interval = "5m";
+                                                agent = "thor";
+                                            }
+                                            // userUnitCheck [ "waydroid-fdroid.service" ]
+                                        )
+                                        (
+                                            {
+                                                name = "Container Watchdog";
+                                                id = "thor-waydroid-container-watch";
+                                                interval = "5m";
+                                                agent = "thor";
+                                            }
+                                            // userUnitCheck [
                                                 "waydroid-container-watch.timer"
                                                 "waydroid-container-watch.service"
-                                            ];
-                                            agent = "thor";
-                                        }
+                                            ]
+                                        )
                                     ];
                                 }
                                 {
