@@ -99,9 +99,7 @@
 # the Vorta repos, the borgmatic module for the Borgmatic ones — so a
 # Vigil-triggered backup produces an archive equivalent to the scheduled one.
 #
-# `keep_*` records each repo's retention policy. Vigil has no prune action yet,
-# so these are inert today; they live here so the policy sits with the monitor
-# rather than only in the tool that currently prunes.
+# `keep_*` and `prune_match` mirror the owning tool's pruning, which Vigil's prune preview dry-runs.
 #
 # Scheduling is deliberately not represented: these backups are triggered
 # manually from the Vigil UI, while Vorta/borgmatic keep their own schedules.
@@ -1628,6 +1626,8 @@ in
                                             ];
                                             compression = "lz4";
                                             archive_prefix = "backup";
+                                            canary_path = "/Storage/Services/.vigil-canary";
+                                            check_units = [ "borgmatic-check.service" ];
                                             keep_hourly = 6;
                                             keep_daily = 7;
                                             keep_weekly = 4;
@@ -1676,6 +1676,8 @@ in
                                             ];
                                             compression = "lz4";
                                             archive_prefix = "backup";
+                                            canary_path = "/Storage/Services/.vigil-canary";
+                                            check_units = [ "borgmatic-check.service" ];
                                             keep_hourly = 6;
                                             keep_daily = 7;
                                             keep_weekly = 4;
@@ -2093,6 +2095,8 @@ in
                                             ];
                                             compression = "lz4";
                                             archive_prefix = "odin";
+                                            canary_path = "/Storage/Files/.vigil-canary";
+                                            prune_match = "Odin-*";
                                             keep_within = "6H";
                                             keep_hourly = 12;
                                             keep_daily = 3;
@@ -2141,11 +2145,11 @@ in
                                             ];
                                             compression = "lz4";
                                             archive_prefix = "odin";
+                                            canary_path = "/Storage/Files/.vigil-canary";
+                                            prune_match = "Odin-*";
                                             keep_within = "6H";
                                             keep_hourly = 12;
                                             keep_daily = 3;
-                                            keep_weekly = 2;
-                                            keep_monthly = 3;
                                             agent = "odin";
                                         }
                                         {
@@ -2194,6 +2198,8 @@ in
                                             ];
                                             compression = "lz4";
                                             archive_prefix = "odin";
+                                            canary_path = "/Storage/Files/.vigil-canary";
+                                            prune_match = "Odin-*";
                                             keep_within = "6H";
                                             keep_hourly = 24;
                                             keep_daily = 30;
@@ -2239,6 +2245,12 @@ in
                                             ];
                                             compression = "lz4";
                                             archive_prefix = "backup";
+                                            canary_path = "/Storage/System/.vigil-canary";
+                                            check_units = [
+                                                "borgmatic-check.service"
+                                                "borgmatic-check-data.service"
+                                            ];
+                                            check_max_age = "9d";
                                             keep_hourly = 24;
                                             keep_daily = 7;
                                             keep_weekly = 4;
@@ -2284,6 +2296,12 @@ in
                                             ];
                                             compression = "lz4";
                                             archive_prefix = "backup";
+                                            canary_path = "/Storage/System/.vigil-canary";
+                                            check_units = [
+                                                "borgmatic-check.service"
+                                                "borgmatic-check-data.service"
+                                            ];
+                                            check_max_age = "9d";
                                             keep_hourly = 24;
                                             keep_daily = 7;
                                             keep_weekly = 4;
@@ -2329,6 +2347,12 @@ in
                                             ];
                                             compression = "lz4";
                                             archive_prefix = "backup";
+                                            canary_path = "/Storage/System/.vigil-canary";
+                                            check_units = [
+                                                "borgmatic-check.service"
+                                                "borgmatic-check-data.service"
+                                            ];
+                                            check_max_age = "9d";
                                             keep_hourly = 24;
                                             keep_daily = 7;
                                             keep_weekly = 4;

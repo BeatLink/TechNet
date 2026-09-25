@@ -190,6 +190,14 @@ in
         "CAP_NET_RAW"
     ];
 
+    # Vigil restores this file from the newest archive and compares it with the live one, so its content must never change.
+    systemd.tmpfiles.settings."Vigil-Canary"."/Storage/System/.vigil-canary".f = {
+        user = "root";
+        group = "root";
+        mode = "0644";
+        argument = "Vigil restore canary";
+    };
+
     # Repository Checks
     #
     # Ragnarok stores these repositories on a four-core, 2GB board, so the checks stay clear of its own Sunday 02:00 and 03:00 check windows and its Wednesday 04:00 compaction.

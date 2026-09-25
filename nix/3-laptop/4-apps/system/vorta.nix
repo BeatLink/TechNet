@@ -25,6 +25,14 @@
         sopsFile = "${config.technet.secrets.path}/vorta.yaml";
     };
 
+    # Vigil restores this file from the newest archive and compares it with the live one, so its content must never change.
+    systemd.tmpfiles.settings."Vigil-Canary"."/Storage/Files/.vigil-canary".f = {
+        user = "root";
+        group = "root";
+        mode = "0644";
+        argument = "Vigil restore canary";
+    };
+
     borg-compact.vorta = {
         path = "/Storage/Files/Backups/Laptop/Vorta";
         user = "beatlink";

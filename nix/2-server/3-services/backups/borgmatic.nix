@@ -193,6 +193,14 @@ in
     # group-readable; this activation step relaxes the group and any files that
     # predate it, using `g+rX` so directories get +x for traversal while data
     # files get only +r (never +x).
+    # Vigil restores this file from the newest archive and compares it with the live one, so its content must never change.
+    systemd.tmpfiles.settings."Vigil-Canary"."/Storage/Services/.vigil-canary".f = {
+        user = "root";
+        group = "root";
+        mode = "0644";
+        argument = "Vigil restore canary";
+    };
+
     systemd.tmpfiles.settings."Borgmatic"."/Storage/Files/Backups/Server/Borgmatic".d = {
         user = "root";
         group = "borg";
