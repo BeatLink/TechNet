@@ -10,21 +10,10 @@
         }
 
         # Aarch64 Builds #############################################################################################################################
-        # Ragnarok builds aarch64 natively; binfmt stays as the fallback for when it is unreachable.
+        # Emulated here rather than sent to Ragnarok, which measured 1053s against Odin's 691s for the same package -- three A53 cores and 2GB of RAM
+        # lose to twelve Zen 3 threads even at a 10-20x emulation penalty.
         {
-            nix.distributedBuilds = true;
-            nix.buildMachines = [
-                {
-                    hostName = "ragnarok.technet";
-                    sshUser = "beatlink";
-                    sshKey = "/persistent/etc/ssh/ssh_host_ed25519_key"; # The nix daemon runs as root, so it cannot reach beatlink's agent
-                    systems = [ "aarch64-linux" ];
-                    maxJobs = 1; # One derivation at a time, so it gets all three cores nix/1-backup-server/1-system/remote-builder.nix allows
-                    speedFactor = 1;
-                    supportedFeatures = [ "big-parallel" ];
-                }
-            ];
-            nix.settings.builders-use-substitutes = true; # Ragnarok pulls its own inputs from the caches instead of Odin uploading them over wifi
+            nix.distributedBuilds = false;
             boot.binfmt = {
                 emulatedSystems = [ "aarch64-linux" ];
                 preferStaticEmulators = true; # A static interpreter stays reachable from a chroot, so nixos-install --root can run aarch64 builders
