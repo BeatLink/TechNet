@@ -99,6 +99,7 @@
                 };
             }
         ];
+        # Every {{HOMEPAGE_VAR_}} is substituted into this YAML as text, so a value holding a quote breaks the whole file and the dashboard renders no cards at all.
         services = [
             {
                 "Personal" = [
@@ -324,7 +325,6 @@
                                 type = "pihole";
                                 url = "http://127.0.0.1:9018"; # Pi-hole's own webserver ACL allows loopback only
                                 version = 6;
-                                key = "{{HOMEPAGE_VAR_PIHOLE_KEY}}";
                             };
                         };
                     }
@@ -369,9 +369,7 @@
                             statusStyle = "dot";
                             widget = {
                                 type = "qbittorrent";
-                                url = "http://127.0.0.1:9050";
-                                username = "{{HOMEPAGE_VAR_QBITTORRENT_USER}}";
-                                password = "{{HOMEPAGE_VAR_QBITTORRENT_PASS}}";
+                                url = "http://127.0.0.1:9050"; # LocalHostAuth is false, so a request from Heimdall itself needs no credential
                             };
                         };
                     }
