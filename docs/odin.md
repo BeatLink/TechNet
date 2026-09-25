@@ -88,6 +88,19 @@ drop it again; keep the download under `/Storage` for the next rebuild. The
 command is `packettracer9`; the AppImage forces `xcb`, so it runs under Xwayland
 on Wayland sessions.
 
+Heimdall needs it too, because `cache-preseed.nix` builds Odin's closure there
+every night and aborts on the whole run when this one path cannot be fetched.
+Give both stores the path and a root that survives collection:
+
+```sh
+nix copy --to ssh://beatlink@heimdall.technet /nix/store/<hash>-CiscoPacketTracer_901_Ubuntu_64bit.deb
+sudo nix-store --add-root /nix/var/nix/gcroots/packet-tracer-deb --indirect --realise /nix/store/<hash>-CiscoPacketTracer_901_Ubuntu_64bit.deb
+```
+
+Run the second command on each host. `attic push technet <path>` would spare
+the copy, but a 400MB upload fails with a pool timeout while a build is pushing
+to the same cache, so push it when the cache is quiet or skip it.
+
 ## Tang server
 
 Odin hosts the tang server that unlocks Heimdall, Ragnarok and Thor, configured
