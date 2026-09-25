@@ -93,3 +93,31 @@ returns 500 after 45s. Frigate is not involved -- it starts disarmed and was rec
 Odin and Heimdall both hold the path with a GC root, so nothing is blocked today; a host that has
 never had the file is the case this covers. Three attempts on 2026-09-24 timed out, including one
 with both `attic-watch-store` units stopped and no build running.
+
+## Install LNXlink on Ragnarok and Thor
+
+- [ ] Add LNXlink to Ragnarok, as a system service like Heimdall's
+      ([`lnxlink.nix`](nix/2-server/3-services/home-automation/lnxlink.nix))
+- [ ] Add LNXlink to Thor, as a user service like Odin's
+      ([`lnxlink.nix`](nix/3-laptop/4-apps/technet/lnxlink.nix))
+- [ ] Give each host its own broker account in Heimdall's
+      [`broker.nix`](nix/2-server/3-services/home-automation/mosquitto/broker.nix)
+- [ ] Confirm both show up in Home Assistant through MQTT discovery
+
+## Features System Bridge has that LNXlink lacks
+
+From a feature comparison of the two in August 2026. Nothing here is needed yet; it is the list to
+check before deciding LNXlink covers everything.
+
+- [ ] Windows support; LNXlink runs on Linux only
+- [ ] A native Home Assistant integration over its own API and WebSocket, with no MQTT broker
+- [ ] A built-in MCP server, so an AI assistant can query and control the machine
+- [ ] An Android companion app
+- [ ] A tray app, a web client and a settings UI
+- [ ] Display sensors: resolution and refresh rate of each monitor
+- [ ] Looking up running processes by PID or name
+- [ ] Power usage as a wattage sensor, for the whole system and the GPU
+- [ ] GPU clock, fan speed, temperature and power sensors
+- [ ] Hibernate, lock and log out as power actions
+- [ ] Notifications with action buttons, images and sound
+- [ ] Browsing media sources, not just controlling playback
