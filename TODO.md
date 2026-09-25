@@ -1,16 +1,5 @@
 # To Do
 
-## Subscribe the phone to Vigil's alerts
-
-- [ ] Install the ntfy app on the phone, with the phone connected to TechNet
-- [ ] Add the server `https://ntfy.heimdall.technet`, trusting TechNet's HTTPS certificate if the app asks
-- [ ] Sign in as `beatlink`, with the password from
-      `sops decrypt --extract '["beatlink_password"]' secrets/2-server/ntfy.yaml`
-- [ ] Subscribe to the topic `vigil`, then send a test from the bell icon in Vigil's dashboard
-
-Vigil publishes its alerts to ntfy on Heimdall (`nix/2-server/3-services/monitoring/ntfy.nix`); until the
-phone subscribes, nothing reads them.
-
 ## Confirm Ragnarok's Vorta rewrite finishes
 
 - [ ] Confirm the `borg recreate` from Odin against `ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Vorta`

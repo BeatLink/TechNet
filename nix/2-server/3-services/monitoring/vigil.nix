@@ -112,6 +112,9 @@
 }:
 let
     # Every host upgrades from the same flake, so Heimdall's own value is every monitor's.
+    haAlertWebhook =
+        (builtins.head (builtins.head config.services.home-assistant.config.homeassistant.packages.vigil_alerts.automation)
+        .triggers).webhook_id;
     upgradeFlake = config.system.autoUpgrade.flake;
 
     # Likewise for garbage collection: one common module sets nix.gc.options fleet-wide, so the button
@@ -296,10 +299,8 @@ in
                     }
                     {
                         id = "phone";
-                        type = "ntfy";
-                        url = "http://127.0.0.1:9420";
-                        topic = "vigil";
-                        token_file = config.sops.secrets.ntfy_vigil_token.path;
+                        type = "webhook";
+                        url = "http://127.0.0.1:8123/api/webhook/${haAlertWebhook}";
                     }
                 ];
             };
