@@ -182,6 +182,7 @@ which draws on the UEFI console, only ever appeared over the serial console.
 | `panel-xingbangda-xbd599.c` | the panel itself, init sequence from Linux `panel-sitronix-st7703.c` |
 | `axp_regulator.c` | the AXP803 GPIO LDOs, which feed the panel and backlight |
 | `button-sun4i-lradc.c`, `button-axp-pek.c` | the volume keys and the power key, as a keyboard |
+| `pinephone_kbd.c` | the keyboard case, polled over the pogo-pin I2C bus |
 
 Once a framebuffer exists, U-Boot puts `vidconsole` on `stdout` and hands the
 framebuffer to EFI as a GOP, so systemd-boot renders on the panel with no
@@ -196,6 +197,11 @@ further work. The buttons reach it as arrow keys and enter:
 The mapping comes from `u-boot,code` in a U-Boot-only device tree overlay, which
 the drivers prefer over `linux,code`, so the volume keys stay volume keys under
 Linux.
+
+The keyboard case works in the menu too, as long as it is attached at power-on:
+the firmware powers the case from the phone's 5V boost (PD8), finds its MCU at
+0x15 on TWI2, and registers it only if it answers, so a phone out of its case
+boots as before. The arrow keys are on the Fn layer, the same as under Linux.
 
 One build carries all of it: the panel, the buttons, the Tow-Boot menu, and the
 LED and vibrator UX. That is possible because the fork keeps Tow-Boot's own
@@ -674,6 +680,11 @@ Thor's root pool uses ZFS native encryption with a passphrase. Clevis unlocks it
 against Odin's tang server, which means it only unlocks where tang is reachable
 **and** Odin's session is unlocked — see [odin.md](odin.md). Away from home it
 falls back to prompting.
+
+The keyboard case types into unl0kr's prompt. udev does not tag it as a
+keyboard, because it has no minus or equals key, and unl0kr ignores the
+characters of anything it does not think is one; an initrd rule in
+[`keyboard.nix`](../nix/5-phone/1-system/keyboard.nix) sets the tag.
 
 Initrd networking comes from the USB gadget in
 [`10-initrd-usb-gadget.nix`](../nix/5-phone/1-system/10-initrd-usb-gadget.nix),

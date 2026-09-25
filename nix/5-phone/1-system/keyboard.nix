@@ -11,6 +11,11 @@
 
     hardware.i2c.enable = true;
 
+    # udev only calls it a keyboard with KEY_MINUS and KEY_EQUAL present, which the case lacks, and unl0kr drops every character from a non-keyboard.
+    boot.initrd.services.udev.rules = ''
+        SUBSYSTEM=="input", KERNEL=="event*", ATTRS{name}=="PinePhone Keyboard", ENV{ID_INPUT_KEYBOARD}="1"
+    '';
+
     # Attach and detach are both invisible to i2c, so this resyncs on the VBUS change udev reports; it does NOT fire when the phone is already on a charger, so run it by hand in that case.
     systemd.services.pinephone-keyboard-sync = {
         description = "Bind the PinePhone keyboard case, and keyd, to whether the case is attached";
