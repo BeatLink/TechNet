@@ -2,9 +2,43 @@
 #
 # Desktop runner for local LLMs. It downloads its own llama.cpp runtimes on
 # first launch, so the only GPU piece needed from NixOS is the CUDA driver.
+# The model files are named here and fetched on demand, so they stay out of backups.
 #
 { lib, ... }:
 let
+    # Models #########################################################################################################################################
+    # The weights are 38GiB of content that Hugging Face already keeps a copy of, so they are excluded from the backups and listed here instead.
+    # Each entry is a Hugging Face repository and the files wanted from it; anything not listed is left alone rather than deleted.
+    models = {
+        "lmstudio-community/gemma-4-26B-A4B-it-QAT-GGUF" = [ "gemma-4-26B-A4B-it-QAT-Q4_0.gguf" ];
+        "lmstudio-community/gpt-oss-20b-GGUF" = [ "gpt-oss-20b-MXFP4.gguf" ];
+        "lmstudio-community/Llama-3.2-3B-Instruct-GGUF" = [ "Llama-3.2-3B-Instruct-Q4_K_M.gguf" ];
+        "lmstudio-community/Qwen3.5-4B-GGUF" = [ "Qwen3.5-4B-Q4_K_M.gguf" ];
+        "lmstudio-community/Qwen3.5-9B-GGUF" = [
+            "Qwen3.5-9B-Q4_K_M.gguf"
+            "mmproj-Qwen3.5-9B-BF16.gguf"
+        ];
+        "Smoffyy/Qwen3.5-4B-Instruct-Revised-GGUF" = [
+            "Qwen3.5-4B-Revised-q4_k_m.gguf"
+            "mmproj-f16.gguf"
+        ];
+    };
+
+    # Vision projectors parked outside the models tree, which is what lets the 4B load text-only and reach its 24k context.
+    disabledMmproj = {
+        "lmstudio-community/Qwen3.5-4B-GGUF" = [ "mmproj-Qwen3.5-4B-BF16.gguf" ];
+    };
+
+    # Renders one `fetch` call per wanted file, for the download service below.
+    fetchCalls =
+        dir: set:
+        lib.flatten (
+            lib.mapAttrsToList (
+                repo: files:
+                map (file: "fetch ${lib.escapeShellArg repo} ${lib.escapeShellArg file} ${dir} || rc=1") files
+            ) set
+        );
+
     # Load Setups ####################################################################################################################################
     # The 3050 Ti holds 3.68GiB. What fits in it is the whole question, so both setups below were measured on this host rather than guessed, and they
     # carry only the keys that were observed to reach llama.cpp -- the cache quantisation fields are flagged experimental in this build and are
@@ -130,6 +164,47 @@ in
                         ) setups
                     )}
                 '';
+            };
+
+            # Model Downloads ########################################################################################################################
+            # Fetches any listed file that is not on disk, so a restored machine reaches the same set of models without them being in a backup.
+            # Removing a model from the lists above stops it being fetched; it does not delete a copy that is already there.
+            systemd.user.services.lm-studio-models = {
+                Unit = {
+                    Description = "Fetch the LM Studio models named in the flake";
+                    After = [ "network-online.target" ];
+                    Wants = [ "network-online.target" ];
+                };
+                Service = {
+                    Type = "oneshot";
+                    RemainAfterExit = true;
+                    Nice = 19;
+                    IOSchedulingClass = "idle";
+                    ExecStart = pkgs.writeShellScript "lm-studio-models" ''
+                        set -u
+                        # Downloads one file into the named directory, resuming a part-file and leaving the final name untouched until it completes.
+                        fetch() {
+                            repo="$1"
+                            file="$2"
+                            case "$3" in
+                                models) dest="$HOME/.lmstudio/models/$repo/$file" ;;
+                                *) dest="$HOME/.lmstudio/disabled-mmproj/$file" ;;
+                            esac
+                            [ -f "$dest" ] && return 0
+                            mkdir -p "$(dirname "$dest")"
+                            ${lib.getExe pkgs.curl} -fL --retry 5 --retry-delay 10 --retry-all-errors -C - \
+                                -o "$dest.part" "https://huggingface.co/$repo/resolve/main/$file" || return 1
+                            mv "$dest.part" "$dest"
+                        }
+
+                        rc=0
+                        ${lib.concatStringsSep "\n" (
+                            fetchCalls "models" models ++ fetchCalls "disabled-mmproj" disabledMmproj
+                        )}
+                        exit $rc
+                    '';
+                };
+                Install.WantedBy = [ "default.target" ];
             };
         };
 }
