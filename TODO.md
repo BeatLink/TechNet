@@ -82,3 +82,25 @@ Thor's `keyboard-dock-rotation` user service
 when home-manager started it during the nixos-upgrade switch. `monitor_state()` read an empty
 logical-monitor list from Mutter's display config and raised `IndexError` at `logical[0][2]`, so
 the panel no longer turns to landscape when the case docks until the service is started again.
+
+## Move a database off Heimdall's data pool
+
+- [ ] Decide whether atticd's state directory or Vigil's `vigil.db` moves to `root-pool-Heimdall`
+- [ ] Confirm the Attic cache answers in well under a second afterwards
+
+`atticd` keeps its SQLite in its state directory on `data-pool-Heimdall`
+([`attic.nix`](nix/2-server/3-services/technet/attic.nix)), the `MQ04ABF100` SMR mirror, and
+`/Storage` on the same pool holds Vigil's `vigil.db`, 3.58GB and written continuously. A plain
+`nix-cache-info` request takes 10-30 seconds, every host's substitutions fall back to building with
+HTTP 500s, and a 400MB `attic push` cannot finish at all: atticd's connection pool times out and
+returns 500 after 45s. Frigate is not involved -- it starts disarmed and was recording nothing.
+`root-pool-Heimdall` is a 64GB SSD with 25GB free, so only one of the two databases fits there.
+
+## Push the Packet Tracer deb into Attic
+
+- [ ] Retry `attic push technet /nix/store/<hash>-CiscoPacketTracer_901_Ubuntu_64bit.deb` once the
+      cache is quiet, or once a database has moved off the data pool
+
+Odin and Heimdall both hold the path with a GC root, so nothing is blocked today; a host that has
+never had the file is the case this covers. Three attempts on 2026-09-24 timed out, including one
+with both `attic-watch-store` units stopped and no build running.
