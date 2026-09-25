@@ -20,7 +20,7 @@ column, and their service definition lives in that host's own directory.
 
 | Service | Port | Vhost |
 |---------|------|-------|
-| Homepage     | 9610 | homepage.heimdall.technet |
+| Homepage     | 9610 | dashboard.heimdall.technet |
 | Vigil        | 9611 | vigil.heimdall.technet — also serves the agent WebSocket at `/api/agent/ws`, reachable over WireGuard so Odin and Ragnarok's agents can dial in |
 
 ## Networking / DNS
@@ -82,7 +82,7 @@ from Heimdall to confirm the web stack is reachable:
 * Nginx (front door) - localhost:443
 * Home Assistant - https://home-assistant.heimdall.technet
 * Pi-hole - https://pi-hole.heimdall.technet
-* Homepage - https://homepage.heimdall.technet
+* Homepage - https://dashboard.heimdall.technet
 * Jackett - https://jackett.heimdall.technet
 * Atuin - https://atuin.heimdall.technet/healthz
 * Atuin Web - https://atuin-web.heimdall.technet/healthz

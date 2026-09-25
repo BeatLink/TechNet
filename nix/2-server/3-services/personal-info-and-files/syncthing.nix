@@ -91,23 +91,31 @@
         };
     };
 
-    systemd.services.syncthing-vigil-api-key = {
-        description = "Extract Syncthing's API key for Vigil";
+    systemd.services.syncthing-api-key-export = {
+        description = "Export Syncthing's API key for Vigil and Homepage";
         after = [ "syncthing-init.service" ];
         serviceConfig.Type = "oneshot";
         # Written beside Config rather than inside it, since Syncthing holds Config at 0700 and no group can reach a file there.
         script = ''
-            ${pkgs.libxml2}/bin/xmllint --xpath 'string(configuration/gui/apikey)' \
-                /Storage/Services/Syncthing/Config/config.xml \
-                > /Storage/Services/Syncthing/.vigil-api-key.new
+            key=$(${pkgs.libxml2}/bin/xmllint --xpath 'string(configuration/gui/apikey)' \
+                /Storage/Services/Syncthing/Config/config.xml)
+
+            printf '%s' "$key" > /Storage/Services/Syncthing/.vigil-api-key.new
             chown root:vigil-monitor /Storage/Services/Syncthing/.vigil-api-key.new
             chmod 0440 /Storage/Services/Syncthing/.vigil-api-key.new
             mv -f /Storage/Services/Syncthing/.vigil-api-key.new \
                 /Storage/Services/Syncthing/vigil-api-key
+
+            # Homepage runs under a DynamicUser and so cannot read the file above; it only ever sees this through systemd's EnvironmentFile, read as root.
+            printf 'HOMEPAGE_VAR_SYNCTHING_KEY=%s\n' "$key" \
+                > /Storage/Services/Syncthing/.homepage-api-key.env.new
+            chmod 0400 /Storage/Services/Syncthing/.homepage-api-key.env.new
+            mv -f /Storage/Services/Syncthing/.homepage-api-key.env.new \
+                /Storage/Services/Syncthing/homepage-api-key.env
         '';
     };
 
-    systemd.timers.syncthing-vigil-api-key = {
+    systemd.timers.syncthing-api-key-export = {
         wantedBy = [ "timers.target" ];
         timerConfig = {
             OnBootSec = "1m";

@@ -828,7 +828,7 @@ in
                                                 }
                                                 {
                                                     name = "Homepage";
-                                                    url = "https://homepage.heimdall.technet";
+                                                    url = "https://dashboard.heimdall.technet";
                                                 }
                                                 {
                                                     name = "Jackett";
