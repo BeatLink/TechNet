@@ -305,6 +305,7 @@ in
                             # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
                             id = "ragnarok-metrics";
                             type = "group";
+                            notify."for" = "1h";
                             children = [
                                 {
                                     name = "Compute";
@@ -615,6 +616,7 @@ in
                             # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
                             id = "heimdall-metrics";
                             type = "group";
+                            notify."for" = "1h";
                             children = [
                                 {
                                     name = "Compute";
@@ -1752,6 +1754,7 @@ in
                             # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
                             id = "odin-metrics";
                             type = "group";
+                            notify."for" = "1h";
                             children = [
                                 {
                                     name = "Compute";
@@ -2425,6 +2428,7 @@ in
                             # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
                             id = "thor-metrics";
                             type = "group";
+                            notify."for" = "1h";
                             children = [
                                 {
                                     name = "Compute";
