@@ -110,6 +110,8 @@ in
                         when = [ "create" ];
                         run = [
                             "${pkgs.iputils}/bin/ping -q -c 1 10.100.100.6 > /dev/null || exit 75"
+                            # The check outlasts lock_wait by hours, so waiting for the lock here fails the run instead of deferring it.
+                            "! ${pkgs.systemd}/bin/systemctl is-active --quiet borgmatic-check.service || exit 75"
                         ];
                     }
                 ];
