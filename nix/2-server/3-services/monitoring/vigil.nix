@@ -2509,13 +2509,23 @@ in
                                     type = "group";
                                     children = [
                                         {
-                                            # Charge thresholds are upower's own percentageLow and percentageCritical from 5-phone/1-system/power.nix, so Vigil warns exactly when the phone does; the keyboard case's battery is listed beside the phone's, and its USB feed counts as plugged in.
+                                            # Charge thresholds are upower's own percentageLow and percentageCritical from 5-phone/1-system/power.nix, so Vigil warns exactly when the phone does; the keyboard case's USB feed counts as plugged in.
                                             name = "Battery";
                                             id = "thor-battery";
                                             type = "power";
                                             interval = "5m";
+                                            battery = "axp20x-battery";
                                             charge_warning = 20;
                                             charge_threshold = 10;
+                                            agent = "thor";
+                                        }
+                                        {
+                                            # The keyboard case's own cell, which reads plugged in only while its own charger is attached; it reads unavailable while the case is off.
+                                            name = "Keyboard Battery";
+                                            id = "thor-keyboard-battery";
+                                            type = "power";
+                                            interval = "5m";
+                                            battery = "ip5xxx-battery";
                                             agent = "thor";
                                         }
                                     ];
