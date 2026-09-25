@@ -257,6 +257,13 @@ in
                         type = "desktop";
                         agent = "odin-desktop";
                     }
+                    {
+                        id = "phone";
+                        type = "ntfy";
+                        url = "http://127.0.0.1:9420";
+                        topic = "vigil";
+                        token_file = config.sops.secrets.ntfy_vigil_token.path;
+                    }
                 ];
             };
 
