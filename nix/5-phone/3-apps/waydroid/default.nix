@@ -8,5 +8,6 @@
         ./gnss
         ./remote.nix
         ./session.nix
+        ./upgrade.nix
     ];
 }
