@@ -1,5 +1,18 @@
 # To Do
 
+## Deploy the Vigil borg monitor extras
+
+- [ ] Deploy Heimdall and Odin, so they get commit `ff6c7f04` and Vigil `ee51de2` or later
+- [ ] Expect the restore checks to fail until the next scheduled backup includes each canary file,
+      then confirm every borg monitor's RESTORE CHECK card shows Passed
+- [ ] Decide whether Vorta's "2. Heimdall Backup" profile is right to keep no weekly or monthly
+      archives; `vigil.nix` was changed to match it, so if Vorta is wrong, fix the profile and put
+      back `keep_weekly = 2` and `keep_monthly = 3` on the `backup-laptop-heimdall` monitor
+
+The canary files are `/Storage/Services/.vigil-canary` on Heimdall, and `/Storage/System/.vigil-canary`
+and `/Storage/Files/.vigil-canary` on Odin. Heimdall's "Ragnarok" backup monitor stays failed until the
+repair below is done.
+
 ## Repair the missing chunk in Ragnarok's server repository
 
 - [ ] Run the repair below on Ragnarok
