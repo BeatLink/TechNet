@@ -283,6 +283,11 @@ in
 
             notifications = {
                 base_url = "https://vigil.heimdall.technet";
+                group_window = "30s";
+                defaults.flapping = {
+                    changes = 4;
+                    within = "1h";
+                };
                 channels = [
                     {
                         id = "odin";
@@ -416,6 +421,7 @@ in
                                             name = "OOM Kills";
                                             id = "ragnarok-oom";
                                             type = "oom";
+                                            notify."for" = 0; # A kill clears within a few cycles, so the System Stats hour would never be reached
                                             interval = "1m";
                                             agent = "ragnarok";
                                         }
@@ -726,6 +732,7 @@ in
                                             name = "OOM Kills";
                                             id = "heimdall-oom";
                                             type = "oom";
+                                            notify."for" = 0; # A kill clears within a few cycles, so the System Stats hour would never be reached
                                             interval = "1m";
                                             agent = "heimdall";
                                         }
@@ -1888,6 +1895,7 @@ in
                                             name = "OOM Kills";
                                             id = "odin-oom";
                                             type = "oom";
+                                            notify."for" = 0; # A kill clears within a few cycles, so the System Stats hour would never be reached
                                             interval = "1m";
                                             agent = "odin";
                                         }
@@ -2550,6 +2558,7 @@ in
                                             name = "OOM Kills";
                                             id = "thor-oom";
                                             type = "oom";
+                                            notify."for" = 0; # A kill clears within a few cycles, so the System Stats hour would never be reached
                                             interval = "1m";
                                             agent = "thor";
                                         }
