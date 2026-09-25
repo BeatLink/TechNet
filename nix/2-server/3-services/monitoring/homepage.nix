@@ -312,6 +312,23 @@
                             description = "URL Content Blocker";
                             siteMonitor = "https://blockurl.heimdall.technet";
                             statusStyle = "dot";
+                            widget = {
+                                type = "customapi";
+                                url = "http://127.0.0.1:9001/urls/stats";
+                                headers."X-API-Key" = "{{HOMEPAGE_VAR_BLOCKURL_KEY}}";
+                                mappings = [
+                                    {
+                                        field = "total_urls";
+                                        label = "URLs";
+                                        format = "number";
+                                    }
+                                    {
+                                        field = "unique_domains";
+                                        label = "Domains";
+                                        format = "number";
+                                    }
+                                ];
+                            };
                         };
                     }
                     {
@@ -420,6 +437,29 @@
                             description = "Network and Systems Monitor";
                             siteMonitor = "https://vigil.heimdall.technet";
                             statusStyle = "dot";
+                            widget = {
+                                type = "customapi";
+                                url = "http://127.0.0.1:9611/api/summary";
+                                username = "admin";
+                                password = "{{HOMEPAGE_VAR_VIGIL_PASS}}";
+                                mappings = [
+                                    {
+                                        field = "total";
+                                        label = "Monitors";
+                                        format = "number";
+                                    }
+                                    {
+                                        field = "online";
+                                        label = "Online";
+                                        format = "number";
+                                    }
+                                    {
+                                        field = "unhealthy";
+                                        label = "Unhealthy";
+                                        format = "number";
+                                    }
+                                ];
+                            };
                         };
                     }
                 ];
