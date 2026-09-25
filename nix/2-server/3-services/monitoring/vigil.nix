@@ -971,6 +971,26 @@ in
                                     ];
                                 }
                                 {
+                                    name = "Cache Preseed";
+                                    id = "heimdall-svc-cache-preseed";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            # Timer-driven oneshot (OnCalendar=04:00). The failure
+                                            # this exists to catch: the x86 half aborts under set -e
+                                            # and the aarch64 hosts are never built, so a phone
+                                            # deploy rebuilds its whole closure under emulation.
+                                            name = "Service";
+                                            id = "heimdall-cache-preseed";
+                                            type = "systemd_service";
+                                            interval = "1h";
+                                            service_name = "cache-preseed.service";
+                                            max_age = "2d"; # Nightly, and a run may take most of a day, so two days is the first missed night
+                                            agent = "heimdall";
+                                        }
+                                    ];
+                                }
+                                {
                                     name = "Stremio Export";
                                     id = "heimdall-svc-stremio-export";
                                     type = "group";
