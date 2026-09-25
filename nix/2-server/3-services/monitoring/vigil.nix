@@ -2646,6 +2646,11 @@ in
                                             threshold = 96;
                                             inode_warning = 85;
                                             inode_threshold = 95;
+                                            exclude_mounts = [
+                                                # Waydroid's Android images are loop mounts that are read-only by design, seen again through the persistence bind.
+                                                "/var/lib/waydroid/rootfs"
+                                                "/Storage/System/Waydroid/var/lib/waydroid/rootfs"
+                                            ];
                                             grid_col_span = 2;
                                             agent = "thor";
                                         }
