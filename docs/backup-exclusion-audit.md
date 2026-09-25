@@ -7,9 +7,9 @@
 | Scope | The three Vorta profiles that back up `/Storage`: *1. On Disk*, *2. Heimdall*, *3. Ragnarok* |
 | Status | Every change under *Work done* at the end of this file has been applied; the findings above describe the state that prompted them |
 
-Vorta's exclusions live in `~/.local/share/Vorta/settings.db`, not in this flake, so they are
-recorded here instead. Each profile carries a set of named presets (shipped with Vorta, expanded
-into borg `fm:` patterns) plus raw patterns of its own.
+Vorta's exclusions live in `~/.local/share/Vorta/settings.db`. Each profile carries a set of named
+presets (shipped with Vorta, expanded into borg `fm:` patterns) plus raw patterns of its own. Since
+2026-09-25 the flake owns them: see *Superseded* at the end of this file.
 
 ## Method
 
@@ -116,7 +116,7 @@ those first. Ragnarok is the long pole at 77 archives reaching back to February 
 - A second sweep on 2026-09-24 caught what the first pattern set missed: the per-origin Firefox
   `cache` directories (11.7G), `DawnWebGPUCache` and `DawnGraphiteCache`, `ScriptCache`, and Steam's
   `appcache`, `depotcache`, `shadercache` and `shaderhitcache`. The set now stands at 62 entries per
-  profile, identical across all three.
+  profile. Those rows matched across all three, but the profiles did not (see *Superseded*).
 - `nix/3-laptop/4-apps/programming/lm-studio.nix` grew a declarative list of the wanted model files
   and a `lm-studio-models` user service that fetches any that are missing from Hugging Face.
 
@@ -131,3 +131,39 @@ Check Vorta's event log for a `returncode` of 0 on profiles 2, 4 and 5 once the 
 
 The working material — the rewrite scripts, their logs, and Vorta's settings from before any of this
 — is kept in `/Storage/Files/Backups/Laptop/vorta-purge-2026-09-24/`, which has its own README.
+
+## Superseded — 2026-09-25
+
+The finding above that the three profiles ended up identical was wrong. Vorta builds each backup's
+exclusions from two places: the `exclusionmodel` rows (presets and custom patterns), and a separate
+raw-text column, `backupprofilemodel.exclude_patterns`. This audit and `patterns.py` read only the
+rows. The raw column still differed: *2. Heimdall* carried about 25 patterns there that the other
+two lacked, including `fm:*/Cache`, `fm:*/Crashpad`, `fm:*/.stversions`, `pf:/Storage/.pnpm-store`
+and more Steam paths. The rewrites of all three repositories used the rows alone.
+
+The flake now holds one set for every backup in the fleet, in
+[`backup-excludes.nix`](../nix/0-common/3-services/backup-excludes.nix): the union of both sources,
+with duplicates and patterns covered by broader ones removed, 220 in all. Borgmatic on Heimdall and
+Odin reads it directly. The `vorta-excludes` user unit in
+[`vorta.nix`](../nix/3-laptop/4-apps/system/vorta.nix) writes it into every Vorta profile as custom
+rows, turns the presets off, and sets the raw column to `pf:/Storage/System` alone. Vigil's borg
+monitors use the same set for manual backups and for the Purge Excluded action.
+
+Checked with borg's own matcher before the change went in:
+
+- Against the old union over all of `/Storage`, the new set differs only in excluding the four
+  `.thumbnails` folders under Pictures and Videos. Nothing previously excluded is backed up again.
+- For *1. On Disk* and *3. Ragnarok*, adopting the union newly excludes about 2.7G, all of it
+  regenerable or a second copy: `.pnpm-store`, Syncthing's `.stversions`, thumbnails and the Electron
+  caches on Thor's synced apps.
+- Over Heimdall's `/Storage/Services` it excludes about 700MB: ESPHome and PlatformIO build output
+  and caches, Trilium's logs and other service logs, `__pycache__`, git reflogs and a few Jackett
+  `.bak` files.
+- Over Odin's `/Storage/System` it matches nothing.
+
+`.stversions` and `.thumbnails` also moved out of borgmatic's `exclude_if_present`. That option drops
+the whole directory containing the marker, so on `/Storage` it would have dropped every Syncthing
+folder root. On the borgmatic sources it matched nothing at the time.
+
+Archives written before this change still hold what the extra patterns now exclude. The Purge
+Excluded button on each borg monitor in Vigil rewrites them.

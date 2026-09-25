@@ -11,6 +11,20 @@
 Vigil publishes its alerts to ntfy on Heimdall (`nix/2-server/3-services/monitoring/ntfy.nix`); until the
 phone subscribes, nothing reads them.
 
+## Confirm Ragnarok's Vorta rewrite finishes
+
+- [ ] Confirm the `borg recreate` from Odin against `ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Vorta`
+      finished and the `borg compact` after it ran
+- [ ] Confirm the lock is gone from `/Storage/Backups/Laptop/Vorta` on Ragnarok
+- [ ] Confirm Vorta's next "3. Ragnarok Backup" run succeeds
+
+The rewrite is `ragnarok-run.sh` from `/Storage/Files/Backups/Laptop/vorta-purge-2026-09-24/`, which
+was 31 of 77 archives in at 23:43 on 2026-09-24. Its log is
+`~/.claude/tmp/claude-1000/-Storage-Files-Projects-TechNet/18ceb386-f731-4c6c-8afa-e85f87c1f9ce/scratchpad/purge-ragnarok.log`,
+in a directory that had been deleted and was recreated by hand. A missing log directory
+makes bash skip any command redirected into it, so check the log ends with `compact exit 0` and
+`DONE`. If the compact did not run, run `borg compact` on that repository by hand.
+
 ## Deploy the Vigil borg monitor extras
 
 - [ ] Deploy Heimdall and Odin, so they get commit `ff6c7f04` and Vigil `ee51de2` or later
