@@ -63,6 +63,7 @@
 
     # systemctl rather than RUN+= directly, which would deadlock the udev worker against the uevents bind itself emits.
     services.udev.extraRules = ''
-        SUBSYSTEM=="power_supply", ACTION=="change", RUN+="${pkgs.systemd}/bin/systemctl --no-block start pinephone-keyboard-sync.service"
+        # The phone's own battery reports a change every second or so while the case is attached, which would start this unit nonstop.
+        SUBSYSTEM=="power_supply", ACTION=="change", KERNEL!="axp20x-battery", RUN+="${pkgs.systemd}/bin/systemctl --no-block start pinephone-keyboard-sync.service"
     '';
 }
