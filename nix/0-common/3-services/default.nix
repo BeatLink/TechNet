@@ -9,7 +9,6 @@
         ./borg-compact.nix
         ./ssh.nix
         ./syncthing.nix
-        ./vigil-access.nix
         ./vigil-agent.nix
     ];
 }
