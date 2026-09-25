@@ -163,6 +163,12 @@ in
         owner = "vigil";
     };
 
+    sops.secrets.vigil_agent_token_odin_desktop = {
+        sopsFile = "${config.technet.secrets.commonPath}/vigil-agent-odin-desktop.yaml";
+        key = "vigil_agent_token";
+        owner = "vigil";
+    };
+
     sops.secrets.vigil_agent_token_ragnarok = {
         sopsFile = "${config.technet.secrets.commonPath}/vigil-agent-ragnarok.yaml";
         key = "vigil_agent_token";
@@ -229,6 +235,11 @@ in
                     token_file = config.sops.secrets.vigil_agent_token_odin.path;
                 }
                 {
+                    id = "odin-desktop";
+                    host = "odin.technet";
+                    token_file = config.sops.secrets.vigil_agent_token_odin_desktop.path;
+                }
+                {
                     id = "ragnarok";
                     host = "ragnarok.technet";
                     token_file = config.sops.secrets.vigil_agent_token_ragnarok.path;
@@ -239,6 +250,17 @@ in
                     token_file = config.sops.secrets.vigil_agent_token_thor.path;
                 }
             ];
+
+            notifications = {
+                base_url = "https://vigil.heimdall.technet";
+                channels = [
+                    {
+                        id = "odin";
+                        type = "desktop";
+                        agent = "odin-desktop";
+                    }
+                ];
+            };
 
             # Fallback only — no monitor sets `ssh_config` any more, so nothing
             # merges these today. See the header before removing them.

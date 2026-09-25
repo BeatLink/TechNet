@@ -17,6 +17,12 @@ creation_rules:
                 - *user_beatlink
                 - *host_heimdall
                 - *host_odin
+    - path_regex: secrets/0-common/vigil-agent-odin-desktop\.yaml$
+      key_groups:
+          - age:
+                - *user_beatlink
+                - *host_heimdall
+                - *host_odin
     - path_regex: secrets/0-common/vigil-agent-ragnarok\.yaml$
       key_groups:
           - age:

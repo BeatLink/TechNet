@@ -67,6 +67,19 @@ in
             ];
         };
 
+        # Desktop Notifications ######################################################################################################################
+        sops.secrets.vigil_agent_desktop_token = lib.mkIf (host == "Odin") {
+            sopsFile = "${config.technet.secrets.commonPath}/vigil-agent-odin-desktop.yaml";
+            key = "vigil_agent_token";
+            owner = "beatlink";
+        };
+
+        services.vigil-agent.desktop = lib.mkIf (host == "Odin") {
+            enable = true;
+            id = "odin-desktop";
+            tokenFile = config.sops.secrets.vigil_agent_desktop_token.path;
+        };
+
         systemd.services.vigil-agent = {
             environment.HOME = "/var/lib/vigil-agent"; # nix and the detached job workdirs write under $HOME; the default /var/empty is immutable
             serviceConfig = {
