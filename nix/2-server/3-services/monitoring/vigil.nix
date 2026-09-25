@@ -117,6 +117,14 @@ let
     # Likewise for garbage collection: one common module sets nix.gc.options fleet-wide, so the button
     # on any host's monitor runs the same collection that host's weekly timer runs.
     gcArgs = builtins.filter (a: a != "") (lib.splitString " " config.nix.gc.options);
+
+    # Passes when every named unit in beatlink's user manager is active with a successful last result; a short-lived oneshot needs only the result.
+    userUnitCheck = units: ''
+        sudo -n systemctl show --user -M beatlink@ -p Id,ActiveState,SubState,Result,Type,RemainAfterExit ${lib.concatStringsSep " " units} |
+            awk -F= -v n=${toString (builtins.length units)} 'function done() { if (id == "") return; seen++; up = a == "active" || (t == "oneshot" && k == "no" && a != "failed"); print id " " a "/" s " " r; if (!up || r != "success") bad = 1; id = "" }
+                NF == 0 { done(); next } $1 == "Id" { id = $2 } $1 == "ActiveState" { a = $2 } $1 == "SubState" { s = $2 } $1 == "Result" { r = $2 } $1 == "Type" { t = $2 } $1 == "RemainAfterExit" { k = $2 }
+                END { done(); exit bad || seen != n }'
+    '';
 in
 {
     imports = [ inputs.vigil.nixosModules.default ];
@@ -2722,6 +2730,83 @@ in
                                             type = "systemd_service";
                                             interval = "1m";
                                             service_name = "phosh.service";
+                                            agent = "thor";
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Waydroid";
+                                    id = "thor-svc-waydroid";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Container Manager";
+                                            id = "thor-waydroid-container";
+                                            type = "systemd_service";
+                                            interval = "1m";
+                                            service_name = "waydroid-container.service";
+                                            agent = "thor";
+                                        }
+                                        {
+                                            # The manager unit stays active after the LXC container inside it dies, and waydroid-container-watch gives up after three restarts; FROZEN is Android asleep, not down.
+                                            name = "Container State";
+                                            id = "thor-waydroid-state";
+                                            type = "command";
+                                            interval = "5m";
+                                            timeout = 30;
+                                            command = ''
+                                                waydroid status | awk -F'\t' '/^Session:/ { s = $2 } /^Container:/ { c = $2 }
+                                                    END { print "session=" s " container=" c; exit !(s == "RUNNING" && (c == "RUNNING" || c == "FROZEN")) }'
+                                            '';
+                                            agent = "thor";
+                                        }
+                                        {
+                                            name = "Session";
+                                            id = "thor-waydroid-session";
+                                            type = "command";
+                                            interval = "5m";
+                                            timeout = 30;
+                                            command = userUnitCheck [ "waydroid-session.service" ];
+                                            agent = "thor";
+                                        }
+                                        {
+                                            # A dead bridge leaves every Android app drawn sideways whenever the phone is not held upright.
+                                            name = "Rotation Bridge";
+                                            id = "thor-waydroid-rotation";
+                                            type = "command";
+                                            interval = "5m";
+                                            timeout = 30;
+                                            command = userUnitCheck [ "waydroid-rotation.service" ];
+                                            agent = "thor";
+                                        }
+                                        {
+                                            name = "Android Settings";
+                                            id = "thor-waydroid-android-config";
+                                            type = "command";
+                                            interval = "5m";
+                                            timeout = 30;
+                                            command = userUnitCheck [ "waydroid-android-config.service" ];
+                                            agent = "thor";
+                                        }
+                                        {
+                                            name = "F-Droid Install";
+                                            id = "thor-waydroid-fdroid";
+                                            type = "command";
+                                            interval = "5m";
+                                            timeout = 30;
+                                            command = userUnitCheck [ "waydroid-fdroid.service" ];
+                                            agent = "thor";
+                                        }
+                                        {
+                                            name = "Container Watchdog";
+                                            id = "thor-waydroid-container-watch";
+                                            type = "command";
+                                            interval = "5m";
+                                            timeout = 30;
+                                            command = userUnitCheck [
+                                                "waydroid-container-watch.timer"
+                                                "waydroid-container-watch.service"
+                                            ];
                                             agent = "thor";
                                         }
                                     ];
