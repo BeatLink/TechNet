@@ -94,10 +94,10 @@
 # non-interactive `sudo -n` succeeds and the inlined BORG_PASSPHRASE survives
 # sudo's env_reset.
 #
-# `source_paths`, `exclude` and `compression` mirror the tool that owns each
-# repo — Vorta's profile settings (Odin's ~/.local/share/Vorta/settings.db) for
-# the Vorta repos, the borgmatic module for the Borgmatic ones — so a
-# Vigil-triggered backup produces an archive equivalent to the scheduled one.
+# `source_paths` and `compression` mirror the tool that owns each repo, and
+# `exclude` is the fleet's one set from backup-excludes.nix that borgmatic and
+# Vorta also apply, so a Vigil-triggered backup produces an archive equivalent
+# to the scheduled one and Purge Excluded rewrites old archives to match it.
 #
 # `keep_*` and `prune_match` mirror the owning tool's pruning, which Vigil's prune preview dry-runs.
 #
@@ -1677,14 +1677,10 @@ in
                                             source_paths = [
                                                 "/Storage/Services"
                                             ];
-                                            exclude = [
-                                                "/Storage/Files/Backups/Server"
-                                            ];
-                                            exclude_if_present = [
-                                                ".nobackup"
-                                                ".stversions"
-                                                ".thumbnails"
-                                            ];
+                                            exclude = config.backup-excludes.patterns;
+                                            exclude_if_present = config.backup-excludes.markers;
+                                            exclude_caches = false;
+                                            allow_purge = true;
                                             compression = "lz4";
                                             archive_prefix = "backup";
                                             canary_path = "/Storage/Services/.vigil-canary";
@@ -1727,14 +1723,10 @@ in
                                             source_paths = [
                                                 "/Storage/Services"
                                             ];
-                                            exclude = [
-                                                "/Storage/Files/Backups/Server"
-                                            ];
-                                            exclude_if_present = [
-                                                ".nobackup"
-                                                ".stversions"
-                                                ".thumbnails"
-                                            ];
+                                            exclude = config.backup-excludes.patterns;
+                                            exclude_if_present = config.backup-excludes.markers;
+                                            exclude_caches = false;
+                                            allow_purge = true;
                                             compression = "lz4";
                                             archive_prefix = "backup";
                                             canary_path = "/Storage/Services/.vigil-canary";
@@ -2161,15 +2153,10 @@ in
                                             source_paths = [
                                                 "/Storage"
                                             ];
-                                            exclude = [
-                                                "**/.cache"
-                                                "**/.Trash-1000"
-                                                "**/venv"
-                                                "**/node_modules"
-                                                "**/.flatpak-builder"
-                                                "/Storage/System"
-                                                "/Storage/Files/Backups"
-                                            ];
+                                            exclude = config.backup-excludes.patterns ++ [ "pf:/Storage/System" ];
+                                            exclude_if_present = config.backup-excludes.markers;
+                                            exclude_caches = false;
+                                            allow_purge = true;
                                             compression = "lz4";
                                             archive_prefix = "odin";
                                             canary_path = "/Storage/Files/.vigil-canary";
@@ -2211,15 +2198,10 @@ in
                                             source_paths = [
                                                 "/Storage"
                                             ];
-                                            exclude = [
-                                                "**/.cache"
-                                                "**/.Trash-1000"
-                                                "**/venv"
-                                                "**/node_modules"
-                                                "**/.flatpak-builder"
-                                                "/Storage/System"
-                                                "/Storage/Files/Backups"
-                                            ];
+                                            exclude = config.backup-excludes.patterns ++ [ "pf:/Storage/System" ];
+                                            exclude_if_present = config.backup-excludes.markers;
+                                            exclude_caches = false;
+                                            allow_purge = true;
                                             compression = "lz4";
                                             archive_prefix = "odin";
                                             canary_path = "/Storage/Files/.vigil-canary";
@@ -2261,18 +2243,10 @@ in
                                             source_paths = [
                                                 "/Storage"
                                             ];
-                                            exclude = [
-                                                "**/.cache"
-                                                "**/.Trash-1000"
-                                                "**/venv"
-                                                "**/node_modules"
-                                                "**/.flatpak-builder"
-                                                "/Storage/System"
-                                                "/Storage/Files/Backups"
-                                            ];
-                                            exclude_if_present = [
-                                                ".nobackup"
-                                            ];
+                                            exclude = config.backup-excludes.patterns ++ [ "pf:/Storage/System" ];
+                                            exclude_if_present = config.backup-excludes.markers;
+                                            exclude_caches = false;
+                                            allow_purge = true;
                                             compression = "lz4";
                                             archive_prefix = "odin";
                                             canary_path = "/Storage/Files/.vigil-canary";
@@ -2315,11 +2289,10 @@ in
                                             source_paths = [
                                                 "/Storage/System"
                                             ];
-                                            exclude_if_present = [
-                                                ".nobackup"
-                                                ".stversions"
-                                                ".thumbnails"
-                                            ];
+                                            exclude = config.backup-excludes.patterns;
+                                            exclude_if_present = config.backup-excludes.markers;
+                                            exclude_caches = false;
+                                            allow_purge = true;
                                             compression = "lz4";
                                             archive_prefix = "backup";
                                             canary_path = "/Storage/System/.vigil-canary";
@@ -2366,11 +2339,10 @@ in
                                             source_paths = [
                                                 "/Storage/System"
                                             ];
-                                            exclude_if_present = [
-                                                ".nobackup"
-                                                ".stversions"
-                                                ".thumbnails"
-                                            ];
+                                            exclude = config.backup-excludes.patterns;
+                                            exclude_if_present = config.backup-excludes.markers;
+                                            exclude_caches = false;
+                                            allow_purge = true;
                                             compression = "lz4";
                                             archive_prefix = "backup";
                                             canary_path = "/Storage/System/.vigil-canary";
@@ -2417,11 +2389,10 @@ in
                                             source_paths = [
                                                 "/Storage/System"
                                             ];
-                                            exclude_if_present = [
-                                                ".nobackup"
-                                                ".stversions"
-                                                ".thumbnails"
-                                            ];
+                                            exclude = config.backup-excludes.patterns;
+                                            exclude_if_present = config.backup-excludes.markers;
+                                            exclude_caches = false;
+                                            allow_purge = true;
                                             compression = "lz4";
                                             archive_prefix = "backup";
                                             canary_path = "/Storage/System/.vigil-canary";
