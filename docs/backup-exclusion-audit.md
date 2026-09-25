@@ -119,3 +119,15 @@ those first. Ragnarok is the long pole at 77 archives reaching back to February 
   profile, identical across all three.
 - `nix/3-laptop/4-apps/programming/lm-studio.nix` grew a declarative list of the wanted model files
   and a `lm-studio-models` user service that fetches any that are missing from Hugging Face.
+
+## Still to verify
+
+The pattern set was tested against real paths in both directions before it was applied, and the
+rewritten archives were checked to confirm the excluded content is gone and `trilium-data`, Music,
+ISOs and `places.sqlite` are still there. What has *not* been watched yet is a scheduled backup
+running to completion on each of the three profiles against the 62-entry set, because the rewrites
+hold the repository locks while they run and every scheduled run against a locked repository fails.
+Check Vorta's event log for a `returncode` of 0 on profiles 2, 4 and 5 once the rewrites finish.
+
+The working material — the rewrite scripts, their logs, and Vorta's settings from before any of this
+— is kept in `/Storage/Files/Backups/Laptop/vorta-purge-2026-09-24/`, which has its own README.
