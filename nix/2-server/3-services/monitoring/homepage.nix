@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, lib, ... }:
 {
     sops.secrets.homepage_env = {
         sopsFile = "${config.technet.secrets.path}/homepage.yaml";
@@ -16,11 +16,9 @@
         allowedHosts = "dashboard.heimdall.technet,www.heimdall.technet,heimdall.technet";
         listenPort = 9610;
         environmentFiles = [
-            # homepage_env still carries its own stale TRILIUM and SYNCTHING keys; the files after it re-set both, and systemd lets the last assignment win.
+            # homepage_env still carries its own stale TRILIUM key; the template after it re-sets it, and systemd lets the last assignment win.
             config.sops.secrets.homepage_env.path
             config.sops.templates."homepage-widgets.env".path
-            # Syncthing generates its own API key, so it is extracted from the live config into an env file by a timer (see syncthing.nix).
-            "/Storage/Services/Syncthing/homepage-api-key.env"
         ];
         settings = {
             title = "TechNet";
@@ -430,6 +428,17 @@
         ];
     };
     systemd.services.homepage-dashboard.environment.HOSTNAME = "127.0.0.1";
+
+    # Syncthing generates its own API key, so it is extracted from the live config into an env file (see syncthing.nix).
+    systemd.services.homepage-dashboard = {
+        wants = [ "syncthing-api-key-export.service" ];
+        after = [ "syncthing-api-key-export.service" ];
+        # The leading dash keeps a missing file non-fatal: without it the unit fails outright on any boot that starts Homepage before the export has run.
+        serviceConfig.EnvironmentFile = lib.mkForce (
+            config.services.homepage-dashboard.environmentFiles
+            ++ [ "-/Storage/Services/Syncthing/homepage-api-key.env" ]
+        );
+    };
 
     # Homepage reads these once and caches; nothing in the unit depends on them,
     # so a rebuild that only edits this file leaves the old dashboard on screen
