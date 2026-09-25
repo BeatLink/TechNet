@@ -241,6 +241,10 @@ in
                 write_batch_seconds = 5;
             };
 
+            logging = {
+                metric_downsample_days = 7;
+            };
+
             # Every agent that may dial in. A monitor's `agent = "<id>"` refers
             # to an `id` here. `host` is a label only — Vigil never dials an
             # agent, the agent always dials Vigil — but it is what a monitor's
