@@ -4,6 +4,7 @@
 #
 {
     imports = [
+        ./boot-state.nix
         ./camera.nix
         ./gnss
         ./remote.nix
