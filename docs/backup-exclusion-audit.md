@@ -76,10 +76,12 @@ and the whole `/Storage/PhoneApps` tree has no `.config` in its paths at all.
   excluded was the 11G of ISOs, and any other `.iso` on the pool. Ragnarok had been silently
   skipping those.
 - **`/Storage/Files/Projects/3ptech/Sysadmin Knowledgebase`** (59G) is not regenerable and is kept.
-- **Firefox site storage is kept**, 4.6G on the desktop profile and 4.2G on the phone one. Most of
-  `storage/default` regenerates from the sites themselves, but offline apps keep state there that
-  exists nowhere else, so the space is accepted. Only the profile's telemetry, crash and
-  start-up-cache directories are excluded.
+- **Firefox site storage is kept**, 4.6G on the desktop profile and 4.2G on the phone one, with one
+  exception. Each origin under `storage/default` has both an `idb` directory, which is real offline
+  state that exists nowhere else, and a `cache` directory, which is the Cache API and regenerates
+  from the site. The `cache` halves came to 11.7G across the desktop and both phone profiles, led by
+  WhatsApp Web, so `fm:*/default/*/cache` excludes those and leaves `idb` and `ls` alone. The
+  profile's telemetry, crash and start-up-cache directories are excluded as well.
 
 ## 5. Existing archives
 
@@ -87,9 +89,17 @@ New exclusions only affect new archives. Content already in a repository has to 
 it with `borg recreate --exclude ...` followed by `borg compact`; `recreate` reuses existing chunks
 for the files it keeps, so it does not re-read the source, but `compact` is what reclaims the space.
 
-All three repositories were rewritten on 2026-09-22 against the full exclusion set above. The
-on-disk one had `steamapps/common` removed first and then the rest; Heimdall followed over the link;
-Ragnarok was offline at the time and ran as soon as it answered SSH.
+The rewrites ran over 2026-09-22 to 2026-09-24. The on-disk repository had `steamapps/common`
+removed first, which alone took it from 539G to 214G, and then the rest, reaching 153G. Heimdall
+followed over the link. Ragnarok was offline at the time; a watcher started it as soon as the board
+answered SSH.
+
+Two things made this slower than one pass. Long rewrites over SSH kept dying with `Connection timed
+out`, so `BORG_RSH` now sets `ServerAliveInterval=30` and the Ragnarok run retries rather than
+waiting on a person. And an interrupted `recreate` leaves a `<archive>.recreate` temporary archive
+behind that makes the next attempt fail immediately with `already exists`; each attempt now deletes
+those first. Ragnarok is the long pole at 77 archives reaching back to February 2025 against the
+20-odd the others hold.
 
 ## Work done
 
@@ -103,5 +113,9 @@ Ragnarok was offline at the time and ran as soon as it answered SSH.
   generic Electron caches, and the in-profile Firefox caches that `firefox-cache` misses.
 - All three repositories rewritten with `borg recreate` and compacted, so the exclusions apply to
   the archives that already existed as well as to new ones.
+- A second sweep on 2026-09-24 caught what the first pattern set missed: the per-origin Firefox
+  `cache` directories (11.7G), `DawnWebGPUCache` and `DawnGraphiteCache`, `ScriptCache`, and Steam's
+  `appcache`, `depotcache`, `shadercache` and `shaderhitcache`. The set now stands at 62 entries per
+  profile, identical across all three.
 - `nix/3-laptop/4-apps/programming/lm-studio.nix` grew a declarative list of the wanted model files
   and a `lm-studio-models` user service that fetches any that are missing from Hugging Face.
