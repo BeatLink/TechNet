@@ -16,14 +16,8 @@ let
             "/Storage/Services"
         ];
         # Excludes
-        exclude_patterns = [
-            "/Storage/Files/Backups/Server"
-        ];
-        exclude_if_present = [
-            ".nobackup"
-            ".stversions"
-            ".thumbnails"
-        ];
+        exclude_patterns = config.backup-excludes.patterns;
+        exclude_if_present = config.backup-excludes.markers;
 
         encryption_passcommand = "cat " + config.sops.secrets.borg_repo_encryption_key.path;
         ssh_command = "ssh -i " + config.sops.secrets.borg_repo_ssh_key.path;
