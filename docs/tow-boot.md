@@ -30,8 +30,9 @@ ported forward to **2026.04**, carrying:
   order, the vibrator uclass and the LRADC button driver.
 - The PinePhone display and button work written here: a sun6i MIPI-DSI host,
   TCON0 in DSI mode, the Xingbangda XBD599 panel, the AXP803 GPIO LDOs,
-  backlight interpolation, the LRADC and AXP power keys as a keyboard, and
-  volume-up at power-on entering USB mass storage.
+  backlight interpolation, the LRADC and AXP power keys as a keyboard, the
+  PinePhone keyboard case, and volume-up at power-on entering USB mass
+  storage.
 
 Upstream moved Rockchip to bootstd and dropped its distro-boot environment,
 but Tow-Boot's boot flow and menu are distro-boot scripts, so the tree carries
