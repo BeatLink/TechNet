@@ -14,8 +14,8 @@
 # problem is not having any. The ARC is reclaimable in principle, but it gives
 # memory back more slowly than a burst of allocation takes it, so the headroom
 # has to exist up front -- the same finding as Ragnarok's
-# 1-backup-server/1-system/remote-builder.nix, which caps it for the same
-# reason on a smaller board.
+# 1-backup-server/1-system/software.nix, which caps that board's build
+# concurrency for the same reason.
 #
 # 1.5GB, which is what ZFS would pick on its own at half of RAM. A 512MB cap
 # costs more than it saves: measured on this phone, a cold nautilus took 8.0s

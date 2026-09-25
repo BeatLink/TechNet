@@ -10,6 +10,5 @@
         ./networking.nix
         ./borg.nix
         ./clevis.nix
-        ./remote-builder.nix
     ];
 }
