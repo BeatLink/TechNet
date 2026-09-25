@@ -1858,6 +1858,21 @@ in
                                     ];
                                 }
                                 {
+                                    name = "Power";
+                                    id = "odin-power";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            # Worn cells only drift over months, so a 5m sample is plenty; low charge counts only while unplugged.
+                                            name = "Battery";
+                                            id = "odin-battery";
+                                            type = "power";
+                                            interval = "5m";
+                                            agent = "odin";
+                                        }
+                                    ];
+                                }
+                                {
                                     name = "Memory";
                                     id = "odin-memory";
                                     type = "group";
@@ -2517,24 +2532,19 @@ in
                                     ];
                                 }
                                 {
-                                    # The signal no other host has: a phone that is merely low on charge is on its way to being a phone that is not there.
+                                    # A phone that is merely low on charge is on its way to being a phone that is not there.
                                     name = "Power";
                                     id = "thor-power";
                                     type = "group";
                                     children = [
                                         {
-                                            # Thresholds are upower's own percentageLow and percentageCritical from 5-phone/1-system/power.nix, so Vigil warns exactly when the phone does.
+                                            # Charge thresholds are upower's own percentageLow and percentageCritical from 5-phone/1-system/power.nix, so Vigil warns exactly when the phone does; the keyboard case's battery is listed beside the phone's, and its USB feed counts as plugged in.
                                             name = "Battery";
                                             id = "thor-battery";
-                                            type = "command";
+                                            type = "power";
                                             interval = "5m";
-                                            command = "cat /sys/class/power_supply/axp20x-battery/capacity";
-                                            pattern = "([0-9]+)";
-                                            invert = true; # A battery is worse the lower it reads, which reverses the usual ranking
-                                            warning = 20;
-                                            threshold = 10;
-                                            value_label = "CHARGE";
-                                            value_unit = "%";
+                                            charge_warning = 20;
+                                            charge_threshold = 10;
                                             agent = "thor";
                                         }
                                     ];
