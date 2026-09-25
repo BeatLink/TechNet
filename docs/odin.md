@@ -90,16 +90,18 @@ on Wayland sessions.
 
 Heimdall needs it too, because `cache-preseed.nix` builds Odin's closure there
 every night and aborts on the whole run when this one path cannot be fetched.
-Give both stores the path and a root that survives collection:
+Syncthing already carries `/Storage/Files/Downloads` to Heimdall, so the `.deb`
+is on both machines. Run the same two commands on each, against the local file:
 
 ```sh
-nix copy --to ssh://beatlink@heimdall.technet /nix/store/<hash>-CiscoPacketTracer_901_Ubuntu_64bit.deb
+nix-store --add-fixed sha256 /Storage/Files/Downloads/CiscoPacketTracer_901_Ubuntu_64bit.deb
 sudo nix-store --add-root /nix/var/nix/gcroots/packet-tracer-deb --indirect --realise /nix/store/<hash>-CiscoPacketTracer_901_Ubuntu_64bit.deb
 ```
 
-Run the second command on each host. `attic push technet <path>` would spare
-the copy, but a 400MB upload fails with a pool timeout while a build is pushing
-to the same cache, so push it when the cache is quiet or skip it.
+The root is what makes it survive, since nothing in the built system refers to
+it. `attic push technet <path>` would let a third host substitute the path
+instead, but a 400MB upload times out against atticd, whose database shares the
+SMR-backed data pool with Vigil's own; it is not worth waiting on.
 
 ## Tang server
 
