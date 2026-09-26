@@ -32,18 +32,20 @@
         mode = "2775";
     };
 
-    # Applied every activation so anything that slipped in under another group or without group write is folded back in.
-    system.activationScripts.ebooksSharedGroup = {
-        deps = [ "users" ];
-        text = ''
-            if [ -d /Storage/Files/eBooks ]; then
-                ${pkgs.findutils}/bin/find /Storage/Files/eBooks \! -group ebooks \
-                    -exec ${pkgs.coreutils}/bin/chgrp ebooks {} + 2>/dev/null || true
-                ${pkgs.findutils}/bin/find /Storage/Files/eBooks -type d \! -perm -g+rwxs \
-                    -exec ${pkgs.coreutils}/bin/chmod g+rwxs {} + 2>/dev/null || true
-                ${pkgs.findutils}/bin/find /Storage/Files/eBooks -type f \! -perm -g+rw \
-                    -exec ${pkgs.coreutils}/bin/chmod g+rw {} + 2>/dev/null || true
-            fi
+    # Applied every boot so anything that slipped in under another group or without group write is folded back in.
+    # A service rather than an activation script: activation runs in the initrd, and a walk on the data pool there holds up switch-root.
+    systemd.services.ebooks-shared-group = {
+        description = "Fold eBooks back into the shared ebooks group";
+        wantedBy = [ "multi-user.target" ];
+        unitConfig.RequiresMountsFor = [ "/Storage/Files/eBooks" ];
+        serviceConfig.Type = "oneshot";
+        script = ''
+            ${pkgs.findutils}/bin/find /Storage/Files/eBooks \! -group ebooks \
+                -exec ${pkgs.coreutils}/bin/chgrp ebooks {} + 2>/dev/null || true
+            ${pkgs.findutils}/bin/find /Storage/Files/eBooks -type d \! -perm -g+rwxs \
+                -exec ${pkgs.coreutils}/bin/chmod g+rwxs {} + 2>/dev/null || true
+            ${pkgs.findutils}/bin/find /Storage/Files/eBooks -type f \! -perm -g+rw \
+                -exec ${pkgs.coreutils}/bin/chmod g+rw {} + 2>/dev/null || true
         '';
     };
 }

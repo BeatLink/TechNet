@@ -202,10 +202,20 @@ in
         group = "borg";
         mode = "0750";
     };
-    system.activationScripts.borgmaticRepoGroupRead = ''
-        if [ -d /Storage/Files/Backups/Server/Borgmatic ]; then
-            chgrp -R borg /Storage/Files/Backups/Server/Borgmatic || true
-            chmod -R g+rX  /Storage/Files/Backups/Server/Borgmatic || true
-        fi
-    '';
+    # Touches only files that are wrong: chgrp -R rewrites every inode on ZFS, and on the shingled mirror disk that stalls the pool for minutes.
+    systemd.services.borgmatic-repo-group-read = {
+        description = "Give the borg group read access to the Borgmatic repository";
+        wantedBy = [ "multi-user.target" ];
+        unitConfig.RequiresMountsFor = [ "/Storage/Files/Backups/Server/Borgmatic" ];
+        serviceConfig.Type = "oneshot";
+        script = ''
+            repo=/Storage/Files/Backups/Server/Borgmatic
+            ${pkgs.findutils}/bin/find "$repo" -ignore_readdir_race \! -group borg \
+                -exec ${pkgs.coreutils}/bin/chgrp borg {} + || true
+            ${pkgs.findutils}/bin/find "$repo" -ignore_readdir_race -type d \! -perm -g+rx \
+                -exec ${pkgs.coreutils}/bin/chmod g+rx {} + || true
+            ${pkgs.findutils}/bin/find "$repo" -ignore_readdir_race -type f \! -perm -g+r \
+                -exec ${pkgs.coreutils}/bin/chmod g+r {} + || true
+        '';
+    };
 }

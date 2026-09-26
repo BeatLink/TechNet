@@ -3,6 +3,7 @@
         ./hardware.nix
         ./filesystem.nix
         ./directories.nix
+        ./storage-dependents.nix
         ./software.nix
         ./networking.nix
         ./utilities.nix

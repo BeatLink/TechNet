@@ -112,14 +112,21 @@ in
     # account are still owned by a uid that no longer has a name, which leaves
     # Syncthing unable to chmod them now that it syncs permission bits. Targeted
     # at those paths only, so nothing walks the rest of /Storage/Files.
-    system.activationScripts.qbittorrentChownToBeatlink = ''
-        for dir in /Storage/Files/Torrents /Storage/Services/Qbittorrent; do
-            if [ -d "$dir" ]; then
-                ${pkgs.findutils}/bin/find "$dir" \! -user beatlink \
-                    -exec ${pkgs.coreutils}/bin/chown beatlink:beatlink {} + 2>/dev/null || true
-            fi
-        done
-    '';
+    systemd.services.qbittorrent-chown-to-beatlink = {
+        description = "Hand leftover qbittorrent files to beatlink";
+        wantedBy = [ "qbittorrent.service" ];
+        before = [ "qbittorrent.service" ];
+        unitConfig.RequiresMountsFor = [ "/Storage" ];
+        serviceConfig.Type = "oneshot";
+        script = ''
+            for dir in /Storage/Files/Torrents /Storage/Services/Qbittorrent; do
+                if [ -d "$dir" ]; then
+                    ${pkgs.findutils}/bin/find "$dir" \! -user beatlink \
+                        -exec ${pkgs.coreutils}/bin/chown beatlink:beatlink {} + 2>/dev/null || true
+                fi
+            done
+        '';
+    };
 
     systemd.tmpfiles.settings."Qbittorrent" = {
         # Owned by beatlink so Syncthing, which owns this folder in the mesh, can write into it; tmpfiles would otherwise leave the parent root-owned

@@ -45,9 +45,16 @@
     users.users.beatlink.extraGroups = [ "frigate" ];
 
     # tmpfiles refuses the beatlink-to-frigate ownership change below /Storage/Files, so the bind source is made here instead.
-    system.activationScripts.frigateRecordingsDir = {
-        deps = [ "users" ];
-        text = ''
+    systemd.services.frigate-recordings-dir = {
+        description = "Create the Frigate recordings bind source";
+        wantedBy = [ "var-lib-frigate-recordings.mount" ];
+        before = [ "var-lib-frigate-recordings.mount" ];
+        unitConfig = {
+            DefaultDependencies = false; # Default ordering after sysinit.target would put this behind the local mounts it has to precede
+            RequiresMountsFor = [ "/Storage/Files/Frigate" ];
+        };
+        serviceConfig.Type = "oneshot";
+        script = ''
             ${pkgs.coreutils}/bin/install -d -m 0770 -o frigate -g frigate /Storage/Files/Frigate/Recordings
         '';
     };
