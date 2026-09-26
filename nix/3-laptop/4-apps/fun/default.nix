@@ -1,5 +1,6 @@
 {
     imports = [
+        ./anthem.nix
         ./calibre-web
         ./ckan.nix
         ./freetube.nix
