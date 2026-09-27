@@ -3,11 +3,9 @@
 # Qbittorrent is the torrent management server. The torrent server allows for automatic 24/7 downloading and setting of content.
 #
 # The Jackett search plugin (nova3/engines/jackett.py) lets qBittorrent's
-# built-in Search tab query Jackett's indexers directly. qBittorrent only
-# looks for plugins under its Data special folder, which for a custom
-# --profile is <profileDir>/data/nova3/engines (NOT profileDir itself, and
-# NOT profileDir/qBittorrent/... like the .conf file) — see
-# SearchPluginManager::pluginsLocation() in qBittorrent's source.
+# built-in Search tab query Jackett's indexers directly. With a custom
+# --profile, qBittorrent scans <profileDir>/qBittorrent/data/nova3/engines
+# for plugins — proven on Heimdall, where the stock plugins live there.
 #
 
 {
@@ -146,23 +144,6 @@ in
             group = "beatlink";
             mode = "2775";
         };
-
-        # Every level needs its own entry; qBittorrent creates these root-owned before ExecStartPre runs
-        "/Storage/Services/Qbittorrent/profile/data".Z = {
-            user = "beatlink";
-            group = "beatlink";
-            mode = "0750";
-        };
-        "/Storage/Services/Qbittorrent/profile/data/nova3".Z = {
-            user = "beatlink";
-            group = "beatlink";
-            mode = "0750";
-        };
-        "/Storage/Services/Qbittorrent/profile/data/nova3/engines".d = {
-            user = "beatlink";
-            group = "beatlink";
-            mode = "0750";
-        };
     };
 
     systemd.services.qbittorrent = {
@@ -231,7 +212,7 @@ in
                         runtimeInputs = [ pkgs.coreutils ];
                         text = ''
                             install -Dm644 ${jackettPlugin} \
-                                /Storage/Services/Qbittorrent/profile/data/nova3/engines/jackett.py
+                                /Storage/Services/Qbittorrent/profile/qBittorrent/data/nova3/engines/jackett.py
                         '';
                     }
                 ))
@@ -244,7 +225,7 @@ in
                                 --arg api_key "$(cat "$CREDENTIALS_DIRECTORY/jackett_api_key")" \
                                 --arg url "http://127.0.0.1:9117" \
                                 '{api_key: $api_key, url: $url, tracker_first: false, thread_count: 20}' \
-                                > /Storage/Services/Qbittorrent/profile/data/nova3/engines/jackett.json
+                                > /Storage/Services/Qbittorrent/profile/qBittorrent/data/nova3/engines/jackett.json
                         '';
                     }
                 ))
