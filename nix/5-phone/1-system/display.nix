@@ -76,11 +76,8 @@
                 # Anyone who picks the phone up can read a locked screen, so the lock screen shows no notifications at all.
                 "org/gnome/desktop/notifications".show-in-lock-screen = false;
 
-                # Off because Waydroid scales its buffer into whatever rectangle phoc hands it instead of resizing to it, so any shrink is a permanent
-                # letterbox: at 0.951 it lost 34px and 70px of the panel, and on a fresh boot it hit the 0.5 floor and drew Android at quarter size.
-                # Native apps resize to the configure they are sent, so they fill the panel either way; the cost is a window that cannot shrink to the
-                # usable area now keeps its own size and phoc slides the excess under the top bar.
-                "sm/puri/phoc".scale-to-fit = false;
+                # Scales a window that cannot shrink to the usable area down to fit it, instead of phoc sliding the excess under the top bar.
+                "sm/puri/phoc".scale-to-fit = true;
 
                 # phoc draws the focus frame at the unscaled size, so leaving it on paints a block of blue beside every scaled window.
                 "mobi/phosh/phoc".focus-frame = false;
