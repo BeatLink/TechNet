@@ -77,7 +77,7 @@ Heimdall's dry-run.
 | `nix/5-phone/1-system/calls.nix` | Required. The test suite nests user namespaces under bwrap, which qemu-user cannot emulate, so an aarch64 build on Odin dies there. |
 | `hyprland/{lid,overview,edge-snap,sounds,scripts}.nix` | `writeShellApplication` only. No compilation. |
 | `0-common/4-apps/technet/waypipe.nix` | One meson flag on a leaf package. |
-| `5-phone/1-system/clevis.nix`, `5-phone/3-apps/native/phone.nix`, `5-phone/3-apps/waydroid/gnss/default.nix` | Single leaf packages, no fan-out. |
+| `5-phone/1-system/clevis.nix`, `5-phone/3-apps/native/phone.nix` | Single leaf packages, no fan-out. |
 
 ## 3. Overlays that cost real build time
 

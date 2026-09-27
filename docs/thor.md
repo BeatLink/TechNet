@@ -362,11 +362,6 @@ feedbackd: Failed to set led pattern: Failed to open
   /sys/devices/platform/leds/leds/blue:indicator/pattern: Permission denied
 ```
 
-A Waydroid window is the other one, and it does not let go — the launch wrapper
-sends `KEYCODE_WAKEUP` and the panel then stays lit indefinitely rather than for
-15 seconds. A run of `Modesetting` with no matching `Turning off` after it is
-that case, and it is worth checking before concluding the timer is broken.
-
 ### Checking it
 
 ```sh
