@@ -114,12 +114,6 @@
                         PersistentKeepalive = 25;
                     }
                     {
-                        # Valkyrie
-                        PublicKey = "2VjbUP0Gl/A3CmHahGsVG+O419WGyJX25lOPNtC6PF0=";
-                        AllowedIPs = [ "10.100.100.7/32" ];
-                        PersistentKeepalive = 25;
-                    }
-                    {
                         # Bedroom Light
                         PublicKey = "9LaDCzP+4z/RtsvsnfpjZXit/jO/uXX5WkfVoTg6jk8=";
                         AllowedIPs = [ "10.100.100.10/32" ];
