@@ -6,7 +6,26 @@
 # other common way to consume it, but isn't set up here.
 #
 
-{ config, lib, ... }:
+{
+    config,
+    lib,
+    pkgs,
+    ...
+}:
+let
+    # Definition overrides for indexers whose packaged definitions predate a domain or layout change; bump commit and hashes together, and drop an entry once a package upgrade catches up.
+    definitionCommit = "d396f7c43015b3541e12b011ec14a56f2cb24078";
+    definitionOverrides = {
+        "52bt" = "0qz23aiv758n3pxbci92dp58qhkhizlfp3w23s9abw480mpqy5d0";
+        "linuxtracker" = "11gi2r26xbkwkzpq42hqpi4nxcf0cmx3mmqca9kfppia2cjj7sli";
+    };
+    definitionFile =
+        name: sha256:
+        pkgs.fetchurl {
+            url = "https://raw.githubusercontent.com/Jackett/Jackett/${definitionCommit}/src/Jackett.Common/Definitions/${name}.yml";
+            inherit sha256;
+        };
+in
 {
     services.jackett = {
         enable = true;
@@ -22,6 +41,20 @@
 
     # Jackett resolves its custom cardigann/definitions/ dir against the process cwd, so without this it looks in / and loads no overrides
     systemd.services.jackett.serviceConfig.WorkingDirectory = config.services.jackett.dataDir;
+
+    # Installs the pinned definition overrides where the WorkingDirectory setting above makes Jackett look for them.
+    systemd.services.jackett.serviceConfig.ExecStartPre = [
+        (lib.getExe (
+            pkgs.writeShellApplication {
+                name = "jackett-install-definition-overrides";
+                runtimeInputs = [ pkgs.coreutils ];
+                text = lib.concatMapStringsSep "\n" (name: ''
+                    install -Dm644 ${definitionFile name definitionOverrides.${name}} \
+                        '${config.services.jackett.dataDir}/cardigann/definitions/${name}.yml'
+                '') (lib.attrNames definitionOverrides);
+            }
+        ))
+    ];
     nginx-vhosts.jackett = {
         domain = "jackett.heimdall.technet";
         port = 9117;
