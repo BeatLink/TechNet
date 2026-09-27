@@ -33,6 +33,24 @@
         group = config.services.pihole-ftl.group;
     };
 
+    # Web login ------------------------------------------------------------------------------------------------------------------------------------
+    sops.secrets.pihole_web_password = {
+        sopsFile = "${config.technet.secrets.path}/pi-hole.yaml";
+        group = "vigil-monitor"; # Read by the `cat` Vigil's pihole plugin runs as the `vigil` user
+        mode = "0440";
+    };
+
+    # FTL hashes this into webserver.api.pwhash at startup and keeps the key read-only, so the password cannot drift from the secret.
+    sops.templates."pihole-web-password.env" = {
+        content = ''
+            FTLCONF_webserver_api_password=${config.sops.placeholder.pihole_web_password}
+        '';
+        restartUnits = [ "pihole-ftl.service" ];
+    };
+
+    systemd.services.pihole-ftl.serviceConfig.EnvironmentFile =
+        config.sops.templates."pihole-web-password.env".path;
+
     nginx-vhosts.pi-hole = {
         domain = "pi-hole.heimdall.technet";
         port = 9018;

@@ -9,6 +9,7 @@
         HOMEPAGE_VAR_TRILIUM_KEY=${config.sops.placeholder.trilium_etapi_token}
         HOMEPAGE_VAR_FRESHRSS_PASS=${config.sops.placeholder.freshrss_api_password}
         HOMEPAGE_VAR_CALIBRE_PASS=${config.sops.placeholder.calibre_web_vigil_password}
+        HOMEPAGE_VAR_PIHOLE_PASS=${config.sops.placeholder.pihole_web_password}
     '';
 
     services.homepage-dashboard = {
@@ -342,6 +343,7 @@
                                 type = "pihole";
                                 url = "http://127.0.0.1:9018"; # Pi-hole's own webserver ACL allows loopback only
                                 version = 6;
+                                key = "{{HOMEPAGE_VAR_PIHOLE_PASS}}";
                             };
                         };
                     }

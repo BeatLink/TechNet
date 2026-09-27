@@ -1202,6 +1202,7 @@ in
                                             type = "pihole";
                                             interval = "5m";
                                             api_url = "http://127.0.0.1:9018";
+                                            api_password_command = "cat /run/secrets/pihole_web_password";
                                             # Both zero, which no percentage can fall below, so the rate is still charted but never sets the status. It
                                             # measures what clients happened to ask for, not whether Pi-hole is still blocking -- a quiet stretch of
                                             # cached and local lookups drags it down with nothing wrong. Blocking being enabled and the gravity list
