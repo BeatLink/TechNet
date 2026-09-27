@@ -130,6 +130,7 @@
                         "10.100.100.4  thor.technet"
                         "10.100.100.5  thorx.technet"
                         "10.100.100.6  ragnarok.technet"
+                        "10.100.100.7  valkyrie.technet"
                         "10.100.100.18 socket-ragnarok.technet"
 
                         # Odin's LAN address, so odin.lan resolves at all.
