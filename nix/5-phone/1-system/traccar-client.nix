@@ -1,7 +1,8 @@
 # Traccar client #####################################################################################################################################
 #
-# Posts one geoclue fix to Heimdall's Traccar over the OsmAnd protocol and exits, rather than holding a client open: a held client keeps the modem's
-# GNSS receiver powered all day instead of for as long as a fix takes.
+# Posts one precise geoclue fix to Heimdall's Traccar over the OsmAnd protocol and exits, rather than holding a client open: a held client keeps the
+# modem's GNSS receiver powered all day instead of for as long as a fix takes. Geoclue hands out its coarse GeoIP guess first and refines afterwards,
+# so the client waits for a fix good enough to track by and only falls back to the least bad one it saw when the wait runs out.
 #
 {
     config,
@@ -13,7 +14,7 @@ let
     device = lib.toLower config.networking.hostName; # Has to exist as a device in Traccar before a report is stored, and can only be added in its web UI
     desktopId = "traccar-client";
     server = "http://heimdall.technet:5055"; # Reached over the tunnel, so it answers on mobile data as well as at home
-    fixTimeout = 120;
+    fixTimeout = 240; # Long enough for a cold GNSS receiver to have a chance at a lock, while still fitting inside the 5 minute timer interval
 
     traccarClient =
         pkgs.writers.writePython3Bin "traccar-client"
@@ -43,6 +44,8 @@ let
                 UNSET = -1.7976931348623157e308
                 # 8 is GeoClue's exact level; anything lower rounds the fix to the city, which is not a track.
                 ACCURACY_EXACT = 8
+                # Metres; wider than this is geoclue's GeoIP or single-hotspot guess, worth posting only when nothing better arrives.
+                ACCURACY_GOOD = 100
 
 
                 def battery():
@@ -60,8 +63,8 @@ let
                     return None, False
 
 
-                def report(bus, path):
-                    """Post one geoclue Location, returning whether the server took it."""
+                def read_fix(bus, path):
+                    """The geoclue Location at this path as OsmAnd report parameters, or None when it has no coordinates."""
                     location = Gio.DBusProxy.new_sync(
                         bus, Gio.DBusProxyFlags.NONE, None,
                         GEOCLUE, path, GEOCLUE + ".Location", None,
@@ -73,7 +76,7 @@ let
 
                     latitude, longitude = number("Latitude"), number("Longitude")
                     if latitude is None or longitude is None:
-                        return False
+                        return None
 
                     params = {"id": DEVICE, "lat": latitude, "lon": longitude, "timestamp": int(time.time())}
 
@@ -83,7 +86,11 @@ let
                         value = number(name)
                         if value is not None and value != UNSET and value >= 0:
                             params[key] = value
+                    return params
 
+
+                def post(params):
+                    """Post one fix, with the battery state read at posting time."""
                     level, charging = battery()
                     if level is not None:
                         params["batt"] = level
@@ -91,7 +98,6 @@ let
 
                     with urllib.request.urlopen(SERVER + "/?" + urllib.parse.urlencode(params), timeout=20) as response:
                         print("reported %(lat)s %(lon)s" % params, "->", response.status, flush=True)
-                    return True
 
 
                 def main():
@@ -119,12 +125,20 @@ let
                     )
                     loop = GLib.MainLoop()
                     done = []
+                    best = {}
 
                     def attempt(path):
-                        """Post the fix at this path and stop waiting, whatever the server makes of it."""
+                        """Post the fix at this path if it is precise enough, otherwise hold the least bad one and keep waiting."""
+                        params = read_fix(bus, path)
+                        if params is None:
+                            return
+                        if params.get("accuracy", 0) > ACCURACY_GOOD:
+                            if params["accuracy"] < best.get("accuracy", float("inf")):
+                                best.clear()
+                                best.update(params)
+                            return
                         try:
-                            if not report(bus, path):
-                                return
+                            post(params)
                         # A phone off the tunnel, or a server that does not know this device, are both ordinary states here
                         except urllib.error.URLError as err:
                             print("traccar took no report:", err, flush=True)
@@ -148,6 +162,14 @@ let
                         loop.run()
 
                     client.call_sync("Stop", None, Gio.DBusCallFlags.NONE, -1, None)
+
+                    # Better a coarse point carrying its accuracy than a silent gap, once the wait for a precise one is over.
+                    if not done and best:
+                        try:
+                            post(best)
+                            done.append(True)
+                        except urllib.error.URLError as err:
+                            print("traccar took no report:", err, flush=True)
                     if not done:
                         print("no fix within", TIMEOUT, "seconds", flush=True)
 
