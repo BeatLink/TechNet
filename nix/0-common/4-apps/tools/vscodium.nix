@@ -270,6 +270,7 @@ in
                                     tomoki1207.pdf
                                     vivaxy.vscode-conventional-commits
                                     jackiotyu.git-worktree-manager
+                                    activitywatch.aw-watcher-vscode
                                 ]
                                 ++ (with pkgs.nix-vscode-extensions.vscode-marketplace; [
                                     fnando.linter
