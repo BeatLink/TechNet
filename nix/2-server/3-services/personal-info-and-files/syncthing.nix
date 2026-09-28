@@ -24,7 +24,7 @@
         owner = "beatlink";
     };
     sops.secrets.syncthing_gui_password = {
-        sopsFile = "${config.technet.secrets.path}/syncthing.yaml";
+        sopsFile = "${config.technet.secrets.commonPath}/syncthing.yaml";
         owner = "beatlink";
     };
     services.syncthing = {
@@ -90,6 +90,14 @@
             port = 8384;
         };
     };
+
+    # Each peer's GUI also answers at syncthing.<host>.technet; the TLS certificate covers only *.heimdall.technet, so HTTPS on these names warns.
+    services.nginx.virtualHosts.syncthing-odin.serverAliases = [ "syncthing.odin.technet" ];
+    services.nginx.virtualHosts.syncthing-ragnarok.serverAliases = [ "syncthing.ragnarok.technet" ];
+    services.pihole-ftl.settings.dns.cnameRecords = [
+        "syncthing.odin.technet,heimdall.technet"
+        "syncthing.ragnarok.technet,heimdall.technet"
+    ];
 
     systemd.services.syncthing-vigil-api-key = {
         description = "Extract Syncthing's API key for Vigil";

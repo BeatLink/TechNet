@@ -17,7 +17,7 @@
         owner = "beatlink";
     };
     sops.secrets.syncthing_gui_password = {
-        sopsFile = "${config.technet.secrets.path}/syncthing.yaml";
+        sopsFile = "${config.technet.secrets.commonPath}/syncthing.yaml";
         owner = "beatlink";
     };
 
