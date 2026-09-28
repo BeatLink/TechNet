@@ -73,6 +73,7 @@ column, and their service definition lives in that host's own directory.
 | Syncthing on Odin      | 8384 | 10.100.100.2; syncthing-odin.heimdall.technet, syncthing.odin.technet |
 | Syncthing on Ragnarok  | 8384 | 10.100.100.6; syncthing-ragnarok.heimdall.technet, syncthing.ragnarok.technet |
 | BlockURL     | 9001 | blockurl.heimdall.technet |
+| ActivityWatch | 5600 | 127.0.0.1; activitywatch.heimdall.technet |
 
 ## Vigil Reachability Checks
 

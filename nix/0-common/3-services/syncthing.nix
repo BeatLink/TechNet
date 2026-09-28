@@ -70,6 +70,14 @@ let
     ];
 
     folders = {
+        # aw-sync's exports, one database per monitored host; Thor's arrives on Heimdall by rsync and travels on from there.
+        ActivityWatch = {
+            ignorePatterns = [
+                "(?d)*.db-journal"
+                "(?d)*.db-wal"
+                "(?d)*.db-shm"
+            ];
+        };
         Documents = { };
         Downloads = {
             ignorePatterns = [
@@ -119,6 +127,7 @@ let
         };
     };
     folderIds = {
+        ActivityWatch = "p5bxq-3be7k";
         Documents = "hz0k1-egjw9";
         Downloads = "unmbe-b2iab";
         eBooks = "kj0id-3vcea";
