@@ -15,6 +15,12 @@ let
     syncDir = "/Storage/Files/ActivityWatch"; # The Syncthing folder of that name, which Thor's exports also reach by rsync
     port = 5600;
     stateDir = "/var/lib/activitywatch";
+    domain = "activitywatch.heimdall.technet";
+
+    # The server refuses cross-origin requests, and the web UI's own requests carry the vhost's origin rather than loopback's
+    serverConfig = pkgs.writeTextDir "activitywatch/aw-server-rust/config.toml" ''
+        cors = ["https://${domain}"]
+    '';
 
     thorToHeimdall = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA2KzwzM/NIrIVXNuKr7tl94i3IUfA3uYnDACTBhXcSM activitywatch-thor-to-heimdall";
 
@@ -37,7 +43,9 @@ in
                 wantedBy = [ "multi-user.target" ];
                 after = [ "network.target" ];
                 unitConfig.RequiresMountsFor = [ stateDir ];
-                inherit environment;
+                environment = environment // {
+                    XDG_CONFIG_HOME = "${serverConfig}";
+                };
                 serviceConfig = {
                     User = "beatlink";
                     Group = "beatlink";
@@ -93,7 +101,7 @@ in
         # Reverse Proxy ##############################################################################################################################
         {
             nginx-vhosts.activitywatch = {
-                domain = "activitywatch.heimdall.technet";
+                inherit domain;
                 inherit port;
             };
 
