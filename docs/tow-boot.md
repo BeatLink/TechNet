@@ -81,8 +81,11 @@ and adds the panel: U-Boot's console and the boot menu render on the screen, the
 volume and power keys drive the menu, and the framebuffer reaches EFI as a GOP
 so systemd-boot is readable on the phone. `PDCURSES_PREFER_VIDCONSOLE` makes the
 menu size itself to the panel rather than to whatever the serial terminal
-reports. Holding volume up at power-on still enters USB mass storage, which is
-what Thor's install procedure depends on.
+reports. When the keyboard case answered at power-on the console is rotated a
+quarter turn clockwise to match how the case holds the phone, and the device
+tree handed to Linux gets `rotation = <90>` on the panel so the kernel's panel
+orientation, Plymouth and phoc start the same way. Holding volume up at power-on
+still enters USB mass storage, which is what Thor's install procedure depends on.
 
 **`pine64-rock64`** (Ragnarok) — RK3328 support: board file, RK3328 ATF, the SPI
 SD-layout install path, HDMI output with USB keyboard input and a

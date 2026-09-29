@@ -124,7 +124,7 @@ needs no temporary edit.
 Clevis can stay enabled through the install: a LUKS container carries its tang
 binding in its own header, so nothing is read at build time and nothing has to
 exist before the first boot. Until the binding is written the phone prompts on
-unl0kr and boots on the typed passphrase. Once Thor boots:
+the console and boots on the typed passphrase. Once Thor boots:
 
 ```sh
 sops secrets/5-phone/clevis.yaml          # zfs_passphrase, same value as thor_encryption_key
@@ -202,6 +202,12 @@ The keyboard case works in the menu too, as long as it is attached at power-on:
 the firmware powers the case from the phone's 5V boost (PD8), finds its MCU at
 0x15 on TWI2, and registers it only if it answers, so a phone out of its case
 boots as before. The arrow keys are on the Fn layer, the same as under Linux.
+
+With the case attached the firmware also turns its console a quarter turn
+clockwise, and adds `rotation = <90>` to the panel node of the device tree it
+hands the kernel. The DRM panel orientation that produces is what Plymouth, the
+console prompt and phoc follow, so a phone that boots docked comes up in
+landscape end to end; out of the case nothing is added and it boots portrait.
 
 One build carries all of it: the panel, the buttons, the Tow-Boot menu, and the
 LED and vibrator UX. That is possible because the fork keeps Tow-Boot's own
@@ -676,10 +682,12 @@ against Odin's tang server, which means it only unlocks where tang is reachable
 **and** Odin's session is unlocked — see [odin.md](odin.md). Away from home it
 falls back to prompting.
 
-The keyboard case types into unl0kr's prompt. udev does not tag it as a
-keyboard, because it has no minus or equals key, and unl0kr ignores the
-characters of anything it does not think is one; an initrd rule in
-[`keyboard.nix`](../nix/5-phone/1-system/keyboard.nix) sets the tag.
+The prompt is systemd's console agent with buffyboard drawing a touch keyboard
+under it ([`buffyboard.nix`](../nix/5-phone/1-system/buffyboard.nix)). It
+replaced unl0kr because buffybox 3.x removed unl0kr's software rotation, while
+buffyboard follows the console's rotation, so the prompt turns with the panel
+when the firmware has marked it sideways for the keyboard case. The case types
+straight into the console.
 
 Initrd networking comes from the USB gadget in
 [`10-initrd-usb-gadget.nix`](../nix/5-phone/1-system/10-initrd-usb-gadget.nix),

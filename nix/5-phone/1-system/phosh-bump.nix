@@ -78,8 +78,8 @@ in
                 src = phoshSrc final "phoc" "sha256-Xzb7C8ZadjS+fPPYlxoEMGcGkcs5yYzhGZs4Mk2lA70=";
             });
 
-            # Two patches, both in the startup timeout path, and they are
-            # related. See each patch header for the detail.
+            # Two patches in the startup timeout path, which are related, and
+            # one in the rotation manager. See each patch header for the detail.
             #
             # The first fixes a use-after-free that takes the whole session
             # down: on_startup_timeout reads through `state` after emitting
@@ -100,6 +100,7 @@ in
                 patches = (old.patches or [ ]) ++ [
                     ./patches/phosh-startup-timeout-uaf.patch
                     ./patches/phosh-startup-keep-pid.patch
+                    ./patches/phosh-lockscreen-keeps-orientation-lock.patch
                 ];
             });
 

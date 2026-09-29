@@ -15,20 +15,24 @@
                 enable = true;
                 user = "beatlink";
                 group = "beatlink";
-                phocConfig = {
-                    xwayland = "false";
-                    outputs = {
-                        DSI-1 = {
-                            scale = 1.5;
-                            mode = "720x1440";
-                        };
+                # Written out by hand because the module's output options have no drm-panel-orientation, which is what starts phoc sideways
+                # when the firmware saw the keyboard case at power-on and marked the panel so.
+                phocConfig = ''
+                    [core]
+                    xwayland = false
 
-                        HDMI-A-1 = {
-                            mode = "1920x1080";
-                            scale = 1;
-                        };
-                    };
-                };
+                    [output:DSI-1]
+                    mode = 720x1440
+                    scale = 1.5
+                    drm-panel-orientation = true
+
+                    [output:HDMI-A-1]
+                    mode = 1920x1080
+                    scale = 1
+
+                    [cursor]
+                    theme = default
+                '';
             };
         };
 

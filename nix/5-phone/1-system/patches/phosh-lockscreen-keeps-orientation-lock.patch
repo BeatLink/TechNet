@@ -1,0 +1,26 @@
+From: TechNet <local>
+Subject: [PATCH] rotation-manager: Keep a locked orientation on the lock screen
+
+On phones the lock screen is forced to portrait when the shell locks and
+the previous transform is put back on unlock. With the orientation lock
+on, whoever set it has said which way the panel goes -- on Thor that is
+the keyboard dock, which holds the phone in landscape -- so leave the
+transform alone in both directions. Without this the docked phone turns
+portrait every time it locks, and the unlock path, which cannot match
+the sensor while the orientation is locked, resets it a second time.
+
+--- a/src/rotation-manager.c
++++ b/src/rotation-manager.c
+@@ -258,6 +258,12 @@ fixup_lockscreen_orientation (PhoshRotationManager *self, gboolean lock)
+   if (!self->monitor)
+     return;
+ 
++  /* A locked orientation holds on the lock screen too */
++  if (self->orientation_locked) {
++    self->prelock_transform = -1;
++    return;
++  }
++
+   /* Only bother on phones */
+   if (!is_phone (self))
+     return;

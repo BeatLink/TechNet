@@ -49,7 +49,7 @@ runCommand "plymouth-theme-nixos-mobile" { nativeBuildInputs = [ imagemagick ]; 
     cat > $theme/nixos-mobile.plymouth <<EOF
     [Plymouth Theme]
     Name=nixos-mobile
-    Description=NixOS logo and progress bar, laid out for a 720x1440 portrait panel
+    Description=NixOS logo and progress bar, laid out for a 720x1440 panel in either orientation
     ModuleName=two-step
 
     [two-step]

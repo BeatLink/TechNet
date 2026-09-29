@@ -31,7 +31,7 @@
         ./webkit.nix
         ./launchapp.nix
         ./plymouth
-        ./unl0kr.nix
+        ./buffyboard.nix
         ./boot-leds.nix
         ./charging.nix
         ./arc-policy.nix

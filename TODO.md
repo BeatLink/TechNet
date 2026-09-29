@@ -61,17 +61,6 @@ repository check was clean. The repair fills the missing chunk with zeros, so th
 one archive stays damaged. Once the Vigil borg monitors are deployed, the "Ragnarok" backup monitor
 under Heimdall's Backups group shows the check result.
 
-## Fix keyboard-dock-rotation failing during a switch
-
-- [ ] Make `keyboard-dock-rotation` survive a moment with no logical monitor, instead of crashing
-- [ ] Confirm it is active again on Thor after the next deploy
-
-Thor's `keyboard-dock-rotation` user service
-([`dock-rotation.nix`](nix/5-phone/1-system/dock-rotation.nix)) failed at 2026-09-24 23:23:22,
-when home-manager started it during the nixos-upgrade switch. `monitor_state()` read an empty
-logical-monitor list from Mutter's display config and raised `IndexError` at `logical[0][2]`, so
-the panel no longer turns to landscape when the case docks until the service is started again.
-
 ## Move a database off Heimdall's data pool
 
 - [ ] Decide whether atticd's state directory or Vigil's `vigil.db` moves to `root-pool-Heimdall`
