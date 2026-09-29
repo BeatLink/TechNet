@@ -568,6 +568,8 @@ in
                                                 "--no-write-lock-file"
                                                 "-L"
                                             ];
+                                            auto_switch = true;
+                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
                                             agent = "ragnarok";
                                         }
                                     ];
@@ -969,6 +971,8 @@ in
                                                 "--no-write-lock-file"
                                                 "-L"
                                             ];
+                                            auto_switch = true;
+                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
                                             agent = "heimdall";
                                         }
                                     ];
@@ -2045,6 +2049,14 @@ in
                                                 "--no-write-lock-file"
                                                 "-L"
                                             ];
+                                            auto_switch = true;
+                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                            switch_wrapper = [
+                                                "systemd-inhibit"
+                                                "--what=idle:sleep"
+                                                "--mode=block"
+                                                "--why=Vigil is switching this system"
+                                            ]; # Idle suspend mid-switch kills the build; the polkit rule in vigil-agent.nix allows it
                                             agent = "odin";
                                         }
                                     ];
@@ -2694,6 +2706,15 @@ in
                                                 "--no-write-lock-file"
                                                 "-L"
                                             ];
+                                            auto_switch = true;
+                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                            switch_wrapper = [
+                                                "systemd-inhibit"
+                                                "--what=idle:sleep"
+                                                "--mode=block"
+                                                "--why=Vigil is switching this system"
+                                            ]; # Idle suspend mid-switch kills the build; the polkit rule in vigil-agent.nix allows it
+                                            post_switch = "systemctl is-active -q phosh.service || sudo -n /run/current-system/sw/bin/systemctl restart phosh.service"; # A switch that touches phosh stops it and leaves the screen dark
                                             agent = "thor";
                                         }
                                     ];

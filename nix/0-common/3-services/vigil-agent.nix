@@ -233,5 +233,19 @@ in
                 }
             ];
         }
+
+        # Sleep Inhibit ##############################################################################################################################
+        # Lets a Deployment monitor's switch_wrapper hold the host awake through a switch, which polkit otherwise refuses a system user.
+        {
+            security.polkit.extraConfig = ''
+                polkit.addRule(function (action, subject) {
+                    if ((action.id == "org.freedesktop.login1.inhibit-block-sleep" ||
+                         action.id == "org.freedesktop.login1.inhibit-block-idle") &&
+                        subject.user == "vigil-agent") {
+                        return polkit.Result.YES;
+                    }
+                });
+            '';
+        }
     ];
 }
