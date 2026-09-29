@@ -10,15 +10,15 @@
       "locked": {
         "lastModified": 1790393850,
         "narHash": "sha256-dCJ20syVQZxlaovqNSKdJTGd3mnMDrozwf6uF7qgBdk=",
-        "ref": "refs/heads/main",
+        "owner": "BeatLink",
+        "repo": "Anthem",
         "rev": "a6ada6b667f2dc1d691552a54f0216c80ae93da0",
-        "revCount": 28,
-        "type": "git",
-        "url": "ssh://git@github.com/BeatLink/Anthem"
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "ssh://git@github.com/BeatLink/Anthem"
+        "owner": "BeatLink",
+        "repo": "Anthem",
+        "type": "github"
       }
     },
     "app-separators": {

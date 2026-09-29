@@ -54,7 +54,7 @@
             inputs.nixpkgs.follows = "nixpkgs";
         };
         anthem = {
-            url = "git+ssh://git@github.com/BeatLink/Anthem";
+            url = "github:BeatLink/Anthem";
             inputs.nixpkgs.follows = "nixpkgs";
         };
         # Patches the Steam client so it loads CSS themes; Odin's Steam package comes from here
