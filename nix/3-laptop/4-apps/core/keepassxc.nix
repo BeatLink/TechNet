@@ -59,6 +59,35 @@
                 };
             };
 
+            # The menu entry shows the service's window; KeePassXC's own check for a running copy gives up after 200ms and starts a second one that fights it for the secrets bus name.
+            xdg.desktopEntries."org.keepassxc.KeePassXC" = {
+                name = "KeePassXC";
+                genericName = "Password Manager";
+                exec = "${
+                    pkgs.writeShellApplication {
+                        name = "keepassxc-show";
+                        runtimeInputs = [ pkgs.socat ];
+                        text = ''
+                            if [ $# -gt 0 ]; then exec ${pkgs.keepassxc}/bin/keepassxc "$@"; fi
+                            systemctl --user start keepassxc.service
+                            for _ in $(seq 50); do
+                                socat -u /dev/null UNIX-CONNECT:"''${TMPDIR:-/tmp}/keepassxc-$USER.socket" 2>/dev/null && exit 0
+                                sleep 0.2
+                            done
+                        '';
+                    }
+                }/bin/keepassxc-show %f";
+                icon = "keepassxc";
+                terminal = false;
+                categories = [
+                    "Utility"
+                    "Security"
+                    "Qt"
+                ];
+                mimeType = [ "application/x-keepass2" ];
+                settings.StartupWMClass = "keepassxc";
+            };
+
             # A unit rather than an autostart .desktop, so the agent socket it adds the database's keys to is ordered before it.
             systemd.user.services.keepassxc = {
                 Unit = {
