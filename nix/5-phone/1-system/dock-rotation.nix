@@ -48,9 +48,9 @@ let
 
                 def monitor_state():
                     serial, monitors, logical, _props = display_config.call_sync("GetCurrentState", None, Gio.DBusCallFlags.NONE, -1, None).unpack()
-                    # Empty for a moment while phosh brings its outputs up, which is where a run at session start used to crash.
+                    # Empty while the panel is blanked and for a moment while phosh brings its outputs up, which is where a session-start run used to crash.
                     if not monitors or not logical:
-                        raise NotReady
+                        raise NotReady("no logical monitor: the panel is off or still coming up")
                     connector = monitors[0][0][0]
                     mode = next(m[0] for m in monitors[0][1] if m[6].get("is-current"))
                     return serial, connector, mode, logical[0][2], logical[0][3]
