@@ -4,7 +4,7 @@
 #
 # Undocking puts back whatever lock and transform the session had before, which for an unlocked session means phosh re-runs its own orientation match.
 #
-# phosh refuses output changes while the screen is locked, so the service stays up and applies the pending change on the unlock signal.
+# phosh refuses output changes while the screen is locked and exposes no usable lock state, so the service stays up and retries until it lands.
 #
 { pkgs, ... }:
 let
@@ -32,17 +32,13 @@ let
                 PREF = os.environ.get("XDG_STATE_HOME", os.path.expanduser("~/.local/state")) + "/keyboard-dock.pref"
                 LANDSCAPE = ${toString landscape}
                 DCONF = "${pkgs.dconf}/bin/dconf"
-                RETRY_S = 2
+                RETRY_S = 5
 
                 session = Gio.bus_get_sync(Gio.BusType.SESSION)
                 display_config = Gio.DBusProxy.new_sync(
                     session, Gio.DBusProxyFlags.NONE, None,
                     "org.gnome.Mutter.DisplayConfig", "/org/gnome/Mutter/DisplayConfig",
                     "org.gnome.Mutter.DisplayConfig", None,
-                )
-                screensaver = Gio.DBusProxy.new_sync(
-                    session, Gio.DBusProxyFlags.NONE, None,
-                    "org.gnome.ScreenSaver", "/org/gnome/ScreenSaver", "org.gnome.ScreenSaver", None,
                 )
 
 
@@ -67,10 +63,6 @@ let
                     # Method 2 (persistent) is the only one phosh acts on: temporary configs are parsed and then dropped without being applied.
                     args = GLib.Variant("(uua(iiduba(ssa{sv}))a{sv})", (serial, 2, [(0, 0, scale, transform, True, [(connector, mode, {})])], {}))
                     display_config.call_sync("ApplyMonitorsConfig", args, Gio.DBusCallFlags.NONE, -1, None)
-
-
-                def screen_locked():
-                    return screensaver.call_sync("GetActive", None, Gio.DBusCallFlags.NONE, -1, None).unpack()[0]
 
 
                 def lock_read():
@@ -114,8 +106,6 @@ let
                         pref_write(lock, transform)
                     # Lock first: an unlocked session re-matches the accelerometer and turns the panel straight back.
                     lock_write("true")
-                    if screen_locked():
-                        return
                     set_transform(LANDSCAPE)
 
 
@@ -125,8 +115,6 @@ let
                         return
                     lock, transform = pref
                     if lock == "true":
-                        if screen_locked():
-                            return
                         set_transform(transform)
                     else:
                         # Releasing the lock is enough for the transform: phosh re-runs its own orientation match on unlock and on the next sensor change.
@@ -134,22 +122,26 @@ let
                     os.remove(PREF)
 
 
+                pending = {"retry": None, "reason": None}
+
+
                 def reconcile(*_):
+                    if pending["retry"]:
+                        GLib.source_remove(pending["retry"])
+                        pending["retry"] = None
                     try:
                         dock() if docked() else undock()
-                    except (NotReady, GLib.Error):
-                        GLib.timeout_add_seconds(RETRY_S, reconcile)
+                        pending["reason"] = None
+                    except (NotReady, GLib.Error) as e:
+                        if str(e) != pending["reason"]:
+                            pending["reason"] = str(e)
+                            print("waiting: " + str(e), flush=True)
+                        pending["retry"] = GLib.timeout_add_seconds(RETRY_S, reconcile)
                     return False
-
-
-                def on_screensaver_signal(_proxy, _sender, signal, _params):
-                    if signal == "ActiveChanged":
-                        reconcile()
 
 
                 flag_monitor = Gio.File.new_for_path(FLAG).monitor_file(Gio.FileMonitorFlags.NONE, None)
                 flag_monitor.connect("changed", reconcile)
-                screensaver.connect("g-signal", on_screensaver_signal)
                 reconcile()
                 GLib.MainLoop().run()
             '';
