@@ -28,7 +28,7 @@ Grouped by directory under [`3-services`](../nix/2-server/3-services):
 | --- | --- |
 | `networking` | nginx, nginx-vhosts, pi-hole, unbound |
 | `personal-info-and-files` | blockurl, radicale, syncthing, trilium |
-| `fun-and-media` | calibre-web-automated, freshrss, jackett, jackettio, qbittorrent, stremio, vlc |
+| `fun-and-media` | calibre-web-automated, comet, freshrss, jackett, jackettio, qbittorrent, stremio, vlc |
 | `home-automation` | esphome, frigate, home-assistant, lnxlink, mosquitto |
 | `monitoring` | homepage, vigil |
 | `technet` | attic, atuin, atuin-web |
@@ -157,6 +157,17 @@ login prompt and show the history to anyone who can reach the vhost; it is
 deliberately left unset.
 
 ## Stremio addon
+
+[Comet](../nix/2-server/3-services/fun-and-media/comet.nix) serves a Stremio
+addon at `https://comet.heimdall.technet/configure`. It searches the local
+Jackett when a title is opened and hands Stremio the torrents directly, so no
+debrid account is needed; the [streaming server](#stremio) plays them. Jackett's
+API key is read from its `ServerConfig.json` each time the service starts, and
+Comet's cache lives in a `comet` database on the Postgres instance atuin also
+uses.
+
+The package comes from a fork pinned in `flake.nix`, because the Nix packaging
+is not upstream yet. Repoint the input at `github:g0ldyy/comet` once it merges.
 
 [Jackettio](../nix/2-server/3-services/fun-and-media/jackettio.nix) serves a
 Stremio addon at `https://jackettio.heimdall.technet/configure`. It searches the

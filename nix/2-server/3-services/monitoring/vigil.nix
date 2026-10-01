@@ -887,6 +887,10 @@ in
                                                     url = "https://jackettio.heimdall.technet/manifest.json";
                                                 }
                                                 {
+                                                    name = "Comet";
+                                                    url = "https://comet.heimdall.technet/health";
+                                                }
+                                                {
                                                     name = "Stremio";
                                                     url = "https://stremio.heimdall.technet";
                                                 }
@@ -1460,6 +1464,21 @@ in
                                             type = "systemd_service";
                                             interval = "1m";
                                             service_name = "jackett.service";
+                                            agent = "heimdall";
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Comet";
+                                    id = "heimdall-svc-comet";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Service";
+                                            id = "heimdall-comet";
+                                            type = "systemd_service";
+                                            interval = "1m";
+                                            service_name = "comet.service";
                                             agent = "heimdall";
                                         }
                                     ];

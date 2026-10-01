@@ -188,6 +188,27 @@
         "type": "github"
       }
     },
+    "comet": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790850377,
+        "narHash": "sha256-BGnIT6lO4MrnTtm/RojYQegRjeqSpaw1/NvQ6lF/HEs=",
+        "owner": "BeatLink",
+        "repo": "comet",
+        "rev": "0837329d97c561d560293772fd5d264d672e59a3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BeatLink",
+        "ref": "nix-packaging",
+        "repo": "comet",
+        "type": "github"
+      }
+    },
     "context": {
       "inputs": {
         "nixpkgs": [
@@ -920,6 +941,7 @@
         "calibre-web-automated": "calibre-web-automated",
         "claude-chat-manager": "claude-chat-manager",
         "claude-code": "claude-code",
+        "comet": "comet",
         "context": "context",
         "disko": "disko",
         "gmusicbrowser": "gmusicbrowser",

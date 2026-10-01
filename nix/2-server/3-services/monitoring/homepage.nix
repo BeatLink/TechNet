@@ -424,6 +424,15 @@
                         };
                     }
                     {
+                        "Comet" = {
+                            icon = "stremio.png";
+                            href = "https://comet.heimdall.technet/configure";
+                            description = "Stremio Torrent Addon";
+                            siteMonitor = "https://comet.heimdall.technet/health";
+                            statusStyle = "dot";
+                        };
+                    }
+                    {
                         "Attic" = {
                             icon = "mdi-package-variant-closed";
                             href = "https://attic.heimdall.technet";
