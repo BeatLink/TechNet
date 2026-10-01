@@ -875,11 +875,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790817530,
-        "narHash": "sha256-RFNnh6N9IwIXNHv9dAzMfqkfMm9eEFkc8/s/e3uuBzI=",
+        "lastModified": 1790820960,
+        "narHash": "sha256-Q/UjgEGQb/nK2WfChS6tQ7FH9piBZMHPeLm2WG0iBDk=",
         "owner": "BeatLink",
         "repo": "playitslowly",
-        "rev": "b082081eedcf0640a4e8a4dbdda1f282bb7b4c55",
+        "rev": "c1b9daf5f91c7503d75ba83375419f69b4aba525",
         "type": "github"
       },
       "original": {
