@@ -211,6 +211,8 @@
             wants = [ "mosquitto.service" ];
             serviceConfig = {
                 EnvironmentFile = config.sops.secrets."frigate_env".path;
+                # The database lives outside the state directory, and the unit runs ProtectSystem=strict, so it needs write access granted; 0.18 also writes a backup there before each migration.
+                ReadWritePaths = [ "/Storage/Services/Frigate/data" ];
                 AmbientCapabilities = "CAP_PERFMON";
                 SupplementaryGroups = [
                     "video"
