@@ -80,7 +80,7 @@
             '';
             settings = {
                 # Frigate migrates any config older than this on start, and the store path is read-only, so a stale value here means it runs un-migrated.
-                version = "0.17-0";
+                version = "0.18-0";
                 database.path = "/Storage/Services/Frigate/data/frigate.db";
                 mqtt = {
                     enabled = true;
@@ -103,8 +103,6 @@
                 };
                 record = {
                     enabled = true;
-                    # The recordings tree is a shared Syncthing folder now, so Frigate reconciles its database with the disk rather than assuming it owns it alone.
-                    sync_recordings = true;
                     # Both default to 0 days, which is what keeps the tree to review clips only rather than a rolling continuous buffer.
                     continuous.days = 0;
                     motion.days = 0;
