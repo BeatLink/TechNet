@@ -174,8 +174,9 @@ is not upstream yet. Repoint the input at `github:g0ldyy/comet` once it merges.
 [`stremio.nix`](../nix/2-server/3-services/fun-and-media/stremio.nix) runs
 Stremio as two pieces on two vhosts:
 
-* `https://stremio.heimdall.technet` — the web UI, a static bundle taken from
-  the upstream release zip and served straight off disk by nginx.
+* `https://stremio.heimdall.technet` — the web UI, built from source by
+  [`stremio-web.nix`](../nix/2-server/3-services/fun-and-media/stremio-web.nix)
+  and served straight off disk by nginx.
 * `https://stremio-server.heimdall.technet` — the streaming server, the Node
   blob that turns a torrent into a playable HTTP stream and transcodes it with
   jellyfin-ffmpeg.
@@ -184,19 +185,36 @@ They need separate names. The UI resolves every call against the *root* of
 whatever streaming server URL it is given, so hanging the server off a path on
 the UI's own name would drop that path and 404.
 
-Both vhosts steer the UI onto the right streaming server, because its own
-default is `http://127.0.0.1:11470/` — the *viewer's* machine, which runs
-nothing, so an unaimed UI reports the server as unavailable. That default is
-compiled into the wasm core, not just the JavaScript, so the only way to point
-the UI elsewhere is to hand it `?streamingServerUrl=` in the query string:
+The UI is built from source for two reasons, both of which the published
+release zip gets wrong for this network.
+
+The first is the streaming server address. Upstream's default is
+`http://127.0.0.1:11470/` — the *viewer's* machine, which runs nothing, so an
+unaimed UI reports the server as unavailable. The build patches
+`src/common/CONSTANTS.js` so the UI's own default is this network's server.
+That alone is not enough: the profile the wasm core starts from still carries
+the loopback address, so the UI must still be handed
+`?streamingServerUrl=` in the query string. What the patch buys is that the
+URL it is handed now matches its own default, which `SearchParamsHandler`
+adopts silently instead of raising a confirmation modal. Two redirects deliver
+it:
 
 * the server's root redirects to the UI with the parameter filled in;
 * the UI's own root redirects to itself with the parameter when it is missing.
 
-The UI asks once to confirm a server it has not seen, then saves it, so the
-parameter is a no-op on later visits. nginx issues both redirects rather than
-the streaming server, which derives the protocol from its own socket and would
-therefore offer an `http://` URL the HTTPS UI refuses as mixed content.
+nginx issues both redirects rather than the streaming server, which derives
+the protocol from its own socket and would therefore offer an `http://` URL the
+HTTPS UI refuses as mixed content.
+
+The second reason is the service worker. Workbox precaches `index.html` and
+maps a bare `/` onto it, so a browser that had loaded the UI once was served
+that cached page forever and never saw either redirect — which is exactly how
+this failed in practice. The build sets `SERVICE_WORKER_DISABLED`, which makes
+`useServiceWorkerUpdater` return before registering anything, and the
+registration is then dropped from the bundle as dead code. Browsers that
+already registered the old worker are not fixed by that, so nginx also serves
+a replacement `service-worker.js` that unregisters itself and empties the
+caches.
 
 Three environment variables matter. `NO_CORS` is required — without it the
 server sends CORS headers only to `strem.io` origins and the UI gets none.

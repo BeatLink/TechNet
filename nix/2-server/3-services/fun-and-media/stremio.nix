@@ -19,10 +19,10 @@ let
     # nixpkgs already fetches the unfree server.js blob for stremio-service, so taking it from there keeps this on the version it tested.
     server = pkgs.stremio-service.server;
 
-    # The bundle registers a service worker that precaches index.html, and workbox maps a bare "/" onto it, so a browser that has once
-    # loaded the UI never asks nginx for the page again and never sees the redirect below. This replaces that worker with one that
-    # retires itself. It deliberately has no fetch handler, so it never serves anything, and it does not reload its clients -- the app
-    # re-registers it on every load, and forcing a navigation from activate would put the page in a reload loop.
+    # The build above registers no service worker, but a browser that loaded an earlier build still has the old one, which precaches
+    # index.html and answers a bare "/" from cache without ever asking nginx. Serving this in its place retires those registrations:
+    # the browser re-fetches the worker on navigation, and this one unregisters itself and empties the caches. It has no fetch handler,
+    # so it never serves anything in the meantime.
     serviceWorkerKillSwitch = pkgs.writeText "stremio-web-service-worker.js" ''
         self.addEventListener("install", function () {
             self.skipWaiting();
@@ -40,12 +40,12 @@ let
         });
     '';
 
-    # Upstream ships a built bundle with every release, which is why this is a fetch rather than a yarn build like the MQTT client.
-    web = pkgs.fetchzip {
-        name = "stremio-web-5.0.0-beta.40";
-        url = "https://github.com/Stremio/stremio-web/releases/download/v5.0.0-beta.40/stremio-web.zip";
-        hash = "sha256-EF7NHAwiMlxq1PA0aD1BsArxVfgG/ppxNsouoTaCdSE=";
+    # Built from source rather than taken from upstream's release zip, so the streaming server it defaults to is set here instead of
+    # being whatever address the published bundle was compiled with.
+    web = pkgs.callPackage ./stremio-web.nix {
+        defaultStreamingServer = "https://${serverDomain}/";
     };
+
 in
 {
     config = lib.mkMerge [
@@ -111,9 +111,10 @@ in
                 extraConfig = {
                     root = "${web}";
                     locations = {
-                        # The UI defaults to a streaming server on 127.0.0.1:11470 -- the viewer's own machine, which runs nothing, so a
-                        # bare visit reports the server as unavailable. That default is compiled into its wasm core, so the query string
-                        # is the only way to aim it here; the UI saves the answer, and the guard keeps the redirect from looping.
+                        # The address above is only the UI's own default; the profile the wasm core starts from still carries
+                        # 127.0.0.1:11470, the viewer's own machine, so an unaimed visit reports the server as unavailable. Handing the
+                        # UI the URL it already calls its default makes it adopt it silently rather than through a modal, and the guard
+                        # keeps the redirect from looping.
                         "= /" = {
                             index = "index.html";
                             tryFiles = "$uri $uri/ /index.html";
