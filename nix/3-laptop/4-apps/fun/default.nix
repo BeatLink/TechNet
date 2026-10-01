@@ -10,6 +10,7 @@
         ./newsflash.nix
         ./nitrox.nix
         ./picard.nix
+        ./playitslowly.nix
         ./quodlibet.nix
         ./steam.nix
         ./stremio.nix

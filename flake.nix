@@ -57,6 +57,10 @@
             url = "github:BeatLink/Anthem";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        playitslowly = {
+            url = "github:BeatLink/playitslowly";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
         # Patches the Steam client so it loads CSS themes; Odin's Steam package comes from here
         millennium = {
             url = "github:SteamClientHomebrew/Millennium?dir=packages/nix";

@@ -868,6 +868,26 @@
         "type": "github"
       }
     },
+    "playitslowly": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790817530,
+        "narHash": "sha256-RFNnh6N9IwIXNHv9dAzMfqkfMm9eEFkc8/s/e3uuBzI=",
+        "owner": "BeatLink",
+        "repo": "playitslowly",
+        "rev": "b082081eedcf0640a4e8a4dbdda1f282bb7b4c55",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BeatLink",
+        "repo": "playitslowly",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "anthem": "anthem",
@@ -898,6 +918,7 @@
         "nixtool": "nixtool",
         "pinephone-charge": "pinephone-charge",
         "pinephone-kernel": "pinephone-kernel",
+        "playitslowly": "playitslowly",
         "sops-nix": "sops-nix",
         "vigil": "vigil",
         "waypipe-desktop": "waypipe-desktop",
