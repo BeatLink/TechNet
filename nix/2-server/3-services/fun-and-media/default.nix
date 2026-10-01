@@ -1,6 +1,6 @@
 {
     imports = [
-        ./calibre-web-automated.nix
+        ./calibre-web-nextgen.nix
         ./comet.nix
         ./flaresolverr.nix
         ./freshrss.nix

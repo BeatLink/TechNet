@@ -91,8 +91,8 @@
         claude-code = {
             url = "github:sadjow/claude-code-nix";
         };
-        calibre-web-automated = {
-            url = "github:BeatLink/Calibre-Web-Automated/nix-packing-final";
+        calibre-web-nextgen = {
+            url = "github:BeatLink/Calibre-Web-NextGen/feat/nix-services";
             inputs.nixpkgs.follows = "nixpkgs";
         };
         lnxlink = {
@@ -167,7 +167,7 @@
             mobile-nixos,
             app-separators,
             claude-code,
-            calibre-web-automated,
+            calibre-web-nextgen,
             lnxlink,
             linux-sidebar,
             nemo-trilium,
@@ -203,7 +203,7 @@
                         arion.nixosModules.arion
                         blockurl.nixosModules.blockurl
                         gmusicbrowser.nixosModules.default
-                        calibre-web-automated.nixosModules.default
+                        calibre-web-nextgen.nixosModules.default
                         lnxlink.nixosModules.default
                         ./nix/0-common
                         ./nix/2-server

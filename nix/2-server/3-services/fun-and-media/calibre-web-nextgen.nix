@@ -1,12 +1,13 @@
-# Calibre Web Automated
+# Calibre-Web-NextGen
 #
 # Used for eBook viewing and management.
 #
-# https://github.com/crocodilestick/Calibre-Web-Automated
+# https://github.com/new-usemame/Calibre-Web-NextGen
 
 {
     config,
     inputs,
+    lib,
     pkgs,
     ...
 }:
@@ -25,14 +26,11 @@
         mode = "0440";
     };
 
-    services.calibre-web-automated = {
+    services.calibre-web-nextgen = {
         enable = true;
-        package = inputs.calibre-web-automated.packages.${pkgs.stdenv.hostPlatform.system}.default;
+        package = inputs.calibre-web-nextgen.packages.${pkgs.stdenv.hostPlatform.system}.default;
         port = 8083;
-        extraArgs = [
-            "-i"
-            "127.0.0.1"
-        ]; # Only nginx reaches it; exposed directly over WireGuard it holds half-open requests forever
+        listenAddress = "127.0.0.1"; # Only nginx reaches it; exposed directly over WireGuard it holds half-open requests forever
         configDir = "/Storage/Services/Calibre-Web/config";
         libraryDir = "/Storage/Files/eBooks/Calibre/Library";
         ingestDir = "/Storage/Services/Calibre-Web/Uploads";
@@ -40,11 +38,6 @@
 
     systemd.tmpfiles.settings."Calibre-Web" = {
         "/Storage/Services/Calibre-Web".d = {
-            user = "calibre-web";
-            group = "calibre-web";
-            mode = "0750";
-        };
-        "/Storage/Services/Calibre-Web/config".d = {
             user = "calibre-web";
             group = "calibre-web";
             mode = "0750";
@@ -63,7 +56,20 @@
 
     # The library sits inside the Syncthing-managed eBooks folder, shared with Syncthing through the ebooks group (see syncthing.nix).
     users.users.calibre-web.extraGroups = [ "ebooks" ];
-    systemd.services.calibre-web-automated.serviceConfig.UMask = "0002";
+    # The web app and the ingest watcher both write into the shared library.
+    systemd.services =
+        lib.genAttrs
+            [
+                "calibre-web-nextgen"
+                "calibre-web-nextgen-auto-zipper"
+                "calibre-web-nextgen-checksums"
+                "calibre-web-nextgen-ingest"
+                "calibre-web-nextgen-metadata"
+                "calibre-web-nextgen-preview-cache"
+            ]
+            (_: {
+                serviceConfig.UMask = "0002";
+            });
 
     nginx-vhosts.calibre-web = {
         domain = "calibre-web.heimdall.technet";

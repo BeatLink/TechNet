@@ -1103,7 +1103,7 @@ in
                                             id = "heimdall-calibre-web";
                                             type = "systemd_service";
                                             interval = "1m";
-                                            service_name = "calibre-web-automated.service";
+                                            service_name = "calibre-web-nextgen.service";
                                             agent = "heimdall";
                                         }
                                         {
@@ -1111,7 +1111,7 @@ in
                                             # monitor above, which only proves the
                                             # process is running. Requests /opds with
                                             # a dedicated "vigil" account (created once
-                                            # by hand — see calibre-web-automated.nix)
+                                            # by hand — see calibre-web-nextgen.nix)
                                             # and checks the body is a real feed, not
                                             # just any 200 — a known upstream issue
                                             # means even a broken metadata DB can
