@@ -28,7 +28,7 @@ Grouped by directory under [`3-services`](../nix/2-server/3-services):
 | --- | --- |
 | `networking` | nginx, nginx-vhosts, pi-hole, unbound |
 | `personal-info-and-files` | blockurl, radicale, syncthing, trilium |
-| `fun-and-media` | calibre-web-automated, comet, freshrss, jackett, jackettio, qbittorrent, stremio, vlc |
+| `fun-and-media` | calibre-web-automated, comet, freshrss, jackett, qbittorrent, stremio, vlc |
 | `home-automation` | esphome, frigate, home-assistant, lnxlink, mosquitto |
 | `monitoring` | homepage, vigil |
 | `technet` | attic, atuin, atuin-web |
@@ -168,17 +168,6 @@ uses.
 
 The package comes from a fork pinned in `flake.nix`, because the Nix packaging
 is not upstream yet. Repoint the input at `github:g0ldyy/comet` once it merges.
-
-[Jackettio](../nix/2-server/3-services/fun-and-media/jackettio.nix) serves a
-Stremio addon at `https://jackettio.heimdall.technet/configure`. It searches the
-local Jackett and resolves results through a debrid service; the debrid account
-is entered on the configure page and ends up in the addon URL Stremio installs,
-so Heimdall holds none. Jackett's API key is read from its `ServerConfig.json`
-each time the service starts.
-
-The package comes from a fork pinned in `flake.nix`, because the Nix packaging
-is not upstream yet. Repoint the input at `github:arvida42/jackettio` once it
-merges.
 
 ## Stremio
 

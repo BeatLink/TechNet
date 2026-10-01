@@ -50,7 +50,6 @@ column, and their service definition lives in that host's own directory.
 | Calibre Web  | 8083 | calibre-web.heimdall.technet |
 | FreshRSS     | —    | freshrss (php-fpm via nginx) |
 | Jackett      | 9117 | jackett.heimdall.technet |
-| Jackettio (Stremio addon) | 9118 | jackettio.heimdall.technet |
 | Comet (Stremio addon) | 9119 | 127.0.0.1; comet.heimdall.technet |
 | Stremio (Web UI)       | —    | stremio.heimdall.technet (static files) |
 | Stremio Server         | 11470 | stremio-server.heimdall.technet |
@@ -89,7 +88,6 @@ from Heimdall to confirm the web stack is reachable:
 * Pi-hole - https://pi-hole.heimdall.technet
 * Homepage - https://dashboard.heimdall.technet
 * Jackett - https://jackett.heimdall.technet
-* Jackettio - https://jackettio.heimdall.technet/manifest.json
 * Comet - https://comet.heimdall.technet/health
 * Stremio - https://stremio.heimdall.technet
 * Stremio Server - https://stremio-server.heimdall.technet/heartbeat

@@ -140,11 +140,6 @@
             url = "github:BeatLink/WaypipeDesktop";
             inputs.nixpkgs.follows = "nixpkgs";
         };
-        # Points at the fork's branch until the Nix packaging lands in arvida42/jackettio
-        jackettio = {
-            url = "github:BeatLink/jackettio/nix-packaging";
-            inputs.nixpkgs.follows = "nixpkgs";
-        };
         # Points at the fork's branch until the Nix packaging lands in g0ldyy/comet
         comet = {
             url = "github:BeatLink/comet/nix-packaging";

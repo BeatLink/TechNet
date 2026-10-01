@@ -883,10 +883,6 @@ in
                                                     url = "https://jackett.heimdall.technet";
                                                 }
                                                 {
-                                                    name = "Jackettio";
-                                                    url = "https://jackettio.heimdall.technet/manifest.json";
-                                                }
-                                                {
                                                     name = "Comet";
                                                     url = "https://comet.heimdall.technet/health";
                                                 }
