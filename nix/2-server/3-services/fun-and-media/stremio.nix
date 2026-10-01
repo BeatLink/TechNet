@@ -49,6 +49,9 @@ in
                     CASTING_DISABLED = "1";
                 };
 
+                # It shells out to `ps` while probing hardware transcoding at startup, and dies on the spawn if it is missing
+                path = [ pkgs.procps ];
+
                 serviceConfig = {
                     ExecStart = "${lib.getExe pkgs.nodejs} ${server}";
                     DynamicUser = true;
