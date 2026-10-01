@@ -19,6 +19,27 @@ let
     # nixpkgs already fetches the unfree server.js blob for stremio-service, so taking it from there keeps this on the version it tested.
     server = pkgs.stremio-service.server;
 
+    # The bundle registers a service worker that precaches index.html, and workbox maps a bare "/" onto it, so a browser that has once
+    # loaded the UI never asks nginx for the page again and never sees the redirect below. This replaces that worker with one that
+    # retires itself. It deliberately has no fetch handler, so it never serves anything, and it does not reload its clients -- the app
+    # re-registers it on every load, and forcing a navigation from activate would put the page in a reload loop.
+    serviceWorkerKillSwitch = pkgs.writeText "stremio-web-service-worker.js" ''
+        self.addEventListener("install", function () {
+            self.skipWaiting();
+        });
+
+        self.addEventListener("activate", function (event) {
+            event.waitUntil(
+                (async function () {
+                    await self.registration.unregister();
+                    for (const key of await caches.keys()) {
+                        await caches.delete(key);
+                    }
+                })()
+            );
+        });
+    '';
+
     # Upstream ships a built bundle with every release, which is why this is a fetch rather than a yarn build like the MQTT client.
     web = pkgs.fetchzip {
         name = "stremio-web-5.0.0-beta.40";
@@ -101,6 +122,11 @@ in
                                     return 307 https://${webDomain}/?streamingServerUrl=https%3A%2F%2F${serverDomain}%2F;
                                 }
                             '';
+                        };
+
+                        "= /service-worker.js" = {
+                            alias = "${serviceWorkerKillSwitch}";
+                            extraConfig = "add_header Cache-Control \"no-store\";";
                         };
 
                         # The UI is a single-page app, so an unknown path has to come back as index.html
