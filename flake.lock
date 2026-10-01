@@ -135,11 +135,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790831410,
-        "narHash": "sha256-29LLoxAlSNzanQxQpc57st9l9uqGvOP3IO/wQDV3byw=",
+        "lastModified": 1790849281,
+        "narHash": "sha256-5XJcEbxwZbFNaYlhwGGOSMb5p68mYOW0E5HCJittpME=",
         "owner": "BeatLink",
         "repo": "Calibre-Web-Automated",
-        "rev": "a8f4dc2d2c86b2deba9011158c1288b92dd49800",
+        "rev": "13a75fd6148bd1be6aba4d5b4ed914daa695182f",
         "type": "github"
       },
       "original": {
