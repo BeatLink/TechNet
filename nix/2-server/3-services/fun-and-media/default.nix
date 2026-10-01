@@ -4,6 +4,7 @@
         ./flaresolverr.nix
         ./freshrss.nix
         ./jackett.nix
+        ./jackettio.nix
         ./qbittorrent.nix
         ./vlc.nix
     ];

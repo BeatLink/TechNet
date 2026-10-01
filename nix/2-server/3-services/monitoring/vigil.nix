@@ -883,6 +883,10 @@ in
                                                     url = "https://jackett.heimdall.technet";
                                                 }
                                                 {
+                                                    name = "Jackettio";
+                                                    url = "https://jackettio.heimdall.technet/manifest.json";
+                                                }
+                                                {
                                                     name = "Atuin";
                                                     url = "https://atuin.heimdall.technet/healthz"; # No web UI to hit, so the health endpoint is the only 200 on this vhost
                                                 }

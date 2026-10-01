@@ -28,7 +28,7 @@ Grouped by directory under [`3-services`](../nix/2-server/3-services):
 | --- | --- |
 | `networking` | nginx, nginx-vhosts, pi-hole, unbound |
 | `personal-info-and-files` | blockurl, radicale, syncthing, trilium |
-| `fun-and-media` | calibre-web-automated, freshrss, jackett, qbittorrent, vlc |
+| `fun-and-media` | calibre-web-automated, freshrss, jackett, jackettio, qbittorrent, vlc |
 | `home-automation` | esphome, frigate, home-assistant, lnxlink, mosquitto |
 | `monitoring` | homepage, vigil |
 | `technet` | attic, atuin, atuin-web |
@@ -155,6 +155,19 @@ and never sent to the server.
 Setting `ATUIN_WEB_TOKEN` through the module's `environmentFile` would drop the
 login prompt and show the history to anyone who can reach the vhost; it is
 deliberately left unset.
+
+## Stremio addon
+
+[Jackettio](../nix/2-server/3-services/fun-and-media/jackettio.nix) serves a
+Stremio addon at `https://jackettio.heimdall.technet/configure`. It searches the
+local Jackett and resolves results through a debrid service; the debrid account
+is entered on the configure page and ends up in the addon URL Stremio installs,
+so Heimdall holds none. Jackett's API key is read from its `ServerConfig.json`
+each time the service starts.
+
+The package comes from a fork pinned in `flake.nix`, because the Nix packaging
+is not upstream yet. Repoint the input at `github:arvida42/jackettio` once it
+merges.
 
 ## Mirroring the PinePhone kernel
 

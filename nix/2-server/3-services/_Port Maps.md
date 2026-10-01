@@ -50,6 +50,7 @@ column, and their service definition lives in that host's own directory.
 | Calibre Web  | 8083 | calibre-web.heimdall.technet |
 | FreshRSS     | —    | freshrss (php-fpm via nginx) |
 | Jackett      | 9117 | jackett.heimdall.technet |
+| Jackettio (Stremio addon) | 9118 | jackettio.heimdall.technet |
 | qBittorrent (Web UI)   | 9050 | qbittorrent.heimdall.technet |
 | qBittorrent (torrents) | 6881 | TCP + UDP |
 | VLC (telnet)  | 4212 | 127.0.0.1; headless audio control for Home Assistant |
@@ -85,6 +86,7 @@ from Heimdall to confirm the web stack is reachable:
 * Pi-hole - https://pi-hole.heimdall.technet
 * Homepage - https://dashboard.heimdall.technet
 * Jackett - https://jackett.heimdall.technet
+* Jackettio - https://jackettio.heimdall.technet/manifest.json
 * Atuin - https://atuin.heimdall.technet/healthz
 * Atuin Web - https://atuin-web.heimdall.technet/healthz
 

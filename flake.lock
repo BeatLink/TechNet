@@ -536,6 +536,27 @@
         "type": "github"
       }
     },
+    "jackettio": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1790846871,
+        "narHash": "sha256-ooAYvwWMnzzMGa5e61CiSt4w8eEh+Gk1EyR/cdWuYoQ=",
+        "owner": "BeatLink",
+        "repo": "jackettio",
+        "rev": "ba277ddb95a7f3c1ba54a0dde123ebc43c1514f7",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BeatLink",
+        "ref": "nix-packaging",
+        "repo": "jackettio",
+        "type": "github"
+      }
+    },
     "linux-sidebar": {
       "inputs": {
         "nixpkgs": [
@@ -905,6 +926,7 @@
         "halon": "halon",
         "home-manager": "home-manager",
         "impermanence": "impermanence",
+        "jackettio": "jackettio",
         "linux-sidebar": "linux-sidebar",
         "lnxlink": "lnxlink",
         "millennium": "millennium",
