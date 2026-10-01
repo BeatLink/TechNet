@@ -23,11 +23,6 @@ nixtool run maintenance/rebuild --host Odin --action dry-activate
 graphical session survives. If the display manager *would* restart, expect to be
 logged out.
 
-## Fans
-
-The fans are driven by the EC and invisible to Linux; see
-[Odin — fans](odin-fans.md) for what was tried and why it stops there.
-
 ## Desktop environments
 
 [`18-desktop-environment/default.nix`](../nix/3-laptop/1-system/desktop-environment/default.nix)
