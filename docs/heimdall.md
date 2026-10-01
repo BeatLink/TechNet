@@ -184,11 +184,19 @@ They need separate names. The UI resolves every call against the *root* of
 whatever streaming server URL it is given, so hanging the server off a path on
 the UI's own name would drop that path and 404.
 
-Opening the server's root redirects to the UI with
-`?streamingServerUrl=` already filled in; the UI asks once to confirm the
-server, and remembers it after that. nginx issues that redirect rather than the
-server, which derives the protocol from its own socket and would therefore
-offer an `http://` URL the HTTPS UI refuses as mixed content.
+Both vhosts steer the UI onto the right streaming server, because its own
+default is `http://127.0.0.1:11470/` — the *viewer's* machine, which runs
+nothing, so an unaimed UI reports the server as unavailable. That default is
+compiled into the wasm core, not just the JavaScript, so the only way to point
+the UI elsewhere is to hand it `?streamingServerUrl=` in the query string:
+
+* the server's root redirects to the UI with the parameter filled in;
+* the UI's own root redirects to itself with the parameter when it is missing.
+
+The UI asks once to confirm a server it has not seen, then saves it, so the
+parameter is a no-op on later visits. nginx issues both redirects rather than
+the streaming server, which derives the protocol from its own socket and would
+therefore offer an `http://` URL the HTTPS UI refuses as mixed content.
 
 Three environment variables matter. `NO_CORS` is required — without it the
 server sends CORS headers only to `strem.io` origins and the UI gets none.

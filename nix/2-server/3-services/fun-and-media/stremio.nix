@@ -89,10 +89,25 @@ in
                 port = serverPort; # Unused -- this vhost serves files, and the option is mandatory
                 extraConfig = {
                     root = "${web}";
-                    # Replaces the generated proxy: the UI is a single-page app, so an unknown path has to come back as index.html
-                    locations."/" = {
-                        index = "index.html";
-                        tryFiles = "$uri $uri/ /index.html";
+                    locations = {
+                        # The UI defaults to a streaming server on 127.0.0.1:11470 -- the viewer's own machine, which runs nothing, so a
+                        # bare visit reports the server as unavailable. That default is compiled into its wasm core, so the query string
+                        # is the only way to aim it here; the UI saves the answer, and the guard keeps the redirect from looping.
+                        "= /" = {
+                            index = "index.html";
+                            tryFiles = "$uri $uri/ /index.html";
+                            extraConfig = ''
+                                if ($arg_streamingServerUrl = "") {
+                                    return 307 https://${webDomain}/?streamingServerUrl=https%3A%2F%2F${serverDomain}%2F;
+                                }
+                            '';
+                        };
+
+                        # The UI is a single-page app, so an unknown path has to come back as index.html
+                        "/" = {
+                            index = "index.html";
+                            tryFiles = "$uri $uri/ /index.html";
+                        };
                     };
                 };
             };
