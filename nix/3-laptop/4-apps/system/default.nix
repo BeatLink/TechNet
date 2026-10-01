@@ -4,7 +4,7 @@
         ./nemo
         ./context.nix
         ./dconf-editor.nix
-        ./mission-center.nix
+        ./mission-center
         ./variety.nix
         ./vorta.nix
         ./blueman
