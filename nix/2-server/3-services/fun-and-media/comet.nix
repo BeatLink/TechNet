@@ -30,6 +30,7 @@ in
                 settings = {
                     PUBLIC_BASE_URL = "https://comet.heimdall.technet";
                     SCRAPE_JACKETT = "live";
+                    SCRAPE_TORRENTIO = "live";
                     JACKETT_URL = "http://127.0.0.1:${toString config.services.jackett.port}";
                 };
             };

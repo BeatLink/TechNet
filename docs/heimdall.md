@@ -160,8 +160,8 @@ deliberately left unset.
 
 [Comet](../nix/2-server/3-services/fun-and-media/comet.nix) serves a Stremio
 addon at `https://comet.heimdall.technet/configure`. It searches the local
-Jackett when a title is opened and hands Stremio the torrents directly, so no
-debrid account is needed; the [streaming server](#stremio) plays them. Jackett's
+Jackett and the public Torrentio instance when a title is opened and hands
+Stremio the deduplicated torrents directly, so no debrid account is needed; the [streaming server](#stremio) plays them. Jackett's
 API key is read from its `ServerConfig.json` each time the service starts, and
 Comet's cache lives in a `comet` database on the Postgres instance atuin also
 uses.
