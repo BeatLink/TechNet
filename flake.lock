@@ -1074,11 +1074,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1790834499,
-        "narHash": "sha256-2PHi/dbfT3fz32atceJzqYEgB6HXTXrJfyctFU+LvL4=",
+        "lastModified": 1790842366,
+        "narHash": "sha256-YiYAKQJNrJwtV5kgQrDMbJYW2+Z9TMK9oYmppf7CVIg=",
         "owner": "BeatLink",
         "repo": "Vigil",
-        "rev": "1a8fc55158a963cad6aef3f15bca30a07ae4e3d3",
+        "rev": "e6a97a621030eca61f26266d75a14830468aad6a",
         "type": "github"
       },
       "original": {
