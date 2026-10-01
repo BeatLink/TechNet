@@ -196,8 +196,11 @@ server sends CORS headers only to `strem.io` origins and the UI gets none.
 from `api.strem.io`, since nginx owns TLS here. `CASTING_DISABLED` stops it
 scanning the network for receivers nothing will use.
 
-The cache lives at `/Storage/Services/Stremio` behind a `.nobackup` marker: it
-is re-downloadable stream data and would otherwise dominate the borg repo. The
+The cache lives at `/Storage/Services/Stremio-Server` behind a `.nobackup`
+marker: it is re-downloadable stream data and would otherwise dominate the borg
+repo. The directory is deliberately *not* `/Storage/Services/Stremio`, which
+belongs to `stremio-export` and holds the daily account exports — a `.nobackup`
+marker there would drop all of them from every backup. The
 persisted path is `/var/lib/private/stremio-server`, not
 `/var/lib/stremio-server`, for the same `DynamicUser` reason as Attic above.
 

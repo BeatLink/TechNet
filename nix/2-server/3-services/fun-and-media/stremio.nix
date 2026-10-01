@@ -60,17 +60,19 @@ in
                 };
             };
 
-            environment.persistence."/Storage/Services/Stremio".directories = [
+            # Not /Storage/Services/Stremio: that is stremio-export's directory of daily account exports, and the marker below would
+            # take the whole of it out of every backup
+            environment.persistence."/Storage/Services/Stremio-Server".directories = [
                 "/var/lib/private/stremio-server"
             ];
 
-            systemd.tmpfiles.settings."Stremio" = {
-                "/Storage/Services/Stremio".d = {
+            systemd.tmpfiles.settings."Stremio-Server" = {
+                "/Storage/Services/Stremio-Server".d = {
                     user = "root";
                     group = "root";
                     mode = "0755";
                 };
-                "/Storage/Services/Stremio/.nobackup".f = {
+                "/Storage/Services/Stremio-Server/.nobackup".f = {
                     user = "root";
                     group = "root";
                     mode = "0644";
