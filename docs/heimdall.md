@@ -28,7 +28,7 @@ Grouped by directory under [`3-services`](../nix/2-server/3-services):
 | --- | --- |
 | `networking` | nginx, nginx-vhosts, pi-hole, unbound |
 | `personal-info-and-files` | blockurl, radicale, syncthing, trilium |
-| `fun-and-media` | calibre-web-automated, freshrss, jackett, jackettio, qbittorrent, vlc |
+| `fun-and-media` | calibre-web-automated, freshrss, jackett, jackettio, qbittorrent, stremio, vlc |
 | `home-automation` | esphome, frigate, home-assistant, lnxlink, mosquitto |
 | `monitoring` | homepage, vigil |
 | `technet` | attic, atuin, atuin-web |
@@ -168,6 +168,42 @@ each time the service starts.
 The package comes from a fork pinned in `flake.nix`, because the Nix packaging
 is not upstream yet. Repoint the input at `github:arvida42/jackettio` once it
 merges.
+
+## Stremio
+
+[`stremio.nix`](../nix/2-server/3-services/fun-and-media/stremio.nix) runs
+Stremio as two pieces on two vhosts:
+
+* `https://stremio.heimdall.technet` — the web UI, a static bundle taken from
+  the upstream release zip and served straight off disk by nginx.
+* `https://stremio-server.heimdall.technet` — the streaming server, the Node
+  blob that turns a torrent into a playable HTTP stream and transcodes it with
+  jellyfin-ffmpeg.
+
+They need separate names. The UI resolves every call against the *root* of
+whatever streaming server URL it is given, so hanging the server off a path on
+the UI's own name would drop that path and 404.
+
+Opening the server's root redirects to the UI with
+`?streamingServerUrl=` already filled in; the UI asks once to confirm the
+server, and remembers it after that. nginx issues that redirect rather than the
+server, which derives the protocol from its own socket and would therefore
+offer an `http://` URL the HTTPS UI refuses as mixed content.
+
+Three environment variables matter. `NO_CORS` is required — without it the
+server sends CORS headers only to `strem.io` origins and the UI gets none.
+`NO_HTTPS_SERVER` stops it opening port 12470 and fetching a certificate for it
+from `api.strem.io`, since nginx owns TLS here. `CASTING_DISABLED` stops it
+scanning the network for receivers nothing will use.
+
+The cache lives at `/Storage/Services/Stremio` behind a `.nobackup` marker: it
+is re-downloadable stream data and would otherwise dominate the borg repo. The
+persisted path is `/var/lib/private/stremio-server`, not
+`/var/lib/stremio-server`, for the same `DynamicUser` reason as Attic above.
+
+The server's listening port is not configurable — `server.js` hardcodes 11470
+and only walks up to 11474 if that is taken. `PORT` is read by the bundled
+addon SDK and does not move this listener.
 
 ## Mirroring the PinePhone kernel
 

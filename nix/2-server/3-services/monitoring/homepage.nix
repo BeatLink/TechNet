@@ -288,6 +288,24 @@
                         };
                     }
                     {
+                        "Stremio" = {
+                            icon = "stremio.png";
+                            href = "https://stremio.heimdall.technet";
+                            description = "Media Streaming";
+                            siteMonitor = "https://stremio.heimdall.technet";
+                            statusStyle = "dot";
+                        };
+                    }
+                    {
+                        "Stremio Server" = {
+                            icon = "stremio.png";
+                            href = "https://stremio-server.heimdall.technet/heartbeat"; # Its root redirects to the web UI, so the heartbeat is the only plain 200 here
+                            description = "Stremio Streaming Backend";
+                            siteMonitor = "https://stremio-server.heimdall.technet/heartbeat";
+                            statusStyle = "dot";
+                        };
+                    }
+                    {
                         "Calibre" = {
                             icon = "calibre.png";
                             href = "https://calibre-web.heimdall.technet";

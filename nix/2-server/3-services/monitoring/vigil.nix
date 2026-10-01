@@ -887,6 +887,14 @@ in
                                                     url = "https://jackettio.heimdall.technet/manifest.json";
                                                 }
                                                 {
+                                                    name = "Stremio";
+                                                    url = "https://stremio.heimdall.technet";
+                                                }
+                                                {
+                                                    name = "Stremio Server";
+                                                    url = "https://stremio-server.heimdall.technet/heartbeat"; # Its root redirects to the web UI, so the heartbeat is the only plain 200 here
+                                                }
+                                                {
                                                     name = "Atuin";
                                                     url = "https://atuin.heimdall.technet/healthz"; # No web UI to hit, so the health endpoint is the only 200 on this vhost
                                                 }

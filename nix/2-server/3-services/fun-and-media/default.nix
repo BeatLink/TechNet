@@ -6,6 +6,7 @@
         ./jackett.nix
         ./jackettio.nix
         ./qbittorrent.nix
+        ./stremio.nix
         ./vlc.nix
     ];
 }
