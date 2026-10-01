@@ -14,10 +14,11 @@
 }:
 let
     # Definition overrides for indexers whose packaged definitions predate a domain or layout change; bump commit and hashes together, and drop an entry once a package upgrade catches up.
-    definitionCommit = "d396f7c43015b3541e12b011ec14a56f2cb24078";
+    definitionCommit = "d0d2362905ee577482697359a20a7932d52b9458";
     definitionOverrides = {
-        "52bt" = "0qz23aiv758n3pxbci92dp58qhkhizlfp3w23s9abw480mpqy5d0";
+        "52bt" = "191lyls18cyzs0hrbd1kfmxbfqys9596g1m0hgm8ljxm3yjq207x";
         "linuxtracker" = "11gi2r26xbkwkzpq42hqpi4nxcf0cmx3mmqca9kfppia2cjj7sli";
+        "torrent9" = "0s86qk42hcx5w6jcaz0x4yydifby7cdzmhc9yyhhi24f4i8ar4sk";
     };
     definitionFile =
         name: sha256:
