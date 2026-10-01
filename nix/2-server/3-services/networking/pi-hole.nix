@@ -24,6 +24,18 @@
 }:
 {
 
+    # pihole-ftl 6.7.1 does not compile under GCC 16: src/config/validator.c sets a variable it never reads, and the package builds with -Werror.
+    # Drop this once nixpkgs carries the fix: https://github.com/NixOS/nixpkgs/issues/568900
+    nixpkgs.overlays = [
+        (final: prev: {
+            pihole-ftl = prev.pihole-ftl.overrideAttrs (old: {
+                env = (old.env or { }) // {
+                    NIX_CFLAGS_COMPILE = "${old.env.NIX_CFLAGS_COMPILE or ""} -Wno-error=unused-but-set-variable";
+                };
+            });
+        })
+    ];
+
     # Read by FTL's dnsmasq as an addn-hosts file, wired up in the settings below.
     sops.templates."pihole-ddns-hosts" = {
         content = ''
