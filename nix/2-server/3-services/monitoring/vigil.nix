@@ -1034,26 +1034,6 @@ in
                                     ];
                                 }
                                 {
-                                    name = "Stremio Export";
-                                    id = "heimdall-svc-stremio-export";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            # Timer-driven oneshot (OnCalendar=daily). Monitored
-                                            # in oneshot mode so a job that silently stops firing
-                                            # is caught by max_age — a plain is-active check would
-                                            # read "inactive" as healthy between runs.
-                                            name = "Service";
-                                            id = "heimdall-stremio-export";
-                                            type = "systemd_service";
-                                            interval = "1h";
-                                            service_name = "stremio-export.service";
-                                            max_age = "2d";
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                                {
                                     name = "Mosquitto";
                                     id = "heimdall-svc-mosquitto";
                                     type = "group";

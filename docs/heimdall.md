@@ -32,7 +32,7 @@ Grouped by directory under [`3-services`](../nix/2-server/3-services):
 | `home-automation` | esphome, frigate, home-assistant, lnxlink, mosquitto |
 | `monitoring` | homepage, vigil |
 | `technet` | attic, atuin, atuin-web |
-| `backups` | borg, borgmatic, stremio-export |
+| `backups` | borg, borgmatic |
 
 Port assignments are tracked in
 [`_Port Maps.md`](../nix/2-server/3-services/_Port%20Maps.md). Services are
@@ -224,10 +224,7 @@ scanning the network for receivers nothing will use.
 
 The cache lives at `/Storage/Services/Stremio-Server` behind a `.nobackup`
 marker: it is re-downloadable stream data and would otherwise dominate the borg
-repo. The directory is deliberately *not* `/Storage/Services/Stremio`, which
-belongs to `stremio-export` and holds the daily account exports — a `.nobackup`
-marker there would drop all of them from every backup. The
-persisted path is `/var/lib/private/stremio-server`, not
+repo. The persisted path is `/var/lib/private/stremio-server`, not
 `/var/lib/stremio-server`, for the same `DynamicUser` reason as Attic above.
 
 The server's listening port is not configurable — `server.js` hardcodes 11470

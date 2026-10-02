@@ -81,8 +81,6 @@ in
                 };
             };
 
-            # Not /Storage/Services/Stremio: that is stremio-export's directory of daily account exports, and the marker below would
-            # take the whole of it out of every backup
             environment.persistence."/Storage/Services/Stremio-Server".directories = [
                 "/var/lib/private/stremio-server"
             ];

@@ -36,7 +36,6 @@
                         "pihole-gravity"
                         "qbittorrent"
                         "radicale"
-                        "stremio-export"
                         "syncthing"
                         "traccar"
                         "trilium-server"
