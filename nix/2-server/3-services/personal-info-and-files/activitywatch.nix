@@ -31,6 +31,18 @@ let
         XDG_DATA_HOME = "${stateDir}/data";
         XDG_CACHE_HOME = "${stateDir}/cache";
     };
+
+    # Imports exports the Android app nests under a device-name folder, through links so the pull's own empty database stays out of the share
+    pullNested = pkgs.writeShellScript "aw-sync-nested" ''
+        links="$RUNTIME_DIRECTORY/nested"
+        rm -rf "$links"
+        mkdir "$links"
+        for device in ${syncDir}/*/*/; do
+            [ -f "$device/test.db" ] && ln -s "''${device%/}" "$links/$(basename "$device")"
+        done
+        [ -z "$(ls -A "$links")" ] && exit 0
+        exec ${awServer}/bin/aw-sync --port ${toString port} --sync-dir "$links" sync-advanced --mode pull
+    '';
 in
 {
     config = lib.mkMerge [
@@ -80,7 +92,11 @@ in
                     Type = "oneshot";
                     User = "beatlink";
                     Group = "beatlink";
-                    ExecStart = "${awServer}/bin/aw-sync --port ${toString port} --sync-dir ${syncDir} sync-advanced --mode pull";
+                    RuntimeDirectory = "aw-sync";
+                    ExecStart = [
+                        "${awServer}/bin/aw-sync --port ${toString port} --sync-dir ${syncDir} sync-advanced --mode pull"
+                        pullNested
+                    ];
                 };
             };
 
