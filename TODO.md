@@ -123,3 +123,25 @@ On 2026-09-26 Syncthing on Heimdall was pulling 10.5 GB of the Projects folder, 
 a mirror with the SMR Toshiba MQ04, had I/O pressure near 90% with sync writes waiting 6-7s.
 `pihole-FTL` sat in uninterruptible disk wait, so Thor's Wi-Fi associated but never got a lease and
 Odin could not resolve names.
+
+## Find why Thor's ActivityWatch device id keeps changing
+
+- [ ] Find why Thor's aw-server lost its device id twice, and fix what loses it
+- [ ] Confirm the two deleted export folders do not come back from Thor's local sync folder
+
+Thor exported under three device ids: `0e0fb438` on 2026-09-26, `34e53ad4` on 2026-09-29 and
+`1ddd78b2` on 2026-10-03. Each one is a fresh aw-server identity, so the persisted
+`~/.local/share/activitywatch` (backed by `/Storage/Apps/TechNet/ActivityWatch`) is not surviving
+something, whether a reboot or a reinstall. The first two exports were deleted from
+`/Storage/Files/ActivityWatch` on 2026-10-04, after confirming Heimdall already holds their events.
+Thor's sync job copies everything in `~/.local/share/activitywatch/sync` to Heimdall, so if either
+folder is still there, it will reappear in the share.
+
+## Check why ThorX's ActivityWatch app stopped syncing
+
+- [ ] Open the app's Sync Settings on ThorX and check its last and next sync times
+- [ ] Confirm a newer export reaches `/Storage/Files/ActivityWatch` and shows up on Heimdall
+
+The Android app exported once: its folder in the share last changed on 2026-09-29, and its newest
+event is from 2026-09-30. It writes one level deeper than the other hosts, under a folder named
+after the device, which Heimdall's import reads through a second pull.
