@@ -4,6 +4,21 @@
 #
 { pkgs, ... }:
 {
+    # The vendored maplibre-native headers define mbgl::style::Style after std::reference_wrapper has already seen it incomplete, which GCC 16 now reports, and the build is -Werror.
+    nixpkgs.overlays = [
+        (_final: prev: {
+            libsForQt5 = prev.libsForQt5.overrideScope (
+                _qtFinal: qtPrev: {
+                    maplibre-native-qt = qtPrev.maplibre-native-qt.overrideAttrs (old: {
+                        env = old.env // {
+                            CXXFLAGS = old.env.CXXFLAGS + " -Wno-error=sfinae-incomplete";
+                        };
+                    });
+                }
+            );
+        })
+    ];
+
     # QtPositioning's geoclue2 plugin asks for a client under the application name, and geoclue hands no fix at all to an id its config does not list
     services.geoclue2.appConfig.pure-maps = {
         isAllowed = true;
