@@ -108,6 +108,14 @@ in
             enable = true;
             platformTheme = "qt5ct";
         };
+
+        # The qt module exports the variable to the login session only, and systemd --user gets it
+        # second-hand from the session's import-environment, which a user unit starting a Qt app can
+        # beat. systemd --user reads environment.d itself before it starts anything, so a unit like
+        # keepassxc.service is themed whichever of the two wins.
+        environment.etc."environment.d/50-qt-platform-theme.conf".text = ''
+            QT_QPA_PLATFORMTHEME=${config.qt.platformTheme}
+        '';
         home-manager.users.beatlink.themes.halon = {
             qt = true;
             qtScheme = "light";
