@@ -1019,10 +1019,7 @@ in
                                     type = "group";
                                     children = [
                                         {
-                                            # Timer-driven oneshot (OnCalendar=04:00). The failure
-                                            # this exists to catch: the x86 half aborts under set -e
-                                            # and the aarch64 hosts are never built, so a phone
-                                            # deploy rebuilds its whole closure under emulation.
+                                            # Timer-driven oneshot (OnCalendar=04:00). The failure this exists to catch: a host's closure holds a package that no longer builds, so a deploy to it rebuilds that package itself.
                                             name = "Service";
                                             id = "heimdall-cache-preseed";
                                             type = "systemd_service";

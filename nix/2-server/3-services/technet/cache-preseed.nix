@@ -34,17 +34,20 @@
                 path = [
                     config.nix.package
                     pkgs.git
+                    pkgs.openssh # A flake input fetched over git+ssh fails with "cannot run ssh" without it
                 ];
 
                 # x86_64 first: those two build natively and are what a morning deploy asks for, so a slow emulated host cannot delay them.
                 script = ''
-                    nix build --no-link --refresh --print-build-logs \
-                        github:BeatLink/TechNet#nixosConfigurations.Heimdall.config.system.build.toplevel \
-                        github:BeatLink/TechNet#nixosConfigurations.Odin.config.system.build.toplevel
+                    status=0
 
-                    nix build --no-link --refresh --print-build-logs \
-                        github:BeatLink/TechNet#nixosConfigurations.Thor.config.system.build.toplevel \
-                        github:BeatLink/TechNet#nixosConfigurations.Ragnarok.config.system.build.toplevel
+                    for host in Heimdall Odin Thor Ragnarok; do
+                        # One invocation per host, each continuing past its own broken packages, so a single bad leaf costs that host's remainder rather than every host's.
+                        nix build --no-link --refresh --keep-going --print-build-logs \
+                            "github:BeatLink/TechNet#nixosConfigurations.$host.config.system.build.toplevel" || status=1
+                    done
+
+                    exit $status
                 '';
 
                 serviceConfig = {
