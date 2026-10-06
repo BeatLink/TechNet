@@ -1250,9 +1250,8 @@ in
                                             # (unauthenticated-by-design, loopback-only)
                                             # API on port 5000 — no credential needed, no
                                             # change to the real auth setup on the
-                                            # regular port. The camera sits disarmed
-                                            # until Home Assistant arms it, which reads
-                                            # as disarmed rather than as a fault.
+                                            # regular port. A camera Home Assistant has
+                                            # disarmed reads as disarmed, not as a fault.
                                             name = "Cameras";
                                             id = "heimdall-frigate-cameras";
                                             type = "frigate";
