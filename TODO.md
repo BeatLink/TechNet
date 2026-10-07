@@ -145,3 +145,14 @@ folder is still there, it will reappear in the share.
 The Android app exported once: its folder in the share last changed on 2026-09-29, and its newest
 event is from 2026-09-30. It writes one level deeper than the other hosts, under a folder named
 after the device, which Heimdall's import reads through a second pull.
+
+## Stop aw-sync duplicating Thor's AFK events on Heimdall
+
+- [ ] Find why each pull re-adds copies of Thor's AFK events, and fix it or report it upstream
+- [ ] Until then, remove the copies now and then by grouping each `-synced-from-` bucket's events on
+      timestamp, duration and data and deleting all but one through aw-server's API
+
+On 2026-10-04 Heimdall's `aw-watcher-afk_Thor-synced-from-Thor` held 5,902 events of which 24 were
+distinct, and Odin's AFK and Firefox buckets held smaller numbers of exact copies. After every copy
+was deleted, two 5-minute pulls added 12 more to Thor's AFK bucket alone, from a single export that
+was not changing because Thor was offline. Every other bucket stayed clean over those two pulls.
