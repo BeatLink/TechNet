@@ -117,9 +117,6 @@ let
         .triggers).webhook_id;
     upgradeFlake = config.system.autoUpgrade.flake;
 
-    # Update Flake pushes with the token flake fetching already uses; the secret has the same path on every host.
-    pushTokenCommand = "sed -n 's/.*github\\.com=\\([^ ]*\\).*/\\1/p' ${config.sops.secrets.github_access_token_conf.path}";
-
     # Likewise for garbage collection: one common module sets nix.gc.options fleet-wide, so the button
     # on any host's monitor runs the same collection that host's weekly timer runs.
     gcArgs = builtins.filter (a: a != "") (lib.splitString " " config.nix.gc.options);
@@ -149,6 +146,12 @@ in
     sops.secrets.vigil_session_secret = {
         sopsFile = "${config.technet.secrets.path}/vigil.yaml";
         owner = "vigil";
+    };
+
+    # Write deploy key on the TechNet repo that Update Flake pushes the new lock with; the job runs as Heimdall's agent user.
+    sops.secrets.vigil_flake_deploy_key = {
+        sopsFile = "${config.technet.secrets.path}/vigil.yaml";
+        owner = "vigil-agent";
     };
 
     # Shared token each agent authenticates with, one file per agent. Heimdall
@@ -571,7 +574,6 @@ in
                                                 "--no-write-lock-file"
                                                 "-L"
                                             ];
-                                            push_token_command = pushTokenCommand;
                                             auto_switch = true;
                                             auto_switch_after = "30m"; # Long enough for a manual deploy to land first
                                             agent = "ragnarok";
@@ -987,7 +989,7 @@ in
                                                 "--no-write-lock-file"
                                                 "-L"
                                             ];
-                                            push_token_command = pushTokenCommand;
+                                            push_ssh_key = config.sops.secrets.vigil_flake_deploy_key.path; # Only this monitor pushes, so the key lives on Heimdall alone
                                             auto_switch = true;
                                             auto_switch_after = "30m"; # Long enough for a manual deploy to land first
                                             agent = "heimdall";
@@ -2057,7 +2059,6 @@ in
                                                 "--no-write-lock-file"
                                                 "-L"
                                             ];
-                                            push_token_command = pushTokenCommand;
                                             auto_switch = true;
                                             auto_switch_after = "30m"; # Long enough for a manual deploy to land first
                                             switch_wrapper = [
@@ -2715,7 +2716,6 @@ in
                                                 "--no-write-lock-file"
                                                 "-L"
                                             ];
-                                            push_token_command = pushTokenCommand;
                                             auto_switch = true;
                                             auto_switch_after = "30m"; # Long enough for a manual deploy to land first
                                             switch_wrapper = [
