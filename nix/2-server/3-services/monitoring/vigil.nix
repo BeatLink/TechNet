@@ -121,6 +121,18 @@ let
     # on any host's monitor runs the same collection that host's weekly timer runs.
     gcArgs = builtins.filter (a: a != "") (lib.splitString " " config.nix.gc.options);
 
+    # Every deployment monitor passes these: the lock belongs to the flake's own commit, and -L puts the build log in the job output.
+    rebuildArgs = [
+        "--no-write-lock-file"
+        "-L"
+    ];
+
+    # Heimdall builds the fleet into Attic and these hosts substitute from it, so a path the cache is missing would otherwise be compiled on the host itself.
+    substituteOnlyArgs = rebuildArgs ++ [
+        "--max-jobs"
+        "0"
+    ];
+
 in
 {
     imports = [ inputs.vigil.nixosModules.default ];
@@ -570,10 +582,7 @@ in
                                             configuration = "Ragnarok";
                                             eval_agent = "heimdall"; # Evaluating the flake on the 2GB Rock64 swaps it to death within seconds
                                             eval_interval = "6h";
-                                            rebuild_args = [
-                                                "--no-write-lock-file"
-                                                "-L"
-                                            ];
+                                            rebuild_args = substituteOnlyArgs;
                                             auto_switch = true;
                                             auto_switch_after = "30m"; # Long enough for a manual deploy to land first
                                             agent = "ragnarok";
@@ -985,10 +994,7 @@ in
                                             interval = "5m";
                                             flake = upgradeFlake;
                                             eval_interval = "6h";
-                                            rebuild_args = [
-                                                "--no-write-lock-file"
-                                                "-L"
-                                            ];
+                                            rebuild_args = rebuildArgs;
                                             push_ssh_key = config.sops.secrets.vigil_flake_deploy_key.path; # Only this monitor pushes, so the key lives on Heimdall alone
                                             auto_switch = true;
                                             auto_switch_after = "30m"; # Long enough for a manual deploy to land first
@@ -2055,10 +2061,7 @@ in
                                             interval = "5m";
                                             flake = upgradeFlake;
                                             eval_interval = "6h";
-                                            rebuild_args = [
-                                                "--no-write-lock-file"
-                                                "-L"
-                                            ];
+                                            rebuild_args = rebuildArgs;
                                             auto_switch = true;
                                             auto_switch_after = "30m"; # Long enough for a manual deploy to land first
                                             switch_wrapper = [
@@ -2712,10 +2715,7 @@ in
                                             configuration = "Thor";
                                             eval_agent = "heimdall"; # Evaluating the flake on four 1.15GHz A53s takes the phone out of service for the duration
                                             eval_interval = "6h";
-                                            rebuild_args = [
-                                                "--no-write-lock-file"
-                                                "-L"
-                                            ];
+                                            rebuild_args = substituteOnlyArgs;
                                             auto_switch = true;
                                             auto_switch_after = "30m"; # Long enough for a manual deploy to land first
                                             switch_wrapper = [
