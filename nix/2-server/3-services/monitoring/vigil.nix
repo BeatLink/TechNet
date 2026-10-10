@@ -545,49 +545,6 @@ in
                             ];
                         }
                         {
-                            name = "Running Services";
-                            # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
-                            id = "ragnarok-services";
-                            type = "group";
-                            children = [
-                                {
-                                    name = "NixOS Deployment";
-                                    id = "ragnarok-nixos-deployment";
-                                    type = "nixos_upgrade";
-                                    interval = "5m";
-                                    flake = upgradeFlake;
-                                    configuration = "Ragnarok";
-                                    eval_agent = "heimdall"; # Evaluating the flake on the 2GB Rock64 swaps it to death within seconds
-                                    eval_interval = "6h";
-                                    rebuild_args = deploy.forHost "Ragnarok";
-                                    build_agent = "heimdall"; # Built emulated on Heimdall, which is faster than the board natively
-                                    build_at = "04:45";
-                                    auto_switch = true;
-                                    auto_switch_after = "30m"; # Long enough for a manual deploy to land first
-                                    agent = "ragnarok";
-                                }
-                                {
-                                    name = "Garbage Collection";
-                                    id = "ragnarok-svc-nix-gc";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Collection";
-                                            id = "ragnarok-nix-gc";
-                                            type = "nix_gc";
-                                            interval = "1h";
-                                            max_age = "2w"; # nix.gc.dates is weekly, so this tolerates one missed run
-                                            warning = 90; # Same policy as this host's Filesystems monitor, so the store's fill alarms once rather than twice
-                                            threshold = 96;
-                                            max_generation_age = "30d"; # --delete-older-than 7d, run weekly, should never leave one this old
-                                            gc_args = gcArgs;
-                                            agent = "ragnarok";
-                                        }
-                                    ];
-                                }
-                            ];
-                        }
-                        {
                             name = "Security";
                             id = "ragnarok-security";
                             type = "group";
@@ -949,57 +906,6 @@ in
                                     resolver = "8.8.8.8";
                                     update_url_file = config.sops.secrets.ddns_sync_url.path;
                                     interval = "5m";
-                                }
-                                {
-                                    name = "NixOS Deployment";
-                                    id = "heimdall-nixos-deployment";
-                                    type = "nixos_upgrade";
-                                    interval = "5m";
-                                    flake = upgradeFlake;
-                                    eval_interval = "6h";
-                                    rebuild_args = deploy.forHost "Heimdall";
-                                    push_ssh_key = config.sops.secrets.vigil_flake_deploy_key.path; # Only this monitor pushes, so the key lives on Heimdall alone
-                                    update_at = "02:00"; # The only thing that bumps flake.lock
-                                    build_at = "04:00"; # The fleet's builds start after attic-gc at 03:00, whose database lock their uploads would contend with
-                                    auto_switch = true;
-                                    auto_switch_after = "30m"; # Long enough for a manual deploy to land first
-                                    agent = "heimdall";
-                                }
-                                {
-                                    name = "Garbage Collection";
-                                    id = "heimdall-svc-nix-gc";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Collection";
-                                            id = "heimdall-nix-gc";
-                                            type = "nix_gc";
-                                            interval = "1h";
-                                            max_age = "2w"; # nix.gc.dates is weekly, so this tolerates one missed run
-                                            warning = 90; # Same policy as this host's Filesystems monitor, so the store's fill alarms once rather than twice
-                                            threshold = 96;
-                                            max_generation_age = "30d"; # --delete-older-than 7d, run weekly, should never leave one this old
-                                            gc_args = gcArgs;
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Attic";
-                                    id = "heimdall-svc-attic";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            # Timer-driven oneshot (OnCalendar=03:00) that empties the cache's deletion backlog; Restart Service runs one now.
-                                            name = "Garbage Collection";
-                                            id = "heimdall-attic-gc";
-                                            type = "systemd_service";
-                                            interval = "1h";
-                                            service_name = "attic-gc.service";
-                                            max_age = "2d"; # Daily, so two days is the first missed run
-                                            agent = "heimdall";
-                                        }
-                                    ];
                                 }
                                 {
                                     name = "Mosquitto";
@@ -1609,6 +1515,150 @@ in
                             ];
                         }
                         {
+                            # Every host's Nix monitors in one place, since Heimdall updates, builds and caches for the fleet; each keeps its own agent and alerts per host.
+                            name = "NixOS Fleet";
+                            id = "heimdall-nixos-fleet";
+                            type = "group";
+                            children = [
+                                {
+                                    name = "Deployments";
+                                    id = "nixos-fleet-deployments";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Heimdall";
+                                            id = "heimdall-nixos-deployment";
+                                            type = "nixos_upgrade";
+                                            interval = "5m";
+                                            flake = upgradeFlake;
+                                            eval_interval = "6h";
+                                            rebuild_args = deploy.forHost "Heimdall";
+                                            push_ssh_key = config.sops.secrets.vigil_flake_deploy_key.path; # Only this monitor pushes, so the key lives on Heimdall alone
+                                            update_at = "02:00"; # The only thing that bumps flake.lock
+                                            build_at = "04:00"; # The fleet's builds start after attic-gc at 03:00, whose database lock their uploads would contend with
+                                            auto_switch = true;
+                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                            agent = "heimdall";
+                                        }
+                                        {
+                                            name = "Odin";
+                                            id = "odin-nixos-deployment";
+                                            type = "nixos_upgrade";
+                                            interval = "5m";
+                                            flake = upgradeFlake;
+                                            configuration = "Odin"; # Named, since the build runs on Heimdall
+                                            eval_interval = "6h";
+                                            rebuild_args = deploy.forHost "Odin";
+                                            build_agent = "heimdall"; # Warms the cache whether or not the laptop is awake
+                                            build_at = "04:15";
+                                            auto_switch = true;
+                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                            switch_wrapper = [
+                                                "systemd-inhibit"
+                                                "--what=idle:sleep"
+                                                "--mode=block"
+                                                "--why=Vigil is switching this system"
+                                            ]; # Idle suspend mid-switch kills the build; the polkit rule in vigil-agent.nix allows it
+                                            agent = "odin";
+                                        }
+                                        {
+                                            name = "Thor";
+                                            id = "thor-nixos-deployment";
+                                            type = "nixos_upgrade";
+                                            interval = "5m";
+                                            flake = upgradeFlake;
+                                            configuration = "Thor";
+                                            eval_agent = "heimdall"; # Evaluating the flake on four 1.15GHz A53s takes the phone out of service for the duration
+                                            eval_interval = "6h";
+                                            rebuild_args = deploy.forHost "Thor";
+                                            build_agent = "heimdall"; # The phone never compiles its own closure
+                                            build_at = "04:30";
+                                            auto_switch = true;
+                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                            switch_wrapper = [
+                                                "systemd-inhibit"
+                                                "--what=idle:sleep"
+                                                "--mode=block"
+                                                "--why=Vigil is switching this system"
+                                            ]; # Idle suspend mid-switch kills the build; the polkit rule in vigil-agent.nix allows it
+                                            post_switch = "systemctl is-active -q phosh.service || sudo -n /run/current-system/sw/bin/systemctl restart phosh.service"; # A switch that touches phosh stops it and leaves the screen dark
+                                            agent = "thor";
+                                        }
+                                        {
+                                            name = "Ragnarok";
+                                            id = "ragnarok-nixos-deployment";
+                                            type = "nixos_upgrade";
+                                            interval = "5m";
+                                            flake = upgradeFlake;
+                                            configuration = "Ragnarok";
+                                            eval_agent = "heimdall"; # Evaluating the flake on the 2GB Rock64 swaps it to death within seconds
+                                            eval_interval = "6h";
+                                            rebuild_args = deploy.forHost "Ragnarok";
+                                            build_agent = "heimdall"; # Built emulated on Heimdall, which is faster than the board natively
+                                            build_at = "04:45";
+                                            auto_switch = true;
+                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                            agent = "ragnarok";
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Garbage Collection";
+                                    id = "nixos-fleet-gc";
+                                    type = "group";
+                                    children =
+                                        map
+                                            (host: {
+                                                name = host;
+                                                id = "${lib.toLower host}-nix-gc";
+                                                type = "nix_gc";
+                                                interval = "1h";
+                                                max_age = "2w"; # nix.gc.dates is weekly, so this tolerates one missed run
+                                                warning = 90; # Same policy as each host's Filesystems monitor, so the store's fill alarms once rather than twice
+                                                threshold = 96;
+                                                max_generation_age = "30d"; # --delete-older-than 7d, run weekly, should never leave one this old
+                                                gc_args = gcArgs;
+                                                agent = lib.toLower host;
+                                            })
+                                            [
+                                                "Heimdall"
+                                                "Odin"
+                                                "Thor"
+                                                "Ragnarok"
+                                            ]
+                                        ++ [
+                                            {
+                                                # The 28GB eMMC pool's real failure mode, and the one no other host needs pinned: every generation lands in this dataset.
+                                                name = "Thor /nix";
+                                                id = "thor-disk-nix";
+                                                type = "disk_space";
+                                                path = "/nix";
+                                                threshold = 90;
+                                                interval = "10m";
+                                                agent = "thor";
+                                            }
+                                        ];
+                                }
+                                {
+                                    name = "Attic";
+                                    id = "heimdall-svc-attic";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            # Timer-driven oneshot (OnCalendar=03:00) that empties the cache's deletion backlog; Restart Service runs one now.
+                                            name = "Garbage Collection";
+                                            id = "heimdall-attic-gc";
+                                            type = "systemd_service";
+                                            interval = "1h";
+                                            service_name = "attic-gc.service";
+                                            max_age = "2d"; # Daily, so two days is the first missed run
+                                            agent = "heimdall";
+                                        }
+                                    ];
+                                }
+                            ];
+                        }
+                        {
                             # Heimdall (the server) owns /Storage/Services, backed up by borgmatic
                             # only — there is no Vorta on the server.
                             name = "Backups";
@@ -2003,46 +2053,6 @@ in
                             id = "odin-services";
                             type = "group";
                             children = [
-                                {
-                                    name = "NixOS Deployment";
-                                    id = "odin-nixos-deployment";
-                                    type = "nixos_upgrade";
-                                    interval = "5m";
-                                    flake = upgradeFlake;
-                                    configuration = "Odin"; # Named, since the build runs on Heimdall
-                                    eval_interval = "6h";
-                                    rebuild_args = deploy.forHost "Odin";
-                                    build_agent = "heimdall"; # Warms the cache whether or not the laptop is awake
-                                    build_at = "04:15";
-                                    auto_switch = true;
-                                    auto_switch_after = "30m"; # Long enough for a manual deploy to land first
-                                    switch_wrapper = [
-                                        "systemd-inhibit"
-                                        "--what=idle:sleep"
-                                        "--mode=block"
-                                        "--why=Vigil is switching this system"
-                                    ]; # Idle suspend mid-switch kills the build; the polkit rule in vigil-agent.nix allows it
-                                    agent = "odin";
-                                }
-                                {
-                                    name = "Garbage Collection";
-                                    id = "odin-svc-nix-gc";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Collection";
-                                            id = "odin-nix-gc";
-                                            type = "nix_gc";
-                                            interval = "1h";
-                                            max_age = "2w"; # nix.gc.dates is weekly, so this tolerates one missed run
-                                            warning = 90; # Same policy as this host's Filesystems monitor, so the store's fill alarms once rather than twice
-                                            threshold = 96;
-                                            max_generation_age = "30d"; # --delete-older-than 7d, run weekly, should never leave one this old
-                                            gc_args = gcArgs;
-                                            agent = "odin";
-                                        }
-                                    ];
-                                }
                                 {
                                     name = "Networking";
                                     id = "odin-svc-networking";
@@ -2559,16 +2569,6 @@ in
                                             agent = "thor";
                                         }
                                         {
-                                            # The 28GB eMMC pool's real failure mode, and the one no other host needs pinned: every generation lands in this dataset.
-                                            name = "/nix";
-                                            id = "thor-disk-nix";
-                                            type = "disk_space";
-                                            path = "/nix";
-                                            threshold = 90;
-                                            interval = "10m";
-                                            agent = "thor";
-                                        }
-                                        {
                                             name = "/Storage";
                                             id = "thor-disk-storage";
                                             type = "disk_space";
@@ -2642,48 +2642,6 @@ in
                             id = "thor-services";
                             type = "group";
                             children = [
-                                {
-                                    name = "NixOS Deployment";
-                                    id = "thor-nixos-deployment";
-                                    type = "nixos_upgrade";
-                                    interval = "5m";
-                                    flake = upgradeFlake;
-                                    configuration = "Thor";
-                                    eval_agent = "heimdall"; # Evaluating the flake on four 1.15GHz A53s takes the phone out of service for the duration
-                                    eval_interval = "6h";
-                                    rebuild_args = deploy.forHost "Thor";
-                                    build_agent = "heimdall"; # The phone never compiles its own closure
-                                    build_at = "04:30";
-                                    auto_switch = true;
-                                    auto_switch_after = "30m"; # Long enough for a manual deploy to land first
-                                    switch_wrapper = [
-                                        "systemd-inhibit"
-                                        "--what=idle:sleep"
-                                        "--mode=block"
-                                        "--why=Vigil is switching this system"
-                                    ]; # Idle suspend mid-switch kills the build; the polkit rule in vigil-agent.nix allows it
-                                    post_switch = "systemctl is-active -q phosh.service || sudo -n /run/current-system/sw/bin/systemctl restart phosh.service"; # A switch that touches phosh stops it and leaves the screen dark
-                                    agent = "thor";
-                                }
-                                {
-                                    name = "Garbage Collection";
-                                    id = "thor-svc-nix-gc";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Collection";
-                                            id = "thor-nix-gc";
-                                            type = "nix_gc";
-                                            interval = "1h";
-                                            max_age = "2w"; # nix.gc.dates is weekly, so this tolerates one missed run
-                                            warning = 90; # Same policy as this host's Filesystems monitor, so the store's fill alarms once rather than twice
-                                            threshold = 96;
-                                            max_generation_age = "30d"; # --delete-older-than 7d, run weekly, should never leave one this old
-                                            gc_args = gcArgs;
-                                            agent = "thor";
-                                        }
-                                    ];
-                                }
                                 {
                                     name = "Phosh";
                                     id = "thor-svc-phosh";
