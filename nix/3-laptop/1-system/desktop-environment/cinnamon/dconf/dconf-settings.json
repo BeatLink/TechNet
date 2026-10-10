@@ -4,5 +4,9 @@
         "/org/gnome/desktop/",
         "/org/gtk/settings/",
         "/org/x/apps/"
+    ],
+    "dconf_ignore": [
+        "/org/gtk/settings/file-chooser/window-position",
+        "/org/gtk/settings/file-chooser/window-size"
     ]
 }
