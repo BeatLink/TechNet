@@ -95,7 +95,7 @@ in
                 wantedBy = [ "timers.target" ];
 
                 timerConfig = {
-                    OnCalendar = "*-*-* 03:00:00"; # Clear of the 04:00 cache preseed, whose pushes would contend for the database
+                    OnCalendar = "*-*-* 03:00:00"; # Clear of Vigil's builds from 04:00, whose pushes would contend for the database
                     Persistent = true;
                     RandomizedDelaySec = "15m";
                 };

@@ -560,6 +560,8 @@ in
                                     eval_agent = "heimdall"; # Evaluating the flake on the 2GB Rock64 swaps it to death within seconds
                                     eval_interval = "6h";
                                     rebuild_args = deploy.forHost "Ragnarok";
+                                    build_agent = "heimdall"; # Built emulated on Heimdall, which is faster than the board natively
+                                    build_at = "04:45";
                                     auto_switch = true;
                                     auto_switch_after = "30m"; # Long enough for a manual deploy to land first
                                     agent = "ragnarok";
@@ -957,8 +959,8 @@ in
                                     eval_interval = "6h";
                                     rebuild_args = deploy.forHost "Heimdall";
                                     push_ssh_key = config.sops.secrets.vigil_flake_deploy_key.path; # Only this monitor pushes, so the key lives on Heimdall alone
-                                    update_at = "02:00"; # After the GitHub bot's 01:00 bump, clear of attic-gc at 03:00 and the preseed at 04:00
-                                    build_at = "02:30"; # Only Heimdall's monitor builds until the others drive their builds from Heimdall via switch_agent
+                                    update_at = "02:00"; # The only thing that bumps flake.lock
+                                    build_at = "04:00"; # The fleet's builds start after attic-gc at 03:00, whose database lock their uploads would contend with
                                     auto_switch = true;
                                     auto_switch_after = "30m"; # Long enough for a manual deploy to land first
                                     agent = "heimdall";
@@ -978,23 +980,6 @@ in
                                             threshold = 96;
                                             max_generation_age = "30d"; # --delete-older-than 7d, run weekly, should never leave one this old
                                             gc_args = gcArgs;
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Cache Preseed";
-                                    id = "heimdall-svc-cache-preseed";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            # Timer-driven oneshot (OnCalendar=04:00). The failure this exists to catch: a host's closure holds a package that no longer builds, so a deploy to it rebuilds that package itself.
-                                            name = "Service";
-                                            id = "heimdall-cache-preseed";
-                                            type = "systemd_service";
-                                            interval = "1h";
-                                            service_name = "cache-preseed.service";
-                                            max_age = "2d"; # Nightly, and a run may take most of a day, so two days is the first missed night
                                             agent = "heimdall";
                                         }
                                     ];
@@ -2024,8 +2009,11 @@ in
                                     type = "nixos_upgrade";
                                     interval = "5m";
                                     flake = upgradeFlake;
+                                    configuration = "Odin"; # Named, since the build runs on Heimdall
                                     eval_interval = "6h";
                                     rebuild_args = deploy.forHost "Odin";
+                                    build_agent = "heimdall"; # Warms the cache whether or not the laptop is awake
+                                    build_at = "04:15";
                                     auto_switch = true;
                                     auto_switch_after = "30m"; # Long enough for a manual deploy to land first
                                     switch_wrapper = [
@@ -2664,6 +2652,8 @@ in
                                     eval_agent = "heimdall"; # Evaluating the flake on four 1.15GHz A53s takes the phone out of service for the duration
                                     eval_interval = "6h";
                                     rebuild_args = deploy.forHost "Thor";
+                                    build_agent = "heimdall"; # The phone never compiles its own closure
+                                    build_at = "04:30";
                                     auto_switch = true;
                                     auto_switch_after = "30m"; # Long enough for a manual deploy to land first
                                     switch_wrapper = [

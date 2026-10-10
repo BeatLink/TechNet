@@ -14,7 +14,7 @@
     # The module installs only the atticadm wrapper; creating caches and reading keys is the client's job.
     environment.systemPackages = [ pkgs.attic-client ];
 
-    # Heimdall pushes too, so the nightly preseed build in cache-preseed.nix lands in the cache rather than only in Heimdall's own store.
+    # Heimdall pushes too, so Vigil's nightly builds of every host land in the cache rather than only in Heimdall's own store.
     technet.atticPush.enable = true;
 
     services.atticd = {

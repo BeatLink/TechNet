@@ -88,8 +88,8 @@ drop it again; keep the download under `/Storage` for the next rebuild. The
 command is `packettracer9`; the AppImage forces `xcb`, so it runs under Xwayland
 on Wayland sessions.
 
-Heimdall needs it too, because `cache-preseed.nix` builds Odin's closure there
-every night and aborts on the whole run when this one path cannot be fetched.
+Heimdall needs it too, because Vigil builds Odin's closure there every night,
+and that build fails when this one path cannot be fetched.
 Syncthing already carries `/Storage/Files/Downloads` to Heimdall, so the `.deb`
 is on both machines. Run the same two commands on each, against the local file:
 

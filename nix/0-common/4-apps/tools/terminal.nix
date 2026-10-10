@@ -123,7 +123,6 @@ in
         {
             home-manager.users.beatlink.programs.bash.shellAliases = {
                 nixos-purge = "sudo nix-collect-garbage -d";
-                nixos-upgrade = "sudo systemctl start nixos-upgrade & journalctl -fu nixos-upgrade";
                 nixos-upgrade-local = "cd /Storage/TechNet && sudo nixos-rebuild --flake .# switch";
 
                 heimdall = "ssh heimdall.technet";
