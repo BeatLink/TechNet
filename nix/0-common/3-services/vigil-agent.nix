@@ -34,10 +34,24 @@ let
     server = if host == "Heimdall" then "127.0.0.1" else "heimdall.technet";
 
     # One definition shared with Heimdall's monitors, so a sudo rule cannot drift from the command the monitor actually runs.
-    deployArgs = lib.concatStringsSep " " ((import ../1-system/software/deploy.nix).forHost config.networking.hostName);
+    deploy = import ../1-system/software/deploy.nix;
+    deployArgs = lib.concatStringsSep " " (deploy.forHost host);
 
     # sudoers ends a command spec at an unescaped colon.
     upgradeFlake = builtins.replaceStrings [ ":" ] [ "\\:" ] config.technet.flake;
+
+    # Vigil's nixos_upgrade switch on a host that deploys itself; a host Heimdall deploys is switched through remote-deploy.nix instead.
+    localSwitchRules = [
+        {
+            command = "/run/current-system/sw/bin/nixos-rebuild switch --flake ${upgradeFlake} ${deployArgs} --refresh";
+            options = [ "NOPASSWD" ];
+        }
+        # The same action from a monitor that names its configuration; sudoers reads a bare # as a comment
+        {
+            command = "/run/current-system/sw/bin/nixos-rebuild switch --flake ${upgradeFlake}\\#${host} ${deployArgs} --refresh";
+            options = [ "NOPASSWD" ];
+        }
+    ];
 
     # The scheduled collection's own arguments, so Vigil's button runs the run the timer runs.
     gcOptions = config.nix.gc.options;
@@ -216,39 +230,16 @@ in
                                 "SETENV"
                             ];
                         }
-                        # Vigil's nixos_upgrade action, matched argv for argv, so both sides read deploy.nix rather than repeating the arguments
-                        {
-                            command = "/run/current-system/sw/bin/nixos-rebuild switch --flake ${upgradeFlake} ${deployArgs} --refresh";
-                            options = [ "NOPASSWD" ];
-                        }
-                        # The same action from a monitor that names its configuration; sudoers reads a bare # as a comment
-                        {
-                            command = "/run/current-system/sw/bin/nixos-rebuild switch --flake ${upgradeFlake}\\#${config.networking.hostName} ${deployArgs} --refresh";
-                            options = [ "NOPASSWD" ];
-                        }
                         # Vigil's nix_gc action, matched the same way: it collects with nix.gc.options and nothing else
                         {
                             command = "/run/current-system/sw/bin/nix-collect-garbage ${gcOptions}";
                             options = [ "NOPASSWD" ];
                         }
                     ]
-                    ++ borgDeadlineRules;
+                    ++ borgDeadlineRules
+                    ++ lib.optionals (!(deploy.remote ? ${host})) localSwitchRules;
                 }
             ];
-        }
-
-        # Sleep Inhibit ##############################################################################################################################
-        # Lets a Deployment monitor's switch_wrapper hold the host awake through a switch, which polkit otherwise refuses a system user.
-        {
-            security.polkit.extraConfig = ''
-                polkit.addRule(function (action, subject) {
-                    if ((action.id == "org.freedesktop.login1.inhibit-block-sleep" ||
-                         action.id == "org.freedesktop.login1.inhibit-block-idle") &&
-                        subject.user == "vigil-agent") {
-                        return polkit.Result.YES;
-                    }
-                });
-            '';
         }
     ];
 }

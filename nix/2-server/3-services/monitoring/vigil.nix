@@ -1549,16 +1549,12 @@ in
                                             configuration = "Odin"; # Named, since the build runs on Heimdall
                                             eval_interval = "6h";
                                             rebuild_args = deploy.forHost "Odin";
-                                            build_agent = "heimdall"; # Warms the cache whether or not the laptop is awake
+                                            switch_agent = "heimdall"; # Heimdall builds, deploys and warms the cache whether or not the laptop is awake
+                                            target_host = deploy.remote.Odin.target;
+                                            rebuild_bin = "technet-remote-switch"; # Holds the target awake through the switch; see remote-deploy.nix
                                             build_at = "04:15";
                                             auto_switch = true;
                                             auto_switch_after = "30m"; # Long enough for a manual deploy to land first
-                                            switch_wrapper = [
-                                                "systemd-inhibit"
-                                                "--what=idle:sleep"
-                                                "--mode=block"
-                                                "--why=Vigil is switching this system"
-                                            ]; # Idle suspend mid-switch kills the build; the polkit rule in vigil-agent.nix allows it
                                             agent = "odin";
                                         }
                                         {
@@ -1571,17 +1567,12 @@ in
                                             eval_agent = "heimdall"; # Evaluating the flake on four 1.15GHz A53s takes the phone out of service for the duration
                                             eval_interval = "6h";
                                             rebuild_args = deploy.forHost "Thor";
-                                            build_agent = "heimdall"; # The phone never compiles its own closure
+                                            switch_agent = "heimdall"; # The phone never compiles its own closure
+                                            target_host = deploy.remote.Thor.target;
+                                            rebuild_bin = "technet-remote-switch"; # Holds the phone awake and restarts phosh after; see remote-deploy.nix
                                             build_at = "04:30";
                                             auto_switch = true;
                                             auto_switch_after = "30m"; # Long enough for a manual deploy to land first
-                                            switch_wrapper = [
-                                                "systemd-inhibit"
-                                                "--what=idle:sleep"
-                                                "--mode=block"
-                                                "--why=Vigil is switching this system"
-                                            ]; # Idle suspend mid-switch kills the build; the polkit rule in vigil-agent.nix allows it
-                                            post_switch = "systemctl is-active -q phosh.service || sudo -n /run/current-system/sw/bin/systemctl restart phosh.service"; # A switch that touches phosh stops it and leaves the screen dark
                                             agent = "thor";
                                         }
                                         {
@@ -1594,7 +1585,9 @@ in
                                             eval_agent = "heimdall"; # Evaluating the flake on the 2GB Rock64 swaps it to death within seconds
                                             eval_interval = "6h";
                                             rebuild_args = deploy.forHost "Ragnarok";
-                                            build_agent = "heimdall"; # Built emulated on Heimdall, which is faster than the board natively
+                                            switch_agent = "heimdall"; # Built emulated on Heimdall, which is faster than the board natively
+                                            target_host = deploy.remote.Ragnarok.target;
+                                            rebuild_bin = "technet-remote-switch";
                                             build_at = "04:45";
                                             auto_switch = true;
                                             auto_switch_after = "30m"; # Long enough for a manual deploy to land first
