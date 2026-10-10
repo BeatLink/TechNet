@@ -998,6 +998,23 @@ in
                                     ];
                                 }
                                 {
+                                    name = "Attic";
+                                    id = "heimdall-svc-attic";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            # Timer-driven oneshot (OnCalendar=03:00) that empties the cache's deletion backlog; Restart Service runs one now.
+                                            name = "Garbage Collection";
+                                            id = "heimdall-attic-gc";
+                                            type = "systemd_service";
+                                            interval = "1h";
+                                            service_name = "attic-gc.service";
+                                            max_age = "2d"; # Daily, so two days is the first missed run
+                                            agent = "heimdall";
+                                        }
+                                    ];
+                                }
+                                {
                                     name = "Mosquitto";
                                     id = "heimdall-svc-mosquitto";
                                     type = "group";

@@ -26,7 +26,7 @@
             api-endpoint = "https://attic.heimdall.technet/";
             compression.type = "zstd";
             garbage-collection = {
-                interval = "12 hours";
+                interval = "0s"; # Off: attic-gc.nix drains the backlog daily, since this one stops at 500 chunks and locks the database at every start
 
                 # Without this the collector runs and deletes nothing, because the default is to keep every path forever. What the fleet actually
                 # substitutes is the last couple of nixpkgs bumps, and the pool this sits on has no redundancy left to spare.

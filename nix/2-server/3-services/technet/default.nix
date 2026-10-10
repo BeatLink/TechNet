@@ -1,6 +1,7 @@
 {
     imports = [
         ./attic.nix
+        ./attic-gc.nix
         ./atuin-web.nix
         ./atuin.nix
         ./cache-preseed.nix
