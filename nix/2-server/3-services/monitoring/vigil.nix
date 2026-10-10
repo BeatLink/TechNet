@@ -957,6 +957,8 @@ in
                                     eval_interval = "6h";
                                     rebuild_args = deploy.forHost "Heimdall";
                                     push_ssh_key = config.sops.secrets.vigil_flake_deploy_key.path; # Only this monitor pushes, so the key lives on Heimdall alone
+                                    update_at = "02:00"; # After the GitHub bot's 01:00 bump, clear of attic-gc at 03:00 and the preseed at 04:00
+                                    build_at = "02:30"; # Only Heimdall's monitor builds until the others drive their builds from Heimdall via switch_agent
                                     auto_switch = true;
                                     auto_switch_after = "30m"; # Long enough for a manual deploy to land first
                                     agent = "heimdall";
