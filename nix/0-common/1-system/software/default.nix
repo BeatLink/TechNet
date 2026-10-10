@@ -6,7 +6,7 @@
         ./attic-cache.nix
         ./attic-push.nix
         ./command-not-found.nix
-        ./auto-upgrade.nix
+        ./flake-source.nix
         ./garbage-collection.nix
         ./packages.nix
     ];

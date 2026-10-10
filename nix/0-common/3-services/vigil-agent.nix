@@ -33,8 +33,11 @@ let
     # Heimdall runs the Vigil server itself, so its own agent takes the short way round rather than depending on WireGuard being up to monitor itself.
     server = if host == "Heimdall" then "127.0.0.1" else "heimdall.technet";
 
+    # One definition shared with Heimdall's monitors, so a sudo rule cannot drift from the command the monitor actually runs.
+    deployArgs = lib.concatStringsSep " " ((import ../1-system/software/deploy.nix).forHost config.networking.hostName);
+
     # sudoers ends a command spec at an unescaped colon.
-    upgradeFlake = builtins.replaceStrings [ ":" ] [ "\\:" ] config.system.autoUpgrade.flake;
+    upgradeFlake = builtins.replaceStrings [ ":" ] [ "\\:" ] config.technet.flake;
 
     # The scheduled collection's own arguments, so Vigil's button runs the run the timer runs.
     gcOptions = config.nix.gc.options;
@@ -213,14 +216,14 @@ in
                                 "SETENV"
                             ];
                         }
-                        # Vigil's nixos_upgrade action, matched argv for argv: changing the monitor's rebuild_args stops sudo matching this
+                        # Vigil's nixos_upgrade action, matched argv for argv, so both sides read deploy.nix rather than repeating the arguments
                         {
-                            command = "/run/current-system/sw/bin/nixos-rebuild switch --flake ${upgradeFlake} --no-write-lock-file -L --refresh";
+                            command = "/run/current-system/sw/bin/nixos-rebuild switch --flake ${upgradeFlake} ${deployArgs} --refresh";
                             options = [ "NOPASSWD" ];
                         }
                         # The same action from a monitor that names its configuration; sudoers reads a bare # as a comment
                         {
-                            command = "/run/current-system/sw/bin/nixos-rebuild switch --flake ${upgradeFlake}\\#${config.networking.hostName} --no-write-lock-file -L --refresh";
+                            command = "/run/current-system/sw/bin/nixos-rebuild switch --flake ${upgradeFlake}\\#${config.networking.hostName} ${deployArgs} --refresh";
                             options = [ "NOPASSWD" ];
                         }
                         # Vigil's nix_gc action, matched the same way: it collects with nix.gc.options and nothing else

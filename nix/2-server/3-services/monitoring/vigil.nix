@@ -115,23 +115,14 @@ let
     haAlertWebhook =
         (builtins.head (builtins.head config.services.home-assistant.config.homeassistant.packages.vigil_alerts.automation)
         .triggers).webhook_id;
-    upgradeFlake = config.system.autoUpgrade.flake;
+    upgradeFlake = config.technet.flake;
 
     # Likewise for garbage collection: one common module sets nix.gc.options fleet-wide, so the button
     # on any host's monitor runs the same collection that host's weekly timer runs.
     gcArgs = builtins.filter (a: a != "") (lib.splitString " " config.nix.gc.options);
 
-    # Every deployment monitor passes these: the lock belongs to the flake's own commit, and -L puts the build log in the job output.
-    rebuildArgs = [
-        "--no-write-lock-file"
-        "-L"
-    ];
-
-    # Heimdall builds the fleet into Attic and these hosts substitute from it, so a path the cache is missing would otherwise be compiled on the host itself.
-    substituteOnlyArgs = rebuildArgs ++ [
-        "--max-jobs"
-        "0"
-    ];
+    # The same definition every host's sudo rules read, so a monitor's arguments always match what sudoers permits.
+    deploy = import ../../../0-common/1-system/software/deploy.nix;
 
 in
 {
@@ -560,34 +551,18 @@ in
                             type = "group";
                             children = [
                                 {
-                                    name = "NixOS Upgrade";
-                                    id = "ragnarok-svc-nixos-upgrade";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "ragnarok-nixos-upgrade";
-                                            type = "systemd_service";
-                                            interval = "1h";
-                                            service_name = "nixos-upgrade.service";
-                                            max_age = "1w";
-                                            agent = "ragnarok";
-                                        }
-                                        {
-                                            name = "Deployment";
-                                            id = "ragnarok-nixos-deployment";
-                                            type = "nixos_upgrade";
-                                            interval = "5m";
-                                            flake = upgradeFlake;
-                                            configuration = "Ragnarok";
-                                            eval_agent = "heimdall"; # Evaluating the flake on the 2GB Rock64 swaps it to death within seconds
-                                            eval_interval = "6h";
-                                            rebuild_args = substituteOnlyArgs;
-                                            auto_switch = true;
-                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
-                                            agent = "ragnarok";
-                                        }
-                                    ];
+                                    name = "NixOS Deployment";
+                                    id = "ragnarok-nixos-deployment";
+                                    type = "nixos_upgrade";
+                                    interval = "5m";
+                                    flake = upgradeFlake;
+                                    configuration = "Ragnarok";
+                                    eval_agent = "heimdall"; # Evaluating the flake on the 2GB Rock64 swaps it to death within seconds
+                                    eval_interval = "6h";
+                                    rebuild_args = deploy.forHost "Ragnarok";
+                                    auto_switch = true;
+                                    auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                    agent = "ragnarok";
                                 }
                                 {
                                     name = "Garbage Collection";
@@ -974,33 +949,17 @@ in
                                     interval = "5m";
                                 }
                                 {
-                                    name = "NixOS Upgrade";
-                                    id = "heimdall-svc-nixos-upgrade";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "heimdall-nixos-upgrade";
-                                            type = "systemd_service";
-                                            interval = "1h";
-                                            service_name = "nixos-upgrade.service";
-                                            max_age = "1w";
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            name = "Deployment";
-                                            id = "heimdall-nixos-deployment";
-                                            type = "nixos_upgrade";
-                                            interval = "5m";
-                                            flake = upgradeFlake;
-                                            eval_interval = "6h";
-                                            rebuild_args = rebuildArgs;
-                                            push_ssh_key = config.sops.secrets.vigil_flake_deploy_key.path; # Only this monitor pushes, so the key lives on Heimdall alone
-                                            auto_switch = true;
-                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
-                                            agent = "heimdall";
-                                        }
-                                    ];
+                                    name = "NixOS Deployment";
+                                    id = "heimdall-nixos-deployment";
+                                    type = "nixos_upgrade";
+                                    interval = "5m";
+                                    flake = upgradeFlake;
+                                    eval_interval = "6h";
+                                    rebuild_args = deploy.forHost "Heimdall";
+                                    push_ssh_key = config.sops.secrets.vigil_flake_deploy_key.path; # Only this monitor pushes, so the key lives on Heimdall alone
+                                    auto_switch = true;
+                                    auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                    agent = "heimdall";
                                 }
                                 {
                                     name = "Garbage Collection";
@@ -2041,38 +2000,22 @@ in
                             type = "group";
                             children = [
                                 {
-                                    name = "NixOS Upgrade";
-                                    id = "odin-svc-nixos-upgrade";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "odin-nixos-upgrade";
-                                            type = "systemd_service";
-                                            interval = "1h";
-                                            service_name = "nixos-upgrade.service";
-                                            max_age = "1w";
-                                            agent = "odin";
-                                        }
-                                        {
-                                            name = "Deployment";
-                                            id = "odin-nixos-deployment";
-                                            type = "nixos_upgrade";
-                                            interval = "5m";
-                                            flake = upgradeFlake;
-                                            eval_interval = "6h";
-                                            rebuild_args = rebuildArgs;
-                                            auto_switch = true;
-                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
-                                            switch_wrapper = [
-                                                "systemd-inhibit"
-                                                "--what=idle:sleep"
-                                                "--mode=block"
-                                                "--why=Vigil is switching this system"
-                                            ]; # Idle suspend mid-switch kills the build; the polkit rule in vigil-agent.nix allows it
-                                            agent = "odin";
-                                        }
-                                    ];
+                                    name = "NixOS Deployment";
+                                    id = "odin-nixos-deployment";
+                                    type = "nixos_upgrade";
+                                    interval = "5m";
+                                    flake = upgradeFlake;
+                                    eval_interval = "6h";
+                                    rebuild_args = deploy.forHost "Odin";
+                                    auto_switch = true;
+                                    auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                    switch_wrapper = [
+                                        "systemd-inhibit"
+                                        "--what=idle:sleep"
+                                        "--mode=block"
+                                        "--why=Vigil is switching this system"
+                                    ]; # Idle suspend mid-switch kills the build; the polkit rule in vigil-agent.nix allows it
+                                    agent = "odin";
                                 }
                                 {
                                     name = "Garbage Collection";
@@ -2471,7 +2414,7 @@ in
                                             agent = "thor";
                                         }
                                         {
-                                            # Deliberately thresholdless: four 1.15GHz A53s spend the weekly nixos-upgrade above capacity, so a load alarm here would only ever be noise.
+                                            # Deliberately thresholdless: four 1.15GHz A53s reach capacity under any sustained work, and the phone's own load says nothing about whether it is healthy.
                                             name = "Load";
                                             id = "thor-load";
                                             type = "load";
@@ -2489,7 +2432,7 @@ in
                                             agent = "thor";
                                         }
                                         {
-                                            # 35k/s measured on the SD card during a nixos-upgrade, so the fleet's 20k/50k would sit warning through every one of them.
+                                            # The SD card sustains about 35k/s under load, so the fleet's 20k/50k would sit warning whenever the phone is busy at all.
                                             name = "Interrupts";
                                             id = "thor-interrupts";
                                             type = "interrupts";
@@ -2693,41 +2636,25 @@ in
                             type = "group";
                             children = [
                                 {
-                                    name = "NixOS Upgrade";
-                                    id = "thor-svc-nixos-upgrade";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "thor-nixos-upgrade";
-                                            type = "systemd_service";
-                                            interval = "1h";
-                                            service_name = "nixos-upgrade.service";
-                                            max_age = "1w";
-                                            agent = "thor";
-                                        }
-                                        {
-                                            name = "Deployment";
-                                            id = "thor-nixos-deployment";
-                                            type = "nixos_upgrade";
-                                            interval = "5m";
-                                            flake = upgradeFlake;
-                                            configuration = "Thor";
-                                            eval_agent = "heimdall"; # Evaluating the flake on four 1.15GHz A53s takes the phone out of service for the duration
-                                            eval_interval = "6h";
-                                            rebuild_args = substituteOnlyArgs;
-                                            auto_switch = true;
-                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
-                                            switch_wrapper = [
-                                                "systemd-inhibit"
-                                                "--what=idle:sleep"
-                                                "--mode=block"
-                                                "--why=Vigil is switching this system"
-                                            ]; # Idle suspend mid-switch kills the build; the polkit rule in vigil-agent.nix allows it
-                                            post_switch = "systemctl is-active -q phosh.service || sudo -n /run/current-system/sw/bin/systemctl restart phosh.service"; # A switch that touches phosh stops it and leaves the screen dark
-                                            agent = "thor";
-                                        }
-                                    ];
+                                    name = "NixOS Deployment";
+                                    id = "thor-nixos-deployment";
+                                    type = "nixos_upgrade";
+                                    interval = "5m";
+                                    flake = upgradeFlake;
+                                    configuration = "Thor";
+                                    eval_agent = "heimdall"; # Evaluating the flake on four 1.15GHz A53s takes the phone out of service for the duration
+                                    eval_interval = "6h";
+                                    rebuild_args = deploy.forHost "Thor";
+                                    auto_switch = true;
+                                    auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                    switch_wrapper = [
+                                        "systemd-inhibit"
+                                        "--what=idle:sleep"
+                                        "--mode=block"
+                                        "--why=Vigil is switching this system"
+                                    ]; # Idle suspend mid-switch kills the build; the polkit rule in vigil-agent.nix allows it
+                                    post_switch = "systemctl is-active -q phosh.service || sudo -n /run/current-system/sw/bin/systemctl restart phosh.service"; # A switch that touches phosh stops it and leaves the screen dark
+                                    agent = "thor";
                                 }
                                 {
                                     name = "Garbage Collection";
