@@ -16,6 +16,7 @@ rec {
     remoteArgs = baseArgs ++ [
         "--sudo"
         "--use-substitutes"
+        "--no-reexec" # The re-exec runs the target's own nixos-rebuild, which for an aarch64 host is emulated and cannot sandbox a build
     ];
 
     # Hosts Heimdall deploys over SSH, with each one's login, its key's public half and anything to run on it once the switch is done.
