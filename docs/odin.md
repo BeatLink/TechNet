@@ -99,9 +99,10 @@ sudo nix-store --add-root /nix/var/nix/gcroots/packet-tracer-deb --indirect --re
 ```
 
 The root is what makes it survive, since nothing in the built system refers to
-it. `attic push technet <path>` would let a third host substitute the path
-instead, but a 400MB upload times out against atticd, whose database shares the
-SMR-backed data pool with Vigil's own; it is not worth waiting on.
+it. The deb and the package's closure are also in the Attic cache, so a host
+that has never had the file substitutes them instead. The cache drops a path no
+host has fetched for 30 days, so push them again with `attic push technet
+<path>` if that happens or after a version bump.
 
 ## Tang server
 

@@ -47,7 +47,19 @@
         };
     };
 
-    # atticd keeps both its SQLite database and its chunk store in the state directory, so the whole thing lives on the data pool.
+    # Its own hand-made dataset with sync=disabled, because atticd syncs every commit on one SQLite connection and SMR syncs fail large uploads.
+    fileSystems."/Storage/Services/Attic" = {
+        device = "data-pool-Heimdall/storage/attic";
+        fsType = "zfs";
+        options = [
+            "zfsutil"
+            "nofail"
+        ];
+        neededForBoot = true;
+    };
+    systemd.services.atticd.unitConfig.RequiresMountsFor = [ "/Storage/Services/Attic" ];
+
+    # atticd keeps both its SQLite database and its chunk store in the state directory, so the whole thing lives in that dataset.
     #
     # The private path, not /var/lib/atticd: the service runs DynamicUser, so systemd owns /var/lib/private/atticd and leaves the shorter path as a
     # symlink to it. Binding over /var/lib/atticd instead makes systemd try to migrate a mountpoint and fail the unit with EBUSY.
