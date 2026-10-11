@@ -4,6 +4,7 @@
         ./filesystem.nix
         ./directories.nix
         ./performance.nix
+        ./memory-guard.nix
         ./sops.nix
         ./boot-splash.nix
         ./software.nix
