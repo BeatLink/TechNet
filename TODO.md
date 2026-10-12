@@ -134,3 +134,13 @@ On 2026-10-04 Heimdall's `aw-watcher-afk_Thor-synced-from-Thor` held 5,902 event
 distinct, and Odin's AFK and Firefox buckets held smaller numbers of exact copies. After every copy
 was deleted, two 5-minute pulls added 12 more to Thor's AFK bucket alone, from a single export that
 was not changing because Thor was offline. Every other bucket stayed clean over those two pulls.
+
+## Give NeoTime Companion the computer's location on Odin
+
+- [ ] Check whether Cinnamon runs a GeoClue agent for beatlink; GeoClue never answers `GetClient`
+      for a user without one
+- [ ] Enable `services.geoclue2` on Odin with an `appConfig` entry for `neotime-companion`, the
+      DesktopId the app asks under
+- [ ] Turn on "Use where this computer is" in the app's Settings and confirm it finds a place
+
+Until then the app's weather uses a place chosen by name, which already works.
