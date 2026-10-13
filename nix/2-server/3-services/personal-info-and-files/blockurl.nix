@@ -18,6 +18,18 @@
         databaseFile = "blockurl.db";
     };
 
+    # Its own hand-made dataset with sync=disabled, because every block is a SQLite commit and SMR syncs hold it past the busy timeout.
+    fileSystems."/Storage/Services/BlockURL" = {
+        device = "data-pool-Heimdall/storage/blockurl";
+        fsType = "zfs";
+        options = [
+            "zfsutil"
+            "nofail"
+        ];
+        neededForBoot = true;
+    };
+    systemd.services.blockurl.unitConfig.RequiresMountsFor = [ "/Storage/Services/BlockURL" ];
+
     systemd.tmpfiles.settings."BlockURL"."/Storage/Services/BlockURL" = {
         d = {
             user = "blockurl";
