@@ -717,11 +717,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1791945603,
-        "narHash": "sha256-uXUL7nDb70hZVpQxI3q2wSMgxp04y2njLzIWlseEptk=",
+        "lastModified": 1791948486,
+        "narHash": "sha256-Y9Zk4Cg6qffN7LME2EPyi3DSKGy1m2qLd1lOjyH18xs=",
         "owner": "BeatLink",
         "repo": "NeoTime",
-        "rev": "16f7a92b3987127e80dc2e03fda1dcb12b22efa4",
+        "rev": "0e6e4555da319f0990852d3f3fae6991c6e0bd11",
         "type": "github"
       },
       "original": {
