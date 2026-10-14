@@ -5,6 +5,7 @@
         ./claude-desktop.nix
         ./gh.nix
         ./lm-studio.nix
+        ./neotime-appbuilder.nix
         ./nodejs.nix
         ./sqlitebrowser.nix
         ./vscodium.nix

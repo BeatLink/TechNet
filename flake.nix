@@ -65,6 +65,10 @@
             url = "github:BeatLink/neotime-companion";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        neotime = {
+            url = "github:BeatLink/NeoTime";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
         # Patches the Steam client so it loads CSS themes; Odin's Steam package comes from here
         millennium = {
             url = "github:SteamClientHomebrew/Millennium?dir=packages/nix";

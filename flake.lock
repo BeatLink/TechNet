@@ -416,6 +416,24 @@
         "type": "github"
       }
     },
+    "flake-utils_8": {
+      "inputs": {
+        "systems": "systems_9"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
     "gmusicbrowser": {
       "inputs": {
         "nixpkgs": [
@@ -556,6 +574,24 @@
         "type": "github"
       }
     },
+    "infinisim": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1783329093,
+        "narHash": "sha256-TbH9tgHDQMTDftr1J65vkxCBGRRc4Z0KOA7qZ7F8LQk=",
+        "ref": "refs/heads/main",
+        "rev": "18fb562ce1a4e96be3a48fa5552d03f27c93f3ac",
+        "revCount": 208,
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/InfiniTimeOrg/InfiniSim"
+      },
+      "original": {
+        "submodules": true,
+        "type": "git",
+        "url": "https://github.com/InfiniTimeOrg/InfiniSim"
+      }
+    },
     "linux-sidebar": {
       "inputs": {
         "nixpkgs": [
@@ -689,9 +725,32 @@
         "type": "github"
       }
     },
-    "neotime-companion": {
+    "neotime": {
       "inputs": {
         "flake-utils": "flake-utils_4",
+        "infinisim": "infinisim",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay"
+      },
+      "locked": {
+        "lastModified": 1791945603,
+        "narHash": "sha256-uXUL7nDb70hZVpQxI3q2wSMgxp04y2njLzIWlseEptk=",
+        "owner": "BeatLink",
+        "repo": "NeoTime",
+        "rev": "16f7a92b3987127e80dc2e03fda1dcb12b22efa4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BeatLink",
+        "repo": "NeoTime",
+        "type": "github"
+      }
+    },
+    "neotime-companion": {
+      "inputs": {
+        "flake-utils": "flake-utils_5",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -867,7 +926,7 @@
     },
     "nixtool": {
       "inputs": {
-        "flake-utils": "flake-utils_5",
+        "flake-utils": "flake-utils_6",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -888,7 +947,7 @@
     },
     "pinephone-charge": {
       "inputs": {
-        "flake-utils": "flake-utils_6",
+        "flake-utils": "flake-utils_7",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -969,6 +1028,7 @@
         "millennium": "millennium",
         "mobile-nixos": "mobile-nixos",
         "nemo-trilium": "nemo-trilium",
+        "neotime": "neotime",
         "neotime-companion": "neotime-companion",
         "nix-index-database": "nix-index-database",
         "nix-vscode-extensions": "nix-vscode-extensions",
@@ -984,6 +1044,27 @@
         "waypipe-desktop": "waypipe-desktop",
         "web-greeter": "web-greeter",
         "xdg-autostart": "xdg-autostart"
+      }
+    },
+    "rust-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "neotime",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1791707771,
+        "narHash": "sha256-w3m8HtAVCfGTHw+gcCTAy7jFHSdGbokm8NngbeFrkek=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "c1cfa7a2c809d364ac1a7e9b3ec418afa3f19793",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
       }
     },
     "sops-nix": {
@@ -1126,9 +1207,24 @@
         "type": "github"
       }
     },
+    "systems_9": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
     "vigil": {
       "inputs": {
-        "flake-utils": "flake-utils_7",
+        "flake-utils": "flake-utils_8",
         "nixpkgs": [
           "nixpkgs"
         ]
