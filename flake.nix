@@ -61,10 +61,6 @@
             url = "github:BeatLink/playitslowly";
             inputs.nixpkgs.follows = "nixpkgs";
         };
-        neotime-companion = {
-            url = "github:BeatLink/neotime-companion";
-            inputs.nixpkgs.follows = "nixpkgs";
-        };
         neotime = {
             url = "github:BeatLink/NeoTime";
             inputs.nixpkgs.follows = "nixpkgs";

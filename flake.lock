@@ -416,24 +416,6 @@
         "type": "github"
       }
     },
-    "flake-utils_8": {
-      "inputs": {
-        "systems": "systems_9"
-      },
-      "locked": {
-        "lastModified": 1731533236,
-        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "numtide",
-        "repo": "flake-utils",
-        "type": "github"
-      }
-    },
     "gmusicbrowser": {
       "inputs": {
         "nixpkgs": [
@@ -748,27 +730,6 @@
         "type": "github"
       }
     },
-    "neotime-companion": {
-      "inputs": {
-        "flake-utils": "flake-utils_5",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1791853445,
-        "narHash": "sha256-Nx47/ESbjbtbuVwQS5ezAy7bZdpcJFUVGitrOq6xfZA=",
-        "owner": "BeatLink",
-        "repo": "neotime-companion",
-        "rev": "0a202aa4f81386d3dce435729e3b6a4a994e837a",
-        "type": "github"
-      },
-      "original": {
-        "owner": "BeatLink",
-        "repo": "neotime-companion",
-        "type": "github"
-      }
-    },
     "nix-flake-tests": {
       "locked": {
         "lastModified": 1677844186,
@@ -926,7 +887,7 @@
     },
     "nixtool": {
       "inputs": {
-        "flake-utils": "flake-utils_6",
+        "flake-utils": "flake-utils_5",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -947,7 +908,7 @@
     },
     "pinephone-charge": {
       "inputs": {
-        "flake-utils": "flake-utils_7",
+        "flake-utils": "flake-utils_6",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -1029,7 +990,6 @@
         "mobile-nixos": "mobile-nixos",
         "nemo-trilium": "nemo-trilium",
         "neotime": "neotime",
-        "neotime-companion": "neotime-companion",
         "nix-index-database": "nix-index-database",
         "nix-vscode-extensions": "nix-vscode-extensions",
         "nixos-hardware": "nixos-hardware",
@@ -1207,24 +1167,9 @@
         "type": "github"
       }
     },
-    "systems_9": {
-      "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
-        "owner": "nix-systems",
-        "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-systems",
-        "repo": "default",
-        "type": "github"
-      }
-    },
     "vigil": {
       "inputs": {
-        "flake-utils": "flake-utils_8",
+        "flake-utils": "flake-utils_7",
         "nixpkgs": [
           "nixpkgs"
         ]

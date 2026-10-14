@@ -10,7 +10,7 @@
         {
             home = {
                 packages = [
-                    inputs.neotime-companion.packages.${pkgs.stdenv.hostPlatform.system}.default
+                    inputs.neotime.packages.${pkgs.stdenv.hostPlatform.system}.companion
                 ];
                 persistence."/Storage/Apps/TechNet/NeoTimeCompanion" = {
                     directories = [
