@@ -12,10 +12,10 @@
                 packages = [
                     inputs.battletime.packages.${pkgs.stdenv.hostPlatform.system}.companion
                 ];
-                persistence."/Storage/Apps/TechNet/NeoTimeCompanion" = {
+                persistence."/Storage/Apps/TechNet/BattleTimeCompanion" = {
                     directories = [
-                        ".config/NeoTime Companion"
-                        ".config/neotime-companion"
+                        ".config/BattleTime Companion"
+                        ".config/battletime-companion"
                     ];
                 };
             };
