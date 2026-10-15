@@ -178,11 +178,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792088611,
-        "narHash": "sha256-Cpzu3hz83jGQI6gRdelrRXM6wUlSXnBfY/XisIiehZM=",
+        "lastModified": 1792091356,
+        "narHash": "sha256-svInews/aMoPjgiqMl2aqAMMbHEr08uCQVwwy/gQZdo=",
         "owner": "BeatLink",
         "repo": "claude-chat-manager",
-        "rev": "4c0da5d8a7ac4a64957ce4799740f2fc595e4ee2",
+        "rev": "aecf310e7ef4a0ad1d8f61e89d3af7833c1acc11",
         "type": "github"
       },
       "original": {
