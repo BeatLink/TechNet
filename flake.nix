@@ -61,8 +61,8 @@
             url = "github:BeatLink/playitslowly";
             inputs.nixpkgs.follows = "nixpkgs";
         };
-        neotime = {
-            url = "github:BeatLink/NeoTime";
+        battletime = {
+            url = "github:BeatLink/BattleTime";
             inputs.nixpkgs.follows = "nixpkgs";
         };
         # Patches the Steam client so it loads CSS themes; Odin's Steam package comes from here

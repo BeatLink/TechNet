@@ -104,9 +104,32 @@
         "type": "github"
       }
     },
-    "blockurl": {
+    "battletime": {
       "inputs": {
         "flake-utils": "flake-utils_2",
+        "infinisim": "infinisim",
+        "nixpkgs": [
+          "nixpkgs"
+        ],
+        "rust-overlay": "rust-overlay"
+      },
+      "locked": {
+        "lastModified": 1792074132,
+        "narHash": "sha256-GKhiEkMMawhnvyyf7RLstviYFbcWt8gHviHVWmTI1mE=",
+        "owner": "BeatLink",
+        "repo": "BattleTime",
+        "rev": "1afa5dcbca78c31d4bd22415c782cc2990d9481d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BeatLink",
+        "repo": "BattleTime",
+        "type": "github"
+      }
+    },
+    "blockurl": {
+      "inputs": {
+        "flake-utils": "flake-utils_3",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -171,7 +194,7 @@
     "claude-code": {
       "inputs": {
         "nixpkgs": "nixpkgs",
-        "systems": "systems_3"
+        "systems": "systems_4"
       },
       "locked": {
         "lastModified": 1792004496,
@@ -328,7 +351,7 @@
     },
     "flake-utils_3": {
       "inputs": {
-        "systems": "systems_4"
+        "systems": "systems_3"
       },
       "locked": {
         "lastModified": 1731533236,
@@ -438,7 +461,7 @@
     },
     "halon": {
       "inputs": {
-        "flake-utils": "flake-utils_3",
+        "flake-utils": "flake-utils_4",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -707,29 +730,6 @@
         "type": "github"
       }
     },
-    "neotime": {
-      "inputs": {
-        "flake-utils": "flake-utils_4",
-        "infinisim": "infinisim",
-        "nixpkgs": [
-          "nixpkgs"
-        ],
-        "rust-overlay": "rust-overlay"
-      },
-      "locked": {
-        "lastModified": 1792069336,
-        "narHash": "sha256-Lh38B54Z8fUViWK9CRdDchmN3Ix6Tpb/RP9yR16TzW4=",
-        "owner": "BeatLink",
-        "repo": "NeoTime",
-        "rev": "824b9de47cf308f8c61a196c9a7a4bd46b305c1b",
-        "type": "github"
-      },
-      "original": {
-        "owner": "BeatLink",
-        "repo": "NeoTime",
-        "type": "github"
-      }
-    },
     "nix-flake-tests": {
       "locked": {
         "lastModified": 1677844186,
@@ -973,6 +973,7 @@
         "arion": "arion",
         "atuin-web": "atuin-web",
         "battery-guardian": "battery-guardian",
+        "battletime": "battletime",
         "blockurl": "blockurl",
         "calibre-web-nextgen": "calibre-web-nextgen",
         "claude-chat-manager": "claude-chat-manager",
@@ -989,7 +990,6 @@
         "millennium": "millennium",
         "mobile-nixos": "mobile-nixos",
         "nemo-trilium": "nemo-trilium",
-        "neotime": "neotime",
         "nix-index-database": "nix-index-database",
         "nix-vscode-extensions": "nix-vscode-extensions",
         "nixos-hardware": "nixos-hardware",
@@ -1009,7 +1009,7 @@
     "rust-overlay": {
       "inputs": {
         "nixpkgs": [
-          "neotime",
+          "battletime",
           "nixpkgs"
         ]
       },
@@ -1079,11 +1079,11 @@
     },
     "systems_3": {
       "locked": {
-        "lastModified": 1791244623,
-        "narHash": "sha256-uuanbkFk8a313Zfrxdcz8Us/yQtaxNnKJtX8v0ZPpd8=",
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
         "owner": "nix-systems",
         "repo": "default",
-        "rev": "d36eeed142f88b5a636f2e3856a53c61654cf29b",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
         "type": "github"
       },
       "original": {
@@ -1094,11 +1094,11 @@
     },
     "systems_4": {
       "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "lastModified": 1791244623,
+        "narHash": "sha256-uuanbkFk8a313Zfrxdcz8Us/yQtaxNnKJtX8v0ZPpd8=",
         "owner": "nix-systems",
         "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "rev": "d36eeed142f88b5a636f2e3856a53c61654cf29b",
         "type": "github"
       },
       "original": {

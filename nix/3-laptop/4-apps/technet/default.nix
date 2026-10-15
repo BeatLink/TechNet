@@ -3,7 +3,7 @@
     imports = [
         ./activitywatch
         ./lnxlink.nix
-        ./neotime-companion.nix
+        ./battletime-companion.nix
         ./nixtool.nix
         ./syncthing.nix
         ./valent

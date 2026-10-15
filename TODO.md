@@ -135,11 +135,11 @@ distinct, and Odin's AFK and Firefox buckets held smaller numbers of exact copie
 was deleted, two 5-minute pulls added 12 more to Thor's AFK bucket alone, from a single export that
 was not changing because Thor was offline. Every other bucket stayed clean over those two pulls.
 
-## Give NeoTime Companion the computer's location on Odin
+## Give BattleTime Companion the computer's location on Odin
 
 - [ ] Check whether Cinnamon runs a GeoClue agent for beatlink; GeoClue never answers `GetClient`
       for a user without one
-- [ ] Enable `services.geoclue2` on Odin with an `appConfig` entry for `neotime-companion`, the
+- [ ] Enable `services.geoclue2` on Odin with an `appConfig` entry for `battletime-companion`, the
       DesktopId the app asks under
 - [ ] Turn on "Use where this computer is" in the app's Settings and confirm it finds a place
 
