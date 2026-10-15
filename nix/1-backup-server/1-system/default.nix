@@ -10,5 +10,6 @@
         ./networking.nix
         ./borg.nix
         ./clevis.nix
+        ./freeze-recovery.nix
     ];
 }
