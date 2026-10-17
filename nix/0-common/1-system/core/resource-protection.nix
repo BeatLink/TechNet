@@ -37,10 +37,5 @@
             };
         }
 
-        # Automatic Kills ############################################################################################################################
-        # Off rather than left at its default-on: an overloaded host Vigil can show beats a killer that can abort a backup or a sync mid-write
-        {
-            systemd.oomd.enable = false;
-        }
     ];
 }
