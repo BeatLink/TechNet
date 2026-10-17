@@ -231,7 +231,6 @@
                                     linux-sidebar.homeManagerModules.default
                                     halon.homeManagerModules.default
                                     nemo-trilium.homeManagerModules.default
-                                    hermes-agent.nixosModules.default
                                 ];
                             };
                         }
