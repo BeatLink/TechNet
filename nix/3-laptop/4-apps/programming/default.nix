@@ -9,5 +9,6 @@
         ./nodejs.nix
         ./sqlitebrowser.nix
         ./vscodium.nix
+        ./hermes.nix
     ];
 }
