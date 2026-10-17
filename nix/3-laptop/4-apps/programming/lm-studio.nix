@@ -22,6 +22,7 @@ let
             "Qwen3.5-4B-Revised-q4_k_m.gguf"
             "mmproj-f16.gguf"
         ];
+        "lmstudio-community/lfm2-24b-a2b-gguf" = [ "liquid/lfm2-24b-a2b" ];
     };
 
     # Vision projectors parked outside the models tree, which is what lets the 4B load text-only and reach its 24k context.
