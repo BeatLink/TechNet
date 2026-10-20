@@ -1250,11 +1250,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1787416624,
-        "narHash": "sha256-yfi8yKtCMDF+1ydfz5ghAaczTTO7fdIWWHfpc3xqk1s=",
+        "lastModified": 1792532324,
+        "narHash": "sha256-o8zXKYKNaEDYQ4UXmiPUrPWKKD1LL3p3izFk3AcFjpw=",
         "ref": "nix-flake",
-        "rev": "14c84de1dfb84c53c6ee703f14b23da7bd030934",
-        "revCount": 893,
+        "rev": "3891b97ec4981f3c606a0cfdef3b3f9805528b85",
+        "revCount": 894,
         "submodules": true,
         "type": "git",
         "url": "https://github.com/BeatLink/web-greeter"

@@ -13,15 +13,10 @@
 let
     webGreeter = inputs.web-greeter.packages.${pkgs.stdenv.hostPlatform.system}.web-greeter;
     halonGreeterTheme = inputs.halon.packages.${pkgs.stdenv.hostPlatform.system}.halon-lightdm-theme;
-    # The packaged QtWebEngine looks for its helper process and data under qtbase, so the greeter aborts unless pointed at them.
-    webEngine = pkgs.qt6.qtwebengine;
     # QtWebEngine's GPU compositor cannot make a Skia representation of its Ozone backing on this iGPU, so every
     # layer above the page background fails to paint and the greeter shows an empty screen; software compositing draws it.
     webGreeterWrapped = pkgs.writeShellScriptBin "web-greeter" ''
         export QTWEBENGINE_CHROMIUM_FLAGS="--disable-gpu-compositing ''${QTWEBENGINE_CHROMIUM_FLAGS:-}"
-        export QTWEBENGINEPROCESS_PATH="${webEngine}/libexec/QtWebEngineProcess"
-        export QTWEBENGINE_RESOURCES_PATH="${webEngine}/resources"
-        export QTWEBENGINE_LOCALES_PATH="${webEngine}/qtwebengine_locales"
         exec ${webGreeter}/bin/web-greeter "$@"
     '';
     # LightDM starts the greeter from this desktop entry's Exec, so the wrapper only takes effect once the entry names it
