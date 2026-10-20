@@ -7,6 +7,7 @@
         ./lm-studio.nix
         ./battletime-appbuilder.nix
         ./nodejs.nix
+        ./smartharness.nix
         ./sqlitebrowser.nix
         ./vscodium.nix
         ./hermes.nix

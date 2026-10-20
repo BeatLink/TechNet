@@ -967,6 +967,22 @@
         "type": "github"
       }
     },
+    "nixpkgs_5": {
+      "locked": {
+        "lastModified": 1791956154,
+        "narHash": "sha256-jBYGPi4udQ9uo4KQp9m2J0546nJVQitG15gvZSaVVAs=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "55bfb4d7437bd4e09ab7cba58a43bd68eb310044",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-unstable",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "nixtool": {
       "inputs": {
         "flake-utils": "flake-utils_5",
@@ -1153,6 +1169,7 @@
         "pinephone-charge": "pinephone-charge",
         "pinephone-kernel": "pinephone-kernel",
         "playitslowly": "playitslowly",
+        "smartharness": "smartharness",
         "sops-nix": "sops-nix",
         "vigil": "vigil",
         "waypipe-desktop": "waypipe-desktop",
@@ -1178,6 +1195,24 @@
       "original": {
         "owner": "oxalica",
         "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "smartharness": {
+      "inputs": {
+        "nixpkgs": "nixpkgs_5"
+      },
+      "locked": {
+        "lastModified": 1792527292,
+        "narHash": "sha256-RKVqondKYIAfjPp4ETCWLKMk6KzryPjBgcD4Xe6sh5g=",
+        "owner": "BeatLink",
+        "repo": "SmartHarness",
+        "rev": "39a40122af58d642cdd0a2ad7d53a727daa873c6",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BeatLink",
+        "repo": "SmartHarness",
         "type": "github"
       }
     },

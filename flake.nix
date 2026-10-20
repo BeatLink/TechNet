@@ -57,6 +57,7 @@
             url = "github:BeatLink/Anthem";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        smartharness.url = "github:BeatLink/SmartHarness";
         playitslowly = {
             url = "github:BeatLink/playitslowly";
             inputs.nixpkgs.follows = "nixpkgs";
