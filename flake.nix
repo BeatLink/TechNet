@@ -154,9 +154,6 @@
             url = "github:BeatLink/BatteryGuardian";
             inputs.nixpkgs.follows = "nixpkgs";
         };
-        hermes-agent = {
-            url = "github:NousResearch/hermes-agent";
-        };
     };
     outputs =
         inputs@{
@@ -180,7 +177,6 @@
             linux-sidebar,
             nemo-trilium,
             nixos-hardware,
-            hermes-agent,
             ...
         }:
         {
@@ -242,7 +238,6 @@
                         home-manager.nixosModules.home-manager
                         halon.nixosModules.default
                         nixos-hardware.nixosModules.lenovo-ideapad-15ach6
-                        hermes-agent.nixosModules.default
                         ./nix/0-common
                         ./nix/3-laptop
                     ];
