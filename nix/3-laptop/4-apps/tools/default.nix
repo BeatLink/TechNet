@@ -10,6 +10,7 @@
         ./packet-tracer.nix
         ./separator.nix
         ./linux-sidebar.nix
+        ./android-debug-bridge.nix
         ./universal-android-debloater.nix
         ./video-downloader.nix
         ./virt-manager.nix
