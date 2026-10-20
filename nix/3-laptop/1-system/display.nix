@@ -21,7 +21,18 @@
                     enable = true;
                     finegrained = true;
                 };
-                package = config.boot.kernelPackages.nvidiaPackages.production;
+                package = config.boot.kernelPackages.nvidiaPackages.production.overrideAttrs (previous: {
+                    # Drop once nixpkgs#576397 lands: patchelf 0.19 breaks these binaries when interpreter and rpath are set in one call.
+                    postInstall = toString (previous.postInstall or "") + ''
+                        for program in nvidia-cuda-mps-control nvidia-cuda-mps-server nvidia-smi nvidia-debugdump nvidia-powerd; do
+                            if [ -e $bin/origBin/$program ]; then
+                                install -m755 $bin/origBin/$program $bin/bin/$program
+                                patchelf --set-rpath $out/lib:$libPath $bin/bin/$program
+                                patchelf --interpreter "$(cat $NIX_CC/nix-support/dynamic-linker)" $bin/bin/$program
+                            fi
+                        done
+                    '';
+                });
             };
         }
 
