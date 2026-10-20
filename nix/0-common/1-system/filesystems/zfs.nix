@@ -32,18 +32,10 @@ in
                 zfs = {
                     autoScrub.enable = true;
 
-                    # Reads the com.sun:auto-snapshot property disko already sets; without this the property is inert and nothing is ever taken
-                    # mkDefault throughout: a host whose pool runs near full lowers these in its own module
-                    autoSnapshot = {
-                        enable = true;
-                        frequent = lib.mkDefault 0; # These pools change in backup-sized bursts, not continuously, so quarter-hourly snapshots only add clutter
-                        monthly = lib.mkDefault 6;
-                    };
+                    # Off: borg, Vorta, Syncthing and this flake already cover backups, and snapshots only pin freed blocks on pools that run near full
+                    autoSnapshot.enable = false;
                 };
             };
-
-            # frequent is 0 everywhere, and the timer still fires quarter-hourly to keep nothing; on the phone that is a wakeup for no reason
-            systemd.timers.zfs-snapshot-frequent.enable = false;
         }
     ];
 }

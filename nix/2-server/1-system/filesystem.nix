@@ -11,14 +11,6 @@
 
     disko.devices.disk.root-drive.device = "/dev/disk/by-id/ata-Dogfish_SSD_64GB_5E56255506071556041";
 
-    # This pool runs near full, so it keeps a shorter snapshot history than the shared default; snapshots pin freed blocks and it has no room to spare
-    services.zfs.autoSnapshot = {
-        hourly = 12;
-        daily = 5;
-        weekly = 2;
-        monthly = 2;
-    };
-
     # Deep queues let the disks sort requests by head position, which is the only thing that makes the shingled drive keep up
     boot.extraModprobeConfig = ''
         options zfs zfs_vdev_max_active=32
