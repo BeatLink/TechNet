@@ -41,8 +41,8 @@ in
                         paths = [ smartharness ];
                         nativeBuildInputs = [ pkgs.makeWrapper ];
                         postBuild = ''
-                            for program in smartharness smartharness-tui; do
-                                wrapProgram $out/bin/$program --run 'export TRILIUM_ETAPI_TOKEN="$(cat ${token_path})"'
+                            for program in $out/bin/*; do
+                                wrapProgram $program --run 'export TRILIUM_ETAPI_TOKEN="$(cat ${token_path})"'
                             done
                         '';
                     })

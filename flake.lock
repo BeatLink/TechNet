@@ -1203,11 +1203,11 @@
         "nixpkgs": "nixpkgs_5"
       },
       "locked": {
-        "lastModified": 1792527292,
-        "narHash": "sha256-RKVqondKYIAfjPp4ETCWLKMk6KzryPjBgcD4Xe6sh5g=",
+        "lastModified": 1792534232,
+        "narHash": "sha256-HtJCfv3FDc2jmK1k7RHbMCsN/QiAwpWjAmwjXWfF2Lw=",
         "owner": "BeatLink",
         "repo": "SmartHarness",
-        "rev": "39a40122af58d642cdd0a2ad7d53a727daa873c6",
+        "rev": "8b4434fa495fd6b29bb8387f82bf987016388b75",
         "type": "github"
       },
       "original": {
