@@ -10,11 +10,12 @@
     # 8883 is the registered port for MQTT over TLS. (The browser client does
     # speak websockets, and is carried by an ordinary vhost -- see web-ui.nix.)
     #
-    # 8883 is deliberately *not* in `allowedTCPPorts`: it is reachable because
-    # wireguard0 is a trusted interface, which means every peer in the TechNet
-    # can open a session to it. Authentication and the per-user ACLs in
-    # broker.nix are what stand between a peer and the topic tree, not the
+    # 8883 is open on the LAN, where split DNS sends the name at home, and over
+    # wireguard0, a trusted interface. Authentication and the per-user ACLs in
+    # broker.nix are what stand between a client and the topic tree, not the
     # firewall.
+    networking.firewall.interfaces.enp2s0f1.allowedTCPPorts = [ 8883 ];
+
     services.nginx.streamConfig = ''
         server {
             listen 8883 ssl;
