@@ -18,7 +18,7 @@
         host = "127.0.0.1";
         port = 8080;
         dataDir = "/Storage/Services/Trilium/data";
-        # Drop once nixpkgs#576397 lands: patchelf after 0.15.2 overlaps node's first two segments, and it segfaults in ld.so before starting.
+        # Drop once nixpkgs' patchelf stops overlapping node's first two segments; every release after 0.15.2 does, and it segfaults in ld.so before starting.
         package = pkgs.trilium-server.overrideAttrs (previous: {
             preFixup = (previous.preFixup or "") + ''
                 export PATH=${
