@@ -1682,9 +1682,7 @@ in
                                             # passphrases, so this is per monitor rather than global, and
                                             # the secret never leaves the host that owns it.
                                             passphrase_command = "cat /run/secrets/borg_repo_encryption_key";
-                                            source_paths = [
-                                                "/Storage/Services"
-                                            ];
+                                            source_paths = config.services.borgmatic.configurations.local.source_directories;
                                             exclude = config.backup-excludes.patterns;
                                             exclude_if_present = config.backup-excludes.markers;
                                             exclude_caches = false;
@@ -1728,9 +1726,7 @@ in
                                             # scheduled job uses, so Vigil triggers the host's backup
                                             # rather than performing one under its own credentials.
                                             ssh_key = "/run/secrets/borg_repo_ssh_key";
-                                            source_paths = [
-                                                "/Storage/Services"
-                                            ];
+                                            source_paths = config.services.borgmatic.configurations.local.source_directories;
                                             exclude = config.backup-excludes.patterns;
                                             exclude_if_present = config.backup-excludes.markers;
                                             exclude_caches = false;

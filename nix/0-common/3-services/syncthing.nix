@@ -103,10 +103,11 @@ let
             ];
         };
         Sounds = { };
-        # Heimdall seeds and Ragnarok keeps a versioned copy; Odin and the phone have no use for the tree and would pay for it in disk.
+        # Heimdall seeds, Ragnarok keeps a versioned copy and Odin's copy goes into its Vorta backups; the phone has no use for the tree.
         Torrents = {
             devices = [
                 "Heimdall"
+                "Odin"
                 "Ragnarok"
             ];
             ignorePatterns = [

@@ -1,6 +1,6 @@
 # Borgmatic
 #
-# Backs up the server's service data to an on-disk repo and to the backup server, split into two
+# Backs up the server's service data and app state to an on-disk repo and to the backup server, split into two
 # configurations so an unreachable Ragnarok cannot cancel the local copy as well.
 #
 
@@ -12,8 +12,11 @@
 let
     commonSettings = {
         # Sources
+        # Only what no other machine holds; the /Storage/Files folders are synced to Odin, whose Vorta backs them up.
         source_directories = [
             "/Storage/Services"
+            "/Storage/Apps"
+            "/Storage/PhoneApps"
         ];
         # Excludes
         exclude_patterns = config.backup-excludes.patterns;
