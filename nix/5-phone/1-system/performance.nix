@@ -1,80 +1,12 @@
 # Performance
 #
-# Things done specifically because this is a 2972MB, 1.15GHz A53 phone rather
-# than a laptop or a server. Measured, not guessed -- each note says what was
-# observed.
-#
-# The ZFS ARC is by far the largest single consumer on this phone. Measured on a
-# 2972MB device, 31 minutes after boot, with nothing but phosh and Firefox
-# running:
-#
-#   ARC size 1622MB, c_max 1948MB, available 429MB
-#
-# That is more than half of RAM held as filesystem cache on a device whose whole
-# problem is not having any. The ARC is reclaimable in principle, but it gives
-# memory back more slowly than a burst of allocation takes it, so the headroom
-# has to exist up front -- the same finding as Ragnarok's
-# 1-backup-server/1-system/software.nix, which caps that board's build
-# concurrency for the same reason.
-#
-# 1.5GB, which is what ZFS would pick on its own at half of RAM. A 512MB cap
-# costs more than it saves: measured on this phone, a cold nautilus took 8.0s
-# and a cold epiphany 18.8s, both entirely waiting on small random reads that a
-# larger cache would have held. Warm, the same launches are 72ms and 63ms. The
-# ARC gives memory back under pressure, and there is zram behind it if it gives
-# it back too slowly.
-#
-# A module parameter rather than a runtime write, because zfs is loaded in the
-# initrd and anything set later applies after the ARC has already grown.
-#
-# vm.swappiness is raised from the default 60. Swap here is zram and nothing
-# else -- compressed pages in RAM, not a disk -- so paging out cold anonymous
-# memory costs CPU rather than an SD card round trip, and on four cores that is
-# the cheaper of the two.
+# Tuning for a 2972MB, 1.15GHz A53 phone rather than a laptop or a server: memory, the governor, heat and the session's priority.
 #
 {
-    config,
     pkgs,
     ...
 }:
 {
-    # The ARC cap is confirmed on the first boot carrying it: c_max 512MB, ARC
-    # size 516MB, available up from 429MB to 1756MB.
-    #
-    # Queue depths, in the same spirit as Heimdall's
-    # 2-server/1-system/filesystem.nix but not the same numbers, because the
-    # two are slow for different reasons. Heimdall's pool is a spinning mirror
-    # and its 32 is about not drowning the disk in seeks. An SD card has no
-    # seeks; what it has is almost no parallelism and painful write
-    # amplification, so the depths go lower still and one extra knob appears.
-    #
-    # zfs_txg_timeout is that knob, and it is the SD-specific one: batching
-    # transaction groups into fewer, larger commits means fewer erase-block
-    # rewrites. 15s rather than the default 5s trades a longer window of
-    # unwritten data for materially less churn on a card whose write endurance
-    # is the thing that eventually kills it.
-    #
-    # Worth being clear that these are module parameters and therefore
-    # **global** -- they apply to root-pool-Thor on the eMMC as well as
-    # data-pool-Thor on the card. That is acceptable because the eMMC is also
-    # not an SSD and also prefers shallow queues, but it does mean this is not
-    # a per-pool tuning however much it reads like one.
-    #
-    # Unlike the ARC cap, these are a considered starting point rather than a
-    # measured win. The thing to watch is whether a sustained bulk write -- a
-    # nix copy, a large transfer onto the card -- starves the session; if it
-    # does, the next lever is that writer's own concurrency rather than pushing
-    # these lower.
-    boot.extraModprobeConfig = ''
-        options zfs zfs_arc_max=1610612736
-        options zfs zfs_vdev_max_active=4
-        options zfs zfs_vdev_async_write_max_active=2
-        options zfs zfs_vdev_async_read_max_active=2
-        options zfs zfs_vdev_sync_read_min_active=4
-        options zfs zfs_vdev_scrub_max_active=1
-        options zfs zfs_txg_timeout=15
-    '';
-
     # vm.vfs_cache_pressure is lowered from the default 100, because every
     # measurement of what makes an app slow to start on this phone came back
     # dominated by per-file cost rather than by bytes. Reading a directory tree
@@ -119,25 +51,8 @@
     # separate and much stronger.
     i18n.inputMethod.enable = false;
 
-    # performance, which is the kernel's compiled-in default here and measured
-    # better than the alternative.
-    #
-    # schedutil was tried on the theory that idling down between bursts would
-    # generate less heat and so cross the thermal trip less often. Measured
-    # under identical conditions -- all four cores pinned for 60s, same 80C
-    # trip, cooled to the same start temperature first:
-    #
-    #                  mean clock   throttled   first throttle
-    #   performance      1116MHz       9/20          24s
-    #   schedutil        1094MHz      14/20          12s
-    #
-    # It lost on every metric, including the one it was chosen for. Ramping to
-    # meet demand takes longer to finish the same work, and the extra time at
-    # load costs more than idling between bursts saves.
-    #
-    # Left explicit rather than unset so the next person does not repeat the
-    # experiment: the numbers above are the reason, not an assumption.
-    powerManagement.cpuFreqGovernor = "performance";
+    # schedutil rather than performance, which held all four cores at 1152MHz and top voltage whenever the phone was awake, idle or not
+    powerManagement.cpuFreqGovernor = "schedutil";
 
     # Raise the passive thermal trip from 75C to 80C.
     #
@@ -282,46 +197,4 @@
     # thing to watch is an app that leans on blend modes or masks looking wrong
     # rather than slow. Unsetting this puts lavapipe back.
     environment.sessionVariables.GSK_RENDERER = "cairo";
-
-    # lz4 rather than zstd, on both pools.
-    #
-    # zstd is the better ratio and the wrong trade here. z_wr_iss -- the ZFS
-    # write pipeline, where compression happens -- is the largest single CPU
-    # consumer on this phone across a whole boot, 514s of cumulative time ahead
-    # of phosh and Firefox, and it spikes past a full core during
-    # writes. Those are kernel threads in the root cgroup, so no CPUQuota,
-    # CPUWeight or Nice anywhere in this file reaches them; the only way to
-    # spend less CPU there is to ask for less work.
-    #
-    # The ratio being traded away costs little, because the resource it saves is
-    # the one in surplus: io pressure measured 3.44 against cpu pressure in the
-    # sixties, and the card's own ceiling is 23.9MB/s, which lz4 has no trouble
-    # feeding on four cores.
-    #
-    # A service rather than a property set by hand, because compression is
-    # recorded in the pool and would otherwise survive only until the next
-    # install -- and the pools are made by nixtool and by disko, neither of
-    # which is host-specific. Idempotent, so it costs one no-op zfs call per
-    # boot. Only new blocks are affected; existing data keeps whatever it was
-    # written with until rewritten.
-    systemd.services.zfs-compression = {
-        description = "Set ZFS compression to lz4 on this host's pools";
-        wantedBy = [ "multi-user.target" ];
-        after = [ "zfs.target" ];
-        serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            ExecStart = pkgs.writeShellScript "zfs-compression-lz4" ''
-                # `|| true` because the data pool lives on a removable card, and a
-                # phone booted without it should not fail a unit over it.
-                for dataset in \
-                    root-pool-${config.networking.hostName}/root \
-                    data-pool-${config.networking.hostName}/storage
-                do
-                    ${config.boot.zfs.package}/sbin/zfs set compression=lz4 "$dataset" || true
-                done
-            '';
-        };
-    };
-
 }

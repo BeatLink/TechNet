@@ -22,7 +22,7 @@ in
         {
             services.logind.settings.Login = {
                 IdleAction = "suspend";
-                IdleActionSec = "5min";
+                IdleActionSec = "1min"; # Counted from the screen blanking, which phosh already holds off for 5 minutes of no input
             };
         }
 
