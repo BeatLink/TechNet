@@ -193,11 +193,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1792625535,
-        "narHash": "sha256-SiQvccv4fyLWg2yenY9O6XhzaqZaL6boibhZqVNzvxE=",
+        "lastModified": 1792626580,
+        "narHash": "sha256-HREbOX79fwTNkB00f3kWnoMTyljZKL1zRUplCwUhfmQ=",
         "owner": "BeatLink",
         "repo": "CODEX",
-        "rev": "e616f1aa014d1a13fa88f9c0aab1facc8506ed5f",
+        "rev": "386c26089738c0660e7594ac6c2d82f30d3d4da5",
         "type": "github"
       },
       "original": {
