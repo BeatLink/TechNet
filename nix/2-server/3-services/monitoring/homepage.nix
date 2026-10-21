@@ -128,20 +128,11 @@
                         };
                     }
                     {
-                        "Cronometer" = {
-                            icon = "https://cronometer.com/favicon.svg";
-                            href = "https://cronometer.com";
-                            description = "Cronometer";
-                            siteMonitor = "https://cronometer.com";
-                            statusStyle = "dot";
-                        };
-                    }
-                    {
-                        "Liftosaur" = {
-                            icon = "https://www.liftosaur.com/images/logo.svg";
-                            href = "https://liftosaur.com";
-                            description = "Liftosaur";
-                            siteMonitor = "https://liftosaur.com";
+                        "ActivityWatch" = {
+                            icon = "https://activitywatch.heimdall.technet/logo.png";
+                            description = "Window and Idle Time Tracker for Every Monitored Host";
+                            href = "https://activitywatch.heimdall.technet";
+                            siteMonitor = "https://activitywatch.heimdall.technet";
                             statusStyle = "dot";
                         };
                     }
