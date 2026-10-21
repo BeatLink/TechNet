@@ -198,7 +198,7 @@
                     leaseTime = "1d";
                     rapidCommit = false;
                     logging = true;
-                    # Reservations follow the WireGuard peer order below the dynamic range; .4 is held for Hela and .13, .16 and .18 for devices not yet seen.
+                    # Reservations follow the WireGuard peer order below the dynamic range; .4 is held for Hela and .13 and .16 for devices not yet seen.
                     hosts = [
                         "02:ba:38:78:9f:56,192.168.0.5,thor"
                         "9c:39:28:8b:59:16,192.168.0.6,thorx"
@@ -211,6 +211,7 @@
                         "e0:98:06:f9:a8:91,192.168.0.14,ir-fan"
                         "80:64:6f:9d:94:d7,192.168.0.15,socket-fan"
                         "80:64:6f:9b:d0:21,192.168.0.17,sensor-bathroom"
+                        "80:64:6f:9b:cd:0e,192.168.0.18,sensor-bedroom"
                     ];
                 };
                 # The home connection's dynamic-DNS name is pinned to its LAN address so internal clients never route out to the internet and back for it.
