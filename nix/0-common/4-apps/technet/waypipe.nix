@@ -41,13 +41,7 @@ in
         # Package ------------------------------------------------------------------------------------------------------------------------------------
         (lib.mkIf (cfg.enable || cfg.serve) {
             nixpkgs.overlays = [
-                inputs.waypipe-desktop.overlays.default # Rebuilds the wrapper against the waypipe below, which its own flake output would miss
-                (final: prev: {
-                    waypipe = prev.waypipe.overrideAttrs (old: {
-                        # Drop when waypipe supports ffmpeg 9; 0.11.0 reads AVVulkanDeviceContext fields it no longer has and fails to compile
-                        mesonFlags = (old.mesonFlags or [ ]) ++ [ "-Dwith_video=disabled" ];
-                    });
-                })
+                inputs.waypipe-desktop.overlays.default # Rebuilds the wrapper against this system's waypipe, which its own flake output would miss
             ];
         })
 

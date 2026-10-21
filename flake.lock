@@ -70,16 +70,15 @@
         ]
       },
       "locked": {
-        "lastModified": 1789662850,
-        "narHash": "sha256-Hi0g3hV1dC/tM53jVnoIlBtvoUsUORhSVrM8MEtfu50=",
-        "owner": "BeatLink",
+        "lastModified": 1792416016,
+        "narHash": "sha256-OXFMwLqxDcJK5s4OzAgOgYz9foAij7V00tRjRhqi8ao=",
+        "owner": "josegonzalez",
         "repo": "atuin-web",
-        "rev": "568e894e212f89e544b209f30eccec0cd3fff0ba",
+        "rev": "52acf6732fc6195d0fc3eb649dc83c0cd8f7ca9a",
         "type": "github"
       },
       "original": {
-        "owner": "BeatLink",
-        "ref": "nix-packaging",
+        "owner": "josegonzalez",
         "repo": "atuin-web",
         "type": "github"
       }
