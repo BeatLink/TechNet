@@ -602,11 +602,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792621286,
-        "narHash": "sha256-/u2tywucu/HQ4z3DFoyvu2D+H5UkK4yoGsV4orYfZUc=",
+        "lastModified": 1792622070,
+        "narHash": "sha256-hc2XsFF5rVd3r3m1anhNYfjJU34yJOpbbwCjdISrDFY=",
         "owner": "BeatLink",
         "repo": "lnxlink",
-        "rev": "3f79321e97d15d91b96dc43f35b6d3c5deb05155",
+        "rev": "1ac5d08019243354f24ff623cac876c44adfbaba",
         "type": "github"
       },
       "original": {
