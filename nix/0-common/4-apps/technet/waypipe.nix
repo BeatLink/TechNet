@@ -77,7 +77,7 @@ in
             # A dedicated alias, so the waypipe key never displaces the agent key on a plain `ssh heimdall`
             programs.ssh.extraConfig = ''
 
-                # heimdall.lan and heimdall.technet resolve to one address, the tunnel's, so there is no second path worth probing for
+                # heimdall.technet already answers with the LAN or the tunnel address to suit the network, so there is no second path worth probing for
                 Host heimdall-waypipe
                     HostName heimdall.technet
                     User beatlink

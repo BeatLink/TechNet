@@ -174,12 +174,6 @@
                         "10.100.100.6  ragnarok.technet"
                         "10.100.100.18 socket-ragnarok.technet"
 
-                        # Odin's LAN address, so odin.lan resolves at all.
-                        # Hosts inside the DHCP range get a .lan name from
-                        # their lease -- thor.lan and ragnarok.lan work that
-                        # way -- but Odin is statically addressed below the
-                        # range and never appears in the lease table.
-                        "192.168.0.3 odin.lan"
                         "162.159.200.1 time.cloudflare.com" # Static IP to break the DNS/NTP circular dependency
                     ];
                     # Every other name is generated from nginx-vhosts, which emits its own cname per service.
@@ -187,7 +181,7 @@
                         "trilium-sysadmin.heimdall.technet,heimdall.technet"
                     ];
                     domain = {
-                        name = "lan";
+                        name = "technet";
                         local = "true";
                     };
                     rateLimit = {

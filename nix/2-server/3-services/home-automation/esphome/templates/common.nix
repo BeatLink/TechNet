@@ -35,8 +35,8 @@
             ssid = "\${friendly_name} Hotspot";
             password = "!secret wifi_password";
         };
-        domain = ".lan";
-        use_address = "\${name}.lan";
+        domain = ".technet";
+        use_address = "\${name}.technet";
     };
     network.enable_ipv6 = false;
     mdns.disabled = true;

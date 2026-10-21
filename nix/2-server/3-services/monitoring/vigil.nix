@@ -2792,37 +2792,37 @@ in
                             name = "Bedroom Light";
                             id = "bedroom-light";
                             type = "uptime";
-                            target_host = "light-bedroom.lan";
+                            target_host = "light-bedroom.technet";
                         }
                         {
                             name = "Bedroom Desk Light";
                             id = "bedroom-desk-light";
                             type = "uptime";
-                            target_host = "light-bedroom-desk.lan";
+                            target_host = "light-bedroom-desk.technet";
                         }
                         {
                             name = "Kitchen Light";
                             id = "kitchen-light";
                             type = "uptime";
-                            target_host = "light-kitchen.lan";
+                            target_host = "light-kitchen.technet";
                         }
                         {
                             name = "Bathroom Light";
                             id = "bathroom-light";
                             type = "uptime";
-                            target_host = "light-bathroom.lan";
+                            target_host = "light-bathroom.technet";
                         }
                         {
                             name = "Outside Light";
                             id = "outside-light";
                             type = "uptime";
-                            target_host = "light-outside.lan";
+                            target_host = "light-outside.technet";
                         }
                         {
                             name = "Fan Socket";
                             id = "fan-socket";
                             type = "uptime";
-                            target_host = "socket-fan.lan";
+                            target_host = "socket-fan.technet";
                         }
                         {
                             name = "Ragnarok Socket";
@@ -2834,19 +2834,19 @@ in
                             name = "Fan IR";
                             id = "fan-ir";
                             type = "uptime";
-                            target_host = "ir-fan.lan";
+                            target_host = "ir-fan.technet";
                         }
                         {
                             name = "Bedroom Sensor";
                             id = "bedroom-sensor";
                             type = "uptime";
-                            target_host = "sensor-bedroom.lan";
+                            target_host = "sensor-bedroom.technet";
                         }
                         {
                             name = "Bathroom Sensor";
                             id = "bathroom-sensor";
                             type = "uptime";
-                            target_host = "sensor-bathroom.lan";
+                            target_host = "sensor-bathroom.technet";
                         }
                     ];
                 }

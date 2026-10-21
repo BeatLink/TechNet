@@ -12,19 +12,19 @@
     };
 
     substitutions = {
-        # `common.yaml` addresses devices as `<name>.lan`; athom defaults to
+        # `common.yaml` addresses devices as `<name>.technet`; athom defaults to
         # `.local`.
-        dns_domain = ".lan";
+        dns_domain = ".technet";
         log_level = "INFO";
     };
 
     esphome = {
         area = "\${room}";
-        # Hostnames here are fixed (`ir-fan.lan`), so no MAC suffix.
+        # Hostnames here are fixed (`ir-fan.technet`), so no MAC suffix.
         name_add_mac_suffix = false;
     };
 
-    # mDNS is off house-wide; DNS resolves the `.lan` names instead.
+    # mDNS is off house-wide; DNS resolves the `.technet` names instead.
     mdns.disabled = true;
 
     # Athom leaves the receiver dumping every code it sees, which is useful when

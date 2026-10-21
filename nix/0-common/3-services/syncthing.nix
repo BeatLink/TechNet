@@ -30,28 +30,24 @@ let
         Heimdall = {
             id = "Q6AIAK4-4PFLB3Z-73QF54Y-EKQ2LC5-5FSVFRZ-RBGWFDI-KZQI45E-JBXXTQY";
             addresses = [
-                "tcp://heimdall.lan:22000"
                 "tcp://heimdall.technet:22000"
             ];
         };
         Ragnarok = {
             id = "FSC6NQO-AS3VEAV-7TDTECF-MHBLG4P-A2SGTKM-E4ZTEBH-5TLLFR2-DMWGNQK";
             addresses = [
-                "tcp://ragnarok.lan:22000"
                 "tcp://ragnarok.technet:22000"
             ];
         };
         Odin = {
             id = "CSIQ7OW-6MP3FSB-OBDABEA-S53TWYT-N2EFGT6-4FMUV7R-HMXLOF5-GLIW7AD";
             addresses = [
-                "tcp://odin.lan:22000"
                 "tcp://odin.technet:22000"
             ];
         };
         ThorX = {
             id = "RF7HAZM-3YMVS35-XDXVMV4-QIVBTY2-MHJTUMI-PYWVRVS-AIII5DI-JOITXA3";
             addresses = [
-                "tcp://thorx.lan:22000"
                 "tcp://thorx.technet:22000"
             ];
         };

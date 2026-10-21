@@ -79,7 +79,6 @@ in
                     "192.168.0.7"
                     "10.100.100.6"
                     "ragnarok.technet"
-                    "ragnarok.lan"
                     "ragnarok"
                     "ragnarok-boot"
                 ];
@@ -90,7 +89,6 @@ in
                     "192.168.0.7"
                     "10.100.100.6"
                     "ragnarok.technet"
-                    "ragnarok.lan"
                     "ragnarok"
                     "ragnarok-boot"
                 ];
@@ -101,7 +99,6 @@ in
                     "192.168.0.2"
                     "10.100.100.1"
                     "heimdall.technet"
-                    "heimdall.lan"
                     "heimdall"
                     "heimdall-boot"
                 ];
@@ -112,7 +109,6 @@ in
                     "192.168.0.2"
                     "10.100.100.1"
                     "heimdall.technet"
-                    "heimdall.lan"
                     "heimdall"
                     "heimdall-boot"
                 ];
@@ -123,7 +119,6 @@ in
                     "192.168.0.3"
                     "10.100.100.2"
                     "odin.technet"
-                    "odin.lan"
                     "odin"
                     "odin-boot"
                 ];
@@ -134,7 +129,6 @@ in
                     "192.168.0.3"
                     "10.100.100.2"
                     "odin.technet"
-                    "odin.lan"
                     "odin"
                     "odin-boot"
                 ];
@@ -155,7 +149,6 @@ in
                     "192.168.0.5"
                     "10.100.100.4"
                     "thor.technet"
-                    "thor.lan"
                     "thor"
                     "thor-boot"
                 ];
@@ -166,7 +159,6 @@ in
                     "192.168.0.5"
                     "10.100.100.4"
                     "thor.technet"
-                    "thor.lan"
                     "thor"
                     "thor-boot"
                 ];

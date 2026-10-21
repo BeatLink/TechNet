@@ -1,7 +1,7 @@
 # Ragnarok socket -- Athom smart plug v2, reachable over WireGuard.
 #
 # This plug lives off-site, so it joins the WireGuard tunnel rather than being
-# addressed on the local `.lan` domain like the other devices.
+# addressed by its LAN lease like the other devices.
 {
     substitutions = {
         name = "socket-ragnarok";
