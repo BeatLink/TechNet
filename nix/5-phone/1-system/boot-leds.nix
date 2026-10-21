@@ -58,17 +58,17 @@ in
 {
     boot.initrd.systemd.services = {
         boot-led-locked = phase (blink "blue" 500) // {
-            description = "Blink the blue indicator while the pools are still locked";
+            description = "Blink the blue indicator while the drives are still locked";
             wantedBy = [ "initrd.target" ];
-            before = [ "zfs-import.target" ];
+            before = [ "cryptsetup.target" ];
             unitConfig.DefaultDependencies = "no";
         };
 
         boot-led-unlocked = phase (blink "green" 500) // {
-            description = "Blink the green indicator once the pools are unlocked";
+            description = "Blink the green indicator once the drives are unlocked";
             wantedBy = [ "initrd.target" ];
-            requires = [ "zfs-import.target" ];
-            after = [ "zfs-import.target" ];
+            requires = [ "cryptsetup.target" ];
+            after = [ "cryptsetup.target" ];
             unitConfig.DefaultDependencies = "no";
         };
 

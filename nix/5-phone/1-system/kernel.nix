@@ -30,10 +30,6 @@
 # while building Thor's closure. See
 # nix/2-server/3-services/technet/pinephone-kernel-mirror.nix.
 #
-# Out-of-tree modules are still built locally against it. ZFS is the one that
-# matters here, since Thor's root is on it -- linuxPackagesFor builds that with
-# this system's pkgs, so it is not cached and takes a while under emulation.
-#
 { pkgs, inputs, ... }:
 {
     boot.kernelPackages = pkgs.linuxPackagesFor inputs.pinephone-kernel.packages.aarch64-linux.linux-pinephone-megi;

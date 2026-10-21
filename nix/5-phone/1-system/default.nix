@@ -34,7 +34,6 @@
         ./buffyboard.nix
         ./boot-leds.nix
         ./charging.nix
-        ./arc-policy.nix
         ./theme.nix
         ./fn-lock.nix
         ./pine-key.nix
