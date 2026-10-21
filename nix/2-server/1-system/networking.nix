@@ -68,6 +68,14 @@
             trustedInterfaces = [ "wireguard0" ];
 
         };
+        # Pi-hole answers Heimdall's own loopback queries with every address a host has, so the fleet is pinned to its WireGuard addresses here.
+        hosts = {
+            "10.100.100.2" = [ "odin.technet" ];
+            "10.100.100.3" = [ "hela.technet" ];
+            "10.100.100.4" = [ "thor.technet" ];
+            "10.100.100.5" = [ "thorx.technet" ];
+            "10.100.100.6" = [ "ragnarok.technet" ];
+        };
     };
     boot.kernel.sysctl."net.ipv4.conf.all.forwarding" = true; # Enables routing between peers for wireguard
 

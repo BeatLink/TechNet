@@ -76,6 +76,7 @@ in
             "ragnarok-boot" = {
                 publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINtSfkBwSLxZxsjO/cvDpeY6j3DA95qOMsapWBAjv2hu";
                 hostNames = [
+                    "192.168.0.7"
                     "10.100.100.6"
                     "ragnarok.technet"
                     "ragnarok.lan"
@@ -86,6 +87,7 @@ in
             "ragnarok" = {
                 publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIInjkzjQG+KUcN1roAomyDKJiJLaHbiKBd46GjSBTbi1";
                 hostNames = [
+                    "192.168.0.7"
                     "10.100.100.6"
                     "ragnarok.technet"
                     "ragnarok.lan"
@@ -146,12 +148,11 @@ in
             #
             # There is no WireGuard in the initrd, so 10.100.100.4 only answers
             # once the system is up. Reaching the initrd means the LAN address,
-            # which is DHCP and may drift -- worth a reservation on the router if
-            # this gets used in anger.
+            # which Pi-hole reserves for Thor.
             "thor-boot" = {
                 publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP0HPTCMyqXEvmT4MxXqMVLqhEY016PYyMo/mnd4fZu8";
                 hostNames = [
-                    "192.168.0.113"
+                    "192.168.0.5"
                     "10.100.100.4"
                     "thor.technet"
                     "thor.lan"
@@ -162,7 +163,7 @@ in
             "thor" = {
                 publicKey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMy7r0+HLy2pOSH8Je8IEUty7j2qHHbcpHWMo1Xdg0mU";
                 hostNames = [
-                    "192.168.0.113"
+                    "192.168.0.5"
                     "10.100.100.4"
                     "thor.technet"
                     "thor.lan"

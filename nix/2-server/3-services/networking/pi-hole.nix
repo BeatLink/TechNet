@@ -45,7 +45,7 @@
         group = config.services.pihole-ftl.group;
     };
 
-    # Web login ------------------------------------------------------------------------------------------------------------------------------------
+    # Web login --------------------------------------------------------------------------------------------------------------------------------------
     sops.secrets.pihole_web_password = {
         sopsFile = "${config.technet.secrets.path}/pi-hole.yaml";
         group = "vigil-monitor"; # Read by the `cat` Vigil's pihole plugin runs as the `vigil` user
@@ -153,12 +153,18 @@
                         "127.0.0.1#5335"
                         "1.1.1.1" # Fallback to resolve NTP if Unbound fails due to inaccurate system time
                     ];
+                    # A host with both a LAN and a WireGuard address answers with the one on the subnet the query arrived from (localise-queries).
                     hosts = [
+                        "192.168.0.2   heimdall.technet"
                         "10.100.100.1  heimdall.technet"
+                        "192.168.0.3   odin.technet"
                         "10.100.100.2  odin.technet"
                         "10.100.100.3  hela.technet"
+                        "192.168.0.5   thor.technet"
                         "10.100.100.4  thor.technet"
+                        "192.168.0.6   thorx.technet"
                         "10.100.100.5  thorx.technet"
+                        "192.168.0.7   ragnarok.technet"
                         "10.100.100.6  ragnarok.technet"
                         "10.100.100.18 socket-ragnarok.technet"
 
@@ -185,13 +191,27 @@
                 };
                 dhcp = {
                     active = true;
-                    start = "192.168.0.10";
+                    start = "192.168.0.50";
                     end = "192.168.0.254";
                     router = "192.168.0.1";
                     netmask = "255.255.255.0";
                     leaseTime = "1d";
                     rapidCommit = false;
                     logging = true;
+                    # Reservations follow the WireGuard peer order below the dynamic range; .4 is held for Hela and .13, .16 and .18 for devices not yet seen.
+                    hosts = [
+                        "02:ba:38:78:9f:56,192.168.0.5,thor"
+                        "9c:39:28:8b:59:16,192.168.0.6,thorx"
+                        "b6:9e:63:ff:6b:90,192.168.0.7,ragnarok"
+                        "8c:ce:4e:4d:6e:44,192.168.0.8,light-bedroom"
+                        "8c:ce:4e:4d:6f:49,192.168.0.9,light-kitchen"
+                        "8c:ce:4e:4d:6d:9b,192.168.0.10,light-bathroom"
+                        "8c:ce:4e:4d:6e:7f,192.168.0.11,light-bedroom-desk"
+                        "80:64:6f:9e:31:00,192.168.0.12,light-outside"
+                        "e0:98:06:f9:a8:91,192.168.0.14,ir-fan"
+                        "80:64:6f:9d:94:d7,192.168.0.15,socket-fan"
+                        "80:64:6f:9b:d0:21,192.168.0.17,sensor-bathroom"
+                    ];
                 };
                 # The home connection's dynamic-DNS name is pinned to its LAN address so internal clients never route out to the internet and back for it.
                 # The name is a secret, so it arrives as an extra hosts file rendered by sops rather than as a `dns.hosts` entry baked into the store.
