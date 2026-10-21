@@ -1027,11 +1027,11 @@
         "nixpkgs": "nixpkgs_4"
       },
       "locked": {
-        "lastModified": 1792564450,
-        "narHash": "sha256-DAUpNqOHi9m7SM68A3vDCmKN7S5uobidHny3bfFuMvg=",
+        "lastModified": 1792624745,
+        "narHash": "sha256-YFCOZId57KjIGpJQLYYFcc4JS5t6sfwaZVpewOrAJ7U=",
         "owner": "BeatLink",
         "repo": "SmartHarness",
-        "rev": "51a29198fbd056e8e037350b960193a617deb784",
+        "rev": "e711180142d71b9359bef132243fbc8ec17ca696",
         "type": "github"
       },
       "original": {
