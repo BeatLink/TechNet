@@ -1,10 +1,8 @@
 { config, ... }:
 {
-    # Heimdall's ETAPI token, made once by hand under Options > ETAPI and shared with
-    # the server's own copy in 2-server/trilium.nix. .sops.yaml names Odin as a second
-    # recipient of that file so the action running as beatlink can read it here.
+    # Odin's own ETAPI token, made once by hand under Options > ETAPI, separate from the one Vigil uses on Heimdall.
     sops.secrets.trilium_etapi_token = {
-        sopsFile = "${config.technet.secrets.root}/2-server/trilium.yaml";
+        sopsFile = "${config.technet.secrets.path}/trilium.yaml";
         owner = "beatlink";
     };
 
