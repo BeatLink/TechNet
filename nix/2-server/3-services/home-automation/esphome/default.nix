@@ -31,6 +31,20 @@ let
 
     stateDir = "/var/lib/esphome";
 
+    # nixpkgs passes `--set` values with their own quotes, so the wrapper exports PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION='python' and every timezone fails validation.
+    esphome = pkgs.esphome.overridePythonAttrs (old: {
+        makeWrapperArgs = map (
+            arg:
+            if arg == "'python'" then
+                "python"
+            else if arg == "''" then
+                ""
+            else
+                arg
+        ) old.makeWrapperArgs;
+    });
+    esphome-device-builder = pkgs.esphome-device-builder.override { inherit esphome; };
+
     # `{ "<name>.yaml" = <derivation>; }` for every device and hardware profile.
     # Profiles are `!include`-only building blocks that the dashboard lists like
     # devices; the labels below tell them apart. Compiling a profile directly
@@ -112,11 +126,11 @@ in
 
     # esphome 2026.8 moved the dashboard into esphome-device-builder and dropped the `dashboard` subcommand the nixpkgs module still calls
     systemd.services.esphome = {
-        path = [ pkgs.esphome-device-builder ];
+        path = [ esphome-device-builder ];
         serviceConfig = {
             EnvironmentFile = config.sops.secrets.esphome_env.path;
             ExecStart = lib.mkForce (
-                "${pkgs.esphome-device-builder}/bin/esphome-device-builder"
+                "${esphome-device-builder}/bin/esphome-device-builder"
                 + " --host ${config.services.esphome.address}"
                 + " --port ${toString config.services.esphome.port}"
                 + " ${stateDir}"
