@@ -28,7 +28,9 @@
 
     services.calibre-web-nextgen = {
         enable = true;
-        package = inputs.calibre-web-nextgen.packages.${pkgs.stdenv.hostPlatform.system}.default;
+        package = inputs.calibre-web-nextgen.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
+            calibre = pkgs.calibre.override { speechSupport = false; }; # calibre's speech stack (piper-tts, speechd) fails its tests in this nixpkgs, and the server never reads aloud
+        };
         port = 8083;
         listenAddress = "127.0.0.1"; # Only nginx reaches it; exposed directly over WireGuard it holds half-open requests forever
         configDir = "/Storage/Services/Calibre-Web/config";
