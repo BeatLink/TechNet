@@ -411,7 +411,8 @@ in
                 clevisLuksAskpass = {
                     enable = true;
                     useTang = true;
-                    package = clevisPackage;
+                    # The module ships systemd-reply-password from config.systemd.package, which nixpkgs patches, so clevis must call that build's copy.
+                    package = clevisPackage.override { systemd = config.systemd.package; };
                 };
 
                 systemd.extraBin.clevis = clevis; # So `clevis luks list -d ...` works from the initrd sshd when a boot needs looking at
