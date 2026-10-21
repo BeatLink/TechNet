@@ -144,3 +144,13 @@ was not changing because Thor was offline. Every other bucket stayed clean over 
 - [ ] Turn on "Use where this computer is" in the app's Settings and confirm it finds a place
 
 Until then the app's weather uses a place chosen by name, which already works.
+
+## Flash the Ragnarok socket with its .technet name
+
+- [ ] Once `socket-ragnarok` is back online, flash it from Heimdall with Device Builder's own ESPHome
+      CLI (`esphome run socket-ragnarok.yaml --device socket-ragnarok.technet`, as the `esphome` user)
+- [ ] Confirm Vigil's "Ragnarok Socket" monitor and the "IoT Sensors" group it belongs to show online
+
+It is the only device not flashed since `.lan` was folded into `.technet`. Home Assistant and Vigil
+already reach it as `socket-ragnarok.technet` over WireGuard (`10.100.100.18`), so the flash only
+updates the name the firmware reports. Until it is online, Vigil's "IoT Sensors" group stays failed.
