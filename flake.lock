@@ -1,26 +1,5 @@
 {
   "nodes": {
-    "anthem": {
-      "inputs": {
-        "flake-utils": "flake-utils",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1790776429,
-        "narHash": "sha256-ha30hSo6aIIWlIIzmLsWsn2WqUktGy9QZCb29F//NqI=",
-        "owner": "BeatLink",
-        "repo": "Anthem",
-        "rev": "883485dfc132e6f3ebd0ddad9ff1970e16480b93",
-        "type": "github"
-      },
-      "original": {
-        "owner": "BeatLink",
-        "repo": "Anthem",
-        "type": "github"
-      }
-    },
     "app-separators": {
       "inputs": {
         "nixpkgs": [
@@ -105,7 +84,7 @@
     },
     "battletime": {
       "inputs": {
-        "flake-utils": "flake-utils_2",
+        "flake-utils": "flake-utils",
         "infinisim": "infinisim",
         "nixpkgs": [
           "nixpkgs"
@@ -128,7 +107,7 @@
     },
     "blockurl": {
       "inputs": {
-        "flake-utils": "flake-utils_3",
+        "flake-utils": "flake-utils_2",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -193,7 +172,7 @@
     "claude-code": {
       "inputs": {
         "nixpkgs": "nixpkgs",
-        "systems": "systems_4"
+        "systems": "systems_3"
       },
       "locked": {
         "lastModified": 1792555313,
@@ -350,7 +329,7 @@
     },
     "flake-utils_3": {
       "inputs": {
-        "systems": "systems_3"
+        "systems": "systems_4"
       },
       "locked": {
         "lastModified": 1731533236,
@@ -460,7 +439,7 @@
     },
     "halon": {
       "inputs": {
-        "flake-utils": "flake-utils_4",
+        "flake-utils": "flake-utils_3",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -902,7 +881,7 @@
     },
     "nixtool": {
       "inputs": {
-        "flake-utils": "flake-utils_5",
+        "flake-utils": "flake-utils_4",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -923,7 +902,7 @@
     },
     "pinephone-charge": {
       "inputs": {
-        "flake-utils": "flake-utils_6",
+        "flake-utils": "flake-utils_5",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -983,7 +962,6 @@
     },
     "root": {
       "inputs": {
-        "anthem": "anthem",
         "app-separators": "app-separators",
         "arion": "arion",
         "atuin-web": "atuin-web",
@@ -1019,6 +997,7 @@
         "vigil": "vigil",
         "waypipe-desktop": "waypipe-desktop",
         "web-greeter": "web-greeter",
+        "x-music": "x-music",
         "xdg-autostart": "xdg-autostart"
       }
     },
@@ -1113,11 +1092,11 @@
     },
     "systems_3": {
       "locked": {
-        "lastModified": 1681028828,
-        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "lastModified": 1791244623,
+        "narHash": "sha256-uuanbkFk8a313Zfrxdcz8Us/yQtaxNnKJtX8v0ZPpd8=",
         "owner": "nix-systems",
         "repo": "default",
-        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "rev": "d36eeed142f88b5a636f2e3856a53c61654cf29b",
         "type": "github"
       },
       "original": {
@@ -1128,11 +1107,11 @@
     },
     "systems_4": {
       "locked": {
-        "lastModified": 1791244623,
-        "narHash": "sha256-uuanbkFk8a313Zfrxdcz8Us/yQtaxNnKJtX8v0ZPpd8=",
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
         "owner": "nix-systems",
         "repo": "default",
-        "rev": "d36eeed142f88b5a636f2e3856a53c61654cf29b",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
         "type": "github"
       },
       "original": {
@@ -1203,7 +1182,7 @@
     },
     "vigil": {
       "inputs": {
-        "flake-utils": "flake-utils_7",
+        "flake-utils": "flake-utils_6",
         "nixpkgs": [
           "nixpkgs"
         ]
@@ -1263,6 +1242,27 @@
         "submodules": true,
         "type": "git",
         "url": "https://github.com/BeatLink/web-greeter"
+      }
+    },
+    "x-music": {
+      "inputs": {
+        "flake-utils": "flake-utils_7",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792615626,
+        "narHash": "sha256-9KIXfPz1XRYGBfPpF+P9cMT9psSWj1PPw/qmGZUPSjI=",
+        "owner": "x-tech-laboratories",
+        "repo": "Anthem",
+        "rev": "01dd6bb5eccecdea9103423c2d9fc9579d73d39d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "x-tech-laboratories",
+        "repo": "Anthem",
+        "type": "github"
       }
     },
     "xdg-autostart": {

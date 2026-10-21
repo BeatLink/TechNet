@@ -53,8 +53,8 @@
             url = "github:BeatLink/claude-chat-manager";
             inputs.nixpkgs.follows = "nixpkgs";
         };
-        anthem = {
-            url = "github:BeatLink/Anthem";
+        x-music = {
+            url = "github:x-tech-laboratories/Anthem";
             inputs.nixpkgs.follows = "nixpkgs";
         };
         smartharness.url = "github:BeatLink/SmartHarness";
