@@ -2834,10 +2834,10 @@ in
     };
 
     # The agents' endpoint is served on the dashboard's own port, so Odin,
-    # Ragnarok and Thor need to reach 9611 — over WireGuard only, the same mesh
-    # their SSH collection already used. The port stays closed on every other
-    # interface; browsers keep using the TLS vhost below.
+    # Ragnarok and Thor need to reach 9611 — over WireGuard, and on the LAN,
+    # where split DNS sends them at home. Browsers keep using the TLS vhost below.
     networking.firewall.interfaces."wireguard0".allowedTCPPorts = [ 9611 ];
+    networking.firewall.interfaces.enp2s0f1.allowedTCPPorts = [ 9611 ];
 
     nginx-vhosts.vigil = {
         domain = "vigil.heimdall.technet";
