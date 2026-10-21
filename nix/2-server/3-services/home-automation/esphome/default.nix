@@ -95,7 +95,6 @@ in
         enable = true;
         port = 6052;
         address = "localhost";
-        usePing = true;
     };
 
     environment.persistence."/Storage/Services/ESPHome".directories = [ stateDir ];
