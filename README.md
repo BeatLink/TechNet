@@ -22,7 +22,8 @@ Every host also imports [`0-common`](nix/0-common).
 On the network, but not configured from here:
 
 - **Hela** — tablet. [`4-tablet`](nix/4-tablet) is a placeholder.
-- **ThorX** — Android phone. Its Syncthing is configured on the device.
+- **[ThorX](docs/thorx.md)** — Android phone. Its Syncthing is configured on the device,
+  and Odin reaches it over adb on a fixed port.
 - **[Loki](docs/smartwatch.md)** — PineTime smart watch, bio-monitor and TechNet
   remote control. Pairs over Bluetooth rather than joining the tunnel.
 - **Home automation** — ESPHome lights, sensors, an IR bridge and two smart
