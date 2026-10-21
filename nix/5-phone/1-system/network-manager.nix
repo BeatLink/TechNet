@@ -6,7 +6,7 @@
 # are kept so the generated keyfiles stay byte-identical to what the phone is already running.
 #
 
-{ lib, ... }:
+{ lib, pkgs, ... }:
 {
 
     config = lib.mkMerge [
@@ -18,6 +18,13 @@
         # Uses Network Manager #######################################################################################################################
         {
             networking.networkmanager.enable = true;
+        }
+
+        # Wake Without Reconnecting ##################################################################################################################
+        {
+            networking.networkmanager.package = pkgs.networkmanager.overrideAttrs (old: {
+                patches = (old.patches or [ ]) ++ [ ./patches/networkmanager-keep-wowlan-wifi-on-wake.patch ];
+            });
         }
 
         # Custom Config for Thor #####################################################################################################################
