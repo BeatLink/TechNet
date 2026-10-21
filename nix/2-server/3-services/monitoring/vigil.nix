@@ -157,41 +157,6 @@ in
         owner = "vigil-agent";
     };
 
-    # Shared token each agent authenticates with, one file per agent. Heimdall
-    # is a recipient of all four (it declares every agent below); each host is
-    # a recipient only of its own, so no monitored host can impersonate
-    # another's agent. Read at runtime via `token_file`, so the tokens never
-    # enter the Nix store the way an inline `token` in `settings` would.
-    sops.secrets.vigil_agent_token_heimdall = {
-        sopsFile = "${config.technet.secrets.commonPath}/vigil-agent-heimdall.yaml";
-        key = "vigil_agent_token";
-        owner = "vigil";
-    };
-
-    sops.secrets.vigil_agent_token_odin = {
-        sopsFile = "${config.technet.secrets.commonPath}/vigil-agent-odin.yaml";
-        key = "vigil_agent_token";
-        owner = "vigil";
-    };
-
-    sops.secrets.vigil_agent_token_odin_desktop = {
-        sopsFile = "${config.technet.secrets.commonPath}/vigil-agent-odin-desktop.yaml";
-        key = "vigil_agent_token";
-        owner = "vigil";
-    };
-
-    sops.secrets.vigil_agent_token_ragnarok = {
-        sopsFile = "${config.technet.secrets.commonPath}/vigil-agent-ragnarok.yaml";
-        key = "vigil_agent_token";
-        owner = "vigil";
-    };
-
-    sops.secrets.vigil_agent_token_thor = {
-        sopsFile = "${config.technet.secrets.commonPath}/vigil-agent-thor.yaml";
-        key = "vigil_agent_token";
-        owner = "vigil";
-    };
-
     # The record's own update URL — a secret, account-specific URL that points it at the caller's apparent IP on GET. It sits beside the hostname in
     # ddns.yaml because the two are reissued together whenever the record is rotated.
     sops.secrets.ddns_sync_url = {
@@ -238,31 +203,32 @@ in
             # An agent that is configured but not currently connected is not an
             # error: its monitors report failed with an explicit message until
             # it reconnects, exactly as a refused SSH dial behaved.
+            # Each agent signs in with its own ed25519 key, whose private half lives only in that host's vigil-agent.yaml.
             agents = [
                 {
                     id = "heimdall";
                     host = "heimdall.technet";
-                    token_file = config.sops.secrets.vigil_agent_token_heimdall.path;
+                    public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIKPAW5Enb1dGlrqkwXso3KRlvZYob2qAXgukolDNtW4 vigil-agent-heimdall";
                 }
                 {
                     id = "odin";
                     host = "odin.technet";
-                    token_file = config.sops.secrets.vigil_agent_token_odin.path;
+                    public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBZyB/HfSkuAZW8Sk+Zo4bPGHJ0cXkMi+5D0N3SE4lEf vigil-agent-odin";
                 }
                 {
                     id = "odin-desktop";
                     host = "odin.technet";
-                    token_file = config.sops.secrets.vigil_agent_token_odin_desktop.path;
+                    public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINodHGt5TYexOt7zCPRyotgI5ZVMRttcvkrHDxzlL5EY vigil-agent-odin-desktop";
                 }
                 {
                     id = "ragnarok";
                     host = "ragnarok.technet";
-                    token_file = config.sops.secrets.vigil_agent_token_ragnarok.path;
+                    public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGjYBeNYewJv8nRs3WSGuTses1tH5I8E6yM8KiNB++0L vigil-agent-ragnarok";
                 }
                 {
                     id = "thor";
                     host = "thor.technet";
-                    token_file = config.sops.secrets.vigil_agent_token_thor.path;
+                    public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDVIJJMSU0UaBuBXq6o2NQBGFELXZUeaabpRftvhrXat vigil-agent-thor";
                 }
             ];
 

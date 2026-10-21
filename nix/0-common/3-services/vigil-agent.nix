@@ -83,10 +83,9 @@ in
         # Agent ######################################################################################################################################
         (lib.mkIf (builtins.elem host agentHosts) {
 
-            # One file per agent, each encrypted to Heimdall (which declares every agent) plus the single host that agent runs on, so no host can
-            # decrypt another's token. The .sops.yaml rules that carve these out of the fleet-wide 0-common rule must stay ahead of it — first match wins.
-            sops.secrets.vigil_agent_token = {
-                sopsFile = "${config.technet.secrets.commonPath}/vigil-agent-${agentId}.yaml";
+            # The agent's private signing key, held only by this host; Heimdall checks it against the public key listed in vigil.nix.
+            sops.secrets.vigil_agent_key = {
+                sopsFile = "${config.technet.secrets.path}/vigil-agent.yaml";
                 owner = "vigil-agent";
             };
 
@@ -94,7 +93,7 @@ in
                 enable = true;
                 url = "ws://${server}:9611/api/agent/ws";
                 id = agentId;
-                tokenFile = config.sops.secrets.vigil_agent_token.path;
+                keyFile = config.sops.secrets.vigil_agent_key.path;
 
                 # Same memberships `vigil-access` holds, since the monitors run the same commands: borg repo reads for backup health, and the journal for
                 # unit status and for the agent's own journal watchers.
@@ -114,16 +113,15 @@ in
             };
 
             # Desktop Notifications ##################################################################################################################
-            sops.secrets.vigil_agent_desktop_token = lib.mkIf (host == "Odin") {
-                sopsFile = "${config.technet.secrets.commonPath}/vigil-agent-odin-desktop.yaml";
-                key = "vigil_agent_token";
+            sops.secrets.vigil_agent_desktop_key = lib.mkIf (host == "Odin") {
+                sopsFile = "${config.technet.secrets.path}/vigil-agent.yaml";
                 owner = "beatlink";
             };
 
             services.vigil-agent.desktop = lib.mkIf (host == "Odin") {
                 enable = true;
                 id = "odin-desktop";
-                tokenFile = config.sops.secrets.vigil_agent_desktop_token.path;
+                keyFile = config.sops.secrets.vigil_agent_desktop_key.path;
             };
 
             systemd.services.vigil-agent = {
