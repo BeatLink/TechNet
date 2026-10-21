@@ -1,4 +1,4 @@
-{ config, ... }:
+{ config, pkgs, ... }:
 {
     # Vigil's `trilium` plugin reads /etapi/metrics to check the note
     # database is actually being modified, not just that the server answers.
@@ -18,6 +18,20 @@
         host = "127.0.0.1";
         port = 8080;
         dataDir = "/Storage/Services/Trilium/data";
+        # Drop once nixpkgs#576397 lands: patchelf after 0.15.2 overlaps node's first two segments, and it segfaults in ld.so before starting.
+        package = pkgs.trilium-server.overrideAttrs (previous: {
+            preFixup = (previous.preFixup or "") + ''
+                export PATH=${
+                    pkgs.patchelf.overrideAttrs (_: rec {
+                        version = "0.15.2";
+                        src = pkgs.fetchurl {
+                            url = "https://github.com/NixOS/patchelf/releases/download/${version}/patchelf-${version}.tar.bz2";
+                            hash = "sha256-F3RfVkFZyOIo/EEtplogSLhGxLa0Igt3y/IkFuAvLXw=";
+                        };
+                    })
+                }/bin:$PATH
+            '';
+        });
     };
 
     # Backend scripts run as the trilium user with full filesystem, network and OS access.
