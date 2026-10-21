@@ -18,8 +18,7 @@
         apiKeyHashes = {
             heimdall-vigil = "191e69fb5754d4c109762074f99bb1c0e7a715648e2453da30c32c8eb94e4da3";
             odin-gallery-dl = "9bcc27946a6570367a65ee99af097a22eddd9a87956fb30c0fb7006703f5ce13";
-            odin-firefox = "15db9d90b5832f1d715c314700af94ed12055b574d90cf684d24ee9a8aa863e5";
-            thor-firefox = "2834560315631c454879e233b1ae274066e14ae6827e41153c14fb9722dae03a";
+            firefox = "15db9d90b5832f1d715c314700af94ed12055b574d90cf684d24ee9a8aa863e5"; # One key for every Firefox, since the add-on keeps it in synced storage
         };
         openFirewall = true;
         port = 9001;
