@@ -36,13 +36,7 @@ in
 
             api = { };
 
-            http = {
-                server_host = [ "127.0.0.1" ];
-                use_x_forwarded_for = true;
-                trusted_proxies = [ "127.0.0.0/8" ];
-                ip_ban_enabled = true;
-                login_attempts_threshold = 5;
-            };
+            # The loopback bind and proxy trust live in .storage/http (Settings > System > Network); HA ignores an http block here.
 
             automation = "!include automations.yaml";
             script = "!include scripts.yaml";
