@@ -43,6 +43,9 @@
             extraConfig = ''
                 client_max_body_size 0;
                 proxy_request_buffering off;
+                # atticd answers only once a NAR is compressed and chunked onto the pool, which for a large CUDA library takes minutes, not 60s.
+                proxy_read_timeout 30m;
+                proxy_send_timeout 30m;
             '';
         };
     };

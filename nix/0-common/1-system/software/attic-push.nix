@@ -50,7 +50,8 @@ in
             ];
 
             serviceConfig = {
-                ExecStart = "${pkgs.attic-client}/bin/attic watch-store technet";
+                # Two uploads at a time: atticd writes through one SQLite connection, and five at once left the rest timing out on its pool.
+                ExecStart = "${pkgs.attic-client}/bin/attic watch-store --jobs 2 technet";
                 # Setting either threshold by hand also stops glibc raising them on the fly, which is what otherwise moves large blocks off
                 # mmap and onto the heap, where freeing them returns nothing. Capping the arenas keeps 19 threads from each holding a free list.
                 Environment = [
@@ -67,6 +68,48 @@ in
                 # Uploading is never worth slowing a build or a desktop for.
                 Nice = 19;
                 IOSchedulingClass = "idle";
+            };
+        };
+
+        # Retry ######################################################################################################################################
+        # The watcher uploads each path once and forgets a failure, so this pushes the running system and every build result again; paths the cache
+        # already holds are skipped, so a pass with nothing missing costs one query.
+        systemd.services.attic-push-retry = {
+            description = "Push anything the Attic watcher failed to upload";
+            after = [
+                "network-online.target"
+                "sops-install-secrets.service"
+            ];
+            wants = [ "network-online.target" ];
+            path = [
+                pkgs.attic-client
+                pkgs.gnugrep
+            ];
+            environment.XDG_CONFIG_HOME = cfg.configDir;
+            script = ''
+                {
+                    readlink -e /run/current-system
+                    for root in /nix/var/nix/gcroots/auto/*; do
+                        readlink -e "$root" || true # A result link deleted since leaves its root dangling
+                    done
+                } \
+                    | grep '^/nix/store/' \
+                    | attic push --jobs 2 --stdin technet
+            '';
+            serviceConfig = {
+                Type = "oneshot";
+                Nice = 19;
+                IOSchedulingClass = "idle";
+            };
+        };
+
+        systemd.timers.attic-push-retry = {
+            description = "Hourly retry of failed Attic uploads";
+            wantedBy = [ "timers.target" ];
+            timerConfig = {
+                OnCalendar = "hourly";
+                RandomizedDelaySec = "15m";
+                Persistent = true;
             };
         };
 
