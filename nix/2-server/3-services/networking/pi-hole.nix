@@ -126,6 +126,12 @@
                     url = "https://raw.githubusercontent.com/DandelionSprout/adfilt/master/Alternate%20versions%20Anti-Malware%20List/AntiMalwareHosts.txt";
                     description = "DandelionSprout anti-malware";
                 }
+                # A fixed path, not a store path: the setup only ever adds lists, so each edit would leave a stale entry behind.
+                {
+                    url = "file:///etc/pihole-allowlist.txt";
+                    type = "allow";
+                    description = "TechNet allowlist";
+                }
             ];
             settings = {
                 webserver.acl = "-0.0.0.0/0,+127.0.0.1/32";
@@ -327,6 +333,43 @@
             RestrictSUIDSGID = true;
             MemoryDenyWriteExecute = true;
             LockPersonality = true;
+        };
+    };
+
+    # Allowlist --------------------------------------------------------------------------------------------------------------------------------------
+    # Exact domains the blocklists catch but that sites in use depend on, one per line.
+    environment.etc."pihole-allowlist.txt".text = ''
+        # Ecwid's storefront script, blocked by hagezi Ultimate, without which Ecwid shops such as Electro World show no catalogue
+        app.ecwid.com
+    '';
+
+    # Rebuilds gravity on the deploy that changes the allowlist, rather than at the next Sunday refresh.
+    systemd.services.pihole-allowlist = {
+        description = "Rebuild Pi-hole gravity when the allowlist changes";
+        after = [ "pihole-ftl-setup.service" ]; # The setup registers the list, so gravity must run after it
+        wantedBy = [ "multi-user.target" ];
+        restartTriggers = [ config.environment.etc."pihole-allowlist.txt".source ];
+        serviceConfig = {
+            Type = "oneshot";
+            RemainAfterExit = true;
+            ExecStart = lib.getExe (
+                pkgs.writeShellApplication {
+                    name = "pihole-allowlist-apply";
+                    runtimeInputs = [
+                        pkgs.coreutils
+                        pkgs.systemd
+                    ];
+                    text = ''
+                        stamp="${config.services.pihole-ftl.stateDirectory}/allowlist.sha256"
+                        current="$(sha256sum /etc/pihole-allowlist.txt | cut -d' ' -f1)"
+                        if [ -f "$stamp" ] && [ "$(cat "$stamp")" = "$current" ]; then
+                            exit 0
+                        fi
+                        systemctl start pihole-gravity.service
+                        echo "$current" > "$stamp"
+                    '';
+                }
+            );
         };
     };
 
