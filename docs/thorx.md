@@ -24,10 +24,11 @@ public repo; the app's status screen shows it.
 
 - **Odin** has `adb` from
   [`android-debug-bridge.nix`](../nix/3-laptop/4-apps/tools/android-debug-bridge.nix).
-  Its key lives in `~/.android`, persisted under
-  `/Storage/Apps/Tools/Android-Debug-Bridge`, and ThorX trusts that key, so the
-  pairing survives reboots on both ends. The key is the only secret; it never
-  goes in the repo or in sops.
+  Its private key is the sops secret `adb_private_key` in
+  [`secrets/3-laptop/android-debug-bridge.yaml`](../secrets/3-laptop/android-debug-bridge.yaml),
+  and `~/.android/adbkey` is a link to the decrypted copy. ThorX trusts that key,
+  so the pairing survives reboots and a reinstall of Odin. The rest of
+  `~/.android` is persisted under `/Storage/Apps/Tools/Android-Debug-Bridge`.
 - **ThorX** runs
   [ADB Auto Enable](https://github.com/mouldybread/adb-auto-enable)
   (`com.tpn.adbautoenable`). At every boot it switches wireless debugging on,
@@ -39,11 +40,13 @@ fixed port is what makes `adb connect` work without looking the port up.
 
 ### Setting it up again
 
-After a factory reset, or for a new Odin key:
+After a factory reset of ThorX, or for a new key:
 
 1. On ThorX, open Developer options, then **Wireless debugging**, and turn it on.
 2. Pair Odin: tap **Pair device with pairing code**, then on Odin run
-   `adb pair 10.100.100.5:<pairing port> <code>`.
+   `adb pair 10.100.100.5:<pairing port> <code>`. For a new key, generate one with
+   `adb keygen`, replace `adb_private_key` with it in the sops file, and switch
+   Odin before pairing.
 3. Connect once on the random port shown on the Wireless debugging screen:
    `adb connect 10.100.100.5:<port>`. If the screen is out of reach,
    `nix run nixpkgs#nmap -- -Pn -p 30000-50000 --open 10.100.100.5` finds it.
