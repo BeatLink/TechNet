@@ -270,7 +270,10 @@ in
                                     tomoki1207.pdf
                                     vivaxy.vscode-conventional-commits
                                     jackiotyu.git-worktree-manager
-                                    activitywatch.aw-watcher-vscode
+                                    # Also reports non-editor tabs such as Claude chats, and keeps time running while the window has focus.
+                                    (activitywatch.aw-watcher-vscode.overrideAttrs (old: {
+                                        patches = (old.patches or [ ]) ++ [ ./patches/aw-watcher-vscode-track-tabs.patch ];
+                                    }))
                                 ]
                                 ++ (with pkgs.nix-vscode-extensions.vscode-marketplace; [
                                     fnando.linter

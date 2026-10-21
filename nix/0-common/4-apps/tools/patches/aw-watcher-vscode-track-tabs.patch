@@ -1,0 +1,86 @@
+--- a/out/src/extension.js
++++ b/out/src/extension.js
+@@ -40,6 +40,14 @@
+         let subscriptions = [];
+         vscode_1.window.onDidChangeTextEditorSelection(this._onEvent, this, subscriptions);
+         vscode_1.window.onDidChangeActiveTextEditor(this._onEvent, this, subscriptions);
++        vscode_1.window.onDidChangeWindowState(this._onEvent, this, subscriptions);
++        if (vscode_1.window.tabGroups) {
++            vscode_1.window.tabGroups.onDidChangeTabs(this._onEvent, this, subscriptions);
++            vscode_1.window.tabGroups.onDidChangeTabGroups(this._onEvent, this, subscriptions);
++        }
++        // Keeps time accruing while the window has focus but nothing in it changes, such as reading or waiting on a chat.
++        const focusedPulse = setInterval(() => this._onEvent(), this._pulseTime * 1000 / 2);
++        subscriptions.push(new vscode_1.Disposable(() => clearInterval(focusedPulse)));
+         this._disposable = vscode_1.Disposable.from(...subscriptions);
+     }
+     init() {
+@@ -72,13 +80,13 @@
+         this._disposable.dispose();
+     }
+     _onEvent() {
+-        if (!this._bucketCreated) {
++        if (!this._bucketCreated || !vscode_1.window.state.focused) {
+             return;
+         }
+         // Create and send heartbeat
+         try {
+             const heartbeat = this._createHeartbeat();
+-            const filePath = this._getFilePath();
++            const filePath = heartbeat.data.file;
+             const curTime = new Date().getTime();
+             // Send heartbeat if file changed or enough time passed
+             if (filePath !== this._lastFilePath || this._lastHeartbeatTime + (1000 / (this._maxHeartbeatsPerSec)) < curTime) {
+@@ -100,6 +108,20 @@
+         });
+     }
+     _createHeartbeat() {
++        if (!vscode_1.window.activeTextEditor) {
++            const tab = this._getActiveTab();
++            if (tab) {
++                return {
++                    timestamp: new Date(),
++                    duration: 0,
++                    data: {
++                        language: this._getTabKind(tab),
++                        project: this._getWorkspaceFolder() || 'unknown',
++                        file: tab.input && tab.input.uri ? tab.input.uri.fsPath : tab.label
++                    }
++                };
++            }
++        }
+         return {
+             timestamp: new Date(),
+             duration: 0,
+@@ -110,6 +132,31 @@
+             }
+         };
+     }
++    _getActiveTab() {
++        const group = vscode_1.window.tabGroups && vscode_1.window.tabGroups.activeTabGroup;
++        return group ? group.activeTab : undefined;
++    }
++    _getTabKind(tab) {
++        const input = tab.input;
++        if (vscode_1.TabInputWebview && input instanceof vscode_1.TabInputWebview) {
++            // Webview tabs report their view type with an internal prefix in front.
++            return `webview:${input.viewType.replace(/^mainThreadWebview-/, '')}`;
++        }
++        if (vscode_1.TabInputTerminal && input instanceof vscode_1.TabInputTerminal) {
++            return 'terminal';
++        }
++        if (vscode_1.TabInputCustom && input instanceof vscode_1.TabInputCustom) {
++            return `custom:${input.viewType}`;
++        }
++        if (vscode_1.TabInputNotebook && input instanceof vscode_1.TabInputNotebook) {
++            return `notebook:${input.notebookType}`;
++        }
++        return 'unknown';
++    }
++    _getWorkspaceFolder() {
++        const folders = vscode_1.workspace.workspaceFolders;
++        return folders && folders.length > 0 ? folders[0].uri.path : undefined;
++    }
+     _getProjectFolder() {
+         const fileUri = this._getActiveFileUri();
+         if (!fileUri) {
