@@ -25,9 +25,6 @@
                 "pf:/Storage/Apps/Fun/Steam/home/beatlink/.local/share/Steam/steamapps/common"
 
                 # Regenerable App Data ###############################################################################################################
-                "fm:*/.lmstudio/models"
-                "fm:*/.lmstudio/extensions"
-                "fm:*/.lmstudio/disabled-mmproj"
                 "fm:*/.stremio-server/stremio-cache"
                 "fm:*/.claude/tmp"
                 "fm:*/target"
