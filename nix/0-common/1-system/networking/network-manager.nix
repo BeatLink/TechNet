@@ -57,6 +57,7 @@
                     ipv4 = {
                         method = lib.mkDefault "auto";
                         dns = "192.168.0.2";
+                        dns-priority = "1"; # Ahead of the WireGuard profile's 2, so at home Pi-hole is asked over the LAN and answers with LAN addresses
                     };
                     ipv6.method = "disabled";
                 };
