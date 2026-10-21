@@ -5,7 +5,7 @@
         ./gh.nix
         ./battletime-appbuilder.nix
         ./nodejs.nix
-        ./smartharness.nix
+        ./codex.nix
         ./sqlitebrowser.nix
         ./vscodium.nix
     ];

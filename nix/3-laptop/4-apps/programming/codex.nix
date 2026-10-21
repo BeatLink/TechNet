@@ -1,6 +1,6 @@
-# SmartHarness #######################################################################################################################################
+# CODEX ##############################################################################################################################################
 #
-# The staged harness for local GGUF models built in /Storage/Files/Projects/SmartHarness, installed from its GitHub flake with Trilium's MCP tools.
+# The staged harness for local GGUF models built in /Storage/Files/Projects/CODEX, installed from its GitHub flake with Trilium's MCP tools.
 #
 { config, inputs, ... }:
 let
@@ -10,10 +10,10 @@ in
     home-manager.users.beatlink =
         { lib, pkgs, ... }:
         let
-            smartharness = inputs.smartharness.packages.${pkgs.stdenv.hostPlatform.system}.default;
-            settings = pkgs.writeText "smartharness-settings.json" (
+            codex = inputs.codex.packages.${pkgs.stdenv.hostPlatform.system}.default;
+            settings = pkgs.writeText "codex-settings.json" (
                 builtins.toJSON {
-                    model_path = "/Storage/Files/Projects/SmartHarness/models/model.gguf";
+                    model_path = "/Storage/Files/Projects/CODEX/models/model.gguf";
                     mcp_servers = [
                         {
                             name = "trilium";
@@ -37,8 +37,8 @@ in
             home = {
                 packages = [
                     (pkgs.symlinkJoin {
-                        name = "smartharness";
-                        paths = [ smartharness ];
+                        name = "codex";
+                        paths = [ codex ];
                         nativeBuildInputs = [ pkgs.makeWrapper ];
                         postBuild = ''
                             for program in $out/bin/*; do
@@ -49,16 +49,16 @@ in
                 ];
 
                 # The settings and the knowledge store live here, and the home rollback would otherwise blank both.
-                persistence."/Storage/Apps/AI/SmartHarness" = {
+                persistence."/Storage/Apps/AI/CODEX" = {
                     directories = [
-                        ".config/smartharness"
-                        ".local/share/smartharness"
+                        ".config/codex"
+                        ".local/share/codex"
                     ];
                 };
 
                 # The options page rewrites this file, so it is seeded once instead of linked read-only from the store.
-                activation.smartharnessSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-                    [ -e "$HOME/.config/smartharness/settings.json" ] || run install -Dm644 ${settings} "$HOME/.config/smartharness/settings.json"
+                activation.codexSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+                    [ -e "$HOME/.config/codex/settings.json" ] || run install -Dm644 ${settings} "$HOME/.config/codex/settings.json"
                 '';
             };
         };

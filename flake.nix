@@ -57,7 +57,7 @@
             url = "github:x-tech-laboratories/Anthem";
             inputs.nixpkgs.follows = "nixpkgs";
         };
-        smartharness.url = "github:BeatLink/SmartHarness";
+        codex.url = "github:BeatLink/CODEX";
         playitslowly = {
             url = "github:BeatLink/playitslowly";
             inputs.nixpkgs.follows = "nixpkgs";
