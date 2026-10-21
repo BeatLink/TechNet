@@ -9,7 +9,7 @@
         enable = true;
         settings = {
             user = {
-                email = "git@beatlink.simplelogin.com";
+                email = "47278150+BeatLink@users.noreply.github.com";
                 name = "BeatLink";
             };
             core = {
