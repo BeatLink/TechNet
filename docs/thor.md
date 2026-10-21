@@ -100,7 +100,7 @@ continuing: it is a local disk, so a wrong path destroys Odin's data.
 nixtool run install/install-local --host Thor --target-disk /dev/sdX
 ```
 
-The passphrase and both host keys come from `secrets/3-laptop/nixtool.yaml` via
+The passphrase and both host keys come from `secrets/admin/nixtool.yaml` via
 sops; nothing is typed. The command partitions with disko, seeds
 `/persistent/etc/ssh` so Thor boots with the identity sops expects, runs
 `nixos-install`, then unmounts and exports the pool.

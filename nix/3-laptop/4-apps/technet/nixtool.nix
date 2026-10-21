@@ -1,23 +1,20 @@
 # NixTool
 #
-# Odin drives every install, so it holds every host's install credentials. Heimdall's and Ragnarok's passphrases are read from the clevis file that
-# already owns them; the SSH host keys, and the two passphrases with no other home, live in nixtool.yaml.
+# Odin drives every install, so nixtool needs every host's install credentials. It decrypts them itself with the user's own age key, so no host key
+# can read them: Heimdall's and Ragnarok's passphrases come from the clevis file that already owns them, the rest from secrets/admin/nixtool.yaml.
 #
-{ config, ... }:
+{ ... }:
+let
+    clevisPassphrase = folder: {
+        file = "secrets/${folder}/clevis.yaml";
+        key = "zfs_passphrase";
+    };
+    adminSecret = key: {
+        file = "secrets/admin/nixtool.yaml";
+        inherit key;
+    };
+in
 {
-    # Encryption keys ################################################################################################################################
-    # Odin is in the recipient list for these two files, so rotating a passphrase stays a single edit to the host's own clevis.yaml.
-    sops.secrets.heimdall_zfs_passphrase = {
-        key = "zfs_passphrase";
-        sopsFile = "${config.technet.secrets.root}/2-server/clevis.yaml";
-        owner = "beatlink";
-    };
-    sops.secrets.ragnarok_zfs_passphrase = {
-        key = "zfs_passphrase";
-        sopsFile = "${config.technet.secrets.root}/1-backup-server/clevis.yaml";
-        owner = "beatlink";
-    };
-
     # NixTool ########################################################################################################################################
     programs.nixtool = {
         enable = true;
@@ -35,36 +32,27 @@
             TOWBOOT_REPO = "/Storage/Files/Projects/Coding/Pinephone/Tow-Boot";
         };
 
-        hostValueFiles = {
-            Heimdall.ENCRYPTION_KEY = config.sops.secrets.heimdall_zfs_passphrase.path;
-            Ragnarok.ENCRYPTION_KEY = config.sops.secrets.ragnarok_zfs_passphrase.path;
-        };
-
-        sops = {
-            enable = true;
-            owner = "beatlink";
-            sopsFile = "${config.technet.secrets.path}/nixtool.yaml";
-
-            # No SSH_PASSWORD: it is whatever the target's live installer was given that boot, so install-nixos prompts for it
-            hostValueSecrets = {
-                Odin = {
-                    ENCRYPTION_KEY = "odin_encryption_key"; # Odin runs no clevis, so its passphrase has no other file to live in
-                    SSH_HOST_KEY = "odin_ssh_host_key";
-                    SSH_INITRD_KEY = "odin_ssh_initrd_key";
-                };
-                Heimdall = {
-                    SSH_HOST_KEY = "heimdall_ssh_host_key";
-                    SSH_INITRD_KEY = "heimdall_ssh_initrd_key";
-                };
-                Ragnarok = {
-                    SSH_HOST_KEY = "ragnarok_ssh_host_key";
-                    SSH_INITRD_KEY = "ragnarok_ssh_initrd_key";
-                };
-                Thor = {
-                    ENCRYPTION_KEY = "thor_encryption_key";
-                    SSH_HOST_KEY = "thor_ssh_host_key";
-                    SSH_INITRD_KEY = "thor_ssh_initrd_key";
-                };
+        # No SSH_PASSWORD: it is whatever the target's live installer was given that boot, so install-nixos prompts for it
+        hostSopsValues = {
+            Odin = {
+                ENCRYPTION_KEY = adminSecret "odin_encryption_key"; # Odin runs no clevis, so its passphrase has no other file to live in
+                SSH_HOST_KEY = adminSecret "odin_ssh_host_key";
+                SSH_INITRD_KEY = adminSecret "odin_ssh_initrd_key";
+            };
+            Heimdall = {
+                ENCRYPTION_KEY = clevisPassphrase "2-server";
+                SSH_HOST_KEY = adminSecret "heimdall_ssh_host_key";
+                SSH_INITRD_KEY = adminSecret "heimdall_ssh_initrd_key";
+            };
+            Ragnarok = {
+                ENCRYPTION_KEY = clevisPassphrase "1-backup-server";
+                SSH_HOST_KEY = adminSecret "ragnarok_ssh_host_key";
+                SSH_INITRD_KEY = adminSecret "ragnarok_ssh_initrd_key";
+            };
+            Thor = {
+                ENCRYPTION_KEY = adminSecret "thor_encryption_key";
+                SSH_HOST_KEY = adminSecret "thor_ssh_host_key";
+                SSH_INITRD_KEY = adminSecret "thor_ssh_initrd_key";
             };
         };
     };
