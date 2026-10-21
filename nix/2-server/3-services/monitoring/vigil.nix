@@ -2097,7 +2097,9 @@ in
                                             name = "On Disk";
                                             id = "backup-laptop-on-disk";
                                             type = "borg";
-                                            interval = "15m";
+                                            interval = "1h";
+                                            # Vorta starts this profile at :10 (vorta.nix), so polls stay 30 minutes clear of it.
+                                            offset = "40m";
                                             # Local repo — no second SSH hop, so this answers far faster than
                                             # the pushed copies.
                                             timeout = "5m";
@@ -2133,6 +2135,8 @@ in
                                             id = "backup-laptop-heimdall";
                                             type = "borg";
                                             interval = "1h";
+                                            # Vorta starts this profile at :15 (vorta.nix), so polls stay 30 minutes clear of it.
+                                            offset = "45m";
                                             # Remote repo on the backup server, whose data pool is a single
                                             # USB disk (~13 MB/s): a read can take many minutes when the pool
                                             # is busy. Long timeout so a slow answer still counts, wide
@@ -2178,6 +2182,8 @@ in
                                             id = "backup-laptop-ragnarok";
                                             type = "borg";
                                             interval = "1h";
+                                            # Vorta starts this profile at :20 (vorta.nix), so polls stay 30 minutes clear of it.
+                                            offset = "50m";
                                             # Remote repo on the backup server, whose data pool is a single
                                             # USB disk (~13 MB/s): a read can take many minutes when the pool
                                             # is busy. Long timeout so a slow answer still counts, wide
