@@ -114,11 +114,11 @@
         "rust-overlay": "rust-overlay"
       },
       "locked": {
-        "lastModified": 1792525429,
-        "narHash": "sha256-5gPGBwaAdlt7WM1Kvvxa5uPiJVLarAETAMhOVxsFNns=",
+        "lastModified": 1792572670,
+        "narHash": "sha256-KLNHMbx1jyR42J59cj/UvYI/OMCb1GzegjhLotuFCXM=",
         "owner": "BeatLink",
         "repo": "BattleTime",
-        "rev": "e2e48fef7e3b625cf955d4d4d458f70e53cc18ae",
+        "rev": "e192ca98cb10df957dc4f244da25652b4da1fc95",
         "type": "github"
       },
       "original": {
