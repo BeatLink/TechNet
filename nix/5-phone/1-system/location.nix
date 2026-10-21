@@ -16,4 +16,7 @@
 #
 {
     users.users.geoclue.extraGroups = [ "networkmanager" ];
+
+    # The default list omits phosh, and without an agent geoclue holds every GetClient call forever, so no app ever gets a fix
+    services.geoclue2.whitelistedAgents = [ "sm.puri.Phosh" ];
 }
