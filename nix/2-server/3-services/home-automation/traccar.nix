@@ -2,8 +2,8 @@
 #
 # The GPS tracking server, receiving over the OsmAnd protocol alone: Thor posts its geoclue fix to port 5055, and no other decoder is started.
 #
-# 5055 is deliberately not in `allowedTCPPorts`. It is reachable because wireguard0 is a trusted interface, so every peer in the TechNet can post to
-# it; the device id in each report is what Traccar matches against a device, not the firewall.
+# 5055 is open over wireguard0, a trusted interface, and on the LAN, where split DNS sends Thor at home; the device id in each report is what Traccar
+# matches against a device, not the firewall.
 #
 # Devices and users live only in the database -- there is no declarative provisioning of either. Two things therefore have to be done once in the web
 # UI: add a device whose identifier is `thor`, and add a read-only `vigil` user whose password matches secrets/2-server/traccar.yaml, which is what the
@@ -31,6 +31,8 @@
             osmand.port = "5055";
         };
     };
+
+    networking.firewall.interfaces.enp2s0f1.allowedTCPPorts = [ 5055 ];
 
     environment.persistence."/Storage/Services/Traccar".directories = [ "/var/lib/private/traccar" ];
 
