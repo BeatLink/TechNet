@@ -137,9 +137,10 @@ in
 
         # BlockURL API Key ###########################################################################################################################
         {
-            # Heimdall's own copy of this key lives in 2-server/blockurl.nix; .sops.yaml names Odin as a second recipient of the file.
+            # gallery-dl's own client key; BlockURL on Heimdall holds only its hash.
             sops.secrets.blockurl_api_key = {
-                sopsFile = "${config.technet.secrets.root}/2-server/blockurl.yaml";
+                key = "blockurl_gallery_dl_api_key";
+                sopsFile = "${config.technet.secrets.path}/blockurl.yaml";
                 owner = "beatlink";
             };
         }

@@ -1,16 +1,26 @@
 # https://github.com/BeatLink/BlockURL
 
 { config, ... }: {
-    sops.secrets.blockurl_api_key = {
-        owner = "blockurl"; # must match services.blockurl.user, which reads the key as its owner
-        group = "vigil-monitor"; # Read by the `cut` the blockurl plugin runs on the Vigil host as the `vigil` user
+    # Vigil's own client key; the server itself holds only the hashes below.
+    sops.secrets.blockurl_vigil_api_key = {
+        group = "vigil-monitor"; # Read by the `cat` the blockurl plugin runs on the Vigil host as the `vigil` user
         mode = "0440";
         sopsFile = "${config.technet.secrets.path}/blockurl.yaml";
     };
 
+    sops.secrets.blockurl_storage_secret.sopsFile = "${config.technet.secrets.path}/blockurl.yaml";
+
     services.blockurl = {
         enable = true;
-        apiKeyFile = config.sops.secrets.blockurl_api_key.path;
+        storageSecretFile = config.sops.secrets.blockurl_storage_secret.path;
+
+        # One key per client, made with `openssl rand -hex 32` and hashed with `printf %s KEY | sha256sum`; the keys sit in each host's blockurl.yaml.
+        apiKeyHashes = {
+            heimdall-vigil = "191e69fb5754d4c109762074f99bb1c0e7a715648e2453da30c32c8eb94e4da3";
+            odin-gallery-dl = "9bcc27946a6570367a65ee99af097a22eddd9a87956fb30c0fb7006703f5ce13";
+            odin-firefox = "15db9d90b5832f1d715c314700af94ed12055b574d90cf684d24ee9a8aa863e5";
+            thor-firefox = "2834560315631c454879e233b1ae274066e14ae6827e41153c14fb9722dae03a";
+        };
         openFirewall = true;
         port = 9001;
         host = "127.0.0.1";
