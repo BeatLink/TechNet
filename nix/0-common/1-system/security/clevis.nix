@@ -415,6 +415,11 @@ in
                 };
 
                 systemd.extraBin.clevis = clevis; # So `clevis luks list -d ...` works from the initrd sshd when a boot needs looking at
+
+                # Each binding has its own random key, so a cached answer only burns a KDF pass on the other device, and once root opens it is left locked
+                luks.devices = lib.genAttrs clevisCfg.luksDevices (name: {
+                    crypttabExtraOpts = [ "password-cache=no" ];
+                });
             };
         })
     ];
