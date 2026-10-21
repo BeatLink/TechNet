@@ -36,8 +36,8 @@ in
     config = lib.mkIf cfg.enable {
         technet.atticPush.configDir = atticConfig;
 
-        # The same token for every pusher: Attic scopes by cache, not by who is writing, so a per-host token would buy nothing.
-        sops.secrets.attic_push_token.sopsFile = "${config.technet.secrets.commonPath}/attic-push.yaml";
+        # Each pusher has its own token, made with `atticadm make-token --sub <host>`, so Attic records which host uploaded each path.
+        sops.secrets.attic_push_token.sopsFile = "${config.technet.secrets.path}/attic-push.yaml";
 
         # Watcher ####################################################################################################################################
         systemd.services.attic-watch-store = {
