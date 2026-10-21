@@ -26,6 +26,7 @@
                 "TechNet Wi-Fi" = {
                     wifi.band = "bg"; # Thor's rtl8723cs is 2.4GHz only, so the shared 5GHz default matches no AP it can see.
                     wifi.hidden = lib.mkForce false;
+                    wifi.wake-on-wlan = "2"; # Arms WoWLAN, which is what makes NetworkManager leave Wi-Fi associated across a suspend.
                 };
                 "TechNet WireGuard (Split Tunnel)" = {
                     ipv4.addresses = "10.100.100.4/24";
