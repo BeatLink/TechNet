@@ -592,8 +592,8 @@ in
                                                     id = "heimdall-load";
                                                     type = "load";
                                                     interval = "1m";
-                                                    warning = 70;
-                                                    threshold = 100;
+                                                    warning = 200;
+                                                    threshold = 1000000; # Unreachable on purpose: X-Monitor ignores a warning given without a threshold, and load here should never fail.
                                                     agent = "heimdall";
                                                 }
                                                 {
