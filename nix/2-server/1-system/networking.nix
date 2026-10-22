@@ -107,7 +107,7 @@
                         # PinePhone
                         PublicKey = "3HLX2V7Z1+40bXbetzOt/K8BX7/65my77j0SlwIBDXo=";
                         AllowedIPs = [ "10.100.100.4/32" ];
-                        PersistentKeepalive = 25;
+                        # No keepalive: a packet queued for a sleeping phone sets off a handshake retry every 5s, and the phone keeps its own NAT path open.
                     }
                     {
                         # Phone
