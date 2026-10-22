@@ -36,7 +36,8 @@
 # while cpu reads every minute, and a failing pool shows as a failing ZFS
 # monitor rather than as one degraded "Disks" roll-up.
 #
-# The tree is one group per host, then per domain. Each host holds
+# The tree is one group per host, then per domain, and a second view regroups
+# the same monitors per domain, then per host. Each host holds
 # `Availability`, `System Stats` (Compute, Memory, Storage, Network),
 # `Running Services`, `Backups` where it owns source data, and `Security`. A
 # group reports the worst case of its children, so a host still collapses to
@@ -123,6 +124,32 @@ let
 
     # The same definition every host's sudo rules read, so a monitor's arguments always match what sudoers permits.
     deploy = import ../../../0-common/1-system/software/deploy.nix;
+
+    # The "By domain" view, read off the host tree: one group per domain, holding each host's copy through a link named after the host.
+    domainView =
+        plugins:
+        let
+            isHost = p: lib.hasSuffix "-host" (p.id or "");
+            hosts = builtins.filter isHost plugins;
+            domains = lib.unique (lib.concatMap (host: map (domain: domain.name) host.children) hosts);
+            linksTo =
+                domain:
+                lib.concatMap (
+                    host:
+                    map (copy: {
+                        ref = copy.id;
+                        name = host.name;
+                    }) (builtins.filter (child: child.name == domain) host.children)
+                ) hosts;
+        in
+        map (domain: {
+            name = domain;
+            id = "domain-${lib.toLower (lib.replaceStrings [ " " ] [ "-" ] domain)}";
+            type = "group";
+            children = linksTo domain;
+        }) domains
+        # Roots that are not hosts, like the IoT sensors, appear in this view unchanged.
+        ++ map (p: { ref = p.id or p.name; }) (builtins.filter (p: !isHost p) plugins);
 
 in
 {
@@ -272,6 +299,15 @@ in
                 status_failed = "red";
                 status_unavailable = "lightgray";
             };
+
+            # The tree below is the "By host" view; "By domain" shows the same monitors regrouped, with no monitor defined twice.
+            view_name = "By host";
+            views = [
+                {
+                    name = "By domain";
+                    plugins = domainView config.services.vigil.settings.plugins;
+                }
+            ];
 
             plugins = [
                 {
