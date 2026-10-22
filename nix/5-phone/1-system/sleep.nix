@@ -105,7 +105,7 @@ in
                 timerConfig = {
                     OnCalendar = "*:00,30";
                     WakeSystem = true;
-                    AccuracySec = "1min";
+                    AccuracySec = "1s"; # The check-in monitors poll a minute after the slot, so the window must open on it
                 };
             };
 

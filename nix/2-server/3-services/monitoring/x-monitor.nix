@@ -1554,6 +1554,7 @@ in
                                                     id = "thor-nixos-deployment";
                                                     type = "nixos_upgrade";
                                                     interval = "5m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     flake = upgradeFlake;
                                                     configuration = "Thor";
                                                     eval_agent = "heimdall"; # Evaluating the flake on four 1.15GHz A53s takes the phone out of service for the duration
@@ -1593,18 +1594,24 @@ in
                                             type = "group";
                                             children =
                                                 map
-                                                    (host: {
-                                                        name = host;
-                                                        id = "${lib.toLower host}-nix-gc";
-                                                        type = "nix_gc";
-                                                        interval = "1h";
-                                                        max_age = "2w"; # nix.gc.dates is weekly, so this tolerates one missed run
-                                                        warning = 90; # Same policy as each host's Filesystems monitor, so the store's fill alarms once rather than twice
-                                                        threshold = 96;
-                                                        max_generation_age = "30d"; # --delete-older-than 7d, run weekly, should never leave one this old
-                                                        gc_args = gcArgs;
-                                                        agent = lib.toLower host;
-                                                    })
+                                                    (
+                                                        host:
+                                                        {
+                                                            name = host;
+                                                            id = "${lib.toLower host}-nix-gc";
+                                                            type = "nix_gc";
+                                                            interval = "1h";
+                                                            max_age = "2w"; # nix.gc.dates is weekly, so this tolerates one missed run
+                                                            warning = 90; # Same policy as each host's Filesystems monitor, so the store's fill alarms once rather than twice
+                                                            threshold = 96;
+                                                            max_generation_age = "30d"; # --delete-older-than 7d, run weekly, should never leave one this old
+                                                            gc_args = gcArgs;
+                                                            agent = lib.toLower host;
+                                                        }
+                                                        // lib.optionalAttrs (host == "Thor") {
+                                                            offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
+                                                        }
+                                                    )
                                                     [
                                                         "Heimdall"
                                                         "Odin"
@@ -1620,6 +1627,7 @@ in
                                                         path = "/nix";
                                                         threshold = 90;
                                                         interval = "10m";
+                                                        offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                         agent = "thor";
                                                     }
                                                 ];
@@ -2395,6 +2403,8 @@ in
                                     id = "thor";
                                     type = "uptime";
                                     target_host = "thor.technet";
+                                    interval = "30m"; # A ping to a sleeping phone sets WireGuard retrying its handshake every 5s for 90s
+                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                 }
                                 {
                                     name = "System Stats";
@@ -2451,6 +2461,7 @@ in
                                                     id = "thor-processes";
                                                     type = "processes";
                                                     interval = "5m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     max_processes = 20;
                                                     grid_col_span = 2;
                                                     agent = "thor";
@@ -2469,6 +2480,7 @@ in
                                                     id = "thor-battery";
                                                     type = "power";
                                                     interval = "5m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     battery = "axp20x-battery";
                                                     charge_warning = 20;
                                                     charge_threshold = 10;
@@ -2480,6 +2492,7 @@ in
                                                     id = "thor-keyboard-battery";
                                                     type = "power";
                                                     interval = "5m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     battery = "ip5xxx-battery";
                                                     agent = "thor";
                                                 }
@@ -2542,6 +2555,7 @@ in
                                                     id = "thor-btrfs";
                                                     type = "btrfs";
                                                     interval = "10m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     warning = 90;
                                                     threshold = 96;
                                                     agent = "thor";
@@ -2553,6 +2567,7 @@ in
                                                     path = "/";
                                                     threshold = 90;
                                                     interval = "10m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     agent = "thor";
                                                 }
                                                 {
@@ -2562,6 +2577,7 @@ in
                                                     path = "/Storage";
                                                     threshold = 90;
                                                     interval = "10m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     agent = "thor";
                                                 }
                                                 {
@@ -2571,6 +2587,7 @@ in
                                                     path = "/boot";
                                                     threshold = 90;
                                                     interval = "10m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     agent = "thor";
                                                 }
                                                 {
@@ -2579,6 +2596,7 @@ in
                                                     id = "thor-filesystems";
                                                     type = "filesystems";
                                                     interval = "10m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     warning = 90;
                                                     threshold = 96;
                                                     inode_warning = 85;
@@ -2737,6 +2755,7 @@ in
                                             id = "thor-vuln-scan";
                                             type = "vuln_scan";
                                             interval = "1d";
+                                            offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                             timeout = "30m"; # A full -sV sweep with every vuln script takes a few minutes; this only bounds a host that stops answering mid-scan
                                             scan_host = "thor.technet";
                                             agent = "heimdall";
