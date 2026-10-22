@@ -602,8 +602,8 @@ in
                                                     id = "heimdall-temperature";
                                                     type = "temperature";
                                                     interval = "1m";
-                                                    warning = 70;
-                                                    threshold = 80;
+                                                    warning = 90;
+                                                    threshold = 100;
                                                     agent = "heimdall";
                                                 }
                                                 {
