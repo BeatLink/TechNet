@@ -1461,6 +1461,7 @@ in
                                                     interval = "10m";
                                                     api_url = "http://127.0.0.1:8384";
                                                     api_key_command = "cat /Storage/Services/Syncthing/x-monitor-api-key";
+                                                    pull_errors_warning = 5; # Syncthing retries these itself, and git rewrites in Projects cause a few
                                                     devices = [
                                                         "Odin"
                                                         "Ragnarok"

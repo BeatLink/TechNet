@@ -97,6 +97,8 @@ let
                 "Heimdall"
                 "Odin"
             ];
+            # Holds live git repositories, so batch their constant .git rewrites instead of announcing each one.
+            fsWatcherDelayS = 60;
         };
         Sounds = { };
         # Heimdall seeds, Ragnarok keeps a versioned copy and Odin's copy goes into its Vorta backups; the phone has no use for the tree.
