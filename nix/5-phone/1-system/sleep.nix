@@ -77,7 +77,7 @@ in
 
                         usb_input=$(read_or_zero /sys/class/power_supply/axp20x-usb/online)
                         docked=$(read_or_zero /run/pinephone-keyboard-docked)
-                        case_input=$(read_or_zero /sys/class/power_supply/ip5xxx-usb/online)
+                        case_input=$(read_or_zero /sys/class/power_supply/ip5xxx-usb/present)
 
                         # With the case on, the phone's input is the case's own battery unless the case itself is plugged in.
                         if [ "$usb_input" = 1 ] && { [ "$docked" != 1 ] || [ "$case_input" = 1 ]; }; then
