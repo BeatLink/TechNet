@@ -1822,8 +1822,8 @@ in
                                                     id = "odin-interrupts";
                                                     type = "interrupts";
                                                     interval = "1m";
-                                                    warning = 20000;
-                                                    threshold = 50000;
+                                                    warning = 60000;
+                                                    threshold = 100000000; # Unreachable on purpose: X-Monitor ignores a warning given without a threshold, and interrupts here should never fail.
                                                     agent = "odin";
                                                 }
                                                 {
