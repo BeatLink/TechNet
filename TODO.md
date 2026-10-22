@@ -1,14 +1,11 @@
 # To Do
 
-## Finish the move from Vigil to X-Monitor on Thor
+## Finish the move from Vigil to X-Monitor
 
-- [ ] Switch Thor once it answers SSH again (it stopped at 01:32 on 2026-10-22); until then its old `vigil-agent`
-      cannot sign in, because X-Monitor 25dcf4f signs agent logins with the new name. Inhibit sleep first and restart phosh after
-- [ ] Then delete Thor's `/var/lib/vigil-agent` and `/persistent/var/cache/vigil-borg`
 - [ ] Update browser bookmarks from `vigil.heimdall.technet` to `x-monitor.heimdall.technet`; links in notifications sent before the switch stop working
 
 Left named Vigil on purpose, because renaming them needs a hand-made change in a running service or an encrypted file:
-the `vigil` accounts in Calibre-Web, Traccar, Trilium and Radicale; the sops key names (`*_vigil_*`, `vigil_*`) and
+Traccar's `vigil` account and Trilium's ETAPI token named Vigil; the sops key names (`*_vigil_*`, `vigil_*`) and
 `HOMEPAGE_VAR_VIGIL_PASS` inside `homepage_env`; the `.vigil-canary` files, whose archived copies the restore checks compare;
 the `vigil-self` monitor id and the Home Assistant automation and webhook ids, which key existing history.
 
