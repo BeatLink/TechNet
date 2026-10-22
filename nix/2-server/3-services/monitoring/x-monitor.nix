@@ -1286,8 +1286,7 @@ in
                                                     type = "traccar";
                                                     interval = "15m";
                                                     api_url = "http://127.0.0.1:9280";
-                                                    # Traccar's account is still named vigil, since users live only in its database; the password is the same secret.
-                                                    username = "vigil";
+                                                    username = "x-monitor";
                                                     password_command = "cat /run/secrets/traccar_x_monitor_password";
                                                     stale_warning = 24;
                                                     stale_threshold = 72;
