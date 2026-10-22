@@ -289,12 +289,6 @@ in
             };
 
             theme = {
-                primary = "#00ACFF";
-                accent = "#FF5500";
-                background = "#FFFFFF";
-                background_muted = "#FAFAFA";
-                text = "#111827";
-                text_muted = "#6B7280";
                 status_online = "lime";
                 status_warning = "gold";
                 status_failed = "red";
