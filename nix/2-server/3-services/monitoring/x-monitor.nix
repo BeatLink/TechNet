@@ -40,7 +40,7 @@
 # host, then per domain, and "By domain" links to them per domain, then per
 # host. Each host holds
 # `Availability`, `System Stats` (Compute, Memory, Storage, Network),
-# `Running Services`, `Backups` where it owns source data, and `Security`. A
+# `Running Services`, `NixOS`, `Backups` where it owns source data, and `Security`. A
 # group reports the worst case of its children, so a host still collapses to
 # one status.
 #
@@ -56,7 +56,7 @@
 # delivery probe, Radicale's WebDAV request, Pi-hole's resolution — so a unit
 # that is up but not working reads as a failure rather than averaging away.
 #
-# `Garbage Collection` is the one such group with no separate unit check. The
+# `Garbage Collection` under `NixOS` has no separate unit check either. The
 # `nix_gc` monitor already reads nix-gc.service's result and nix-gc.timer's
 # schedule itself, and dates the last collection from the journal — which a
 # `systemd_service` in oneshot mode cannot do, because systemd drops an
@@ -298,6 +298,24 @@ in
             # Two roots over the same monitors: "By host" defines each one, and "By domain" links to them regrouped, so none is defined twice.
             plugins =
                 let
+                    # A host's store garbage collection, the same policy everywhere.
+                    nixGc =
+                        host:
+                        {
+                            name = "Garbage Collection";
+                            id = "${lib.toLower host}-nix-gc";
+                            type = "nix_gc";
+                            interval = "1h";
+                            max_age = "2w"; # nix.gc.dates is weekly, so this tolerates one missed run
+                            warning = 90; # Same policy as each host's Filesystems monitor, so the store's fill alarms once rather than twice
+                            threshold = 96;
+                            max_generation_age = "30d"; # --delete-older-than 7d, run weekly, should never leave one this old
+                            gc_args = gcArgs;
+                            agent = lib.toLower host;
+                        }
+                        // lib.optionalAttrs (host == "Thor") {
+                            offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
+                        };
                     # Every host and the IoT sensors, as nested definitions: the one place each monitor is defined.
                     hostTree = [
                         {
@@ -534,6 +552,32 @@ in
                                                 }
                                             ];
                                         }
+                                    ];
+                                }
+                                {
+                                    name = "NixOS";
+                                    id = "ragnarok-nixos";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Deployment";
+                                            id = "ragnarok-nixos-deployment";
+                                            type = "nixos_upgrade";
+                                            interval = "5m";
+                                            flake = upgradeFlake;
+                                            configuration = "Ragnarok";
+                                            eval_agent = "heimdall"; # Evaluating the flake on the 2GB Rock64 swaps it to death within seconds
+                                            eval_interval = "6h";
+                                            rebuild_args = deploy.forHost "Ragnarok";
+                                            switch_agent = "heimdall"; # Built emulated on Heimdall, which is faster than the board natively
+                                            target_host = deploy.remote.Ragnarok.target;
+                                            rebuild_bin = "technet-remote-switch";
+                                            build_at = "04:45";
+                                            auto_switch = true;
+                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                            agent = "ragnarok";
+                                        }
+                                        (nixGc "Ragnarok")
                                     ];
                                 }
                                 {
@@ -1509,131 +1553,26 @@ in
                                     ];
                                 }
                                 {
-                                    # Every host's Nix monitors in one place, since Heimdall updates, builds and caches for the fleet; each keeps its own agent and alerts per host.
-                                    name = "NixOS Fleet";
-                                    id = "heimdall-nixos-fleet";
+                                    name = "NixOS";
+                                    id = "heimdall-nixos";
                                     type = "group";
                                     children = [
                                         {
-                                            name = "Deployments";
-                                            id = "nixos-fleet-deployments";
-                                            type = "group";
-                                            children = [
-                                                {
-                                                    name = "Heimdall";
-                                                    id = "heimdall-nixos-deployment";
-                                                    type = "nixos_upgrade";
-                                                    interval = "5m";
-                                                    flake = upgradeFlake;
-                                                    eval_interval = "6h";
-                                                    rebuild_args = deploy.forHost "Heimdall";
-                                                    push_ssh_key = config.sops.secrets.x_monitor_flake_deploy_key.path; # Only this monitor pushes, so the key lives on Heimdall alone
-                                                    update_at = "02:00"; # The only thing that bumps flake.lock
-                                                    build_at = "04:00"; # The fleet's builds start after attic-gc at 03:00, whose database lock their uploads would contend with
-                                                    auto_switch = true;
-                                                    auto_switch_after = "30m"; # Long enough for a manual deploy to land first
-                                                    agent = "heimdall";
-                                                }
-                                                {
-                                                    name = "Odin";
-                                                    id = "odin-nixos-deployment";
-                                                    type = "nixos_upgrade";
-                                                    interval = "5m";
-                                                    flake = upgradeFlake;
-                                                    configuration = "Odin"; # Named, since the build runs on Heimdall
-                                                    eval_interval = "6h";
-                                                    rebuild_args = deploy.forHost "Odin";
-                                                    switch_agent = "heimdall"; # Heimdall builds, deploys and warms the cache whether or not the laptop is awake
-                                                    target_host = deploy.remote.Odin.target;
-                                                    rebuild_bin = "technet-remote-switch"; # Holds the target awake through the switch; see remote-deploy.nix
-                                                    build_at = "04:15";
-                                                    auto_switch = true;
-                                                    auto_switch_after = "30m"; # Long enough for a manual deploy to land first
-                                                    agent = "odin";
-                                                }
-                                                {
-                                                    name = "Thor";
-                                                    id = "thor-nixos-deployment";
-                                                    type = "nixos_upgrade";
-                                                    interval = "5m";
-                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
-                                                    flake = upgradeFlake;
-                                                    configuration = "Thor";
-                                                    eval_agent = "heimdall"; # Evaluating the flake on four 1.15GHz A53s takes the phone out of service for the duration
-                                                    eval_interval = "6h";
-                                                    rebuild_args = deploy.forHost "Thor";
-                                                    switch_agent = "heimdall"; # The phone never compiles its own closure
-                                                    target_host = deploy.remote.Thor.target;
-                                                    rebuild_bin = "technet-remote-switch"; # Holds the phone awake and restarts phosh after; see remote-deploy.nix
-                                                    build_at = "04:30";
-                                                    auto_switch = true;
-                                                    auto_switch_after = "30m"; # Long enough for a manual deploy to land first
-                                                    agent = "thor";
-                                                }
-                                                {
-                                                    name = "Ragnarok";
-                                                    id = "ragnarok-nixos-deployment";
-                                                    type = "nixos_upgrade";
-                                                    interval = "5m";
-                                                    flake = upgradeFlake;
-                                                    configuration = "Ragnarok";
-                                                    eval_agent = "heimdall"; # Evaluating the flake on the 2GB Rock64 swaps it to death within seconds
-                                                    eval_interval = "6h";
-                                                    rebuild_args = deploy.forHost "Ragnarok";
-                                                    switch_agent = "heimdall"; # Built emulated on Heimdall, which is faster than the board natively
-                                                    target_host = deploy.remote.Ragnarok.target;
-                                                    rebuild_bin = "technet-remote-switch";
-                                                    build_at = "04:45";
-                                                    auto_switch = true;
-                                                    auto_switch_after = "30m"; # Long enough for a manual deploy to land first
-                                                    agent = "ragnarok";
-                                                }
-                                            ];
+                                            name = "Deployment";
+                                            id = "heimdall-nixos-deployment";
+                                            type = "nixos_upgrade";
+                                            interval = "5m";
+                                            flake = upgradeFlake;
+                                            eval_interval = "6h";
+                                            rebuild_args = deploy.forHost "Heimdall";
+                                            push_ssh_key = config.sops.secrets.x_monitor_flake_deploy_key.path; # Only this monitor pushes, so the key lives on Heimdall alone
+                                            update_at = "02:00"; # The only thing that bumps flake.lock
+                                            build_at = "04:00"; # The fleet's builds start after attic-gc at 03:00, whose database lock their uploads would contend with
+                                            auto_switch = true;
+                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                            agent = "heimdall";
                                         }
-                                        {
-                                            name = "Garbage Collection";
-                                            id = "nixos-fleet-gc";
-                                            type = "group";
-                                            children =
-                                                map
-                                                    (
-                                                        host:
-                                                        {
-                                                            name = host;
-                                                            id = "${lib.toLower host}-nix-gc";
-                                                            type = "nix_gc";
-                                                            interval = "1h";
-                                                            max_age = "2w"; # nix.gc.dates is weekly, so this tolerates one missed run
-                                                            warning = 90; # Same policy as each host's Filesystems monitor, so the store's fill alarms once rather than twice
-                                                            threshold = 96;
-                                                            max_generation_age = "30d"; # --delete-older-than 7d, run weekly, should never leave one this old
-                                                            gc_args = gcArgs;
-                                                            agent = lib.toLower host;
-                                                        }
-                                                        // lib.optionalAttrs (host == "Thor") {
-                                                            offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
-                                                        }
-                                                    )
-                                                    [
-                                                        "Heimdall"
-                                                        "Odin"
-                                                        "Thor"
-                                                        "Ragnarok"
-                                                    ]
-                                                ++ [
-                                                    {
-                                                        # The 28GB eMMC pool's real failure mode, and the one no other host needs pinned: every generation lands in this dataset.
-                                                        name = "Thor /nix";
-                                                        id = "thor-disk-nix";
-                                                        type = "disk_space";
-                                                        path = "/nix";
-                                                        threshold = 90;
-                                                        interval = "10m";
-                                                        offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
-                                                        agent = "thor";
-                                                    }
-                                                ];
-                                        }
+                                        (nixGc "Heimdall")
                                         {
                                             name = "Attic";
                                             id = "heimdall-svc-attic";
@@ -2074,6 +2013,31 @@ in
                                                 }
                                             ];
                                         }
+                                    ];
+                                }
+                                {
+                                    name = "NixOS";
+                                    id = "odin-nixos";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Deployment";
+                                            id = "odin-nixos-deployment";
+                                            type = "nixos_upgrade";
+                                            interval = "5m";
+                                            flake = upgradeFlake;
+                                            configuration = "Odin"; # Named, since the build runs on Heimdall
+                                            eval_interval = "6h";
+                                            rebuild_args = deploy.forHost "Odin";
+                                            switch_agent = "heimdall"; # Heimdall builds, deploys and warms the cache whether or not the laptop is awake
+                                            target_host = deploy.remote.Odin.target;
+                                            rebuild_bin = "technet-remote-switch"; # Holds the target awake through the switch; see remote-deploy.nix
+                                            build_at = "04:15";
+                                            auto_switch = true;
+                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                            agent = "odin";
+                                        }
+                                        (nixGc "Odin")
                                     ];
                                 }
                                 {
@@ -2743,6 +2707,44 @@ in
                                                     agent = "thor";
                                                 }
                                             ];
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "NixOS";
+                                    id = "thor-nixos";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Deployment";
+                                            id = "thor-nixos-deployment";
+                                            type = "nixos_upgrade";
+                                            interval = "5m";
+                                            offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
+                                            flake = upgradeFlake;
+                                            configuration = "Thor";
+                                            eval_agent = "heimdall"; # Evaluating the flake on four 1.15GHz A53s takes the phone out of service for the duration
+                                            eval_interval = "6h";
+                                            rebuild_args = deploy.forHost "Thor";
+                                            switch_agent = "heimdall"; # The phone never compiles its own closure
+                                            target_host = deploy.remote.Thor.target;
+                                            rebuild_bin = "technet-remote-switch"; # Holds the phone awake and restarts phosh after; see remote-deploy.nix
+                                            build_at = "04:30";
+                                            auto_switch = true;
+                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                            agent = "thor";
+                                        }
+                                        (nixGc "Thor")
+                                        {
+                                            # The 28GB eMMC pool's real failure mode, and the one no other host needs pinned: every generation lands in this dataset.
+                                            name = "/nix";
+                                            id = "thor-disk-nix";
+                                            type = "disk_space";
+                                            path = "/nix";
+                                            threshold = 90;
+                                            interval = "10m";
+                                            offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
+                                            agent = "thor";
                                         }
                                     ];
                                 }
