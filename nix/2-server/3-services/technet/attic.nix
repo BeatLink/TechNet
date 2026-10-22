@@ -50,7 +50,18 @@
         };
     };
 
-    # Its own hand-made dataset with sync=disabled, because atticd syncs every commit on one SQLite connection and SMR syncs fail large uploads.
+    # Without statistics SQLite scans every chunk on each dedup lookup, which starves atticd's one connection, so give it some at every start.
+    # The index name is our own so an upstream migration adding one on nar_hash cannot collide with it.
+    systemd.services.atticd.path = [ pkgs.sqlite ];
+    systemd.services.atticd.preStart = ''
+        db=/var/lib/atticd/server.db
+        if [ -e "$db" ] && [ -n "$(sqlite3 "$db" "select name from sqlite_master where name = 'nar'")" ]; then
+            sqlite3 "$db" 'create index if not exists "technet-nar-hash" on nar (nar_hash); analyze;'
+        fi
+    '';
+
+    # Its own hand-made dataset with sync=disabled, because atticd syncs every commit on one SQLite connection and SMR syncs fail large uploads,
+    # and recordsize=16K, so reading one 4K SQLite page does not decompress a whole 128K record.
     fileSystems."/Storage/Services/Attic" = {
         device = "data-pool-Heimdall/storage/attic";
         fsType = "zfs";
