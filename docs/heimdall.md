@@ -249,8 +249,8 @@ bump rather than a daily one.
 
 Heimdall's root pool is unlocked by clevis against Odin's tang server, enabled in
 [`clevis.nix`](../nix/2-server/1-system/clevis.nix). The passphrase is stored
-in `secrets/2-server/clevis.yaml`, so it is recoverable — unlike a host where
-clevis is disabled.
+as `heimdall_encryption_key` in `secrets/admin/nixtool.yaml`, readable only with
+your own age key; `rebind-clevis Heimdall` on Odin renews the bindings from it.
 
 Because tang runs on Odin and stops when Odin's session locks, **Heimdall will
 not come back from a reboot unless Odin is awake and unlocked**. The

@@ -138,15 +138,11 @@ passphrase: `sops.age.sshKeyPaths` derives each host's age identity from
 machine unable to decrypt its own secrets.
 
 nixtool decrypts every credential itself with your own age key, so no host key
-can read them. The passphrases come from two places, deliberately:
-
-- **Heimdall and Ragnarok** reuse the `zfs_passphrase` already in their own
-  `clevis.yaml`. There is one copy, so rotating it is a single edit to the
-  host's file.
-- **Odin and Thor** keep theirs in
-  [`nixtool.yaml`](../secrets/admin/nixtool.yaml), beside every host's SSH host
-  and initrd keys. Odin runs no clevis, and Thor's predates the arrangement
-  above.
+can read them. Every host's disk passphrase lives as `<host>_encryption_key` in
+[`nixtool.yaml`](../secrets/admin/nixtool.yaml), beside every host's SSH host
+and initrd keys. No host holds a copy of its own: `rebind-clevis <host>` on Odin
+pipes it over SSH into the host's `rebind-clevis` when its bindings need
+renewing.
 
 `SSH_PASSWORD` is not stored. It is whatever the target's live installer was
 given that boot, so `install-nixos` prompts for it.

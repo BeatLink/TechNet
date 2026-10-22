@@ -306,15 +306,8 @@ def deploy(name):
 
 
 def rebind_heimdall():
-    """Renews Heimdall's clevis bindings with tang running, then switches it again so its initrd carries them."""
-    tang_was_running = subprocess.run(["systemctl", "is-active", "-q", "tangd.socket"], check=False).returncode == 0
-    if not tang_was_running:
-        run(["systemctl", "start", "tangd.socket"], root=True)
-    try:
-        run_shown(["rebind-clevis"], host=HEIMDALL, root=True)
-    finally:
-        if not tang_was_running:
-            run(["systemctl", "stop", "tangd.socket"], root=True)
+    """Renews Heimdall's clevis bindings from its passphrase in secrets/admin, then switches it again so its initrd carries them."""
+    run_shown(["rebind-clevis", "Heimdall"])
     deploy("Heimdall")
 
 
@@ -353,17 +346,17 @@ def random_passphrase():
 
 def apply_heimdall(new):
     """Heimdall's ZFS root and data pools."""
-    zfs_rotate(HEIMDALL, ["root-pool-Heimdall/root", "data-pool-Heimdall/storage"], sops_value("secrets/2-server/clevis.yaml", "zfs_passphrase"), new)
+    zfs_rotate(HEIMDALL, ["root-pool-Heimdall/root", "data-pool-Heimdall/storage"], sops_value("secrets/admin/nixtool.yaml", "heimdall_encryption_key"), new)
 
 
 def apply_ragnarok(new):
     """Ragnarok's LUKS root and backup drives."""
-    luks_rotate(RAGNAROK, ["cryptroot", "cryptstorage"], sops_value("secrets/1-backup-server/clevis.yaml", "zfs_passphrase"), new)
+    luks_rotate(RAGNAROK, ["cryptroot", "cryptstorage"], sops_value("secrets/admin/nixtool.yaml", "ragnarok_encryption_key"), new)
 
 
 def apply_thor(new):
     """Thor's LUKS root and SD card."""
-    luks_rotate(THOR, ["cryptroot", "cryptstorage"], sops_value("secrets/5-phone/clevis.yaml", "zfs_passphrase"), new)
+    luks_rotate(THOR, ["cryptroot", "cryptstorage"], sops_value("secrets/admin/nixtool.yaml", "thor_encryption_key"), new)
 
 
 def apply_odin(new):
@@ -497,19 +490,19 @@ TARGETS = {
         make=lambda: prompt_new("Heimdall's disks"),
         apply=apply_heimdall,
         hosts=["Heimdall"],
-        store=[("secrets/2-server/clevis.yaml", "zfs_passphrase")],
+        store=[("secrets/admin/nixtool.yaml", "heimdall_encryption_key")],
     ),
     "ragnarok": dict(
         make=lambda: prompt_new("Ragnarok's disks"),
         apply=apply_ragnarok,
         hosts=["Ragnarok"],
-        store=[("secrets/1-backup-server/clevis.yaml", "zfs_passphrase")],
+        store=[("secrets/admin/nixtool.yaml", "ragnarok_encryption_key")],
     ),
     "thor": dict(
         make=lambda: prompt_new("Thor's disks"),
         apply=apply_thor,
         hosts=["Thor"],
-        store=[("secrets/5-phone/clevis.yaml", "zfs_passphrase"), ("secrets/admin/nixtool.yaml", "thor_encryption_key")],
+        store=[("secrets/admin/nixtool.yaml", "thor_encryption_key")],
     ),
     "odin": dict(make=lambda: prompt_new("Odin's disks"), apply=apply_odin, hosts=[], store=[("secrets/admin/nixtool.yaml", "odin_encryption_key")]),
     "login": dict(

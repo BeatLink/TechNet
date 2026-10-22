@@ -127,8 +127,7 @@ exist before the first boot. Until the binding is written the phone prompts on
 the console and boots on the typed passphrase. Once Thor boots:
 
 ```sh
-sops secrets/5-phone/clevis.yaml          # zfs_passphrase, same value as thor_encryption_key
-sudo rebind-clevis                        # needs tang reachable; binds both containers
+rebind-clevis Thor                        # on Odin, from the TechNet checkout; binds both containers
 ```
 
 From the next boot on, clevis-luks-askpass answers the prompts from those
@@ -695,6 +694,6 @@ which brings up a CDC ECM link on `172.16.42.1` and reaches tang at
 `172.16.42.2`. The matching side on Odin is
 [`19-thor-usb-link.nix`](../nix/3-laptop/1-system/19-thor-usb-link.nix).
 
-The passphrase is stored as `zfs_passphrase` in `secrets/5-phone/clevis.yaml`.
+The passphrase is stored as `thor_encryption_key` in `secrets/admin/nixtool.yaml`.
 Keep it — ZFS native encryption has exactly one wrapping key per encryption root
 and no spare keyslots, so losing it means reinstalling.

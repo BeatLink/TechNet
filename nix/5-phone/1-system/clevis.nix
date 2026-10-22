@@ -1,8 +1,7 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 {
     technet.clevis = {
         enable = true;
-        sopsFile = "${config.technet.secrets.path}/clevis.yaml";
 
         # Nothing on this host is ZFS any more: the root drive and the SD card are both LUKS
         datasets = [ ];

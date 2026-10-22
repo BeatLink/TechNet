@@ -1,14 +1,10 @@
 # NixTool
 #
 # Odin drives every install, so nixtool needs every host's install credentials. It decrypts them itself with the user's own age key, so no host key
-# can read them: Heimdall's and Ragnarok's passphrases come from the clevis file that already owns them, the rest from secrets/admin/nixtool.yaml.
+# can read them: every one lives in secrets/admin/nixtool.yaml.
 #
 { ... }:
 let
-    clevisPassphrase = folder: {
-        file = "secrets/${folder}/clevis.yaml";
-        key = "zfs_passphrase";
-    };
     adminSecret = key: {
         file = "secrets/admin/nixtool.yaml";
         inherit key;
@@ -35,17 +31,17 @@ in
         # No SSH_PASSWORD: it is whatever the target's live installer was given that boot, so install-nixos prompts for it
         hostSopsValues = {
             Odin = {
-                ENCRYPTION_KEY = adminSecret "odin_encryption_key"; # Odin runs no clevis, so its passphrase has no other file to live in
+                ENCRYPTION_KEY = adminSecret "odin_encryption_key";
                 SSH_HOST_KEY = adminSecret "odin_ssh_host_key";
                 SSH_INITRD_KEY = adminSecret "odin_ssh_initrd_key";
             };
             Heimdall = {
-                ENCRYPTION_KEY = clevisPassphrase "2-server";
+                ENCRYPTION_KEY = adminSecret "heimdall_encryption_key";
                 SSH_HOST_KEY = adminSecret "heimdall_ssh_host_key";
                 SSH_INITRD_KEY = adminSecret "heimdall_ssh_initrd_key";
             };
             Ragnarok = {
-                ENCRYPTION_KEY = clevisPassphrase "1-backup-server";
+                ENCRYPTION_KEY = adminSecret "ragnarok_encryption_key";
                 SSH_HOST_KEY = adminSecret "ragnarok_ssh_host_key";
                 SSH_INITRD_KEY = adminSecret "ragnarok_ssh_initrd_key";
             };

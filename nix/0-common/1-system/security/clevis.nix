@@ -120,21 +120,20 @@ let
         text = ''
             set -euo pipefail
 
-            PASSPHRASE_FILE="${config.sops.secrets.zfs_passphrase.path}"
-
             if [ "$(id -u)" -ne 0 ]; then
                 echo "rebind-clevis: must run as root" >&2
                 exit 1
             fi
 
-            if [ ! -r "$PASSPHRASE_FILE" ]; then
-                echo "rebind-clevis: cannot read $PASSPHRASE_FILE" >&2
-                echo "rebind-clevis: check that zfs_passphrase exists in the host's sops file" >&2
-                exit 1
+            if [ -t 0 ]; then
+                read -rsp "rebind-clevis: disk passphrase: " expected
+                echo
+            else
+                expected="$(tr -d '\n')"
             fi
 
-            if [ -z "$(tr -d '\n' < "$PASSPHRASE_FILE")" ]; then
-                echo "rebind-clevis: $PASSPHRASE_FILE is empty, refusing" >&2
+            if [ -z "$expected" ]; then
+                echo "rebind-clevis: no passphrase given, refusing" >&2
                 exit 1
             fi
 
@@ -158,14 +157,17 @@ let
                 echo "rebind-clevis: unreachable addresses are still bound but unverified." >&2
             fi
 
-            expected="$(tr -d '\n' < "$PASSPHRASE_FILE")"
-
             # ZFS datasets: a JWE file each, embedded into the initrd by the next rebuild ------------------------------------------------------------
             ${lib.optionalString (clevisCfg.datasets != [ ]) ''
                 install -d -m 0700 -o root -g root "${clevisCfg.stateDir}"
             ''}
 
             ${lib.concatMapStringsSep "\n" (ds: ''
+                if ! printf '%s' "$expected" | ${zfs} load-key -n -L prompt "${ds}" > /dev/null 2>&1; then
+                    echo "rebind-clevis: that passphrase does not open ${ds}, refusing to bind it" >&2
+                    exit 1
+                fi
+
                 tmp="$(mktemp)"
                 trap 'rm -f "$tmp"' EXIT
 
@@ -229,8 +231,7 @@ let
                 echo "LUKS bindings live in the headers and are used from the next boot on."
             ''}
             ${lib.optionalString (clevisCfg.datasets != [ ]) ''
-                echo "Apply the dataset JWEs to the initrd with:"
-                echo "  sudo nixos-rebuild boot --flake .#${config.networking.hostName}"
+                echo "Deploy ${config.networking.hostName} again so its initrd carries the new dataset JWEs."
             ''}
         '';
     };
@@ -243,21 +244,15 @@ in
         rebindTool = {
             enable = lib.mkOption {
                 type = lib.types.bool;
-                default = true;
+                default = false;
                 description = ''
-                    Install rebind-clevis and the zfs_passphrase secret it needs,
-                    independently of whether unlocking at boot is enabled.
+                    Install rebind-clevis on a host whose unlocking at boot is still
+                    off, so a freshly installed host can write its first binding
+                    before turning on the feature that reads it. `enable` installs
+                    it anyway.
 
-                    Deliberately separate, because the two have a chicken-and-egg
-                    relationship: rebind-clevis is what *writes* the JWE or header
-                    binding, and unlocking at boot is what consumes it. Gating the
-                    tool behind `enable` means a freshly installed host cannot
-                    produce the binding without first turning on a feature that
-                    has nothing to read.
-
-                    Defaults on. It costs one sops secret and one script, and
-                    nothing it installs runs on its own -- rebind-clevis only does
-                    anything when invoked by hand.
+                    The host holds no copy of its passphrase: Odin's rebind-clevis
+                    pipes it in from secrets/admin, or it is typed at the prompt.
                 '';
             };
         };
@@ -292,7 +287,7 @@ in
 
                 Each carries its own binding as a LUKS2 token, written by
                 rebind-clevis with `clevis luks bind` using the host passphrase
-                from sopsFile. At boot, clevis-luks-askpass answers the device's
+                Odin sends it. At boot, clevis-luks-askpass answers the device's
                 password prompt from that token whenever tang can be reached, and
                 keeps retrying while the prompt is pending; the prompt itself stays
                 open for the console and the initrd sshd the whole time. The
@@ -331,21 +326,6 @@ in
                 here directly. LUKS devices keep nothing here.
             '';
         };
-
-        sopsFile = lib.mkOption {
-            type = lib.types.nullOr lib.types.path;
-            default = null;
-            description = ''
-                sops file holding zfs_passphrase for this host.
-
-                Null means this host has nothing to unlock, and the whole module
-                stays inert. That is not the same as `enable = false`:
-                `rebindTool.enable` defaults on, so without this a host that
-                never mentions clevis at all still reaches for the secret and
-                fails to evaluate. Odin is exactly that case -- it runs the tang
-                server the others unlock against and cannot unlock itself.
-            '';
-        };
     };
 
     config = lib.mkMerge [
@@ -353,10 +333,6 @@ in
         # Guards #####################################################################################################################################
         {
             assertions = [
-                {
-                    assertion = clevisCfg.enable -> clevisCfg.sopsFile != null;
-                    message = "technet.clevis.enable is on for ${config.networking.hostName} but no sopsFile is set, so there is no zfs_passphrase to unlock with.";
-                }
                 {
                     assertion = lib.all (name: lib.hasAttr name config.boot.initrd.luks.devices) clevisCfg.luksDevices;
                     message = "technet.clevis.luksDevices on ${config.networking.hostName} names a device that boot.initrd.luks.devices does not declare.";
@@ -366,11 +342,7 @@ in
 
         # Rebind Tool ################################################################################################################################
         # Available whether or not boot unlocking is on, so a new host can write its first binding before enabling the feature that consumes it.
-        (lib.mkIf ((clevisCfg.rebindTool.enable || clevisCfg.enable) && clevisCfg.sopsFile != null) {
-            sops.secrets.zfs_passphrase = {
-                sopsFile = clevisCfg.sopsFile;
-            };
-
+        (lib.mkIf (clevisCfg.rebindTool.enable || clevisCfg.enable) {
             environment.systemPackages = [ rebindClevis ];
         })
 

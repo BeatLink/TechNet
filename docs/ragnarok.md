@@ -247,7 +247,7 @@ used to force clevis off during an install.
 
 The binding can be added at either end: from Odin right after partitioning,
 while disko still has the container open and tang is local (step 3), or after
-the first boot with `sudo rebind-clevis` on Ragnarok, which needs tang
+the first boot with `rebind-clevis Ragnarok` on Odin, which needs tang
 reachable and otherwise leaves the board sitting on a prompt it can answer
 over the initrd sshd.
 
@@ -261,8 +261,7 @@ are otherwise exactly what the tool does.
 nix build --no-link --print-out-paths \
   /Storage/Files/Projects/TechNet#nixosConfigurations.Ragnarok.config.system.build.toplevel
 
-sudo sh -c 'printf "%s" "$(cat /run/secrets/ragnarok_zfs_passphrase)" > /tmp/encryption.key'
-sudo chmod 600 /tmp/encryption.key
+sops -d --extract '["ragnarok_encryption_key"]' /Storage/Files/Projects/TechNet/secrets/admin/nixtool.yaml | sudo install -m 600 /dev/stdin /tmp/encryption.key
 
 sudo "$(nix build --impure --no-link --print-out-paths --expr \
   '((builtins.getFlake "/Storage/Files/Projects/TechNet").nixosConfigurations."Ragnarok".extendModules {
@@ -372,10 +371,10 @@ borg handed them over checksums clean at the filesystem layer, which is how a
 
 ## Unlocking
 
-Both containers are made with the same passphrase, `zfs_passphrase` in
-`secrets/1-backup-server/clevis.yaml`, and each carries a clevis binding to
-Odin's tang server in its LUKS2 header, written by `sudo rebind-clevis` from
-[`clevis.nix`](../nix/1-backup-server/1-system/clevis.nix). At boot,
+Both containers are made with the same passphrase, `ragnarok_encryption_key`
+in `secrets/admin/nixtool.yaml`, and each carries a clevis binding to Odin's
+tang server in its LUKS2 header, written by `rebind-clevis Ragnarok` on Odin
+through [`clevis.nix`](../nix/1-backup-server/1-system/clevis.nix). At boot,
 systemd-cryptsetup puts up a password prompt for each container as its disk
 appears, and three things can answer it:
 
@@ -418,7 +417,7 @@ systemctl start --no-block systemd-cryptsetup@cryptroot.service   # askpass answ
 systemctl start --no-block initrd.target                          # re-runs rollback, mounts, switch-root
 ```
 
-`sudo rebind-clevis` rebinds both headers against the current tang keys, and
+`rebind-clevis Ragnarok` on Odin rebinds both headers against the current tang keys, and
 is also how a fresh container gets its first binding; it needs tang reachable.
 `clevis luks list -d <device>` shows the binding, and
 `journalctl -b -u clevis-luks-askpass` shows what askpass did during the boot.
@@ -491,13 +490,13 @@ whatever host it is plugged into or it comes up unusable:
 echo "152d:0583:uf" | sudo tee /sys/module/usb_storage/parameters/quirks
 ```
 
-The passphrase is the host's `zfs_passphrase`, and should stay that way: it is
+The passphrase is the host's `ragnarok_encryption_key`, and should stay that way: it is
 what `rebind-clevis` presents when it adds the tang binding, and what lets one
 typed passphrase open both containers at the console.
 
 ```sh
-sudo sh -c 'printf "%s" "$(cat /run/secrets/ragnarok_zfs_passphrase)" > /tmp/dk.key'
-sudo chmod 600 /tmp/dk.key
+# On Odin, from the TechNet checkout:
+sops -d --extract '["ragnarok_encryption_key"]' secrets/admin/nixtool.yaml | ssh ragnarok.technet sudo install -m 600 /dev/stdin /tmp/dk.key
 
 # Both partition ends must land on 4096-byte boundaries -- see below
 TOTAL=$(sudo blockdev --getsz /dev/sdX)
@@ -581,7 +580,7 @@ sudo clevis luks bind -y -k /tmp/dk.key -d /dev/sdX1 sss \
   '{"t":1,"pins":{"tang":[{"url":"http://10.100.100.2:7654"},{"url":"http://192.168.0.3:7654"}]}}'
 ```
 
-or afterwards on Ragnarok with `sudo rebind-clevis`, which does both containers
+or afterwards with `rebind-clevis Ragnarok` on Odin, which does both containers
 at once. Nothing in `data-drive.nix` depends on the binding existing, so the
 config can be deployed in either order: an unbound drive simply prompts, and
 `/Storage` is `nofail`, so the host comes up without it rather than stalling.
