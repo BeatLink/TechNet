@@ -113,10 +113,13 @@ def unstage(host, directory):
 
 # ZFS ################################################################################################################################################
 
+PBKDF2_ITERATIONS = {"odin": 10_000_000, "heimdall.technet": 1_500_000}
+
 
 def zfs_change(host, root, value):
-    """Moves one encryption root to a passphrase, then checks it opens with it."""
-    run(["zfs", "change-key", "-o", "keyformat=passphrase", "-o", "keylocation=prompt", root], data=value, host=host, root=True)
+    """Moves one encryption root to a passphrase and its host's PBKDF2 rounds, then checks it opens with it."""
+    options = ["-o", "keyformat=passphrase", "-o", "keylocation=prompt", "-o", f"pbkdf2iters={PBKDF2_ITERATIONS[host]}"]
+    run(["zfs", "change-key", *options, root], data=value, host=host, root=True)
     run(["zfs", "load-key", "-n", "-L", "prompt", root], data=value, host=host, root=True)
 
 
@@ -407,6 +410,17 @@ def apply_vorta_backups(new):
     )
 
 
+def apply_zfs_iterations(new):
+    """Re-wraps Odin's and Heimdall's pools with their current passphrases at the PBKDF2 rounds above."""
+    for host, roots, key in [
+        (LOCAL_HOST, ["root-pool-Odin/root", "data-pool-Odin"], "odin_encryption_key"),
+        (HEIMDALL, ["root-pool-Heimdall/root", "data-pool-Heimdall/storage"], "heimdall_encryption_key"),
+    ]:
+        current = sops_value("secrets/admin/nixtool.yaml", key)
+        zfs_rotate(host, roots, current, current)
+        say(f"{host}: {PBKDF2_ITERATIONS[host]:,} PBKDF2 rounds")
+
+
 def apply_nothing(new):
     """For targets whose only copy is in sops."""
 
@@ -511,6 +525,7 @@ TARGETS = {
         hosts=["Heimdall", "Ragnarok", "Thor", "Odin"],
         store=[("secrets/0-common/users.yaml", "beatlink_hashed_password"), ("secrets/5-phone/users.yaml", "beatlink_hashed_password_phone")],
     ),
+    "zfs-iterations": dict(make=lambda: None, apply=apply_zfs_iterations, hosts=[], store=[]),
     "keepassxc": dict(make=keepassxc_passwords, apply=apply_keepassxc, hosts=[], store=[], last=True),
 }
 

@@ -63,6 +63,7 @@ in
                             encryption = "aes-256-gcm";
                             keyformat = "passphrase";
                             keylocation = "file:///tmp/encryption.key";
+                            pbkdf2iters = "1500000";
                         };
                         postCreateHook = ''
                             zfs set keylocation="prompt" "${rootPool}/root";
