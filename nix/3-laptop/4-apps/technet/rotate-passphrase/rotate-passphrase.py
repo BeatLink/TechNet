@@ -518,7 +518,7 @@ TARGETS = {
         hosts=["Heimdall", "Ragnarok", "Thor", "Odin"],
         store=[("secrets/0-common/users.yaml", "beatlink_hashed_password"), ("secrets/5-phone/users.yaml", "beatlink_hashed_password_phone")],
     ),
-    "keepassxc": dict(make=keepassxc_passwords, apply=apply_keepassxc, hosts=[], store=[]),
+    "keepassxc": dict(make=keepassxc_passwords, apply=apply_keepassxc, hosts=[], store=[], last=True),
 }
 
 # Main ###############################################################################################################################################
@@ -536,9 +536,8 @@ def preflight():
     run(["git", "merge", "-q", "--ff-only", "origin/main"])
 
 
-def rotate_all(names):
+def rotate_all(names, values):
     """Rotates each target in turn, committing each; returns the ones that finished, stopping at the first that fails."""
-    values = {name: TARGETS[name]["make"]() for name in names}
     done = []
     for name in names:
         target, new = TARGETS[name], values[name]
@@ -566,13 +565,15 @@ def main(arguments):
         return 2
     names = [name for name in TARGETS if name in names]
     borg = any(TARGETS[name].get("borg") for name in names)
+    last = [name for name in names if TARGETS[name].get("last")]
     done = []
     try:
         preflight()
+        values = {name: TARGETS[name]["make"]() for name in names}
         if borg:
             pause_backups()
         try:
-            done = rotate_all(names)
+            done = rotate_all([name for name in names if name not in last], values)
             if any(TARGETS[name]["store"] for name in done):
                 land()
                 hosts = {host for name in done for host in TARGETS[name]["hosts"]}
@@ -584,6 +585,9 @@ def main(arguments):
         finally:
             if borg:
                 resume_backups()
+        # Closing the KeePassXC database also takes the SSH keys out of the agent, so nothing that needs SSH may come after this
+        if len(done) == len(names) - len(last):
+            done += rotate_all(last, values)
         skipped = [name for name in names if name not in done]
         say(f"finished: {', '.join(done) or 'nothing'}" + (f"; not done: {', '.join(skipped)}" if skipped else ""))
         if "odin" in done:
