@@ -18,7 +18,7 @@
         mode = "0755";
     };
 
-    # Root-owned so the borg and borgmatic rules beneath it are not skipped: the repos below belong to borg and to root, and tmpfiles will not act
+    # Root-owned so the borg rules beneath it are not skipped: the repos below belong to borg and to root, and tmpfiles will not act
     # across an ownership change unless the parent is root.
     systemd.tmpfiles.settings."Storage"."/Storage/Files/Backups".d = {
         user = "root";

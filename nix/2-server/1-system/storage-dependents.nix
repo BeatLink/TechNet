@@ -16,8 +16,6 @@
                         "atticd"
                         "blockurl"
                         "borg-compact-laptop-vorta"
-                        "borgmatic"
-                        "borgmatic-check"
                         "calibre-web-nextgen"
                         "calibre-web-nextgen-auto-zipper"
                         "calibre-web-nextgen-checksums"

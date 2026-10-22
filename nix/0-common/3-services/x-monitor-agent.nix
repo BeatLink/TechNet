@@ -1,4 +1,4 @@
-# X-Monitor Agent ########################################################################################################################################
+# X-Monitor Agent ####################################################################################################################################
 #
 # Everything X-Monitor needs on a monitored host: the agent it collects through, the SSH login it falls back to, and the sudo rules both run under.
 #
@@ -139,6 +139,25 @@ in
                     CPUWeight = 40;
                 };
             };
+        })
+
+        # Backup Jobs ################################################################################################################################
+        (lib.mkIf (builtins.elem host agentHosts) {
+            systemd.tmpfiles.settings."X-Monitor-Agent"."/run/x-monitor-borg.lock".f = {
+                user = "x-monitor-agent";
+                group = "x-monitor-agent";
+                mode = "0600";
+            };
+
+            security.polkit.extraConfig = ''
+                polkit.addRule(function (action, subject) {
+                    if ((action.id == "org.freedesktop.login1.inhibit-block-sleep" ||
+                         action.id == "org.freedesktop.login1.inhibit-block-shutdown") &&
+                        subject.user == "x-monitor-agent") {
+                        return polkit.Result.YES;
+                    }
+                });
+            '';
         })
 
         # SSH Fallback Login #########################################################################################################################

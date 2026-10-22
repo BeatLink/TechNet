@@ -1,6 +1,6 @@
 {
     imports = [
-        ./borgmatic.nix
+        ./server-backup.nix
         ./borg.nix
     ];
 }
