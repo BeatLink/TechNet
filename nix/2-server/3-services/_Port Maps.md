@@ -106,7 +106,7 @@ just answering:
 <!-- * Traccar (`heimdall-traccar-devices`) - device staleness via `/api/devices`, using a dedicated read-only account created once by hand (switched off) -->
 * FreshRSS (`heimdall-freshrss-feeds`) - per-feed refresh staleness via the Fever API
 * Trilium (`heimdall-trilium-activity`) - note write-activity staleness via ETAPI metrics, using a token created once by hand
-* Radicale (`heimdall-radicale-webdav`) - live PROPFIND via a dedicated `vigil` htpasswd account
+* Radicale (`heimdall-radicale-webdav`) - live PROPFIND via a dedicated `x-monitor` htpasswd account
 * Syncthing (`heimdall-syncthing-health`) - folder sync state + device connectivity via the REST API
 * Calibre Web (`heimdall-calibre-web-library`) - live OPDS feed request via a dedicated account created once by hand
 * Blockurl (`heimdall-blockurl-database`) - blocklist database non-emptiness via its own API

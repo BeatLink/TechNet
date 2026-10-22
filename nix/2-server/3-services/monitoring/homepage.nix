@@ -8,7 +8,7 @@
     sops.templates."homepage-widgets.env".content = ''
         HOMEPAGE_VAR_TRILIUM_KEY=${config.sops.placeholder.trilium_etapi_token}
         HOMEPAGE_VAR_FRESHRSS_PASS=${config.sops.placeholder.freshrss_api_password}
-        HOMEPAGE_VAR_CALIBRE_PASS=${config.sops.placeholder.calibre_web_vigil_password}
+        HOMEPAGE_VAR_CALIBRE_PASS=${config.sops.placeholder.calibre_web_x_monitor_password}
         HOMEPAGE_VAR_PIHOLE_PASS=${config.sops.placeholder.pihole_web_password}
     '';
 
@@ -306,7 +306,7 @@
                             widget = {
                                 type = "calibreweb";
                                 url = "http://127.0.0.1:8083";
-                                username = "vigil";
+                                username = "x-monitor";
                                 password = "{{HOMEPAGE_VAR_CALIBRE_PASS}}";
                             };
                         };
@@ -461,7 +461,7 @@
                                 type = "customapi";
                                 url = "http://127.0.0.1:9611/api/summary";
                                 username = "admin";
-                                password = "{{HOMEPAGE_VAR_VIGIL_PASS}}";
+                                password = "{{HOMEPAGE_VAR_X_MONITOR_PASS}}";
                                 mappings = [
                                     {
                                         field = "total";

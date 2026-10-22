@@ -84,7 +84,7 @@ in
         (lib.mkIf (builtins.elem host agentHosts) {
 
             # The agent's private signing key, held only by this host; Heimdall checks it against the public key listed in x-monitor.nix.
-            sops.secrets.vigil_agent_key = {
+            sops.secrets.x_monitor_agent_key = {
                 sopsFile = "${config.technet.secrets.path}/x-monitor-agent.yaml";
                 owner = "x-monitor-agent";
             };
@@ -93,7 +93,7 @@ in
                 enable = true;
                 url = "ws://${server}:9611/api/agent/ws";
                 id = agentId;
-                keyFile = config.sops.secrets.vigil_agent_key.path;
+                keyFile = config.sops.secrets.x_monitor_agent_key.path;
 
                 # Same memberships `x-monitor-access` holds, since the monitors run the same commands: borg repo reads for backup health, and the journal for
                 # unit status and for the agent's own journal watchers.
@@ -113,7 +113,7 @@ in
             };
 
             # Desktop Notifications ##################################################################################################################
-            sops.secrets.vigil_agent_desktop_key = lib.mkIf (host == "Odin") {
+            sops.secrets.x_monitor_agent_desktop_key = lib.mkIf (host == "Odin") {
                 sopsFile = "${config.technet.secrets.path}/x-monitor-agent.yaml";
                 owner = "beatlink";
             };
@@ -121,7 +121,7 @@ in
             services.x-monitor-agent.desktop = lib.mkIf (host == "Odin") {
                 enable = true;
                 id = "odin-desktop";
-                keyFile = config.sops.secrets.vigil_agent_desktop_key.path;
+                keyFile = config.sops.secrets.x_monitor_agent_desktop_key.path;
             };
 
             systemd.services.x-monitor-agent = {

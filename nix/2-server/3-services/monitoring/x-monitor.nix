@@ -158,7 +158,7 @@ in
     # Private SSH key the x-monitor service user authenticates with, used only to log
     # into the monitored hosts. Owned by the `x-monitor` service user that runs the
     # daemon here; no other host needs a copy.
-    sops.secrets.vigil_ssh_key = {
+    sops.secrets.x_monitor_ssh_key = {
         sopsFile = "${config.technet.secrets.path}/x-monitor.yaml";
         owner = "x-monitor";
     };
@@ -167,19 +167,19 @@ in
     # dashboard has no `openFirewall` here, so it's reachable only over the
     # WireGuard mesh — auth is defense-in-depth against anyone else on that
     # mesh, not the internet at large.
-    sops.secrets.vigil_dashboard_password = {
+    sops.secrets.x_monitor_dashboard_password = {
         sopsFile = "${config.technet.secrets.path}/x-monitor.yaml";
         owner = "x-monitor";
     };
 
     # Signs the dashboard session cookies, so a X-Monitor restart or redeploy does not sign every browser out.
-    sops.secrets.vigil_session_secret = {
+    sops.secrets.x_monitor_session_secret = {
         sopsFile = "${config.technet.secrets.path}/x-monitor.yaml";
         owner = "x-monitor";
     };
 
     # Write deploy key on the TechNet repo that Update Flake pushes the new lock with; the job runs as Heimdall's agent user.
-    sops.secrets.vigil_flake_deploy_key = {
+    sops.secrets.x_monitor_flake_deploy_key = {
         sopsFile = "${config.technet.secrets.path}/x-monitor.yaml";
         owner = "x-monitor-agent";
     };
@@ -206,8 +206,8 @@ in
         port = 9611;
         dataDir = "/Storage/Services/X-Monitor"; # SQLite database lives here (persisted)
         authUsername = "admin";
-        authPasswordFile = config.sops.secrets.vigil_dashboard_password.path;
-        authSessionSecretFile = config.sops.secrets.vigil_session_secret.path;
+        authPasswordFile = config.sops.secrets.x_monitor_dashboard_password.path;
+        authSessionSecretFile = config.sops.secrets.x_monitor_session_secret.path;
         settings = {
             # Batches queued metric/status/event/log writes into one commit
             # every N seconds instead of committing each individually, cutting
@@ -284,7 +284,7 @@ in
             # merges these today. See the header before removing them.
             ssh_defaults = {
                 username = "x-monitor-access";
-                key_path = config.sops.secrets.vigil_ssh_key.path;
+                key_path = config.sops.secrets.x_monitor_ssh_key.path;
             };
 
             theme = {
@@ -943,7 +943,7 @@ in
                                             host = "127.0.0.1";
                                             port = 1883;
                                             username = "x-monitor";
-                                            password_command = "cat /run/secrets/mosquitto_vigil_password";
+                                            password_command = "cat /run/secrets/mosquitto_x_monitor_password";
                                             probe_topic = "x-monitor/probe/heimdall-mosquitto-delivery";
                                             agent = "heimdall";
                                         }
@@ -966,7 +966,7 @@ in
                                             # Library-serving health, as opposed to the
                                             # monitor above, which only proves the
                                             # process is running. Requests /opds with
-                                            # a dedicated "vigil" account (created once
+                                            # a dedicated "x-monitor" account (created once
                                             # by hand — see calibre-web-nextgen.nix)
                                             # and checks the body is a real feed, not
                                             # just any 200 — a known upstream issue
@@ -977,8 +977,8 @@ in
                                             type = "http";
                                             interval = "10m";
                                             url = "http://127.0.0.1:8083/opds";
-                                            username = "vigil";
-                                            password_command = "cat /run/secrets/calibre_web_vigil_password";
+                                            username = "x-monitor";
+                                            password_command = "cat /run/secrets/calibre_web_x_monitor_password";
                                             check_title = "OPDS FEED";
                                             expect = {
                                                 body_contains = "<feed";
@@ -1167,7 +1167,7 @@ in
                                             timeout = 15;
                                             command = ''
                                                 test "$(mosquitto_sub -h 127.0.0.1 -p 1883 \
-                                                    -u x-monitor -P "$(cat /run/secrets/mosquitto_vigil_password)" \
+                                                    -u x-monitor -P "$(cat /run/secrets/mosquitto_x_monitor_password)" \
                                                     -t frigate/available -C 1 -W 5)" = online
                                             '';
                                             agent = "heimdall";
@@ -1282,7 +1282,7 @@ in
                                             # Device-staleness health, as opposed to
                                             # the monitor above, which only proves the
                                             # server is running. Authenticates as a
-                                            # dedicated read-only "vigil" user created
+                                            # dedicated read-only "x-monitor" user created
                                             # once by hand (see traccar.nix, which has
                                             # no declarative user provisioning at all)
                                             # and computes staleness itself from each
@@ -1296,8 +1296,8 @@ in
                                             type = "traccar";
                                             interval = "15m";
                                             api_url = "http://127.0.0.1:9280";
-                                            username = "vigil";
-                                            password_command = "cat /run/secrets/traccar_vigil_password";
+                                            username = "x-monitor";
+                                            password_command = "cat /run/secrets/traccar_x_monitor_password";
                                             stale_warning = 24;
                                             stale_threshold = 72;
                                             agent = "heimdall";
@@ -1392,7 +1392,7 @@ in
                                             type = "blockurl";
                                             interval = "15m";
                                             api_url = "http://127.0.0.1:9001";
-                                            api_key_command = "cat /run/secrets/blockurl_vigil_api_key";
+                                            api_key_command = "cat /run/secrets/blockurl_x_monitor_api_key";
                                             # The write probe lands on the data-pool mirror, where a cold write outlasts the 10s default.
                                             api_timeout = 30;
                                             agent = "heimdall";
@@ -1417,7 +1417,7 @@ in
                                             # monitor above, which only proves the
                                             # process is running. Radicale has no JSON
                                             # API at all — issues a live PROPFIND as a
-                                            # dedicated "vigil" htpasswd account
+                                            # dedicated "x-monitor" htpasswd account
                                             # (provisioned declaratively; see
                                             # radicale.nix) and checks for the 207
                                             # Multi-Status a healthy WebDAV server
@@ -1433,8 +1433,8 @@ in
                                                 "Content-Type" = "application/xml";
                                             };
                                             body = ''<?xml version="1.0"?><propfind xmlns="DAV:"><prop><current-user-principal/></prop></propfind>'';
-                                            username = "vigil";
-                                            password_command = "cat /run/secrets/radicale_vigil_password";
+                                            username = "x-monitor";
+                                            password_command = "cat /run/secrets/radicale_x_monitor_password";
                                             check_title = "PROPFIND";
                                             expect = {
                                                 status = 207;
@@ -1535,7 +1535,7 @@ in
                                             flake = upgradeFlake;
                                             eval_interval = "6h";
                                             rebuild_args = deploy.forHost "Heimdall";
-                                            push_ssh_key = config.sops.secrets.vigil_flake_deploy_key.path; # Only this monitor pushes, so the key lives on Heimdall alone
+                                            push_ssh_key = config.sops.secrets.x_monitor_flake_deploy_key.path; # Only this monitor pushes, so the key lives on Heimdall alone
                                             update_at = "02:00"; # The only thing that bumps flake.lock
                                             build_at = "04:00"; # The fleet's builds start after attic-gc at 03:00, whose database lock their uploads would contend with
                                             auto_switch = true;

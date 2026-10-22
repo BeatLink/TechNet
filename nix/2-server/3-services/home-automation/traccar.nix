@@ -6,13 +6,13 @@
 # matches against a device, not the firewall.
 #
 # Devices and users live only in the database -- there is no declarative provisioning of either. Two things therefore have to be done once in the web
-# UI: add a device whose identifier is `thor`, and add a read-only `vigil` user whose password matches secrets/2-server/traccar.yaml, which is what the
+# UI: add a device whose identifier is `thor`, and add a read-only `x-monitor` user whose password matches secrets/2-server/traccar.yaml, which is what the
 # device-staleness monitor authenticates as.
 #
 { config, ... }:
 {
     # Read by whichever X-Monitor transport runs the `cat` -- the agent today, x-monitor-access as fallback
-    sops.secrets.traccar_vigil_password = {
+    sops.secrets.traccar_x_monitor_password = {
         sopsFile = "${config.technet.secrets.path}/traccar.yaml";
         group = "x-monitor-credentials";
         mode = "0440";

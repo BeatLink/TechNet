@@ -5,7 +5,7 @@
     # `password_command`, LNXlink through its environment file. The module hashes
     # them into the generated password file at startup. Home Assistant and
     # Frigate hold their own copies, so only the hash is needed here.
-    sops.secrets.mosquitto_vigil_password = {
+    sops.secrets.mosquitto_x_monitor_password = {
         sopsFile = "${config.technet.secrets.path}/mosquitto.yaml";
         group = "x-monitor-credentials"; # Read by whichever X-Monitor transport runs the `cat` — the agent today, x-monitor-access as fallback
         mode = "0440";
@@ -73,7 +73,7 @@
                             # business anywhere else under frigate/.
                             "read frigate/available"
                         ];
-                        passwordFile = config.sops.secrets.mosquitto_vigil_password.path;
+                        passwordFile = config.sops.secrets.mosquitto_x_monitor_password.path;
                     };
 
                     # LNXlink lowercases its own topic prefix, so the ACLs are

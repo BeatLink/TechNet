@@ -21,7 +21,7 @@
     # separate declarative API-password option — it must be set once by hand
     # under Settings > Authentication > "API management" for this user, then
     # stored here to match, the same one-time-manual-step pattern as
-    # Traccar's vigil account (see traccar.nix).
+    # Traccar's x-monitor account (see traccar.nix).
     sops.secrets.freshrss_api_password = {
         sopsFile = "${config.technet.secrets.path}/freshrss.yaml";
         group = "x-monitor-credentials"; # Read by the `cat` the freshrss plugin runs on the X-Monitor host as the `x-monitor` user

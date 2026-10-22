@@ -4,7 +4,7 @@
     # database is actually being modified, not just that the server answers.
     # Trilium has no declarative token provisioning — ETAPI tokens are
     # generated once by hand under Options > ETAPI, then stored here to
-    # match, the same one-time-manual-step pattern as Traccar's vigil
+    # match, the same one-time-manual-step pattern as Traccar's x-monitor
     # account (see traccar.nix).
     sops.secrets.trilium_etapi_token = {
         sopsFile = "${config.technet.secrets.path}/trilium.yaml";

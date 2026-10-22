@@ -23,10 +23,10 @@
     # `x-monitor-access` made every PROPFIND probe send an empty password and fail
     # authentication every 10 minutes.
     #
-    # radicale-vigil-htpasswd reads it via LoadCredential, which systemd
+    # radicale-x-monitor-htpasswd reads it via LoadCredential, which systemd
     # resolves as root before dropping to the radicale user, so that side is
     # unaffected by the owner.
-    sops.secrets.radicale_vigil_password = {
+    sops.secrets.radicale_x_monitor_password = {
         sopsFile = "${config.technet.secrets.path}/radicale.yaml";
         owner = "x-monitor";
     };
@@ -63,12 +63,12 @@
 
     # The htpasswd file is otherwise unmanaged by Nix (the real beatlink
     # login was added once by hand), so this only ever touches the single
-    # `vigil` line — idempotent, and never overwrites the file wholesale.
+    # `x-monitor` line — idempotent, and never overwrites the file wholesale.
     # Runs after radicale's tmpfiles rule so the parent directory exists,
     # and before radicale.service so an empty file is never read as "no
     # collections" (Radicale creates the file itself if absent, but this
     # keeps the ordering explicit rather than relying on that).
-    systemd.services.radicale-vigil-htpasswd = {
+    systemd.services.radicale-x-monitor-htpasswd = {
         description = "Provision X-Monitor's Radicale probe account";
         before = [ "radicale.service" ];
         wantedBy = [ "radicale.service" ];
@@ -76,12 +76,12 @@
             Type = "oneshot";
             User = "radicale";
             Group = "radicale";
-            LoadCredential = "vigil_password:${config.sops.secrets.radicale_vigil_password.path}";
+            LoadCredential = "x_monitor_password:${config.sops.secrets.radicale_x_monitor_password.path}";
         };
         script = ''
             ${pkgs.apacheHttpd}/bin/htpasswd -bB \
                 /Storage/Services/Radicale/data/users \
-                vigil "$(cat "$CREDENTIALS_DIRECTORY/vigil_password")"
+                x-monitor "$(cat "$CREDENTIALS_DIRECTORY/x_monitor_password")"
         '';
     };
 
