@@ -583,8 +583,9 @@ in
                                                     id = "heimdall-cpu";
                                                     type = "cpu";
                                                     interval = "1m";
-                                                    warning = 70;
-                                                    threshold = 85;
+                                                    warning = 95;
+                                                    # CPU readings stop at 100, so 101 means this monitor only ever warns.
+                                                    threshold = 101;
                                                     agent = "heimdall";
                                                 }
                                                 {
