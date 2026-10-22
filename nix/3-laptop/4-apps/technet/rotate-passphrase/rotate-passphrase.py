@@ -418,6 +418,55 @@ def apply_nothing(new):
     """For targets whose only copy is in sops."""
 
 
+# KeePassXC ##########################################################################################################################################
+
+KEEPASSXC_DATABASE = "/Storage/Files/Documents/SecurityDatabase.kdbx"
+KEEPASSXC_BUS = ["busctl", "--user", "--timeout=60", "call", "org.keepassxc.KeePassXC.MainWindow", "/keepassxc"]
+
+
+def keepassxc_opens(password):
+    """Whether the database opens with a password."""
+    try:
+        run(["keepassxc-cli", "db-info", "-q", KEEPASSXC_DATABASE], data=f"{password}\n")
+        return True
+    except RotateError:
+        return False
+
+
+def keepassxc_passwords():
+    """Asks for the current master password, checks it opens the database, then asks twice for the new one."""
+    current = secret(getpass.getpass("Current KeePassXC master password: "))
+    if not keepassxc_opens(current):
+        raise RotateError("that is not the current KeePassXC master password")
+    return current, prompt_new("your KeePassXC database")
+
+
+def keepassxc_app_running():
+    """Whether the KeePassXC app is running in this session."""
+    try:
+        run([*KEEPASSXC_BUS, "org.freedesktop.DBus.Peer", "Ping"])
+        return True
+    except RotateError:
+        return False
+
+
+def apply_keepassxc(passwords):
+    """Closes the database in the app, changes its master password, checks it, and asks the app to open it again."""
+    current, new = passwords
+    running = keepassxc_app_running()
+    if running:
+        run([*KEEPASSXC_BUS, "org.keepassxc.KeePassXC.MainWindow", "closeAllDatabases"])
+        if "/org/freedesktop/secrets/collection/" in run(["busctl", "--user", "tree", "org.keepassxc.KeePassXC.MainWindow"]):
+            raise RotateError("KeePassXC still has the database open; save or discard its changes, close it, and run this target again")
+    run(["keepassxc-cli", "db-edit", "-q", "--set-password", KEEPASSXC_DATABASE], data=f"{current}\n{new}\n{new}\n")
+    if not keepassxc_opens(new) or keepassxc_opens(current):
+        raise RotateError("the database did not take the new master password")
+    say("KeePassXC master password changed")
+    if running:
+        run([*KEEPASSXC_BUS, "org.keepassxc.KeePassXC.MainWindow", "openDatabase", "s", KEEPASSXC_DATABASE])
+        say("KeePassXC is asking for the new master password")
+
+
 # Each target: how its new value is made, what changes on the machines, where sops keeps it, and which hosts switch to it.
 TARGETS = {
     "server-backups": dict(
@@ -469,6 +518,7 @@ TARGETS = {
         hosts=["Heimdall", "Ragnarok", "Thor", "Odin"],
         store=[("secrets/0-common/users.yaml", "beatlink_hashed_password"), ("secrets/5-phone/users.yaml", "beatlink_hashed_password_phone")],
     ),
+    "keepassxc": dict(make=keepassxc_passwords, apply=apply_keepassxc, hosts=[], store=[]),
 }
 
 # Main ###############################################################################################################################################
@@ -498,8 +548,9 @@ def rotate_all(names):
             for file, key in target["store"]:
                 sops_store(file, key, new)
             files = [file for file, _ in target["store"]]
-            run(["git", "add", "--", *files])
-            run(["git", "commit", "-q", "-m", f"chore(secrets): rotate the {name} passphrase", "--", *files])
+            if files:
+                run(["git", "add", "--", *files])
+                run(["git", "commit", "-q", "-m", f"chore(secrets): rotate the {name} passphrase", "--", *files])
             done.append(name)
         except RotateError as error:
             say(f"{name} stopped: {error}")
@@ -522,7 +573,7 @@ def main(arguments):
             pause_backups()
         try:
             done = rotate_all(names)
-            if done:
+            if any(TARGETS[name]["store"] for name in done):
                 land()
                 hosts = {host for name in done for host in TARGETS[name]["hosts"]}
                 for host in DEPLOY_ORDER:

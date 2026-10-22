@@ -9,6 +9,7 @@
             name = "rotate-passphrase";
             runtimeInputs = [
                 pkgs.git
+                pkgs.keepassxc
                 pkgs.libsecret
                 pkgs.openssh
                 pkgs.python3
