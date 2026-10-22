@@ -12,7 +12,7 @@
     ...
 }:
 {
-    # Vigil's `calibre_web` plugin authenticates to /opds as this account to
+    # X-Monitor's `calibre_web` plugin authenticates to /opds as this account to
     # confirm the DB layer actually serves a real book feed, not just that
     # the login page renders. Calibre-Web has no declarative user creation
     # (accounts live only in its own SQLite DB) — create a "vigil" user once
@@ -22,7 +22,7 @@
     # traccar.nix).
     sops.secrets.calibre_web_vigil_password = {
         sopsFile = "${config.technet.secrets.path}/calibre-web.yaml";
-        group = "vigil-monitor"; # Read by whichever Vigil transport runs the `cat` — the agent today, vigil-access as fallback
+        group = "x-monitor-credentials"; # Read by whichever X-Monitor transport runs the `cat` — the agent today, x-monitor-access as fallback
         mode = "0440";
     };
 

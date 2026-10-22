@@ -4,12 +4,12 @@
 # through the desktop ssh-agent, so it needs no key on disk.
 #
 # The same key is also provisioned here as a sops secret, root-owned, for
-# Vigil's manually-triggered backups: Vigil logs into this host as
-# `vigil-access` and runs `borg create` under `sudo`, and borg then makes its
+# X-Monitor's manually-triggered backups: X-Monitor logs into this host as
+# `x-monitor-access` and runs `borg create` under `sudo`, and borg then makes its
 # own SSH connection to the repo server. That connection cannot reach the
-# desktop agent — Vigil is a system service — so it authenticates with this
+# desktop agent — X-Monitor is a system service — so it authenticates with this
 # file instead. Same identity the repos already authorize (`odin-borg-key`),
-# so Vigil triggers this host's backup rather than performing one under
+# so X-Monitor triggers this host's backup rather than performing one under
 # credentials of its own.
 #
 { config, lib, ... }:
@@ -20,10 +20,10 @@ let
         raw = [ "pf:/Storage/System" ];
     };
 
-    # Borg's default 1s lock wait made scheduled backups fail whenever a Vigil poll held the repo; 1800s outlasts Vigil's longest poll timeout.
+    # Borg's default 1s lock wait made scheduled backups fail whenever a X-Monitor poll held the repo; 1800s outlasts X-Monitor's longest poll timeout.
     vortaBorgArguments = "--lock-wait 1800";
 
-    # Systemd timers start each profile at a fixed minute, kept 30 minutes from its Vigil poll in vigil.nix, because Vorta's own interval schedule drifts.
+    # Systemd timers start each profile at a fixed minute, kept 30 minutes from its X-Monitor poll in x-monitor.nix, because Vorta's own interval schedule drifts.
     vortaProfileMinutes = {
         "1. On Disk Backup" = 10;
         "2. Heimdall Backup" = 15;
@@ -35,14 +35,14 @@ in
         sopsFile = "${config.technet.secrets.path}/vorta.yaml";
     };
 
-    # Passphrase for the encrypted Vorta repos, likewise for Vigil's use: its
+    # Passphrase for the encrypted Vorta repos, likewise for X-Monitor's use: its
     # borg monitors run `cat` on this path to unlock the repo. Vorta itself
     # takes the passphrase from the system keyring, not from here.
     sops.secrets.vorta_backup_passphrase = {
         sopsFile = "${config.technet.secrets.path}/vorta.yaml";
     };
 
-    # Vigil restores this file from the newest archive and compares it with the live one, so its content must never change.
+    # X-Monitor restores this file from the newest archive and compares it with the live one, so its content must never change.
     systemd.tmpfiles.settings."Vigil-Canary"."/Storage/Files/.vigil-canary".f = {
         user = "root";
         group = "root";

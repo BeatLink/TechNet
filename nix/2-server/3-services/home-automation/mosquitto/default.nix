@@ -1,7 +1,7 @@
 #  Mosquitto
 #
 #  The MQTT broker every device on the network reports through. Home Assistant,
-#  Frigate and both LNXlink instances are its clients, and Vigil probes it; it is
+#  Frigate and both LNXlink instances are its clients, and X-Monitor probes it; it is
 #  filed under home automation because that is what most of the traffic is, but
 #  more than home automation depends on it.
 #

@@ -186,7 +186,7 @@ in
         "CAP_NET_RAW"
     ];
 
-    # Vigil restores this file from the newest archive and compares it with the live one, so its content must never change.
+    # X-Monitor restores this file from the newest archive and compares it with the live one, so its content must never change.
     systemd.tmpfiles.settings."Vigil-Canary"."/Storage/System/.vigil-canary".f = {
         user = "root";
         group = "root";
@@ -227,8 +227,8 @@ in
 
     # Notifications
     #
-    # Backup health is monitored by Vigil rather than pushed from here.
-    # Vigil's `borg` monitors (nix/2-server/3-services/monitoring/vigil.nix,
+    # Backup health is monitored by X-Monitor rather than pushed from here.
+    # X-Monitor's `borg` monitors (nix/2-server/3-services/monitoring/x-monitor.nix,
     # "Backups" group) read each repo directly over SSH and alert when the
     # newest archive exceeds max_age. That checks the repository itself —
     # the authoritative state — instead of trusting this scheduler to

@@ -3,10 +3,10 @@
 # Configures the Borg Server for other devices to connect
 #
 # Only each source host's own borg key is authorized per repo. A
-# Vigil-triggered backup deliberately reuses that same key rather than one of
-# Vigil's own: Vigil logs into the source host as `vigil-access` and runs
+# X-Monitor-triggered backup deliberately reuses that same key rather than one of
+# X-Monitor's own: X-Monitor logs into the source host as `x-monitor-access` and runs
 # `borg create` there, and borg then authenticates here as the host always has.
-# Vigil therefore triggers the host's backup instead of performing its own, and
+# X-Monitor therefore triggers the host's backup instead of performing its own, and
 # never holds write credentials to a backup repository.
 #
 {

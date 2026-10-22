@@ -276,7 +276,7 @@ POST_SWITCH = {"Thor": ["sh", "-c", "systemctl is-active -q phosh.service || sys
 
 
 def deploy(name):
-    """Switches one host to the checkout the way Vigil does: sleep held off for the switch, and its after-switch step run."""
+    """Switches one host to the checkout the way X-Monitor does: sleep held off for the switch, and its after-switch step run."""
     address = ADDRESSES[name]
     say(f"switching {name}")
     inhibit = subprocess.Popen(

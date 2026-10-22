@@ -41,8 +41,9 @@
                         "trilium-server"
                         "unbound"
                         "unbound-root-hints"
-                        "vigil"
                         "vlc-audio"
+                        "x-monitor"
+                        "x-monitor-import-vigil-db"
                     ]
                     (_: {
                         unitConfig.RequiresMountsFor = [ "/Storage" ];

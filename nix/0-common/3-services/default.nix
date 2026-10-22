@@ -10,6 +10,6 @@
         ./remote-deploy.nix
         ./ssh.nix
         ./syncthing.nix
-        ./vigil-agent.nix
+        ./x-monitor-agent.nix
     ];
 }

@@ -1,9 +1,9 @@
 # https://github.com/BeatLink/BlockURL
 
 { config, ... }: {
-    # Vigil's own client key; the server itself holds only the hashes below.
+    # X-Monitor's own client key; the server itself holds only the hashes below.
     sops.secrets.blockurl_vigil_api_key = {
-        group = "vigil-monitor"; # Read by the `cat` the blockurl plugin runs on the Vigil host as the `vigil` user
+        group = "x-monitor-credentials"; # Read by the `cat` the blockurl plugin runs on the X-Monitor host as the `x-monitor` user
         mode = "0440";
         sopsFile = "${config.technet.secrets.path}/blockurl.yaml";
     };

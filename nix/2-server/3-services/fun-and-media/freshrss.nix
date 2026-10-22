@@ -16,7 +16,7 @@
         group = "freshrss";
     };
 
-    # Vigil's `freshrss` plugin authenticates to the Fever API as this same
+    # X-Monitor's `freshrss` plugin authenticates to the Fever API as this same
     # (beatlink) user to check feed-refresh staleness. FreshRSS has no
     # separate declarative API-password option — it must be set once by hand
     # under Settings > Authentication > "API management" for this user, then
@@ -24,7 +24,7 @@
     # Traccar's vigil account (see traccar.nix).
     sops.secrets.freshrss_api_password = {
         sopsFile = "${config.technet.secrets.path}/freshrss.yaml";
-        group = "vigil-monitor"; # Read by the `cat` the freshrss plugin runs on the Vigil host as the `vigil` user
+        group = "x-monitor-credentials"; # Read by the `cat` the freshrss plugin runs on the X-Monitor host as the `x-monitor` user
         mode = "0440";
     };
 

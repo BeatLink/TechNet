@@ -12,7 +12,7 @@
         }
 
         # Emulation ##################################################################################################################################
-        # Vigil's nightly builds compile Thor's and Ragnarok's closures here, since neither builds its own and Ragnarok natively is slower.
+        # X-Monitor's nightly builds compile Thor's and Ragnarok's closures here, since neither builds its own and Ragnarok natively is slower.
         {
             boot.binfmt = {
                 emulatedSystems = [ "aarch64-linux" ];
@@ -21,7 +21,7 @@
         }
 
         # Build Priority #############################################################################################################################
-        # Vigil's builds run inside nix-daemon, so the daemon's own scheduling is what keeps an hours-long emulated build off the services.
+        # X-Monitor's builds run inside nix-daemon, so the daemon's own scheduling is what keeps an hours-long emulated build off the services.
         {
             nix.daemonCPUSchedPolicy = "idle";
             nix.daemonIOSchedClass = "idle";

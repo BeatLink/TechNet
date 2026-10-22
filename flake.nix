@@ -108,8 +108,8 @@
             url = "github:nix-community/nix-vscode-extensions";
             inputs.nixpkgs.follows = "nixpkgs";
         };
-        vigil = {
-            url = "github:BeatLink/Vigil";
+        x-monitor = {
+            url = "github:x-tech-laboratories/X-Monitor";
             inputs.nixpkgs.follows = "nixpkgs";
         };
         context = {

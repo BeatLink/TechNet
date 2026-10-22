@@ -57,14 +57,14 @@ the current hash, so nothing here forced a build.
 
 ### `nix/2-server/overlays.nix` — ineffective, and no longer needed — **deleted**
 
-It never reaches Vigil. The overlaid `python3.12-aiohttp` (`8b9mzphi…`, `doInstallCheck=""`)
-has **zero referrers**. `config.services.vigil.package` (`hs3k2bv1…`) depends on the untouched
+It never reaches X-Monitor. The overlaid `python3.12-aiohttp` (`8b9mzphi…`, `doInstallCheck=""`)
+has **zero referrers**. `config.services.x-monitor.package` (`hs3k2bv1…`) depends on the untouched
 `3mi33qgb…` aiohttp and `jki9apb4…` python-ulid, tests still on.
 
-The reason is structural: Vigil comes from `inputs.vigil.nixosModules.default`, and a flake
+The reason is structural: X-Monitor comes from `inputs.x-monitor.nixosModules.default`, and a flake
 input's packages are built inside that flake's own nixpkgs instantiation. `nixpkgs.overlays`
-set in a NixOS module never applies to them. A broken transitive Python dependency of Vigil
-has to be fixed in the Vigil flake.
+set in a NixOS module never applies to them. A broken transitive Python dependency of X-Monitor
+has to be fixed in the X-Monitor flake.
 
 It is also unnecessary now: both untouched packages are satisfied from the caches in
 Heimdall's dry-run.

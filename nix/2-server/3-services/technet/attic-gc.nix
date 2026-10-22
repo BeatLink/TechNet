@@ -1,7 +1,7 @@
 # Attic Garbage Collection ###########################################################################################################################
 #
 # Drains Attic's whole deletion backlog once a day, since atticd's own collector removes only 500 chunks per run and then sleeps.
-# Vigil watches the run and can start one by hand.
+# X-Monitor watches the run and can start one by hand.
 #
 {
     config,
@@ -95,7 +95,7 @@ in
                 wantedBy = [ "timers.target" ];
 
                 timerConfig = {
-                    OnCalendar = "*-*-* 03:00:00"; # Clear of Vigil's builds from 04:00, whose pushes would contend for the database
+                    OnCalendar = "*-*-* 03:00:00"; # Clear of X-Monitor's builds from 04:00, whose pushes would contend for the database
                     Persistent = true;
                     RandomizedDelaySec = "15m";
                 };

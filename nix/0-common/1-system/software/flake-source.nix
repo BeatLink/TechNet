@@ -1,6 +1,6 @@
 # Flake Source #######################################################################################################################################
 #
-# Which flake the fleet deploys from. Heimdall's Vigil builds and activates every host's closure from it, and each agent's sudo rules name it.
+# Which flake the fleet deploys from. Heimdall's X-Monitor builds and activates every host's closure from it, and each agent's sudo rules name it.
 #
 { lib, ... }:
 {
@@ -10,7 +10,7 @@
         description = ''
             Flake reference every host is deployed from.
 
-            Heimdall's Vigil deployment monitors evaluate
+            Heimdall's X-Monitor deployment monitors evaluate
             `<flake>#nixosConfigurations.<host>` and switch each host to the
             result, so one value decides what the whole fleet runs. The agents'
             sudo rules are written against it too, which is why it is an option

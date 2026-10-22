@@ -11,10 +11,10 @@
 #
 { config, ... }:
 {
-    # Read by whichever Vigil transport runs the `cat` -- the agent today, vigil-access as fallback
+    # Read by whichever X-Monitor transport runs the `cat` -- the agent today, x-monitor-access as fallback
     sops.secrets.traccar_vigil_password = {
         sopsFile = "${config.technet.secrets.path}/traccar.yaml";
-        group = "vigil-monitor";
+        group = "x-monitor-credentials";
         mode = "0440";
     };
 

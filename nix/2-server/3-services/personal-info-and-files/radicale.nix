@@ -15,12 +15,12 @@
     ...
 }:
 {
-    # Owned by `vigil`, not `vigil-access`, unlike the probe credentials that
-    # are read on the target host over SSH. Vigil's HTTP-style plugins resolve
-    # `password_command` on the Vigil host itself at plugin construction --
+    # Owned by `x-monitor`, not `x-monitor-access`, unlike the probe credentials that
+    # are read on the target host over SSH. X-Monitor's HTTP-style plugins resolve
+    # `password_command` on the X-Monitor host itself at plugin construction --
     # a probe's ssh_config routes the request, not the password lookup -- so
-    # this is read by vigil.service, which runs as `vigil`. Owning it
-    # `vigil-access` made every PROPFIND probe send an empty password and fail
+    # this is read by x-monitor.service, which runs as `x-monitor`. Owning it
+    # `x-monitor-access` made every PROPFIND probe send an empty password and fail
     # authentication every 10 minutes.
     #
     # radicale-vigil-htpasswd reads it via LoadCredential, which systemd
@@ -28,7 +28,7 @@
     # unaffected by the owner.
     sops.secrets.radicale_vigil_password = {
         sopsFile = "${config.technet.secrets.path}/radicale.yaml";
-        owner = "vigil";
+        owner = "x-monitor";
     };
 
     services.radicale = {
@@ -69,7 +69,7 @@
     # collections" (Radicale creates the file itself if absent, but this
     # keeps the ordering explicit rather than relying on that).
     systemd.services.radicale-vigil-htpasswd = {
-        description = "Provision Vigil's Radicale probe account";
+        description = "Provision X-Monitor's Radicale probe account";
         before = [ "radicale.service" ];
         wantedBy = [ "radicale.service" ];
         serviceConfig = {

@@ -1,6 +1,6 @@
 { config, pkgs, ... }:
 {
-    # Vigil's `trilium` plugin reads /etapi/metrics to check the note
+    # X-Monitor's `trilium` plugin reads /etapi/metrics to check the note
     # database is actually being modified, not just that the server answers.
     # Trilium has no declarative token provisioning — ETAPI tokens are
     # generated once by hand under Options > ETAPI, then stored here to
@@ -8,7 +8,7 @@
     # account (see traccar.nix).
     sops.secrets.trilium_etapi_token = {
         sopsFile = "${config.technet.secrets.path}/trilium.yaml";
-        group = "vigil-monitor"; # Read by whichever Vigil transport runs the `cat` — the agent today, vigil-access as fallback
+        group = "x-monitor-credentials"; # Read by whichever X-Monitor transport runs the `cat` — the agent today, x-monitor-access as fallback
         mode = "0440";
     };
 

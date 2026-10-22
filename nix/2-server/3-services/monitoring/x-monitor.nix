@@ -1,10 +1,10 @@
-# Vigil
+# X-Monitor
 #
 # Web-based network and systems monitor. Runs on Heimdall and collects metrics,
 # service status and backup health from the TechNet hosts.
 #
-# Heimdall, Odin, Ragnarok and Thor are reached through the Vigil agent: each
-# runs `vigil-agent` (nix/0-common/3-services/vigil-agent.nix), which dials out
+# Heimdall, Odin, Ragnarok and Thor are reached through the X-Monitor agent: each
+# runs `x-monitor-agent` (nix/0-common/3-services/x-monitor-agent.nix), which dials out
 # to this host and holds one WebSocket open. Monitors name their host with
 # `agent = "<id>"`. Nothing about a monitor's commands changes — the agent runs
 # the same shell the SSH transport carried — but there is no per-host session
@@ -15,7 +15,7 @@
 # No monitor sets `ssh_config` any more, so nothing uses it; it stays until the
 # agents have proven themselves, because restoring SSH access to a host you can
 # no longer see is the wrong order of operations. Drop it, and the
-# `vigil-access` account, once that is settled.
+# `x-monitor-access` account, once that is settled.
 #
 # Devices with nothing to run — the IoT sensors, lights and ThorX — are still
 # reached agentlessly by ICMP/HTTP/DNS, which needs nothing installed on them.
@@ -25,9 +25,9 @@
 # Repo passphrases are per monitor, not global. Each borg monitor sets
 # `passphrase_command` pointing at the sops secret of the tool that owns its
 # repo — Vorta's on Odin, borgmatic's on Odin or Heimdall. That command runs on
-# the host borg runs on, so Vigil never holds the passphrases and each repo is
+# the host borg runs on, so X-Monitor never holds the passphrases and each repo is
 # unlocked with its own, exactly as the scheduled job does it. (Vorta and
-# borgmatic use different passphrases, so a single Vigil-wide default would
+# borgmatic use different passphrases, so a single X-Monitor-wide default would
 # unlock only one of them.)
 #
 # Every signal a host reports is its own monitor and its own plugin type: `cpu`,
@@ -70,14 +70,14 @@
 # an id defaults to the name, and three hosts sharing a "System Stats" would
 # otherwise write their status under one key.
 #
-# Vigil's own SSH key stays in secrets/2-server/vigil.yaml, encrypted to
+# X-Monitor's own SSH key stays in secrets/2-server/x-monitor.yaml, encrypted to
 # Heimdall alone: it is only ever used to log INTO the monitored hosts, which
-# Vigil does from here, so no other host needs a copy.
+# X-Monitor does from here, so no other host needs a copy.
 #
 # A backup monitor runs `borg create` on the host that owns the source data, and
 # borg then opens its own SSH connection to the repo server. That hop
 # authenticates with the SOURCE HOST's existing borg key (`ssh_key` on each
-# monitor: Vorta's or borgmatic's), never with Vigil's. Vigil therefore triggers
+# monitor: Vorta's or borgmatic's), never with X-Monitor's. X-Monitor therefore triggers
 # the host's backup rather than performing one under its own identity, and holds
 # no write credential to any backup repository.
 #
@@ -89,7 +89,7 @@
 # and where those copies go".
 #
 # Every backup monitor runs `borg` under sudo (`require_sudo`). The repos are
-# root-owned, so reading an archive as the unprivileged `vigil-access` account
+# root-owned, so reading an archive as the unprivileged `x-monitor-access` account
 # fails on permissions. That account is in `wheel`, and wheelNeedsPassword =
 # false (nix/0-common/2-users/default.nix) grants it NOPASSWD:SETENV, so the
 # non-interactive `sudo -n` succeeds and the inlined BORG_PASSPHRASE survives
@@ -97,13 +97,13 @@
 #
 # `source_paths` and `compression` mirror the tool that owns each repo, and
 # `exclude` is the fleet's one set from backup-excludes.nix that borgmatic and
-# Vorta also apply, so a Vigil-triggered backup produces an archive equivalent
+# Vorta also apply, so a X-Monitor-triggered backup produces an archive equivalent
 # to the scheduled one and Purge Excluded rewrites old archives to match it.
 #
-# `keep_*` and `prune_match` mirror the owning tool's pruning, which Vigil's prune preview dry-runs.
+# `keep_*` and `prune_match` mirror the owning tool's pruning, which X-Monitor's prune preview dry-runs.
 #
 # Scheduling is deliberately not represented: these backups are triggered
-# manually from the Vigil UI, while Vorta/borgmatic keep their own schedules.
+# manually from the X-Monitor UI, while Vorta/borgmatic keep their own schedules.
 #
 {
     config,
@@ -114,7 +114,7 @@
 let
     # Every host upgrades from the same flake, so Heimdall's own value is every monitor's.
     haAlertWebhook =
-        (builtins.head (builtins.head config.services.home-assistant.config.homeassistant.packages.vigil_alerts.automation)
+        (builtins.head (builtins.head config.services.home-assistant.config.homeassistant.packages.x_monitor_alerts.automation)
         .triggers).webhook_id;
     upgradeFlake = config.technet.flake;
 
@@ -153,14 +153,14 @@ let
 
 in
 {
-    imports = [ inputs.vigil.nixosModules.default ];
+    imports = [ inputs.x-monitor.nixosModules.default ];
 
-    # Private SSH key the vigil service user authenticates with, used only to log
-    # into the monitored hosts. Owned by the `vigil` service user that runs the
+    # Private SSH key the x-monitor service user authenticates with, used only to log
+    # into the monitored hosts. Owned by the `x-monitor` service user that runs the
     # daemon here; no other host needs a copy.
     sops.secrets.vigil_ssh_key = {
-        sopsFile = "${config.technet.secrets.path}/vigil.yaml";
-        owner = "vigil";
+        sopsFile = "${config.technet.secrets.path}/x-monitor.yaml";
+        owner = "x-monitor";
     };
 
     # Login credentials gating the dashboard and REST API. The
@@ -168,20 +168,20 @@ in
     # WireGuard mesh — auth is defense-in-depth against anyone else on that
     # mesh, not the internet at large.
     sops.secrets.vigil_dashboard_password = {
-        sopsFile = "${config.technet.secrets.path}/vigil.yaml";
-        owner = "vigil";
+        sopsFile = "${config.technet.secrets.path}/x-monitor.yaml";
+        owner = "x-monitor";
     };
 
-    # Signs the dashboard session cookies, so a Vigil restart or redeploy does not sign every browser out.
+    # Signs the dashboard session cookies, so a X-Monitor restart or redeploy does not sign every browser out.
     sops.secrets.vigil_session_secret = {
-        sopsFile = "${config.technet.secrets.path}/vigil.yaml";
-        owner = "vigil";
+        sopsFile = "${config.technet.secrets.path}/x-monitor.yaml";
+        owner = "x-monitor";
     };
 
     # Write deploy key on the TechNet repo that Update Flake pushes the new lock with; the job runs as Heimdall's agent user.
     sops.secrets.vigil_flake_deploy_key = {
-        sopsFile = "${config.technet.secrets.path}/vigil.yaml";
-        owner = "vigil-agent";
+        sopsFile = "${config.technet.secrets.path}/x-monitor.yaml";
+        owner = "x-monitor-agent";
     };
 
     # The record's own update URL — a secret, account-specific URL that points it at the caller's apparent IP on GET. It sits beside the hostname in
@@ -189,22 +189,22 @@ in
     sops.secrets.ddns_sync_url = {
         sopsFile = "${config.technet.secrets.commonPath}/ddns.yaml";
         key = "sync_url";
-        owner = "vigil";
+        owner = "x-monitor";
     };
 
     # The domain that monitor keeps current, handed over as a file (domain_file) for the same reason the update URL is: it names the home connection.
-    sops.templates."vigil-ddns-domain" = {
+    sops.templates."x-monitor-ddns-domain" = {
         content = config.sops.placeholder.ddns_hostname;
-        owner = "vigil";
+        owner = "x-monitor";
     };
 
-    # HTTP plugins run `api_password_command` here as the `vigil` user, not through the agent, so it needs the same credential group the agent holds.
-    users.users.vigil.extraGroups = [ "vigil-monitor" ];
+    # HTTP plugins run `api_password_command` here as the `x-monitor` user, not through the agent, so it needs the same credential group the agent holds.
+    users.users.x-monitor.extraGroups = [ "x-monitor-credentials" ];
 
-    services.vigil = {
+    services.x-monitor = {
         enable = true;
         port = 9611;
-        dataDir = "/Storage/Services/Vigil"; # SQLite database lives here (persisted)
+        dataDir = "/Storage/Services/X-Monitor"; # SQLite database lives here (persisted)
         authUsername = "admin";
         authPasswordFile = config.sops.secrets.vigil_dashboard_password.path;
         authSessionSecretFile = config.sops.secrets.vigil_session_secret.path;
@@ -223,14 +223,14 @@ in
             };
 
             # Every agent that may dial in. A monitor's `agent = "<id>"` refers
-            # to an `id` here. `host` is a label only — Vigil never dials an
-            # agent, the agent always dials Vigil — but it is what a monitor's
+            # to an `id` here. `host` is a label only — X-Monitor never dials an
+            # agent, the agent always dials X-Monitor — but it is what a monitor's
             # target shows as in the dashboard, so it stays the real hostname.
             #
             # An agent that is configured but not currently connected is not an
             # error: its monitors report failed with an explicit message until
             # it reconnects, exactly as a refused SSH dial behaved.
-            # Each agent signs in with its own ed25519 key, whose private half lives only in that host's vigil-agent.yaml.
+            # Each agent signs in with its own ed25519 key, whose private half lives only in that host's x-monitor-agent.yaml.
             agents = [
                 {
                     id = "heimdall";
@@ -260,7 +260,7 @@ in
             ];
 
             notifications = {
-                base_url = "https://vigil.heimdall.technet";
+                base_url = "https://x-monitor.heimdall.technet";
                 group_window = "30s";
                 defaults.flapping = {
                     changes = 4;
@@ -283,7 +283,7 @@ in
             # Fallback only — no monitor sets `ssh_config` any more, so nothing
             # merges these today. See the header before removing them.
             ssh_defaults = {
-                username = "vigil-access";
+                username = "x-monitor-access";
                 key_path = config.sops.secrets.vigil_ssh_key.path;
             };
 
@@ -305,7 +305,7 @@ in
             views = [
                 {
                     name = "By domain";
-                    plugins = domainView config.services.vigil.settings.plugins;
+                    plugins = domainView config.services.x-monitor.settings.plugins;
                 }
             ];
 
@@ -863,7 +863,7 @@ in
                             type = "group";
                             children = [
                                 {
-                                    # Vigil watching itself. Runs in-process on Heimdall rather
+                                    # X-Monitor watching itself. Runs in-process on Heimdall rather
                                     # than through a transport, so it names no agent.
                                     #
                                     # The value here is the stall check: if the engine wedges,
@@ -872,14 +872,14 @@ in
                                     # green that is indistinguishable from a healthy one. This
                                     # monitor is what makes that failure visible.
                                     #
-                                    # Necessarily blind to Vigil being down entirely: a dead
+                                    # Necessarily blind to X-Monitor being down entirely: a dead
                                     # process cannot report its own death. That gap closes with
                                     # external alerting, not from here.
-                                    name = "Vigil";
-                                    id = "vigil-self";
-                                    type = "vigil_self";
+                                    name = "X-Monitor";
+                                    id = "vigil-self"; # Kept from Vigil, because the id keys this monitor's history in the database
+                                    type = "x_monitor_self";
                                     interval = "1m";
-                                    # Vigil settles around 500 MB with this monitor count; these
+                                    # X-Monitor settles around 500 MB with this monitor count; these
                                     # leave generous headroom while still catching a real leak.
                                     memory_warning = 768;
                                     memory_threshold = 1024;
@@ -890,7 +890,7 @@ in
                                     # for the laptop, phone, and backup server (see their
                                     # networking.nix files), so a stale record breaks remote access
                                     # to all three. Replaces the standalone ddns-updater service:
-                                    # Vigil now both performs the update and reports on whether
+                                    # X-Monitor now both performs the update and reports on whether
                                     # it's in sync, instead of a separate opaque container doing the
                                     # former with no visibility into the latter.
                                     #
@@ -903,7 +903,7 @@ in
                                     name = "DDNS";
                                     id = "ddns-home";
                                     type = "ddns_updater";
-                                    domain_file = config.sops.templates."vigil-ddns-domain".path;
+                                    domain_file = config.sops.templates."x-monitor-ddns-domain".path;
                                     record_type = "A";
                                     resolver = "8.8.8.8";
                                     update_url_file = config.sops.secrets.ddns_sync_url.path;
@@ -933,18 +933,18 @@ in
                                             # stays green while every client silently
                                             # stops seeing messages. Publishes a nonce and
                                             # confirms it comes back on the same topic,
-                                            # authenticating as a dedicated `vigil` MQTT
+                                            # authenticating as a dedicated `x-monitor` MQTT
                                             # user (mosquitto/broker.nix) scoped by ACL to
-                                            # vigil/probe/# only.
+                                            # x-monitor/probe/# only.
                                             name = "Delivery";
                                             id = "heimdall-mosquitto-delivery";
                                             type = "mosquitto";
                                             interval = "5m";
                                             host = "127.0.0.1";
                                             port = 1883;
-                                            username = "vigil";
+                                            username = "x-monitor";
                                             password_command = "cat /run/secrets/mosquitto_vigil_password";
-                                            probe_topic = "vigil/probe/heimdall-mosquitto-delivery";
+                                            probe_topic = "x-monitor/probe/heimdall-mosquitto-delivery";
                                             agent = "heimdall";
                                         }
                                     ];
@@ -1156,7 +1156,7 @@ in
                                             # a non-zero exit here. Read from Frigate's
                                             # source (comms/mqtt.py) rather than assumed.
                                             #
-                                            # Authenticates as the same `vigil` user as
+                                            # Authenticates as the same `x-monitor` user as
                                             # the delivery probe, which for this needs
                                             # `read frigate/available` -- see
                                             # mosquitto/broker.nix.
@@ -1167,7 +1167,7 @@ in
                                             timeout = 15;
                                             command = ''
                                                 test "$(mosquitto_sub -h 127.0.0.1 -p 1883 \
-                                                    -u vigil -P "$(cat /run/secrets/mosquitto_vigil_password)" \
+                                                    -u x-monitor -P "$(cat /run/secrets/mosquitto_vigil_password)" \
                                                     -t frigate/available -C 1 -W 5)" = online
                                             '';
                                             agent = "heimdall";
@@ -1469,7 +1469,7 @@ in
                                             type = "syncthing";
                                             interval = "10m";
                                             api_url = "http://127.0.0.1:8384";
-                                            api_key_command = "cat /Storage/Services/Syncthing/vigil-api-key";
+                                            api_key_command = "cat /Storage/Services/Syncthing/x-monitor-api-key";
                                             devices = [
                                                 "Odin"
                                                 "Ragnarok"
@@ -1677,7 +1677,7 @@ in
                                             max_age = "1d";
                                             repo = "/Storage/Files/Backups/Server/Borgmatic";
                                             # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
-                                            cache_dir = "/var/cache/vigil-borg";
+                                            cache_dir = "/var/cache/x-monitor-borg";
                                             require_sudo = true;
                                             # Unlocks this repo with borgmatic's own passphrase, read on the
                                             # host borg runs on. Vorta and borgmatic use different
@@ -1715,7 +1715,7 @@ in
                                             max_age = "1d";
                                             repo = "ssh://borg@ragnarok.technet/Storage/Backups/Server/Borgmatic";
                                             # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
-                                            cache_dir = "/var/cache/vigil-borg";
+                                            cache_dir = "/var/cache/x-monitor-borg";
                                             require_sudo = true;
                                             # Unlocks this repo with borgmatic's own passphrase, read on the
                                             # host borg runs on. Vorta and borgmatic use different
@@ -1723,9 +1723,9 @@ in
                                             # the secret never leaves the host that owns it.
                                             passphrase_command = "cat /run/secrets/borg_repo_encryption_key";
                                             # borg makes its OWN SSH connection to the repo server, with
-                                            # its own identity — Vigil's login here does not carry over.
+                                            # its own identity — X-Monitor's login here does not carry over.
                                             # This is the host's existing borgmatic key, the same one the
-                                            # scheduled job uses, so Vigil triggers the host's backup
+                                            # scheduled job uses, so X-Monitor triggers the host's backup
                                             # rather than performing one under its own credentials.
                                             ssh_key = "/run/secrets/borg_repo_ssh_key";
                                             source_paths = config.services.borgmatic.configurations.local.source_directories;
@@ -2104,7 +2104,7 @@ in
                                             max_age = "1d";
                                             repo = "/Storage/Files/Backups/Laptop/Vorta";
                                             # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
-                                            cache_dir = "/var/cache/vigil-borg";
+                                            cache_dir = "/var/cache/x-monitor-borg";
                                             require_sudo = true;
                                             # Unlocks this repo with Vorta's own passphrase, read on the
                                             # host borg runs on. Vorta and borgmatic use different
@@ -2145,7 +2145,7 @@ in
                                             max_age = "1d";
                                             repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Vorta";
                                             # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
-                                            cache_dir = "/var/cache/vigil-borg";
+                                            cache_dir = "/var/cache/x-monitor-borg";
                                             require_sudo = true;
                                             # Unlocks this repo with Vorta's own passphrase, read on the
                                             # host borg runs on. Vorta and borgmatic use different
@@ -2153,9 +2153,9 @@ in
                                             # the secret never leaves the host that owns it.
                                             passphrase_command = "cat /run/secrets/vorta_backup_passphrase";
                                             # borg makes its OWN SSH connection to the repo server, with
-                                            # its own identity — Vigil's login here does not carry over.
+                                            # its own identity — X-Monitor's login here does not carry over.
                                             # This is Odin's existing Vorta repo key, the same one Vorta
-                                            # authenticates with, so Vigil triggers the host's backup
+                                            # authenticates with, so X-Monitor triggers the host's backup
                                             # rather than performing one under its own credentials.
                                             ssh_key = "/run/secrets/vorta_ssh_key";
                                             source_paths = [
@@ -2192,7 +2192,7 @@ in
                                             max_age = "1d";
                                             repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Vorta";
                                             # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
-                                            cache_dir = "/var/cache/vigil-borg";
+                                            cache_dir = "/var/cache/x-monitor-borg";
                                             require_sudo = true;
                                             # Unlocks this repo with Vorta's own passphrase, read on the
                                             # host borg runs on. Vorta and borgmatic use different
@@ -2200,9 +2200,9 @@ in
                                             # the secret never leaves the host that owns it.
                                             passphrase_command = "cat /run/secrets/vorta_backup_passphrase";
                                             # borg makes its OWN SSH connection to the repo server, with
-                                            # its own identity — Vigil's login here does not carry over.
+                                            # its own identity — X-Monitor's login here does not carry over.
                                             # This is Odin's existing Vorta repo key, the same one Vorta
-                                            # authenticates with, so Vigil triggers the host's backup
+                                            # authenticates with, so X-Monitor triggers the host's backup
                                             # rather than performing one under its own credentials.
                                             ssh_key = "/run/secrets/vorta_ssh_key";
                                             source_paths = [
@@ -2244,7 +2244,7 @@ in
                                             max_age = "1d";
                                             repo = "/Storage/Files/Backups/Laptop/Borgmatic";
                                             # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
-                                            cache_dir = "/var/cache/vigil-borg";
+                                            cache_dir = "/var/cache/x-monitor-borg";
                                             require_sudo = true;
                                             # Unlocks this repo with borgmatic's own passphrase, read on the
                                             # host borg runs on. Vorta and borgmatic use different
@@ -2288,7 +2288,7 @@ in
                                             max_age = "1d";
                                             repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Borgmatic";
                                             # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
-                                            cache_dir = "/var/cache/vigil-borg";
+                                            cache_dir = "/var/cache/x-monitor-borg";
                                             require_sudo = true;
                                             # Unlocks this repo with borgmatic's own passphrase, read on the
                                             # host borg runs on. Vorta and borgmatic use different
@@ -2296,9 +2296,9 @@ in
                                             # the secret never leaves the host that owns it.
                                             passphrase_command = "cat /run/secrets/borg_repo_encryption_key";
                                             # borg makes its OWN SSH connection to the repo server, with
-                                            # its own identity — Vigil's login here does not carry over.
+                                            # its own identity — X-Monitor's login here does not carry over.
                                             # This is the host's existing borgmatic key, the same one the
-                                            # scheduled job uses, so Vigil triggers the host's backup
+                                            # scheduled job uses, so X-Monitor triggers the host's backup
                                             # rather than performing one under its own credentials.
                                             ssh_key = "/run/secrets/borg_repo_ssh_key";
                                             source_paths = [
@@ -2338,7 +2338,7 @@ in
                                             max_age = "1d";
                                             repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Borgmatic";
                                             # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
-                                            cache_dir = "/var/cache/vigil-borg";
+                                            cache_dir = "/var/cache/x-monitor-borg";
                                             require_sudo = true;
                                             # Unlocks this repo with borgmatic's own passphrase, read on the
                                             # host borg runs on. Vorta and borgmatic use different
@@ -2346,9 +2346,9 @@ in
                                             # the secret never leaves the host that owns it.
                                             passphrase_command = "cat /run/secrets/borg_repo_encryption_key";
                                             # borg makes its OWN SSH connection to the repo server, with
-                                            # its own identity — Vigil's login here does not carry over.
+                                            # its own identity — X-Monitor's login here does not carry over.
                                             # This is the host's existing borgmatic key, the same one the
-                                            # scheduled job uses, so Vigil triggers the host's backup
+                                            # scheduled job uses, so X-Monitor triggers the host's backup
                                             # rather than performing one under its own credentials.
                                             ssh_key = "/run/secrets/borg_repo_ssh_key";
                                             source_paths = [
@@ -2474,7 +2474,7 @@ in
                                     type = "group";
                                     children = [
                                         {
-                                            # Charge thresholds are upower's own percentageLow and percentageCritical from 5-phone/1-system/power.nix, so Vigil warns exactly when the phone does; the keyboard case's USB feed counts as plugged in.
+                                            # Charge thresholds are upower's own percentageLow and percentageCritical from 5-phone/1-system/power.nix, so X-Monitor warns exactly when the phone does; the keyboard case's USB feed counts as plugged in.
                                             name = "Battery";
                                             id = "thor-battery";
                                             type = "power";
@@ -2756,7 +2756,7 @@ in
                     ];
                 }
                 {
-                    # The Android phone, configured on the device rather than from here, so reachability is the whole of what Vigil can see.
+                    # The Android phone, configured on the device rather than from here, so reachability is the whole of what X-Monitor can see.
                     name = "ThorX";
                     id = "thorx-host";
                     type = "group";
@@ -2856,17 +2856,47 @@ in
         };
     };
 
-    systemd.tmpfiles.settings."Vigil"."/Storage/Services/Vigil" = {
+    systemd.tmpfiles.settings."X-Monitor"."/Storage/Services/X-Monitor" = {
         d = {
-            user = "vigil";
-            group = "vigil";
+            user = "x-monitor";
+            group = "x-monitor";
             mode = "0750";
         };
         Z = {
-            user = "vigil";
-            group = "vigil";
+            user = "x-monitor";
+            group = "x-monitor";
             mode = "0750";
         };
+    };
+
+    # Copies the history Vigil kept into X-Monitor's database once, before X-Monitor first starts; the original stays put as a rollback.
+    systemd.services.x-monitor-import-vigil-db = {
+        description = "Copy Vigil's database into X-Monitor's data directory";
+        requiredBy = [ "x-monitor.service" ];
+        before = [ "x-monitor.service" ];
+        unitConfig = {
+            ConditionPathExists = [
+                "/Storage/Services/Vigil/vigil.db"
+                "!/Storage/Services/X-Monitor/x-monitor.db"
+            ];
+        };
+        serviceConfig.Type = "oneshot";
+        # The write-ahead log carries commits not yet folded into the database file, so it is copied too, and the database file lands last.
+        script = ''
+            set -eu
+            source=/Storage/Services/Vigil/vigil.db
+            target=/Storage/Services/X-Monitor/x-monitor.db
+            install -d -o x-monitor -g x-monitor -m 0750 /Storage/Services/X-Monitor
+            if [ -e "$source-wal" ]; then
+                cp --preserve=timestamps "$source-wal" "$target-wal.new"
+                chown x-monitor:x-monitor "$target-wal.new"
+                mv "$target-wal.new" "$target-wal"
+            fi
+            cp --preserve=timestamps "$source" "$target.new"
+            chown x-monitor:x-monitor "$target.new"
+            chmod 0640 "$target.new"
+            mv "$target.new" "$target"
+        '';
     };
 
     # The agents' endpoint is served on the dashboard's own port, so Odin,
@@ -2875,8 +2905,8 @@ in
     networking.firewall.interfaces."wireguard0".allowedTCPPorts = [ 9611 ];
     networking.firewall.interfaces.enp2s0f1.allowedTCPPorts = [ 9611 ];
 
-    nginx-vhosts.vigil = {
-        domain = "vigil.heimdall.technet";
+    nginx-vhosts.x-monitor = {
+        domain = "x-monitor.heimdall.technet";
         port = 9611;
     };
 }

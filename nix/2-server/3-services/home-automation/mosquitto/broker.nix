@@ -1,13 +1,13 @@
 { pkgs, config, ... }:
 {
-    # Vigil and LNXlink get plaintext passwords rather than hashes because the
-    # same value has to be handed to the client as well: Vigil reads it with
+    # X-Monitor and LNXlink get plaintext passwords rather than hashes because the
+    # same value has to be handed to the client as well: X-Monitor reads it with
     # `password_command`, LNXlink through its environment file. The module hashes
     # them into the generated password file at startup. Home Assistant and
     # Frigate hold their own copies, so only the hash is needed here.
     sops.secrets.mosquitto_vigil_password = {
         sopsFile = "${config.technet.secrets.path}/mosquitto.yaml";
-        group = "vigil-monitor"; # Read by whichever Vigil transport runs the `cat` — the agent today, vigil-access as fallback
+        group = "x-monitor-credentials"; # Read by whichever X-Monitor transport runs the `cat` — the agent today, x-monitor-access as fallback
         mode = "0440";
     };
 
@@ -64,12 +64,12 @@
                         hashedPasswordFile = config.sops.secrets.mosquitto_frigate_password_hash.path;
                     };
 
-                    vigil = {
+                    x-monitor = {
                         acl = [
-                            "readwrite vigil/probe/#"
+                            "readwrite x-monitor/probe/#"
                             # The Frigate MQTT monitor reads the retained
                             # availability topic to prove Frigate's session is
-                            # still up. One topic, read only -- Vigil has no
+                            # still up. One topic, read only -- X-Monitor has no
                             # business anywhere else under frigate/.
                             "read frigate/available"
                         ];

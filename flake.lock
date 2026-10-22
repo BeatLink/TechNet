@@ -1012,9 +1012,9 @@
         "pinephone-kernel": "pinephone-kernel",
         "playitslowly": "playitslowly",
         "sops-nix": "sops-nix",
-        "vigil": "vigil",
         "waypipe-desktop": "waypipe-desktop",
         "web-greeter": "web-greeter",
+        "x-monitor": "x-monitor",
         "x-music": "x-music",
         "xdg-autostart": "xdg-autostart"
       }
@@ -1180,27 +1180,6 @@
         "type": "github"
       }
     },
-    "vigil": {
-      "inputs": {
-        "flake-utils": "flake-utils_6",
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1792621558,
-        "narHash": "sha256-oxGPQ46FQazHY4rW1CP9AVcoUkGztmv+ygwgY3ruLVc=",
-        "owner": "BeatLink",
-        "repo": "Vigil",
-        "rev": "eda0bb65211c6ead71bdd3c2280c6b4ffbb3bfc8",
-        "type": "github"
-      },
-      "original": {
-        "owner": "BeatLink",
-        "repo": "Vigil",
-        "type": "github"
-      }
-    },
     "waypipe-desktop": {
       "inputs": {
         "nixpkgs": [
@@ -1242,6 +1221,27 @@
         "submodules": true,
         "type": "git",
         "url": "https://github.com/BeatLink/web-greeter"
+      }
+    },
+    "x-monitor": {
+      "inputs": {
+        "flake-utils": "flake-utils_6",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1792638417,
+        "narHash": "sha256-OzV5OwTpG4JYMYhnqYhFcuwaz0g4mvyocmC+g4duGQc=",
+        "owner": "x-tech-laboratories",
+        "repo": "X-Monitor",
+        "rev": "fba74b967734c9da638320c1d1a97b995072d43d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "x-tech-laboratories",
+        "repo": "X-Monitor",
+        "type": "github"
       }
     },
     "x-music": {

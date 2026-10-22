@@ -1,9 +1,9 @@
-# Vigil alerts -- a Home Assistant package that forwards Vigil's notifications to the phone.
+# X-Monitor alerts -- a Home Assistant package that forwards X-Monitor's notifications to the phone.
 #
-# Vigil posts each notification to a loopback-only webhook, and this pushes it to the companion app, tagged by monitor
+# X-Monitor posts each notification to a loopback-only webhook, and this pushes it to the companion app, tagged by monitor
 # so a newer alert replaces the older one and a recovery clears it from the phone.
 let
-    webhookId = "vigil-alerts-nhl7efetwt6wbo139wfs";
+    webhookId = "vigil-alerts-nhl7efetwt6wbo139wfs"; # Kept from Vigil; the id is only a secret path, so renaming it gains nothing
     phone = "notify.mobile_app_thor";
     json = field: "{{ trigger.json.${field} }}";
 in
@@ -11,8 +11,8 @@ in
     # Automations ------------------------------------------------------------------------------------------------------------------------------------
     automation = [
         {
-            id = "vigil_alert_to_phone";
-            alias = "Vigil Alert To Phone";
+            id = "vigil_alert_to_phone"; # Kept from Vigil, so Home Assistant keeps this automation's entity and history
+            alias = "X-Monitor Alert To Phone";
             mode = "queued";
             triggers = [
                 {

@@ -1,7 +1,7 @@
 # Backup Exclusions ##################################################################################################################################
 #
-# The one set of borg exclude patterns every backup in the fleet applies: borgmatic on each host, all of Vorta's profiles, and Vigil's backup runs.
-# Borgmatic and Vigil read it from here, and a user unit in the Vorta module writes it into Vorta's settings database.
+# The one set of borg exclude patterns every backup in the fleet applies: borgmatic on each host, all of Vorta's profiles, and X-Monitor's backup runs.
+# Borgmatic and X-Monitor read it from here, and a user unit in the Vorta module writes it into Vorta's settings database.
 #
 
 { lib, ... }:

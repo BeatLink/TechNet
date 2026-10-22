@@ -55,7 +55,7 @@ in
                 };
                 # Packages hold whole features as one unit; each is its own file beside this one.
                 packages.bedroom_fan = import ./bedroom-fan.nix;
-                packages.vigil_alerts = import ./vigil-alerts.nix;
+                packages.x_monitor_alerts = import ./x-monitor-alerts.nix;
             };
 
             sensor = [

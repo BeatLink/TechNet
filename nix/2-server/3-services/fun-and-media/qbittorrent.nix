@@ -55,7 +55,7 @@ in
         torrentingPort = 6881;
         serverConfig.Preferences.WebUI = {
             # Let requests originating on Heimdall itself skip the WebUI login,
-            # so Vigil's qbittorrent monitor can read the API over SSH from this
+            # so X-Monitor's qbittorrent monitor can read the API over SSH from this
             # host against 127.0.0.1 without a stored credential.
             LocalHostAuth = false;
 

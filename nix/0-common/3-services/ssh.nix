@@ -33,7 +33,7 @@ in
             challengeResponseAuthentication = false;
             PermitRootLogin = "no";
             PerSourcePenalties = "no";
-            # Default (10) is too low for Vigil's collector: it opens one
+            # Default (10) is too low for X-Monitor's collector: it opens one
             # persistent SSH connection per host and runs each monitor's
             # command as a concurrent channel on it rather than a separate
             # connection, so a host with many monitors can have more than 10
@@ -43,7 +43,7 @@ in
             # monitor count) with headroom for future monitors.
             MaxSessions = 50;
 
-            # Unset, sshd never probes a peer, so a session whose client is gone lives forever. Vigil kills a borg monitor at its timeout and the
+            # Unset, sshd never probes a peer, so a session whose client is gone lives forever. X-Monitor kills a borg monitor at its timeout and the
             # `borg serve` it started keeps running and holding its memory; on Ragnarok's 2GB those orphans accumulated past the borg slice's
             # MemoryHigh and squeezed the ARC. A live client answers these probes, so an in-flight backup is never cut short.
             ClientAliveInterval = 60;

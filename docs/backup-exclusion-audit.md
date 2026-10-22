@@ -146,7 +146,7 @@ The flake now holds one set for every backup in the fleet, in
 with duplicates and patterns covered by broader ones removed, 220 in all. Borgmatic on Heimdall and
 Odin reads it directly. The `vorta-excludes` user unit in
 [`vorta.nix`](../nix/3-laptop/4-apps/system/vorta.nix) writes it into every Vorta profile as custom
-rows, turns the presets off, and sets the raw column to `pf:/Storage/System` alone. Vigil's borg
+rows, turns the presets off, and sets the raw column to `pf:/Storage/System` alone. X-Monitor's borg
 monitors use the same set for manual backups and for the Purge Excluded action.
 
 Checked with borg's own matcher before the change went in:
@@ -166,4 +166,4 @@ the whole directory containing the marker, so on `/Storage` it would have droppe
 folder root. On the borgmatic sources it matched nothing at the time.
 
 Archives written before this change still hold what the extra patterns now exclude. The Purge
-Excluded button on each borg monitor in Vigil rewrites them.
+Excluded button on each borg monitor in X-Monitor rewrites them.

@@ -1,16 +1,16 @@
-# Vigil Agent ########################################################################################################################################
+# X-Monitor Agent ########################################################################################################################################
 #
-# Everything Vigil needs on a monitored host: the agent it collects through, the SSH login it falls back to, and the sudo rules both run under.
+# Everything X-Monitor needs on a monitored host: the agent it collects through, the SSH login it falls back to, and the sudo rules both run under.
 #
-# The agent dials outward to Heimdall and holds one WebSocket open, carrying both the commands Vigil's monitors run here and the events it watches
+# The agent dials outward to Heimdall and holds one WebSocket open, carrying both the commands X-Monitor's monitors run here and the events it watches
 # locally (journal follow, fast local sampling) and pushes the moment they happen. Nothing listens on this host: the agent opens no port and needs no
 # key of its own.
 #
-# The `vigil-access` SSH login is no longer on the collection path. It stays configured as a fallback — an agent that cannot connect takes its host's
+# The `x-monitor-access` SSH login is no longer on the collection path. It stays configured as a fallback — an agent that cannot connect takes its host's
 # monitors down with it, and re-adding SSH access to a host you can no longer see is the wrong order of operations. Remove it once the agents have
 # proven themselves.
 #
-# The agent runs unprivileged as `vigil-agent`, with the same group memberships and the same scoped NOPASSWD sudo rules `vigil-access` has. Those
+# The agent runs unprivileged as `x-monitor-agent`, with the same group memberships and the same scoped NOPASSWD sudo rules `x-monitor-access` has. Those
 # rules do not become unnecessary under the agent — smartctl needs root either way — so the alternative to this list is a root daemon, which is worse.
 #
 {
@@ -30,7 +30,7 @@ let
     host = config.networking.hostName;
     agentId = lib.toLower host;
 
-    # Heimdall runs the Vigil server itself, so its own agent takes the short way round rather than depending on WireGuard being up to monitor itself.
+    # Heimdall runs the X-Monitor server itself, so its own agent takes the short way round rather than depending on WireGuard being up to monitor itself.
     server = if host == "Heimdall" then "127.0.0.1" else "heimdall.technet";
 
     # One definition shared with Heimdall's monitors, so a sudo rule cannot drift from the command the monitor actually runs.
@@ -40,7 +40,7 @@ let
     # sudoers ends a command spec at an unescaped colon.
     upgradeFlake = builtins.replaceStrings [ ":" ] [ "\\:" ] config.technet.flake;
 
-    # Vigil's nixos_upgrade switch on a host that deploys itself; a host Heimdall deploys is switched through remote-deploy.nix instead.
+    # X-Monitor's nixos_upgrade switch on a host that deploys itself; a host Heimdall deploys is switched through remote-deploy.nix instead.
     localSwitchRules = [
         {
             command = "/run/current-system/sw/bin/nixos-rebuild switch --flake ${upgradeFlake} ${deployArgs} --refresh";
@@ -53,7 +53,7 @@ let
         }
     ];
 
-    # The scheduled collection's own arguments, so Vigil's button runs the run the timer runs.
+    # The scheduled collection's own arguments, so X-Monitor's button runs the run the timer runs.
     gcOptions = config.nix.gc.options;
 
     # A borg poll carries its deadline inside the sudo, so sudo matches `timeout` rather than `borg` and the plain borg rule below never fires. One spec
@@ -76,31 +76,31 @@ let
             ];
 in
 {
-    imports = [ inputs.vigil.nixosModules.agent ];
+    imports = [ inputs.x-monitor.nixosModules.agent ];
 
     config = lib.mkMerge [
 
         # Agent ######################################################################################################################################
         (lib.mkIf (builtins.elem host agentHosts) {
 
-            # The agent's private signing key, held only by this host; Heimdall checks it against the public key listed in vigil.nix.
+            # The agent's private signing key, held only by this host; Heimdall checks it against the public key listed in x-monitor.nix.
             sops.secrets.vigil_agent_key = {
-                sopsFile = "${config.technet.secrets.path}/vigil-agent.yaml";
-                owner = "vigil-agent";
+                sopsFile = "${config.technet.secrets.path}/x-monitor-agent.yaml";
+                owner = "x-monitor-agent";
             };
 
-            services.vigil-agent = {
+            services.x-monitor-agent = {
                 enable = true;
                 url = "ws://${server}:9611/api/agent/ws";
                 id = agentId;
                 keyFile = config.sops.secrets.vigil_agent_key.path;
 
-                # Same memberships `vigil-access` holds, since the monitors run the same commands: borg repo reads for backup health, and the journal for
+                # Same memberships `x-monitor-access` holds, since the monitors run the same commands: borg repo reads for backup health, and the journal for
                 # unit status and for the agent's own journal watchers.
                 extraGroups = [
                     "borg"
                     "systemd-journal"
-                    "vigil-monitor"
+                    "x-monitor-credentials"
                 ];
 
                 # Monitors send plain shell, and over SSH they resolved against the host's system profile. Handing the agent that same profile keeps all 98
@@ -114,26 +114,26 @@ in
 
             # Desktop Notifications ##################################################################################################################
             sops.secrets.vigil_agent_desktop_key = lib.mkIf (host == "Odin") {
-                sopsFile = "${config.technet.secrets.path}/vigil-agent.yaml";
+                sopsFile = "${config.technet.secrets.path}/x-monitor-agent.yaml";
                 owner = "beatlink";
             };
 
-            services.vigil-agent.desktop = lib.mkIf (host == "Odin") {
+            services.x-monitor-agent.desktop = lib.mkIf (host == "Odin") {
                 enable = true;
                 id = "odin-desktop";
                 keyFile = config.sops.secrets.vigil_agent_desktop_key.path;
             };
 
-            systemd.services.vigil-agent = {
-                environment.HOME = "/var/lib/vigil-agent"; # nix and the detached job workdirs write under $HOME; the default /var/empty is immutable
+            systemd.services.x-monitor-agent = {
+                environment.HOME = "/var/lib/x-monitor-agent"; # nix and the detached job workdirs write under $HOME; the default /var/empty is immutable
                 serviceConfig = {
-                    StateDirectory = "vigil-agent";
-                    CacheDirectory = "vigil-borg"; # Backs the borg monitors' cache_dir; without it each poll rebuilds the repo's chunks cache under mktemp and discards it
+                    StateDirectory = "x-monitor-agent";
+                    CacheDirectory = "x-monitor-borg"; # Backs the borg monitors' cache_dir; without it each poll rebuilds the repo's chunks cache under mktemp and discards it
                     ProtectHome = lib.mkForce false; # true hides /home from borg source paths and makes /root read-only for the rebuild's nix cache
 
                     # Contention-only. A CPUQuota of 200% was here and had to go: it throttled the agent 679 times on Odin and 1625 on Heimdall, and every
                     # monitor command runs under a deadline, so starving this is how a healthy host starts reporting timeouts. What made the ceiling look
-                    # necessary was borg polls that never terminated, and that was a Vigil bug -- an unprivileged agent cannot kill what sudo started, so
+                    # necessary was borg polls that never terminated, and that was a X-Monitor bug -- an unprivileged agent cannot kill what sudo started, so
                     # the timeout it reported was never enforced. Fixed upstream in 64729f9; the deadline now sits inside the sudo.
                     Nice = 10;
                     CPUWeight = 40;
@@ -144,20 +144,20 @@ in
         # SSH Fallback Login #########################################################################################################################
         {
             users = {
-                groups."vigil-access" = { };
+                groups."x-monitor-access" = { };
 
                 # Read access to the credentials monitors `cat` on the target host (API tokens, service passwords). Held by both transports, because
                 # which user runs that `cat` is exactly what changes between them.
-                groups."vigil-monitor" = { };
-                users."vigil-access" = {
+                groups."x-monitor-credentials" = { };
+                users."x-monitor-access" = {
                     isSystemUser = true;
-                    description = "Vigil monitor (remote login account)";
-                    group = "vigil-access";
+                    description = "X-Monitor monitor (remote login account)";
+                    group = "x-monitor-access";
                     shell = "/run/current-system/sw/bin/bash"; # borg and systemctl run over SSH exec, which needs a shell
                     extraGroups = [
                         "borg" # Read access to borg repos for backup health checks
                         "systemd-journal" # Read systemd service status and logs
-                        "vigil-monitor" # Read the per-service credentials monitors cat on the target
+                        "x-monitor-credentials" # Read the per-service credentials monitors cat on the target
                     ];
                     openssh.authorizedKeys.keys = [
                         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID6oDtIndxb2aJJFhl3+xU+4nuVUQQrzcWOLX+RslJU/ vigil@technet"
@@ -171,8 +171,8 @@ in
             security.sudo.extraRules = [
                 {
                     users = [
-                        "vigil-access" # SSH transport (fallback)
-                        "vigil-agent" # Agent transport (primary)
+                        "x-monitor-access" # SSH transport (fallback)
+                        "x-monitor-agent" # Agent transport (primary)
                     ];
                     commands = [
                         # Never add the python3 heredoc helper, since sudoers matches argv rather than the script body and it would grant arbitrary root
@@ -228,7 +228,7 @@ in
                                 "SETENV"
                             ];
                         }
-                        # Vigil's nix_gc action, matched the same way: it collects with nix.gc.options and nothing else
+                        # X-Monitor's nix_gc action, matched the same way: it collects with nix.gc.options and nothing else
                         {
                             command = "/run/current-system/sw/bin/nix-collect-garbage ${gcOptions}";
                             options = [ "NOPASSWD" ];

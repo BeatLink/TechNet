@@ -36,7 +36,7 @@
     # Web login --------------------------------------------------------------------------------------------------------------------------------------
     sops.secrets.pihole_web_password = {
         sopsFile = "${config.technet.secrets.path}/pi-hole.yaml";
-        group = "vigil-monitor"; # Read by the `cat` Vigil's pihole plugin runs as the `vigil` user
+        group = "x-monitor-credentials"; # Read by the `cat` X-Monitor's pihole plugin runs as the `x-monitor` user
         mode = "0440";
     };
 

@@ -1,6 +1,6 @@
 { config, ... }:
 {
-    # Odin's own ETAPI token, made once by hand under Options > ETAPI, separate from the one Vigil uses on Heimdall.
+    # Odin's own ETAPI token, made once by hand under Options > ETAPI, separate from the one X-Monitor uses on Heimdall.
     sops.secrets.trilium_etapi_token = {
         sopsFile = "${config.technet.secrets.path}/trilium.yaml";
         owner = "beatlink";

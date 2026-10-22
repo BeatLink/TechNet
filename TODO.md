@@ -1,5 +1,22 @@
 # To Do
 
+## Deploy the move from Vigil to X-Monitor
+
+- [ ] Deploy Heimdall first, then Odin, Ragnarok and Thor; agents and servers of either name accept each other, so the order is free
+- [ ] On Heimdall, confirm `x-monitor-import-vigil-db.service` ran and the dashboard at `https://x-monitor.heimdall.technet`
+      shows the old history; it copies `/Storage/Services/Vigil/vigil.db` (and its `-wal`) to
+      `/Storage/Services/X-Monitor/x-monitor.db` once, only while the target does not exist
+- [ ] Once X-Monitor has run cleanly for a while, delete `/Storage/Services/Vigil`, the old Syncthing key
+      `/Storage/Services/Syncthing/vigil-api-key`, and on each host the leftover `/var/lib/vigil-agent`
+- [ ] Update browser bookmarks from `vigil.heimdall.technet` to `x-monitor.heimdall.technet`; links in notifications sent before the switch stop working
+- [ ] Expect each borg monitor's first poll to be slow, because the cache moved to `/var/cache/x-monitor-borg` and is rebuilt;
+      then delete `/persistent/var/cache/vigil-borg` on each host
+
+Left named Vigil on purpose, because renaming them needs a hand-made change in a running service or an encrypted file:
+the `vigil` accounts in Calibre-Web, Traccar, Trilium and Radicale; the sops key names (`*_vigil_*`, `vigil_*`) and
+`HOMEPAGE_VAR_VIGIL_PASS` inside `homepage_env`; the `.vigil-canary` files, whose archived copies the restore checks compare;
+the `vigil-self` monitor id and the Home Assistant automation and webhook ids, which key existing history.
+
 ## Confirm Ragnarok's Vorta rewrite finishes
 
 - [ ] Confirm the `borg recreate` from Odin against `ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Vorta`
@@ -14,13 +31,13 @@ in a directory that had been deleted and was recreated by hand. A missing log di
 makes bash skip any command redirected into it, so check the log ends with `compact exit 0` and
 `DONE`. If the compact did not run, run `borg compact` on that repository by hand.
 
-## Deploy the Vigil borg monitor extras
+## Deploy the X-Monitor borg monitor extras
 
-- [ ] Deploy Heimdall and Odin, so they get commit `ff6c7f04` and Vigil `ee51de2` or later
+- [ ] Deploy Heimdall and Odin, so they get commit `ff6c7f04` and X-Monitor `ee51de2` or later
 - [ ] Expect the restore checks to fail until the next scheduled backup includes each canary file,
       then confirm every borg monitor's RESTORE CHECK card shows Passed
 - [ ] Decide whether Vorta's "2. Heimdall Backup" profile is right to keep no weekly or monthly
-      archives; `vigil.nix` was changed to match it, so if Vorta is wrong, fix the profile and put
+      archives; `x-monitor.nix` was changed to match it, so if Vorta is wrong, fix the profile and put
       back `keep_weekly = 2` and `keep_monthly = 3` on the `backup-laptop-heimdall` monitor
 
 The canary files are `/Storage/Services/.vigil-canary` on Heimdall, and `/Storage/System/.vigil-canary`
@@ -58,7 +75,7 @@ sudo -u borg env BORG_PASSCOMMAND="cat /run/secrets/borg_repo_encryption_key" BO
 The first step takes an instant copy of the repository on btrfs while holding borg's lock, so the
 repair can be rolled back. The second step repairs only the archive metadata, because the
 repository check was clean. The repair fills the missing chunk with zeros, so that one tar in that
-one archive stays damaged. Once the Vigil borg monitors are deployed, the "Ragnarok" backup monitor
+one archive stays damaged. Once the X-Monitor borg monitors are deployed, the "Ragnarok" backup monitor
 under Heimdall's Backups group shows the check result.
 
 ## Install LNXlink on Ragnarok and Thor
@@ -149,8 +166,8 @@ Until then the app's weather uses a place chosen by name, which already works.
 
 - [ ] Once `socket-ragnarok` is back online, flash it from Heimdall with Device Builder's own ESPHome
       CLI (`esphome run socket-ragnarok.yaml --device socket-ragnarok.technet`, as the `esphome` user)
-- [ ] Confirm Vigil's "Ragnarok Socket" monitor and the "IoT Sensors" group it belongs to show online
+- [ ] Confirm X-Monitor's "Ragnarok Socket" monitor and the "IoT Sensors" group it belongs to show online
 
-It is the only device not flashed since `.lan` was folded into `.technet`. Home Assistant and Vigil
+It is the only device not flashed since `.lan` was folded into `.technet`. Home Assistant and X-Monitor
 already reach it as `socket-ragnarok.technet` over WireGuard (`10.100.100.18`), so the flash only
-updates the name the firmware reports. Until it is online, Vigil's "IoT Sensors" group stays failed.
+updates the name the firmware reports. Until it is online, X-Monitor's "IoT Sensors" group stays failed.

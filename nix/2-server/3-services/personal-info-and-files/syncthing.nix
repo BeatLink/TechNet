@@ -99,23 +99,23 @@
         "syncthing.ragnarok.technet,heimdall.technet"
     ];
 
-    systemd.services.syncthing-vigil-api-key = {
-        description = "Extract Syncthing's API key for Vigil";
+    systemd.services.syncthing-x-monitor-api-key = {
+        description = "Extract Syncthing's API key for X-Monitor";
         after = [ "syncthing-init.service" ];
         serviceConfig.Type = "oneshot";
         # Written beside Config rather than inside it, since Syncthing holds Config at 0700 and no group can reach a file there.
         script = ''
             ${pkgs.libxml2}/bin/xmllint --xpath 'string(configuration/gui/apikey)' \
                 /Storage/Services/Syncthing/Config/config.xml \
-                > /Storage/Services/Syncthing/.vigil-api-key.new
-            chown root:vigil-monitor /Storage/Services/Syncthing/.vigil-api-key.new
-            chmod 0440 /Storage/Services/Syncthing/.vigil-api-key.new
-            mv -f /Storage/Services/Syncthing/.vigil-api-key.new \
-                /Storage/Services/Syncthing/vigil-api-key
+                > /Storage/Services/Syncthing/.x-monitor-api-key.new
+            chown root:x-monitor-credentials /Storage/Services/Syncthing/.x-monitor-api-key.new
+            chmod 0440 /Storage/Services/Syncthing/.x-monitor-api-key.new
+            mv -f /Storage/Services/Syncthing/.x-monitor-api-key.new \
+                /Storage/Services/Syncthing/x-monitor-api-key
         '';
     };
 
-    systemd.timers.syncthing-vigil-api-key = {
+    systemd.timers.syncthing-x-monitor-api-key = {
         wantedBy = [ "timers.target" ];
         timerConfig = {
             OnBootSec = "1m";

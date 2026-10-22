@@ -42,7 +42,7 @@ in
                     "read #"
                     # `#` does not cover $SYS, and broker health -- uptime, client
                     # count, dropped messages -- is only there. Nothing else on
-                    # this network reads it; Vigil's probe proves delivery works
+                    # this network reads it; X-Monitor's probe proves delivery works
                     # but says nothing about load.
                     "read $SYS/#"
                 ];

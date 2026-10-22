@@ -30,7 +30,7 @@ let
         archive_name_format = "backup-{now}";
         relocated_repo_access_is_ok = true;
         # Create repo files group-readable (0640/0750) so the `borg` group —
-        # which the Vigil monitor account belongs to — can read the on-disk
+        # which the X-Monitor monitor account belongs to — can read the on-disk
         # repo for backup-health checks. Borgmatic passes this to borg's
         # --umask (local repo only); the remote Ragnarok repo is already
         # group-accessible via the borg server.
@@ -186,13 +186,13 @@ in
     environment.persistence."/persistent".directories = [ "/var/lib/borgmatic" ];
 
     # borgmatic runs as root, so the on-disk repo is created root-owned and
-    # (before `umask` above) 0700 — unreadable by the Vigil monitor account.
-    # Grant the `borg` group read+traverse so Vigil (a member of `borg`) can
+    # (before `umask` above) 0700 — unreadable by the X-Monitor monitor account.
+    # Grant the `borg` group read+traverse so X-Monitor (a member of `borg`) can
     # read the repo for backup-health checks. `umask` keeps *new* files
     # group-readable; this activation step relaxes the group and any files that
     # predate it, using `g+rX` so directories get +x for traversal while data
     # files get only +r (never +x).
-    # Vigil restores this file from the newest archive and compares it with the live one, so its content must never change.
+    # X-Monitor restores this file from the newest archive and compares it with the live one, so its content must never change.
     systemd.tmpfiles.settings."Vigil-Canary"."/Storage/Services/.vigil-canary".f = {
         user = "root";
         group = "root";

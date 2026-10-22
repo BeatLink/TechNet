@@ -1,6 +1,6 @@
 { pkgs, ... }:
 {
-    # dig, for Vigil's `unbound` plugin to issue a live resolution probe over
+    # dig, for X-Monitor's `unbound` plugin to issue a live resolution probe over
     # SSH (services.unbound only installs the server/unbound-control itself,
     # not a general-purpose query client).
     environment.systemPackages = [ pkgs.dnsutils ];
@@ -10,8 +10,8 @@
         stateDir = "/Storage/Services/Unbound";
         # Plain UNIX socket for `unbound-control` (no TLS cert setup, unlike
         # the settings.remote-control route). Access is gated by group
-        # membership rather than a shared secret — vigil-access is added to
-        # the `unbound` group below so Vigil's plugin can read stats over
+        # membership rather than a shared secret — x-monitor-access is added to
+        # the `unbound` group below so X-Monitor's plugin can read stats over
         # SSH without any credential of its own.
         localControlSocketPath = "/run/unbound/unbound.ctl";
         settings = {
@@ -83,11 +83,11 @@
         };
     };
 
-    # Lets Vigil read the control socket (owned unbound:nogroup, mode 0770-ish
+    # Lets X-Monitor read the control socket (owned unbound:nogroup, mode 0770-ish
     # per the NixOS module) so its `unbound` plugin can run
     # `unbound-control stats_noreset` with no stored credential. Granted to
-    # both transports: the agent runs the command now, and vigil-access stays
+    # both transports: the agent runs the command now, and x-monitor-access stays
     # as the SSH fallback.
-    users.users."vigil-access".extraGroups = [ "unbound" ];
-    users.users."vigil-agent".extraGroups = [ "unbound" ];
+    users.users."x-monitor-access".extraGroups = [ "unbound" ];
+    users.users."x-monitor-agent".extraGroups = [ "unbound" ];
 }

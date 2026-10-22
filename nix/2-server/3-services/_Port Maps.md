@@ -21,7 +21,7 @@ column, and their service definition lives in that host's own directory.
 | Service | Port | Vhost |
 |---------|------|-------|
 | Homepage     | 9610 | dashboard.heimdall.technet |
-| Vigil        | 9611 | vigil.heimdall.technet — also serves the agent WebSocket at `/api/agent/ws`, reachable over WireGuard so Odin and Ragnarok's agents can dial in |
+| X-Monitor        | 9611 | x-monitor.heimdall.technet — also serves the agent WebSocket at `/api/agent/ws`, reachable over WireGuard so Odin and Ragnarok's agents can dial in |
 
 ## Networking / DNS
 
@@ -78,9 +78,9 @@ column, and their service definition lives in that host's own directory.
 | BlockURL     | 9001 | blockurl.heimdall.technet |
 | ActivityWatch | 5600 | 127.0.0.1; activitywatch.heimdall.technet |
 
-## Vigil Reachability Checks
+## X-Monitor Reachability Checks
 
-Vigil's `ports` monitor on Heimdall (`heimdall-ports`) probes these endpoints
+X-Monitor's `ports` monitor on Heimdall (`heimdall-ports`) probes these endpoints
 from Heimdall to confirm the web stack is reachable:
 
 * Nginx (front door) - localhost:443
@@ -95,13 +95,13 @@ from Heimdall to confirm the web stack is reachable:
 * Atuin Web - https://atuin-web.heimdall.technet/healthz
 
 Beyond that generic reachability probe, a few services get a dedicated
-app-aware Vigil plugin that checks the service is actually doing its job, not
+app-aware X-Monitor plugin that checks the service is actually doing its job, not
 just answering:
 
 * Pi-hole (`heimdall-pihole-dns`) - block rate + gravity age via the FTL API
 * qBittorrent (`heimdall-qbittorrent-transfers`) - transfer/connection health via the WebUI API
 * Unbound (`heimdall-unbound-resolution`) - live query + SERVFAIL rate via `unbound-control`
-* Mosquitto (`heimdall-mosquitto-delivery`) - publish/subscribe round trip on a dedicated `vigil` MQTT user
+* Mosquitto (`heimdall-mosquitto-delivery`) - publish/subscribe round trip on a dedicated `x-monitor` MQTT user
 * Frigate (`heimdall-frigate-cameras`) - per-camera `connection_quality` via the internal (unauthenticated, loopback-only) API
 <!-- * Traccar (`heimdall-traccar-devices`) - device staleness via `/api/devices`, using a dedicated read-only account created once by hand (switched off) -->
 * FreshRSS (`heimdall-freshrss-feeds`) - per-feed refresh staleness via the Fever API

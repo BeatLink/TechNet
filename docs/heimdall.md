@@ -30,7 +30,7 @@ Grouped by directory under [`3-services`](../nix/2-server/3-services):
 | `personal-info-and-files` | blockurl, radicale, syncthing, trilium |
 | `fun-and-media` | calibre-web-automated, comet, freshrss, jackett, qbittorrent, stremio, vlc |
 | `home-automation` | esphome, frigate, home-assistant, lnxlink, mosquitto |
-| `monitoring` | homepage, vigil |
+| `monitoring` | homepage, x-monitor |
 | `technet` | attic, atuin, atuin-web |
 | `backups` | borg, borgmatic |
 
