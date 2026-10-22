@@ -1,16 +1,11 @@
 # To Do
 
-## Deploy the move from Vigil to X-Monitor
+## Finish the move from Vigil to X-Monitor on Thor
 
-- [ ] Deploy Heimdall first, then Odin, Ragnarok and Thor; agents and servers of either name accept each other, so the order is free
-- [ ] On Heimdall, confirm `x-monitor-import-vigil-db.service` ran and the dashboard at `https://x-monitor.heimdall.technet`
-      shows the old history; it copies `/Storage/Services/Vigil/vigil.db` (and its `-wal`) to
-      `/Storage/Services/X-Monitor/x-monitor.db` once, only while the target does not exist
-- [ ] Once X-Monitor has run cleanly for a while, delete `/Storage/Services/Vigil`, the old Syncthing key
-      `/Storage/Services/Syncthing/vigil-api-key`, and on each host the leftover `/var/lib/vigil-agent`
+- [ ] Switch Thor once it answers SSH again (it stopped at 01:32 on 2026-10-22); until then its old `vigil-agent`
+      cannot sign in, because X-Monitor 25dcf4f signs agent logins with the new name. Inhibit sleep first and restart phosh after
+- [ ] Then delete Thor's `/var/lib/vigil-agent` and `/persistent/var/cache/vigil-borg`
 - [ ] Update browser bookmarks from `vigil.heimdall.technet` to `x-monitor.heimdall.technet`; links in notifications sent before the switch stop working
-- [ ] Expect each borg monitor's first poll to be slow, because the cache moved to `/var/cache/x-monitor-borg` and is rebuilt;
-      then delete `/persistent/var/cache/vigil-borg` on each host
 
 Left named Vigil on purpose, because renaming them needs a hand-made change in a running service or an encrypted file:
 the `vigil` accounts in Calibre-Web, Traccar, Trilium and Radicale; the sops key names (`*_vigil_*`, `vigil_*`) and
