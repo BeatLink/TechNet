@@ -36,8 +36,9 @@
 # while cpu reads every minute, and a failing pool shows as a failing ZFS
 # monitor rather than as one degraded "Disks" roll-up.
 #
-# The tree is one group per host, then per domain, and a second view regroups
-# the same monitors per domain, then per host. Each host holds
+# The tree has two roots over the same monitors: "By host" holds one group per
+# host, then per domain, and "By domain" links to them per domain, then per
+# host. Each host holds
 # `Availability`, `System Stats` (Compute, Memory, Storage, Network),
 # `Running Services`, `Backups` where it owns source data, and `Security`. A
 # group reports the worst case of its children, so a host still collapses to
@@ -125,8 +126,8 @@ let
     # The same definition every host's sudo rules read, so a monitor's arguments always match what sudoers permits.
     deploy = import ../../../0-common/1-system/software/deploy.nix;
 
-    # The "By domain" view, read off the host tree: one group per domain, holding each host's copy through a link named after the host.
-    domainView =
+    # The "By domain" groups, read off the host tree: one per domain, holding each host's copy through a link named after the host.
+    domainGroups =
         plugins:
         let
             isHost = p: lib.hasSuffix "-host" (p.id or "");
@@ -148,7 +149,7 @@ let
             type = "group";
             children = linksTo domain;
         }) domains
-        # Roots that are not hosts, like the IoT sensors, appear in this view unchanged.
+        # Entries that are not hosts, like the IoT sensors, appear under "By domain" as they are.
         ++ map (p: { ref = p.id or p.name; }) (builtins.filter (p: !isHost p) plugins);
 
 in
@@ -300,556 +301,259 @@ in
                 status_unavailable = "lightgray";
             };
 
-            # The tree below is the "By host" view; "By domain" shows the same monitors regrouped, with no monitor defined twice.
-            view_name = "By host";
-            views = [
-                {
-                    name = "By domain";
-                    plugins = domainView config.services.x-monitor.settings.plugins;
-                }
-            ];
-
-            plugins = [
-                {
-                    name = "Ragnarok";
-                    id = "ragnarok-host";
-                    type = "group";
-                    children = [
+            # Two roots over the same monitors: "By host" defines each one, and "By domain" links to them regrouped, so none is defined twice.
+            plugins =
+                let
+                    # Every host and the IoT sensors, as nested definitions: the one place each monitor is defined.
+                    hostTree = [
                         {
-                            name = "Availability";
-                            id = "ragnarok";
-                            type = "uptime";
-                            target_host = "ragnarok.technet";
-                            interval = "30s";
-                        }
-                        {
-                            name = "System Stats";
-                            # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
-                            id = "ragnarok-metrics";
-                            type = "group";
-                            notify."for" = "1h";
-                            children = [
-                                {
-                                    name = "Compute";
-                                    id = "ragnarok-compute";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "CPU";
-                                            id = "ragnarok-cpu";
-                                            type = "cpu";
-                                            interval = "1m";
-                                            warning = 70;
-                                            threshold = 85;
-                                            agent = "ragnarok";
-                                        }
-                                        {
-                                            name = "Load";
-                                            id = "ragnarok-load";
-                                            type = "load";
-                                            interval = "1m";
-                                            # Load here counts uninterruptible sleep on a shingled USB drive, not CPU demand: four cores sit at 18-28 whenever a scan or a backup runs, with the CPU near idle. Percent of cores, so 300 is load 12 and 600 is load 24.
-                                            warning = 300;
-                                            threshold = 600;
-                                            agent = "ragnarok";
-                                        }
-                                        {
-                                            name = "Temperature";
-                                            id = "ragnarok-temperature";
-                                            type = "temperature";
-                                            interval = "1m";
-                                            warning = 70;
-                                            threshold = 80;
-                                            agent = "ragnarok";
-                                        }
-                                        {
-                                            name = "Interrupts";
-                                            id = "ragnarok-interrupts";
-                                            type = "interrupts";
-                                            interval = "1m";
-                                            warning = 20000;
-                                            threshold = 50000;
-                                            agent = "ragnarok";
-                                        }
-                                        {
-                                            name = "Processes";
-                                            id = "ragnarok-processes";
-                                            type = "processes";
-                                            interval = "30s";
-                                            max_processes = 20;
-                                            grid_col_span = 2;
-                                            agent = "ragnarok";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Memory";
-                                    id = "ragnarok-memory";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Usage";
-                                            id = "ragnarok-memory-usage";
-                                            type = "memory";
-                                            interval = "1m";
-                                            warning = 90;
-                                            threshold = 95;
-                                            agent = "ragnarok";
-                                        }
-                                        {
-                                            # An OOM kill is an event, not a level: memory is back to normal
-                                            # before the next sample, so the usage monitor beside this one cannot
-                                            # see it. The counter read each cycle means no kill is ever missed,
-                                            # and over this host's agent the module also follows the kernel
-                                            # journal, so a kill is reported the moment it happens and names the
-                                            # process the counter can only total.
-                                            name = "OOM Kills";
-                                            id = "ragnarok-oom";
-                                            type = "oom";
-                                            notify."for" = 0; # A kill clears within a few cycles, so the System Stats hour would never be reached
-                                            interval = "1m";
-                                            agent = "ragnarok";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Storage";
-                                    id = "ragnarok-storage";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            # One monitor per drive, each pinned: unpinned, the plugin charts whichever disk is busiest across its two samples, which is the data drive
-                                            # every time and the root drive never. The names are the kernel's, the only thing /proc/diskstats carries, so a USB enumeration
-                                            # change would swap what these two report -- the models on the SMART monitor are what confirm which is which.
-                                            name = "Disk I/O (Data)";
-                                            id = "ragnarok-disk-io";
-                                            type = "disk_io";
-                                            interval = "30s";
-                                            device = "/dev/disk/by-id/wwn-0x5000c500e81e231d"; # ST5000LM000, the shingled backup drive
-                                            agent = "ragnarok";
-                                        }
-                                        {
-                                            name = "Disk I/O (Root)";
-                                            id = "ragnarok-disk-io-root";
-                                            type = "disk_io";
-                                            interval = "30s";
-                                            device = "/dev/disk/by-id/ata-SATA_SSD_22020812000605"; # The SSD holding root, nix and swap
-                                            agent = "ragnarok";
-                                        }
-                                        {
-                                            # smartctl is slow and rarely changes its answer, so this reads hourly.
-                                            name = "SMART";
-                                            id = "ragnarok-smart";
-                                            type = "smart";
-                                            interval = "1h";
-                                            agent = "ragnarok";
-                                        }
-                                        {
-                                            # smartd runs the scheduled self-tests whose verdict the monitor above
-                                            # reads. The journal tail is the point rather than the unit being
-                                            # active: a drive's own health verdict stays PASSED through thousands
-                                            # of reallocated sectors, and it is smartd that names the failing
-                                            # self-test and the LBA it could not read. Nothing else surfaces that,
-                                            # because with no MTA on the network smartd notifies by `wall`, which
-                                            # on a headless host reaches no one.
-                                            #
-                                            # Polled at 5m against smartd's own 30m check cycle, so a finding
-                                            # still surfaces promptly and a faster poll would only re-read the
-                                            # same journal.
-                                            name = "SMART Daemon";
-                                            id = "ragnarok-smartd";
-                                            type = "systemd_service";
-                                            interval = "5m";
-                                            service_name = "smartd.service";
-                                            lines = 25;
-                                            agent = "ragnarok";
-                                        }
-                                        {
-                                            # Both containers here are btrfs: the root SSD and the 5TB backup disk. Btrfs
-                                            # publishes no pool health word, so the verdict comes from the per-device error
-                                            # counters it keeps in the filesystem itself, which is why this reads more often
-                                            # than the `zpool status` it replaced -- the whole probe costs a third of a second.
-                                            name = "Btrfs";
-                                            id = "ragnarok-btrfs";
-                                            type = "btrfs";
-                                            interval = "10m";
-                                            warning = 90;
-                                            threshold = 96;
-                                            agent = "ragnarok";
-                                        }
-                                        {
-                                            name = "/";
-                                            id = "ragnarok-disk-root";
-                                            type = "disk_space";
-                                            path = "/";
-                                            threshold = 90;
-                                            interval = "10m";
-                                            agent = "ragnarok";
-                                        }
-                                        {
-                                            name = "/Storage";
-                                            id = "ragnarok-disk-storage";
-                                            type = "disk_space";
-                                            path = "/Storage";
-                                            threshold = 90;
-                                            interval = "10m";
-                                            agent = "ragnarok";
-                                        }
-                                        {
-                                            name = "/boot";
-                                            id = "ragnarok-disk-boot";
-                                            type = "disk_space";
-                                            path = "/boot";
-                                            threshold = 90;
-                                            interval = "10m";
-                                            agent = "ragnarok";
-                                        }
-                                        {
-                                            # Auto-discovers every mount, so it also covers filesystems not listed
-                                            # explicitly above. Catches read-only remounts (which leave df reporting
-                                            # healthy usage forever) and inode exhaustion.
-                                            name = "Filesystems";
-                                            id = "ragnarok-filesystems";
-                                            type = "filesystems";
-                                            interval = "10m";
-                                            warning = 90;
-                                            threshold = 96;
-                                            inode_warning = 85;
-                                            inode_threshold = 95;
-                                            grid_col_span = 2;
-                                            agent = "ragnarok";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Network";
-                                    id = "ragnarok-network";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Throughput";
-                                            id = "ragnarok-throughput";
-                                            type = "throughput";
-                                            interval = "30s";
-                                            agent = "ragnarok";
-                                        }
-                                        {
-                                            name = "Connections";
-                                            id = "ragnarok-connections";
-                                            type = "connections";
-                                            interval = "1m";
-                                            warning = 500;
-                                            threshold = 1000;
-                                            agent = "ragnarok";
-                                        }
-                                    ];
-                                }
-                            ];
-                        }
-                        {
-                            name = "Security";
-                            id = "ragnarok-security";
+                            name = "Ragnarok";
+                            id = "ragnarok-host";
                             type = "group";
                             children = [
                                 {
-                                    name = "Vulnerability Scan";
-                                    id = "ragnarok-vuln-scan";
-                                    type = "vuln_scan";
-                                    interval = "1d";
-                                    timeout = "30m"; # A full -sV sweep with every vuln script takes a few minutes; this only bounds a host that stops answering mid-scan
-                                    scan_host = "ragnarok.technet";
-                                    agent = "heimdall";
-                                }
-                            ];
-                        }
-                    ];
-                }
-                {
-                    name = "Heimdall";
-                    id = "heimdall-host";
-                    type = "group";
-                    children = [
-                        {
-                            name = "Availability";
-                            id = "heimdall";
-                            type = "uptime";
-                            target_host = "heimdall.technet";
-                            interval = "30s";
-                        }
-                        {
-                            name = "System Stats";
-                            # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
-                            id = "heimdall-metrics";
-                            type = "group";
-                            notify."for" = "1h";
-                            children = [
-                                {
-                                    name = "Compute";
-                                    id = "heimdall-compute";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "CPU";
-                                            id = "heimdall-cpu";
-                                            type = "cpu";
-                                            interval = "1m";
-                                            warning = 70;
-                                            threshold = 85;
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            name = "Load";
-                                            id = "heimdall-load";
-                                            type = "load";
-                                            interval = "1m";
-                                            warning = 70;
-                                            threshold = 100;
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            name = "Temperature";
-                                            id = "heimdall-temperature";
-                                            type = "temperature";
-                                            interval = "1m";
-                                            warning = 70;
-                                            threshold = 80;
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            name = "Interrupts";
-                                            id = "heimdall-interrupts";
-                                            type = "interrupts";
-                                            interval = "1m";
-                                            warning = 20000;
-                                            threshold = 50000;
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            name = "Processes";
-                                            id = "heimdall-processes";
-                                            type = "processes";
-                                            interval = "30s";
-                                            max_processes = 20;
-                                            grid_col_span = 2;
-                                            agent = "heimdall";
-                                        }
-                                    ];
+                                    name = "Availability";
+                                    id = "ragnarok";
+                                    type = "uptime";
+                                    target_host = "ragnarok.technet";
+                                    interval = "30s";
                                 }
                                 {
-                                    name = "Memory";
-                                    id = "heimdall-memory";
+                                    name = "System Stats";
+                                    # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
+                                    id = "ragnarok-metrics";
                                     type = "group";
+                                    notify."for" = "1h";
                                     children = [
                                         {
-                                            name = "Usage";
-                                            id = "heimdall-memory-usage";
-                                            type = "memory";
-                                            interval = "1m";
-                                            warning = 90;
-                                            threshold = 95;
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            # An OOM kill is an event, not a level: memory is back to normal
-                                            # before the next sample, so the usage monitor beside this one cannot
-                                            # see it. The counter read each cycle means no kill is ever missed,
-                                            # and over this host's agent the module also follows the kernel
-                                            # journal, so a kill is reported the moment it happens and names the
-                                            # process the counter can only total.
-                                            name = "OOM Kills";
-                                            id = "heimdall-oom";
-                                            type = "oom";
-                                            notify."for" = 0; # A kill clears within a few cycles, so the System Stats hour would never be reached
-                                            interval = "1m";
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Storage";
-                                    id = "heimdall-storage";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            # One monitor per drive, because the plugin charts a single device and an unpinned one picks whichever is busiest.
-                                            name = "Disk I/O (Data 1)";
-                                            id = "heimdall-disk-io";
-                                            type = "disk_io";
-                                            interval = "30s";
-                                            device = "/dev/disk/by-id/ata-TOSHIBA_MQ04ABF100_18BPSDNPS"; # One half of the data-pool mirror
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            name = "Disk I/O (Data 2)";
-                                            id = "heimdall-disk-io-data2";
-                                            type = "disk_io";
-                                            interval = "30s";
-                                            device = "/dev/disk/by-id/ata-ADATA_SU720_2K442LSNKEEX"; # The mirror's other half, an SSD, so reads land here and not on the spinning half
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            name = "Disk I/O (Root)";
-                                            id = "heimdall-disk-io-root";
-                                            type = "disk_io";
-                                            interval = "30s";
-                                            device = "/dev/disk/by-id/ata-Dogfish_SSD_64GB_5E56255506071556041"; # root-pool-Heimdall
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            # smartctl is slow and rarely changes its answer, so this reads hourly.
-                                            name = "SMART";
-                                            id = "heimdall-smart";
-                                            type = "smart";
-                                            interval = "1h";
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            # smartd runs the scheduled self-tests whose verdict the monitor above
-                                            # reads. The journal tail is the point rather than the unit being
-                                            # active: a drive's own health verdict stays PASSED through thousands
-                                            # of reallocated sectors, and it is smartd that names the failing
-                                            # self-test and the LBA it could not read. Nothing else surfaces that,
-                                            # because with no MTA on the network smartd notifies by `wall`, which
-                                            # on a headless host reaches no one.
-                                            #
-                                            # Polled at 5m against smartd's own 30m check cycle, so a finding
-                                            # still surfaces promptly and a faster poll would only re-read the
-                                            # same journal.
-                                            name = "SMART Daemon";
-                                            id = "heimdall-smartd";
-                                            type = "systemd_service";
-                                            interval = "5m";
-                                            service_name = "smartd.service";
-                                            lines = 25;
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            # A pool changes state slowly and `zpool status` walks every vdev.
-                                            name = "ZFS";
-                                            id = "heimdall-zfs";
-                                            type = "zfs";
-                                            interval = "1h";
-                                            warning = 90;
-                                            threshold = 96;
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            name = "/";
-                                            id = "heimdall-disk-root";
-                                            type = "disk_space";
-                                            path = "/";
-                                            threshold = 90;
-                                            interval = "10m";
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            name = "/Storage";
-                                            id = "heimdall-disk-storage";
-                                            type = "disk_space";
-                                            path = "/Storage";
-                                            threshold = 90;
-                                            interval = "10m";
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            name = "/boot";
-                                            id = "heimdall-disk-boot";
-                                            type = "disk_space";
-                                            path = "/boot";
-                                            threshold = 90;
-                                            interval = "10m";
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            # Auto-discovers every mount, so it also covers filesystems not listed
-                                            # explicitly above. Catches read-only remounts (which leave df reporting
-                                            # healthy usage forever) and inode exhaustion.
-                                            name = "Filesystems";
-                                            id = "heimdall-filesystems";
-                                            type = "filesystems";
-                                            interval = "10m";
-                                            warning = 90;
-                                            threshold = 96;
-                                            inode_warning = 85;
-                                            inode_threshold = 95;
-                                            grid_col_span = 2;
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Network";
-                                    id = "heimdall-network";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Throughput";
-                                            id = "heimdall-throughput";
-                                            type = "throughput";
-                                            interval = "30s";
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            name = "Connections";
-                                            id = "heimdall-connections";
-                                            type = "connections";
-                                            interval = "1m";
-                                            warning = 500;
-                                            threshold = 1000;
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            # nginx fronts every web service on Heimdall; probe the local front
-                                            # door plus a few representative app URLs.
-                                            name = "Service Reachability";
-                                            id = "heimdall-ports";
-                                            type = "ports";
-                                            interval = "1m";
-                                            timeout = 5;
-                                            grid_col_span = 2;
-                                            checks = [
+                                            name = "Compute";
+                                            id = "ragnarok-compute";
+                                            type = "group";
+                                            children = [
                                                 {
-                                                    name = "Nginx";
-                                                    host = "localhost";
-                                                    port = 443;
+                                                    name = "CPU";
+                                                    id = "ragnarok-cpu";
+                                                    type = "cpu";
+                                                    interval = "1m";
+                                                    warning = 70;
+                                                    threshold = 85;
+                                                    agent = "ragnarok";
                                                 }
                                                 {
-                                                    name = "Home Assistant";
-                                                    url = "https://home-assistant.heimdall.technet";
+                                                    name = "Load";
+                                                    id = "ragnarok-load";
+                                                    type = "load";
+                                                    interval = "1m";
+                                                    # Load here counts uninterruptible sleep on a shingled USB drive, not CPU demand: four cores sit at 18-28 whenever a scan or a backup runs, with the CPU near idle. Percent of cores, so 300 is load 12 and 600 is load 24.
+                                                    warning = 300;
+                                                    threshold = 600;
+                                                    agent = "ragnarok";
                                                 }
                                                 {
-                                                    name = "Pi-hole";
-                                                    url = "https://pi-hole.heimdall.technet";
+                                                    name = "Temperature";
+                                                    id = "ragnarok-temperature";
+                                                    type = "temperature";
+                                                    interval = "1m";
+                                                    warning = 70;
+                                                    threshold = 80;
+                                                    agent = "ragnarok";
                                                 }
                                                 {
-                                                    name = "Homepage";
-                                                    url = "https://dashboard.heimdall.technet";
+                                                    name = "Interrupts";
+                                                    id = "ragnarok-interrupts";
+                                                    type = "interrupts";
+                                                    interval = "1m";
+                                                    warning = 20000;
+                                                    threshold = 50000;
+                                                    agent = "ragnarok";
                                                 }
                                                 {
-                                                    name = "Jackett";
-                                                    url = "https://jackett.heimdall.technet";
-                                                }
-                                                {
-                                                    name = "Comet";
-                                                    url = "https://comet.heimdall.technet/health";
-                                                }
-                                                {
-                                                    name = "Stremio";
-                                                    url = "https://stremio.heimdall.technet";
-                                                }
-                                                {
-                                                    name = "Stremio Server";
-                                                    url = "https://stremio-server.heimdall.technet/heartbeat"; # Its root redirects to the web UI, so the heartbeat is the only plain 200 here
-                                                }
-                                                {
-                                                    name = "Atuin";
-                                                    url = "https://atuin.heimdall.technet/healthz"; # No web UI to hit, so the health endpoint is the only 200 on this vhost
-                                                }
-                                                {
-                                                    name = "Atuin Web";
-                                                    url = "https://atuin-web.heimdall.technet/healthz";
+                                                    name = "Processes";
+                                                    id = "ragnarok-processes";
+                                                    type = "processes";
+                                                    interval = "30s";
+                                                    max_processes = 20;
+                                                    grid_col_span = 2;
+                                                    agent = "ragnarok";
                                                 }
                                             ];
+                                        }
+                                        {
+                                            name = "Memory";
+                                            id = "ragnarok-memory";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Usage";
+                                                    id = "ragnarok-memory-usage";
+                                                    type = "memory";
+                                                    interval = "1m";
+                                                    warning = 90;
+                                                    threshold = 95;
+                                                    agent = "ragnarok";
+                                                }
+                                                {
+                                                    # An OOM kill is an event, not a level: memory is back to normal
+                                                    # before the next sample, so the usage monitor beside this one cannot
+                                                    # see it. The counter read each cycle means no kill is ever missed,
+                                                    # and over this host's agent the module also follows the kernel
+                                                    # journal, so a kill is reported the moment it happens and names the
+                                                    # process the counter can only total.
+                                                    name = "OOM Kills";
+                                                    id = "ragnarok-oom";
+                                                    type = "oom";
+                                                    notify."for" = 0; # A kill clears within a few cycles, so the System Stats hour would never be reached
+                                                    interval = "1m";
+                                                    agent = "ragnarok";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Storage";
+                                            id = "ragnarok-storage";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    # One monitor per drive, each pinned: unpinned, the plugin charts whichever disk is busiest across its two samples, which is the data drive
+                                                    # every time and the root drive never. The names are the kernel's, the only thing /proc/diskstats carries, so a USB enumeration
+                                                    # change would swap what these two report -- the models on the SMART monitor are what confirm which is which.
+                                                    name = "Disk I/O (Data)";
+                                                    id = "ragnarok-disk-io";
+                                                    type = "disk_io";
+                                                    interval = "30s";
+                                                    device = "/dev/disk/by-id/wwn-0x5000c500e81e231d"; # ST5000LM000, the shingled backup drive
+                                                    agent = "ragnarok";
+                                                }
+                                                {
+                                                    name = "Disk I/O (Root)";
+                                                    id = "ragnarok-disk-io-root";
+                                                    type = "disk_io";
+                                                    interval = "30s";
+                                                    device = "/dev/disk/by-id/ata-SATA_SSD_22020812000605"; # The SSD holding root, nix and swap
+                                                    agent = "ragnarok";
+                                                }
+                                                {
+                                                    # smartctl is slow and rarely changes its answer, so this reads hourly.
+                                                    name = "SMART";
+                                                    id = "ragnarok-smart";
+                                                    type = "smart";
+                                                    interval = "1h";
+                                                    agent = "ragnarok";
+                                                }
+                                                {
+                                                    # smartd runs the scheduled self-tests whose verdict the monitor above
+                                                    # reads. The journal tail is the point rather than the unit being
+                                                    # active: a drive's own health verdict stays PASSED through thousands
+                                                    # of reallocated sectors, and it is smartd that names the failing
+                                                    # self-test and the LBA it could not read. Nothing else surfaces that,
+                                                    # because with no MTA on the network smartd notifies by `wall`, which
+                                                    # on a headless host reaches no one.
+                                                    #
+                                                    # Polled at 5m against smartd's own 30m check cycle, so a finding
+                                                    # still surfaces promptly and a faster poll would only re-read the
+                                                    # same journal.
+                                                    name = "SMART Daemon";
+                                                    id = "ragnarok-smartd";
+                                                    type = "systemd_service";
+                                                    interval = "5m";
+                                                    service_name = "smartd.service";
+                                                    lines = 25;
+                                                    agent = "ragnarok";
+                                                }
+                                                {
+                                                    # Both containers here are btrfs: the root SSD and the 5TB backup disk. Btrfs
+                                                    # publishes no pool health word, so the verdict comes from the per-device error
+                                                    # counters it keeps in the filesystem itself, which is why this reads more often
+                                                    # than the `zpool status` it replaced -- the whole probe costs a third of a second.
+                                                    name = "Btrfs";
+                                                    id = "ragnarok-btrfs";
+                                                    type = "btrfs";
+                                                    interval = "10m";
+                                                    warning = 90;
+                                                    threshold = 96;
+                                                    agent = "ragnarok";
+                                                }
+                                                {
+                                                    name = "/";
+                                                    id = "ragnarok-disk-root";
+                                                    type = "disk_space";
+                                                    path = "/";
+                                                    threshold = 90;
+                                                    interval = "10m";
+                                                    agent = "ragnarok";
+                                                }
+                                                {
+                                                    name = "/Storage";
+                                                    id = "ragnarok-disk-storage";
+                                                    type = "disk_space";
+                                                    path = "/Storage";
+                                                    threshold = 90;
+                                                    interval = "10m";
+                                                    agent = "ragnarok";
+                                                }
+                                                {
+                                                    name = "/boot";
+                                                    id = "ragnarok-disk-boot";
+                                                    type = "disk_space";
+                                                    path = "/boot";
+                                                    threshold = 90;
+                                                    interval = "10m";
+                                                    agent = "ragnarok";
+                                                }
+                                                {
+                                                    # Auto-discovers every mount, so it also covers filesystems not listed
+                                                    # explicitly above. Catches read-only remounts (which leave df reporting
+                                                    # healthy usage forever) and inode exhaustion.
+                                                    name = "Filesystems";
+                                                    id = "ragnarok-filesystems";
+                                                    type = "filesystems";
+                                                    interval = "10m";
+                                                    warning = 90;
+                                                    threshold = 96;
+                                                    inode_warning = 85;
+                                                    inode_threshold = 95;
+                                                    grid_col_span = 2;
+                                                    agent = "ragnarok";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Network";
+                                            id = "ragnarok-network";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Throughput";
+                                                    id = "ragnarok-throughput";
+                                                    type = "throughput";
+                                                    interval = "30s";
+                                                    agent = "ragnarok";
+                                                }
+                                                {
+                                                    name = "Connections";
+                                                    id = "ragnarok-connections";
+                                                    type = "connections";
+                                                    interval = "1m";
+                                                    warning = 500;
+                                                    threshold = 1000;
+                                                    agent = "ragnarok";
+                                                }
+                                            ];
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Security";
+                                    id = "ragnarok-security";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Vulnerability Scan";
+                                            id = "ragnarok-vuln-scan";
+                                            type = "vuln_scan";
+                                            interval = "1d";
+                                            timeout = "30m"; # A full -sV sweep with every vuln script takes a few minutes; this only bounds a host that stops answering mid-scan
+                                            scan_host = "ragnarok.technet";
                                             agent = "heimdall";
                                         }
                                     ];
@@ -857,796 +561,1830 @@ in
                             ];
                         }
                         {
-                            name = "Running Services";
-                            # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
-                            id = "heimdall-services";
+                            name = "Heimdall";
+                            id = "heimdall-host";
                             type = "group";
                             children = [
                                 {
-                                    # X-Monitor watching itself. Runs in-process on Heimdall rather
-                                    # than through a transport, so it names no agent.
-                                    #
-                                    # The value here is the stall check: if the engine wedges,
-                                    # every other monitor simply stops updating while the UI
-                                    # keeps serving their last known statuses — a screen full of
-                                    # green that is indistinguishable from a healthy one. This
-                                    # monitor is what makes that failure visible.
-                                    #
-                                    # Necessarily blind to X-Monitor being down entirely: a dead
-                                    # process cannot report its own death. That gap closes with
-                                    # external alerting, not from here.
-                                    name = "X-Monitor";
-                                    id = "vigil-self"; # Kept from Vigil, because the id keys this monitor's history in the database
-                                    type = "x_monitor_self";
-                                    interval = "1m";
-                                    # X-Monitor settles around 500 MB with this monitor count; these
-                                    # leave generous headroom while still catching a real leak.
-                                    memory_warning = 768;
-                                    memory_threshold = 1024;
+                                    name = "Availability";
+                                    id = "heimdall";
+                                    type = "uptime";
+                                    target_host = "heimdall.technet";
+                                    interval = "30s";
                                 }
                                 {
-                                    # Keeps the home connection's dynamic-DNS record pointed at its
-                                    # current public IP — that record is also the WireGuard endpoint
-                                    # for the laptop, phone, and backup server (see their
-                                    # networking.nix files), so a stale record breaks remote access
-                                    # to all three. Replaces the standalone ddns-updater service:
-                                    # X-Monitor now both performs the update and reports on whether
-                                    # it's in sync, instead of a separate opaque container doing the
-                                    # former with no visibility into the latter.
-                                    #
-                                    # Checked against 8.8.8.8 rather than the local Pi-hole/Unbound
-                                    # resolver: Pi-hole has a hosts-file override for this exact
-                                    # name pointing at the LAN IP (pi-hole.nix), so asking it would
-                                    # return that override and never notice a real DDNS failure.
-                                    # 8.8.8.8 matches the old ddns-updater's own RESOLVER_ADDRESS,
-                                    # for the same reason.
-                                    name = "DDNS";
-                                    id = "ddns-home";
-                                    type = "ddns_updater";
-                                    domain_file = config.sops.templates."x-monitor-ddns-domain".path;
-                                    record_type = "A";
-                                    resolver = "8.8.8.8";
-                                    update_url_file = config.sops.secrets.ddns_sync_url.path;
-                                    interval = "5m";
-                                }
-                                {
-                                    name = "Mosquitto";
-                                    id = "heimdall-svc-mosquitto";
+                                    name = "System Stats";
+                                    # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
+                                    id = "heimdall-metrics";
                                     type = "group";
+                                    notify."for" = "1h";
                                     children = [
                                         {
-                                            name = "Service";
-                                            id = "heimdall-mosquitto";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "mosquitto.service";
-                                            agent = "heimdall";
+                                            name = "Compute";
+                                            id = "heimdall-compute";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "CPU";
+                                                    id = "heimdall-cpu";
+                                                    type = "cpu";
+                                                    interval = "1m";
+                                                    warning = 70;
+                                                    threshold = 85;
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    name = "Load";
+                                                    id = "heimdall-load";
+                                                    type = "load";
+                                                    interval = "1m";
+                                                    warning = 70;
+                                                    threshold = 100;
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    name = "Temperature";
+                                                    id = "heimdall-temperature";
+                                                    type = "temperature";
+                                                    interval = "1m";
+                                                    warning = 70;
+                                                    threshold = 80;
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    name = "Interrupts";
+                                                    id = "heimdall-interrupts";
+                                                    type = "interrupts";
+                                                    interval = "1m";
+                                                    warning = 20000;
+                                                    threshold = 50000;
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    name = "Processes";
+                                                    id = "heimdall-processes";
+                                                    type = "processes";
+                                                    interval = "30s";
+                                                    max_processes = 20;
+                                                    grid_col_span = 2;
+                                                    agent = "heimdall";
+                                                }
+                                            ];
                                         }
                                         {
-                                            # Message-delivery health, as opposed to the
-                                            # monitor above, which only proves the broker
-                                            # process is running. The failure this exists
-                                            # to catch: the broker accepts connections
-                                            # while routing itself is wedged (a
-                                            # persistence-file jam, a socket wired to a
-                                            # dead internal queue) — every liveness check
-                                            # stays green while every client silently
-                                            # stops seeing messages. Publishes a nonce and
-                                            # confirms it comes back on the same topic,
-                                            # authenticating as a dedicated `x-monitor` MQTT
-                                            # user (mosquitto/broker.nix) scoped by ACL to
-                                            # x-monitor/probe/# only.
-                                            name = "Delivery";
-                                            id = "heimdall-mosquitto-delivery";
-                                            type = "mosquitto";
-                                            interval = "5m";
-                                            host = "127.0.0.1";
-                                            port = 1883;
-                                            username = "x-monitor";
-                                            password_command = "cat /run/secrets/mosquitto_x_monitor_password";
-                                            probe_topic = "x-monitor/probe/heimdall-mosquitto-delivery";
-                                            agent = "heimdall";
+                                            name = "Memory";
+                                            id = "heimdall-memory";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Usage";
+                                                    id = "heimdall-memory-usage";
+                                                    type = "memory";
+                                                    interval = "1m";
+                                                    warning = 90;
+                                                    threshold = 95;
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    # An OOM kill is an event, not a level: memory is back to normal
+                                                    # before the next sample, so the usage monitor beside this one cannot
+                                                    # see it. The counter read each cycle means no kill is ever missed,
+                                                    # and over this host's agent the module also follows the kernel
+                                                    # journal, so a kill is reported the moment it happens and names the
+                                                    # process the counter can only total.
+                                                    name = "OOM Kills";
+                                                    id = "heimdall-oom";
+                                                    type = "oom";
+                                                    notify."for" = 0; # A kill clears within a few cycles, so the System Stats hour would never be reached
+                                                    interval = "1m";
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Storage";
+                                            id = "heimdall-storage";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    # One monitor per drive, because the plugin charts a single device and an unpinned one picks whichever is busiest.
+                                                    name = "Disk I/O (Data 1)";
+                                                    id = "heimdall-disk-io";
+                                                    type = "disk_io";
+                                                    interval = "30s";
+                                                    device = "/dev/disk/by-id/ata-TOSHIBA_MQ04ABF100_18BPSDNPS"; # One half of the data-pool mirror
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    name = "Disk I/O (Data 2)";
+                                                    id = "heimdall-disk-io-data2";
+                                                    type = "disk_io";
+                                                    interval = "30s";
+                                                    device = "/dev/disk/by-id/ata-ADATA_SU720_2K442LSNKEEX"; # The mirror's other half, an SSD, so reads land here and not on the spinning half
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    name = "Disk I/O (Root)";
+                                                    id = "heimdall-disk-io-root";
+                                                    type = "disk_io";
+                                                    interval = "30s";
+                                                    device = "/dev/disk/by-id/ata-Dogfish_SSD_64GB_5E56255506071556041"; # root-pool-Heimdall
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    # smartctl is slow and rarely changes its answer, so this reads hourly.
+                                                    name = "SMART";
+                                                    id = "heimdall-smart";
+                                                    type = "smart";
+                                                    interval = "1h";
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    # smartd runs the scheduled self-tests whose verdict the monitor above
+                                                    # reads. The journal tail is the point rather than the unit being
+                                                    # active: a drive's own health verdict stays PASSED through thousands
+                                                    # of reallocated sectors, and it is smartd that names the failing
+                                                    # self-test and the LBA it could not read. Nothing else surfaces that,
+                                                    # because with no MTA on the network smartd notifies by `wall`, which
+                                                    # on a headless host reaches no one.
+                                                    #
+                                                    # Polled at 5m against smartd's own 30m check cycle, so a finding
+                                                    # still surfaces promptly and a faster poll would only re-read the
+                                                    # same journal.
+                                                    name = "SMART Daemon";
+                                                    id = "heimdall-smartd";
+                                                    type = "systemd_service";
+                                                    interval = "5m";
+                                                    service_name = "smartd.service";
+                                                    lines = 25;
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    # A pool changes state slowly and `zpool status` walks every vdev.
+                                                    name = "ZFS";
+                                                    id = "heimdall-zfs";
+                                                    type = "zfs";
+                                                    interval = "1h";
+                                                    warning = 90;
+                                                    threshold = 96;
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    name = "/";
+                                                    id = "heimdall-disk-root";
+                                                    type = "disk_space";
+                                                    path = "/";
+                                                    threshold = 90;
+                                                    interval = "10m";
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    name = "/Storage";
+                                                    id = "heimdall-disk-storage";
+                                                    type = "disk_space";
+                                                    path = "/Storage";
+                                                    threshold = 90;
+                                                    interval = "10m";
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    name = "/boot";
+                                                    id = "heimdall-disk-boot";
+                                                    type = "disk_space";
+                                                    path = "/boot";
+                                                    threshold = 90;
+                                                    interval = "10m";
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    # Auto-discovers every mount, so it also covers filesystems not listed
+                                                    # explicitly above. Catches read-only remounts (which leave df reporting
+                                                    # healthy usage forever) and inode exhaustion.
+                                                    name = "Filesystems";
+                                                    id = "heimdall-filesystems";
+                                                    type = "filesystems";
+                                                    interval = "10m";
+                                                    warning = 90;
+                                                    threshold = 96;
+                                                    inode_warning = 85;
+                                                    inode_threshold = 95;
+                                                    grid_col_span = 2;
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Network";
+                                            id = "heimdall-network";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Throughput";
+                                                    id = "heimdall-throughput";
+                                                    type = "throughput";
+                                                    interval = "30s";
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    name = "Connections";
+                                                    id = "heimdall-connections";
+                                                    type = "connections";
+                                                    interval = "1m";
+                                                    warning = 500;
+                                                    threshold = 1000;
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    # nginx fronts every web service on Heimdall; probe the local front
+                                                    # door plus a few representative app URLs.
+                                                    name = "Service Reachability";
+                                                    id = "heimdall-ports";
+                                                    type = "ports";
+                                                    interval = "1m";
+                                                    timeout = 5;
+                                                    grid_col_span = 2;
+                                                    checks = [
+                                                        {
+                                                            name = "Nginx";
+                                                            host = "localhost";
+                                                            port = 443;
+                                                        }
+                                                        {
+                                                            name = "Home Assistant";
+                                                            url = "https://home-assistant.heimdall.technet";
+                                                        }
+                                                        {
+                                                            name = "Pi-hole";
+                                                            url = "https://pi-hole.heimdall.technet";
+                                                        }
+                                                        {
+                                                            name = "Homepage";
+                                                            url = "https://dashboard.heimdall.technet";
+                                                        }
+                                                        {
+                                                            name = "Jackett";
+                                                            url = "https://jackett.heimdall.technet";
+                                                        }
+                                                        {
+                                                            name = "Comet";
+                                                            url = "https://comet.heimdall.technet/health";
+                                                        }
+                                                        {
+                                                            name = "Stremio";
+                                                            url = "https://stremio.heimdall.technet";
+                                                        }
+                                                        {
+                                                            name = "Stremio Server";
+                                                            url = "https://stremio-server.heimdall.technet/heartbeat"; # Its root redirects to the web UI, so the heartbeat is the only plain 200 here
+                                                        }
+                                                        {
+                                                            name = "Atuin";
+                                                            url = "https://atuin.heimdall.technet/healthz"; # No web UI to hit, so the health endpoint is the only 200 on this vhost
+                                                        }
+                                                        {
+                                                            name = "Atuin Web";
+                                                            url = "https://atuin-web.heimdall.technet/healthz";
+                                                        }
+                                                    ];
+                                                    agent = "heimdall";
+                                                }
+                                            ];
                                         }
                                     ];
                                 }
                                 {
-                                    name = "Calibre Web";
-                                    id = "heimdall-svc-calibre-web";
+                                    name = "Running Services";
+                                    # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
+                                    id = "heimdall-services";
                                     type = "group";
                                     children = [
                                         {
-                                            name = "Service";
-                                            id = "heimdall-calibre-web";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "calibre-web-nextgen.service";
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            # Library-serving health, as opposed to the
-                                            # monitor above, which only proves the
-                                            # process is running. Requests /opds with
-                                            # a dedicated "x-monitor" account (created once
-                                            # by hand — see calibre-web-nextgen.nix)
-                                            # and checks the body is a real feed, not
-                                            # just any 200 — a known upstream issue
-                                            # means even a broken metadata DB can
-                                            # answer 200 on some routes.
-                                            name = "Library";
-                                            id = "heimdall-calibre-web-library";
-                                            type = "http";
-                                            interval = "10m";
-                                            url = "http://127.0.0.1:8083/opds";
-                                            username = "x-monitor";
-                                            password_command = "cat /run/secrets/calibre_web_x_monitor_password";
-                                            check_title = "OPDS FEED";
-                                            expect = {
-                                                body_contains = "<feed";
-                                                body_contains_any = [
-                                                    "atom"
-                                                    "opds"
-                                                ];
-                                            };
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Unbound";
-                                    id = "heimdall-svc-unbound";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "heimdall-unbound";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "unbound.service";
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            # Resolution health, as opposed to the monitor
-                                            # above, which only proves the daemon is
-                                            # running. The failure this exists to catch:
-                                            # the process stays up and the socket stays
-                                            # open while recursion itself is broken (stale
-                                            # root hints, no outbound path, a validation
-                                            # wedge) — every liveness check reports that
-                                            # as healthy. Reads unbound-control's stats
-                                            # socket (see unbound.nix's
-                                            # localControlSocketPath) and issues one live
-                                            # query, both over SSH on Heimdall itself, so
-                                            # no new network exposure is added.
-                                            name = "Resolution";
-                                            id = "heimdall-unbound-resolution";
-                                            type = "unbound";
-                                            interval = "5m";
-                                            query_host = "127.0.0.1";
-                                            query_port = 5335;
-                                            query_domain = "cloudflare.com";
-                                            servfail_warning = 5;
-                                            servfail_threshold = 20;
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "VLC";
-                                    id = "heimdall-svc-vlc";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "heimdall-vlc";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "vlc-audio.service";
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Nginx";
-                                    id = "heimdall-svc-nginx";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "heimdall-nginx";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "nginx.service";
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Pi-hole";
-                                    id = "heimdall-svc-pihole";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "heimdall-pihole";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "pihole-ftl.service";
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            name = "DNS";
-                                            id = "heimdall-pihole-dns";
-                                            type = "pihole";
-                                            interval = "5m";
-                                            api_url = "http://127.0.0.1:9018";
-                                            api_password_command = "cat /run/secrets/pihole_web_password";
-                                            # Both zero, which no percentage can fall below, so the rate is still charted but never sets the status. It
-                                            # measures what clients happened to ask for, not whether Pi-hole is still blocking -- a quiet stretch of
-                                            # cached and local lookups drags it down with nothing wrong. Blocking being enabled and the gravity list
-                                            # being non-empty are the checks that answer that, and both stay. min_queries went with these: it gated
-                                            # nothing else.
-                                            block_rate_warning = 0;
-                                            block_rate_threshold = 0;
-                                            # Wide enough that pihole-gravity.timer has to miss several weekly runs before this fires.
-                                            gravity_max_age = "30d";
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Home Assistant";
-                                    id = "heimdall-svc-home-assistant";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "heimdall-home-assistant";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "home-assistant.service";
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Frigate";
-                                    id = "heimdall-svc-frigate";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "heimdall-frigate";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "frigate.service";
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            # Camera health, as opposed to the monitor
-                                            # above, which only proves the process is
-                                            # running. Reads stream fps and the live
-                                            # armed state via Frigate's internal
-                                            # (unauthenticated-by-design, loopback-only)
-                                            # API on port 5000 — no credential needed, no
-                                            # change to the real auth setup on the
-                                            # regular port. A camera Home Assistant has
-                                            # disarmed reads as disarmed, not as a fault.
-                                            name = "Cameras";
-                                            id = "heimdall-frigate-cameras";
-                                            type = "frigate";
-                                            interval = "1m";
-                                            api_url = "http://127.0.0.1:5000";
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            # The broker leg, which neither monitor above
-                                            # covers: Frigate can be running, and its API
-                                            # answering, while its MQTT session is gone --
-                                            # Home Assistant then stops seeing events and
-                                            # everything else stays green.
+                                            # X-Monitor watching itself. Runs in-process on Heimdall rather
+                                            # than through a transport, so it names no agent.
                                             #
-                                            # frigate/available is retained and carries
-                                            # Frigate's last will, so the broker's own
-                                            # view of the session answers immediately:
-                                            # "online" was published on connect, "offline"
-                                            # is what the broker publishes on an unclean
-                                            # disconnect, and nothing at all means Frigate
-                                            # has never connected since the broker's
-                                            # persistence file was written. All three are
-                                            # a non-zero exit here. Read from Frigate's
-                                            # source (comms/mqtt.py) rather than assumed.
+                                            # The value here is the stall check: if the engine wedges,
+                                            # every other monitor simply stops updating while the UI
+                                            # keeps serving their last known statuses — a screen full of
+                                            # green that is indistinguishable from a healthy one. This
+                                            # monitor is what makes that failure visible.
                                             #
-                                            # Authenticates as the same `x-monitor` user as
-                                            # the delivery probe, which for this needs
-                                            # `read frigate/available` -- see
-                                            # mosquitto/broker.nix.
-                                            name = "MQTT";
-                                            id = "heimdall-frigate-mqtt";
-                                            type = "command";
-                                            interval = "5m";
-                                            timeout = 15;
-                                            command = ''
-                                                test "$(mosquitto_sub -h 127.0.0.1 -p 1883 \
-                                                    -u x-monitor -P "$(cat /run/secrets/mosquitto_x_monitor_password)" \
-                                                    -t frigate/available -C 1 -W 5)" = online
-                                            '';
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "FreshRSS";
-                                    id = "heimdall-svc-freshrss";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "heimdall-freshrss";
-                                            type = "systemd_service";
+                                            # Necessarily blind to X-Monitor being down entirely: a dead
+                                            # process cannot report its own death. That gap closes with
+                                            # external alerting, not from here.
+                                            name = "X-Monitor";
+                                            id = "vigil-self"; # Kept from Vigil, because the id keys this monitor's history in the database
+                                            type = "x_monitor_self";
                                             interval = "1m";
-                                            service_name = "phpfpm-freshrss.service";
-                                            agent = "heimdall";
+                                            # X-Monitor settles around 500 MB with this monitor count; these
+                                            # leave generous headroom while still catching a real leak.
+                                            memory_warning = 768;
+                                            memory_threshold = 1024;
                                         }
                                         {
-                                            # Feed-refresh health, as opposed to the
-                                            # monitor above, which only proves
-                                            # PHP-FPM is running. Reads per-feed
-                                            # last-updated timestamps via the Fever
-                                            # API — the account's separate API
-                                            # password is set once by hand (see
-                                            # freshrss.nix) since FreshRSS has no
-                                            # declarative option for it.
-                                            name = "Feeds";
-                                            id = "heimdall-freshrss-feeds";
-                                            type = "freshrss";
-                                            interval = "15m";
-                                            api_url = "http://freshrss.heimdall.technet"; # nginx's catch-all drops requests to the bare IP with 444, so the FreshRSS vhost name is required
-                                            username = "beatlink";
-                                            api_password_command = "cat /run/secrets/freshrss_api_password";
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "qBittorrent";
-                                    id = "heimdall-svc-qbittorrent";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "heimdall-qbittorrent";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "qbittorrent.service";
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            # Transfer health, as opposed to the monitor
-                                            # above, which only proves the daemon is
-                                            # running. The failure this exists to catch:
-                                            # the daemon keeps running while transfers
-                                            # have silently stopped — no peer
-                                            # connectivity, or the storage path went
-                                            # away — which every liveness check reports
-                                            # as healthy.
+                                            # Keeps the home connection's dynamic-DNS record pointed at its
+                                            # current public IP — that record is also the WireGuard endpoint
+                                            # for the laptop, phone, and backup server (see their
+                                            # networking.nix files), so a stale record breaks remote access
+                                            # to all three. Replaces the standalone ddns-updater service:
+                                            # X-Monitor now both performs the update and reports on whether
+                                            # it's in sync, instead of a separate opaque container doing the
+                                            # former with no visibility into the latter.
                                             #
-                                            # Port 9050 is the WebUI listener on
-                                            # Heimdall (see qbittorrent.nix), read from
-                                            # that host over SSH so the monitor does not
-                                            # depend on the nginx vhost in front of it.
-                                            # That config sets LocalHostAuth = false, so
-                                            # requests from Heimdall itself need no
-                                            # credential and none is stored here. If that
-                                            # ever changes, set username together with
-                                            # password_command (pointing at a sops
-                                            # secret, as the borg monitors do) — the
-                                            # plugin reports a rejected login explicitly
-                                            # rather than failing obscurely.
-                                            #
-                                            # Exposes Resume All / Recheck Errored /
-                                            # Pause All on the monitor's page. Nothing
-                                            # destructive is offered: the dashboard fires
-                                            # actions with no confirmation step.
-                                            name = "Transfers";
-                                            id = "heimdall-qbittorrent-transfers";
-                                            type = "qbittorrent";
+                                            # Checked against 8.8.8.8 rather than the local Pi-hole/Unbound
+                                            # resolver: Pi-hole has a hosts-file override for this exact
+                                            # name pointing at the LAN IP (pi-hole.nix), so asking it would
+                                            # return that override and never notice a real DDNS failure.
+                                            # 8.8.8.8 matches the old ddns-updater's own RESOLVER_ADDRESS,
+                                            # for the same reason.
+                                            name = "DDNS";
+                                            id = "ddns-home";
+                                            type = "ddns_updater";
+                                            domain_file = config.sops.templates."x-monitor-ddns-domain".path;
+                                            record_type = "A";
+                                            resolver = "8.8.8.8";
+                                            update_url_file = config.sops.secrets.ddns_sync_url.path;
                                             interval = "5m";
-                                            api_url = "http://127.0.0.1:9050";
-                                            # A couple of stalled torrents is a dead
-                                            # swarm and normal; the whole queue stalling
-                                            # at once is the connection, not the peers.
-                                            stalled_warning = 3;
-                                            stalled_threshold = 10;
-                                            # An errored torrent usually means the
-                                            # storage path under /Storage disappeared,
-                                            # which is worth failing on immediately.
-                                            error_threshold = 1;
-                                            agent = "heimdall";
+                                        }
+                                        {
+                                            name = "Mosquitto";
+                                            id = "heimdall-svc-mosquitto";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "heimdall-mosquitto";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "mosquitto.service";
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    # Message-delivery health, as opposed to the
+                                                    # monitor above, which only proves the broker
+                                                    # process is running. The failure this exists
+                                                    # to catch: the broker accepts connections
+                                                    # while routing itself is wedged (a
+                                                    # persistence-file jam, a socket wired to a
+                                                    # dead internal queue) — every liveness check
+                                                    # stays green while every client silently
+                                                    # stops seeing messages. Publishes a nonce and
+                                                    # confirms it comes back on the same topic,
+                                                    # authenticating as a dedicated `x-monitor` MQTT
+                                                    # user (mosquitto/broker.nix) scoped by ACL to
+                                                    # x-monitor/probe/# only.
+                                                    name = "Delivery";
+                                                    id = "heimdall-mosquitto-delivery";
+                                                    type = "mosquitto";
+                                                    interval = "5m";
+                                                    host = "127.0.0.1";
+                                                    port = 1883;
+                                                    username = "x-monitor";
+                                                    password_command = "cat /run/secrets/mosquitto_x_monitor_password";
+                                                    probe_topic = "x-monitor/probe/heimdall-mosquitto-delivery";
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Calibre Web";
+                                            id = "heimdall-svc-calibre-web";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "heimdall-calibre-web";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "calibre-web-nextgen.service";
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    # Library-serving health, as opposed to the
+                                                    # monitor above, which only proves the
+                                                    # process is running. Requests /opds with
+                                                    # a dedicated "x-monitor" account (created once
+                                                    # by hand — see calibre-web-nextgen.nix)
+                                                    # and checks the body is a real feed, not
+                                                    # just any 200 — a known upstream issue
+                                                    # means even a broken metadata DB can
+                                                    # answer 200 on some routes.
+                                                    name = "Library";
+                                                    id = "heimdall-calibre-web-library";
+                                                    type = "http";
+                                                    interval = "10m";
+                                                    url = "http://127.0.0.1:8083/opds";
+                                                    username = "x-monitor";
+                                                    password_command = "cat /run/secrets/calibre_web_x_monitor_password";
+                                                    check_title = "OPDS FEED";
+                                                    expect = {
+                                                        body_contains = "<feed";
+                                                        body_contains_any = [
+                                                            "atom"
+                                                            "opds"
+                                                        ];
+                                                    };
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Unbound";
+                                            id = "heimdall-svc-unbound";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "heimdall-unbound";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "unbound.service";
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    # Resolution health, as opposed to the monitor
+                                                    # above, which only proves the daemon is
+                                                    # running. The failure this exists to catch:
+                                                    # the process stays up and the socket stays
+                                                    # open while recursion itself is broken (stale
+                                                    # root hints, no outbound path, a validation
+                                                    # wedge) — every liveness check reports that
+                                                    # as healthy. Reads unbound-control's stats
+                                                    # socket (see unbound.nix's
+                                                    # localControlSocketPath) and issues one live
+                                                    # query, both over SSH on Heimdall itself, so
+                                                    # no new network exposure is added.
+                                                    name = "Resolution";
+                                                    id = "heimdall-unbound-resolution";
+                                                    type = "unbound";
+                                                    interval = "5m";
+                                                    query_host = "127.0.0.1";
+                                                    query_port = 5335;
+                                                    query_domain = "cloudflare.com";
+                                                    servfail_warning = 5;
+                                                    servfail_threshold = 20;
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "VLC";
+                                            id = "heimdall-svc-vlc";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "heimdall-vlc";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "vlc-audio.service";
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Nginx";
+                                            id = "heimdall-svc-nginx";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "heimdall-nginx";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "nginx.service";
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Pi-hole";
+                                            id = "heimdall-svc-pihole";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "heimdall-pihole";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "pihole-ftl.service";
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    name = "DNS";
+                                                    id = "heimdall-pihole-dns";
+                                                    type = "pihole";
+                                                    interval = "5m";
+                                                    api_url = "http://127.0.0.1:9018";
+                                                    api_password_command = "cat /run/secrets/pihole_web_password";
+                                                    # Both zero, which no percentage can fall below, so the rate is still charted but never sets the status. It
+                                                    # measures what clients happened to ask for, not whether Pi-hole is still blocking -- a quiet stretch of
+                                                    # cached and local lookups drags it down with nothing wrong. Blocking being enabled and the gravity list
+                                                    # being non-empty are the checks that answer that, and both stay. min_queries went with these: it gated
+                                                    # nothing else.
+                                                    block_rate_warning = 0;
+                                                    block_rate_threshold = 0;
+                                                    # Wide enough that pihole-gravity.timer has to miss several weekly runs before this fires.
+                                                    gravity_max_age = "30d";
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Home Assistant";
+                                            id = "heimdall-svc-home-assistant";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "heimdall-home-assistant";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "home-assistant.service";
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Frigate";
+                                            id = "heimdall-svc-frigate";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "heimdall-frigate";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "frigate.service";
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    # Camera health, as opposed to the monitor
+                                                    # above, which only proves the process is
+                                                    # running. Reads stream fps and the live
+                                                    # armed state via Frigate's internal
+                                                    # (unauthenticated-by-design, loopback-only)
+                                                    # API on port 5000 — no credential needed, no
+                                                    # change to the real auth setup on the
+                                                    # regular port. A camera Home Assistant has
+                                                    # disarmed reads as disarmed, not as a fault.
+                                                    name = "Cameras";
+                                                    id = "heimdall-frigate-cameras";
+                                                    type = "frigate";
+                                                    interval = "1m";
+                                                    api_url = "http://127.0.0.1:5000";
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    # The broker leg, which neither monitor above
+                                                    # covers: Frigate can be running, and its API
+                                                    # answering, while its MQTT session is gone --
+                                                    # Home Assistant then stops seeing events and
+                                                    # everything else stays green.
+                                                    #
+                                                    # frigate/available is retained and carries
+                                                    # Frigate's last will, so the broker's own
+                                                    # view of the session answers immediately:
+                                                    # "online" was published on connect, "offline"
+                                                    # is what the broker publishes on an unclean
+                                                    # disconnect, and nothing at all means Frigate
+                                                    # has never connected since the broker's
+                                                    # persistence file was written. All three are
+                                                    # a non-zero exit here. Read from Frigate's
+                                                    # source (comms/mqtt.py) rather than assumed.
+                                                    #
+                                                    # Authenticates as the same `x-monitor` user as
+                                                    # the delivery probe, which for this needs
+                                                    # `read frigate/available` -- see
+                                                    # mosquitto/broker.nix.
+                                                    name = "MQTT";
+                                                    id = "heimdall-frigate-mqtt";
+                                                    type = "command";
+                                                    interval = "5m";
+                                                    timeout = 15;
+                                                    command = ''
+                                                        test "$(mosquitto_sub -h 127.0.0.1 -p 1883 \
+                                                            -u x-monitor -P "$(cat /run/secrets/mosquitto_x_monitor_password)" \
+                                                            -t frigate/available -C 1 -W 5)" = online
+                                                    '';
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "FreshRSS";
+                                            id = "heimdall-svc-freshrss";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "heimdall-freshrss";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "phpfpm-freshrss.service";
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    # Feed-refresh health, as opposed to the
+                                                    # monitor above, which only proves
+                                                    # PHP-FPM is running. Reads per-feed
+                                                    # last-updated timestamps via the Fever
+                                                    # API — the account's separate API
+                                                    # password is set once by hand (see
+                                                    # freshrss.nix) since FreshRSS has no
+                                                    # declarative option for it.
+                                                    name = "Feeds";
+                                                    id = "heimdall-freshrss-feeds";
+                                                    type = "freshrss";
+                                                    interval = "15m";
+                                                    api_url = "http://freshrss.heimdall.technet"; # nginx's catch-all drops requests to the bare IP with 444, so the FreshRSS vhost name is required
+                                                    username = "beatlink";
+                                                    api_password_command = "cat /run/secrets/freshrss_api_password";
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "qBittorrent";
+                                            id = "heimdall-svc-qbittorrent";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "heimdall-qbittorrent";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "qbittorrent.service";
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    # Transfer health, as opposed to the monitor
+                                                    # above, which only proves the daemon is
+                                                    # running. The failure this exists to catch:
+                                                    # the daemon keeps running while transfers
+                                                    # have silently stopped — no peer
+                                                    # connectivity, or the storage path went
+                                                    # away — which every liveness check reports
+                                                    # as healthy.
+                                                    #
+                                                    # Port 9050 is the WebUI listener on
+                                                    # Heimdall (see qbittorrent.nix), read from
+                                                    # that host over SSH so the monitor does not
+                                                    # depend on the nginx vhost in front of it.
+                                                    # That config sets LocalHostAuth = false, so
+                                                    # requests from Heimdall itself need no
+                                                    # credential and none is stored here. If that
+                                                    # ever changes, set username together with
+                                                    # password_command (pointing at a sops
+                                                    # secret, as the borg monitors do) — the
+                                                    # plugin reports a rejected login explicitly
+                                                    # rather than failing obscurely.
+                                                    #
+                                                    # Exposes Resume All / Recheck Errored /
+                                                    # Pause All on the monitor's page. Nothing
+                                                    # destructive is offered: the dashboard fires
+                                                    # actions with no confirmation step.
+                                                    name = "Transfers";
+                                                    id = "heimdall-qbittorrent-transfers";
+                                                    type = "qbittorrent";
+                                                    interval = "5m";
+                                                    api_url = "http://127.0.0.1:9050";
+                                                    # A couple of stalled torrents is a dead
+                                                    # swarm and normal; the whole queue stalling
+                                                    # at once is the connection, not the peers.
+                                                    stalled_warning = 3;
+                                                    stalled_threshold = 10;
+                                                    # An errored torrent usually means the
+                                                    # storage path under /Storage disappeared,
+                                                    # which is worth failing on immediately.
+                                                    error_threshold = 1;
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Traccar";
+                                            id = "heimdall-svc-traccar";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "heimdall-traccar";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "traccar.service";
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    # Device-staleness health, as opposed to
+                                                    # the monitor above, which only proves the
+                                                    # server is running. Authenticates as a
+                                                    # dedicated read-only "x-monitor" user created
+                                                    # once by hand (see traccar.nix, which has
+                                                    # no declarative user provisioning at all)
+                                                    # and computes staleness itself from each
+                                                    # device's lastUpdate, rather than
+                                                    # trusting Traccar's own status field —
+                                                    # that field doesn't reliably reach
+                                                    # "offline" on its own for a tracker that
+                                                    # has simply gone silent.
+                                                    name = "Devices";
+                                                    id = "heimdall-traccar-devices";
+                                                    type = "traccar";
+                                                    interval = "15m";
+                                                    api_url = "http://127.0.0.1:9280";
+                                                    username = "x-monitor";
+                                                    password_command = "cat /run/secrets/traccar_x_monitor_password";
+                                                    stale_warning = 24;
+                                                    stale_threshold = 72;
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Jackett";
+                                            id = "heimdall-svc-jackett";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "heimdall-jackett";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "jackett.service";
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Comet";
+                                            id = "heimdall-svc-comet";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "heimdall-comet";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "comet.service";
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "ESPHome";
+                                            id = "heimdall-svc-esphome";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "heimdall-esphome";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "esphome.service";
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Homepage";
+                                            id = "heimdall-svc-homepage";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "heimdall-homepage";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "homepage-dashboard.service";
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Blockurl";
+                                            id = "heimdall-svc-blockurl";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "heimdall-blockurl";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "blockurl.service";
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    # Database health, as opposed to the
+                                                    # monitor above, which only proves the
+                                                    # process is running. Reads the domain
+                                                    # list via BlockURL's own X-API-Key auth
+                                                    # (blockurl.nix's existing secret — no new
+                                                    # credential needed) and checks it is
+                                                    # non-empty, catching a corrupted or
+                                                    # wiped database that a liveness check
+                                                    # cannot see.
+                                                    name = "Database";
+                                                    id = "heimdall-blockurl-database";
+                                                    type = "blockurl";
+                                                    interval = "15m";
+                                                    api_url = "http://127.0.0.1:9001";
+                                                    api_key_command = "cat /run/secrets/blockurl_x_monitor_api_key";
+                                                    # The write probe lands on the data-pool mirror, where a cold write outlasts the 10s default.
+                                                    api_timeout = 30;
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Radicale";
+                                            id = "heimdall-svc-radicale";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "heimdall-radicale";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "radicale.service";
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    # CalDAV/CardDAV health, as opposed to the
+                                                    # monitor above, which only proves the
+                                                    # process is running. Radicale has no JSON
+                                                    # API at all — issues a live PROPFIND as a
+                                                    # dedicated "x-monitor" htpasswd account
+                                                    # (provisioned declaratively; see
+                                                    # radicale.nix) and checks for the 207
+                                                    # Multi-Status a healthy WebDAV server
+                                                    # returns.
+                                                    name = "WebDAV";
+                                                    id = "heimdall-radicale-webdav";
+                                                    type = "http";
+                                                    interval = "10m";
+                                                    url = "http://127.0.0.1:5232/";
+                                                    method = "PROPFIND";
+                                                    headers = {
+                                                        Depth = "0";
+                                                        "Content-Type" = "application/xml";
+                                                    };
+                                                    body = ''<?xml version="1.0"?><propfind xmlns="DAV:"><prop><current-user-principal/></prop></propfind>'';
+                                                    username = "x-monitor";
+                                                    password_command = "cat /run/secrets/radicale_x_monitor_password";
+                                                    check_title = "PROPFIND";
+                                                    expect = {
+                                                        status = 207;
+                                                    };
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Syncthing";
+                                            id = "heimdall-svc-syncthing";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "heimdall-syncthing";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "syncthing.service";
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    # Folder/device health, as opposed to the
+                                                    # monitor above, which only proves the
+                                                    # daemon is running. Reads Syncthing's own
+                                                    # REST API, keyed by an API key extracted
+                                                    # from config.xml by a small Nix-managed
+                                                    # timer (see syncthing.nix) rather than a
+                                                    # separately stored credential.
+                                                    name = "Sync Health";
+                                                    id = "heimdall-syncthing-health";
+                                                    type = "syncthing";
+                                                    interval = "10m";
+                                                    api_url = "http://127.0.0.1:8384";
+                                                    api_key_command = "cat /Storage/Services/Syncthing/x-monitor-api-key";
+                                                    devices = [
+                                                        "Odin"
+                                                        "Ragnarok"
+                                                    ]; # ThorX is the phone and roams by design, so its absence is not a health signal
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Trilium";
+                                            id = "heimdall-svc-trilium";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "heimdall-trilium";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "trilium-server.service";
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    # Write-activity health, as opposed to the
+                                                    # monitor above, which only proves the
+                                                    # process is running. Reads
+                                                    # statistics.lastModified via ETAPI, using
+                                                    # a token generated once by hand (see
+                                                    # trilium.nix, which has no declarative
+                                                    # token provisioning at all). Staleness
+                                                    # here can be entirely normal (nobody used
+                                                    # Trilium overnight), so the default
+                                                    # window is generous and meant to be
+                                                    # tuned per instance.
+                                                    name = "Activity";
+                                                    id = "heimdall-trilium-activity";
+                                                    type = "trilium";
+                                                    interval = "1h";
+                                                    api_url = "http://127.0.0.1:8080";
+                                                    token_command = "cat /run/secrets/trilium_etapi_token";
+                                                    stale_warning = 72;
+                                                    agent = "heimdall";
+                                                }
+                                            ];
                                         }
                                     ];
                                 }
                                 {
-                                    name = "Traccar";
-                                    id = "heimdall-svc-traccar";
+                                    # Every host's Nix monitors in one place, since Heimdall updates, builds and caches for the fleet; each keeps its own agent and alerts per host.
+                                    name = "NixOS Fleet";
+                                    id = "heimdall-nixos-fleet";
                                     type = "group";
                                     children = [
                                         {
-                                            name = "Service";
-                                            id = "heimdall-traccar";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "traccar.service";
-                                            agent = "heimdall";
+                                            name = "Deployments";
+                                            id = "nixos-fleet-deployments";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Heimdall";
+                                                    id = "heimdall-nixos-deployment";
+                                                    type = "nixos_upgrade";
+                                                    interval = "5m";
+                                                    flake = upgradeFlake;
+                                                    eval_interval = "6h";
+                                                    rebuild_args = deploy.forHost "Heimdall";
+                                                    push_ssh_key = config.sops.secrets.x_monitor_flake_deploy_key.path; # Only this monitor pushes, so the key lives on Heimdall alone
+                                                    update_at = "02:00"; # The only thing that bumps flake.lock
+                                                    build_at = "04:00"; # The fleet's builds start after attic-gc at 03:00, whose database lock their uploads would contend with
+                                                    auto_switch = true;
+                                                    auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    name = "Odin";
+                                                    id = "odin-nixos-deployment";
+                                                    type = "nixos_upgrade";
+                                                    interval = "5m";
+                                                    flake = upgradeFlake;
+                                                    configuration = "Odin"; # Named, since the build runs on Heimdall
+                                                    eval_interval = "6h";
+                                                    rebuild_args = deploy.forHost "Odin";
+                                                    switch_agent = "heimdall"; # Heimdall builds, deploys and warms the cache whether or not the laptop is awake
+                                                    target_host = deploy.remote.Odin.target;
+                                                    rebuild_bin = "technet-remote-switch"; # Holds the target awake through the switch; see remote-deploy.nix
+                                                    build_at = "04:15";
+                                                    auto_switch = true;
+                                                    auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                                    agent = "odin";
+                                                }
+                                                {
+                                                    name = "Thor";
+                                                    id = "thor-nixos-deployment";
+                                                    type = "nixos_upgrade";
+                                                    interval = "5m";
+                                                    flake = upgradeFlake;
+                                                    configuration = "Thor";
+                                                    eval_agent = "heimdall"; # Evaluating the flake on four 1.15GHz A53s takes the phone out of service for the duration
+                                                    eval_interval = "6h";
+                                                    rebuild_args = deploy.forHost "Thor";
+                                                    switch_agent = "heimdall"; # The phone never compiles its own closure
+                                                    target_host = deploy.remote.Thor.target;
+                                                    rebuild_bin = "technet-remote-switch"; # Holds the phone awake and restarts phosh after; see remote-deploy.nix
+                                                    build_at = "04:30";
+                                                    auto_switch = true;
+                                                    auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                                    agent = "thor";
+                                                }
+                                                {
+                                                    name = "Ragnarok";
+                                                    id = "ragnarok-nixos-deployment";
+                                                    type = "nixos_upgrade";
+                                                    interval = "5m";
+                                                    flake = upgradeFlake;
+                                                    configuration = "Ragnarok";
+                                                    eval_agent = "heimdall"; # Evaluating the flake on the 2GB Rock64 swaps it to death within seconds
+                                                    eval_interval = "6h";
+                                                    rebuild_args = deploy.forHost "Ragnarok";
+                                                    switch_agent = "heimdall"; # Built emulated on Heimdall, which is faster than the board natively
+                                                    target_host = deploy.remote.Ragnarok.target;
+                                                    rebuild_bin = "technet-remote-switch";
+                                                    build_at = "04:45";
+                                                    auto_switch = true;
+                                                    auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                                    agent = "ragnarok";
+                                                }
+                                            ];
                                         }
                                         {
-                                            # Device-staleness health, as opposed to
-                                            # the monitor above, which only proves the
-                                            # server is running. Authenticates as a
-                                            # dedicated read-only "x-monitor" user created
-                                            # once by hand (see traccar.nix, which has
-                                            # no declarative user provisioning at all)
-                                            # and computes staleness itself from each
-                                            # device's lastUpdate, rather than
-                                            # trusting Traccar's own status field —
-                                            # that field doesn't reliably reach
-                                            # "offline" on its own for a tracker that
-                                            # has simply gone silent.
-                                            name = "Devices";
-                                            id = "heimdall-traccar-devices";
-                                            type = "traccar";
-                                            interval = "15m";
-                                            api_url = "http://127.0.0.1:9280";
-                                            username = "x-monitor";
-                                            password_command = "cat /run/secrets/traccar_x_monitor_password";
-                                            stale_warning = 24;
-                                            stale_threshold = 72;
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Jackett";
-                                    id = "heimdall-svc-jackett";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "heimdall-jackett";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "jackett.service";
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Comet";
-                                    id = "heimdall-svc-comet";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "heimdall-comet";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "comet.service";
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "ESPHome";
-                                    id = "heimdall-svc-esphome";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "heimdall-esphome";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "esphome.service";
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Homepage";
-                                    id = "heimdall-svc-homepage";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "heimdall-homepage";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "homepage-dashboard.service";
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Blockurl";
-                                    id = "heimdall-svc-blockurl";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "heimdall-blockurl";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "blockurl.service";
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            # Database health, as opposed to the
-                                            # monitor above, which only proves the
-                                            # process is running. Reads the domain
-                                            # list via BlockURL's own X-API-Key auth
-                                            # (blockurl.nix's existing secret — no new
-                                            # credential needed) and checks it is
-                                            # non-empty, catching a corrupted or
-                                            # wiped database that a liveness check
-                                            # cannot see.
-                                            name = "Database";
-                                            id = "heimdall-blockurl-database";
-                                            type = "blockurl";
-                                            interval = "15m";
-                                            api_url = "http://127.0.0.1:9001";
-                                            api_key_command = "cat /run/secrets/blockurl_x_monitor_api_key";
-                                            # The write probe lands on the data-pool mirror, where a cold write outlasts the 10s default.
-                                            api_timeout = 30;
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Radicale";
-                                    id = "heimdall-svc-radicale";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "heimdall-radicale";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "radicale.service";
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            # CalDAV/CardDAV health, as opposed to the
-                                            # monitor above, which only proves the
-                                            # process is running. Radicale has no JSON
-                                            # API at all — issues a live PROPFIND as a
-                                            # dedicated "x-monitor" htpasswd account
-                                            # (provisioned declaratively; see
-                                            # radicale.nix) and checks for the 207
-                                            # Multi-Status a healthy WebDAV server
-                                            # returns.
-                                            name = "WebDAV";
-                                            id = "heimdall-radicale-webdav";
-                                            type = "http";
-                                            interval = "10m";
-                                            url = "http://127.0.0.1:5232/";
-                                            method = "PROPFIND";
-                                            headers = {
-                                                Depth = "0";
-                                                "Content-Type" = "application/xml";
-                                            };
-                                            body = ''<?xml version="1.0"?><propfind xmlns="DAV:"><prop><current-user-principal/></prop></propfind>'';
-                                            username = "x-monitor";
-                                            password_command = "cat /run/secrets/radicale_x_monitor_password";
-                                            check_title = "PROPFIND";
-                                            expect = {
-                                                status = 207;
-                                            };
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Syncthing";
-                                    id = "heimdall-svc-syncthing";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "heimdall-syncthing";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "syncthing.service";
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            # Folder/device health, as opposed to the
-                                            # monitor above, which only proves the
-                                            # daemon is running. Reads Syncthing's own
-                                            # REST API, keyed by an API key extracted
-                                            # from config.xml by a small Nix-managed
-                                            # timer (see syncthing.nix) rather than a
-                                            # separately stored credential.
-                                            name = "Sync Health";
-                                            id = "heimdall-syncthing-health";
-                                            type = "syncthing";
-                                            interval = "10m";
-                                            api_url = "http://127.0.0.1:8384";
-                                            api_key_command = "cat /Storage/Services/Syncthing/x-monitor-api-key";
-                                            devices = [
-                                                "Odin"
-                                                "Ragnarok"
-                                            ]; # ThorX is the phone and roams by design, so its absence is not a health signal
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Trilium";
-                                    id = "heimdall-svc-trilium";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "heimdall-trilium";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "trilium-server.service";
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            # Write-activity health, as opposed to the
-                                            # monitor above, which only proves the
-                                            # process is running. Reads
-                                            # statistics.lastModified via ETAPI, using
-                                            # a token generated once by hand (see
-                                            # trilium.nix, which has no declarative
-                                            # token provisioning at all). Staleness
-                                            # here can be entirely normal (nobody used
-                                            # Trilium overnight), so the default
-                                            # window is generous and meant to be
-                                            # tuned per instance.
-                                            name = "Activity";
-                                            id = "heimdall-trilium-activity";
-                                            type = "trilium";
-                                            interval = "1h";
-                                            api_url = "http://127.0.0.1:8080";
-                                            token_command = "cat /run/secrets/trilium_etapi_token";
-                                            stale_warning = 72;
-                                            agent = "heimdall";
-                                        }
-                                    ];
-                                }
-                            ];
-                        }
-                        {
-                            # Every host's Nix monitors in one place, since Heimdall updates, builds and caches for the fleet; each keeps its own agent and alerts per host.
-                            name = "NixOS Fleet";
-                            id = "heimdall-nixos-fleet";
-                            type = "group";
-                            children = [
-                                {
-                                    name = "Deployments";
-                                    id = "nixos-fleet-deployments";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Heimdall";
-                                            id = "heimdall-nixos-deployment";
-                                            type = "nixos_upgrade";
-                                            interval = "5m";
-                                            flake = upgradeFlake;
-                                            eval_interval = "6h";
-                                            rebuild_args = deploy.forHost "Heimdall";
-                                            push_ssh_key = config.sops.secrets.x_monitor_flake_deploy_key.path; # Only this monitor pushes, so the key lives on Heimdall alone
-                                            update_at = "02:00"; # The only thing that bumps flake.lock
-                                            build_at = "04:00"; # The fleet's builds start after attic-gc at 03:00, whose database lock their uploads would contend with
-                                            auto_switch = true;
-                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
-                                            agent = "heimdall";
-                                        }
-                                        {
-                                            name = "Odin";
-                                            id = "odin-nixos-deployment";
-                                            type = "nixos_upgrade";
-                                            interval = "5m";
-                                            flake = upgradeFlake;
-                                            configuration = "Odin"; # Named, since the build runs on Heimdall
-                                            eval_interval = "6h";
-                                            rebuild_args = deploy.forHost "Odin";
-                                            switch_agent = "heimdall"; # Heimdall builds, deploys and warms the cache whether or not the laptop is awake
-                                            target_host = deploy.remote.Odin.target;
-                                            rebuild_bin = "technet-remote-switch"; # Holds the target awake through the switch; see remote-deploy.nix
-                                            build_at = "04:15";
-                                            auto_switch = true;
-                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
-                                            agent = "odin";
-                                        }
-                                        {
-                                            name = "Thor";
-                                            id = "thor-nixos-deployment";
-                                            type = "nixos_upgrade";
-                                            interval = "5m";
-                                            flake = upgradeFlake;
-                                            configuration = "Thor";
-                                            eval_agent = "heimdall"; # Evaluating the flake on four 1.15GHz A53s takes the phone out of service for the duration
-                                            eval_interval = "6h";
-                                            rebuild_args = deploy.forHost "Thor";
-                                            switch_agent = "heimdall"; # The phone never compiles its own closure
-                                            target_host = deploy.remote.Thor.target;
-                                            rebuild_bin = "technet-remote-switch"; # Holds the phone awake and restarts phosh after; see remote-deploy.nix
-                                            build_at = "04:30";
-                                            auto_switch = true;
-                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
-                                            agent = "thor";
-                                        }
-                                        {
-                                            name = "Ragnarok";
-                                            id = "ragnarok-nixos-deployment";
-                                            type = "nixos_upgrade";
-                                            interval = "5m";
-                                            flake = upgradeFlake;
-                                            configuration = "Ragnarok";
-                                            eval_agent = "heimdall"; # Evaluating the flake on the 2GB Rock64 swaps it to death within seconds
-                                            eval_interval = "6h";
-                                            rebuild_args = deploy.forHost "Ragnarok";
-                                            switch_agent = "heimdall"; # Built emulated on Heimdall, which is faster than the board natively
-                                            target_host = deploy.remote.Ragnarok.target;
-                                            rebuild_bin = "technet-remote-switch";
-                                            build_at = "04:45";
-                                            auto_switch = true;
-                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
-                                            agent = "ragnarok";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Garbage Collection";
-                                    id = "nixos-fleet-gc";
-                                    type = "group";
-                                    children =
-                                        map
-                                            (host: {
-                                                name = host;
-                                                id = "${lib.toLower host}-nix-gc";
-                                                type = "nix_gc";
-                                                interval = "1h";
-                                                max_age = "2w"; # nix.gc.dates is weekly, so this tolerates one missed run
-                                                warning = 90; # Same policy as each host's Filesystems monitor, so the store's fill alarms once rather than twice
-                                                threshold = 96;
-                                                max_generation_age = "30d"; # --delete-older-than 7d, run weekly, should never leave one this old
-                                                gc_args = gcArgs;
-                                                agent = lib.toLower host;
-                                            })
-                                            [
-                                                "Heimdall"
-                                                "Odin"
-                                                "Thor"
-                                                "Ragnarok"
-                                            ]
-                                        ++ [
-                                            {
-                                                # The 28GB eMMC pool's real failure mode, and the one no other host needs pinned: every generation lands in this dataset.
-                                                name = "Thor /nix";
-                                                id = "thor-disk-nix";
-                                                type = "disk_space";
-                                                path = "/nix";
-                                                threshold = 90;
-                                                interval = "10m";
-                                                agent = "thor";
-                                            }
-                                        ];
-                                }
-                                {
-                                    name = "Attic";
-                                    id = "heimdall-svc-attic";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            # Timer-driven oneshot (OnCalendar=03:00) that empties the cache's deletion backlog; Restart Service runs one now.
                                             name = "Garbage Collection";
-                                            id = "heimdall-attic-gc";
-                                            type = "systemd_service";
-                                            interval = "1h";
-                                            service_name = "attic-gc.service";
-                                            max_age = "2d"; # Daily, so two days is the first missed run
+                                            id = "nixos-fleet-gc";
+                                            type = "group";
+                                            children =
+                                                map
+                                                    (host: {
+                                                        name = host;
+                                                        id = "${lib.toLower host}-nix-gc";
+                                                        type = "nix_gc";
+                                                        interval = "1h";
+                                                        max_age = "2w"; # nix.gc.dates is weekly, so this tolerates one missed run
+                                                        warning = 90; # Same policy as each host's Filesystems monitor, so the store's fill alarms once rather than twice
+                                                        threshold = 96;
+                                                        max_generation_age = "30d"; # --delete-older-than 7d, run weekly, should never leave one this old
+                                                        gc_args = gcArgs;
+                                                        agent = lib.toLower host;
+                                                    })
+                                                    [
+                                                        "Heimdall"
+                                                        "Odin"
+                                                        "Thor"
+                                                        "Ragnarok"
+                                                    ]
+                                                ++ [
+                                                    {
+                                                        # The 28GB eMMC pool's real failure mode, and the one no other host needs pinned: every generation lands in this dataset.
+                                                        name = "Thor /nix";
+                                                        id = "thor-disk-nix";
+                                                        type = "disk_space";
+                                                        path = "/nix";
+                                                        threshold = 90;
+                                                        interval = "10m";
+                                                        agent = "thor";
+                                                    }
+                                                ];
+                                        }
+                                        {
+                                            name = "Attic";
+                                            id = "heimdall-svc-attic";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    # Timer-driven oneshot (OnCalendar=03:00) that empties the cache's deletion backlog; Restart Service runs one now.
+                                                    name = "Garbage Collection";
+                                                    id = "heimdall-attic-gc";
+                                                    type = "systemd_service";
+                                                    interval = "1h";
+                                                    service_name = "attic-gc.service";
+                                                    max_age = "2d"; # Daily, so two days is the first missed run
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                    ];
+                                }
+                                {
+                                    # Heimdall (the server) owns /Storage/Services, backed up by borgmatic
+                                    # only — there is no Vorta on the server.
+                                    name = "Backups";
+                                    # Explicit id: a group id defaults to its name and both backed-up hosts have this group, so they would share one key.
+                                    id = "backups-heimdall";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Borgmatic";
+                                            id = "backups-heimdall-borgmatic";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "On Disk";
+                                                    id = "backup-server-on-disk";
+                                                    type = "borg";
+                                                    interval = "15m";
+                                                    # Local repo — no second SSH hop, so this answers far faster than
+                                                    # the pushed copies.
+                                                    timeout = "5m";
+                                                    max_age = "1d";
+                                                    repo = "/Storage/Files/Backups/Server/Borgmatic";
+                                                    # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
+                                                    cache_dir = "/var/cache/x-monitor-borg";
+                                                    require_sudo = true;
+                                                    # Unlocks this repo with borgmatic's own passphrase, read on the
+                                                    # host borg runs on. Vorta and borgmatic use different
+                                                    # passphrases, so this is per monitor rather than global, and
+                                                    # the secret never leaves the host that owns it.
+                                                    passphrase_command = "cat /run/secrets/borg_repo_encryption_key";
+                                                    source_paths = config.services.borgmatic.configurations.local.source_directories;
+                                                    exclude = config.backup-excludes.patterns;
+                                                    exclude_if_present = config.backup-excludes.markers;
+                                                    exclude_caches = false;
+                                                    allow_purge = true;
+                                                    compression = "lz4";
+                                                    archive_prefix = "backup";
+                                                    canary_path = "/Storage/Services/.vigil-canary";
+                                                    check_units = [ "borgmatic-check.service" ];
+                                                    keep_hourly = 6;
+                                                    keep_daily = 7;
+                                                    keep_weekly = 4;
+                                                    keep_monthly = 3;
+                                                    keep_yearly = 1;
+                                                    agent = "heimdall";
+                                                }
+                                                {
+                                                    name = "Ragnarok";
+                                                    id = "backup-server-ragnarok";
+                                                    type = "borg";
+                                                    interval = "1h";
+                                                    # Remote repo on the backup server, whose data pool is a single
+                                                    # USB disk (~13 MB/s): a read can take many minutes when the pool
+                                                    # is busy. Long timeout so a slow answer still counts, wide
+                                                    # interval so polls cannot stack up behind each other. The timeout stays
+                                                    # well under the interval, so a poll that runs to its
+                                                    # deadline is killed before the next one is due.
+                                                    timeout = "30m";
+                                                    max_age = "1d";
+                                                    repo = "ssh://borg@ragnarok.technet/Storage/Backups/Server/Borgmatic";
+                                                    # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
+                                                    cache_dir = "/var/cache/x-monitor-borg";
+                                                    require_sudo = true;
+                                                    # Unlocks this repo with borgmatic's own passphrase, read on the
+                                                    # host borg runs on. Vorta and borgmatic use different
+                                                    # passphrases, so this is per monitor rather than global, and
+                                                    # the secret never leaves the host that owns it.
+                                                    passphrase_command = "cat /run/secrets/borg_repo_encryption_key";
+                                                    # borg makes its OWN SSH connection to the repo server, with
+                                                    # its own identity — X-Monitor's login here does not carry over.
+                                                    # This is the host's existing borgmatic key, the same one the
+                                                    # scheduled job uses, so X-Monitor triggers the host's backup
+                                                    # rather than performing one under its own credentials.
+                                                    ssh_key = "/run/secrets/borg_repo_ssh_key";
+                                                    source_paths = config.services.borgmatic.configurations.local.source_directories;
+                                                    exclude = config.backup-excludes.patterns;
+                                                    exclude_if_present = config.backup-excludes.markers;
+                                                    exclude_caches = false;
+                                                    allow_purge = true;
+                                                    compression = "lz4";
+                                                    archive_prefix = "backup";
+                                                    canary_path = "/Storage/Services/.vigil-canary";
+                                                    check_units = [ "borgmatic-check.service" ];
+                                                    keep_hourly = 6;
+                                                    keep_daily = 7;
+                                                    keep_weekly = 4;
+                                                    keep_monthly = 3;
+                                                    keep_yearly = 1;
+                                                    agent = "heimdall";
+                                                }
+                                            ];
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Security";
+                                    id = "heimdall-security";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            # Ragnarok is the one other always-on host, so it is the vantage point for the server.
+                                            name = "Vulnerability Scan";
+                                            id = "heimdall-vuln-scan";
+                                            type = "vuln_scan";
+                                            interval = "1d";
+                                            timeout = "30m"; # A full -sV sweep with every vuln script takes a few minutes; this only bounds a host that stops answering mid-scan
+                                            scan_host = "heimdall.technet";
+                                            agent = "ragnarok";
+                                        }
+                                    ];
+                                }
+                            ];
+                        }
+                        {
+                            name = "Odin";
+                            id = "odin-host";
+                            type = "group";
+                            children = [
+                                {
+                                    name = "Availability";
+                                    id = "odin";
+                                    type = "uptime";
+                                    target_host = "odin.technet";
+                                    interval = "30s";
+                                }
+                                {
+                                    name = "System Stats";
+                                    # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
+                                    id = "odin-metrics";
+                                    type = "group";
+                                    notify."for" = "1h";
+                                    children = [
+                                        {
+                                            name = "Compute";
+                                            id = "odin-compute";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "CPU";
+                                                    id = "odin-cpu";
+                                                    type = "cpu";
+                                                    interval = "1m";
+                                                    warning = 70;
+                                                    threshold = 85;
+                                                    agent = "odin";
+                                                }
+                                                {
+                                                    name = "Load";
+                                                    id = "odin-load";
+                                                    type = "load";
+                                                    interval = "1m";
+                                                    warning = 70;
+                                                    threshold = 100;
+                                                    agent = "odin";
+                                                }
+                                                {
+                                                    name = "Temperature";
+                                                    id = "odin-temperature";
+                                                    type = "temperature";
+                                                    interval = "1m";
+                                                    warning = 95;
+                                                    threshold = 100;
+                                                    agent = "odin";
+                                                }
+                                                {
+                                                    name = "Interrupts";
+                                                    id = "odin-interrupts";
+                                                    type = "interrupts";
+                                                    interval = "1m";
+                                                    warning = 20000;
+                                                    threshold = 50000;
+                                                    agent = "odin";
+                                                }
+                                                {
+                                                    # Odin's dGPU sleeps with the laptop lid and nvidia-smi can wedge
+                                                    # uninterruptibly when it does. The module suspends its own probe
+                                                    # after `timeout_trip` timeouts rather than stranding a process per
+                                                    # cycle, and reports unavailable (not failed) while suspended.
+                                                    name = "GPU";
+                                                    id = "odin-gpu";
+                                                    type = "gpu";
+                                                    interval = "1m";
+                                                    util_warning = 85;
+                                                    util_threshold = 95;
+                                                    mem_warning = 85;
+                                                    mem_threshold = 95;
+                                                    temp_warning = 80;
+                                                    temp_threshold = 90;
+                                                    agent = "odin";
+                                                }
+                                                {
+                                                    name = "Processes";
+                                                    id = "odin-processes";
+                                                    type = "processes";
+                                                    interval = "30s";
+                                                    max_processes = 20;
+                                                    grid_col_span = 2;
+                                                    agent = "odin";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Power";
+                                            id = "odin-power";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    # Worn cells only drift over months, so a 5m sample is plenty; low charge counts only while unplugged.
+                                                    name = "Battery";
+                                                    id = "odin-battery";
+                                                    type = "power";
+                                                    interval = "5m";
+                                                    agent = "odin";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Memory";
+                                            id = "odin-memory";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Usage";
+                                                    id = "odin-memory-usage";
+                                                    type = "memory";
+                                                    interval = "1m";
+                                                    warning = 90;
+                                                    threshold = 95;
+                                                    agent = "odin";
+                                                }
+                                                {
+                                                    # An OOM kill is an event, not a level: memory is back to normal
+                                                    # before the next sample, so the usage monitor beside this one cannot
+                                                    # see it. The counter read each cycle means no kill is ever missed,
+                                                    # and over this host's agent the module also follows the kernel
+                                                    # journal, so a kill is reported the moment it happens and names the
+                                                    # process the counter can only total.
+                                                    name = "OOM Kills";
+                                                    id = "odin-oom";
+                                                    type = "oom";
+                                                    notify."for" = 0; # A kill clears within a few cycles, so the System Stats hour would never be reached
+                                                    interval = "1m";
+                                                    agent = "odin";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Storage";
+                                            id = "odin-storage";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    # Pinned so each drive has its own chart; the id stays on the root drive because that is the one auto-detect had been picking.
+                                                    name = "Disk I/O (Root)";
+                                                    id = "odin-disk-io";
+                                                    type = "disk_io";
+                                                    interval = "30s";
+                                                    device = "/dev/disk/by-id/nvme-WDC_PC_SN530_SDBPMPZ-256G-1101_22215C456623"; # root-pool-Odin
+                                                    agent = "odin";
+                                                }
+                                                {
+                                                    name = "Disk I/O (Data)";
+                                                    id = "odin-disk-io-data";
+                                                    type = "disk_io";
+                                                    interval = "30s";
+                                                    device = "/dev/disk/by-id/nvme-Corsair_MP600_MICRO_A828B42710C0GL"; # data-pool-Odin
+                                                    agent = "odin";
+                                                }
+                                                {
+                                                    # smartctl is slow and rarely changes its answer, so this reads hourly.
+                                                    name = "SMART";
+                                                    id = "odin-smart";
+                                                    type = "smart";
+                                                    interval = "1h";
+                                                    agent = "odin";
+                                                }
+                                                {
+                                                    # smartd runs the scheduled self-tests whose verdict the monitor above
+                                                    # reads. The journal tail is the point rather than the unit being
+                                                    # active: a drive's own health verdict stays PASSED through thousands
+                                                    # of reallocated sectors, and it is smartd that names the failing
+                                                    # self-test and the LBA it could not read. Nothing else surfaces that,
+                                                    # because with no MTA on the network smartd notifies by `wall`, which
+                                                    # on a headless host reaches no one.
+                                                    #
+                                                    # Polled at 5m against smartd's own 30m check cycle, so a finding
+                                                    # still surfaces promptly and a faster poll would only re-read the
+                                                    # same journal.
+                                                    name = "SMART Daemon";
+                                                    id = "odin-smartd";
+                                                    type = "systemd_service";
+                                                    interval = "5m";
+                                                    service_name = "smartd.service";
+                                                    lines = 25;
+                                                    agent = "odin";
+                                                }
+                                                {
+                                                    # A pool changes state slowly and `zpool status` walks every vdev.
+                                                    name = "ZFS";
+                                                    id = "odin-zfs";
+                                                    type = "zfs";
+                                                    interval = "1h";
+                                                    warning = 90;
+                                                    threshold = 96;
+                                                    agent = "odin";
+                                                }
+                                                {
+                                                    name = "/";
+                                                    id = "odin-disk-root";
+                                                    type = "disk_space";
+                                                    path = "/";
+                                                    threshold = 90;
+                                                    interval = "10m";
+                                                    agent = "odin";
+                                                }
+                                                {
+                                                    name = "/Storage";
+                                                    id = "odin-disk-storage";
+                                                    type = "disk_space";
+                                                    path = "/Storage";
+                                                    threshold = 90;
+                                                    interval = "10m";
+                                                    agent = "odin";
+                                                }
+                                                {
+                                                    name = "/boot";
+                                                    id = "odin-disk-boot";
+                                                    type = "disk_space";
+                                                    path = "/boot";
+                                                    threshold = 90;
+                                                    interval = "10m";
+                                                    agent = "odin";
+                                                }
+                                                {
+                                                    # Auto-discovers every mount, so it also covers filesystems not listed
+                                                    # explicitly above. Catches read-only remounts (which leave df reporting
+                                                    # healthy usage forever) and inode exhaustion.
+                                                    name = "Filesystems";
+                                                    id = "odin-filesystems";
+                                                    type = "filesystems";
+                                                    interval = "10m";
+                                                    warning = 90;
+                                                    threshold = 96;
+                                                    inode_warning = 85;
+                                                    inode_threshold = 95;
+                                                    grid_col_span = 2;
+                                                    agent = "odin";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Network";
+                                            id = "odin-network";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Throughput";
+                                                    id = "odin-throughput";
+                                                    type = "throughput";
+                                                    interval = "30s";
+                                                    agent = "odin";
+                                                }
+                                                {
+                                                    name = "Connections";
+                                                    id = "odin-connections";
+                                                    type = "connections";
+                                                    interval = "1m";
+                                                    warning = 500;
+                                                    threshold = 1000;
+                                                    agent = "odin";
+                                                }
+                                                {
+                                                    name = "WiFi";
+                                                    id = "odin-wifi";
+                                                    type = "wifi";
+                                                    interval = "1m";
+                                                    quality_warning = 40;
+                                                    quality_threshold = 20;
+                                                    agent = "odin";
+                                                }
+                                            ];
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Running Services";
+                                    # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
+                                    id = "odin-services";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Networking";
+                                            id = "odin-svc-networking";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "odin-networking";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "NetworkManager.service";
+                                                    agent = "odin";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Bluetooth";
+                                            id = "odin-svc-bluetooth";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "local-bluetooth";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "bluetooth.service";
+                                                    agent = "odin";
+                                                }
+                                            ];
+                                        }
+                                    ];
+                                }
+                                {
+                                    # Odin (the laptop) owns /Storage. Vorta and borgmatic each keep their
+                                    # own repo set, so both appear here.
+                                    name = "Backups";
+                                    # Explicit id: a group id defaults to its name and both backed-up hosts have this group, so they would share one key.
+                                    id = "backups-odin";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Vorta";
+                                            id = "backups-odin-vorta";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    # Odin's local Vorta repo has no "Laptop/" segment — that layout
+                                                    # is Heimdall's, where the laptop's repo sits alongside the server's.
+                                                    name = "On Disk";
+                                                    id = "backup-laptop-on-disk";
+                                                    type = "borg";
+                                                    interval = "1h";
+                                                    # Vorta starts this profile at :10 (vorta.nix), so polls stay 30 minutes clear of it.
+                                                    offset = "40m";
+                                                    # Local repo — no second SSH hop, so this answers far faster than
+                                                    # the pushed copies.
+                                                    timeout = "5m";
+                                                    max_age = "1d";
+                                                    repo = "/Storage/Files/Backups/Laptop/Vorta";
+                                                    # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
+                                                    cache_dir = "/var/cache/x-monitor-borg";
+                                                    require_sudo = true;
+                                                    # Unlocks this repo with Vorta's own passphrase, read on the
+                                                    # host borg runs on. Vorta and borgmatic use different
+                                                    # passphrases, so this is per monitor rather than global, and
+                                                    # the secret never leaves the host that owns it.
+                                                    passphrase_command = "cat /run/secrets/vorta_backup_passphrase";
+                                                    source_paths = [
+                                                        "/Storage"
+                                                    ];
+                                                    exclude = config.backup-excludes.patterns ++ [ "pf:/Storage/System" ];
+                                                    exclude_if_present = config.backup-excludes.markers;
+                                                    exclude_caches = false;
+                                                    allow_purge = true;
+                                                    compression = "lz4";
+                                                    archive_prefix = "odin";
+                                                    canary_path = "/Storage/Files/.vigil-canary";
+                                                    prune_match = "Odin-*";
+                                                    keep_within = "6H";
+                                                    keep_hourly = 12;
+                                                    keep_daily = 3;
+                                                    agent = "odin";
+                                                }
+                                                {
+                                                    # Vorta profile "2. Heimdall Backup".
+                                                    name = "Heimdall";
+                                                    id = "backup-laptop-heimdall";
+                                                    type = "borg";
+                                                    interval = "1h";
+                                                    # Vorta starts this profile at :15 (vorta.nix), so polls stay 30 minutes clear of it.
+                                                    offset = "45m";
+                                                    # Remote repo on the backup server, whose data pool is a single
+                                                    # USB disk (~13 MB/s): a read can take many minutes when the pool
+                                                    # is busy. Long timeout so a slow answer still counts, wide
+                                                    # interval so polls cannot stack up behind each other. The timeout stays
+                                                    # well under the interval, so a poll that runs to its
+                                                    # deadline is killed before the next one is due.
+                                                    timeout = "30m";
+                                                    max_age = "1d";
+                                                    repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Vorta";
+                                                    # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
+                                                    cache_dir = "/var/cache/x-monitor-borg";
+                                                    require_sudo = true;
+                                                    # Unlocks this repo with Vorta's own passphrase, read on the
+                                                    # host borg runs on. Vorta and borgmatic use different
+                                                    # passphrases, so this is per monitor rather than global, and
+                                                    # the secret never leaves the host that owns it.
+                                                    passphrase_command = "cat /run/secrets/vorta_backup_passphrase";
+                                                    # borg makes its OWN SSH connection to the repo server, with
+                                                    # its own identity — X-Monitor's login here does not carry over.
+                                                    # This is Odin's existing Vorta repo key, the same one Vorta
+                                                    # authenticates with, so X-Monitor triggers the host's backup
+                                                    # rather than performing one under its own credentials.
+                                                    ssh_key = "/run/secrets/vorta_ssh_key";
+                                                    source_paths = [
+                                                        "/Storage"
+                                                    ];
+                                                    exclude = config.backup-excludes.patterns ++ [ "pf:/Storage/System" ];
+                                                    exclude_if_present = config.backup-excludes.markers;
+                                                    exclude_caches = false;
+                                                    allow_purge = true;
+                                                    compression = "lz4";
+                                                    archive_prefix = "odin";
+                                                    canary_path = "/Storage/Files/.vigil-canary";
+                                                    prune_match = "Odin-*";
+                                                    keep_within = "6H";
+                                                    keep_hourly = 12;
+                                                    keep_daily = 3;
+                                                    agent = "odin";
+                                                }
+                                                {
+                                                    # Vorta profile "3. Ragnarok Backup" — the long-term copy.
+                                                    name = "Ragnarok";
+                                                    id = "backup-laptop-ragnarok";
+                                                    type = "borg";
+                                                    interval = "1h";
+                                                    # Vorta starts this profile at :20 (vorta.nix), so polls stay 30 minutes clear of it.
+                                                    offset = "50m";
+                                                    # Remote repo on the backup server, whose data pool is a single
+                                                    # USB disk (~13 MB/s): a read can take many minutes when the pool
+                                                    # is busy. Long timeout so a slow answer still counts, wide
+                                                    # interval so polls cannot stack up behind each other. The timeout stays
+                                                    # well under the interval, so a poll that runs to its
+                                                    # deadline is killed before the next one is due.
+                                                    timeout = "30m";
+                                                    max_age = "1d";
+                                                    repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Vorta";
+                                                    # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
+                                                    cache_dir = "/var/cache/x-monitor-borg";
+                                                    require_sudo = true;
+                                                    # Unlocks this repo with Vorta's own passphrase, read on the
+                                                    # host borg runs on. Vorta and borgmatic use different
+                                                    # passphrases, so this is per monitor rather than global, and
+                                                    # the secret never leaves the host that owns it.
+                                                    passphrase_command = "cat /run/secrets/vorta_backup_passphrase";
+                                                    # borg makes its OWN SSH connection to the repo server, with
+                                                    # its own identity — X-Monitor's login here does not carry over.
+                                                    # This is Odin's existing Vorta repo key, the same one Vorta
+                                                    # authenticates with, so X-Monitor triggers the host's backup
+                                                    # rather than performing one under its own credentials.
+                                                    ssh_key = "/run/secrets/vorta_ssh_key";
+                                                    source_paths = [
+                                                        "/Storage"
+                                                    ];
+                                                    exclude = config.backup-excludes.patterns ++ [ "pf:/Storage/System" ];
+                                                    exclude_if_present = config.backup-excludes.markers;
+                                                    exclude_caches = false;
+                                                    allow_purge = true;
+                                                    compression = "lz4";
+                                                    archive_prefix = "odin";
+                                                    canary_path = "/Storage/Files/.vigil-canary";
+                                                    prune_match = "Odin-*";
+                                                    keep_within = "6H";
+                                                    keep_hourly = 24;
+                                                    keep_daily = 30;
+                                                    keep_weekly = 8;
+                                                    keep_monthly = 24;
+                                                    keep_yearly = 3;
+                                                    agent = "odin";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Borgmatic";
+                                            # Explicit id: without one it defaults to the name and both host groups have a "Borgmatic" child,
+                                            # so both would write status under the same key.
+                                            id = "backups-odin-borgmatic";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "On Disk";
+                                                    id = "backup-laptop-borgmatic-on-disk";
+                                                    type = "borg";
+                                                    interval = "15m";
+                                                    # Local repo — no second SSH hop, so this answers far faster than
+                                                    # the pushed copies.
+                                                    timeout = "5m";
+                                                    max_age = "1d";
+                                                    repo = "/Storage/Files/Backups/Laptop/Borgmatic";
+                                                    # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
+                                                    cache_dir = "/var/cache/x-monitor-borg";
+                                                    require_sudo = true;
+                                                    # Unlocks this repo with borgmatic's own passphrase, read on the
+                                                    # host borg runs on. Vorta and borgmatic use different
+                                                    # passphrases, so this is per monitor rather than global, and
+                                                    # the secret never leaves the host that owns it.
+                                                    passphrase_command = "cat /run/secrets/borg_repo_encryption_key";
+                                                    source_paths = [
+                                                        "/Storage/System"
+                                                    ];
+                                                    exclude = config.backup-excludes.patterns;
+                                                    exclude_if_present = config.backup-excludes.markers;
+                                                    exclude_caches = false;
+                                                    allow_purge = true;
+                                                    compression = "lz4";
+                                                    archive_prefix = "backup";
+                                                    canary_path = "/Storage/System/.vigil-canary";
+                                                    check_units = [
+                                                        "borgmatic-check.service"
+                                                        "borgmatic-check-data.service"
+                                                    ];
+                                                    check_max_age = "9d";
+                                                    keep_hourly = 24;
+                                                    keep_daily = 7;
+                                                    keep_weekly = 4;
+                                                    keep_monthly = 12;
+                                                    keep_yearly = 3;
+                                                    agent = "odin";
+                                                }
+                                                {
+                                                    name = "Heimdall";
+                                                    id = "backup-laptop-borgmatic-heimdall";
+                                                    type = "borg";
+                                                    interval = "1h";
+                                                    # Remote repo on the backup server, whose data pool is a single
+                                                    # USB disk (~13 MB/s): a read can take many minutes when the pool
+                                                    # is busy. Long timeout so a slow answer still counts, wide
+                                                    # interval so polls cannot stack up behind each other. The timeout stays
+                                                    # well under the interval, so a poll that runs to its
+                                                    # deadline is killed before the next one is due.
+                                                    timeout = "30m";
+                                                    max_age = "1d";
+                                                    repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Borgmatic";
+                                                    # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
+                                                    cache_dir = "/var/cache/x-monitor-borg";
+                                                    require_sudo = true;
+                                                    # Unlocks this repo with borgmatic's own passphrase, read on the
+                                                    # host borg runs on. Vorta and borgmatic use different
+                                                    # passphrases, so this is per monitor rather than global, and
+                                                    # the secret never leaves the host that owns it.
+                                                    passphrase_command = "cat /run/secrets/borg_repo_encryption_key";
+                                                    # borg makes its OWN SSH connection to the repo server, with
+                                                    # its own identity — X-Monitor's login here does not carry over.
+                                                    # This is the host's existing borgmatic key, the same one the
+                                                    # scheduled job uses, so X-Monitor triggers the host's backup
+                                                    # rather than performing one under its own credentials.
+                                                    ssh_key = "/run/secrets/borg_repo_ssh_key";
+                                                    source_paths = [
+                                                        "/Storage/System"
+                                                    ];
+                                                    exclude = config.backup-excludes.patterns;
+                                                    exclude_if_present = config.backup-excludes.markers;
+                                                    exclude_caches = false;
+                                                    allow_purge = true;
+                                                    compression = "lz4";
+                                                    archive_prefix = "backup";
+                                                    canary_path = "/Storage/System/.vigil-canary";
+                                                    check_units = [
+                                                        "borgmatic-check.service"
+                                                        "borgmatic-check-data.service"
+                                                    ];
+                                                    check_max_age = "9d";
+                                                    keep_hourly = 24;
+                                                    keep_daily = 7;
+                                                    keep_weekly = 4;
+                                                    keep_monthly = 12;
+                                                    keep_yearly = 3;
+                                                    agent = "odin";
+                                                }
+                                                {
+                                                    name = "Ragnarok";
+                                                    id = "backup-laptop-borgmatic-ragnarok";
+                                                    type = "borg";
+                                                    interval = "1h";
+                                                    # Remote repo on the backup server, whose data pool is a single
+                                                    # USB disk (~13 MB/s): a read can take many minutes when the pool
+                                                    # is busy. Long timeout so a slow answer still counts, wide
+                                                    # interval so polls cannot stack up behind each other. The timeout stays
+                                                    # well under the interval, so a poll that runs to its
+                                                    # deadline is killed before the next one is due.
+                                                    timeout = "30m";
+                                                    max_age = "1d";
+                                                    repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Borgmatic";
+                                                    # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
+                                                    cache_dir = "/var/cache/x-monitor-borg";
+                                                    require_sudo = true;
+                                                    # Unlocks this repo with borgmatic's own passphrase, read on the
+                                                    # host borg runs on. Vorta and borgmatic use different
+                                                    # passphrases, so this is per monitor rather than global, and
+                                                    # the secret never leaves the host that owns it.
+                                                    passphrase_command = "cat /run/secrets/borg_repo_encryption_key";
+                                                    # borg makes its OWN SSH connection to the repo server, with
+                                                    # its own identity — X-Monitor's login here does not carry over.
+                                                    # This is the host's existing borgmatic key, the same one the
+                                                    # scheduled job uses, so X-Monitor triggers the host's backup
+                                                    # rather than performing one under its own credentials.
+                                                    ssh_key = "/run/secrets/borg_repo_ssh_key";
+                                                    source_paths = [
+                                                        "/Storage/System"
+                                                    ];
+                                                    exclude = config.backup-excludes.patterns;
+                                                    exclude_if_present = config.backup-excludes.markers;
+                                                    exclude_caches = false;
+                                                    allow_purge = true;
+                                                    compression = "lz4";
+                                                    archive_prefix = "backup";
+                                                    canary_path = "/Storage/System/.vigil-canary";
+                                                    check_units = [
+                                                        "borgmatic-check.service"
+                                                        "borgmatic-check-data.service"
+                                                    ];
+                                                    check_max_age = "9d";
+                                                    keep_hourly = 24;
+                                                    keep_daily = 7;
+                                                    keep_weekly = 4;
+                                                    keep_monthly = 12;
+                                                    keep_yearly = 3;
+                                                    agent = "odin";
+                                                }
+                                            ];
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Security";
+                                    id = "odin-security";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            name = "Vulnerability Scan";
+                                            id = "odin-vuln-scan";
+                                            type = "vuln_scan";
+                                            interval = "1d";
+                                            timeout = "30m"; # A full -sV sweep with every vuln script takes a few minutes; this only bounds a host that stops answering mid-scan
+                                            scan_host = "odin.technet";
                                             agent = "heimdall";
                                         }
                                     ];
@@ -1654,94 +2392,390 @@ in
                             ];
                         }
                         {
-                            # Heimdall (the server) owns /Storage/Services, backed up by borgmatic
-                            # only — there is no Vorta on the server.
-                            name = "Backups";
-                            # Explicit id: a group id defaults to its name and both backed-up hosts have this group, so they would share one key.
-                            id = "backups-heimdall";
+                            name = "Thor";
+                            id = "thor-host";
                             type = "group";
                             children = [
                                 {
-                                    name = "Borgmatic";
-                                    id = "backups-heimdall-borgmatic";
+                                    name = "Availability";
+                                    id = "thor";
+                                    type = "uptime";
+                                    target_host = "thor.technet";
+                                }
+                                {
+                                    name = "System Stats";
+                                    # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
+                                    id = "thor-metrics";
+                                    type = "group";
+                                    notify."for" = "1h";
+                                    children = [
+                                        {
+                                            name = "Compute";
+                                            id = "thor-compute";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "CPU";
+                                                    id = "thor-cpu";
+                                                    type = "cpu";
+                                                    interval = "1m";
+                                                    warning = 70;
+                                                    threshold = 85;
+                                                    agent = "thor";
+                                                }
+                                                {
+                                                    # Deliberately thresholdless: four 1.15GHz A53s reach capacity under any sustained work, and the phone's own load says nothing about whether it is healthy.
+                                                    name = "Load";
+                                                    id = "thor-load";
+                                                    type = "load";
+                                                    interval = "1m";
+                                                    agent = "thor";
+                                                }
+                                                {
+                                                    # The kernel's own trip points, with the passive one raised to 80C by 5-phone/1-system/performance.nix: warn where the A64 throttles, fail where it calls itself hot.
+                                                    name = "Temperature";
+                                                    id = "thor-temperature";
+                                                    type = "temperature";
+                                                    interval = "1m";
+                                                    warning = 80;
+                                                    threshold = 90;
+                                                    agent = "thor";
+                                                }
+                                                {
+                                                    # The SD card sustains about 35k/s under load, so the fleet's 20k/50k would sit warning whenever the phone is busy at all.
+                                                    name = "Interrupts";
+                                                    id = "thor-interrupts";
+                                                    type = "interrupts";
+                                                    interval = "1m";
+                                                    warning = 50000;
+                                                    threshold = 100000;
+                                                    agent = "thor";
+                                                }
+                                                {
+                                                    # ps over 600 processes is the most expensive sample the agent takes here, so it runs at a tenth of Odin's rate.
+                                                    name = "Processes";
+                                                    id = "thor-processes";
+                                                    type = "processes";
+                                                    interval = "5m";
+                                                    max_processes = 20;
+                                                    grid_col_span = 2;
+                                                    agent = "thor";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            # A phone that is merely low on charge is on its way to being a phone that is not there.
+                                            name = "Power";
+                                            id = "thor-power";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    # Charge thresholds are upower's own percentageLow and percentageCritical from 5-phone/1-system/power.nix, so X-Monitor warns exactly when the phone does; the keyboard case's USB feed counts as plugged in.
+                                                    name = "Battery";
+                                                    id = "thor-battery";
+                                                    type = "power";
+                                                    interval = "5m";
+                                                    battery = "axp20x-battery";
+                                                    charge_warning = 20;
+                                                    charge_threshold = 10;
+                                                    agent = "thor";
+                                                }
+                                                {
+                                                    # The keyboard case's own cell, which reads plugged in only while its own charger is attached; it reads unavailable while the case is off.
+                                                    name = "Keyboard Battery";
+                                                    id = "thor-keyboard-battery";
+                                                    type = "power";
+                                                    interval = "5m";
+                                                    battery = "ip5xxx-battery";
+                                                    agent = "thor";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Memory";
+                                            id = "thor-memory";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    # 3GB behind a 1.5GB ARC ceiling: unavailable memory sits high here by design, so the fleet's 90/95 would warn on a healthy phone.
+                                                    name = "Usage";
+                                                    id = "thor-memory-usage";
+                                                    type = "memory";
+                                                    interval = "1m";
+                                                    warning = 93;
+                                                    threshold = 97;
+                                                    agent = "thor";
+                                                }
+                                                {
+                                                    # An OOM kill is an event rather than a level, so the usage monitor beside this one reads normal again before it can see it.
+                                                    name = "OOM Kills";
+                                                    id = "thor-oom";
+                                                    type = "oom";
+                                                    notify."for" = 0; # A kill clears within a few cycles, so the System Stats hour would never be reached
+                                                    interval = "1m";
+                                                    agent = "thor";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Storage";
+                                            id = "thor-storage";
+                                            type = "group";
+                                            # No SMART pair here: the eMMC and the SD card expose none, which is why 5-phone/1-system/hardware-configuration.nix disables smartd outright.
+                                            children = [
+                                                {
+                                                    # Pinned like the other hosts; the id stays on the eMMC because that is the one auto-detect had been charting. mmcblk1 is absent:
+                                                    # the numbering follows the controllers, not the slots, so the SD card is mmcblk0 and the internal eMMC is mmcblk2.
+                                                    name = "Disk I/O (Root)";
+                                                    id = "thor-disk-io";
+                                                    type = "disk_io";
+                                                    interval = "1m";
+                                                    device = "/dev/disk/by-id/mmc-ASTCXX_0xd1002721"; # 32GB eMMC, root-pool-Thor and /boot
+                                                    agent = "thor";
+                                                }
+                                                {
+                                                    name = "Disk I/O (Data)";
+                                                    id = "thor-disk-io-data";
+                                                    type = "disk_io";
+                                                    interval = "1m";
+                                                    device = "/dev/disk/by-id/mmc-SN01T_0x8ade202e"; # 1TB SD card, data-pool-Thor
+                                                    agent = "thor";
+                                                }
+                                                {
+                                                    # Both containers here are btrfs: the eMMC root and the SD card. The verdict is the per-device error counters btrfs keeps in the
+                                                    # filesystem itself, since it publishes no pool health word -- and unlike the SMART pair, these counters exist on media that has none.
+                                                    name = "Btrfs";
+                                                    id = "thor-btrfs";
+                                                    type = "btrfs";
+                                                    interval = "10m";
+                                                    warning = 90;
+                                                    threshold = 96;
+                                                    agent = "thor";
+                                                }
+                                                {
+                                                    name = "/";
+                                                    id = "thor-disk-root";
+                                                    type = "disk_space";
+                                                    path = "/";
+                                                    threshold = 90;
+                                                    interval = "10m";
+                                                    agent = "thor";
+                                                }
+                                                {
+                                                    name = "/Storage";
+                                                    id = "thor-disk-storage";
+                                                    type = "disk_space";
+                                                    path = "/Storage";
+                                                    threshold = 90;
+                                                    interval = "10m";
+                                                    agent = "thor";
+                                                }
+                                                {
+                                                    name = "/boot";
+                                                    id = "thor-disk-boot";
+                                                    type = "disk_space";
+                                                    path = "/boot";
+                                                    threshold = 90;
+                                                    interval = "10m";
+                                                    agent = "thor";
+                                                }
+                                                {
+                                                    # Auto-discovers every mount, so it also covers the removable card going read-only, which df alone reports as healthy usage forever.
+                                                    name = "Filesystems";
+                                                    id = "thor-filesystems";
+                                                    type = "filesystems";
+                                                    interval = "10m";
+                                                    warning = 90;
+                                                    threshold = 96;
+                                                    inode_warning = 85;
+                                                    inode_threshold = 95;
+                                                    grid_col_span = 2;
+                                                    agent = "thor";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Network";
+                                            id = "thor-network";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Throughput";
+                                                    id = "thor-throughput";
+                                                    type = "throughput";
+                                                    interval = "1m";
+                                                    agent = "thor";
+                                                }
+                                                {
+                                                    # A phone holds a handful of sockets, not a server's hundreds, so the counts that mean something here are far lower than Odin's.
+                                                    name = "Connections";
+                                                    id = "thor-connections";
+                                                    type = "connections";
+                                                    interval = "1m";
+                                                    warning = 200;
+                                                    threshold = 500;
+                                                    agent = "thor";
+                                                }
+                                                {
+                                                    name = "WiFi";
+                                                    id = "thor-wifi";
+                                                    type = "wifi";
+                                                    interval = "1m";
+                                                    quality_warning = 40;
+                                                    quality_threshold = 20;
+                                                    agent = "thor";
+                                                }
+                                            ];
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Running Services";
+                                    # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
+                                    id = "thor-services";
                                     type = "group";
                                     children = [
                                         {
-                                            name = "On Disk";
-                                            id = "backup-server-on-disk";
-                                            type = "borg";
-                                            interval = "15m";
-                                            # Local repo — no second SSH hop, so this answers far faster than
-                                            # the pushed copies.
-                                            timeout = "5m";
-                                            max_age = "1d";
-                                            repo = "/Storage/Files/Backups/Server/Borgmatic";
-                                            # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
-                                            cache_dir = "/var/cache/x-monitor-borg";
-                                            require_sudo = true;
-                                            # Unlocks this repo with borgmatic's own passphrase, read on the
-                                            # host borg runs on. Vorta and borgmatic use different
-                                            # passphrases, so this is per monitor rather than global, and
-                                            # the secret never leaves the host that owns it.
-                                            passphrase_command = "cat /run/secrets/borg_repo_encryption_key";
-                                            source_paths = config.services.borgmatic.configurations.local.source_directories;
-                                            exclude = config.backup-excludes.patterns;
-                                            exclude_if_present = config.backup-excludes.markers;
-                                            exclude_caches = false;
-                                            allow_purge = true;
-                                            compression = "lz4";
-                                            archive_prefix = "backup";
-                                            canary_path = "/Storage/Services/.vigil-canary";
-                                            check_units = [ "borgmatic-check.service" ];
-                                            keep_hourly = 6;
-                                            keep_daily = 7;
-                                            keep_weekly = 4;
-                                            keep_monthly = 3;
-                                            keep_yearly = 1;
+                                            name = "Phosh";
+                                            id = "thor-svc-phosh";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    # A switch stops phosh and does not reliably bring it back, which leaves the phone dark with nothing on the device itself left to say so.
+                                                    name = "Service";
+                                                    id = "thor-phosh";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "phosh.service";
+                                                    agent = "thor";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Networking";
+                                            id = "thor-svc-networking";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "thor-networking";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "NetworkManager.service";
+                                                    agent = "thor";
+                                                }
+                                                {
+                                                    # The tunnel carries Thor's DNS and, on mobile data, its whole default route; NetworkManager cannot see a WireGuard session die, so this watchdog is what does.
+                                                    name = "WireGuard Watchdog";
+                                                    id = "thor-wireguard-watchdog";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "wireguard-watchdog.service";
+                                                    agent = "thor";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Modem";
+                                            id = "thor-svc-modem";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "thor-modemmanager";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "ModemManager.service";
+                                                    agent = "thor";
+                                                }
+                                                {
+                                                    # eg25-manager owns the EG25-G's power and reset lines, so ModemManager finding no modem at all starts here rather than there.
+                                                    name = "Power Control";
+                                                    id = "thor-eg25-manager";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "eg25-manager.service";
+                                                    agent = "thor";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Bluetooth";
+                                            id = "thor-svc-bluetooth";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    name = "Service";
+                                                    id = "thor-bluetooth";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "bluetooth.service";
+                                                    agent = "thor";
+                                                }
+                                            ];
+                                        }
+                                        {
+                                            name = "Charging";
+                                            id = "thor-svc-charging";
+                                            type = "group";
+                                            children = [
+                                                {
+                                                    # chargectl holds the cell in the 75-80% maintain band; with it stopped the phone charges to full and stays there, which is the slow way to lose a battery.
+                                                    name = "Service";
+                                                    id = "thor-chargectl";
+                                                    type = "systemd_service";
+                                                    interval = "1m";
+                                                    service_name = "chargectl.service";
+                                                    agent = "thor";
+                                                }
+                                            ];
+                                        }
+                                    ];
+                                }
+                                {
+                                    name = "Security";
+                                    id = "thor-security";
+                                    type = "group";
+                                    children = [
+                                        {
+                                            # Offline whenever the phone is asleep; a day's interval means it catches the next wake.
+                                            name = "Vulnerability Scan";
+                                            id = "thor-vuln-scan";
+                                            type = "vuln_scan";
+                                            interval = "1d";
+                                            timeout = "30m"; # A full -sV sweep with every vuln script takes a few minutes; this only bounds a host that stops answering mid-scan
+                                            scan_host = "thor.technet";
                                             agent = "heimdall";
                                         }
+                                    ];
+                                }
+                            ];
+                        }
+                        {
+                            # The Android phone, configured on the device rather than from here, so reachability is the whole of what X-Monitor can see.
+                            name = "ThorX";
+                            id = "thorx-host";
+                            type = "group";
+                            children = [
+                                {
+                                    name = "Availability";
+                                    id = "thorx";
+                                    type = "uptime";
+                                    target_host = "thorx.technet";
+                                }
+                                {
+                                    name = "Security";
+                                    id = "thorx-security";
+                                    type = "group";
+                                    children = [
                                         {
-                                            name = "Ragnarok";
-                                            id = "backup-server-ragnarok";
-                                            type = "borg";
-                                            interval = "1h";
-                                            # Remote repo on the backup server, whose data pool is a single
-                                            # USB disk (~13 MB/s): a read can take many minutes when the pool
-                                            # is busy. Long timeout so a slow answer still counts, wide
-                                            # interval so polls cannot stack up behind each other. The timeout stays
-                                            # well under the interval, so a poll that runs to its
-                                            # deadline is killed before the next one is due.
-                                            timeout = "30m";
-                                            max_age = "1d";
-                                            repo = "ssh://borg@ragnarok.technet/Storage/Backups/Server/Borgmatic";
-                                            # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
-                                            cache_dir = "/var/cache/x-monitor-borg";
-                                            require_sudo = true;
-                                            # Unlocks this repo with borgmatic's own passphrase, read on the
-                                            # host borg runs on. Vorta and borgmatic use different
-                                            # passphrases, so this is per monitor rather than global, and
-                                            # the secret never leaves the host that owns it.
-                                            passphrase_command = "cat /run/secrets/borg_repo_encryption_key";
-                                            # borg makes its OWN SSH connection to the repo server, with
-                                            # its own identity — X-Monitor's login here does not carry over.
-                                            # This is the host's existing borgmatic key, the same one the
-                                            # scheduled job uses, so X-Monitor triggers the host's backup
-                                            # rather than performing one under its own credentials.
-                                            ssh_key = "/run/secrets/borg_repo_ssh_key";
-                                            source_paths = config.services.borgmatic.configurations.local.source_directories;
-                                            exclude = config.backup-excludes.patterns;
-                                            exclude_if_present = config.backup-excludes.markers;
-                                            exclude_caches = false;
-                                            allow_purge = true;
-                                            compression = "lz4";
-                                            archive_prefix = "backup";
-                                            canary_path = "/Storage/Services/.vigil-canary";
-                                            check_units = [ "borgmatic-check.service" ];
-                                            keep_hourly = 6;
-                                            keep_daily = 7;
-                                            keep_weekly = 4;
-                                            keep_monthly = 3;
-                                            keep_yearly = 1;
+                                            # Nothing runs on the Android phone, so the exposed ports are the whole of what can be checked.
+                                            name = "Vulnerability Scan";
+                                            id = "thorx-vuln-scan";
+                                            type = "vuln_scan";
+                                            interval = "1d";
+                                            timeout = "30m"; # A full -sV sweep with every vuln script takes a few minutes; this only bounds a host that stops answering mid-scan
+                                            scan_host = "thorx.technet";
                                             agent = "heimdall";
                                         }
                                     ];
@@ -1749,1110 +2783,87 @@ in
                             ];
                         }
                         {
-                            name = "Security";
-                            id = "heimdall-security";
+                            name = "IoT Sensors";
                             type = "group";
                             children = [
                                 {
-                                    # Ragnarok is the one other always-on host, so it is the vantage point for the server.
-                                    name = "Vulnerability Scan";
-                                    id = "heimdall-vuln-scan";
-                                    type = "vuln_scan";
-                                    interval = "1d";
-                                    timeout = "30m"; # A full -sV sweep with every vuln script takes a few minutes; this only bounds a host that stops answering mid-scan
-                                    scan_host = "heimdall.technet";
-                                    agent = "ragnarok";
+                                    name = "Bedroom Light";
+                                    id = "bedroom-light";
+                                    type = "uptime";
+                                    target_host = "light-bedroom.technet";
+                                }
+                                {
+                                    name = "Bedroom Desk Light";
+                                    id = "bedroom-desk-light";
+                                    type = "uptime";
+                                    target_host = "light-bedroom-desk.technet";
+                                }
+                                {
+                                    name = "Kitchen Light";
+                                    id = "kitchen-light";
+                                    type = "uptime";
+                                    target_host = "light-kitchen.technet";
+                                }
+                                {
+                                    name = "Bathroom Light";
+                                    id = "bathroom-light";
+                                    type = "uptime";
+                                    target_host = "light-bathroom.technet";
+                                }
+                                {
+                                    name = "Outside Light";
+                                    id = "outside-light";
+                                    type = "uptime";
+                                    target_host = "light-outside.technet";
+                                }
+                                {
+                                    name = "Fan Socket";
+                                    id = "fan-socket";
+                                    type = "uptime";
+                                    target_host = "socket-fan.technet";
+                                }
+                                {
+                                    name = "Ragnarok Socket";
+                                    id = "ragnarok-socket";
+                                    type = "uptime";
+                                    target_host = "socket-ragnarok.technet";
+                                }
+                                {
+                                    name = "Fan IR";
+                                    id = "fan-ir";
+                                    type = "uptime";
+                                    target_host = "ir-fan.technet";
+                                }
+                                {
+                                    name = "Bedroom Sensor";
+                                    id = "bedroom-sensor";
+                                    type = "uptime";
+                                    target_host = "sensor-bedroom.technet";
+                                }
+                                {
+                                    name = "Bathroom Sensor";
+                                    id = "bathroom-sensor";
+                                    type = "uptime";
+                                    target_host = "sensor-bathroom.technet";
                                 }
                             ];
                         }
                     ];
-                }
-                {
-                    name = "Odin";
-                    id = "odin-host";
-                    type = "group";
-                    children = [
-                        {
-                            name = "Availability";
-                            id = "odin";
-                            type = "uptime";
-                            target_host = "odin.technet";
-                            interval = "30s";
-                        }
-                        {
-                            name = "System Stats";
-                            # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
-                            id = "odin-metrics";
-                            type = "group";
-                            notify."for" = "1h";
-                            children = [
-                                {
-                                    name = "Compute";
-                                    id = "odin-compute";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "CPU";
-                                            id = "odin-cpu";
-                                            type = "cpu";
-                                            interval = "1m";
-                                            warning = 70;
-                                            threshold = 85;
-                                            agent = "odin";
-                                        }
-                                        {
-                                            name = "Load";
-                                            id = "odin-load";
-                                            type = "load";
-                                            interval = "1m";
-                                            warning = 70;
-                                            threshold = 100;
-                                            agent = "odin";
-                                        }
-                                        {
-                                            name = "Temperature";
-                                            id = "odin-temperature";
-                                            type = "temperature";
-                                            interval = "1m";
-                                            warning = 95;
-                                            threshold = 100;
-                                            agent = "odin";
-                                        }
-                                        {
-                                            name = "Interrupts";
-                                            id = "odin-interrupts";
-                                            type = "interrupts";
-                                            interval = "1m";
-                                            warning = 20000;
-                                            threshold = 50000;
-                                            agent = "odin";
-                                        }
-                                        {
-                                            # Odin's dGPU sleeps with the laptop lid and nvidia-smi can wedge
-                                            # uninterruptibly when it does. The module suspends its own probe
-                                            # after `timeout_trip` timeouts rather than stranding a process per
-                                            # cycle, and reports unavailable (not failed) while suspended.
-                                            name = "GPU";
-                                            id = "odin-gpu";
-                                            type = "gpu";
-                                            interval = "1m";
-                                            util_warning = 85;
-                                            util_threshold = 95;
-                                            mem_warning = 85;
-                                            mem_threshold = 95;
-                                            temp_warning = 80;
-                                            temp_threshold = 90;
-                                            agent = "odin";
-                                        }
-                                        {
-                                            name = "Processes";
-                                            id = "odin-processes";
-                                            type = "processes";
-                                            interval = "30s";
-                                            max_processes = 20;
-                                            grid_col_span = 2;
-                                            agent = "odin";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Power";
-                                    id = "odin-power";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            # Worn cells only drift over months, so a 5m sample is plenty; low charge counts only while unplugged.
-                                            name = "Battery";
-                                            id = "odin-battery";
-                                            type = "power";
-                                            interval = "5m";
-                                            agent = "odin";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Memory";
-                                    id = "odin-memory";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Usage";
-                                            id = "odin-memory-usage";
-                                            type = "memory";
-                                            interval = "1m";
-                                            warning = 90;
-                                            threshold = 95;
-                                            agent = "odin";
-                                        }
-                                        {
-                                            # An OOM kill is an event, not a level: memory is back to normal
-                                            # before the next sample, so the usage monitor beside this one cannot
-                                            # see it. The counter read each cycle means no kill is ever missed,
-                                            # and over this host's agent the module also follows the kernel
-                                            # journal, so a kill is reported the moment it happens and names the
-                                            # process the counter can only total.
-                                            name = "OOM Kills";
-                                            id = "odin-oom";
-                                            type = "oom";
-                                            notify."for" = 0; # A kill clears within a few cycles, so the System Stats hour would never be reached
-                                            interval = "1m";
-                                            agent = "odin";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Storage";
-                                    id = "odin-storage";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            # Pinned so each drive has its own chart; the id stays on the root drive because that is the one auto-detect had been picking.
-                                            name = "Disk I/O (Root)";
-                                            id = "odin-disk-io";
-                                            type = "disk_io";
-                                            interval = "30s";
-                                            device = "/dev/disk/by-id/nvme-WDC_PC_SN530_SDBPMPZ-256G-1101_22215C456623"; # root-pool-Odin
-                                            agent = "odin";
-                                        }
-                                        {
-                                            name = "Disk I/O (Data)";
-                                            id = "odin-disk-io-data";
-                                            type = "disk_io";
-                                            interval = "30s";
-                                            device = "/dev/disk/by-id/nvme-Corsair_MP600_MICRO_A828B42710C0GL"; # data-pool-Odin
-                                            agent = "odin";
-                                        }
-                                        {
-                                            # smartctl is slow and rarely changes its answer, so this reads hourly.
-                                            name = "SMART";
-                                            id = "odin-smart";
-                                            type = "smart";
-                                            interval = "1h";
-                                            agent = "odin";
-                                        }
-                                        {
-                                            # smartd runs the scheduled self-tests whose verdict the monitor above
-                                            # reads. The journal tail is the point rather than the unit being
-                                            # active: a drive's own health verdict stays PASSED through thousands
-                                            # of reallocated sectors, and it is smartd that names the failing
-                                            # self-test and the LBA it could not read. Nothing else surfaces that,
-                                            # because with no MTA on the network smartd notifies by `wall`, which
-                                            # on a headless host reaches no one.
-                                            #
-                                            # Polled at 5m against smartd's own 30m check cycle, so a finding
-                                            # still surfaces promptly and a faster poll would only re-read the
-                                            # same journal.
-                                            name = "SMART Daemon";
-                                            id = "odin-smartd";
-                                            type = "systemd_service";
-                                            interval = "5m";
-                                            service_name = "smartd.service";
-                                            lines = 25;
-                                            agent = "odin";
-                                        }
-                                        {
-                                            # A pool changes state slowly and `zpool status` walks every vdev.
-                                            name = "ZFS";
-                                            id = "odin-zfs";
-                                            type = "zfs";
-                                            interval = "1h";
-                                            warning = 90;
-                                            threshold = 96;
-                                            agent = "odin";
-                                        }
-                                        {
-                                            name = "/";
-                                            id = "odin-disk-root";
-                                            type = "disk_space";
-                                            path = "/";
-                                            threshold = 90;
-                                            interval = "10m";
-                                            agent = "odin";
-                                        }
-                                        {
-                                            name = "/Storage";
-                                            id = "odin-disk-storage";
-                                            type = "disk_space";
-                                            path = "/Storage";
-                                            threshold = 90;
-                                            interval = "10m";
-                                            agent = "odin";
-                                        }
-                                        {
-                                            name = "/boot";
-                                            id = "odin-disk-boot";
-                                            type = "disk_space";
-                                            path = "/boot";
-                                            threshold = 90;
-                                            interval = "10m";
-                                            agent = "odin";
-                                        }
-                                        {
-                                            # Auto-discovers every mount, so it also covers filesystems not listed
-                                            # explicitly above. Catches read-only remounts (which leave df reporting
-                                            # healthy usage forever) and inode exhaustion.
-                                            name = "Filesystems";
-                                            id = "odin-filesystems";
-                                            type = "filesystems";
-                                            interval = "10m";
-                                            warning = 90;
-                                            threshold = 96;
-                                            inode_warning = 85;
-                                            inode_threshold = 95;
-                                            grid_col_span = 2;
-                                            agent = "odin";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Network";
-                                    id = "odin-network";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Throughput";
-                                            id = "odin-throughput";
-                                            type = "throughput";
-                                            interval = "30s";
-                                            agent = "odin";
-                                        }
-                                        {
-                                            name = "Connections";
-                                            id = "odin-connections";
-                                            type = "connections";
-                                            interval = "1m";
-                                            warning = 500;
-                                            threshold = 1000;
-                                            agent = "odin";
-                                        }
-                                        {
-                                            name = "WiFi";
-                                            id = "odin-wifi";
-                                            type = "wifi";
-                                            interval = "1m";
-                                            quality_warning = 40;
-                                            quality_threshold = 20;
-                                            agent = "odin";
-                                        }
-                                    ];
-                                }
-                            ];
-                        }
-                        {
-                            name = "Running Services";
-                            # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
-                            id = "odin-services";
-                            type = "group";
-                            children = [
-                                {
-                                    name = "Networking";
-                                    id = "odin-svc-networking";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "odin-networking";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "NetworkManager.service";
-                                            agent = "odin";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Bluetooth";
-                                    id = "odin-svc-bluetooth";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "local-bluetooth";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "bluetooth.service";
-                                            agent = "odin";
-                                        }
-                                    ];
-                                }
-                            ];
-                        }
-                        {
-                            # Odin (the laptop) owns /Storage. Vorta and borgmatic each keep their
-                            # own repo set, so both appear here.
-                            name = "Backups";
-                            # Explicit id: a group id defaults to its name and both backed-up hosts have this group, so they would share one key.
-                            id = "backups-odin";
-                            type = "group";
-                            children = [
-                                {
-                                    name = "Vorta";
-                                    id = "backups-odin-vorta";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            # Odin's local Vorta repo has no "Laptop/" segment — that layout
-                                            # is Heimdall's, where the laptop's repo sits alongside the server's.
-                                            name = "On Disk";
-                                            id = "backup-laptop-on-disk";
-                                            type = "borg";
-                                            interval = "1h";
-                                            # Vorta starts this profile at :10 (vorta.nix), so polls stay 30 minutes clear of it.
-                                            offset = "40m";
-                                            # Local repo — no second SSH hop, so this answers far faster than
-                                            # the pushed copies.
-                                            timeout = "5m";
-                                            max_age = "1d";
-                                            repo = "/Storage/Files/Backups/Laptop/Vorta";
-                                            # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
-                                            cache_dir = "/var/cache/x-monitor-borg";
-                                            require_sudo = true;
-                                            # Unlocks this repo with Vorta's own passphrase, read on the
-                                            # host borg runs on. Vorta and borgmatic use different
-                                            # passphrases, so this is per monitor rather than global, and
-                                            # the secret never leaves the host that owns it.
-                                            passphrase_command = "cat /run/secrets/vorta_backup_passphrase";
-                                            source_paths = [
-                                                "/Storage"
-                                            ];
-                                            exclude = config.backup-excludes.patterns ++ [ "pf:/Storage/System" ];
-                                            exclude_if_present = config.backup-excludes.markers;
-                                            exclude_caches = false;
-                                            allow_purge = true;
-                                            compression = "lz4";
-                                            archive_prefix = "odin";
-                                            canary_path = "/Storage/Files/.vigil-canary";
-                                            prune_match = "Odin-*";
-                                            keep_within = "6H";
-                                            keep_hourly = 12;
-                                            keep_daily = 3;
-                                            agent = "odin";
-                                        }
-                                        {
-                                            # Vorta profile "2. Heimdall Backup".
-                                            name = "Heimdall";
-                                            id = "backup-laptop-heimdall";
-                                            type = "borg";
-                                            interval = "1h";
-                                            # Vorta starts this profile at :15 (vorta.nix), so polls stay 30 minutes clear of it.
-                                            offset = "45m";
-                                            # Remote repo on the backup server, whose data pool is a single
-                                            # USB disk (~13 MB/s): a read can take many minutes when the pool
-                                            # is busy. Long timeout so a slow answer still counts, wide
-                                            # interval so polls cannot stack up behind each other. The timeout stays
-                                            # well under the interval, so a poll that runs to its
-                                            # deadline is killed before the next one is due.
-                                            timeout = "30m";
-                                            max_age = "1d";
-                                            repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Vorta";
-                                            # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
-                                            cache_dir = "/var/cache/x-monitor-borg";
-                                            require_sudo = true;
-                                            # Unlocks this repo with Vorta's own passphrase, read on the
-                                            # host borg runs on. Vorta and borgmatic use different
-                                            # passphrases, so this is per monitor rather than global, and
-                                            # the secret never leaves the host that owns it.
-                                            passphrase_command = "cat /run/secrets/vorta_backup_passphrase";
-                                            # borg makes its OWN SSH connection to the repo server, with
-                                            # its own identity — X-Monitor's login here does not carry over.
-                                            # This is Odin's existing Vorta repo key, the same one Vorta
-                                            # authenticates with, so X-Monitor triggers the host's backup
-                                            # rather than performing one under its own credentials.
-                                            ssh_key = "/run/secrets/vorta_ssh_key";
-                                            source_paths = [
-                                                "/Storage"
-                                            ];
-                                            exclude = config.backup-excludes.patterns ++ [ "pf:/Storage/System" ];
-                                            exclude_if_present = config.backup-excludes.markers;
-                                            exclude_caches = false;
-                                            allow_purge = true;
-                                            compression = "lz4";
-                                            archive_prefix = "odin";
-                                            canary_path = "/Storage/Files/.vigil-canary";
-                                            prune_match = "Odin-*";
-                                            keep_within = "6H";
-                                            keep_hourly = 12;
-                                            keep_daily = 3;
-                                            agent = "odin";
-                                        }
-                                        {
-                                            # Vorta profile "3. Ragnarok Backup" — the long-term copy.
-                                            name = "Ragnarok";
-                                            id = "backup-laptop-ragnarok";
-                                            type = "borg";
-                                            interval = "1h";
-                                            # Vorta starts this profile at :20 (vorta.nix), so polls stay 30 minutes clear of it.
-                                            offset = "50m";
-                                            # Remote repo on the backup server, whose data pool is a single
-                                            # USB disk (~13 MB/s): a read can take many minutes when the pool
-                                            # is busy. Long timeout so a slow answer still counts, wide
-                                            # interval so polls cannot stack up behind each other. The timeout stays
-                                            # well under the interval, so a poll that runs to its
-                                            # deadline is killed before the next one is due.
-                                            timeout = "30m";
-                                            max_age = "1d";
-                                            repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Vorta";
-                                            # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
-                                            cache_dir = "/var/cache/x-monitor-borg";
-                                            require_sudo = true;
-                                            # Unlocks this repo with Vorta's own passphrase, read on the
-                                            # host borg runs on. Vorta and borgmatic use different
-                                            # passphrases, so this is per monitor rather than global, and
-                                            # the secret never leaves the host that owns it.
-                                            passphrase_command = "cat /run/secrets/vorta_backup_passphrase";
-                                            # borg makes its OWN SSH connection to the repo server, with
-                                            # its own identity — X-Monitor's login here does not carry over.
-                                            # This is Odin's existing Vorta repo key, the same one Vorta
-                                            # authenticates with, so X-Monitor triggers the host's backup
-                                            # rather than performing one under its own credentials.
-                                            ssh_key = "/run/secrets/vorta_ssh_key";
-                                            source_paths = [
-                                                "/Storage"
-                                            ];
-                                            exclude = config.backup-excludes.patterns ++ [ "pf:/Storage/System" ];
-                                            exclude_if_present = config.backup-excludes.markers;
-                                            exclude_caches = false;
-                                            allow_purge = true;
-                                            compression = "lz4";
-                                            archive_prefix = "odin";
-                                            canary_path = "/Storage/Files/.vigil-canary";
-                                            prune_match = "Odin-*";
-                                            keep_within = "6H";
-                                            keep_hourly = 24;
-                                            keep_daily = 30;
-                                            keep_weekly = 8;
-                                            keep_monthly = 24;
-                                            keep_yearly = 3;
-                                            agent = "odin";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Borgmatic";
-                                    # Explicit id: without one it defaults to the name and both host groups have a "Borgmatic" child,
-                                    # so both would write status under the same key.
-                                    id = "backups-odin-borgmatic";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "On Disk";
-                                            id = "backup-laptop-borgmatic-on-disk";
-                                            type = "borg";
-                                            interval = "15m";
-                                            # Local repo — no second SSH hop, so this answers far faster than
-                                            # the pushed copies.
-                                            timeout = "5m";
-                                            max_age = "1d";
-                                            repo = "/Storage/Files/Backups/Laptop/Borgmatic";
-                                            # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
-                                            cache_dir = "/var/cache/x-monitor-borg";
-                                            require_sudo = true;
-                                            # Unlocks this repo with borgmatic's own passphrase, read on the
-                                            # host borg runs on. Vorta and borgmatic use different
-                                            # passphrases, so this is per monitor rather than global, and
-                                            # the secret never leaves the host that owns it.
-                                            passphrase_command = "cat /run/secrets/borg_repo_encryption_key";
-                                            source_paths = [
-                                                "/Storage/System"
-                                            ];
-                                            exclude = config.backup-excludes.patterns;
-                                            exclude_if_present = config.backup-excludes.markers;
-                                            exclude_caches = false;
-                                            allow_purge = true;
-                                            compression = "lz4";
-                                            archive_prefix = "backup";
-                                            canary_path = "/Storage/System/.vigil-canary";
-                                            check_units = [
-                                                "borgmatic-check.service"
-                                                "borgmatic-check-data.service"
-                                            ];
-                                            check_max_age = "9d";
-                                            keep_hourly = 24;
-                                            keep_daily = 7;
-                                            keep_weekly = 4;
-                                            keep_monthly = 12;
-                                            keep_yearly = 3;
-                                            agent = "odin";
-                                        }
-                                        {
-                                            name = "Heimdall";
-                                            id = "backup-laptop-borgmatic-heimdall";
-                                            type = "borg";
-                                            interval = "1h";
-                                            # Remote repo on the backup server, whose data pool is a single
-                                            # USB disk (~13 MB/s): a read can take many minutes when the pool
-                                            # is busy. Long timeout so a slow answer still counts, wide
-                                            # interval so polls cannot stack up behind each other. The timeout stays
-                                            # well under the interval, so a poll that runs to its
-                                            # deadline is killed before the next one is due.
-                                            timeout = "30m";
-                                            max_age = "1d";
-                                            repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Borgmatic";
-                                            # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
-                                            cache_dir = "/var/cache/x-monitor-borg";
-                                            require_sudo = true;
-                                            # Unlocks this repo with borgmatic's own passphrase, read on the
-                                            # host borg runs on. Vorta and borgmatic use different
-                                            # passphrases, so this is per monitor rather than global, and
-                                            # the secret never leaves the host that owns it.
-                                            passphrase_command = "cat /run/secrets/borg_repo_encryption_key";
-                                            # borg makes its OWN SSH connection to the repo server, with
-                                            # its own identity — X-Monitor's login here does not carry over.
-                                            # This is the host's existing borgmatic key, the same one the
-                                            # scheduled job uses, so X-Monitor triggers the host's backup
-                                            # rather than performing one under its own credentials.
-                                            ssh_key = "/run/secrets/borg_repo_ssh_key";
-                                            source_paths = [
-                                                "/Storage/System"
-                                            ];
-                                            exclude = config.backup-excludes.patterns;
-                                            exclude_if_present = config.backup-excludes.markers;
-                                            exclude_caches = false;
-                                            allow_purge = true;
-                                            compression = "lz4";
-                                            archive_prefix = "backup";
-                                            canary_path = "/Storage/System/.vigil-canary";
-                                            check_units = [
-                                                "borgmatic-check.service"
-                                                "borgmatic-check-data.service"
-                                            ];
-                                            check_max_age = "9d";
-                                            keep_hourly = 24;
-                                            keep_daily = 7;
-                                            keep_weekly = 4;
-                                            keep_monthly = 12;
-                                            keep_yearly = 3;
-                                            agent = "odin";
-                                        }
-                                        {
-                                            name = "Ragnarok";
-                                            id = "backup-laptop-borgmatic-ragnarok";
-                                            type = "borg";
-                                            interval = "1h";
-                                            # Remote repo on the backup server, whose data pool is a single
-                                            # USB disk (~13 MB/s): a read can take many minutes when the pool
-                                            # is busy. Long timeout so a slow answer still counts, wide
-                                            # interval so polls cannot stack up behind each other. The timeout stays
-                                            # well under the interval, so a poll that runs to its
-                                            # deadline is killed before the next one is due.
-                                            timeout = "30m";
-                                            max_age = "1d";
-                                            repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Borgmatic";
-                                            # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
-                                            cache_dir = "/var/cache/x-monitor-borg";
-                                            require_sudo = true;
-                                            # Unlocks this repo with borgmatic's own passphrase, read on the
-                                            # host borg runs on. Vorta and borgmatic use different
-                                            # passphrases, so this is per monitor rather than global, and
-                                            # the secret never leaves the host that owns it.
-                                            passphrase_command = "cat /run/secrets/borg_repo_encryption_key";
-                                            # borg makes its OWN SSH connection to the repo server, with
-                                            # its own identity — X-Monitor's login here does not carry over.
-                                            # This is the host's existing borgmatic key, the same one the
-                                            # scheduled job uses, so X-Monitor triggers the host's backup
-                                            # rather than performing one under its own credentials.
-                                            ssh_key = "/run/secrets/borg_repo_ssh_key";
-                                            source_paths = [
-                                                "/Storage/System"
-                                            ];
-                                            exclude = config.backup-excludes.patterns;
-                                            exclude_if_present = config.backup-excludes.markers;
-                                            exclude_caches = false;
-                                            allow_purge = true;
-                                            compression = "lz4";
-                                            archive_prefix = "backup";
-                                            canary_path = "/Storage/System/.vigil-canary";
-                                            check_units = [
-                                                "borgmatic-check.service"
-                                                "borgmatic-check-data.service"
-                                            ];
-                                            check_max_age = "9d";
-                                            keep_hourly = 24;
-                                            keep_daily = 7;
-                                            keep_weekly = 4;
-                                            keep_monthly = 12;
-                                            keep_yearly = 3;
-                                            agent = "odin";
-                                        }
-                                    ];
-                                }
-                            ];
-                        }
-                        {
-                            name = "Security";
-                            id = "odin-security";
-                            type = "group";
-                            children = [
-                                {
-                                    name = "Vulnerability Scan";
-                                    id = "odin-vuln-scan";
-                                    type = "vuln_scan";
-                                    interval = "1d";
-                                    timeout = "30m"; # A full -sV sweep with every vuln script takes a few minutes; this only bounds a host that stops answering mid-scan
-                                    scan_host = "odin.technet";
-                                    agent = "heimdall";
-                                }
-                            ];
-                        }
-                    ];
-                }
-                {
-                    name = "Thor";
-                    id = "thor-host";
-                    type = "group";
-                    children = [
-                        {
-                            name = "Availability";
-                            id = "thor";
-                            type = "uptime";
-                            target_host = "thor.technet";
-                        }
-                        {
-                            name = "System Stats";
-                            # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
-                            id = "thor-metrics";
-                            type = "group";
-                            notify."for" = "1h";
-                            children = [
-                                {
-                                    name = "Compute";
-                                    id = "thor-compute";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "CPU";
-                                            id = "thor-cpu";
-                                            type = "cpu";
-                                            interval = "1m";
-                                            warning = 70;
-                                            threshold = 85;
-                                            agent = "thor";
-                                        }
-                                        {
-                                            # Deliberately thresholdless: four 1.15GHz A53s reach capacity under any sustained work, and the phone's own load says nothing about whether it is healthy.
-                                            name = "Load";
-                                            id = "thor-load";
-                                            type = "load";
-                                            interval = "1m";
-                                            agent = "thor";
-                                        }
-                                        {
-                                            # The kernel's own trip points, with the passive one raised to 80C by 5-phone/1-system/performance.nix: warn where the A64 throttles, fail where it calls itself hot.
-                                            name = "Temperature";
-                                            id = "thor-temperature";
-                                            type = "temperature";
-                                            interval = "1m";
-                                            warning = 80;
-                                            threshold = 90;
-                                            agent = "thor";
-                                        }
-                                        {
-                                            # The SD card sustains about 35k/s under load, so the fleet's 20k/50k would sit warning whenever the phone is busy at all.
-                                            name = "Interrupts";
-                                            id = "thor-interrupts";
-                                            type = "interrupts";
-                                            interval = "1m";
-                                            warning = 50000;
-                                            threshold = 100000;
-                                            agent = "thor";
-                                        }
-                                        {
-                                            # ps over 600 processes is the most expensive sample the agent takes here, so it runs at a tenth of Odin's rate.
-                                            name = "Processes";
-                                            id = "thor-processes";
-                                            type = "processes";
-                                            interval = "5m";
-                                            max_processes = 20;
-                                            grid_col_span = 2;
-                                            agent = "thor";
-                                        }
-                                    ];
-                                }
-                                {
-                                    # A phone that is merely low on charge is on its way to being a phone that is not there.
-                                    name = "Power";
-                                    id = "thor-power";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            # Charge thresholds are upower's own percentageLow and percentageCritical from 5-phone/1-system/power.nix, so X-Monitor warns exactly when the phone does; the keyboard case's USB feed counts as plugged in.
-                                            name = "Battery";
-                                            id = "thor-battery";
-                                            type = "power";
-                                            interval = "5m";
-                                            battery = "axp20x-battery";
-                                            charge_warning = 20;
-                                            charge_threshold = 10;
-                                            agent = "thor";
-                                        }
-                                        {
-                                            # The keyboard case's own cell, which reads plugged in only while its own charger is attached; it reads unavailable while the case is off.
-                                            name = "Keyboard Battery";
-                                            id = "thor-keyboard-battery";
-                                            type = "power";
-                                            interval = "5m";
-                                            battery = "ip5xxx-battery";
-                                            agent = "thor";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Memory";
-                                    id = "thor-memory";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            # 3GB behind a 1.5GB ARC ceiling: unavailable memory sits high here by design, so the fleet's 90/95 would warn on a healthy phone.
-                                            name = "Usage";
-                                            id = "thor-memory-usage";
-                                            type = "memory";
-                                            interval = "1m";
-                                            warning = 93;
-                                            threshold = 97;
-                                            agent = "thor";
-                                        }
-                                        {
-                                            # An OOM kill is an event rather than a level, so the usage monitor beside this one reads normal again before it can see it.
-                                            name = "OOM Kills";
-                                            id = "thor-oom";
-                                            type = "oom";
-                                            notify."for" = 0; # A kill clears within a few cycles, so the System Stats hour would never be reached
-                                            interval = "1m";
-                                            agent = "thor";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Storage";
-                                    id = "thor-storage";
-                                    type = "group";
-                                    # No SMART pair here: the eMMC and the SD card expose none, which is why 5-phone/1-system/hardware-configuration.nix disables smartd outright.
-                                    children = [
-                                        {
-                                            # Pinned like the other hosts; the id stays on the eMMC because that is the one auto-detect had been charting. mmcblk1 is absent:
-                                            # the numbering follows the controllers, not the slots, so the SD card is mmcblk0 and the internal eMMC is mmcblk2.
-                                            name = "Disk I/O (Root)";
-                                            id = "thor-disk-io";
-                                            type = "disk_io";
-                                            interval = "1m";
-                                            device = "/dev/disk/by-id/mmc-ASTCXX_0xd1002721"; # 32GB eMMC, root-pool-Thor and /boot
-                                            agent = "thor";
-                                        }
-                                        {
-                                            name = "Disk I/O (Data)";
-                                            id = "thor-disk-io-data";
-                                            type = "disk_io";
-                                            interval = "1m";
-                                            device = "/dev/disk/by-id/mmc-SN01T_0x8ade202e"; # 1TB SD card, data-pool-Thor
-                                            agent = "thor";
-                                        }
-                                        {
-                                            # Both containers here are btrfs: the eMMC root and the SD card. The verdict is the per-device error counters btrfs keeps in the
-                                            # filesystem itself, since it publishes no pool health word -- and unlike the SMART pair, these counters exist on media that has none.
-                                            name = "Btrfs";
-                                            id = "thor-btrfs";
-                                            type = "btrfs";
-                                            interval = "10m";
-                                            warning = 90;
-                                            threshold = 96;
-                                            agent = "thor";
-                                        }
-                                        {
-                                            name = "/";
-                                            id = "thor-disk-root";
-                                            type = "disk_space";
-                                            path = "/";
-                                            threshold = 90;
-                                            interval = "10m";
-                                            agent = "thor";
-                                        }
-                                        {
-                                            name = "/Storage";
-                                            id = "thor-disk-storage";
-                                            type = "disk_space";
-                                            path = "/Storage";
-                                            threshold = 90;
-                                            interval = "10m";
-                                            agent = "thor";
-                                        }
-                                        {
-                                            name = "/boot";
-                                            id = "thor-disk-boot";
-                                            type = "disk_space";
-                                            path = "/boot";
-                                            threshold = 90;
-                                            interval = "10m";
-                                            agent = "thor";
-                                        }
-                                        {
-                                            # Auto-discovers every mount, so it also covers the removable card going read-only, which df alone reports as healthy usage forever.
-                                            name = "Filesystems";
-                                            id = "thor-filesystems";
-                                            type = "filesystems";
-                                            interval = "10m";
-                                            warning = 90;
-                                            threshold = 96;
-                                            inode_warning = 85;
-                                            inode_threshold = 95;
-                                            grid_col_span = 2;
-                                            agent = "thor";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Network";
-                                    id = "thor-network";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Throughput";
-                                            id = "thor-throughput";
-                                            type = "throughput";
-                                            interval = "1m";
-                                            agent = "thor";
-                                        }
-                                        {
-                                            # A phone holds a handful of sockets, not a server's hundreds, so the counts that mean something here are far lower than Odin's.
-                                            name = "Connections";
-                                            id = "thor-connections";
-                                            type = "connections";
-                                            interval = "1m";
-                                            warning = 200;
-                                            threshold = 500;
-                                            agent = "thor";
-                                        }
-                                        {
-                                            name = "WiFi";
-                                            id = "thor-wifi";
-                                            type = "wifi";
-                                            interval = "1m";
-                                            quality_warning = 40;
-                                            quality_threshold = 20;
-                                            agent = "thor";
-                                        }
-                                    ];
-                                }
-                            ];
-                        }
-                        {
-                            name = "Running Services";
-                            # Explicit id: a group id defaults to its name and every host has this group, so all four would share one key.
-                            id = "thor-services";
-                            type = "group";
-                            children = [
-                                {
-                                    name = "Phosh";
-                                    id = "thor-svc-phosh";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            # A switch stops phosh and does not reliably bring it back, which leaves the phone dark with nothing on the device itself left to say so.
-                                            name = "Service";
-                                            id = "thor-phosh";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "phosh.service";
-                                            agent = "thor";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Networking";
-                                    id = "thor-svc-networking";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "thor-networking";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "NetworkManager.service";
-                                            agent = "thor";
-                                        }
-                                        {
-                                            # The tunnel carries Thor's DNS and, on mobile data, its whole default route; NetworkManager cannot see a WireGuard session die, so this watchdog is what does.
-                                            name = "WireGuard Watchdog";
-                                            id = "thor-wireguard-watchdog";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "wireguard-watchdog.service";
-                                            agent = "thor";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Modem";
-                                    id = "thor-svc-modem";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "thor-modemmanager";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "ModemManager.service";
-                                            agent = "thor";
-                                        }
-                                        {
-                                            # eg25-manager owns the EG25-G's power and reset lines, so ModemManager finding no modem at all starts here rather than there.
-                                            name = "Power Control";
-                                            id = "thor-eg25-manager";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "eg25-manager.service";
-                                            agent = "thor";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Bluetooth";
-                                    id = "thor-svc-bluetooth";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Service";
-                                            id = "thor-bluetooth";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "bluetooth.service";
-                                            agent = "thor";
-                                        }
-                                    ];
-                                }
-                                {
-                                    name = "Charging";
-                                    id = "thor-svc-charging";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            # chargectl holds the cell in the 75-80% maintain band; with it stopped the phone charges to full and stays there, which is the slow way to lose a battery.
-                                            name = "Service";
-                                            id = "thor-chargectl";
-                                            type = "systemd_service";
-                                            interval = "1m";
-                                            service_name = "chargectl.service";
-                                            agent = "thor";
-                                        }
-                                    ];
-                                }
-                            ];
-                        }
-                        {
-                            name = "Security";
-                            id = "thor-security";
-                            type = "group";
-                            children = [
-                                {
-                                    # Offline whenever the phone is asleep; a day's interval means it catches the next wake.
-                                    name = "Vulnerability Scan";
-                                    id = "thor-vuln-scan";
-                                    type = "vuln_scan";
-                                    interval = "1d";
-                                    timeout = "30m"; # A full -sV sweep with every vuln script takes a few minutes; this only bounds a host that stops answering mid-scan
-                                    scan_host = "thor.technet";
-                                    agent = "heimdall";
-                                }
-                            ];
-                        }
-                    ];
-                }
-                {
-                    # The Android phone, configured on the device rather than from here, so reachability is the whole of what X-Monitor can see.
-                    name = "ThorX";
-                    id = "thorx-host";
-                    type = "group";
-                    children = [
-                        {
-                            name = "Availability";
-                            id = "thorx";
-                            type = "uptime";
-                            target_host = "thorx.technet";
-                        }
-                        {
-                            name = "Security";
-                            id = "thorx-security";
-                            type = "group";
-                            children = [
-                                {
-                                    # Nothing runs on the Android phone, so the exposed ports are the whole of what can be checked.
-                                    name = "Vulnerability Scan";
-                                    id = "thorx-vuln-scan";
-                                    type = "vuln_scan";
-                                    interval = "1d";
-                                    timeout = "30m"; # A full -sV sweep with every vuln script takes a few minutes; this only bounds a host that stops answering mid-scan
-                                    scan_host = "thorx.technet";
-                                    agent = "heimdall";
-                                }
-                            ];
-                        }
-                    ];
-                }
-                {
-                    name = "IoT Sensors";
-                    type = "group";
-                    children = [
-                        {
-                            name = "Bedroom Light";
-                            id = "bedroom-light";
-                            type = "uptime";
-                            target_host = "light-bedroom.technet";
-                        }
-                        {
-                            name = "Bedroom Desk Light";
-                            id = "bedroom-desk-light";
-                            type = "uptime";
-                            target_host = "light-bedroom-desk.technet";
-                        }
-                        {
-                            name = "Kitchen Light";
-                            id = "kitchen-light";
-                            type = "uptime";
-                            target_host = "light-kitchen.technet";
-                        }
-                        {
-                            name = "Bathroom Light";
-                            id = "bathroom-light";
-                            type = "uptime";
-                            target_host = "light-bathroom.technet";
-                        }
-                        {
-                            name = "Outside Light";
-                            id = "outside-light";
-                            type = "uptime";
-                            target_host = "light-outside.technet";
-                        }
-                        {
-                            name = "Fan Socket";
-                            id = "fan-socket";
-                            type = "uptime";
-                            target_host = "socket-fan.technet";
-                        }
-                        {
-                            name = "Ragnarok Socket";
-                            id = "ragnarok-socket";
-                            type = "uptime";
-                            target_host = "socket-ragnarok.technet";
-                        }
-                        {
-                            name = "Fan IR";
-                            id = "fan-ir";
-                            type = "uptime";
-                            target_host = "ir-fan.technet";
-                        }
-                        {
-                            name = "Bedroom Sensor";
-                            id = "bedroom-sensor";
-                            type = "uptime";
-                            target_host = "sensor-bedroom.technet";
-                        }
-                        {
-                            name = "Bathroom Sensor";
-                            id = "bathroom-sensor";
-                            type = "uptime";
-                            target_host = "sensor-bathroom.technet";
-                        }
-                    ];
-                }
-            ];
+                in
+                [
+                    {
+                        name = "By host";
+                        id = "by-host";
+                        type = "group";
+                        children = hostTree;
+                    }
+                    {
+                        name = "By domain";
+                        id = "by-domain";
+                        type = "group";
+                        children = domainGroups hostTree;
+                    }
+                ];
         };
     };
 
