@@ -358,7 +358,7 @@ in
                                                     type = "interrupts";
                                                     interval = "1m";
                                                     warning = 20000;
-                                                    threshold = 50000;
+                                                    threshold = 100000000; # Unreachable on purpose: X-Monitor ignores a warning given without a threshold, and interrupts here should never fail.
                                                     agent = "ragnarok";
                                                 }
                                                 {
@@ -612,7 +612,7 @@ in
                                                     type = "interrupts";
                                                     interval = "1m";
                                                     warning = 20000;
-                                                    threshold = 50000;
+                                                    threshold = 100000000; # Unreachable on purpose: X-Monitor ignores a warning given without a threshold, and interrupts here should never fail.
                                                     agent = "heimdall";
                                                 }
                                                 {
@@ -2453,7 +2453,7 @@ in
                                                     type = "interrupts";
                                                     interval = "1m";
                                                     warning = 50000;
-                                                    threshold = 100000;
+                                                    threshold = 100000000; # Unreachable on purpose: X-Monitor ignores a warning given without a threshold, and interrupts here should never fail.
                                                     agent = "thor";
                                                 }
                                                 {
