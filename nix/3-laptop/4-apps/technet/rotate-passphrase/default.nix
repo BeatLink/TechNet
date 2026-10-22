@@ -8,6 +8,7 @@
         (pkgs.writeShellApplication {
             name = "rotate-passphrase";
             runtimeInputs = [
+                pkgs.age
                 pkgs.git
                 pkgs.keepassxc
                 pkgs.libsecret

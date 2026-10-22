@@ -8,6 +8,7 @@ every command is a fixed argument list, and anything printed passes through a fi
 import getpass
 import hashlib
 import json
+import os
 import secrets
 import shlex
 import subprocess
@@ -59,10 +60,10 @@ def wrap(argv, host, root):
     return argv
 
 
-def run(argv, data=None, host=LOCAL_HOST, root=False):
+def run(argv, data=None, host=LOCAL_HOST, root=False, env=None):
     """Runs a command with data on stdin and returns its output without printing it."""
     full = wrap(argv, host, root)
-    result = subprocess.run(full, input=data, capture_output=True, text=True, check=False)
+    result = subprocess.run(full, input=data, capture_output=True, text=True, check=False, env=env)
     if result.returncode != 0:
         lines = [line for line in result.stderr.strip().splitlines() if line.strip() and not line.startswith(DIAGNOSTIC_PREFIXES)]
         raise RotateError(f"{host}: {shlex.join(argv)} failed: {(lines or ['no error output'])[-1]}")
@@ -425,6 +426,88 @@ def apply_nothing(new):
     """For targets whose only copy is in sops."""
 
 
+# Age Key ############################################################################################################################################
+
+AGE_KEY_TITLE = "sops age key"
+AGE_KEY_PENDING_TITLE = "sops age key (new)"
+
+
+def keyring_lookup(title):
+    """Reads the secret of the KeePassXC entry with this title."""
+    return secret(run(["secret-tool", "lookup", "Title", title]).strip())
+
+
+def keyring_put(title, value):
+    """Creates or replaces the KeePassXC entry with this title, then reads it back."""
+    run(["secret-tool", "store", "--label", title, "Title", title], data=value)
+    if digest(keyring_lookup(title)) != digest(value):
+        raise RotateError(f"the KeePassXC entry '{title}' did not read back as written")
+
+
+def age_public(key):
+    """The public recipient of an age key."""
+    return run(["age-keygen", "-y"], data=key).strip()
+
+
+def new_age_key():
+    """A new age key, held only in memory until it is stored in KeePassXC."""
+    lines = run(["age-keygen"]).splitlines()
+    return secret(next(line for line in lines if line.startswith("AGE-SECRET-KEY-")))
+
+
+def only_age_key(key):
+    """An environment in which sops can use this one age key and no other."""
+    env = {name: value for name, value in os.environ.items() if not name.startswith("SOPS_AGE_")}
+    env["SOPS_AGE_KEY"] = key
+    return env
+
+
+def sops_files():
+    """Every sops-encrypted file in the checkout."""
+    return run(["git", "ls-files", "--", "secrets"]).split()
+
+
+def age_key_move(files, old, new):
+    """Re-encrypts each file to the new key with a fresh data key, checking its contents are unchanged and the old key no longer opens it."""
+    old_public, new_public = age_public(old), age_public(new)
+    for file in files:
+        before = digest(run(["sops", "--decrypt", file], env=only_age_key(old)))
+        run(["sops", "rotate", "--in-place", "--add-age", new_public, "--rm-age", old_public, file], env=only_age_key(old))
+        if digest(run(["sops", "--decrypt", file], env=only_age_key(new))) != before:
+            raise RotateError(f"{file} did not decrypt to the same contents with the new key")
+        try:
+            run(["sops", "--decrypt", file], env=only_age_key(old))
+        except RotateError:
+            continue
+        raise RotateError(f"{file} still opens with the old key")
+    sops_config = Path(".sops.yaml")
+    sops_config.write_text(sops_config.read_text().replace(old_public, new_public))
+
+
+def apply_age_key(new):
+    """Moves every sops file and .sops.yaml to a new age key, then points KeePassXC's entry at it; undone in full if any step fails."""
+    old = keyring_lookup(AGE_KEY_TITLE)
+    if age_public(old) not in Path(".sops.yaml").read_text():
+        raise RotateError(f"the '{AGE_KEY_TITLE}' entry in KeePassXC is not the key .sops.yaml names")
+    keyring_put(AGE_KEY_PENDING_TITLE, new)
+    say(f"new age key saved in KeePassXC as '{AGE_KEY_PENDING_TITLE}'")
+    files = sops_files()
+    try:
+        age_key_move(files, old, new)
+        say(f"re-encrypted {len(files)} files to the new key")
+        keyring_put(AGE_KEY_TITLE, new)
+    except RotateError:
+        run(["git", "checkout", "--", "secrets", ".sops.yaml"])
+        if digest(keyring_lookup(AGE_KEY_TITLE)) != digest(old):
+            keyring_put(AGE_KEY_TITLE, old)
+        say(f"put every file back on the old key; '{AGE_KEY_PENDING_TITLE}' stays in KeePassXC until you delete it")
+        raise
+    say(f"'{AGE_KEY_TITLE}' in KeePassXC now holds the new key")
+    run(["secret-tool", "clear", "Title", AGE_KEY_PENDING_TITLE])
+    run(["git", "add", "--", "secrets", ".sops.yaml"])
+    run(["git", "commit", "-q", "-m", "chore(secrets): rotate the sops age key", "--", "secrets", ".sops.yaml"])
+
+
 # KeePassXC ##########################################################################################################################################
 
 KEEPASSXC_DATABASE = "/Storage/Files/Documents/SecurityDatabase.kdbx"
@@ -526,6 +609,7 @@ TARGETS = {
         store=[("secrets/0-common/users.yaml", "beatlink_hashed_password"), ("secrets/5-phone/users.yaml", "beatlink_hashed_password_phone")],
     ),
     "zfs-iterations": dict(make=lambda: None, apply=apply_zfs_iterations, hosts=[], store=[]),
+    "age-key": dict(make=new_age_key, apply=apply_age_key, hosts=[], store=[], commits=True, alone=True),
     "keepassxc": dict(make=keepassxc_passwords, apply=apply_keepassxc, hosts=[], store=[], last=True),
 }
 
@@ -567,7 +651,7 @@ def rotate_all(names, values):
 
 def main(arguments):
     """Rotates the named targets, or all of them, then pushes, deploys and renews Heimdall's bindings."""
-    names = list(TARGETS) if arguments == ["all"] else arguments
+    names = [name for name in TARGETS if not TARGETS[name].get("alone")] if arguments == ["all"] else arguments
     if not names or any(name not in TARGETS for name in names):
         print("Usage: rotate-passphrase all | <" + "|".join(TARGETS) + ">...", file=sys.stderr)
         return 2
@@ -582,7 +666,7 @@ def main(arguments):
             pause_backups()
         try:
             done = rotate_all([name for name in names if name not in last], values)
-            if any(TARGETS[name]["store"] for name in done):
+            if any(TARGETS[name]["store"] or TARGETS[name].get("commits") for name in done):
                 land()
                 hosts = {host for name in done for host in TARGETS[name]["hosts"]}
                 for host in DEPLOY_ORDER:
