@@ -13,6 +13,7 @@
                 pkgs.openssh
                 pkgs.python3
                 pkgs.sops
+                pkgs.whois
             ];
             text = ''exec python3 ${./rotate-passphrase.py} "$@"'';
         })
