@@ -22,9 +22,6 @@ let
     ];
 
     pausedSystemUnits = [
-        "borgmatic.timer"
-        "borgmatic-check.timer"
-        "borgmatic-check-data.timer"
         "borg-compact-vorta.timer"
         "zfs-scrub.timer"
         "zpool-trim.timer"
@@ -38,12 +35,16 @@ let
         "quodlibet"
     ];
 
+    # Active for as long as a game runs, so X-Monitor's backups on this host skip instead of starting.
+    quietMarker = "gamemode-quiet.service";
+
     systemctl = "${pkgs.systemd}/bin/systemctl";
     pkill = "${pkgs.procps}/bin/pkill";
 
     quietStart = pkgs.writeShellScript "gamemode-quiet-start" ''
         ${systemctl} --user stop ${lib.concatStringsSep " " pausedUserUnits} || true
         ${systemctl} stop ${lib.concatStringsSep " " pausedSystemUnits} || true
+        ${systemctl} start ${quietMarker} || true
         ${lib.concatMapStringsSep "\n" (app: "${pkill} -f ${app} || true") killedApps}
     '';
 
@@ -51,6 +52,7 @@ let
     quietEnd = pkgs.writeShellScript "gamemode-quiet-end" ''
         ${systemctl} --user start ${lib.concatStringsSep " " pausedUserUnits} || true
         ${systemctl} start ${lib.concatStringsSep " " pausedSystemUnits} || true
+        ${systemctl} stop ${quietMarker} || true
     '';
 in
 {
@@ -148,11 +150,20 @@ in
         }
 
         # Quiet Hours ################################################################################################################################
-        # Lets the hooks above stop the maintenance timers, which systemd otherwise only takes from root.
+        # Lets the hooks above stop the maintenance timers and raise the marker, which systemd otherwise only takes from root.
         {
+            systemd.services.gamemode-quiet = {
+                description = "Marks that a game is running";
+                serviceConfig = {
+                    Type = "oneshot";
+                    RemainAfterExit = true;
+                    ExecStart = "${pkgs.coreutils}/bin/true";
+                };
+            };
+
             security.polkit.extraConfig = ''
                 polkit.addRule(function (action, subject) {
-                    var paused = ${builtins.toJSON pausedSystemUnits};
+                    var paused = ${builtins.toJSON (pausedSystemUnits ++ [ quietMarker ])};
                     if (action.id == "org.freedesktop.systemd1.manage-units" &&
                         subject.user == "beatlink" &&
                         paused.indexOf(action.lookup("unit")) >= 0) {
