@@ -219,6 +219,11 @@ in
                             command = "/run/current-system/sw/bin/systemctl daemon-reload";
                             options = [ "NOPASSWD" ];
                         }
+                        # The Reboot action on a NixOS deployment monitor
+                        {
+                            command = "/run/current-system/sw/bin/systemctl reboot";
+                            options = [ "NOPASSWD" ];
+                        }
                         {
                             command = "/run/current-system/sw/bin/systemctl cat *";
                             options = [ "NOPASSWD" ];
