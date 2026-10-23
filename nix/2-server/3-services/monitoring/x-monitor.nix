@@ -118,6 +118,9 @@ let
         .triggers).webhook_id;
     upgradeFlake = config.technet.flake;
 
+    # Each nightly build links its closure here, replacing the last one, so it stays rooted until deployed and attic-push-retry can find it.
+    buildRoots = "/var/lib/x-monitor-agent/build-roots";
+
     # Likewise for garbage collection: one common module sets nix.gc.options fleet-wide, so the button
     # on any host's monitor runs the same collection that host's weekly timer runs.
     gcArgs = builtins.filter (a: a != "") (lib.splitString " " config.nix.gc.options);
@@ -637,6 +640,7 @@ in
                                             target_host = deploy.remote.Ragnarok.target;
                                             rebuild_bin = "technet-remote-switch";
                                             build_at = "04:45";
+                                            build_root_dir = buildRoots;
                                             auto_switch = true;
                                             auto_switch_after = "0"; # Switch as soon as drift is seen
                                             agent = "ragnarok";
@@ -1632,6 +1636,7 @@ in
                                             push_ssh_key = config.sops.secrets.x_monitor_flake_deploy_key.path; # Only this monitor pushes, so the key lives on Heimdall alone
                                             update_at = "02:00"; # The only thing that bumps flake.lock
                                             build_at = "04:00"; # The fleet's builds start after attic-gc at 03:00, whose database lock their uploads would contend with
+                                            build_root_dir = buildRoots;
                                             auto_switch = false; # Off while Heimdall runs local X-Monitor main via deploy-heimdall.sh; turn back on when that ends
                                             agent = "heimdall";
                                         }
@@ -2081,6 +2086,7 @@ in
                                             target_host = deploy.remote.Odin.target;
                                             rebuild_bin = "technet-remote-switch"; # Holds the target awake through the switch; see remote-deploy.nix
                                             build_at = "04:15";
+                                            build_root_dir = buildRoots;
                                             auto_switch = true;
                                             auto_switch_after = "0"; # Switch as soon as drift is seen
                                             agent = "odin";
@@ -2778,6 +2784,7 @@ in
                                             target_host = deploy.remote.Thor.target;
                                             rebuild_bin = "technet-remote-switch"; # Holds the phone awake and restarts phosh after; see remote-deploy.nix
                                             build_at = "04:30";
+                                            build_root_dir = buildRoots;
                                             auto_switch = true;
                                             auto_switch_after = "0"; # Switch as soon as drift is seen
                                             agent = "thor";
