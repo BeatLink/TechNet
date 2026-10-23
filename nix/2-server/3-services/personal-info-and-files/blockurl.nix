@@ -16,7 +16,7 @@
 
         # One key per client, made with `openssl rand -hex 32` and hashed with `printf %s KEY | sha256sum`; the keys sit in each host's blockurl.yaml.
         apiKeyHashes = {
-            heimdall-vigil = "191e69fb5754d4c109762074f99bb1c0e7a715648e2453da30c32c8eb94e4da3";
+            heimdall-vigil = "b3323825f9d79d3b3c043238ceea48239851ddde5ad447cb2d828af4ba0811fe";
             odin-gallery-dl = "9bcc27946a6570367a65ee99af097a22eddd9a87956fb30c0fb7006703f5ce13";
             firefox = "15db9d90b5832f1d715c314700af94ed12055b574d90cf684d24ee9a8aa863e5"; # One key for every Firefox, since the add-on keeps it in synced storage
         };
