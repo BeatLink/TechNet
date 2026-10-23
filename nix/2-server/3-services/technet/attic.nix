@@ -17,6 +17,12 @@
     # Heimdall pushes too, so X-Monitor's nightly builds of every host land in the cache rather than only in Heimdall's own store.
     technet.atticPush.enable = true;
 
+    # X-Monitor's Fleet Closures monitor pushes a target by hand with this host's token, as the agent's user.
+    sops.secrets.attic_push_token = {
+        group = "x-monitor-credentials";
+        mode = "0440";
+    };
+
     services.atticd = {
         enable = true;
         environmentFile = config.sops.secrets.attic_env.path;

@@ -109,6 +109,7 @@
     config,
     inputs,
     lib,
+    pkgs,
     ...
 }:
 let
@@ -1695,6 +1696,15 @@ in
                                                         "Thor"
                                                     ];
                                                     cache_url = "https://attic.heimdall.technet/technet";
+                                                    # A hand-made build replaces the nightly one's root, so it stays rooted until deployed like that one would.
+                                                    build_root_dir = buildRoots;
+                                                    build_links = lib.genAttrs [
+                                                        "Heimdall"
+                                                        "Odin"
+                                                        "Ragnarok"
+                                                        "Thor"
+                                                    ] (host: "${lib.toLower host}-nixos-deployment");
+                                                    push_command = "env XDG_CONFIG_HOME=${config.technet.atticPush.configDir} ${pkgs.attic-client}/bin/attic push --jobs 2 technet";
                                                     agent = "heimdall";
                                                 }
                                                 {
