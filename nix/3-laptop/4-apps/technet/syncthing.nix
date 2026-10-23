@@ -70,6 +70,27 @@
                             key_file = config.sops.secrets.syncthing_api_key.path;
                         }
                     )}";
+                    # The tray keeps its own copy of the key and rewrites its ini on exit, so it is stopped before the copy is replaced.
+                    ExecStartPost = "${pkgs.writeShellScript "syncthing-tray-api-key" ''
+                        set -euo pipefail
+                        ini="$HOME/.config/syncthingtray.ini"
+                        [ -f "$ini" ] || exit 0
+                        ${pkgs.gawk}/bin/awk 'NR == FNR { key = $0; next } /apiKey=@ByteArray\(.+\)$/ { sub(/=.*/, "=@ByteArray(" key ")") } { print }' \
+                            "${config.sops.secrets.syncthing_api_key.path}" "$ini" > "$RUNTIME_DIRECTORY/tray.ini"
+                        if ${pkgs.diffutils}/bin/cmp -s "$RUNTIME_DIRECTORY/tray.ini" "$ini"; then
+                            exit 0
+                        fi
+                        tray_was_active=0
+                        if systemctl --user is-active --quiet syncthingtray.service; then
+                            tray_was_active=1
+                        fi
+                        systemctl --user stop syncthingtray.service
+                        # Written in place, since the ini is a bind-mounted persisted file that rejects a rename over it.
+                        cat "$RUNTIME_DIRECTORY/tray.ini" > "$ini"
+                        if [ "$tray_was_active" = 1 ]; then
+                            systemctl --user start --no-block syncthingtray.service
+                        fi
+                    ''}";
                 };
                 Install.WantedBy = [ "default.target" ];
             };
