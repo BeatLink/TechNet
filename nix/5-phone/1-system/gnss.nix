@@ -14,6 +14,17 @@ let
     socket_path = "/run/gnss-nmea.sock";
     modem_device = "/dev/cdc-wdm0";
 
+    # eg25-manager replaces its whole configure list with the one in a --config file, so this is the packaged one with a single entry changed.
+    eg25_config_name = "pine64,pinephone-1.2.toml";
+    eg25_default = builtins.fromTOML (
+        builtins.readFile "${config.services.eg25-manager.package.src}/data/${eg25_config_name}"
+    );
+    all_constellations =
+        command: if (command.subcmd or null) == "gnssconfig" then command // { expect = "1"; } else command;
+    eg25_config = (pkgs.formats.toml { }).generate eg25_config_name {
+        at.configure = map all_constellations eg25_default.at.configure;
+    };
+
     nmea_stream = pkgs.writeShellApplication {
         name = "gnss-nmea";
         runtimeInputs = [
@@ -88,6 +99,16 @@ in
 
             systemd.services.geoclue.restartTriggers = [
                 config.environment.etc."geoclue/conf.d/90-gnss.conf".source
+            ];
+        }
+
+        # Constellations #############################################################################################################################
+
+        # gnssconfig 1 tracks Galileo and BeiDou alongside the packaged GPS and GLONASS, so more satellites are in view for a first fix.
+        {
+            systemd.services.eg25-manager.serviceConfig.ExecStart = [
+                ""
+                "${lib.getExe config.services.eg25-manager.package} --config ${eg25_config}"
             ];
         }
     ];
