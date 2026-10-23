@@ -1632,8 +1632,7 @@ in
                                             push_ssh_key = config.sops.secrets.x_monitor_flake_deploy_key.path; # Only this monitor pushes, so the key lives on Heimdall alone
                                             update_at = "02:00"; # The only thing that bumps flake.lock
                                             build_at = "04:00"; # The fleet's builds start after attic-gc at 03:00, whose database lock their uploads would contend with
-                                            auto_switch = true;
-                                            auto_switch_after = "0"; # Switch as soon as drift is seen
+                                            auto_switch = false; # Heimdall runs local X-Monitor main through deploy-heimdall.sh, which an automatic switch from the flake would undo
                                             agent = "heimdall";
                                         }
                                         (nixGc "Heimdall")
