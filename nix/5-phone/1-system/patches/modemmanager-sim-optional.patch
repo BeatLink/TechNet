@@ -1,0 +1,180 @@
+diff --git a/src/mm-broadband-modem.c b/src/mm-broadband-modem.c
+index c14bce3..5d91d11 100644
+--- a/src/mm-broadband-modem.c
++++ b/src/mm-broadband-modem.c
+@@ -4782,6 +4782,23 @@ sim_swap_check_step (GTask *task)
+     }
+ }
+ 
++static void
++sim_missing_recheck_ready (MMIfaceModem *self,
++                           GAsyncResult *res,
++                           GTask        *task)
++{
++    g_autoptr(GError) error = NULL;
++
++    MM_IFACE_MODEM_GET_IFACE (self)->load_unlock_required_finish (self, res, &error);
++    if (!error) {
++        mm_obj_msg (self, "SIM inserted, handle as SIM hot-swap");
++        mm_iface_modem_process_sim_event (self);
++    } else if (!g_error_matches (error, MM_MOBILE_EQUIPMENT_ERROR, MM_MOBILE_EQUIPMENT_ERROR_SIM_NOT_INSERTED))
++        mm_obj_dbg (self, "couldn't recheck for a SIM: %s", error->message);
++    g_task_return_boolean (task, TRUE);
++    g_object_unref (task);
++}
++
+ static void
+ modem_check_for_sim_swap (MMIfaceModem        *self,
+                           GAsyncReadyCallback  callback,
+@@ -4803,6 +4820,17 @@ modem_check_for_sim_swap (MMIfaceModem        *self,
+     if (!ctx->sim) {
+         MMModemState modem_state;
+ 
++        /* Still no SIM is the expected answer here; only a card that has appeared since counts as a swap */
++        if (mm_iface_modem_is_sim_missing (self)) {
++            MM_IFACE_MODEM_GET_IFACE (self)->load_unlock_required (
++                self,
++                TRUE,
++                NULL,
++                (GAsyncReadyCallback)sim_missing_recheck_ready,
++                task);
++            return;
++        }
++
+         modem_state = MM_MODEM_STATE_UNKNOWN;
+         g_object_get (self,
+                       MM_IFACE_MODEM_STATE, &modem_state,
+@@ -13537,7 +13565,8 @@ initialize_step (GTask *task)
+        /* fall through */
+ 
+     case INITIALIZE_STEP_IFACE_3GPP_PROFILE_MANAGER:
+-        if (mm_iface_modem_is_3gpp (MM_IFACE_MODEM (ctx->self))) {
++        if (mm_iface_modem_is_3gpp (MM_IFACE_MODEM (ctx->self)) &&
++            !mm_iface_modem_is_sim_missing (MM_IFACE_MODEM (ctx->self))) {
+             /* Initialize the 3GPP Profile Manager interface */
+             mm_iface_modem_3gpp_profile_manager_initialize (MM_IFACE_MODEM_3GPP_PROFILE_MANAGER (ctx->self),
+                                                             (GAsyncReadyCallback)iface_modem_3gpp_profile_manager_initialize_ready,
+@@ -13548,7 +13577,8 @@ initialize_step (GTask *task)
+        /* fall through */
+ 
+     case INITIALIZE_STEP_IFACE_3GPP_USSD:
+-        if (mm_iface_modem_is_3gpp (MM_IFACE_MODEM (ctx->self))) {
++        if (mm_iface_modem_is_3gpp (MM_IFACE_MODEM (ctx->self)) &&
++            !mm_iface_modem_is_sim_missing (MM_IFACE_MODEM (ctx->self))) {
+             /* Initialize the 3GPP/USSD interface */
+             mm_iface_modem_3gpp_ussd_initialize (MM_IFACE_MODEM_3GPP_USSD (ctx->self),
+                                                  (GAsyncReadyCallback)iface_modem_3gpp_ussd_initialize_ready,
+@@ -13571,12 +13601,16 @@ initialize_step (GTask *task)
+        /* fall through */
+ 
+     case INITIALIZE_STEP_IFACE_MESSAGING:
+-        /* Initialize the Messaging interface */
+-        mm_iface_modem_messaging_initialize (MM_IFACE_MODEM_MESSAGING (ctx->self),
+-                                             g_task_get_cancellable (task),
+-                                             (GAsyncReadyCallback)iface_modem_messaging_initialize_ready,
+-                                             task);
+-        return;
++        if (!mm_iface_modem_is_sim_missing (MM_IFACE_MODEM (ctx->self))) {
++            /* Initialize the Messaging interface */
++            mm_iface_modem_messaging_initialize (MM_IFACE_MODEM_MESSAGING (ctx->self),
++                                                 g_task_get_cancellable (task),
++                                                 (GAsyncReadyCallback)iface_modem_messaging_initialize_ready,
++                                                 task);
++            return;
++        }
++        ctx->step++;
++        /* fall through */
+ 
+     case INITIALIZE_STEP_IFACE_TIME:
+         /* Initialize the Time interface */
+@@ -13649,7 +13683,8 @@ initialize_step (GTask *task)
+         return;
+ 
+     case INITIALIZE_STEP_IFACE_SIMPLE:
+-        if (ctx->self->priv->modem_state != MM_MODEM_STATE_FAILED)
++        if (ctx->self->priv->modem_state != MM_MODEM_STATE_FAILED &&
++            !mm_iface_modem_is_sim_missing (MM_IFACE_MODEM (ctx->self)))
+             mm_iface_modem_simple_initialize (MM_IFACE_MODEM_SIMPLE (ctx->self));
+         ctx->step++;
+        /* fall through */
+diff --git a/src/mm-iface-modem.c b/src/mm-iface-modem.c
+index d9b2e00..840ed1d 100644
+--- a/src/mm-iface-modem.c
++++ b/src/mm-iface-modem.c
+@@ -88,6 +88,9 @@ typedef struct {
+     /* SIM hot swap setup done flag */
+     gboolean sim_hot_swap_configured;
+ 
++    /* No SIM card inserted; SIM-dependent features stay off */
++    gboolean sim_missing;
++
+     /* Timer that tracks when the last power operation request was
+      * performed, so that we can throttle the requests to the modem. */
+     GTimer *power_state_timer;
+@@ -138,6 +141,12 @@ get_private (MMIfaceModem *self)
+     return priv;
+ }
+ 
++gboolean
++mm_iface_modem_is_sim_missing (MMIfaceModem *self)
++{
++    return get_private (self)->sim_missing;
++}
++
+ /*****************************************************************************/
+ 
+ gboolean
+@@ -4014,6 +4023,8 @@ internal_load_unlock_required_ready (MMIfaceModem *self,
+     ctx = g_task_get_task_data (task);
+ 
+     ctx->lock = internal_load_unlock_required_finish (self, res, &error);
++    if (!error)
++        get_private (self)->sim_missing = FALSE;
+     if (error) {
+         /* Treat several SIM related, serial and other core errors as critical
+          * and abort the checks. These will end up moving the modem to a FAILED
+@@ -4030,8 +4041,14 @@ internal_load_unlock_required_ready (MMIfaceModem *self,
+ 
+         if (g_error_matches (error,
+                              MM_MOBILE_EQUIPMENT_ERROR,
+-                             MM_MOBILE_EQUIPMENT_ERROR_SIM_NOT_INSERTED) ||
+-            g_error_matches (error,
++                             MM_MOBILE_EQUIPMENT_ERROR_SIM_NOT_INSERTED)) {
++            /* A modem without a SIM is still a modem: run it with the SIM-dependent features off */
++            if (!get_private (self)->sim_missing)
++                mm_obj_msg (self, "no SIM inserted, continuing without SIM-dependent features");
++            get_private (self)->sim_missing = TRUE;
++            g_error_free (error);
++            ctx->lock = MM_MODEM_LOCK_NONE;
++        } else if (g_error_matches (error,
+                              MM_MOBILE_EQUIPMENT_ERROR,
+                              MM_MOBILE_EQUIPMENT_ERROR_SIM_FAILURE) ||
+             g_error_matches (error,
+@@ -6199,6 +6216,7 @@ interface_initialization_step (GTask *task)
+         /* If the modem doesn't need any SIM (not implemented by plugin, or not
+          * needed in CDMA-only modems) */
+         if (!mm_iface_modem_is_cdma_only (self) &&
++            !get_private (self)->sim_missing &&
+             MM_IFACE_MODEM_GET_IFACE (self)->create_sim &&
+             MM_IFACE_MODEM_GET_IFACE (self)->create_sim_finish) {
+             MMBaseSim *sim = NULL;
+@@ -6275,6 +6293,7 @@ interface_initialization_step (GTask *task)
+          * lifetime of the modem. Therefore, if we already have them loaded,
+          * don't try to load them again. */
+         if (mm_gdbus_modem_get_own_numbers (ctx->skeleton) == NULL &&
++            !get_private (self)->sim_missing &&
+             MM_IFACE_MODEM_GET_IFACE (self)->load_own_numbers &&
+             MM_IFACE_MODEM_GET_IFACE (self)->load_own_numbers_finish) {
+             MM_IFACE_MODEM_GET_IFACE (self)->load_own_numbers (
+diff --git a/src/mm-iface-modem.h b/src/mm-iface-modem.h
+index 977dd16..4b7048c 100644
+--- a/src/mm-iface-modem.h
++++ b/src/mm-iface-modem.h
+@@ -428,6 +428,7 @@ MMModemAccessTechnology mm_iface_modem_get_access_technologies (MMIfaceModem *se
+ /* Helpers to query capabilities */
+ MMModemCapability mm_iface_modem_get_current_capabilities (MMIfaceModem *self);
+ gboolean          mm_iface_modem_is_3gpp                  (MMIfaceModem *self);
++gboolean          mm_iface_modem_is_sim_missing           (MMIfaceModem *self);
+ gboolean          mm_iface_modem_is_3gpp_only             (MMIfaceModem *self);
+ gboolean          mm_iface_modem_is_3gpp_lte              (MMIfaceModem *self);
+ gboolean          mm_iface_modem_is_3gpp_5gnr             (MMIfaceModem *self);

@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ config, pkgs, ... }:
 let
     # callaudiod dereferences info->active_port->name in four places without
     # checking it, and PulseAudio is entitled to hand back a sink with no active
@@ -34,7 +34,7 @@ in
     # Optional but recommended. https://github.com/NixOS/nixpkgs/pull/162894
     systemd.services.ModemManager.serviceConfig.ExecStart = [
         "" # clear ExecStart from upstream unit file.
-        "${pkgs.modemmanager}/sbin/ModemManager --test-quick-suspend-resume"
+        "${config.networking.modemmanager.package}/sbin/ModemManager --test-quick-suspend-resume"
     ];
 
     # Routes call audio between earpiece, speaker and headset. gnome-calls asks
