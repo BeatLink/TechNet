@@ -21,6 +21,9 @@
     # The default list omits phosh, and without an agent geoclue holds every GetClient call forever, so no app ever gets a fix
     services.geoclue2.whitelistedAgents = [ "sm.puri.Phosh" ];
 
+    # beaconDB knows no access point or cell here, so every GPS fix within 100 m sends the ones in view to it under the default nick
+    services.geoclue2.submitData = true;
+
     # Turns the location quick setting back on at every login, so switching it off lasts until the next boot rather than silently stopping Traccar for good
     home-manager.users.beatlink.systemd.user.services.location-on = {
         Unit = {
