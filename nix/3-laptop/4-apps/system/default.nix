@@ -8,7 +8,7 @@
         ./variety.nix
         ./vorta.nix
         ./blueman
-        ./borgmatic.nix
+        ./laptop-backup.nix
         ./tilix
         ./ssh.nix
     ];
