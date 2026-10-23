@@ -122,16 +122,27 @@
             set -euo pipefail
             config_file=/Storage/Services/Syncthing/Config/config.xml
             new_key_file=${config.sops.secrets.syncthing_api_key.path}
-            current_key=$(${pkgs.libxml2}/bin/xmllint --xpath 'string(configuration/gui/apikey)' "$config_file")
+            read_key() { ${pkgs.libxml2}/bin/xmllint --xpath 'string(configuration/gui/apikey)' "$config_file"; }
+            current_key=$(read_key)
             if [ "$current_key" = "$(cat "$new_key_file")" ]; then
                 exit 0
             fi
+            ${pkgs.curl}/bin/curl -sSf --retry 60 --retry-delay 2 --retry-all-errors -o /dev/null http://127.0.0.1:8384/rest/noauth/health
             printf 'X-API-Key: %s\n' "$current_key" > "$RUNTIME_DIRECTORY/headers"
             ${pkgs.jq}/bin/jq -n --rawfile key "$new_key_file" '{apiKey: ($key | rtrimstr("\n"))}' > "$RUNTIME_DIRECTORY/body"
-            ${pkgs.curl}/bin/curl -sSf --retry 10 --retry-delay 3 --retry-all-errors -o /dev/null \
+            # Syncthing restarts its GUI listener on this change and can drop the reply, so success is judged from config.xml instead.
+            ${pkgs.curl}/bin/curl -sS -o /dev/null \
                 -H @"$RUNTIME_DIRECTORY/headers" -H 'Content-Type: application/json' \
-                -X PATCH --data @"$RUNTIME_DIRECTORY/body" http://127.0.0.1:8384/rest/config/gui
-            systemctl start --no-block syncthing-x-monitor-api-key.service
+                -X PATCH --data @"$RUNTIME_DIRECTORY/body" http://127.0.0.1:8384/rest/config/gui || true
+            for _ in $(seq 30); do
+                if [ "$(read_key)" = "$(cat "$new_key_file")" ]; then
+                    systemctl start --no-block syncthing-x-monitor-api-key.service
+                    exit 0
+                fi
+                sleep 1
+            done
+            echo "Syncthing did not take the new API key" >&2
+            exit 1
         '';
     };
 
