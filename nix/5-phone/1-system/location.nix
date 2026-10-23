@@ -14,9 +14,24 @@
 # Recommended by the NixOS PinePhone wiki page and absent here, which is how it
 # was noticed.
 #
+{ pkgs, ... }:
 {
     users.users.geoclue.extraGroups = [ "networkmanager" ];
 
     # The default list omits phosh, and without an agent geoclue holds every GetClient call forever, so no app ever gets a fix
     services.geoclue2.whitelistedAgents = [ "sm.puri.Phosh" ];
+
+    # Turns the location quick setting back on at every login, so switching it off lasts until the next boot rather than silently stopping Traccar for good
+    home-manager.users.beatlink.systemd.user.services.location-on = {
+        Unit = {
+            Description = "Switch location services on at login";
+            PartOf = [ "graphical-session.target" ];
+            After = [ "graphical-session.target" ];
+        };
+        Service = {
+            Type = "oneshot";
+            ExecStart = "${pkgs.dconf}/bin/dconf write /org/gnome/system/location/enabled true";
+        };
+        Install.WantedBy = [ "graphical-session.target" ];
+    };
 }
