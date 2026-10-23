@@ -1231,11 +1231,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792712696,
-        "narHash": "sha256-B1w77CBuIbysmLcFwatTN8FRa9jFOebeTJQ4mOqCXF8=",
+        "lastModified": 1792713930,
+        "narHash": "sha256-fmV0vl53JzHVK3venzqtolNmqdWw9GvDx3btlulnYn0=",
         "owner": "x-tech-laboratories",
         "repo": "X-Monitor",
-        "rev": "a62e6e11fff89175e99f58fa515963b6e2b62322",
+        "rev": "9bd0107af4dfccd86d52df21b073fb1136523496",
         "type": "github"
       },
       "original": {
