@@ -10,6 +10,7 @@
         HOMEPAGE_VAR_FRESHRSS_PASS=${config.sops.placeholder.freshrss_api_password}
         HOMEPAGE_VAR_CALIBRE_PASS=${config.sops.placeholder.calibre_web_x_monitor_password}
         HOMEPAGE_VAR_PIHOLE_PASS=${config.sops.placeholder.pihole_web_password}
+        HOMEPAGE_VAR_SYNCTHING_KEY=${config.sops.placeholder.syncthing_api_key}
     '';
 
     services.homepage-dashboard = {
@@ -18,7 +19,6 @@
         listenPort = 9610;
         environmentFiles = [
             # homepage_env still carries its own stale TRILIUM key; the template after it re-sets it, and systemd lets the last assignment win.
-            # Syncthing's API key is in here too: it generates its own, so the live value was captured once by hand (see syncthing.nix for where X-Monitor reads it).
             config.sops.secrets.homepage_env.path
             config.sops.templates."homepage-widgets.env".path
         ];

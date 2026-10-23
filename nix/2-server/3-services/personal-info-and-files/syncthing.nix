@@ -27,6 +27,13 @@
         sopsFile = "${config.technet.secrets.commonPath}/syncthing.yaml";
         owner = "beatlink";
     };
+    sops.secrets.syncthing_api_key = {
+        sopsFile = "${config.technet.secrets.path}/syncthing.yaml";
+        restartUnits = [
+            "syncthing-api-key.service"
+            "homepage-dashboard.service"
+        ];
+    };
     services.syncthing = {
         enable = true;
         openDefaultPorts = true;
@@ -98,6 +105,35 @@
         "syncthing.odin.technet,heimdall.technet"
         "syncthing.ragnarok.technet,heimdall.technet"
     ];
+
+    # Syncthing generates its own API key, so this swaps in the one from sops through the REST API whenever the two differ.
+    systemd.services.syncthing-api-key = {
+        description = "Apply Syncthing's API key from sops";
+        after = [ "syncthing-init.service" ];
+        wants = [ "syncthing-init.service" ];
+        wantedBy = [ "multi-user.target" ];
+        serviceConfig = {
+            Type = "oneshot";
+            RuntimeDirectory = "syncthing-api-key";
+            RuntimeDirectoryMode = "0700";
+        };
+        # Keys travel through files in the runtime directory, never argv, so no process listing can show them.
+        script = ''
+            set -euo pipefail
+            config_file=/Storage/Services/Syncthing/Config/config.xml
+            new_key_file=${config.sops.secrets.syncthing_api_key.path}
+            current_key=$(${pkgs.libxml2}/bin/xmllint --xpath 'string(configuration/gui/apikey)' "$config_file")
+            if [ "$current_key" = "$(cat "$new_key_file")" ]; then
+                exit 0
+            fi
+            printf 'X-API-Key: %s\n' "$current_key" > "$RUNTIME_DIRECTORY/headers"
+            ${pkgs.jq}/bin/jq -n --rawfile key "$new_key_file" '{apiKey: ($key | rtrimstr("\n"))}' > "$RUNTIME_DIRECTORY/body"
+            ${pkgs.curl}/bin/curl -sSf --retry 10 --retry-delay 3 --retry-all-errors -o /dev/null \
+                -H @"$RUNTIME_DIRECTORY/headers" -H 'Content-Type: application/json' \
+                -X PATCH --data @"$RUNTIME_DIRECTORY/body" http://127.0.0.1:8384/rest/config/gui
+            systemctl start --no-block syncthing-x-monitor-api-key.service
+        '';
+    };
 
     systemd.services.syncthing-x-monitor-api-key = {
         description = "Extract Syncthing's API key for X-Monitor";
