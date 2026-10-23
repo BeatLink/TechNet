@@ -638,7 +638,7 @@ in
                                             rebuild_bin = "technet-remote-switch";
                                             build_at = "04:45";
                                             auto_switch = true;
-                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                            auto_switch_after = "0"; # Switch as soon as drift is seen
                                             agent = "ragnarok";
                                         }
                                         (nixGc "Ragnarok")
@@ -1633,7 +1633,7 @@ in
                                             update_at = "02:00"; # The only thing that bumps flake.lock
                                             build_at = "04:00"; # The fleet's builds start after attic-gc at 03:00, whose database lock their uploads would contend with
                                             auto_switch = true;
-                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                            auto_switch_after = "0"; # Switch as soon as drift is seen
                                             agent = "heimdall";
                                         }
                                         (nixGc "Heimdall")
@@ -2049,7 +2049,7 @@ in
                                             rebuild_bin = "technet-remote-switch"; # Holds the target awake through the switch; see remote-deploy.nix
                                             build_at = "04:15";
                                             auto_switch = true;
-                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                            auto_switch_after = "0"; # Switch as soon as drift is seen
                                             agent = "odin";
                                         }
                                         (nixGc "Odin")
@@ -2746,7 +2746,7 @@ in
                                             rebuild_bin = "technet-remote-switch"; # Holds the phone awake and restarts phosh after; see remote-deploy.nix
                                             build_at = "04:30";
                                             auto_switch = true;
-                                            auto_switch_after = "30m"; # Long enough for a manual deploy to land first
+                                            auto_switch_after = "0"; # Switch as soon as drift is seen
                                             agent = "thor";
                                         }
                                         (nixGc "Thor")
