@@ -20,6 +20,10 @@
         sopsFile = "${config.technet.secrets.commonPath}/syncthing.yaml";
         owner = "beatlink";
     };
+    sops.secrets.syncthing_api_key = {
+        sopsFile = "${config.technet.secrets.path}/syncthing.yaml";
+        owner = "beatlink";
+    };
 
     syncthing-mesh.self = "Odin";
 
@@ -44,6 +48,30 @@
                     RestartSec = 5;
                 };
                 Install.WantedBy = lib.mkForce [ "display.target" ];
+            };
+
+            # A user unit, since Syncthing runs only in the session; the sops file's hash restarts it when the key is rotated.
+            systemd.user.services.syncthing-api-key = {
+                Unit = {
+                    Description = "Apply Syncthing's API key from sops";
+                    After = [ "syncthing-init.service" ];
+                    Wants = [ "syncthing-init.service" ];
+                    X-Restart-Triggers = [
+                        (builtins.hashFile "sha256" "${config.technet.secrets.path}/syncthing.yaml")
+                    ];
+                };
+                Service = {
+                    Type = "oneshot";
+                    RuntimeDirectory = "syncthing-api-key";
+                    RuntimeDirectoryMode = "0700";
+                    ExecStart = "${pkgs.writeShellScript "syncthing-api-key" (
+                        config.syncthing-mesh.applyApiKeyScript {
+                            config_file = "/home/beatlink/.local/state/syncthing/config.xml";
+                            key_file = config.sops.secrets.syncthing_api_key.path;
+                        }
+                    )}";
+                };
+                Install.WantedBy = [ "default.target" ];
             };
 
             systemd.user.targets.tray = {

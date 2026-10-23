@@ -106,7 +106,6 @@
         "syncthing.ragnarok.technet,heimdall.technet"
     ];
 
-    # Syncthing generates its own API key, so this swaps in the one from sops through the REST API whenever the two differ.
     systemd.services.syncthing-api-key = {
         description = "Apply Syncthing's API key from sops";
         after = [ "syncthing-init.service" ];
@@ -117,33 +116,12 @@
             RuntimeDirectory = "syncthing-api-key";
             RuntimeDirectoryMode = "0700";
         };
-        # Keys travel through files in the runtime directory, never argv, so no process listing can show them.
-        script = ''
-            set -euo pipefail
-            config_file=/Storage/Services/Syncthing/Config/config.xml
-            new_key_file=${config.sops.secrets.syncthing_api_key.path}
-            read_key() { ${pkgs.libxml2}/bin/xmllint --xpath 'string(configuration/gui/apikey)' "$config_file"; }
-            current_key=$(read_key)
-            if [ "$current_key" = "$(cat "$new_key_file")" ]; then
-                exit 0
-            fi
-            ${pkgs.curl}/bin/curl -sSf --retry 60 --retry-delay 2 --retry-all-errors -o /dev/null http://127.0.0.1:8384/rest/noauth/health
-            printf 'X-API-Key: %s\n' "$current_key" > "$RUNTIME_DIRECTORY/headers"
-            ${pkgs.jq}/bin/jq -n --rawfile key "$new_key_file" '{apiKey: ($key | rtrimstr("\n"))}' > "$RUNTIME_DIRECTORY/body"
-            # Syncthing restarts its GUI listener on this change and can drop the reply, so success is judged from config.xml instead.
-            ${pkgs.curl}/bin/curl -sS -o /dev/null \
-                -H @"$RUNTIME_DIRECTORY/headers" -H 'Content-Type: application/json' \
-                -X PATCH --data @"$RUNTIME_DIRECTORY/body" http://127.0.0.1:8384/rest/config/gui || true
-            for _ in $(seq 30); do
-                if [ "$(read_key)" = "$(cat "$new_key_file")" ]; then
-                    systemctl start --no-block syncthing-x-monitor-api-key.service
-                    exit 0
-                fi
-                sleep 1
-            done
-            echo "Syncthing did not take the new API key" >&2
-            exit 1
-        '';
+        script = config.syncthing-mesh.applyApiKeyScript {
+            config_file = "/Storage/Services/Syncthing/Config/config.xml";
+            key_file = config.sops.secrets.syncthing_api_key.path;
+            # X-Monitor reads the key only at startup, so it is restarted once the extracted copy is fresh.
+            on_change = "systemctl start syncthing-x-monitor-api-key.service && systemctl try-restart --no-block x-monitor.service";
+        };
     };
 
     systemd.services.syncthing-x-monitor-api-key = {

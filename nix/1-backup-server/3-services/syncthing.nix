@@ -24,6 +24,10 @@
                 sopsFile = "${config.technet.secrets.commonPath}/syncthing.yaml";
                 owner = "beatlink";
             };
+            sops.secrets.syncthing_api_key = {
+                sopsFile = "${config.technet.secrets.path}/syncthing.yaml";
+                restartUnits = [ "syncthing-api-key.service" ];
+            };
 
             services.syncthing = {
                 cert = config.sops.secrets.syncthing_cert.path;
@@ -91,6 +95,25 @@
             services.syncthing.settings.gui = {
                 user = "beatlink";
                 insecureSkipHostcheck = true;
+            };
+        }
+
+        # API Key ####################################################################################################################################
+        {
+            systemd.services.syncthing-api-key = {
+                description = "Apply Syncthing's API key from sops";
+                after = [ "syncthing-init.service" ];
+                wants = [ "syncthing-init.service" ];
+                wantedBy = [ "multi-user.target" ];
+                serviceConfig = {
+                    Type = "oneshot";
+                    RuntimeDirectory = "syncthing-api-key";
+                    RuntimeDirectoryMode = "0700";
+                };
+                script = config.syncthing-mesh.applyApiKeyScript {
+                    config_file = "${config.services.syncthing.configDir}/config.xml";
+                    key_file = config.sops.secrets.syncthing_api_key.path;
+                };
             };
         }
 
