@@ -614,7 +614,6 @@ in
                                                     type = "connections";
                                                     interval = "1m";
                                                     warning = 500;
-                                                    threshold = 1000;
                                                     agent = "ragnarok";
                                                 }
                                             ];
@@ -898,7 +897,6 @@ in
                                                     type = "connections";
                                                     interval = "1m";
                                                     warning = 500;
-                                                    threshold = 1000;
                                                     agent = "heimdall";
                                                 }
                                                 {
@@ -2014,7 +2012,6 @@ in
                                                     type = "connections";
                                                     interval = "1m";
                                                     warning = 500;
-                                                    threshold = 1000;
                                                     agent = "odin";
                                                 }
                                                 {
@@ -2645,7 +2642,6 @@ in
                                                     type = "connections";
                                                     interval = "1m";
                                                     warning = 200;
-                                                    threshold = 500;
                                                     agent = "thor";
                                                 }
                                                 {
