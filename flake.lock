@@ -1309,15 +1309,15 @@
       "locked": {
         "lastModified": 1792858355,
         "narHash": "sha256-kBWWhyEVdZPNdlNcmKhUpuu4a8JlAeTVLsyFoYvrShU=",
-        "ref": "refs/heads/main",
+        "owner": "x-tech-laboratories",
+        "repo": "X-Tasks",
         "rev": "5efea5aba6491147e3d9ed81fe88b8f8d0693123",
-        "revCount": 86,
-        "type": "git",
-        "url": "file:///Storage/Files/Projects/X-Tech-Laboratories/X-Tasks"
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "file:///Storage/Files/Projects/X-Tech-Laboratories/X-Tasks"
+        "owner": "x-tech-laboratories",
+        "repo": "X-Tasks",
+        "type": "github"
       }
     },
     "xdg-autostart": {

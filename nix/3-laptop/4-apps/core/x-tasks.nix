@@ -1,6 +1,6 @@
 # X-Tasks ############################################################################################################################################
 #
-# The task app built in /Storage/Files/Projects/X-Tech-Laboratories/X-Tasks, installed from its flake.
+# The task app built in /Storage/Files/Projects/X-Tech-Laboratories/X-Tasks, installed from its GitHub flake.
 #
 { inputs, ... }:
 {
