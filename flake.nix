@@ -57,6 +57,11 @@
             url = "github:x-tech-laboratories/Anthem";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        # A local checkout, because the repo has no remote yet
+        x-tasks = {
+            url = "git+file:///Storage/Files/Projects/X-Tech-Laboratories/X-Tasks";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
         codex.url = "github:BeatLink/CODEX";
         playitslowly = {
             url = "github:BeatLink/playitslowly";
