@@ -18,7 +18,6 @@
         # message regardless of console level, so journald still holds a full boot to read back afterwards.
         {
             boot.consoleLogLevel = 3; # Not lower: a silent console hides the panic that boot.shell_on_fail exists to catch
-            boot.initrd.verbose = false;
             boot.kernelParams = [
                 "systemd.show_status=false"
                 "rd.systemd.show_status=false"

@@ -1,6 +1,6 @@
 # Boot Loader ########################################################################################################################################
 #
-# Systemd owns the whole path: systemd-boot as the EFI loader, then systemd rather than the scripted initrd for early userspace.
+# Systemd owns the whole path: systemd-boot as the EFI loader, then systemd in the initrd for early userspace.
 #
 
 { lib, ... }:
@@ -14,8 +14,5 @@
         timeout = 5;
     };
 
-    boot.initrd = {
-        enable = true;
-        systemd.enable = true;
-    };
+    boot.initrd.enable = true;
 }
