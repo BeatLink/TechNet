@@ -122,6 +122,9 @@ let
     # Each nightly build links its closure here, replacing the last one, so it stays rooted until deployed and attic-push-retry can find it.
     buildRoots = "/var/lib/x-monitor-agent/build-roots";
 
+    # Heimdall's Attic cache, where the other hosts' closures are kept once pushed instead of in Heimdall's own store.
+    cacheUrl = "https://attic.heimdall.technet/technet";
+
     # Likewise for garbage collection: one common module sets nix.gc.options fleet-wide, so the button
     # on any host's monitor runs the same collection that host's weekly timer runs.
     gcArgs = builtins.filter (a: a != "") (lib.splitString " " config.nix.gc.options);
@@ -668,6 +671,7 @@ in
                                             rebuild_bin = "technet-remote-switch";
                                             build_at = "04:45";
                                             build_root_dir = buildRoots;
+                                            cache_url = cacheUrl; # A closure the cache already holds is not fetched back just to root it
                                             auto_switch = true;
                                             auto_switch_after = "0"; # Switch as soon as drift is seen
                                             agent = "ragnarok";
@@ -1695,7 +1699,7 @@ in
                                                         "Ragnarok"
                                                         "Thor"
                                                     ];
-                                                    cache_url = "https://attic.heimdall.technet/technet";
+                                                    cache_url = cacheUrl;
                                                     # A hand-made build replaces the nightly one's root, so it stays rooted until deployed like that one would.
                                                     build_root_dir = buildRoots;
                                                     build_links = lib.genAttrs [
@@ -1704,6 +1708,12 @@ in
                                                         "Ragnarok"
                                                         "Thor"
                                                     ] (host: "${lib.toLower host}-nixos-deployment");
+                                                    # Once fully pushed these live only in the cache, and their deploys substitute them back from it.
+                                                    drop_pushed = [
+                                                        "Odin"
+                                                        "Ragnarok"
+                                                        "Thor"
+                                                    ];
                                                     push_command = "env XDG_CONFIG_HOME=${config.technet.atticPush.configDir} ${pkgs.attic-client}/bin/attic push --jobs 2 technet";
                                                     agent = "heimdall";
                                                 }
@@ -2123,6 +2133,7 @@ in
                                             rebuild_bin = "technet-remote-switch"; # Holds the target awake through the switch; see remote-deploy.nix
                                             build_at = "04:15";
                                             build_root_dir = buildRoots;
+                                            cache_url = cacheUrl; # A closure the cache already holds is not fetched back just to root it
                                             auto_switch = true;
                                             auto_switch_after = "0"; # Switch as soon as drift is seen
                                             agent = "odin";
@@ -2728,6 +2739,7 @@ in
                                             rebuild_bin = "technet-remote-switch"; # Holds the phone awake and restarts phosh after; see remote-deploy.nix
                                             build_at = "04:30";
                                             build_root_dir = buildRoots;
+                                            cache_url = cacheUrl; # A closure the cache already holds is not fetched back just to root it
                                             auto_switch = true;
                                             auto_switch_after = "0"; # Switch as soon as drift is seen
                                             agent = "thor";
