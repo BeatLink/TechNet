@@ -1667,7 +1667,8 @@ in
                                             update_at = "02:00"; # The only thing that bumps flake.lock
                                             build_at = "04:00"; # The fleet's builds start after attic-gc at 03:00, whose database lock their uploads would contend with
                                             build_root_dir = buildRoots;
-                                            auto_switch = false; # Off while Heimdall runs local X-Monitor main via deploy-heimdall.sh; turn back on when that ends
+                                            auto_switch = true;
+                                            auto_switch_after = "0"; # Switch as soon as drift is seen
                                             agent = "heimdall";
                                         }
                                         (nixGc "Heimdall")
