@@ -2397,7 +2397,8 @@ in
                                                     name = "CPU";
                                                     id = "thor-cpu";
                                                     type = "cpu";
-                                                    interval = "1m";
+                                                    interval = "30m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     warning = 70;
                                                     threshold = 85;
                                                     agent = "thor";
@@ -2407,7 +2408,8 @@ in
                                                     name = "Load";
                                                     id = "thor-load";
                                                     type = "load";
-                                                    interval = "1m";
+                                                    interval = "30m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     agent = "thor";
                                                 }
                                                 {
@@ -2415,7 +2417,8 @@ in
                                                     name = "Temperature";
                                                     id = "thor-temperature";
                                                     type = "temperature";
-                                                    interval = "1m";
+                                                    interval = "30m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     warning = 80;
                                                     threshold = 90;
                                                     agent = "thor";
@@ -2425,17 +2428,17 @@ in
                                                     name = "Interrupts";
                                                     id = "thor-interrupts";
                                                     type = "interrupts";
-                                                    interval = "1m";
+                                                    interval = "30m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     warning = 50000;
                                                     threshold = null;
                                                     agent = "thor";
                                                 }
                                                 {
-                                                    # ps over 600 processes is the most expensive sample the agent takes here, so it runs at a tenth of Odin's rate.
                                                     name = "Processes";
                                                     id = "thor-processes";
                                                     type = "processes";
-                                                    interval = "5m";
+                                                    interval = "30m";
                                                     offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     max_processes = 20;
                                                     grid_col_span = 2;
@@ -2454,7 +2457,7 @@ in
                                                     name = "Battery";
                                                     id = "thor-battery";
                                                     type = "power";
-                                                    interval = "5m";
+                                                    interval = "30m";
                                                     offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     battery = "axp20x-battery";
                                                     charge_warning = 20;
@@ -2466,7 +2469,7 @@ in
                                                     name = "Keyboard Battery";
                                                     id = "thor-keyboard-battery";
                                                     type = "power";
-                                                    interval = "5m";
+                                                    interval = "30m";
                                                     offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     battery = "ip5xxx-battery";
                                                     agent = "thor";
@@ -2483,7 +2486,8 @@ in
                                                     name = "Usage";
                                                     id = "thor-memory-usage";
                                                     type = "memory";
-                                                    interval = "1m";
+                                                    interval = "30m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     warning = 93;
                                                     threshold = 97;
                                                     agent = "thor";
@@ -2494,7 +2498,8 @@ in
                                                     id = "thor-oom";
                                                     type = "oom";
                                                     notify."for" = 0; # A kill clears within a few cycles, so the System Stats hour would never be reached
-                                                    interval = "1m";
+                                                    interval = "30m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     agent = "thor";
                                                 }
                                             ];
@@ -2511,7 +2516,8 @@ in
                                                     name = "Disk I/O (Root)";
                                                     id = "thor-disk-io";
                                                     type = "disk_io";
-                                                    interval = "1m";
+                                                    interval = "30m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     device = "/dev/disk/by-id/mmc-ASTCXX_0xd1002721"; # 32GB eMMC, root-pool-Thor and /boot
                                                     agent = "thor";
                                                 }
@@ -2519,7 +2525,8 @@ in
                                                     name = "Disk I/O (Data)";
                                                     id = "thor-disk-io-data";
                                                     type = "disk_io";
-                                                    interval = "1m";
+                                                    interval = "30m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     device = "/dev/disk/by-id/mmc-SN01T_0x8ade202e"; # 1TB SD card, data-pool-Thor
                                                     agent = "thor";
                                                 }
@@ -2529,7 +2536,7 @@ in
                                                     name = "Btrfs";
                                                     id = "thor-btrfs";
                                                     type = "btrfs";
-                                                    interval = "10m";
+                                                    interval = "30m";
                                                     offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     warning = 90;
                                                     threshold = 96;
@@ -2541,7 +2548,7 @@ in
                                                     type = "disk_space";
                                                     path = "/";
                                                     threshold = 90;
-                                                    interval = "10m";
+                                                    interval = "30m";
                                                     offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     agent = "thor";
                                                 }
@@ -2551,7 +2558,7 @@ in
                                                     type = "disk_space";
                                                     path = "/Storage";
                                                     threshold = 90;
-                                                    interval = "10m";
+                                                    interval = "30m";
                                                     offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     agent = "thor";
                                                 }
@@ -2561,7 +2568,7 @@ in
                                                     type = "disk_space";
                                                     path = "/boot";
                                                     threshold = 90;
-                                                    interval = "10m";
+                                                    interval = "30m";
                                                     offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     agent = "thor";
                                                 }
@@ -2570,7 +2577,7 @@ in
                                                     name = "Filesystems";
                                                     id = "thor-filesystems";
                                                     type = "filesystems";
-                                                    interval = "10m";
+                                                    interval = "30m";
                                                     offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     warning = 90;
                                                     threshold = 96;
@@ -2590,7 +2597,8 @@ in
                                                     name = "Throughput";
                                                     id = "thor-throughput";
                                                     type = "throughput";
-                                                    interval = "1m";
+                                                    interval = "30m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     agent = "thor";
                                                 }
                                                 {
@@ -2598,7 +2606,8 @@ in
                                                     name = "Connections";
                                                     id = "thor-connections";
                                                     type = "connections";
-                                                    interval = "1m";
+                                                    interval = "30m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     warning = 200;
                                                     agent = "thor";
                                                 }
@@ -2606,7 +2615,8 @@ in
                                                     name = "WiFi";
                                                     id = "thor-wifi";
                                                     type = "wifi";
-                                                    interval = "1m";
+                                                    interval = "30m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     quality_warning = 40;
                                                     quality_threshold = 20;
                                                     agent = "thor";
@@ -2631,7 +2641,8 @@ in
                                                     name = "Service";
                                                     id = "thor-phosh";
                                                     type = "systemd_service";
-                                                    interval = "1m";
+                                                    interval = "30m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     service_name = "phosh.service";
                                                     agent = "thor";
                                                 }
@@ -2646,7 +2657,8 @@ in
                                                     name = "Service";
                                                     id = "thor-networking";
                                                     type = "systemd_service";
-                                                    interval = "1m";
+                                                    interval = "30m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     service_name = "NetworkManager.service";
                                                     agent = "thor";
                                                 }
@@ -2655,7 +2667,8 @@ in
                                                     name = "WireGuard Watchdog";
                                                     id = "thor-wireguard-watchdog";
                                                     type = "systemd_service";
-                                                    interval = "1m";
+                                                    interval = "30m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     service_name = "wireguard-watchdog.service";
                                                     agent = "thor";
                                                 }
@@ -2670,7 +2683,8 @@ in
                                                     name = "Service";
                                                     id = "thor-modemmanager";
                                                     type = "systemd_service";
-                                                    interval = "1m";
+                                                    interval = "30m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     service_name = "ModemManager.service";
                                                     agent = "thor";
                                                 }
@@ -2679,7 +2693,8 @@ in
                                                     name = "Power Control";
                                                     id = "thor-eg25-manager";
                                                     type = "systemd_service";
-                                                    interval = "1m";
+                                                    interval = "30m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     service_name = "eg25-manager.service";
                                                     agent = "thor";
                                                 }
@@ -2694,7 +2709,8 @@ in
                                                     name = "Service";
                                                     id = "thor-bluetooth";
                                                     type = "systemd_service";
-                                                    interval = "1m";
+                                                    interval = "30m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     service_name = "bluetooth.service";
                                                     agent = "thor";
                                                 }
@@ -2710,7 +2726,8 @@ in
                                                     name = "Service";
                                                     id = "thor-chargectl";
                                                     type = "systemd_service";
-                                                    interval = "1m";
+                                                    interval = "30m";
+                                                    offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                                     service_name = "chargectl.service";
                                                     agent = "thor";
                                                 }
@@ -2727,7 +2744,7 @@ in
                                             name = "Deployment";
                                             id = "thor-nixos-deployment";
                                             type = "nixos_upgrade";
-                                            interval = "5m";
+                                            interval = "30m";
                                             offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                             flake = upgradeFlake;
                                             configuration = "Thor";
@@ -2752,7 +2769,7 @@ in
                                             type = "disk_space";
                                             path = "/nix";
                                             threshold = 90;
-                                            interval = "10m";
+                                            interval = "30m";
                                             offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                                             agent = "thor";
                                         }
