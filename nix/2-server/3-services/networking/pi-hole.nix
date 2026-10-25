@@ -247,6 +247,9 @@
     };
 
     # Setup ordering ---------------------------------------------------------------------------------------------------------------------------------
+    # Stays active after it exits, so a switch that changes the list set restarts it and registers the new lists.
+    systemd.services.pihole-ftl-setup.serviceConfig.RemainAfterExit = true;
+
     # FTL serves the API before the gravity database is open, so the setup's list registration is gated on the lists endpoint returning data.
     systemd.services.pihole-ftl-setup.serviceConfig.ExecStartPre = lib.getExe (
         pkgs.writeShellApplication {
