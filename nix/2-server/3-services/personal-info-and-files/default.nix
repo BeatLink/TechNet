@@ -5,5 +5,6 @@
         ./radicale.nix
         ./syncthing.nix
         ./trilium.nix
+        ./x-tasks.nix
     ];
 }
