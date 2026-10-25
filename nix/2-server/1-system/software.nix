@@ -26,5 +26,15 @@
             nix.daemonCPUSchedPolicy = "idle";
             nix.daemonIOSchedClass = "idle";
         }
+
+        # Build Space ################################################################################################################################
+        # The nightly builds of every host share the root pool with / and once filled it, so the store is collected before them and during them.
+        {
+            nix.gc.dates = lib.mkForce "*-*-* 03:30:00";
+            nix.settings = {
+                min-free = 5 * 1024 * 1024 * 1024;
+                max-free = 15 * 1024 * 1024 * 1024;
+            };
+        }
     ];
 }
