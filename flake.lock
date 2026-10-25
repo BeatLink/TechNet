@@ -1307,11 +1307,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792897992,
-        "narHash": "sha256-hr/yNZBSc6XEnhht/+BTDUqffrCVh1MdXAT/9WMGFKo=",
+        "lastModified": 1792898116,
+        "narHash": "sha256-y35b7ADcAP0B13YTSTVHN2Xo+pQLEvH30I6+WOEFqwU=",
         "owner": "x-tech-laboratories",
         "repo": "X-Tasks",
-        "rev": "b815a2c92695f1ce571f63a9d0e0954211d204ad",
+        "rev": "bc8c31a67145582bf162334ef9e0fd3a4b5843f0",
         "type": "github"
       },
       "original": {
