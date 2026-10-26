@@ -2,12 +2,16 @@
 
 ## Finish the move from Vigil to X-Monitor
 
-- [ ] Update browser bookmarks from `vigil.heimdall.technet` to `x-monitor.heimdall.technet`; links in notifications sent before the switch stop working
+- [ ] Update browser bookmarks from `vigil.heimdall.technet` and `x-monitor.heimdall.technet` to `monitor.heimdall.technet`; links in notifications sent before the switch stop working
 
 Left named Vigil on purpose, because renaming them needs a hand-made change in a running service or an encrypted file:
 Trilium's ETAPI token named Vigil; the sops key names (`*_vigil_*`, `vigil_*`) and
 `HOMEPAGE_VAR_VIGIL_PASS` inside `homepage_env`; the `.vigil-canary` files, whose archived copies the restore checks compare;
 the `vigil-self` monitor id and the Home Assistant automation and webhook ids, which key existing history.
+
+## Finish dropping x- from the app domains
+
+- [ ] Point the X-Tasks desktop and Android apps' sync server at `tasks.heimdall.technet`; `x-tasks.heimdall.technet` no longer resolves
 
 ## Confirm Ragnarok's Vorta rewrite finishes
 

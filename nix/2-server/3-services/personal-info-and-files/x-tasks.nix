@@ -29,7 +29,7 @@
     ];
 
     nginx-vhosts.x-tasks = {
-        domain = "x-tasks.heimdall.technet";
+        domain = "tasks.heimdall.technet";
         port = 9002;
     };
 }

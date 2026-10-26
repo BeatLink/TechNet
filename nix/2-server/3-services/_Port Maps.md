@@ -21,7 +21,7 @@ column, and their service definition lives in that host's own directory.
 | Service | Port | Vhost |
 |---------|------|-------|
 | Homepage     | 9610 | dashboard.heimdall.technet |
-| X-Monitor        | 9611 | x-monitor.heimdall.technet — also serves the agent WebSocket at `/api/agent/ws`, reachable over WireGuard so Odin and Ragnarok's agents can dial in |
+| X-Monitor        | 9611 | monitor.heimdall.technet — also serves the agent WebSocket at `/api/agent/ws`, reachable over WireGuard so Odin and Ragnarok's agents can dial in |
 
 ## Networking / DNS
 
@@ -76,7 +76,7 @@ column, and their service definition lives in that host's own directory.
 | Syncthing on Odin      | 8384 | 10.100.100.2; syncthing-odin.heimdall.technet, syncthing.odin.technet |
 | Syncthing on Ragnarok  | 8384 | 10.100.100.6; syncthing-ragnarok.heimdall.technet, syncthing.ragnarok.technet |
 | BlockURL     | 9001 | blockurl.heimdall.technet |
-| X-Tasks      | 9002 | x-tasks.heimdall.technet |
+| X-Tasks      | 9002 | tasks.heimdall.technet |
 | ActivityWatch | 5600 | 127.0.0.1; activitywatch.heimdall.technet |
 
 ## X-Monitor Reachability Checks

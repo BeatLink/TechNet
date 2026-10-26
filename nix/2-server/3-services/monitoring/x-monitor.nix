@@ -360,7 +360,7 @@ in
             ];
 
             notifications = {
-                base_url = "https://x-monitor.heimdall.technet";
+                base_url = "https://monitor.heimdall.technet";
                 group_window = "30s";
                 defaults.flapping = {
                     changes = 4;
@@ -2963,7 +2963,7 @@ in
     networking.firewall.interfaces.enp2s0f1.allowedTCPPorts = [ 9611 ];
 
     nginx-vhosts.x-monitor = {
-        domain = "x-monitor.heimdall.technet";
+        domain = "monitor.heimdall.technet";
         port = 9611;
     };
 }

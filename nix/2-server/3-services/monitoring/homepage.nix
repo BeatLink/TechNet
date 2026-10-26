@@ -453,9 +453,9 @@
                     {
                         "X-Monitor" = {
                             icon = "uptime-kuma.png";
-                            href = "https://x-monitor.heimdall.technet";
+                            href = "https://monitor.heimdall.technet";
                             description = "Network and Systems Monitor";
-                            siteMonitor = "https://x-monitor.heimdall.technet";
+                            siteMonitor = "https://monitor.heimdall.technet";
                             statusStyle = "dot";
                             widget = {
                                 type = "customapi";
