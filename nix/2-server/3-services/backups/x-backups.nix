@@ -6,7 +6,7 @@
 # It reaches every repository the way X-Monitor's SSH fallback does: it logs into the host borg runs on as `x-monitor-access` with X-Monitor's key,
 # and runs borg there under that account's scoped sudo. Each passphrase is read on that host by `passphrase_command`, so none reaches Heimdall.
 #
-# The login is X-Monitor's dashboard password, hashed into /run at each start, so there is no second password to keep.
+# The login's password hash is its own, in secrets/2-server/x-backups.yaml, written by X-Backups' `npm run hash-password`.
 #
 {
     config,
@@ -16,7 +16,6 @@
 }:
 let
     port = 7710;
-    hashDir = "/run/x-backups-auth";
 
     # Settings shared by every repository, as in X-Monitor's `borgBackup`.
     borgBackup = {
@@ -104,10 +103,12 @@ in
 {
     imports = [ inputs.x-backups.nixosModules.default ];
 
+    sops.secrets.x_backups_password_hash.sopsFile = "${config.technet.secrets.path}/x-backups.yaml";
+
     services.x-backups = {
         enable = true;
         inherit port;
-        passwordHashFile = "${hashDir}/password-hash";
+        passwordHashFile = config.sops.secrets.x_backups_password_hash.path;
         sshKeyFile = config.sops.secrets.x_monitor_ssh_key.path;
 
         repositories = {
@@ -164,26 +165,6 @@ in
                     ssh_key = "/run/secrets/borg_repo_ssh_key";
                 };
         };
-    };
-
-    # Hashes X-Monitor's dashboard password on stdin, so it never reaches argv, a log or the Nix store.
-    systemd.services.x-backups-password-hash = {
-        description = "Hash X-Monitor's dashboard password for X-Backups";
-        requiredBy = [ "x-backups.service" ];
-        before = [ "x-backups.service" ];
-        partOf = [ "x-backups.service" ];
-        serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            RuntimeDirectory = baseNameOf hashDir;
-            RuntimeDirectoryMode = "0700";
-            RuntimeDirectoryPreserve = true;
-            LoadCredential = [ "password:${config.sops.secrets.x_monitor_dashboard_password.path}" ];
-        };
-        script = ''
-            ${pkgs.nodejs_24}/bin/node ${config.services.x-backups.package}/lib/x-backups/server/hash_password.ts ${hashDir}/password-hash \
-                < "$CREDENTIALS_DIRECTORY/password"
-        '';
     };
 
     environment.persistence."/Storage/Services/X-Backups".directories = [
