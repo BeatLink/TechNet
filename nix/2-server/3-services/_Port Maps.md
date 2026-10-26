@@ -22,6 +22,7 @@ column, and their service definition lives in that host's own directory.
 |---------|------|-------|
 | Homepage     | 9610 | dashboard.heimdall.technet |
 | X-Monitor        | 9611 | monitor.heimdall.technet — also serves the agent WebSocket at `/api/agent/ws`, reachable over WireGuard so Odin and Ragnarok's agents can dial in |
+| X-Backups        | 7710 | backups.heimdall.technet |
 
 ## Networking / DNS
 

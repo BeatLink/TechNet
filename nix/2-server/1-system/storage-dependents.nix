@@ -40,6 +40,7 @@
                         "unbound"
                         "unbound-root-hints"
                         "vlc-audio"
+                        "x-backups"
                         "x-monitor"
                         "x-monitor-import-vigil-db"
                     ]

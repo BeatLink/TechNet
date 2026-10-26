@@ -116,6 +116,10 @@
             url = "github:x-tech-laboratories/X-Monitor";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        x-backups = {
+            url = "github:x-tech-laboratories/X-Backups";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
         context = {
             url = "github:BeatLink/Context";
             inputs.nixpkgs.follows = "nixpkgs";
