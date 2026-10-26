@@ -340,6 +340,7 @@ in
                     id = "odin";
                     host = "odin.technet";
                     public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBZyB/HfSkuAZW8Sk+Zo4bPGHJ0cXkMi+5D0N3SE4lEf vigil-agent-odin";
+                    run_monitors = true;
                 }
                 {
                     id = "odin-desktop";
