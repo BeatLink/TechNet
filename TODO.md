@@ -13,6 +13,10 @@ the `vigil-self` monitor id and the Home Assistant automation and webhook ids, w
 
 - [ ] Point the X-Tasks desktop and Android apps' sync server at `tasks.heimdall.technet`; `x-tasks.heimdall.technet` no longer resolves
 
+## Finish moving X-Backups to its own SSH key
+
+- [ ] Confirm Odin has switched to bf7c3ea8 or later, which authorizes `x-backups@technet` for `x-monitor-access`; until then X-Backups shows Odin's six repositories as unavailable at `backups.heimdall.technet`
+
 ## Confirm Ragnarok's Vorta rewrite finishes
 
 - [ ] Confirm the `borg recreate` from Odin against `ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Vorta`
