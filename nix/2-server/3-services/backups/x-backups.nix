@@ -3,7 +3,7 @@
 # The borg web platform that takes over X-Monitor's borg monitors. It runs beside them for now, watching the same repositories with the same
 # settings, so the two can be compared before X-Monitor's borg plugin is removed (task 16 in X-Backups' todo.md).
 #
-# It reaches every repository the way X-Monitor's SSH fallback does: it logs into the host borg runs on as `x-monitor-access` with X-Monitor's key,
+# It reaches every repository the way X-Monitor's SSH fallback does: it logs into the host borg runs on as `x-monitor-access` with its own key,
 # and runs borg there under that account's scoped sudo. Each passphrase is read on that host by `passphrase_command`, so none reaches Heimdall.
 #
 # The login's password hash is its own, in secrets/2-server/x-backups.yaml, written by X-Backups' `npm run hash-password`.
@@ -104,12 +104,13 @@ in
     imports = [ inputs.x-backups.nixosModules.default ];
 
     sops.secrets.x_backups_password_hash.sopsFile = "${config.technet.secrets.path}/x-backups.yaml";
+    sops.secrets.x_backups_ssh_key.sopsFile = "${config.technet.secrets.path}/x-backups.yaml";
 
     services.x-backups = {
         enable = true;
         inherit port;
         passwordHashFile = config.sops.secrets.x_backups_password_hash.path;
-        sshKeyFile = config.sops.secrets.x_monitor_ssh_key.path;
+        sshKeyFile = config.sops.secrets.x_backups_ssh_key.path;
 
         repositories = {
             heimdall-on-disk = serverBackup // onDisk // { repo = "/Storage/Files/Backups/Server/Borgmatic"; };

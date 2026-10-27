@@ -180,6 +180,7 @@ in
                     ];
                     openssh.authorizedKeys.keys = [
                         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID6oDtIndxb2aJJFhl3+xU+4nuVUQQrzcWOLX+RslJU/ vigil@technet"
+                        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO0XISJpmLxD7KJZ5Xr3TD0eO/KUiIHJfwt0dKjtSC7U x-backups@technet" # X-Backups' own key
                     ];
                 };
             };
