@@ -15,7 +15,6 @@ let
     pausedUserUnits = [
         "syncthing.service"
         "syncthingtray.service"
-        "vorta.service"
         "variety.service"
         "linux-sidebar.service"
         "gallery-dl-blockurl-sync.timer"
