@@ -66,7 +66,8 @@ let
 
     laptopBackup = borgmaticBackup // {
         host = "odin.technet";
-        source_paths = [ "/Storage/System" ];
+        # All of /Storage, which Vorta used to back up.
+        source_paths = [ "/Storage" ];
         canary_path = "/Storage/System/.vigil-canary";
         keep_hourly = 24;
         keep_daily = 7;
@@ -74,11 +75,6 @@ let
         keep_monthly = 12;
         keep_yearly = 3;
         skip_while_active = [ "gamemode-quiet.service" ];
-    };
-
-    # All of /Storage, as in X-Monitor's `laptopFullBackup`; Heimdall's copy stays on /Storage/System until its Vorta repo is gone.
-    laptopFullBackup = laptopBackup // {
-        source_paths = [ "/Storage" ];
     };
 
     # Ragnarok's USB pool can take many minutes to answer, so remote repositories keep a long timeout, still under their interval.
@@ -129,7 +125,7 @@ in
                 };
 
 
-            odin-borgmatic-on-disk = laptopFullBackup // onDisk // { repo = "/Storage/Files/Backups/Laptop/Borgmatic"; };
+            odin-borgmatic-on-disk = laptopBackup // onDisk // { repo = "/Storage/Files/Backups/Laptop/Borgmatic"; };
             odin-borgmatic-heimdall =
                 laptopBackup
                 // remote
@@ -138,7 +134,7 @@ in
                     ssh_key = "/run/secrets/borg_repo_ssh_key"; # Odin's own borg key
                 };
             odin-borgmatic-ragnarok =
-                laptopFullBackup
+                laptopBackup
                 // remote
                 // {
                     repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Borgmatic";

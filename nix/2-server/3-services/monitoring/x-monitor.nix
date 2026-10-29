@@ -179,7 +179,8 @@ let
 
     # Odin's three backups, which skip while a game runs and catch up as soon as the laptop is back after missing one.
     laptopBackup = borgBackup // {
-        source_paths = [ "/Storage/System" ];
+        # All of /Storage, which Vorta used to back up.
+        source_paths = [ "/Storage" ];
         canary_path = "/Storage/System/.vigil-canary";
         keep_hourly = 24;
         keep_daily = 7;
@@ -194,11 +195,6 @@ let
             }
         ];
         agent = "odin";
-    };
-
-    # All of /Storage, which Vorta used to back up; Heimdall's copy stays on /Storage/System until its Vorta repo is gone and frees the room.
-    laptopFullBackup = laptopBackup // {
-        source_paths = [ "/Storage" ];
     };
 
     # A backup's schedule: every three hours, a weekly check on `weekday` at `hour`, and monthly extract and data checks from day `day`.
@@ -2304,7 +2300,7 @@ in
                                             type = "group";
                                             children = [
                                                 (
-                                                    laptopFullBackup
+                                                    laptopBackup
                                                     // {
                                                         name = "On Disk";
                                                         id = "backup-laptop-borgmatic-on-disk";
@@ -2336,7 +2332,7 @@ in
                                                     }
                                                 )
                                                 (
-                                                    laptopFullBackup
+                                                    laptopBackup
                                                     // {
                                                         name = "Ragnarok";
                                                         id = "backup-laptop-borgmatic-ragnarok";
