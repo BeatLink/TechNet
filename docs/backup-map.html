@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Odin Backup Map</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+/* Layout: one column; today's map, then the map after the merge, then a short key and what changes. */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --fg: #1b2230;
+  --muted: #5a6476;
+  --rule: #d9dee7;
+  --accent: #2f6db5;
+  --font-body: "IBM Plex Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161d; --surface: #1a2029; --fg: #e3e8f0; --muted: #9aa5b6; --rule: #2c3542; --accent: #7fb0eb;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12161d; --surface: #1a2029; --fg: #e3e8f0; --muted: #9aa5b6; --rule: #2c3542; --accent: #7fb0eb;
+  color-scheme: dark;
+}
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.55; }
+main {
+  max-width: 1100px; margin: 0 auto;
+  padding-block: 28px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 28px;
+}
+h1 { font-size: 1.6rem; margin: 0; text-wrap: balance; }
+h2 { font-size: 1.2rem; margin: 0; }
+h3 { font-size: 1.02rem; margin: 0 0 8px; }
+.sub { color: var(--muted); margin: 4px 0 0; }
+.map { display: grid; gap: 10px; }
+.label { font-family: var(--font-mono); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.diagram { background: var(--surface); border: 1px solid var(--rule); border-radius: 8px; padding: 16px; overflow: auto; max-height: 80vh; cursor: grab; }
+.diagram.dragging { cursor: grabbing; user-select: none; }
+.diagram pre { margin: 0; width: max-content; min-width: 100%; }
+.diagram svg { max-width: none !important; height: auto; display: block; }
+.zoom { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.zoom button {
+  font: inherit; font-size: 0.9rem; min-width: 36px; padding: 4px 10px;
+  background: var(--surface); color: var(--fg); border: 1px solid var(--rule); border-radius: 6px; cursor: pointer;
+}
+.zoom button:hover { border-color: var(--accent); }
+.zoom button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.zoom .level { font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted); min-width: 4.5ch; font-variant-numeric: tabular-nums; }
+.zoom .hint { font-size: 0.85rem; color: var(--muted); }
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+.notes section { min-width: 0; }
+ul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+code { font-family: var(--font-mono); font-size: 0.9em; }
+.k { font-family: var(--font-mono); color: var(--accent); }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js"></script>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Odin Backup Map</h1>
+    <p class="sub">Where Odin's data is backed up today, and where it will be once the Vorta merge is finished. As of 2026-10-29.</p>
+  </header>
+
+  <section class="map">
+    <span class="label">Today</span>
+    <h2>As it runs now</h2>
+    <p class="sub">Only <code>/Storage/System</code> gets new backups. The rest of Odin's <code>/Storage</code> has had none since Vorta stopped on 2026-10-27 at 21:10; its history sits in the frozen Vorta repositories and the replayed copy on Odin's disk.</p>
+    <div class="diagram">
+<pre class="mermaid">
+flowchart LR
+    subgraph ODIN["Odin (laptop)"]
+        OS["/Storage/System"]
+        OF["/Storage/Files, Apps, PhoneApps"]
+        OB[("Laptop/Borgmatic&lt;br/&gt;24h / 7d / 4w / 12m / 3y")]
+        OV[("Laptop/Vorta&lt;br/&gt;frozen")]
+    end
+    subgraph HEIM["Heimdall (off-site copy 1)"]
+        HS["/Storage/Services, Apps, PhoneApps"]
+        HB[("Laptop/Borgmatic&lt;br/&gt;24h / 7d / 4w / 12m / 3y")]
+        HV[("Laptop/Vorta&lt;br/&gt;frozen, 12h / 3d")]
+        HSB[("Server/Borgmatic&lt;br/&gt;6h / 7d / 4w / 3m / 1y")]
+    end
+    subgraph RAG["Ragnarok (off-site copy 2)"]
+        RB[("Laptop/Borgmatic&lt;br/&gt;24h / 7d / 4w / 12m / 3y")]
+        RV[("Laptop/Vorta&lt;br/&gt;frozen, 24h / 30d / 8w / 24m / 3y")]
+        RSB[("Server/Borgmatic")]
+    end
+
+    OS -->|every 3h| OB
+    OS -->|every 3h, SSH| HB
+    OS -->|every 3h, SSH| RB
+
+    OF -.->|stopped 2026-10-27| OV
+    OF -.->|stopped 2026-10-27| HV
+    OF -.->|stopped 2026-10-27| RV
+
+    OV ==>|history replayed, checked| OB
+
+    HS -->|scheduled| HSB
+    HS -->|scheduled, SSH| RSB
+
+    classDef frozen stroke-dasharray: 5 4
+    class OV,HV,RV frozen
+</pre>
+    </div>
+  </section>
+
+  <section class="map">
+    <span class="label">After steps 5 to 8</span>
+    <h2>Once the merge is finished</h2>
+    <p class="sub">All of Odin's <code>/Storage</code> goes to three borgmatic repositories, one on its own disk and two off site. All three Vorta repositories are gone.</p>
+    <div class="diagram">
+<pre class="mermaid">
+flowchart LR
+    subgraph ODIN["Odin (laptop)"]
+        OA["All of /Storage&lt;br/&gt;System, Files, Apps, PhoneApps"]
+        OB[("Laptop/Borgmatic&lt;br/&gt;24h / 7d / 4w / 12m / 3y&lt;br/&gt;includes Vorta's replayed history")]
+    end
+    subgraph HEIM["Heimdall (off-site copy 1)"]
+        HS["/Storage/Services, Apps, PhoneApps"]
+        HB[("Laptop/Borgmatic&lt;br/&gt;24h / 7d / 4w / 12m / 3y")]
+        HSB[("Server/Borgmatic&lt;br/&gt;6h / 7d / 4w / 3m / 1y")]
+    end
+    subgraph RAG["Ragnarok (off-site copy 2)"]
+        RB[("Laptop/Borgmatic&lt;br/&gt;24h / 30d / 8w / 24m / 3y&lt;br/&gt;includes Vorta's replayed history")]
+        RSB[("Server/Borgmatic")]
+    end
+
+    OA -->|"every 3h (step 5)"| OB
+    OA -->|"every 3h, SSH (step 6)"| HB
+    OA -->|"every 3h, SSH (step 5)"| RB
+
+    HS -->|scheduled| HSB
+    HS -->|scheduled, SSH| RSB
+</pre>
+    </div>
+  </section>
+
+  <section class="map">
+    <span class="label">Today and after</span>
+    <h2>Live copies through Syncthing</h2>
+    <p class="sub">Unchanged by the merge. Every host keeps its copy under <code>/Storage/Files/&lt;folder&gt;</code>. These copies are for access, not history: a deleted or overwritten file stays in Syncthing's trash for 7 days.</p>
+    <div class="diagram">
+<pre class="mermaid">
+flowchart LR
+    O["Odin&lt;br/&gt;/Storage/Files"]
+    H["Heimdall&lt;br/&gt;/Storage/Files"]
+    R["Ragnarok&lt;br/&gt;/Storage/Files"]
+    P["Phone (ThorX)"]
+
+    O <-->|"all folders"| H
+    O <-->|"all but Projects, Frigate"| R
+    H <-->|"all but Projects, Frigate"| R
+    O <-->|"all but Projects, Frigate, Torrents"| P
+    H <-->|"all but Projects, Frigate, Torrents"| P
+    R <-->|"all but Projects, Frigate, Torrents"| P
+</pre>
+    </div>
+  </section>
+
+  <div class="notes">
+    <section>
+      <h3>What each step changes</h3>
+      <ul>
+        <li><b>Step 5</b>, pushed, waiting on Heimdall's deploy: Odin's disk and Ragnarok back up all of <code>/Storage</code>.</li>
+        <li><b>Step 6</b>: Heimdall backs up all of <code>/Storage</code>. Its Vorta repository is deleted only after that copy lands and passes a check.</li>
+        <li><b>Step 7</b>: Ragnarok's Vorta history is replayed into its borgmatic repository, keeping the long history.</li>
+        <li><b>Step 8</b>: the remaining Vorta repositories are deleted, each only once its history is replayed and checked.</li>
+      </ul>
+    </section>
+    <section>
+      <h3>Reading the diagrams</h3>
+      <ul>
+        <li>Each host box holds that host's data and the repositories stored on its disk.</li>
+        <li><span class="k">solid arrow</span>: a backup that runs on a schedule. "SSH" means it crosses to another machine.</li>
+        <li><span class="k">dotted arrow</span>: Vorta's backups, stopped on 2026-10-27; those repositories are frozen.</li>
+        <li><span class="k">thick arrow</span>: history copied from one repository into another.</li>
+        <li>Cylinders are borg repositories; boxes are folders.</li>
+        <li>Every backup skips <code>/Storage/Files/Backups</code>, Steam game files, caches, and Torrents (it has a <code>.nobackup</code> marker).</li>
+      </ul>
+    </section>
+    <section>
+      <h3>Syncthing folders</h3>
+      <ul>
+        <li>All hosts keep them under <code>/Storage/Files/&lt;name&gt;</code>.</li>
+        <li>Most folders go to Odin, Heimdall, Ragnarok and the phone. Projects and Frigate: Odin and Heimdall only. Torrents: Odin, Heimdall, Ragnarok.</li>
+        <li>Heimdall's own server backup does not cover <code>/Storage/Files</code>; Odin's backups are where those files get history.</li>
+      </ul>
+    </section>
+  </div>
+</main>
+
+<script>
+// Gives each diagram zoom buttons, Ctrl+scroll zoom and drag-to-pan, once mermaid has drawn its SVG.
+document.querySelectorAll('.diagram').forEach((box, i) => {
+  const bar = document.createElement('div');
+  bar.className = 'zoom';
+  bar.innerHTML =
+    '<button type="button" id="zoom-out-' + i + '" aria-label="Zoom out">−</button>' +
+    '<span class="level" aria-live="polite">100%</span>' +
+    '<button type="button" id="zoom-in-' + i + '" aria-label="Zoom in">+</button>' +
+    '<button type="button" id="zoom-fit-' + i + '">Fit</button>' +
+    '<span class="hint">Ctrl+scroll to zoom, drag to move</span>';
+  box.before(bar);
+  const level = bar.querySelector('.level');
+  let svg = null, base = 0, scale = 1;
+
+  function apply() {
+    if (!svg) return;
+    svg.style.width = Math.round(base * scale) + 'px';
+    level.textContent = Math.round(scale * 100) + '%';
+  }
+  function zoomTo(next, cx, cy) {
+    if (!svg) return;
+    next = Math.min(4, Math.max(0.25, next));
+    const r = box.getBoundingClientRect();
+    const px = (cx ?? r.width / 2), py = (cy ?? r.height / 2);
+    const fx = (box.scrollLeft + px) / scale, fy = (box.scrollTop + py) / scale;
+    scale = next;
+    apply();
+    box.scrollLeft = fx * scale - px;
+    box.scrollTop = fy * scale - py;
+  }
+  function fit() {
+    if (!svg) return;
+    scale = Math.min(1, (box.clientWidth - 32) / base) || 1;
+    apply();
+  }
+
+  bar.querySelector('[aria-label="Zoom in"]').addEventListener('click', () => zoomTo(scale * 1.25));
+  bar.querySelector('[aria-label="Zoom out"]').addEventListener('click', () => zoomTo(scale / 1.25));
+  bar.querySelector('#zoom-fit-' + i).addEventListener('click', fit);
+
+  box.addEventListener('wheel', e => {
+    if (!e.ctrlKey && !e.metaKey) return;
+    e.preventDefault();
+    const r = box.getBoundingClientRect();
+    zoomTo(scale * (e.deltaY < 0 ? 1.1 : 1 / 1.1), e.clientX - r.left, e.clientY - r.top);
+  }, { passive: false });
+
+  let drag = null;
+  box.addEventListener('pointerdown', e => {
+    if (e.button !== 0) return;
+    drag = { x: e.clientX, y: e.clientY, l: box.scrollLeft, t: box.scrollTop };
+    box.classList.add('dragging');
+    box.setPointerCapture(e.pointerId);
+  });
+  box.addEventListener('pointermove', e => {
+    if (!drag) return;
+    box.scrollLeft = drag.l - (e.clientX - drag.x);
+    box.scrollTop = drag.t - (e.clientY - drag.y);
+  });
+  const end = () => { drag = null; box.classList.remove('dragging'); };
+  box.addEventListener('pointerup', end);
+  box.addEventListener('pointercancel', end);
+
+  function attach() {
+    const found = box.querySelector('svg');
+    if (!found || found === svg) return;
+    svg = found;
+    const vb = svg.viewBox && svg.viewBox.baseVal;
+    base = (vb && vb.width) || svg.getBoundingClientRect().width || 1000;
+    fit();
+  }
+  attach();
+  new MutationObserver(attach).observe(box, { childList: true, subtree: true });
+});
+</script>
+<script>
+// Draws the diagrams in the reader's light or dark theme; the zoom controls above attach once each SVG appears.
+mermaid.initialize({
+  startOnLoad: false,
+  theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default',
+});
+mermaid.run({ querySelector: 'pre.mermaid' });
+</script>
+</body>
+</html>
