@@ -103,7 +103,7 @@
 #
 # `keep_*` and `prune_match` mirror the owning tool's pruning, which X-Monitor's prune preview dry-runs.
 #
-# Heimdall's backups are run by X-Monitor on a schedule; Odin's are still run by Vorta and borgmatic and only triggered manually here.
+# Heimdall's and Odin's backups are run by X-Monitor on a schedule. Odin's Vorta repos are frozen and only watched until they are deleted.
 #
 {
     config,
@@ -177,7 +177,7 @@ let
         agent = "heimdall";
     };
 
-    # Odin's three system backups, which skip while a game runs and catch up as soon as the laptop is back after missing one.
+    # Odin's three backups, which skip while a game runs and catch up as soon as the laptop is back after missing one.
     laptopBackup = borgBackup // {
         source_paths = [ "/Storage/System" ];
         canary_path = "/Storage/System/.vigil-canary";
@@ -194,6 +194,11 @@ let
             }
         ];
         agent = "odin";
+    };
+
+    # All of /Storage, which Vorta used to back up; Heimdall's copy stays on /Storage/System until its Vorta repo is gone and frees the room.
+    laptopFullBackup = laptopBackup // {
+        source_paths = [ "/Storage" ];
     };
 
     # A backup's schedule: every three hours, a weekly check on `weekday` at `hour`, and monthly extract and data checks from day `day`.
@@ -2299,7 +2304,7 @@ in
                                             type = "group";
                                             children = [
                                                 (
-                                                    laptopBackup
+                                                    laptopFullBackup
                                                     // {
                                                         name = "On Disk";
                                                         id = "backup-laptop-borgmatic-on-disk";
@@ -2331,10 +2336,14 @@ in
                                                     }
                                                 )
                                                 (
-                                                    laptopBackup
+                                                    laptopFullBackup
                                                     // {
                                                         name = "Ragnarok";
                                                         id = "backup-laptop-borgmatic-ragnarok";
+                                                        # The long-term copy keeps Vorta's longer history.
+                                                        keep_daily = 30;
+                                                        keep_weekly = 8;
+                                                        keep_monthly = 24;
                                                         interval = "1h";
                                                         # Ragnarok's USB pool can take many minutes to answer, so the timeout stays long but under the interval.
                                                         timeout = "30m";

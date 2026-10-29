@@ -77,6 +77,11 @@ let
         skip_while_active = [ "gamemode-quiet.service" ];
     };
 
+    # All of /Storage, as in X-Monitor's `laptopFullBackup`; Heimdall's copy stays on /Storage/System until its Vorta repo is gone.
+    laptopFullBackup = laptopBackup // {
+        source_paths = [ "/Storage" ];
+    };
+
     # Odin's Vorta profiles, unlocked with Vorta's own passphrase.
     vortaBackup = borgBackup // {
         host = "odin.technet";
@@ -150,7 +155,7 @@ in
                     keep_yearly = 3;
                 };
 
-            odin-borgmatic-on-disk = laptopBackup // onDisk // { repo = "/Storage/Files/Backups/Laptop/Borgmatic"; };
+            odin-borgmatic-on-disk = laptopFullBackup // onDisk // { repo = "/Storage/Files/Backups/Laptop/Borgmatic"; };
             odin-borgmatic-heimdall =
                 laptopBackup
                 // remote
@@ -159,11 +164,15 @@ in
                     ssh_key = "/run/secrets/borg_repo_ssh_key"; # Odin's own borg key
                 };
             odin-borgmatic-ragnarok =
-                laptopBackup
+                laptopFullBackup
                 // remote
                 // {
                     repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Borgmatic";
                     ssh_key = "/run/secrets/borg_repo_ssh_key";
+                    # The long-term copy keeps Vorta's longer history.
+                    keep_daily = 30;
+                    keep_weekly = 8;
+                    keep_monthly = 24;
                 };
         };
     };
