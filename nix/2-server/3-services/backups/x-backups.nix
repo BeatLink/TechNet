@@ -124,6 +124,11 @@ in
                 address = "odin.technet";
                 agent_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGKAWTL9Mk0V/yOKzGfN7Pdpxkk+hMMaCzTTH6cF1VUl x-backups-agent-odin";
             };
+            # Ragnarok holds the remote repositories, which its agent can read locally
+            "ragnarok.technet" = {
+                address = "ragnarok.technet";
+                agent_public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIWwX835zk3CXBjSgi62Y8covbX0PexYRuGISUy3p23/ x-backups-agent-ragnarok";
+            };
         };
 
         repositories = {

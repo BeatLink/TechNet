@@ -20,6 +20,7 @@ let
     agentNames = {
         Heimdall = "heimdall.technet";
         Odin = "odin.technet";
+        Ragnarok = "ragnarok.technet";
     };
 
     # Heimdall runs the server itself, so its own agent takes the short way round rather than depending on WireGuard being up.
