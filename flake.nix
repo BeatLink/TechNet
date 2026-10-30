@@ -5,6 +5,10 @@
         nixpkgs = {
             url = "github:NixOS/nixpkgs/nixos-unstable";
         };
+        # The stable release, for the odd package unstable's cache has no aarch64 build of yet
+        nixpkgs-stable = {
+            url = "github:NixOS/nixpkgs/nixos-26.05";
+        };
         nix-index-database = {
             url = "github:nix-community/nix-index-database";
             inputs.nixpkgs.follows = "nixpkgs";

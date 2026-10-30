@@ -5,6 +5,7 @@
 
 {
     config,
+    inputs,
     lib,
     pkgs,
     ...
@@ -100,20 +101,12 @@ in
 
         # Shell History Sync #########################################################################################################################
         {
-            # Drop this once nixpkgs #578792 reaches the lock, which skips the same timing tests upstream.
+            # Unstable's atuin has no cached aarch64 build and takes over a day to build under emulation, so aarch64 hosts take stable's cached one.
             nixpkgs.overlays = [
                 (final: prev: {
                     atuin =
                         if prev.stdenv.hostPlatform.isAarch64 then
-                            prev.atuin.overrideAttrs (old: {
-                                checkFlags = (old.checkFlags or [ ]) ++ [
-                                    "--skip=a_copy_behind_another_machine_catches_up_as_it_resumes"
-                                    "--skip=capture_starts_when_the_config_turns_it_on"
-                                    "--skip=continuing_a_diverged_session_carries_one_branch"
-                                    "--skip=continuing_in_another_agent_carries_the_conversation"
-                                    "--skip=disjoint_concurrent_deletes_leave_the_index_empty"
-                                ];
-                            })
+                            inputs.nixpkgs-stable.legacyPackages.${prev.stdenv.hostPlatform.system}.atuin
                         else
                             prev.atuin;
                 })
