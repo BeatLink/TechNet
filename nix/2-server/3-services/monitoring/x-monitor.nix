@@ -2156,53 +2156,6 @@ in
                                             type = "group";
                                             children = [
                                                 {
-                                                    # Vorta profile "2. Heimdall Backup".
-                                                    name = "Heimdall";
-                                                    id = "backup-laptop-heimdall";
-                                                    type = "borg";
-                                                    interval = "1h";
-                                                    # Vorta starts this profile at :15 (vorta.nix), so polls stay 30 minutes clear of it.
-                                                    offset = "45m";
-                                                    # Remote repo on the backup server, whose data pool is a single
-                                                    # USB disk (~13 MB/s): a read can take many minutes when the pool
-                                                    # is busy. Long timeout so a slow answer still counts, wide
-                                                    # interval so polls cannot stack up behind each other. The timeout stays
-                                                    # well under the interval, so a poll that runs to its
-                                                    # deadline is killed before the next one is due.
-                                                    timeout = "30m";
-                                                    max_age = "1d";
-                                                    repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Vorta";
-                                                    # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
-                                                    cache_dir = "/var/cache/x-monitor-borg";
-                                                    require_sudo = true;
-                                                    # Unlocks this repo with Vorta's own passphrase, read on the
-                                                    # host borg runs on. Vorta and borgmatic use different
-                                                    # passphrases, so this is per monitor rather than global, and
-                                                    # the secret never leaves the host that owns it.
-                                                    passphrase_command = "cat /run/secrets/vorta_backup_passphrase";
-                                                    # borg makes its OWN SSH connection to the repo server, with
-                                                    # its own identity — X-Monitor's login here does not carry over.
-                                                    # This is Odin's existing Vorta repo key, the same one Vorta
-                                                    # authenticates with, so X-Monitor triggers the host's backup
-                                                    # rather than performing one under its own credentials.
-                                                    ssh_key = "/run/secrets/vorta_ssh_key";
-                                                    source_paths = [
-                                                        "/Storage"
-                                                    ];
-                                                    exclude = config.backup-excludes.patterns ++ [ "pf:/Storage/System" ];
-                                                    exclude_if_present = config.backup-excludes.markers;
-                                                    exclude_caches = false;
-                                                    allow_purge = true;
-                                                    compression = "lz4";
-                                                    archive_prefix = "odin";
-                                                    canary_path = "/Storage/Files/.vigil-canary";
-                                                    prune_match = "Odin-*";
-                                                    keep_within = "6H";
-                                                    keep_hourly = 12;
-                                                    keep_daily = 3;
-                                                    agent = "odin";
-                                                }
-                                                {
                                                     # Vorta profile "3. Ragnarok Backup" — the long-term copy.
                                                     name = "Ragnarok";
                                                     id = "backup-laptop-ragnarok";

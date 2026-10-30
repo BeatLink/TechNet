@@ -238,7 +238,7 @@ RAGNAROK = "ragnarok.technet"
 THOR = "thor.technet"
 
 BORG_UNITS = {
-    HEIMDALL: ["borgmatic", "borgmatic-check", "borg-compact-laptop-vorta"],
+    HEIMDALL: ["borgmatic", "borgmatic-check"],
     RAGNAROK: ["borg-check", "borg-check-data", "borg-compact-laptop-vorta"],
     LOCAL_HOST: ["borgmatic", "borgmatic-check", "borgmatic-check-data"],
 }
@@ -386,7 +386,6 @@ def apply_vorta_backups(new):
     """Odin's Vorta repositories and their keyring entries."""
     borg_rotate(
         [
-            (HEIMDALL, "borg", "/Storage/Files/Backups/Laptop/Vorta"),
             (RAGNAROK, "borg", "/Storage/Backups/Laptop/Vorta"),
         ],
         sops_value("secrets/3-laptop/vorta.yaml", "vorta_backup_passphrase"),
@@ -394,7 +393,6 @@ def apply_vorta_backups(new):
     )
     keyring_store(
         [
-            "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Vorta",
             "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Vorta",
         ],
         new,

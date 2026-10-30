@@ -15,7 +15,6 @@
                     [
                         "atticd"
                         "blockurl"
-                        "borg-compact-laptop-vorta"
                         "calibre-web-nextgen"
                         "calibre-web-nextgen-auto-zipper"
                         "calibre-web-nextgen-checksums"
