@@ -102,7 +102,7 @@ let
             fsWatcherDelayS = 60;
         };
         Sounds = { };
-        # Heimdall seeds, Ragnarok keeps a versioned copy and Odin's copy goes into its Vorta backups; the phone has no use for the tree.
+        # Heimdall seeds and Ragnarok keeps a versioned copy; Odin's copy carries a .nobackup marker, so no borg backup takes it. The phone has no use for the tree.
         Torrents = {
             devices = [
                 "Heimdall"
