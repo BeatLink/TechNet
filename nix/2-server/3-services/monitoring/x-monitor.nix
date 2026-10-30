@@ -103,7 +103,8 @@
 #
 # `keep_*` and `prune_match` mirror the owning tool's pruning, which X-Monitor's prune preview dry-runs.
 #
-# Heimdall's and Odin's backups are run by X-Monitor on a schedule. Odin's Vorta repos are frozen and only watched until they are deleted.
+# Heimdall's and Odin's borgmatic backups are run and watched by X-Backups (x-backups.nix); X-Monitor only checks X-Backups' health. Odin's
+# frozen Vorta repo on Ragnarok is still watched here until it is deleted.
 #
 {
     config,
@@ -131,99 +132,6 @@ let
 
     # The same definition every host's sudo rules read, so a monitor's arguments always match what sudoers permits.
     deploy = import ../../../0-common/1-system/software/deploy.nix;
-
-    # Settings shared by every backup X-Monitor runs.
-    borgBackup = {
-        type = "borg";
-        max_age = "1d";
-        cache_dir = "/var/cache/x-monitor-borg";
-        require_sudo = true;
-        passphrase_command = "cat /run/secrets/borg_repo_encryption_key";
-        exclude = config.backup-excludes.patterns;
-        exclude_if_present = config.backup-excludes.markers;
-        exclude_caches = false;
-        # The sources hold nested datasets, which --one-file-system would silently leave out.
-        one_file_system = false;
-        allow_purge = true;
-        compression = "lz4";
-        archive_prefix = "backup";
-        prune_after_backup = true;
-        compact_after_backup = true;
-        job_nice = 19;
-        job_io_idle = true;
-        inhibit_sleep = true;
-        job_lock = "/run/x-monitor-borg.lock";
-        check_kinds = {
-            repository = "8d";
-            archives = "8d";
-            extract = "32d";
-            data = "32d";
-        };
-    };
-
-    # Heimdall's two server backups.
-    serverBackup = borgBackup // {
-        source_paths = [
-            "/Storage/Services"
-            "/Storage/Apps"
-            "/Storage/PhoneApps"
-        ];
-        canary_path = "/Storage/Services/.vigil-canary";
-        keep_hourly = 6;
-        keep_daily = 7;
-        keep_weekly = 4;
-        keep_monthly = 3;
-        keep_yearly = 1;
-        agent = "heimdall";
-    };
-
-    # Odin's three backups, which skip while a game runs and catch up as soon as the laptop is back after missing one.
-    laptopBackup = borgBackup // {
-        # All of /Storage, which Vorta used to back up.
-        source_paths = [ "/Storage" ];
-        canary_path = "/Storage/System/.vigil-canary";
-        keep_hourly = 24;
-        keep_daily = 7;
-        keep_weekly = 4;
-        keep_monthly = 12;
-        keep_yearly = 3;
-        skip_while_active = [ "gamemode-quiet.service" ];
-        triggers = [
-            {
-                action = "run_backup";
-                status = "failed";
-            }
-        ];
-        agent = "odin";
-    };
-
-    # A backup's schedule: every three hours, a weekly check on `weekday` at `hour`, and monthly extract and data checks from day `day`.
-    backupSchedule =
-        {
-            weekday,
-            day,
-            hour,
-        }:
-        [
-            {
-                action = "run_backup";
-                cron = "0 */3 * * *";
-            }
-            {
-                action = "check_repo";
-                cron = "0 ${toString hour} * * ${weekday}";
-            }
-            {
-                action = "check_repo";
-                cron = "0 ${toString hour} ${toString day} * *";
-                args.kind = "extract";
-            }
-            {
-                action = "check_repo";
-                cron = "0 ${toString hour} ${toString (day + 7)} * *";
-                args.kind = "data";
-            }
-        ];
 
     # The "By domain" groups, read off the host tree: one per domain, holding each host's copy through a link named after the host.
     domainGroups =
@@ -1749,44 +1657,13 @@ in
                                     type = "group";
                                     children = [
                                         {
-                                            name = "Borg";
-                                            id = "backups-heimdall-borgmatic";
-                                            type = "group";
-                                            children = [
-                                                (
-                                                    serverBackup
-                                                    // {
-                                                        name = "On Disk";
-                                                        id = "backup-server-on-disk";
-                                                        interval = "15m";
-                                                        timeout = "5m";
-                                                        repo = "/Storage/Files/Backups/Server/Borgmatic";
-                                                        schedule = backupSchedule {
-                                                            weekday = "mon";
-                                                            day = 8;
-                                                            hour = 4;
-                                                        };
-                                                    }
-                                                )
-                                                (
-                                                    serverBackup
-                                                    // {
-                                                        name = "Ragnarok";
-                                                        id = "backup-server-ragnarok";
-                                                        interval = "1h";
-                                                        # Ragnarok's USB pool can take many minutes to answer, so the timeout stays long but under the interval.
-                                                        timeout = "30m";
-                                                        repo = "ssh://borg@ragnarok.technet/Storage/Backups/Server/Borgmatic";
-                                                        # Heimdall's own borg key, which is all the repo server authorizes.
-                                                        ssh_key = "/run/secrets/borg_repo_ssh_key";
-                                                        schedule = backupSchedule {
-                                                            weekday = "tue";
-                                                            day = 9;
-                                                            hour = 4;
-                                                        };
-                                                    }
-                                                )
-                                            ];
+                                            # X-Backups runs and watches every borg backup and answers 503 when one is critical, so a plain request is the whole check.
+                                            name = "X-Backups";
+                                            id = "heimdall-x-backups";
+                                            type = "http";
+                                            interval = "5m";
+                                            url = "http://127.0.0.1:7710/api/health";
+                                            agent = "heimdall";
                                         }
                                     ];
                                 }
@@ -2205,69 +2082,6 @@ in
                                                     keep_yearly = 3;
                                                     agent = "odin";
                                                 }
-                                            ];
-                                        }
-                                        {
-                                            name = "Borg";
-                                            # Explicit id: without one it defaults to the name and both host groups have a "Borg" child,
-                                            # so both would write status under the same key.
-                                            id = "backups-odin-borgmatic";
-                                            type = "group";
-                                            children = [
-                                                (
-                                                    laptopBackup
-                                                    // {
-                                                        name = "On Disk";
-                                                        id = "backup-laptop-borgmatic-on-disk";
-                                                        interval = "15m";
-                                                        timeout = "5m";
-                                                        repo = "/Storage/Files/Backups/Laptop/Borgmatic";
-                                                        schedule = backupSchedule {
-                                                            weekday = "sun";
-                                                            day = 2;
-                                                            hour = 13;
-                                                        };
-                                                    }
-                                                )
-                                                (
-                                                    laptopBackup
-                                                    // {
-                                                        name = "Heimdall";
-                                                        id = "backup-laptop-borgmatic-heimdall";
-                                                        interval = "1h";
-                                                        timeout = "30m";
-                                                        repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Borgmatic";
-                                                        # Odin's own borg key, which is all the repo server authorizes.
-                                                        ssh_key = "/run/secrets/borg_repo_ssh_key";
-                                                        schedule = backupSchedule {
-                                                            weekday = "sun";
-                                                            day = 3;
-                                                            hour = 13;
-                                                        };
-                                                    }
-                                                )
-                                                (
-                                                    laptopBackup
-                                                    // {
-                                                        name = "Ragnarok";
-                                                        id = "backup-laptop-borgmatic-ragnarok";
-                                                        # The long-term copy keeps Vorta's longer history.
-                                                        keep_daily = 30;
-                                                        keep_weekly = 8;
-                                                        keep_monthly = 24;
-                                                        interval = "1h";
-                                                        # Ragnarok's USB pool can take many minutes to answer, so the timeout stays long but under the interval.
-                                                        timeout = "30m";
-                                                        repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Borgmatic";
-                                                        # Odin's own borg key, which is all the repo server authorizes.
-                                                        ssh_key = "/run/secrets/borg_repo_ssh_key";
-                                                        schedule = backupSchedule {
-                                                            weekday = "sun";
-                                                            day = 4;
-                                                            hour = 13;
-                                                        };
-                                                    }
-                                                )
                                             ];
                                         }
                                     ];

@@ -1,7 +1,7 @@
 # X-Backups ##########################################################################################################################################
 #
-# The borg web platform that takes over X-Monitor's borg monitors. It runs beside them for now, watching the same repositories with the same
-# settings, so the two can be compared before X-Monitor's borg plugin is removed (task 16 in X-Backups' todo.md).
+# The borg web platform that runs and watches Heimdall's and Odin's borg backups, taking them over from X-Monitor's borg monitors, which now
+# only check its health (x-monitor.nix).
 #
 # It reaches every repository through the X-Backups agent on the host borg runs on (x-backups-agent.nix), which signs in with the key declared under
 # `hosts` and runs borg under its own scoped sudo. Each passphrase is read on that host by `passphrase_command`, so none reaches Heimdall.
@@ -17,7 +17,7 @@
 let
     port = 7710;
 
-    # Settings shared by every repository, as in X-Monitor's `borgBackup`.
+    # Settings shared by every repository.
     borgBackup = {
         max_age = "1d";
         cache_dir = "/var/cache/x-monitor-borg";
@@ -30,7 +30,7 @@ let
         job_nice = 19;
         job_io_idle = true;
         inhibit_sleep = true;
-        job_lock = "/run/x-monitor-borg.lock"; # X-Monitor's lock, so the two never run jobs on one host at once
+        job_lock = "/run/x-monitor-borg.lock"; # Also taken by Odin's Vorta replay, so the two never run borg at once
     };
 
     # Heimdall's and Odin's borgmatic repositories.
@@ -48,6 +48,32 @@ let
             data = "32d";
         };
     };
+
+    # When a repository's tasks run, as X-Monitor ran them: a backup every three hours, followed by a prune and a compact, a weekly check
+    # of the repository and its archives on `weekday` at `hour`, and monthly extract and data checks from day `day`.
+    backupTasks =
+        {
+            weekday,
+            day,
+            hour,
+        }:
+        {
+            backup = "0 */3 * * *";
+            check = [
+                {
+                    kind = "all";
+                    schedule = "0 ${toString hour} * * ${weekday}";
+                }
+                {
+                    kind = "extract";
+                    schedule = "0 ${toString hour} ${toString day} * *";
+                }
+                {
+                    kind = "data";
+                    schedule = "0 ${toString hour} ${toString (day + 7)} * *";
+                }
+            ];
+        };
 
     serverBackup = borgmaticBackup // {
         host = "heimdall.technet";
@@ -115,23 +141,53 @@ in
         };
 
         repositories = {
-            heimdall-on-disk = serverBackup // onDisk // { repo = "/Storage/Files/Backups/Server/Borgmatic"; };
+            heimdall-on-disk =
+                serverBackup
+                // onDisk
+                // {
+                    repo = "/Storage/Files/Backups/Server/Borgmatic";
+                    tasks = backupTasks {
+                        weekday = "mon";
+                        day = 8;
+                        hour = 4;
+                    };
+                };
             heimdall-ragnarok =
                 serverBackup
                 // remote
                 // {
                     repo = "ssh://borg@ragnarok.technet/Storage/Backups/Server/Borgmatic";
                     ssh_key = "/run/secrets/borg_repo_ssh_key"; # Heimdall's own borg key, which is all the repo server authorizes
+                    tasks = backupTasks {
+                        weekday = "tue";
+                        day = 9;
+                        hour = 4;
+                    };
                 };
 
 
-            odin-borgmatic-on-disk = laptopBackup // onDisk // { repo = "/Storage/Files/Backups/Laptop/Borgmatic"; };
+            odin-borgmatic-on-disk =
+                laptopBackup
+                // onDisk
+                // {
+                    repo = "/Storage/Files/Backups/Laptop/Borgmatic";
+                    tasks = backupTasks {
+                        weekday = "sun";
+                        day = 2;
+                        hour = 13;
+                    };
+                };
             odin-borgmatic-heimdall =
                 laptopBackup
                 // remote
                 // {
                     repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Borgmatic";
                     ssh_key = "/run/secrets/borg_repo_ssh_key"; # Odin's own borg key
+                    tasks = backupTasks {
+                        weekday = "sun";
+                        day = 3;
+                        hour = 13;
+                    };
                 };
             odin-borgmatic-ragnarok =
                 laptopBackup
@@ -143,6 +199,11 @@ in
                     keep_daily = 30;
                     keep_weekly = 8;
                     keep_monthly = 24;
+                    tasks = backupTasks {
+                        weekday = "sun";
+                        day = 4;
+                        hour = 13;
+                    };
                 };
         };
     };
