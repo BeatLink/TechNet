@@ -5,9 +5,9 @@
         nixpkgs = {
             url = "github:NixOS/nixpkgs/nixos-unstable";
         };
-        # The stable release, for the odd package unstable's cache has no aarch64 build of yet
-        nixpkgs-stable = {
-            url = "github:NixOS/nixpkgs/nixos-26.05";
+        # The unstable revision whose atuin aarch64 hosts keep, since cache.nixos.org has a build of it and a newer one migrated their history past stable's
+        nixpkgs-atuin = {
+            url = "github:NixOS/nixpkgs/02c087f3fe673c9e317f206a627cb6b910336dbe";
         };
         nix-index-database = {
             url = "github:nix-community/nix-index-database";

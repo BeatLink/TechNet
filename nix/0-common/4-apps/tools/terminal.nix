@@ -101,12 +101,12 @@ in
 
         # Shell History Sync #########################################################################################################################
         {
-            # Unstable's atuin has no cached aarch64 build and takes over a day to build under emulation, so aarch64 hosts take stable's cached one.
+            # Unstable's newest atuin has no cached aarch64 build and takes over a day to build under emulation, so aarch64 hosts keep the cached one they ran.
             nixpkgs.overlays = [
                 (final: prev: {
                     atuin =
                         if prev.stdenv.hostPlatform.isAarch64 then
-                            inputs.nixpkgs-stable.legacyPackages.${prev.stdenv.hostPlatform.system}.atuin
+                            inputs.nixpkgs-atuin.legacyPackages.${prev.stdenv.hostPlatform.system}.atuin
                         else
                             prev.atuin;
                 })
