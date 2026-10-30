@@ -2156,44 +2156,6 @@ in
                                             type = "group";
                                             children = [
                                                 {
-                                                    # Odin's local Vorta repo has no "Laptop/" segment — that layout
-                                                    # is Heimdall's, where the laptop's repo sits alongside the server's.
-                                                    name = "On Disk";
-                                                    id = "backup-laptop-on-disk";
-                                                    type = "borg";
-                                                    interval = "1h";
-                                                    # Vorta starts this profile at :10 (vorta.nix), so polls stay 30 minutes clear of it.
-                                                    offset = "40m";
-                                                    # Local repo — no second SSH hop, so this answers far faster than
-                                                    # the pushed copies.
-                                                    timeout = "5m";
-                                                    max_age = "1d";
-                                                    repo = "/Storage/Files/Backups/Laptop/Vorta";
-                                                    # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
-                                                    cache_dir = "/var/cache/x-monitor-borg";
-                                                    require_sudo = true;
-                                                    # Unlocks this repo with Vorta's own passphrase, read on the
-                                                    # host borg runs on. Vorta and borgmatic use different
-                                                    # passphrases, so this is per monitor rather than global, and
-                                                    # the secret never leaves the host that owns it.
-                                                    passphrase_command = "cat /run/secrets/vorta_backup_passphrase";
-                                                    source_paths = [
-                                                        "/Storage"
-                                                    ];
-                                                    exclude = config.backup-excludes.patterns ++ [ "pf:/Storage/System" ];
-                                                    exclude_if_present = config.backup-excludes.markers;
-                                                    exclude_caches = false;
-                                                    allow_purge = true;
-                                                    compression = "lz4";
-                                                    archive_prefix = "odin";
-                                                    canary_path = "/Storage/Files/.vigil-canary";
-                                                    prune_match = "Odin-*";
-                                                    keep_within = "6H";
-                                                    keep_hourly = 12;
-                                                    keep_daily = 3;
-                                                    agent = "odin";
-                                                }
-                                                {
                                                     # Vorta profile "2. Heimdall Backup".
                                                     name = "Heimdall";
                                                     id = "backup-laptop-heimdall";

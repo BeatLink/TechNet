@@ -24,11 +24,6 @@
         argument = "Vigil restore canary";
     };
 
-    borg-compact.vorta = {
-        path = "/Storage/Files/Backups/Laptop/Vorta";
-        user = "beatlink";
-    };
-
     # Vorta's settings database names each profile's sources, excludes and retention, so it stays with the history it describes.
     home-manager.users.beatlink.home.persistence."/Storage/Apps/System/Vorta".directories = [
         ".cache/borg"

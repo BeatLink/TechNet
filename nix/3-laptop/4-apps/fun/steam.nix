@@ -21,7 +21,6 @@ let
     ];
 
     pausedSystemUnits = [
-        "borg-compact-vorta.timer"
         "zfs-scrub.timer"
         "zpool-trim.timer"
         "fstrim.timer"

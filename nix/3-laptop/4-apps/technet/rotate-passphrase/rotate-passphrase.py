@@ -240,33 +240,25 @@ THOR = "thor.technet"
 BORG_UNITS = {
     HEIMDALL: ["borgmatic", "borgmatic-check", "borg-compact-laptop-vorta"],
     RAGNAROK: ["borg-check", "borg-check-data", "borg-compact-laptop-vorta"],
-    LOCAL_HOST: ["borgmatic", "borgmatic-check", "borgmatic-check-data", "borg-compact-vorta"],
+    LOCAL_HOST: ["borgmatic", "borgmatic-check", "borgmatic-check-data"],
 }
-VORTA_UNITS = ["vorta-backup-1-on-disk-backup", "vorta-backup-2-heimdall-backup", "vorta-backup-3-ragnarok-backup"]
 
 
 def pause_backups():
-    """Stops every borg timer and job on the three backup hosts, and Vorta, so nothing holds a repository while it changes."""
+    """Stops every borg timer and job on the three backup hosts, so nothing holds a repository while it changes."""
     for host, units in BORG_UNITS.items():
         run(["systemctl", "stop", *[f"{unit}.timer" for unit in units], *[f"{unit}.service" for unit in units]], host=host, root=True)
         say(f"{host}: backups paused")
-    run(["systemctl", "--user", "stop", *[f"{unit}.timer" for unit in VORTA_UNITS], *[f"{unit}.service" for unit in VORTA_UNITS], "vorta.service"])
-    say("odin: Vorta paused")
 
 
 def resume_backups():
-    """Starts the borg timers and Vorta again, reporting rather than stopping on a host that fails."""
+    """Starts the borg timers again, reporting rather than stopping on a host that fails."""
     for host, units in BORG_UNITS.items():
         try:
             run(["systemctl", "start", *[f"{unit}.timer" for unit in units]], host=host, root=True)
             say(f"{host}: backups resumed")
         except RotateError as error:
             say(f"could not resume backups: {error}")
-    try:
-        run(["systemctl", "--user", "start", *[f"{unit}.timer" for unit in VORTA_UNITS], "vorta.service"])
-        say("odin: Vorta resumed")
-    except RotateError as error:
-        say(f"could not resume Vorta: {error}")
 
 
 # Deploying ##########################################################################################################################################
@@ -394,7 +386,6 @@ def apply_vorta_backups(new):
     """Odin's Vorta repositories and their keyring entries."""
     borg_rotate(
         [
-            (LOCAL_HOST, "beatlink", "/Storage/Files/Backups/Laptop/Vorta"),
             (HEIMDALL, "borg", "/Storage/Files/Backups/Laptop/Vorta"),
             (RAGNAROK, "borg", "/Storage/Backups/Laptop/Vorta"),
         ],
@@ -405,7 +396,6 @@ def apply_vorta_backups(new):
         [
             "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Vorta",
             "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Vorta",
-            "/Storage/Files/Backups/Laptop/Vorta",
         ],
         new,
     )
