@@ -99,6 +99,7 @@ in
                 # unit status and for the agent's own journal watchers.
                 extraGroups = [
                     "borg"
+                    "borg-job-lock"
                     "systemd-journal"
                     "x-monitor-credentials"
                 ];
@@ -143,17 +144,19 @@ in
 
         # Backup Jobs ################################################################################################################################
         (lib.mkIf (builtins.elem host agentHosts) {
+            # Shared with X-Backups' agent, so the two never run borg jobs on one host at once
+            users.groups."borg-job-lock" = { };
             systemd.tmpfiles.settings."X-Monitor-Agent"."/run/x-monitor-borg.lock".f = {
                 user = "x-monitor-agent";
-                group = "x-monitor-agent";
-                mode = "0600";
+                group = "borg-job-lock";
+                mode = "0660";
             };
 
             security.polkit.extraConfig = ''
                 polkit.addRule(function (action, subject) {
                     if ((action.id == "org.freedesktop.login1.inhibit-block-sleep" ||
                          action.id == "org.freedesktop.login1.inhibit-block-shutdown") &&
-                        subject.user == "x-monitor-agent") {
+                        (subject.user == "x-monitor-agent" || subject.user == "x-backups-agent")) {
                         return polkit.Result.YES;
                     }
                 });
@@ -180,7 +183,6 @@ in
                     ];
                     openssh.authorizedKeys.keys = [
                         "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAID6oDtIndxb2aJJFhl3+xU+4nuVUQQrzcWOLX+RslJU/ vigil@technet"
-                        "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO0XISJpmLxD7KJZ5Xr3TD0eO/KUiIHJfwt0dKjtSC7U x-backups@technet" # X-Backups' own key
                     ];
                 };
             };

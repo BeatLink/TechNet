@@ -1299,11 +1299,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1793155561,
-        "narHash": "sha256-B5fEXh6usyS4ypvmfbJjkyNB2eTYClPq4aPMcJt/HQY=",
+        "lastModified": 1793332806,
+        "narHash": "sha256-oEhli7G218Dx24DvX4bDp/HXeN1e1WRzgkAzvO2Go+w=",
         "owner": "x-tech-laboratories",
         "repo": "X-Backups",
-        "rev": "9a91097f32dde7f209211b92750d7b7cbc8bc026",
+        "rev": "88930459c672a626a3021db0d6ffa6560f3bab12",
         "type": "github"
       },
       "original": {
