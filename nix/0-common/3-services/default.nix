@@ -6,7 +6,6 @@
 {
     imports = [
         ./backup-excludes.nix
-        ./borg-compact.nix
         ./ssh.nix
         ./syncthing.nix
         ./x-backups-agent.nix

@@ -221,16 +221,6 @@ def borg_rotate(repositories, old, new):
         say(f"{host}: {path} now uses the new passphrase")
 
 
-def keyring_store(urls, new):
-    """Points Vorta's keyring entry for each repository URL at the new passphrase, then reads it back."""
-    for url in urls:
-        attributes = ["application", "Vorta", "service", "vorta-repo", "repo_url", url]
-        run(["secret-tool", "store", "--label", f"Vorta Backup Repo {url}", *attributes, "xdg:schema", "org.freedesktop.Secret.Generic"], data=new)
-        if digest(secret(run(["secret-tool", "lookup", *attributes]))) != digest(new):
-            raise RotateError(f"the keyring entry for {url} did not read back as written")
-        say(f"keyring entry for {url} updated")
-
-
 # Pausing Backups ####################################################################################################################################
 
 HEIMDALL = "heimdall.technet"
@@ -239,7 +229,7 @@ THOR = "thor.technet"
 
 BORG_UNITS = {
     HEIMDALL: ["borgmatic", "borgmatic-check"],
-    RAGNAROK: ["borg-check", "borg-check-data", "borg-compact-laptop-vorta"],
+    RAGNAROK: ["borg-check", "borg-check-data"],
     LOCAL_HOST: ["borgmatic", "borgmatic-check", "borgmatic-check-data"],
 }
 
@@ -378,23 +368,6 @@ def apply_laptop_backups(new):
             (RAGNAROK, "borg", "/Storage/Backups/Laptop/Borgmatic"),
         ],
         sops_value("secrets/3-laptop/borgmatic.yaml", "borg_repo_encryption_key"),
-        new,
-    )
-
-
-def apply_vorta_backups(new):
-    """Odin's Vorta repositories and their keyring entries."""
-    borg_rotate(
-        [
-            (RAGNAROK, "borg", "/Storage/Backups/Laptop/Vorta"),
-        ],
-        sops_value("secrets/3-laptop/vorta.yaml", "vorta_backup_passphrase"),
-        new,
-    )
-    keyring_store(
-        [
-            "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Vorta",
-        ],
         new,
     )
 
@@ -563,13 +536,6 @@ TARGETS = {
         borg=True,
         hosts=["Odin"],
         store=[("secrets/3-laptop/borgmatic.yaml", "borg_repo_encryption_key")],
-    ),
-    "vorta-backups": dict(
-        make=random_passphrase,
-        apply=apply_vorta_backups,
-        borg=True,
-        hosts=["Odin"],
-        store=[("secrets/3-laptop/vorta.yaml", "vorta_backup_passphrase")],
     ),
     "heimdall": dict(
         make=lambda: prompt_new("Heimdall's disks"),

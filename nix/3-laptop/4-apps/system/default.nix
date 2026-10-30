@@ -6,7 +6,6 @@
         ./dconf-editor.nix
         ./mission-center
         ./variety.nix
-        ./vorta.nix
         ./blueman
         ./laptop-backup.nix
         ./tilix

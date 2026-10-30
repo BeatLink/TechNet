@@ -35,7 +35,7 @@ in
                     zfs = {
                         autoScrub.enable = true;
 
-                        # Off: borg, Vorta, Syncthing and this flake already cover backups, and snapshots only pin freed blocks on pools that run near full
+                        # Off: borg, Syncthing and this flake already cover backups, and snapshots only pin freed blocks on pools that run near full
                         autoSnapshot.enable = false;
                     };
                 };

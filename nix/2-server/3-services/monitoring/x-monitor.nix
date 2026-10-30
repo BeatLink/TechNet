@@ -22,14 +22,6 @@
 # That is the case the agent does not replace and is why SSH and the other
 # agentless transports remain first-class.
 #
-# Repo passphrases are per monitor, not global. Each borg monitor sets
-# `passphrase_command` pointing at the sops secret of the tool that owns its
-# repo — Vorta's on Odin, borgmatic's on Odin or Heimdall. That command runs on
-# the host borg runs on, so X-Monitor never holds the passphrases and each repo is
-# unlocked with its own, exactly as the scheduled job does it. (Vorta and
-# borgmatic use different passphrases, so a single X-Monitor-wide default would
-# unlock only one of them.)
-#
 # Every signal a host reports is its own monitor and its own plugin type: `cpu`,
 # `memory`, `smart`, `throughput` and the rest each collect one thing. Each
 # therefore carries its own status, interval and history — smart reads hourly
@@ -40,7 +32,7 @@
 # host, then per domain, and "By domain" links to them per domain, then per
 # host. Each host holds
 # `Availability`, `System Stats` (Compute, Memory, Storage, Network),
-# `Running Services`, `NixOS`, `Backups` where it owns source data, and `Security`. A
+# `Running Services`, `NixOS`, `Backups` on Heimdall, where X-Backups runs, and `Security`. A
 # group reports the worst case of its children, so a host still collapses to
 # one status.
 #
@@ -75,36 +67,7 @@
 # Heimdall alone: it is only ever used to log INTO the monitored hosts, which
 # X-Monitor does from here, so no other host needs a copy.
 #
-# A backup monitor runs `borg create` on the host that owns the source data, and
-# borg then opens its own SSH connection to the repo server. That hop
-# authenticates with the SOURCE HOST's existing borg key (`ssh_key` on each
-# monitor: Vorta's or borgmatic's), never with X-Monitor's. X-Monitor therefore triggers
-# the host's backup rather than performing one under its own identity, and holds
-# no write credential to any backup repository.
-#
-# Backups are grouped under the host borg RUNS ON, not where the repo lives:
-# `borg create` archives the filesystem of whichever host executes it, so the
-# monitor for the laptop's copy on Heimdall still belongs to Odin (reaching
-# Heimdall over ssh://) — otherwise a backup would silently archive Heimdall's
-# /Storage into the laptop's repo. Each group reads as "what this host backs up,
-# and where those copies go".
-#
-# Every backup monitor runs `borg` under sudo (`require_sudo`). The repos are
-# root-owned, so reading an archive as the unprivileged `x-monitor-access` account
-# fails on permissions. That account is in `wheel`, and wheelNeedsPassword =
-# false (nix/0-common/2-users/default.nix) grants it NOPASSWD:SETENV, so the
-# non-interactive `sudo -n` succeeds and the inlined BORG_PASSPHRASE survives
-# sudo's env_reset.
-#
-# `source_paths` and `compression` mirror the tool that owns each repo, and
-# `exclude` is the fleet's one set from backup-excludes.nix that borgmatic and
-# Vorta also apply, so a X-Monitor-triggered backup produces an archive equivalent
-# to the scheduled one and Purge Excluded rewrites old archives to match it.
-#
-# `keep_*` and `prune_match` mirror the owning tool's pruning, which X-Monitor's prune preview dry-runs.
-#
-# Heimdall's and Odin's borgmatic backups are run and watched by X-Backups (x-backups.nix); X-Monitor only checks X-Backups' health. Odin's
-# frozen Vorta repo on Ragnarok is still watched here until it is deleted.
+# Heimdall's and Odin's borgmatic backups are run and watched by X-Backups (x-backups.nix); X-Monitor only checks X-Backups' health.
 #
 {
     config,
@@ -1273,7 +1236,7 @@ in
                                                     # credential and none is stored here. If that
                                                     # ever changes, set username together with
                                                     # password_command (pointing at a sops
-                                                    # secret, as the borg monitors do) — the
+                                                    # secret) — the
                                                     # plugin reports a rejected login explicitly
                                                     # rather than failing obscurely.
                                                     #
@@ -1637,7 +1600,7 @@ in
                                 }
                                 {
                                     name = "Backups";
-                                    # Explicit id: a group id defaults to its name and both backed-up hosts have this group, so they would share one key.
+                                    # Explicit id: group ids default to their name, which every host's groups share.
                                     id = "backups-heimdall";
                                     type = "group";
                                     children = [
@@ -1996,71 +1959,6 @@ in
                                         }
                                         (nixGc "Odin")
                                         (journal "Odin")
-                                    ];
-                                }
-                                {
-                                    name = "Backups";
-                                    # Explicit id: a group id defaults to its name and both backed-up hosts have this group, so they would share one key.
-                                    id = "backups-odin";
-                                    type = "group";
-                                    children = [
-                                        {
-                                            name = "Vorta";
-                                            id = "backups-odin-vorta";
-                                            type = "group";
-                                            children = [
-                                                {
-                                                    # Vorta profile "3. Ragnarok Backup" — the long-term copy.
-                                                    name = "Ragnarok";
-                                                    id = "backup-laptop-ragnarok";
-                                                    type = "borg";
-                                                    interval = "1h";
-                                                    # Vorta starts this profile at :20 (vorta.nix), so polls stay 30 minutes clear of it.
-                                                    offset = "50m";
-                                                    # Remote repo on the backup server, whose data pool is a single
-                                                    # USB disk (~13 MB/s): a read can take many minutes when the pool
-                                                    # is busy. Long timeout so a slow answer still counts, wide
-                                                    # interval so polls cannot stack up behind each other. The timeout stays
-                                                    # well under the interval, so a poll that runs to its
-                                                    # deadline is killed before the next one is due.
-                                                    timeout = "30m";
-                                                    max_age = "1d";
-                                                    repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Vorta";
-                                                    # Without this the plugin falls back to a mktemp base dir, so borg rebuilds the repo's whole chunks cache on every poll and discards it.
-                                                    cache_dir = "/var/cache/x-monitor-borg";
-                                                    require_sudo = true;
-                                                    # Unlocks this repo with Vorta's own passphrase, read on the
-                                                    # host borg runs on. Vorta and borgmatic use different
-                                                    # passphrases, so this is per monitor rather than global, and
-                                                    # the secret never leaves the host that owns it.
-                                                    passphrase_command = "cat /run/secrets/vorta_backup_passphrase";
-                                                    # borg makes its OWN SSH connection to the repo server, with
-                                                    # its own identity — X-Monitor's login here does not carry over.
-                                                    # This is Odin's existing Vorta repo key, the same one Vorta
-                                                    # authenticates with, so X-Monitor triggers the host's backup
-                                                    # rather than performing one under its own credentials.
-                                                    ssh_key = "/run/secrets/vorta_ssh_key";
-                                                    source_paths = [
-                                                        "/Storage"
-                                                    ];
-                                                    exclude = config.backup-excludes.patterns ++ [ "pf:/Storage/System" ];
-                                                    exclude_if_present = config.backup-excludes.markers;
-                                                    exclude_caches = false;
-                                                    allow_purge = true;
-                                                    compression = "lz4";
-                                                    archive_prefix = "odin";
-                                                    canary_path = "/Storage/Files/.vigil-canary";
-                                                    prune_match = "Odin-*";
-                                                    keep_within = "6H";
-                                                    keep_hourly = 24;
-                                                    keep_daily = 30;
-                                                    keep_weekly = 8;
-                                                    keep_monthly = 24;
-                                                    keep_yearly = 3;
-                                                    agent = "odin";
-                                                }
-                                            ];
-                                        }
                                     ];
                                 }
                                 {
