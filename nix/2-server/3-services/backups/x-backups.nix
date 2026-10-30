@@ -81,19 +81,6 @@ let
         source_paths = [ "/Storage" ];
     };
 
-    # Odin's Vorta profiles, unlocked with Vorta's own passphrase.
-    vortaBackup = borgBackup // {
-        host = "odin.technet";
-        interval = "1h";
-        passphrase_command = "cat /run/secrets/vorta_backup_passphrase";
-        source_paths = [ "/Storage" ];
-        exclude = config.backup-excludes.patterns ++ [ "pf:/Storage/System" ];
-        archive_prefix = "odin";
-        canary_path = "/Storage/Files/.vigil-canary";
-        prune_match = "Odin-*";
-        keep_within = "6H";
-    };
-
     # Ragnarok's USB pool can take many minutes to answer, so remote repositories keep a long timeout, still under their interval.
     remote = {
         interval = "1h";
@@ -141,33 +128,6 @@ in
                     ssh_key = "/run/secrets/borg_repo_ssh_key"; # Heimdall's own borg key, which is all the repo server authorizes
                 };
 
-            odin-vorta-on-disk = vortaBackup // {
-                timeout = "5m";
-                repo = "/Storage/Files/Backups/Laptop/Vorta";
-                keep_hourly = 12;
-                keep_daily = 3;
-            };
-            odin-vorta-heimdall =
-                vortaBackup
-                // remote
-                // {
-                    repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Vorta";
-                    ssh_key = "/run/secrets/vorta_ssh_key"; # Odin's Vorta key, the one Vorta itself authenticates with
-                    keep_hourly = 12;
-                    keep_daily = 3;
-                };
-            odin-vorta-ragnarok =
-                vortaBackup
-                // remote
-                // {
-                    repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Vorta";
-                    ssh_key = "/run/secrets/vorta_ssh_key";
-                    keep_hourly = 24;
-                    keep_daily = 30;
-                    keep_weekly = 8;
-                    keep_monthly = 24;
-                    keep_yearly = 3;
-                };
 
             odin-borgmatic-on-disk = laptopFullBackup // onDisk // { repo = "/Storage/Files/Backups/Laptop/Borgmatic"; };
             odin-borgmatic-heimdall =
