@@ -1,6 +1,6 @@
 # Remote Deploy ######################################################################################################################################
 #
-# Heimdall's X-Monitor switches the other hosts over SSH: each target has a `deploy` account that only Heimdall's key for that host can log in to, and
+# Heimdall's X-Nix switches the other hosts over SSH: each target has a `deploy` account that only Heimdall's key for that host can log in to, and
 # Heimdall runs every such switch through one root-only script that holds the target awake and runs its after-switch hook.
 #
 {
@@ -18,7 +18,7 @@ let
 
     keySecret = name: "deploy_key_${lib.toLower name}";
 
-    # Runs nixos-rebuild with the arguments X-Monitor sends, refusing any target not in deploy.nix, so the sudo rules below are the whole of what it can do.
+    # Runs nixos-rebuild with the arguments X-Nix sends, refusing any target not in deploy.nix, so the sudo rules below are the whole of what it can do.
     remoteSwitch = pkgs.writeShellApplication {
         name = "technet-remote-switch";
         runtimeInputs = [
@@ -114,10 +114,10 @@ in
 
             environment.systemPackages = [ remoteSwitch ];
 
-            # X-Monitor's switch of each remote host, matched argv for argv against what its monitor sends, so the agent can only deploy the committed flake.
+            # X-Nix's switch of each remote host, matched argv for argv against what its deployment sends, so it can only deploy the committed flake.
             security.sudo.extraRules = [
                 {
-                    users = [ "x-monitor-agent" ];
+                    users = [ "x-nix" ];
                     commands = lib.mapAttrsToList (name: d: {
                         command = "/run/current-system/sw/bin/technet-remote-switch switch --flake ${upgradeFlake}\\#${name} --target-host ${d.target} ${lib.concatStringsSep " " deploy.remoteArgs} --refresh";
                         options = [ "NOPASSWD" ];

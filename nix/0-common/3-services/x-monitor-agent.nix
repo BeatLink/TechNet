@@ -33,29 +33,6 @@ let
     # Heimdall runs the X-Monitor server itself, so its own agent takes the short way round rather than depending on WireGuard being up to monitor itself.
     server = if host == "Heimdall" then "127.0.0.1" else "heimdall.technet";
 
-    # One definition shared with Heimdall's monitors, so a sudo rule cannot drift from the command the monitor actually runs.
-    deploy = import ../1-system/software/deploy.nix;
-    deployArgs = lib.concatStringsSep " " (deploy.forHost host);
-
-    # sudoers ends a command spec at an unescaped colon.
-    upgradeFlake = builtins.replaceStrings [ ":" ] [ "\\:" ] config.technet.flake;
-
-    # X-Monitor's nixos_upgrade switch on a host that deploys itself; a host Heimdall deploys is switched through remote-deploy.nix instead.
-    localSwitchRules = [
-        {
-            command = "/run/current-system/sw/bin/nixos-rebuild switch --flake ${upgradeFlake} ${deployArgs} --refresh";
-            options = [ "NOPASSWD" ];
-        }
-        # The same action from a monitor that names its configuration; sudoers reads a bare # as a comment
-        {
-            command = "/run/current-system/sw/bin/nixos-rebuild switch --flake ${upgradeFlake}\\#${host} ${deployArgs} --refresh";
-            options = [ "NOPASSWD" ];
-        }
-    ];
-
-    # The scheduled collection's own arguments, so X-Monitor's button runs the run the timer runs.
-    gcOptions = config.nix.gc.options;
-
     # A borg poll carries its deadline inside the sudo, so sudo matches `timeout` rather than `borg` and the plain borg rule below never fires. One spec
     # per digit count, because a `*` in place of the seconds would span the space after them and let any command follow.
     borgDeadlineRules =
@@ -222,11 +199,6 @@ in
                             command = "/run/current-system/sw/bin/systemctl daemon-reload";
                             options = [ "NOPASSWD" ];
                         }
-                        # The Reboot action on a NixOS deployment monitor
-                        {
-                            command = "/run/current-system/sw/bin/systemctl reboot";
-                            options = [ "NOPASSWD" ];
-                        }
                         {
                             command = "/run/current-system/sw/bin/systemctl cat *";
                             options = [ "NOPASSWD" ];
@@ -255,14 +227,8 @@ in
                                 "SETENV"
                             ];
                         }
-                        # X-Monitor's nix_gc action, matched the same way: it collects with nix.gc.options and nothing else
-                        {
-                            command = "/run/current-system/sw/bin/nix-collect-garbage ${gcOptions}";
-                            options = [ "NOPASSWD" ];
-                        }
                     ]
-                    ++ borgDeadlineRules
-                    ++ lib.optionals (!(deploy.remote ? ${host})) localSwitchRules;
+                    ++ borgDeadlineRules;
                 }
             ];
         }

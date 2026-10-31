@@ -120,18 +120,11 @@ let
         .triggers).webhook_id;
     upgradeFlake = config.technet.flake;
 
-    # Each nightly build links its closure here, replacing the last one, so it stays rooted until deployed and attic-push-retry can find it.
-    buildRoots = "/var/lib/x-monitor-agent/build-roots";
+    # X-Nix's nightly builds link each closure here (x-nix.nix), and keep the closure list of one held only in the cache beside its link.
+    buildRoots = "/var/lib/x-nix-build-roots";
 
     # Heimdall's Attic cache, where the other hosts' closures are kept once pushed instead of in Heimdall's own store.
     cacheUrl = "https://attic.heimdall.technet/technet";
-
-    # Likewise for garbage collection: one common module sets nix.gc.options fleet-wide, so the button
-    # on any host's monitor runs the same collection that host's weekly timer runs.
-    gcArgs = builtins.filter (a: a != "") (lib.splitString " " config.nix.gc.options);
-
-    # The same definition every host's sudo rules read, so a monitor's arguments always match what sudoers permits.
-    deploy = import ../../../0-common/1-system/software/deploy.nix;
 
     # The "By domain" groups, read off the host tree: one per domain, holding each host's copy through a link named after the host.
     domainGroups =
@@ -184,12 +177,6 @@ in
     sops.secrets.x_monitor_session_secret = {
         sopsFile = "${config.technet.secrets.path}/x-monitor.yaml";
         owner = "x-monitor";
-    };
-
-    # Write deploy key on the TechNet repo that Update Flake pushes the new lock with; the job runs as Heimdall's agent user.
-    sops.secrets.x_monitor_flake_deploy_key = {
-        sopsFile = "${config.technet.secrets.path}/x-monitor.yaml";
-        owner = "x-monitor-agent";
     };
 
     # The record's own update URL — a secret, account-specific URL that points it at the caller's apparent IP on GET. It sits beside the hostname in
@@ -318,7 +305,6 @@ in
                             warning = 90; # Same policy as each host's Filesystems monitor, so the store's fill alarms once rather than twice
                             threshold = 96;
                             max_generation_age = "30d"; # --delete-older-than 7d, run weekly, should never leave one this old
-                            gc_args = gcArgs;
                             agent = lib.toLower host;
                         }
                         // lib.optionalAttrs (host == "Thor") {
@@ -575,15 +561,6 @@ in
                                             configuration = "Ragnarok";
                                             eval_agent = "heimdall"; # Evaluating the flake on the 2GB Rock64 swaps it to death within seconds
                                             eval_interval = "6h";
-                                            rebuild_args = deploy.forHost "Ragnarok";
-                                            switch_agent = "heimdall"; # Built emulated on Heimdall, which is faster than the board natively
-                                            target_host = deploy.remote.Ragnarok.target;
-                                            rebuild_bin = "technet-remote-switch";
-                                            build_at = "04:45";
-                                            build_root_dir = buildRoots;
-                                            cache_url = cacheUrl; # A closure the cache already holds is not fetched back just to root it
-                                            auto_switch = true;
-                                            auto_switch_after = "0"; # Switch as soon as drift is seen
                                             agent = "ragnarok";
                                         }
                                         (nixGc "Ragnarok")
@@ -1572,13 +1549,6 @@ in
                                             interval = "5m";
                                             flake = upgradeFlake;
                                             eval_interval = "6h";
-                                            rebuild_args = deploy.forHost "Heimdall";
-                                            push_ssh_key = config.sops.secrets.x_monitor_flake_deploy_key.path; # Only this monitor pushes, so the key lives on Heimdall alone
-                                            update_at = "02:00"; # The only thing that bumps flake.lock
-                                            build_at = "04:00"; # The fleet's builds start after attic-gc at 03:00, whose database lock their uploads would contend with
-                                            build_root_dir = buildRoots;
-                                            auto_switch = true;
-                                            auto_switch_after = "0"; # Switch as soon as drift is seen
                                             agent = "heimdall";
                                         }
                                         (nixGc "Heimdall")
@@ -1598,7 +1568,7 @@ in
                                                     agent = "heimdall";
                                                 }
                                                 {
-                                                    # Every host's closure is built here nightly, so this store is where "built" is true or not.
+                                                    # Every host's closure is built here nightly by X-Nix, so this store is where "built" is true or not.
                                                     name = "Fleet Closures";
                                                     id = "heimdall-attic-push";
                                                     type = "attic_push";
@@ -1611,21 +1581,20 @@ in
                                                         "Thor"
                                                     ];
                                                     cache_url = cacheUrl;
-                                                    # A hand-made build replaces the nightly one's root, so it stays rooted until deployed like that one would.
+                                                    # X-Nix's build roots, read for the closure lists of the targets it keeps only in the cache.
                                                     build_root_dir = buildRoots;
                                                     build_links = lib.genAttrs [
                                                         "Heimdall"
                                                         "Odin"
                                                         "Ragnarok"
                                                         "Thor"
-                                                    ] (host: "${lib.toLower host}-nixos-deployment");
+                                                    ] lib.toLower;
                                                     # Once fully pushed these live only in the cache, and their deploys substitute them back from it.
                                                     drop_pushed = [
                                                         "Odin"
                                                         "Ragnarok"
                                                         "Thor"
                                                     ];
-                                                    push_command = "env XDG_CONFIG_HOME=${config.technet.atticPush.configDir} ${pkgs.attic-client}/bin/attic push --jobs 2 technet";
                                                     agent = "heimdall";
                                                 }
                                                 {
@@ -2005,17 +1974,8 @@ in
                                             type = "nixos_upgrade";
                                             interval = "5m";
                                             flake = upgradeFlake;
-                                            configuration = "Odin"; # Named, since the build runs on Heimdall
+                                            configuration = "Odin";
                                             eval_interval = "6h";
-                                            rebuild_args = deploy.forHost "Odin";
-                                            switch_agent = "heimdall"; # Heimdall builds, deploys and warms the cache whether or not the laptop is awake
-                                            target_host = deploy.remote.Odin.target;
-                                            rebuild_bin = "technet-remote-switch"; # Holds the target awake through the switch; see remote-deploy.nix
-                                            build_at = "04:15";
-                                            build_root_dir = buildRoots;
-                                            cache_url = cacheUrl; # A closure the cache already holds is not fetched back just to root it
-                                            auto_switch = true;
-                                            auto_switch_after = "0"; # Switch as soon as drift is seen
                                             agent = "odin";
                                         }
                                         (nixGc "Odin")
@@ -2486,15 +2446,6 @@ in
                                             configuration = "Thor";
                                             eval_agent = "heimdall"; # Evaluating the flake on four 1.15GHz A53s takes the phone out of service for the duration
                                             eval_interval = "6h";
-                                            rebuild_args = deploy.forHost "Thor";
-                                            switch_agent = "heimdall"; # The phone never compiles its own closure
-                                            target_host = deploy.remote.Thor.target;
-                                            rebuild_bin = "technet-remote-switch"; # Holds the phone awake and restarts phosh after; see remote-deploy.nix
-                                            build_at = "04:30";
-                                            build_root_dir = buildRoots;
-                                            cache_url = cacheUrl; # A closure the cache already holds is not fetched back just to root it
-                                            auto_switch = true;
-                                            auto_switch_after = "0"; # Switch as soon as drift is seen
                                             agent = "thor";
                                         }
                                         (nixGc "Thor")

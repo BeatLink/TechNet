@@ -14,12 +14,12 @@
     # The module installs only the atticadm wrapper; creating caches and reading keys is the client's job.
     environment.systemPackages = [ pkgs.attic-client ];
 
-    # Heimdall pushes too, so X-Monitor's nightly builds of every host land in the cache rather than only in Heimdall's own store.
+    # Heimdall pushes too, so X-Nix's nightly builds of every host land in the cache rather than only in Heimdall's own store.
     technet.atticPush.enable = true;
 
-    # X-Monitor's Fleet Closures monitor pushes a target by hand with this host's token, as the agent's user.
+    # X-Nix's TechNet cache pushes each build with this host's token, as its own user.
     sops.secrets.attic_push_token = {
-        group = "x-monitor-credentials";
+        group = "x-nix";
         mode = "0440";
     };
 
