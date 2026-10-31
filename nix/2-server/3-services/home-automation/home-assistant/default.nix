@@ -150,7 +150,7 @@ in
         ];
         customComponents = [
             (pkgs.home-assistant-custom-components.frigate.overrideAttrs (old: {
-                pytestFlagsArray = (old.pytestFlagsArray or [ ]) ++ [
+                pytestFlags = (old.pytestFlags or [ ]) ++ [
                     "--deselect=tests/test_integration_services.py::test_review_summarize_service_version_check"
                     "--deselect=tests/test_integration_services.py::test_review_summarize_service_no_integration"
                     "--deselect=tests/test_diagnostics.py::test_diagnostics"
