@@ -90,6 +90,15 @@ in
                     command = "/run/current-system/sw/bin/nix-collect-garbage ${gcOptions}";
                     options = [ "NOPASSWD" ];
                 }
+                # The Boot page reads systemd-boot's entries from the root-only /boot, and sets the one-shot next entry.
+                {
+                    command = "/run/current-system/sw/bin/bootctl list --json=short";
+                    options = [ "NOPASSWD" ];
+                }
+                {
+                    command = "/run/current-system/sw/bin/bootctl set-oneshot *";
+                    options = [ "NOPASSWD" ];
+                }
             ];
         }
     ];
