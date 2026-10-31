@@ -12,5 +12,6 @@
         ./syncthing.nix
         ./x-backups-agent.nix
         ./x-monitor-agent.nix
+        ./x-nix-agent.nix
     ];
 }

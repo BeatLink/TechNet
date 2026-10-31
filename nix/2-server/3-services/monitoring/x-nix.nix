@@ -1,9 +1,10 @@
 # X-Nix ##############################################################################################################################################
 #
-# The NixOS deployment portal at nix.heimdall.technet, watching Heimdall against the flake and its Nix store, and the fleet's closures in the
-# Attic cache, beside X-Monitor, which still updates, switches, collects, builds and pushes.
+# The NixOS deployment portal at nix.heimdall.technet, watching every host against the flake with its Nix store and boot entries, and the
+# fleet's closures in the Attic cache, beside X-Monitor, which still updates, switches, collects, builds and pushes.
 #
-# The login's password hash is its own, in secrets/2-server/x-nix.yaml, written by X-Nix's `npm run hash-password`.
+# The login's password hash is its own, in secrets/2-server/x-nix.yaml, written by X-Nix's `npm run hash-password`. The other hosts are reached
+# through their X-Nix agents (x-nix-agent.nix), each signing in with the key whose public line is declared under `agents` below.
 #
 {
     config,
@@ -22,6 +23,15 @@ let
 
     # Collect Garbage runs the same collection the weekly timer does.
     gcOptions = config.nix.gc.options;
+
+    # The same store policy as X-Monitor's nix_gc monitors.
+    gc = {
+        max_age = "2w";
+        warning = 90;
+        threshold = 96;
+        max_generation_age = "30d";
+        gc_args = builtins.filter (a: a != "") (lib.splitString " " gcOptions);
+    };
 
     # X-Monitor's nightly builds root each closure here, and drop those kept only in the cache.
     buildRoots = "/var/lib/x-monitor-agent/build-roots";
@@ -42,19 +52,46 @@ in
         inherit port;
         serverName = "heimdall";
         passwordHashFile = config.sops.secrets.x_nix_password_hash.path;
+        # Each agent host's key, whose private half is in that host's x-nix-agent.yaml.
+        agents = {
+            odin = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAQiMXi+0bu88Gkiuh+jXXEWROogQ0Uj/icnNZbAQrmJ x-nix-agent-odin";
+            ragnarok = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGt5YJVNXiS5IiS4D3eCcD5BhqE3oJGcW4pxy1bnlzjA x-nix-agent-ragnarok";
+            thor = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPrMmoZrvzNQGTQbvP3WYgROY2vjM6zQD4nJL4XsqQJA x-nix-agent-thor";
+        };
         deployments.heimdall = {
             name = "Heimdall";
             flake = config.technet.flake;
             eval_interval = "6h";
             rebuild_args = deploy.forHost "Heimdall";
-            # The same store policy as X-Monitor's nix_gc monitors.
-            gc = {
-                max_age = "2w";
-                warning = 90;
-                threshold = 96;
-                max_generation_age = "30d";
-                gc_args = builtins.filter (a: a != "") (lib.splitString " " gcOptions);
-            };
+            inherit gc;
+        };
+        # Watched only: X-Monitor builds and switches these from here over SSH, as their deploy account.
+        deployments.odin = {
+            name = "Odin";
+            host = "odin";
+            flake = config.technet.flake;
+            configuration = "Odin";
+            eval_interval = "6h";
+            inherit gc;
+        };
+        deployments.ragnarok = {
+            name = "Ragnarok";
+            host = "ragnarok";
+            flake = config.technet.flake;
+            configuration = "Ragnarok";
+            eval_agent = "heimdall"; # Evaluating the flake on the 2GB Rock64 swaps it to death within seconds
+            eval_interval = "6h";
+            inherit gc;
+        };
+        deployments.thor = {
+            name = "Thor";
+            host = "thor";
+            interval = "30m"; # The phone wakes on battery only every half hour
+            flake = config.technet.flake;
+            configuration = "Thor";
+            eval_agent = "heimdall"; # Evaluating the flake on four 1.15GHz A53s takes the phone out of service for the duration
+            eval_interval = "6h";
+            inherit gc;
         };
         # Checked only, and less often than X-Monitor's hourly check: X-Monitor still builds and pushes them, and holds the Attic token and the
         # build roots.
