@@ -152,6 +152,8 @@ in
         path = [ pkgs.python3 ];
 
         serviceConfig = {
+            Restart = "on-failure";
+
             # Completed downloads land in /Storage/Files/Torrents, a
             # sendreceive Syncthing folder that now syncs permission bits.
             # Keeping group write on new downloads means the modes qbittorrent
