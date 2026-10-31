@@ -124,6 +124,10 @@
             url = "github:x-tech-laboratories/X-Backups";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        x-nix = {
+            url = "github:x-tech-laboratories/X-Nix";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
         context = {
             url = "github:BeatLink/Context";
             inputs.nixpkgs.follows = "nixpkgs";
