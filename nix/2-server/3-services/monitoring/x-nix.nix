@@ -1,12 +1,8 @@
 # X-Nix ##############################################################################################################################################
 #
-# The NixOS deployment portal at nix.heimdall.technet, which runs the whole fleet's NixOS upkeep: it updates the flake, builds every host's closure
-# nightly and pushes it to the Attic cache, switches each host once it drifts, and watches every host's Nix store and boot entries. X-Monitor only
-# checks the outcome.
-#
-# The login's password hash is its own, in secrets/2-server/x-nix.yaml, written by X-Nix's `npm run hash-password`. The other hosts are reached
-# through their X-Nix agents (x-nix-agent.nix), each signing in with the key whose public line is declared under `agents` below. Heimdall builds and
-# switches them itself, over SSH as their deploy account, through technet-remote-switch (remote-deploy.nix).
+# The NixOS deployment portal at nix.heimdall.technet, which runs the whole fleet's NixOS upkeep: it updates the flake, evaluates and builds every
+# host's closure on Heimdall nightly and pushes it to the Attic cache, and switches each host once it drifts. Heimdall switches itself; every other host
+# is switched from the cache by its own X-Nix agent (x-nix-agent.nix). The X-Nix modules carry their own sudo rules.
 #
 {
     config,
@@ -18,22 +14,13 @@
 let
     port = 7720;
 
-    deploy = import ../../../0-common/1-system/software/deploy.nix;
-    deployArgs = lib.concatStringsSep " " (deploy.forHost "Heimdall");
-
-    # sudoers ends a command spec at an unescaped colon.
-    upgradeFlake = builtins.replaceStrings [ ":" ] [ "\\:" ] config.technet.flake;
-
-    # Collect Garbage runs the same collection the weekly timer does.
-    gcOptions = config.nix.gc.options;
-
     # The same store policy as X-Monitor's nix_gc monitors.
     gc = {
         max_age = "2w";
         warning = 90;
         threshold = 96;
         max_generation_age = "30d";
-        gc_args = builtins.filter (a: a != "") (lib.splitString " " gcOptions);
+        gc_args = builtins.filter (a: a != "") (lib.splitString " " config.nix.gc.options);
     };
 
     # Each nightly build links its closure here, replacing the last one, so it stays rooted until deployed and attic-push-retry can find it. Readable by
@@ -50,24 +37,33 @@ let
         "Thor"
     ];
 
-    # A host Heimdall builds nightly and switches over SSH as soon as it drifts.
-    remote = name: buildAt: {
-        inherit name;
-        host = lib.toLower name;
-        flake = config.technet.flake;
-        configuration = name;
-        eval_interval = "6h";
-        rebuild_args = deploy.forHost name;
-        switch_agent = "heimdall";
-        target_host = deploy.remote.${name}.target;
-        rebuild_bin = "technet-remote-switch"; # Holds the target awake through the switch and runs its after-switch hook; see remote-deploy.nix
-        build_at = buildAt;
-        build_root_dir = buildRoots;
-        cache_url = cacheUrl; # A closure the cache already holds is not fetched back just to root it
-        auto_switch = true;
-        auto_switch_after = "0"; # Switch as soon as drift is seen
-        inherit gc;
+    # Rolls a switch back unless X-Nix can still reach the host's agent once it has activated.
+    safety = {
+        magic_rollback = true;
+        confirm_timeout = "2m";
     };
+
+    # A host Heimdall evaluates and builds nightly, whose own agent switches it from the cache once it drifts and the cache holds the closure.
+    remote =
+        name: buildAt: tags:
+        {
+            inherit name tags;
+            host = lib.toLower name;
+            flake = config.technet.flake;
+            configuration = name;
+            eval_interval = "6h";
+            eval_agent = "heimdall"; # Evaluating the flake on the 2GB Rock64 swaps it to death, and on the phone takes it out of service
+            build_agent = "heimdall";
+            build_at = buildAt;
+            build_root_dir = buildRoots;
+            cache_url = cacheUrl;
+            switch_from_cache = true;
+            auto_switch = true;
+            auto_switch_after = "0";
+            health_commands = [ "systemctl is-active --quiet sshd.service" ];
+            inherit gc;
+        }
+        // safety;
 in
 {
     imports = [ inputs.x-nix.nixosModules.default ];
@@ -77,6 +73,12 @@ in
     # Write deploy key on the TechNet repo that Update Flake pushes the new lock with.
     sops.secrets.x_monitor_flake_deploy_key = {
         sopsFile = "${config.technet.secrets.path}/x-monitor.yaml";
+        owner = "x-nix";
+    };
+
+    # The key the Provision page logs in to a machine being installed with; its public half goes in that machine's installer.
+    sops.secrets.x_nix_provision_key = {
+        sopsFile = "${config.technet.secrets.path}/x-nix.yaml";
         owner = "x-nix";
     };
 
@@ -93,24 +95,47 @@ in
         };
         deployments.heimdall = {
             name = "Heimdall";
+            tags = [ "server" ];
             flake = config.technet.flake;
             eval_interval = "6h";
-            rebuild_args = deploy.forHost "Heimdall";
+            rebuild_args = [
+                "--no-write-lock-file"
+                "-L"
+            ];
             push_ssh_key = config.sops.secrets.x_monitor_flake_deploy_key.path; # Only this deployment pushes, so the key lives on Heimdall alone
             update_at = "02:00"; # The only thing that bumps flake.lock
             build_at = "04:00"; # The fleet's builds start after attic-gc at 03:00, whose database lock their uploads would contend with
             build_root_dir = buildRoots;
             auto_switch = true;
-            auto_switch_after = "0"; # Switch as soon as drift is seen
+            auto_switch_after = "0";
+            pre_switch_checks = [ "test \"$(df --output=pcent /boot | tail -1 | tr -dc 0-9)\" -lt 90" ];
+            health_commands = [
+                "systemctl is-active --quiet nginx.service"
+                "systemctl is-active --quiet sshd.service"
+                "systemctl is-active --quiet atticd.service"
+            ];
             inherit gc;
-        };
-        deployments.odin = remote "Odin" "04:15";
-        deployments.ragnarok = remote "Ragnarok" "04:45" // {
-            eval_agent = "heimdall"; # Evaluating the flake on the 2GB Rock64 swaps it to death within seconds
-        };
-        deployments.thor = remote "Thor" "04:30" // {
+        }
+        // safety;
+        deployments.odin = remote "Odin" "04:15" [ "desktop" ];
+        deployments.ragnarok = remote "Ragnarok" "04:45" [ "arm" ];
+        deployments.thor = remote "Thor" "04:30" [ "arm" ] // {
             interval = "30m"; # The phone wakes on battery only every half hour
-            eval_agent = "heimdall"; # Evaluating the flake on four 1.15GHz A53s takes the phone out of service for the duration
+            inhibit_sleep = true;
+            post_switch = "systemctl is-active -q phosh.service || systemctl restart phosh.service"; # A switch that touches phosh stops it and leaves the screen dark
+            health_commands = [
+                "systemctl is-active --quiet sshd.service"
+                "systemctl is-active --quiet phosh.service"
+            ];
+        };
+        fleet.stages = [
+            "@arm"
+            "@desktop"
+            "@server"
+        ];
+        provisioning = {
+            ssh_key = config.sops.secrets.x_nix_provision_key.path;
+            agent_url = "wss://nix.heimdall.technet/api/agent";
         };
         caches.technet = {
             name = "TechNet";
@@ -129,35 +154,6 @@ in
             push_command = "env XDG_CONFIG_HOME=${config.technet.atticPush.configDir} ${pkgs.attic-client}/bin/attic push --jobs 2 technet";
         };
     };
-
-    security.sudo.extraRules = [
-        {
-            users = [ "x-nix" ];
-            commands = [
-                {
-                    command = "/run/current-system/sw/bin/nixos-rebuild switch --flake ${upgradeFlake} ${deployArgs} --refresh";
-                    options = [ "NOPASSWD" ];
-                }
-                {
-                    command = "/run/current-system/sw/bin/systemctl reboot";
-                    options = [ "NOPASSWD" ];
-                }
-                {
-                    command = "/run/current-system/sw/bin/nix-collect-garbage ${gcOptions}";
-                    options = [ "NOPASSWD" ];
-                }
-                # The Boot page reads systemd-boot's entries from the root-only /boot, and sets the one-shot next entry.
-                {
-                    command = "/run/current-system/sw/bin/bootctl list --json=short";
-                    options = [ "NOPASSWD" ];
-                }
-                {
-                    command = "/run/current-system/sw/bin/bootctl set-oneshot *";
-                    options = [ "NOPASSWD" ];
-                }
-            ];
-        }
-    ];
 
     systemd.tmpfiles.settings."X-Nix".${buildRoots}.d = {
         user = "x-nix";
