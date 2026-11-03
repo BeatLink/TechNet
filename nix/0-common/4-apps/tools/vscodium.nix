@@ -275,6 +275,8 @@ in
                                     }))
                                 ]
                                 ++ (with pkgs.nix-vscode-extensions.vscode-marketplace; [
+                                    github.copilot
+                                    github.copilot-chat
                                     fnando.linter
                                     colinkiama.linter-vala
                                     emeraldwalk.runonsave
