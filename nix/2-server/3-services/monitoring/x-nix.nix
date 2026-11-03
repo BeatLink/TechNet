@@ -93,6 +93,10 @@ in
             ragnarok = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGt5YJVNXiS5IiS4D3eCcD5BhqE3oJGcW4pxy1bnlzjA x-nix-agent-ragnarok";
             thor = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPrMmoZrvzNQGTQbvP3WYgROY2vjM6zQD4nJL4XsqQJA x-nix-agent-thor";
         };
+        wakeOnLan.thor = {
+            mac = "02:ba:38:78:9f:56";
+            broadcast = "192.168.0.255";
+        };
         deployments.heimdall = {
             name = "Heimdall";
             tags = [ "server" ];
