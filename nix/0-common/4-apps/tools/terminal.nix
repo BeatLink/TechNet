@@ -49,13 +49,21 @@ let
     atuinLogin = user: {
         description = "Log ${user} in to the TechNet shell history server";
         wantedBy = [ "multi-user.target" ];
-        wants = [ "network-online.target" ];
-        after = [ "network-online.target" ];
+        # Atuin run before Home Manager links config.toml writes its default to ~/.atuin/config.toml, which then shadows the linked one with api.atuin.sh
+        wants = [
+            "network-online.target"
+            "home-manager-${user}.service"
+        ];
+        after = [
+            "network-online.target"
+            "home-manager-${user}.service"
+        ];
         path = [ pkgs.atuin ];
         script = ''
             # Atuin keeps the session in meta.db, not a session file, so its exit code is the only login check
             if atuin status >/dev/null 2>&1; then exit 0; fi
-            atuin login --username "$ATUIN_USERNAME" --password "$ATUIN_PASSWORD" --key "$ATUIN_KEY"
+            # The password and key come from the environment, which unlike argv no other user can read
+            ATUIN_ENCRYPTION_KEY="$ATUIN_KEY" atuin login --username "$ATUIN_USERNAME"
         '';
         serviceConfig = {
             Type = "oneshot";
