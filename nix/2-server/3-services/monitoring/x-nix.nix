@@ -49,7 +49,7 @@ let
         {
             inherit name tags;
             host = lib.toLower name;
-            flake = config.technet.flake;
+            flake = "technet-config";
             configuration = name;
             eval_interval = "6h";
             eval_agent = "heimdall"; # Evaluating the flake on the 2GB Rock64 swaps it to death, and on the phone takes it out of service
@@ -97,17 +97,21 @@ in
             mac = "02:ba:38:78:9f:56";
             broadcast = "192.168.0.255";
         };
+        flakes.technet-config = {
+            name = "TechNet";
+            url = config.technet.flake;
+            update_at = "02:00";
+            push_ssh_key = config.sops.secrets.x_monitor_flake_deploy_key.path; # Lives on Heimdall alone, which updates the flake for the whole fleet
+        };
         deployments.heimdall = {
             name = "Heimdall";
             tags = [ "server" ];
-            flake = config.technet.flake;
+            flake = "technet-config";
             eval_interval = "6h";
             rebuild_args = [
                 "--no-write-lock-file"
                 "-L"
             ];
-            push_ssh_key = config.sops.secrets.x_monitor_flake_deploy_key.path; # Only this deployment pushes, so the key lives on Heimdall alone
-            update_at = "02:00"; # The only thing that bumps flake.lock
             build_at = "04:00"; # The fleet's builds start after attic-gc at 03:00, whose database lock their uploads would contend with
             build_root_dir = buildRoots;
             auto_switch = true;
@@ -143,7 +147,7 @@ in
         };
         caches.technet = {
             name = "TechNet";
-            flake = config.technet.flake;
+            flake = "technet-config";
             configurations = fleet;
             cache_url = cacheUrl;
             # A hand-made build replaces the nightly one's root, so it stays rooted until deployed like that one would.
