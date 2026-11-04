@@ -1591,6 +1591,7 @@ in
                                                     ] lib.toLower;
                                                     # Once fully pushed these live only in the cache, and their deploys substitute them back from it.
                                                     drop_pushed = [
+                                                        "Heimdall"
                                                         "Odin"
                                                         "Ragnarok"
                                                         "Thor"

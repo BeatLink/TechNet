@@ -1,8 +1,9 @@
 # X-Nix ##############################################################################################################################################
 #
 # The NixOS deployment portal at nix.heimdall.technet, which runs the whole fleet's NixOS upkeep: it updates the flake, and the TechNet cache evaluates
-# and builds every host's closure nightly on Odin when it is up and on Heimdall otherwise, and pushes it to Attic, and each host switches once it drifts. Heimdall switches itself; every other
-# host is switched from the cache by its own X-Nix agent (x-nix-agent.nix). The X-Nix modules carry their own sudo rules.
+# and builds every host's closure nightly on Odin when it is up and on Heimdall otherwise, and pushes it to Attic, and each host switches once it drifts.
+# Heimdall switches itself; every other host is switched from the cache by its own X-Nix agent (x-nix-agent.nix). The X-Nix modules carry their own sudo
+# rules.
 #
 {
     config,
@@ -164,6 +165,7 @@ in
             build_links = lib.genAttrs fleet lib.toLower;
             # Once fully pushed these live only in the cache, and their deploys substitute them back from it.
             drop_pushed = [
+                "Heimdall"
                 "Odin"
                 "Ragnarok"
                 "Thor"
