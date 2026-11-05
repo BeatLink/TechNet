@@ -26,6 +26,7 @@ in
             settings = pkgs.writeText "codex-settings.json" (
                 builtins.toJSON {
                     model_path = "/Storage/Files/Projects/X-Tech-Laboratories/CODEX/models/model.gguf";
+                    embedding_model_path = "/Storage/Files/Projects/X-Tech-Laboratories/CODEX/models/embedding.gguf";
                     mcp_servers = [
                         {
                             name = "trilium";
