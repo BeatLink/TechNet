@@ -25,7 +25,7 @@ in
             };
             settings = pkgs.writeText "codex-settings.json" (
                 builtins.toJSON {
-                    model_path = "/Storage/Files/Projects/CODEX/models/model.gguf";
+                    model_path = "/Storage/Files/Projects/X-Tech-Laboratories/CODEX/models/model.gguf";
                     mcp_servers = [
                         {
                             name = "trilium";
@@ -85,8 +85,8 @@ in
                 Service = {
                     ExecStart = pkgs.writeShellScript "codex-daemon-watch" ''
                         watch() {
-                            ${pkgs.inotify-tools}/bin/inotifywait -r -q "$@" -e close_write,create,delete,move --exclude __pycache__ \
-                                ${source}/codex ${source}/pyproject.toml ${source}/flake.nix ${source}/flake.lock
+                            ${pkgs.inotify-tools}/bin/inotifywait -r -q "$@" -e close_write,create,delete,move \
+                                ${source}/src ${source}/package.json ${source}/package-lock.json ${source}/flake.nix ${source}/flake.lock
                         }
                         while watch; do
                             while watch -t 60; do :; done

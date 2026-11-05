@@ -193,11 +193,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1793860682,
-        "narHash": "sha256-ocglzydF0tnrv8wjvKlT+XNWNmEO5V5xE1sX3YRxmFs=",
+        "lastModified": 1793865370,
+        "narHash": "sha256-yhNNfudPwxkimYeYAueSXUxb5bfTfe0IDUqnnDQtuKs=",
         "ref": "refs/heads/main",
-        "rev": "ffa462153309d8e0c6c2baa548317c9e76a188b1",
-        "revCount": 151,
+        "rev": "27097dd719d554afc964bfdfde3d4e13caeec392",
+        "revCount": 182,
         "type": "git",
         "url": "file:///Storage/Files/Projects/X-Tech-Laboratories/CODEX"
       },
