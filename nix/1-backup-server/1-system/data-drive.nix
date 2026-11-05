@@ -29,5 +29,10 @@
                 neededForBoot = true;
             };
         }
+
+        # Scrub State ################################################################################################################################
+        {
+            environment.persistence."/persistent".directories = [ "/var/lib/btrfs" ];
+        }
     ];
 }
