@@ -4,6 +4,7 @@
 #
 { config, inputs, ... }:
 let
+    source = "/Storage/Files/Projects/X-Tech-Laboratories/CODEX";
     token_path = config.sops.secrets.trilium_etapi_token.path;
 in
 {
@@ -63,12 +64,36 @@ in
             };
 
             # Started at login so the model stays loaded and background research runs; the interfaces connect to it over its socket.
+            # It runs from the live folder instead of the store copy, so a restart picks up whatever was edited. Untracked files are not seen: git add them.
             systemd.user.services.codex-daemon = {
                 Unit.Description = "CODEX daemon";
                 Service = {
-                    ExecStart = "${wrapped}/bin/codex-daemon";
+                    ExecStart = pkgs.writeShellScript "codex-daemon-start" ''
+                        export TRILIUM_ETAPI_TOKEN="$(cat ${token_path})"
+                        exec ${pkgs.nix}/bin/nix shell git+file://${source}#codex --command codex-daemon
+                    '';
                     Restart = "on-failure";
                     RestartSec = 5;
+                    TimeoutStartSec = 900; # the first start after an edit rebuilds the package
+                };
+                Install.WantedBy = [ "default.target" ];
+            };
+
+            # Restarts the daemon once the source has been quiet for a minute, so finished work goes live without interrupting an edit in progress.
+            systemd.user.services.codex-daemon-watch = {
+                Unit.Description = "Restart the CODEX daemon when its source changes";
+                Service = {
+                    ExecStart = pkgs.writeShellScript "codex-daemon-watch" ''
+                        watch() {
+                            ${pkgs.inotify-tools}/bin/inotifywait -r -q "$@" -e close_write,create,delete,move --exclude __pycache__ \
+                                ${source}/codex ${source}/pyproject.toml ${source}/flake.nix ${source}/flake.lock
+                        }
+                        while watch; do
+                            while watch -t 60; do :; done
+                            ${pkgs.systemd}/bin/systemctl --user restart codex-daemon
+                        done
+                    '';
+                    Restart = "always";
                 };
                 Install.WantedBy = [ "default.target" ];
             };

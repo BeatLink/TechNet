@@ -65,7 +65,8 @@
             url = "github:x-tech-laboratories/X-Tasks";
             inputs.nixpkgs.follows = "nixpkgs";
         };
-        codex.url = "path:/Storage/Files/Projects/X-Tech-Laboratories/CODEX";
+        # git+file, not path:, because the folder holds 22GB of gitignored models that a path: input would copy into the store on every evaluation
+        codex.url = "git+file:///Storage/Files/Projects/X-Tech-Laboratories/CODEX";
         playitslowly = {
             url = "github:BeatLink/playitslowly";
             inputs.nixpkgs.follows = "nixpkgs";
