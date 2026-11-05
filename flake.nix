@@ -65,7 +65,7 @@
             url = "github:x-tech-laboratories/X-Tasks";
             inputs.nixpkgs.follows = "nixpkgs";
         };
-        codex.url = "github:BeatLink/CODEX";
+        codex.url = "path:/Storage/Files/Projects/X-Tech-Laboratories/CODEX";
         playitslowly = {
             url = "github:BeatLink/playitslowly";
             inputs.nixpkgs.follows = "nixpkgs";

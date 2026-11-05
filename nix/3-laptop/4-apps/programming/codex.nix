@@ -1,6 +1,6 @@
 # CODEX ##############################################################################################################################################
 #
-# The staged harness for local GGUF models built in /Storage/Files/Projects/CODEX, installed from its GitHub flake with Trilium's MCP tools.
+# The staged harness for local GGUF models built in /Storage/Files/Projects/X-Tech-Laboratories/CODEX, installed from that folder's flake with Trilium's MCP tools.
 #
 { config, inputs, ... }:
 let
@@ -11,6 +11,17 @@ in
         { lib, pkgs, ... }:
         let
             codex = inputs.codex.packages.${pkgs.stdenv.hostPlatform.system}.default;
+            # Wrapped so every program, the daemon included, finds the Trilium token.
+            wrapped = pkgs.symlinkJoin {
+                name = "codex";
+                paths = [ codex ];
+                nativeBuildInputs = [ pkgs.makeWrapper ];
+                postBuild = ''
+                    for program in $out/bin/*; do
+                        wrapProgram $program --run 'export TRILIUM_ETAPI_TOKEN="$(cat ${token_path})"'
+                    done
+                '';
+            };
             settings = pkgs.writeText "codex-settings.json" (
                 builtins.toJSON {
                     model_path = "/Storage/Files/Projects/CODEX/models/model.gguf";
@@ -35,18 +46,7 @@ in
         in
         {
             home = {
-                packages = [
-                    (pkgs.symlinkJoin {
-                        name = "codex";
-                        paths = [ codex ];
-                        nativeBuildInputs = [ pkgs.makeWrapper ];
-                        postBuild = ''
-                            for program in $out/bin/*; do
-                                wrapProgram $program --run 'export TRILIUM_ETAPI_TOKEN="$(cat ${token_path})"'
-                            done
-                        '';
-                    })
-                ];
+                packages = [ wrapped ];
 
                 # The settings and the knowledge store live here, and the home rollback would otherwise blank both.
                 persistence."/Storage/Apps/AI/CODEX" = {
@@ -60,6 +60,17 @@ in
                 activation.codexSettings = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
                     [ -e "$HOME/.config/codex/settings.json" ] || run install -Dm644 ${settings} "$HOME/.config/codex/settings.json"
                 '';
+            };
+
+            # Started at login so the model stays loaded and background research runs; the interfaces connect to it over its socket.
+            systemd.user.services.codex-daemon = {
+                Unit.Description = "CODEX daemon";
+                Service = {
+                    ExecStart = "${wrapped}/bin/codex-daemon";
+                    Restart = "on-failure";
+                    RestartSec = 5;
+                };
+                Install.WantedBy = [ "default.target" ];
             };
         };
 }
