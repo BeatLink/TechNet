@@ -206,6 +206,22 @@
         "url": "file:///Storage/Files/Projects/X-Tech-Laboratories/CODEX"
       }
     },
+    "collapsible-systray": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1793997805,
+        "narHash": "sha256-OecD/+TTJi7e+6igPa78K6dxzwRICFcDjE7cVv44rZE=",
+        "owner": "BeatLink",
+        "repo": "CollapsibleSystemTray",
+        "rev": "06c7d4bb6feda86fc5e2a4bf543f4a627cbe4718",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BeatLink",
+        "repo": "CollapsibleSystemTray",
+        "type": "github"
+      }
+    },
     "comet": {
       "inputs": {
         "nixpkgs": [
@@ -1060,6 +1076,7 @@
         "claude-chat-manager": "claude-chat-manager",
         "claude-code": "claude-code",
         "codex": "codex",
+        "collapsible-systray": "collapsible-systray",
         "comet": "comet",
         "context": "context",
         "disko": "disko",

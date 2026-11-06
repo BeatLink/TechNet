@@ -57,6 +57,10 @@
             url = "github:BeatLink/claude-chat-manager";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        collapsible-systray = {
+            url = "github:BeatLink/CollapsibleSystemTray";
+            flake = false;
+        };
         x-music = {
             url = "github:x-tech-laboratories/Anthem";
             inputs.nixpkgs.follows = "nixpkgs";
