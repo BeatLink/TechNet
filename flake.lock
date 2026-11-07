@@ -209,11 +209,11 @@
     "collapsible-systray": {
       "flake": false,
       "locked": {
-        "lastModified": 1794081705,
-        "narHash": "sha256-doCOFiHFXyUTnkSjjGvzZIB6KWDdX4U7Zr6GIw4WYGE=",
+        "lastModified": 1794082911,
+        "narHash": "sha256-W0VzTYxLFaLay8gsEleYoIgOO+69SBdVtIIw78Nvjf8=",
         "owner": "BeatLink",
         "repo": "CollapsibleSystemTray",
-        "rev": "e5916e536cdef00294a05fd70687055adadcf11a",
+        "rev": "c5ee1373633a5ce354fed23862a3701ea7f0a1d9",
         "type": "github"
       },
       "original": {
