@@ -27,6 +27,8 @@ in
                 builtins.toJSON {
                     model_path = "/Storage/Files/Projects/X-Tech-Laboratories/CODEX/models/model.gguf";
                     embedding_model_path = "/Storage/Files/Projects/X-Tech-Laboratories/CODEX/models/embedding.gguf";
+                    # The file tools reach only this folder and what lies under it; the named folders (Documents, Downloads, ...) live here, not in the home folder the daemon runs from.
+                    filesystem_root = "/Storage/Files";
                     mcp_servers = [
                         {
                             name = "trilium";
