@@ -44,6 +44,7 @@ in
             persistence."/Storage/Apps/Tools/LinuxSidebar" = {
                 directories = [
                     ".config/linux-sidebar"
+                    ".local/share/linux-sidebar"
                 ];
 
             };

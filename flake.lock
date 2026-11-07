@@ -670,11 +670,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794022484,
-        "narHash": "sha256-Z+2EDhqFgOgBBX7ybXryFukJqP7zWYwhdu+kOuif4So=",
+        "lastModified": 1794024007,
+        "narHash": "sha256-laHvY5hRo7TXeFfYmr0XG1iATd1sAM2wZU25ezQ1LMM=",
         "owner": "BeatLink",
         "repo": "linux-sidebar",
-        "rev": "915ca61f0c82ddfd99cc8586bc4ba39c00899e4a",
+        "rev": "ea2268bfbbffa2b45cb37e3012404f661213625b",
         "type": "github"
       },
       "original": {
@@ -1451,11 +1451,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794021154,
-        "narHash": "sha256-08rkV/sAXTR+rJLwys4zcdsO6CJpFfDmMgAbZ0NNDYw=",
+        "lastModified": 1794024018,
+        "narHash": "sha256-A5q9Up6Y5d0Uf7ehabn4J1hHNbsnDue2Cq81H4RBTMk=",
         "owner": "x-tech-laboratories",
         "repo": "X-Tasks",
-        "rev": "b8383a5b2070a4182b112a89c28d7a65b6307181",
+        "rev": "92045e981c618d839450b40f089e147c21b48dec",
         "type": "github"
       },
       "original": {
