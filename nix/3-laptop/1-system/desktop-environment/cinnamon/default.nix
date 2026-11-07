@@ -31,7 +31,7 @@ in
         ./always-on-top.nix
         ./battery-guardian.nix
         ./cinnamon-bump.nix
-        ./collapsible-systray.nix
+        ./tray-drawer.nix
         ./monitors.nix
         ./tang.nix
     ];

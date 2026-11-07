@@ -206,22 +206,6 @@
         "url": "file:///Storage/Files/Projects/X-Tech-Laboratories/CODEX"
       }
     },
-    "collapsible-systray": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1794086228,
-        "narHash": "sha256-S6yDoLuvYu/4r8/8e0p9lIH0hnRhuQVnJEGn/gb2P6Q=",
-        "owner": "BeatLink",
-        "repo": "CollapsibleSystemTray",
-        "rev": "a22445adde65707d4c806c9206a0e9a2533d2249",
-        "type": "github"
-      },
-      "original": {
-        "owner": "BeatLink",
-        "repo": "CollapsibleSystemTray",
-        "type": "github"
-      }
-    },
     "comet": {
       "inputs": {
         "nixpkgs": [
@@ -1076,7 +1060,6 @@
         "claude-chat-manager": "claude-chat-manager",
         "claude-code": "claude-code",
         "codex": "codex",
-        "collapsible-systray": "collapsible-systray",
         "comet": "comet",
         "context": "context",
         "disko": "disko",
@@ -1100,6 +1083,7 @@
         "pinephone-kernel": "pinephone-kernel",
         "playitslowly": "playitslowly",
         "sops-nix": "sops-nix",
+        "tray-drawer": "tray-drawer",
         "waypipe-desktop": "waypipe-desktop",
         "web-greeter": "web-greeter",
         "x-backups": "x-backups",
@@ -1313,6 +1297,22 @@
       "original": {
         "owner": "nix-systems",
         "repo": "default",
+        "type": "github"
+      }
+    },
+    "tray-drawer": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794094654,
+        "narHash": "sha256-kJWLWN0SRsqbLP6ptjC9YLaXujXzDazNteAC4yMoq7Y=",
+        "owner": "BeatLink",
+        "repo": "TrayDrawer",
+        "rev": "42de280cbce01f3cd68ce84045ab02e9967c4fc3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "BeatLink",
+        "repo": "TrayDrawer",
         "type": "github"
       }
     },

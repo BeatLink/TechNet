@@ -1,14 +1,14 @@
-# Collapsible System Tray
+# Tray Drawer
 #
-# Our tray applet: one tray for XApp, StatusNotifier and XEmbed icons that tucks chosen icons and applets into a drawer or popup grid.
+# Our tray applet: one tray for XApp, StatusNotifier and XEmbed icons that tucks chosen icons and applets into a drawer.
 # It does the stock System Tray and XApp Status applets' jobs, so those two are removed from Cinnamon.
 #
 { inputs, pkgs, ... }:
 let
-    uuid = "collapsible-systray@beatlink";
+    uuid = "tray-drawer@beatlink";
     applet = pkgs.runCommand "cinnamon-applet-${uuid}" { } ''
         mkdir -p "$out/share/cinnamon/applets"
-        cp -r ${inputs.collapsible-systray}/${uuid}/files/${uuid} "$out/share/cinnamon/applets/${uuid}"
+        cp -r ${inputs.tray-drawer}/${uuid}/files/${uuid} "$out/share/cinnamon/applets/${uuid}"
     '';
 in
 {
