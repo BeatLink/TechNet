@@ -1,4 +1,4 @@
-{ inputs, pkgs, ... }:
+{ config, inputs, pkgs, ... }:
 let
     # WebKit divides by the DRM refresh rate, which is 0 while an output is connected but unlit, so pin it to the timer vblank monitor
     linux-sidebar =
@@ -10,6 +10,12 @@ let
             });
 in
 {
+    # The X-Tasks server's token, which the sidebar's X-Tasks section reads through its token command
+    sops.secrets.x_tasks_access_token = {
+        sopsFile = "${config.technet.secrets.path}/x-tasks.yaml";
+        owner = "beatlink";
+    };
+
     home-manager.users.beatlink = {
         programs.linux-sidebar = {
             enable = true;
