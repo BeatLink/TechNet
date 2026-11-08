@@ -1303,11 +1303,11 @@
     "tray-drawer": {
       "flake": false,
       "locked": {
-        "lastModified": 1794094654,
-        "narHash": "sha256-kJWLWN0SRsqbLP6ptjC9YLaXujXzDazNteAC4yMoq7Y=",
+        "lastModified": 1794096813,
+        "narHash": "sha256-Rz8Jl+GtF+Y6c9CIx+ok9JL1q2qXwuFF21/m+8hAfv4=",
         "owner": "BeatLink",
         "repo": "TrayDrawer",
-        "rev": "42de280cbce01f3cd68ce84045ab02e9967c4fc3",
+        "rev": "6792a4363334c7df2d4a9193d6cc149d52fd49a7",
         "type": "github"
       },
       "original": {
