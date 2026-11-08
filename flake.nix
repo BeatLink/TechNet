@@ -98,7 +98,10 @@
             inputs.nixpkgs.follows = "nixpkgs";
         };
         nixos-plymouth = {
-            url = "github:BeatLink/nixos-plymouth";
+            url = "github:x-tech-laboratories/X-Plymouth/33b308bfc0e9411e5c96bc114b9f7e83e7c7fd2c"; # The phone theme copies this revision's throbber frames, which later X-Plymouth dropped
+        };
+        x-plymouth = {
+            url = "github:x-tech-laboratories/X-Plymouth";
         };
         app-separators = {
             url = "github:/BeatLink/Plank-Separator";

@@ -860,14 +860,15 @@
       "locked": {
         "lastModified": 1758476321,
         "narHash": "sha256-kP9fSJxZO4vHn9kL3o9h1yxKxUvON/1yvlNIYSH5yq0=",
-        "owner": "BeatLink",
-        "repo": "nixos-plymouth",
+        "owner": "x-tech-laboratories",
+        "repo": "X-Plymouth",
         "rev": "33b308bfc0e9411e5c96bc114b9f7e83e7c7fd2c",
         "type": "github"
       },
       "original": {
-        "owner": "BeatLink",
-        "repo": "nixos-plymouth",
+        "owner": "x-tech-laboratories",
+        "repo": "X-Plymouth",
+        "rev": "33b308bfc0e9411e5c96bc114b9f7e83e7c7fd2c",
         "type": "github"
       }
     },
@@ -1090,6 +1091,7 @@
         "x-monitor": "x-monitor",
         "x-music": "x-music",
         "x-nix": "x-nix",
+        "x-plymouth": "x-plymouth",
         "x-tasks": "x-tasks",
         "xdg-autostart": "xdg-autostart"
       }
@@ -1440,6 +1442,21 @@
       "original": {
         "owner": "x-tech-laboratories",
         "repo": "X-Nix",
+        "type": "github"
+      }
+    },
+    "x-plymouth": {
+      "locked": {
+        "lastModified": 1794180571,
+        "narHash": "sha256-QpdewfuQppejsfXotUlV1EOcfZaFmrE2JORXZSLICAI=",
+        "owner": "x-tech-laboratories",
+        "repo": "X-Plymouth",
+        "rev": "0b9122db046a4f8b2228f2ac0dc33a8f698fba4b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "x-tech-laboratories",
+        "repo": "X-Plymouth",
         "type": "github"
       }
     },

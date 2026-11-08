@@ -9,7 +9,7 @@
     ...
 }:
 {
-    imports = [ inputs.nixos-plymouth.nixosModules.default ];
+    imports = [ inputs.x-plymouth.nixosModules.default ];
 
     config = lib.mkMerge [
 
