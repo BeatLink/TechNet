@@ -32,6 +32,7 @@ in
         ./battery-guardian.nix
         ./cinnamon-bump.nix
         ./tray-drawer.nix
+        ./xlet-settings.nix
         ./monitors.nix
         ./tang.nix
     ];
