@@ -69,8 +69,8 @@
             url = "github:x-tech-laboratories/X-Tasks";
             inputs.nixpkgs.follows = "nixpkgs";
         };
-        # git+file, not path:, because the folder holds 22GB of gitignored models that a path: input would copy into the store on every evaluation
-        codex.url = "git+file:///Storage/Files/Projects/X-Tech-Laboratories/CODEX";
+        # From GitHub, not the local checkout: libgit2 refuses a git+file repo owned by another user, so X-Nix's agent could not evaluate it
+        codex.url = "github:x-tech-laboratories/CODEX";
         playitslowly = {
             url = "github:BeatLink/playitslowly";
             inputs.nixpkgs.follows = "nixpkgs";

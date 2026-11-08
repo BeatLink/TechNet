@@ -195,15 +195,15 @@
       "locked": {
         "lastModified": 1794123665,
         "narHash": "sha256-vNQy0k8HJRVD4WTG+yvaVkZ9BrErY+F2UD/t5vLcuE4=",
-        "ref": "refs/heads/main",
+        "owner": "x-tech-laboratories",
+        "repo": "CODEX",
         "rev": "9fa87d7d55396ed255d51ec08195ed86fb3510c7",
-        "revCount": 309,
-        "type": "git",
-        "url": "file:///Storage/Files/Projects/X-Tech-Laboratories/CODEX"
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "file:///Storage/Files/Projects/X-Tech-Laboratories/CODEX"
+        "owner": "x-tech-laboratories",
+        "repo": "CODEX",
+        "type": "github"
       }
     },
     "comet": {
