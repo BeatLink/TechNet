@@ -62,7 +62,7 @@
             flake = false;
         };
         x-music = {
-            url = "github:x-tech-laboratories/Anthem";
+            url = "github:x-tech-laboratories/X-Music";
             inputs.nixpkgs.follows = "nixpkgs";
         };
         x-tasks = {
