@@ -136,6 +136,15 @@
                             statusStyle = "dot";
                         };
                     }
+                    {
+                        "X-Tasks" = {
+                            icon = "mdi-checkbox-marked-outline";
+                            description = "Task Manager and Sync Server";
+                            href = "https://tasks.heimdall.technet";
+                            siteMonitor = "https://tasks.heimdall.technet/login"; # The root redirects to the login page when signed out
+                            statusStyle = "dot";
+                        };
+                    }
                 ];
             }
             {
@@ -220,18 +229,15 @@
                             };
                         };
                     }
-                    # Traccar is switched off (see home-automation/traccar.nix).
-                    /*
-                      {
-                          "Traccar" = {
-                              icon = "traccar.png";
-                              description = "Vehicle Tracking Server";
-                              href = "https://traccar.heimdall.technet";
-                              siteMonitor = "https://traccar.heimdall.technet";
-                              statusStyle = "dot";
-                          };
-                      }
-                    */
+                    {
+                        "Traccar" = {
+                            icon = "traccar.png";
+                            description = "Vehicle Tracking Server";
+                            href = "https://traccar.heimdall.technet";
+                            siteMonitor = "https://traccar.heimdall.technet";
+                            statusStyle = "dot";
+                        };
+                    }
                     {
                         "MQTT" = {
                             icon = "mosquitto.png";
@@ -447,6 +453,24 @@
                             href = "https://atuin-web.heimdall.technet";
                             description = "Shell History Browser";
                             siteMonitor = "https://atuin-web.heimdall.technet/healthz";
+                            statusStyle = "dot";
+                        };
+                    }
+                    {
+                        "X-Nix" = {
+                            icon = "https://nix.heimdall.technet/icon.svg";
+                            href = "https://nix.heimdall.technet";
+                            description = "NixOS Deployment Portal";
+                            siteMonitor = "https://nix.heimdall.technet/health";
+                            statusStyle = "dot";
+                        };
+                    }
+                    {
+                        "X-Backups" = {
+                            icon = "mdi-backup-restore";
+                            href = "https://backups.heimdall.technet";
+                            description = "Borg Backup Manager";
+                            siteMonitor = "https://backups.heimdall.technet";
                             statusStyle = "dot";
                         };
                     }
