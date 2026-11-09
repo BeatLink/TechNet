@@ -72,6 +72,13 @@ in
         owner = "x-nix";
     };
 
+    # The GitHub token's nix.conf include again, readable by X-Nix, so updating the flake does not run into the API's rate limit for anonymous callers.
+    sops.secrets.x_nix_github_access_token_conf = {
+        sopsFile = "${config.technet.secrets.commonPath}/github.yaml";
+        key = "github_access_token_conf";
+        owner = "x-nix";
+    };
+
     # The key the Provision page logs in to a machine being installed with; its public half goes in that machine's installer.
     sops.secrets.x_nix_provision_key = {
         sopsFile = "${config.technet.secrets.path}/x-nix.yaml";
@@ -109,6 +116,36 @@ in
             url = config.technet.flake;
             update_at = "02:00";
             push_ssh_key = config.sops.secrets.x_monitor_flake_deploy_key.path; # Lives on Heimdall alone, which updates the flake for the whole fleet
+            access_tokens_file = config.sops.secrets.x_nix_github_access_token_conf.path;
+            # Only my own repositories update the flake as soon as they move; everything upstream waits for update_at.
+            watch_inputs = [
+                "app-separators"
+                "battery-guardian"
+                "battletime"
+                "blockurl"
+                "calibre-web-nextgen"
+                "claude-chat-manager"
+                "codex"
+                "comet"
+                "context"
+                "gmusicbrowser"
+                "halon"
+                "linux-sidebar"
+                "lnxlink"
+                "nixtool"
+                "pinephone-charge"
+                "pinephone-kernel"
+                "playitslowly"
+                "tray-drawer"
+                "waypipe-desktop"
+                "web-greeter"
+                "x-backups"
+                "x-monitor"
+                "x-music"
+                "x-nix"
+                "x-plymouth"
+                "x-tasks"
+            ];
         };
         deployments.heimdall = {
             name = "Heimdall";
