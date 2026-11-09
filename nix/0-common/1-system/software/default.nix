@@ -9,5 +9,6 @@
         ./flake-source.nix
         ./garbage-collection.nix
         ./packages.nix
+        ./aws-lc-system.nix
     ];
 }
