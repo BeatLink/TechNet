@@ -1,6 +1,7 @@
 # Hardware Configuration #############################################################################################################################
 #
-# The Rock64 board, the drivers it needs before the disks can be unlocked, and the fixes its three USB-to-SATA adapters need to work reliably.
+# The Rock64 board, the drivers it needs before the disks can be unlocked, and the fixes its USB 3 controller and three USB-to-SATA adapters need
+# to work reliably.
 #
 
 { lib, pkgs, ... }:
@@ -10,6 +11,9 @@ let
         "0583"
         "0576"
     ];
+
+    # One setting for every adapter, because a second usb-storage.quirks on the command line replaces the first instead of adding to it
+    storageQuirks = lib.concatStringsSep "," (map (id: "152d:${id}:uf") dataBridges ++ [ "152d:1561:u" ]);
 
     # The most the root drive's adapter will erase in one request: it refuses anything above 65535 sectors, and the kernel wants a multiple of 4 KiB
     maxDiscardBytes = toString (8191 * 4096);
@@ -53,16 +57,25 @@ in
             # Loaded at the very start of boot so the disks and the network are ready when the unlock needs them
             boot.initrd.kernelModules = [
                 "uas"
+                "usb_storage"
+            ];
+        }
+
+        # Disk Protocol ##############################################################################################################################
+        {
+            boot.kernelParams = [
+                # Use the older, simpler USB disk protocol for every adapter: the backup drive's lock up under the fast one, and the root drive's
+                # times out on commands there. The f keeps a kernel default this list would otherwise drop.
+                "usb-storage.quirks=${storageQuirks}"
+
+                # Slow down the first moments of USB setup for these adapters; without it they sometimes reject the setup and the drive never appears.
+                # One setting for both, because a second usbcore.quirks on the command line replaces the first.
+                "usbcore.quirks=152d:1561:gn,152d:0576:gn"
             ];
         }
 
         # Backup Drive Adapter #######################################################################################################################
         {
-            # Use the older, simpler USB disk protocol for these adapters, which lock up under the fast one; the f keeps a kernel default this list would otherwise drop
-            boot.kernelParams = [
-                "usb-storage.quirks=${lib.concatMapStringsSep "," (id: "152d:${id}:uf") dataBridges}"
-            ];
-
             services.udev.extraRules = lib.concatMapStringsSep "\n" (id: ''
                 # Give the drive three minutes to answer: it pauses for long stretches while rewriting, and a timeout would disconnect it mid-write
                 ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${id}", ATTR{device/timeout}="180"
@@ -77,9 +90,6 @@ in
 
         # Root Drive Adapter #########################################################################################################################
         {
-            # Slow down the first moments of USB setup for this adapter; without it, it sometimes rejects the setup and the root drive never appears
-            boot.kernelParams = [ "usbcore.quirks=152d:1561:gn" ];
-
             # Applied in early boot as well, because the encrypted root copies these settings from the drive at the moment it is opened
             services.udev.extraRules = rootBridgeRules;
             boot.initrd.services.udev.rules = rootBridgeRules;
