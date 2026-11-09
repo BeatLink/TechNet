@@ -17,8 +17,8 @@
 #  placeholder keeps the path itself inside the state directory while the
 #  content still comes from the store.
 #
-#  The build caches (`.esphome/`, `.platformio/`) and `secrets.yaml` deliberately
-#  stay mutable; only the config files themselves are Nix-owned.
+#  The build caches (`.esphome/`, `.platformio/`, `.cache/`) and `secrets.yaml`
+#  deliberately stay mutable; only the config files themselves are Nix-owned.
 
 {
     config,
@@ -137,6 +137,10 @@ in
             );
         };
     };
+
+    # Native ESP8266 toolchain -----------------------------------------------------------------------------------------------------------------------
+    # The compiler ESPHome downloads into the state directory is a generic-linux gcc, so it needs a real loader rather than NixOS's stub-ld.
+    programs.nix-ld.enable = true;
 
     # Device secrets ---------------------------------------------------------------------------------------------------------------------------------
     # Each key is decrypted individually and reassembled into the `secrets.yaml`
