@@ -61,6 +61,34 @@ in
             ];
         }
 
+        # USB 3 Controller ###########################################################################################################################
+        {
+            # Stop the controller parking on one SuperSpeed bulk pipe: with both drives behind the hub under load, the controller stops answering and
+            # the kernel declares it dead, dropping every disk at once. Mainline carries the fix but leaves it to each board's device tree.
+            hardware.deviceTree = {
+                # Without the name, systemd-boot leaves the firmware's device tree in place and the overlay never reaches the kernel
+                name = "rockchip/rk3328-rock64.dtb";
+                overlays = [
+                    {
+                        name = "usb3-no-park-mode";
+                        dtsText = ''
+                            /dts-v1/;
+                            /plugin/;
+                            / {
+                                compatible = "pine64,rock64", "rockchip,rk3328";
+                                fragment@0 {
+                                    target-path = "/usb@ff600000";
+                                    __overlay__ {
+                                        snps,parkmode-disable-ss-quirk;
+                                    };
+                                };
+                            };
+                        '';
+                    }
+                ];
+            };
+        }
+
         # Disk Protocol ##############################################################################################################################
         {
             boot.kernelParams = [
