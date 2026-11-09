@@ -33,6 +33,7 @@ in
                 serviceConfig.Type = "oneshot";
                 path = [
                     pkgs.clevis
+                    pkgs.curl # clevis reaches tang through it
                     pkgs.coreutils
                 ];
                 script = ''
