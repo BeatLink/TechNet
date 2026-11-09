@@ -175,11 +175,11 @@
         "systems": "systems_3"
       },
       "locked": {
-        "lastModified": 1793988107,
-        "narHash": "sha256-O91/HnND0xTpdCecUJedsfRU2n/V5xdTLV4iplOXS7Y=",
+        "lastModified": 1794145993,
+        "narHash": "sha256-VTuZErYZM9Dc5XyXzpejgxsCjYHxEZVTYKRSJYxN9PY=",
         "owner": "sadjow",
         "repo": "claude-code-nix",
-        "rev": "623c716377e67e88cd96e505928a03b087e00e8a",
+        "rev": "dcf5354053c67a0c653796cca9af5630e4a54fc4",
         "type": "github"
       },
       "original": {
@@ -731,11 +731,11 @@
     "mobile-nixos": {
       "flake": false,
       "locked": {
-        "lastModified": 1783912271,
-        "narHash": "sha256-CzwmiKxuh1u+H8hDnrVeUl/fL59PvsgLbr2l0FhqWK0=",
+        "lastModified": 1794159983,
+        "narHash": "sha256-1tjLyKCcIYcTE1qQlV8fFvU/QXXiXXNUZCdYfuRtFQE=",
         "owner": "NixOS",
         "repo": "mobile-nixos",
-        "rev": "2c132754323fc1915e8d21dcfc0ef68ab084c6fb",
+        "rev": "3254af68b7ef5b41cae7f425d5c0aef7fc551250",
         "type": "github"
       },
       "original": {
@@ -938,11 +938,11 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1793876309,
-        "narHash": "sha256-Wojg9lIH/hDH91iDVH2/EPw8oDSpxjxhXONbU1yf4Zg=",
+        "lastModified": 1794042290,
+        "narHash": "sha256-ziZn2PvCJE5JEEpqTdxXwJpPB+L3YqoCpTAMCzyaP3U=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "f9a75f41be3a74eab55d3a7679d34ad6cc0da977",
+        "rev": "f4a03c008967841f2a0b3cb7c436fc6fc31671f6",
         "type": "github"
       },
       "original": {
@@ -1345,11 +1345,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1792532324,
-        "narHash": "sha256-o8zXKYKNaEDYQ4UXmiPUrPWKKD1LL3p3izFk3AcFjpw=",
+        "lastModified": 1794181559,
+        "narHash": "sha256-kC0PJcOx0sOVn0rqJD80uJimr7Q0h/9xDmTIjLqC8hM=",
         "ref": "nix-flake",
-        "rev": "3891b97ec4981f3c606a0cfdef3b3f9805528b85",
-        "revCount": 894,
+        "rev": "a1be0f37c3b659eb5401f98699247d58a392fc36",
+        "revCount": 898,
         "submodules": true,
         "type": "git",
         "url": "https://github.com/BeatLink/web-greeter"
@@ -1468,11 +1468,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794183848,
-        "narHash": "sha256-/psH92LoybYECZQvk0SWlhPX3nsp+gZnxViAC4LrPl8=",
+        "lastModified": 1794187447,
+        "narHash": "sha256-fzRK2b1ElLmS2d3ef8CHC+N66tjM/Tl44cKcJzKxoWQ=",
         "owner": "x-tech-laboratories",
         "repo": "X-Tasks",
-        "rev": "d2257e4172ef0db932b3cf42e1437d11d19d6528",
+        "rev": "25ff87106e4c7e777893c825e5c838533d261d61",
         "type": "github"
       },
       "original": {
