@@ -126,7 +126,11 @@ in
 
     # esphome 2026.8 moved the dashboard into esphome-device-builder and dropped the `dashboard` subcommand the nixpkgs module still calls
     systemd.services.esphome = {
-        path = [ esphome-device-builder ];
+        # nixpkgs' ninja runs each build step through `sh` found on PATH, and a service's path has no shell.
+        path = [
+            esphome-device-builder
+            pkgs.bash
+        ];
         serviceConfig = {
             EnvironmentFile = config.sops.secrets.esphome_env.path;
             ExecStart = lib.mkForce (
