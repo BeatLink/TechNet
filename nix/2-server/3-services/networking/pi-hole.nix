@@ -192,7 +192,7 @@
                         "9c:39:28:8b:59:16,192.168.0.6,thorx"
                         "b6:9e:63:ff:6b:90,192.168.0.7,ragnarok"
                         "8c:ce:4e:4d:6e:44,192.168.0.8,light-bedroom"
-                        "8c:ce:4e:4d:6f:49,192.168.0.9,light-kitchen"
+                        "80:64:6f:9e:2d:91,192.168.0.9,light-kitchen"
                         "8c:ce:4e:4d:6d:9b,192.168.0.10,light-bathroom"
                         "8c:ce:4e:4d:6e:7f,192.168.0.11,light-bedroom-desk"
                         "80:64:6f:9e:31:00,192.168.0.12,light-outside"
