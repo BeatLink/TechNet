@@ -1,5 +1,9 @@
 # To Do
 
+## Decide how X-Nix treats a switch that exits 4
+
+- [ ] In the X-Nix repo, decide whether the agent should roll back when `switch-to-configuration` exits 4 (some units failed) instead of only when the switch itself fails; a single failed unit made Odin build and revert generations 505 to 513
+
 ## Finish the move from Vigil to X-Monitor
 
 - [ ] Update browser bookmarks from `vigil.heimdall.technet` and `x-monitor.heimdall.technet` to `monitor.heimdall.technet`; links in notifications sent before the switch stop working
