@@ -1,6 +1,6 @@
 # X-Tasks ############################################################################################################################################
 #
-# The X-Tasks web app and sync server, which the desktop and Android apps sync with using the token in secrets/2-server/x-tasks.yaml.
+# The X-Tasks web app and sync server. Its admins are the accounts file in secrets/2-server/x-tasks.yaml; browsers and devices sign in as them.
 #
 {
     config,
@@ -11,12 +11,12 @@
 {
     imports = [ inputs.x-tasks.nixosModules.default ];
 
-    sops.secrets.x_tasks_access_token.sopsFile = "${config.technet.secrets.path}/x-tasks.yaml";
+    sops.secrets.x_tasks_password_hash.sopsFile = "${config.technet.secrets.path}/x-tasks.yaml";
 
     services.x-tasks-server = {
         enable = true;
         port = 9002;
-        tokenFile = config.sops.secrets.x_tasks_access_token.path;
+        passwordHashFile = config.sops.secrets.x_tasks_password_hash.path;
     };
 
     environment.persistence."/Storage/Services/X-Tasks".directories = [

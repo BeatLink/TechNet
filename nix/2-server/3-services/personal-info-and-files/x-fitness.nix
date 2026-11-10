@@ -1,6 +1,6 @@
 # X-Fitness ##########################################################################################################################################
 #
-# The X-Fitness web app and sync server, which the desktop and Android apps sync with using the token in secrets/2-server/x-fitness.yaml.
+# The X-Fitness web app and sync server. Its admins are the accounts file in secrets/2-server/x-fitness.yaml; browsers and devices sign in as them.
 #
 {
     config,
@@ -11,12 +11,12 @@
 {
     imports = [ inputs.x-fitness.nixosModules.default ];
 
-    sops.secrets.x_fitness_access_token.sopsFile = "${config.technet.secrets.path}/x-fitness.yaml";
+    sops.secrets.x_fitness_password_hash.sopsFile = "${config.technet.secrets.path}/x-fitness.yaml";
 
     services.x-fitness = {
         enable = true;
         port = 9003;
-        tokenFile = config.sops.secrets.x_fitness_access_token.path;
+        passwordHashFile = config.sops.secrets.x_fitness_password_hash.path;
     };
 
     environment.persistence."/Storage/Services/X-Fitness".directories = [
