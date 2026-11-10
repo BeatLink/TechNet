@@ -145,6 +145,15 @@
                             statusStyle = "dot";
                         };
                     }
+                    {
+                        "X-Fitness" = {
+                            icon = "mdi-dumbbell";
+                            description = "Workout, Diet and Body Tracker and Sync Server";
+                            href = "https://fitness.heimdall.technet";
+                            siteMonitor = "https://fitness.heimdall.technet/login"; # The root redirects to the login page when signed out
+                            statusStyle = "dot";
+                        };
+                    }
                 ];
             }
             {

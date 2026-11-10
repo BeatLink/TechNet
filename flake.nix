@@ -69,6 +69,10 @@
             url = "github:x-tech-laboratories/X-Tasks";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        x-fitness = {
+            url = "github:x-tech-laboratories/X-Fitness";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
         # From GitHub, not the local checkout: libgit2 refuses a git+file repo owned by another user, so X-Nix's agent could not evaluate it
         codex.url = "github:x-tech-laboratories/CODEX";
         playitslowly = {

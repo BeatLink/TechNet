@@ -78,6 +78,7 @@ column, and their service definition lives in that host's own directory.
 | Syncthing on Ragnarok  | 8384 | 10.100.100.6; syncthing-ragnarok.heimdall.technet, syncthing.ragnarok.technet |
 | BlockURL     | 9001 | blockurl.heimdall.technet |
 | X-Tasks      | 9002 | tasks.heimdall.technet |
+| X-Fitness    | 9003 | fitness.heimdall.technet |
 | ActivityWatch | 5600 | 127.0.0.1; activitywatch.heimdall.technet |
 
 ## X-Monitor Reachability Checks
