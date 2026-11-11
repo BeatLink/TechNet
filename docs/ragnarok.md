@@ -26,6 +26,45 @@ live on USB-attached 2.5" disks:
 | NixOS        | 128 GB | 2.5" SATA USB SSD |
 | Backup drive | 5 TB   | 2.5" SATA USB HDD |
 
+### USB layout
+
+Both drives share the board's one USB 3 port through a hub, and the hub and
+the board each run from their own 5V 3A supply:
+
+| Part         | Device                                                  | Protocol    |
+| ------------ | ------------------------------------------------------- | ----------- |
+| Hub          | Xtech XTC-391, Genesys `05e3:0626` / `05e3:0610`        |             |
+| Root SSD     | Sabrent enclosure, JMicron `152d:0583`, hub port 2      | UAS         |
+| Backup drive | Sabrent adapter, JMicron JMS576 `152d:0576`, hub port 1 | usb-storage |
+| Spare        | Sabrent enclosure, JMicron JMS561U `152d:1561`          | usb-storage |
+
+Three things about it are deliberate, and each was a fault before it was
+fixed:
+
+- **The 5V wire of the hub's upstream cable is cut.** The hub ties its supply
+  straight to that wire, so it fed the board backwards through the USB 3
+  port: the board stayed up on the hub's supply alone with its own unplugged.
+  With the wire cut the hub and drives run only from the hub's supply, and
+  the drives do not power up until it is plugged in.
+- **The hub needs its supply, and a 3A one.** The 5 TB drive draws about 1.2A
+  while it spins up, more than the 0.9A a USB 3 port provides, and the two
+  drives, their adapters and the hub together peak a little over 2A. On a 2A
+  supply the backup drive's adapter took a transfer-error reset every two to
+  three minutes under concurrent reads from both drives; on 3A the same test
+  saw one.
+- **The root SSD is not in the JMS561U.** That enclosure aborted commands
+  under UAS, dropped off the bus after enumeration, and was slow to appear
+  behind the hub even on Odin.
+
+What remains is the occasional reset on the backup drive's adapter: five
+`Transfer error` lines on its bulk-in endpoint, then `reset SuperSpeed USB
+device`. The read is retried and no I/O error reaches the filesystem. The
+drive's SMART power counters (192 Power-Off_Retract_Count, 12
+Power_Cycle_Count) do not move across one, so it is not the drive losing
+power. The RK3328's USB 3 controller has no PHY driver in mainline Linux and
+is known to fail with two SuperSpeed disks behind a hub; lowering
+`max_sectors` from the 1024 the udev rule sets is the untried mitigation.
+
 Two things to know before touching it physically:
 
 - It will not drive certain monitors over HDMI directly. An Xtech HDMI-to-VGA
@@ -76,6 +115,9 @@ scp part1.bin ragnarok:/tmp/
 ssh ragnarok 'sudo dd if=/tmp/part1.bin of=/dev/mmcblk1p1 bs=1M oflag=direct conv=fsync'
 ```
 
+The card is `mmcblk0` or `mmcblk1` depending on the boot; `lsblk -o NAME,PARTLABEL`
+shows which one carries the `Firmware (Tow-Boot)` partition.
+
 It takes effect at the next reboot.
 
 ### Firmware console
@@ -125,8 +167,9 @@ be run by hand.
 
 The RK3328's USB 3 PHY has a known erratum: it never tells the controller
 that a device has disconnected, and mainline Linux has no driver for the
-polling workaround Rockchip's vendor kernel uses. The Sabrent bridge trips it
-in two ways, both of which the firmware console shows:
+polling workaround Rockchip's vendor kernel uses. The JMS561U enclosure the
+root SSD used to sit in tripped it in two ways, both of which the firmware
+console shows:
 
 - After a warm reboot it is often invisible to the firmware: `usb start`
   finds it on no bus, or it has fallen back to USB 2, where U-Boot's EHCI
@@ -424,31 +467,35 @@ Two hardware notes that shape the timing. The passphrase slots were re-derived
 on the board itself with the argon2id memory capped at 256 MiB, because a slot
 derived on Odin took nineteen seconds and half the RAM here; redo that with
 `cryptsetup luksConvertKey --pbkdf-memory 262144` after any `luksChangeKey`.
-And the root SSD's JMS561U bridge is the weak part of the machine. On about half
-the boots it aborts and resets under UAS, 30s before the disk exists; twice on
-2026-09-10 it came up at SuperSpeed and refused `SET_CONFIGURATION` with
-`error -71` 15ms later, after which nothing retries and the boot above is the
-result. `usbcore.quirks=152d:1561:gn` in
+And the JMS561U enclosure the root SSD used to sit in was the weak part of the
+machine, which is why it is now the spare. On about half the boots it aborted
+and reset under UAS, 30s before the disk existed; twice on 2026-09-10 it came
+up at SuperSpeed and refused `SET_CONFIGURATION` with `error -71` 15ms later,
+after which nothing retries and the boot above is the result.
+`usbcore.quirks=152d:1561:gn` in
 [`hardware-configuration.nix`](../nix/1-backup-server/1-system/hardware-configuration.nix)
 delays descriptor fetching and every control message for that device; set live
 through `/sys/module/usbcore/parameters/quirks` and followed by the
-re-enumeration above, it configured the bridge first time. Forcing the bridge to
-usb-storage instead would cost only throughput -- 237 MB/s in 1 MiB reads under
-UAS against 135 MB/s in the 120 KiB commands usb-storage defaults to -- and
-would not touch the enumeration failure, which happens before either driver.
+re-enumeration above, it configured the bridge first time. The same file keeps
+it on usb-storage, which costs only throughput -- 237 MB/s in 1 MiB reads
+under UAS against 135 MB/s in the 120 KiB commands usb-storage defaults to.
 
-TRIM through that bridge needs help too, in the same file.
-Its firmware (0204) clears the provisioning bit in READ CAPACITY(16) while the
-VPD pages advertise UNMAP with a 65535-block limit, and the kernel trusts the
-capacity bit: provisioning mode stays `full`, `fstrim` reports discard
-unsupported, and the unmap limit is never recorded. A udev rule forces the mode
-to `unmap` and caps `discard_max_bytes` at 8191 × 4 KiB, the largest granular
-value under that limit -- without the cap the kernel sends 64 MiB descriptors
-and the bridge answers ILLEGAL REQUEST. Verified 2026-09-10: a 16 MiB discard
-inside the swap partition succeeded, a 64 MiB one was refused, and `fstrim`
-then released 90 GiB from the root filesystem with a clean scrub afterwards.
-The rule runs in both stages because dm-crypt stacks the discard limits when
-the container is opened, and the SSD passes no TRIM at all without it.
+The SSD's present enclosure, `152d:0583`, runs UAS with the `f` quirk the
+kernel's own entry for that ID carries.
+
+TRIM is set up by a udev rule in the same file, written for the JMS561U and
+carried over to `152d:0583`, where it has not been verified yet. The
+JMS561U's firmware (0204) clears the provisioning bit in READ CAPACITY(16)
+while the VPD pages advertise UNMAP with a 65535-block limit, and the kernel
+trusts the capacity bit: provisioning mode stays `full`, `fstrim` reports
+discard unsupported, and the unmap limit is never recorded. The rule forces
+the mode to `unmap` and caps `discard_max_bytes` at 8191 × 4 KiB, the largest
+granular value under that limit -- without the cap the kernel sent 64 MiB
+descriptors and that bridge answered ILLEGAL REQUEST. Verified there on
+2026-09-10: a 16 MiB discard inside the swap partition succeeded, a 64 MiB one
+was refused, and `fstrim` then released 90 GiB from the root filesystem with a
+clean scrub afterwards. The rule runs in both stages because dm-crypt stacks
+the discard limits when the container is opened.
 
 ## Data drive
 
@@ -465,7 +512,7 @@ copy a checksum failure is detected and *not* repairable. It halves the drive �
 
 |               |                                                                                                    |
 | ------------- | -------------------------------------------------------------------------------------------------- |
-| device        | `ST5000LM000-2U8170`, serial `WCJ9HXR9`, USB via SABRENT `152d:0583`                               |
+| device        | `ST5000LM000-2U8170`, serial `WCJ9HXR9`, USB via SABRENT JMS576 `152d:0576`                        |
 | partition     | GPT, one partition, partlabel `ragnarok-cryptstorage`                                              |
 | PARTUUID      | `b701e0a4-fa98-467d-afd6-36cbca0f0737`                                                             |
 | LUKS          | LUKS2, `aes-xts-plain64`, 512-bit key, **4096-byte sectors**                                       |
