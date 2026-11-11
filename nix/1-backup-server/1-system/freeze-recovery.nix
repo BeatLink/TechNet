@@ -44,8 +44,10 @@
 
         # Netconsole #################################################################################################################################
         {
+            # Carries panics and oopses only: the console level stays at the command line's 3, because one level covers every console and a flood
+            # of warnings printed to the 115200 baud serial one locks the board up hard enough to stop softdog's timer
             systemd.services.netconsole = {
-                description = "Stream the kernel log to the LAN";
+                description = "Send kernel panics to the LAN";
                 wantedBy = [ "multi-user.target" ];
                 after = [ "network-online.target" ];
                 wants = [ "network-online.target" ];
@@ -53,7 +55,6 @@
                     pkgs.gawk
                     pkgs.iproute2
                     pkgs.kmod
-                    pkgs.util-linux
                 ];
                 serviceConfig = {
                     Type = "oneshot";
@@ -64,9 +65,25 @@
 
                     # Broadcast, as the firmware's own console does, so the receiver needs no MAC address here.
                     modprobe netconsole netconsole="6666@$address/end0,6666@192.168.0.255/ff:ff:ff:ff:ff:ff"
+                '';
+            };
+        }
 
-                    # The command line's loglevel=3 keeps hung-task and USB reset messages off every console, this one included.
-                    dmesg --console-level info
+        # Kernel Log Trail ###########################################################################################################################
+        {
+            # Everything below the console level reaches Heimdall from here instead, where a flood costs this process time and nothing else
+            systemd.services.kernel-log-trail = {
+                description = "Stream the kernel log to Heimdall";
+                wantedBy = [ "multi-user.target" ];
+                path = [ pkgs.util-linux ];
+                serviceConfig = {
+                    Restart = "always";
+                    Nice = 10;
+                };
+                script = ''
+                    dmesg --follow-new | while IFS= read -r line; do
+                        echo "$line" > /dev/udp/192.168.0.2/6666 || true
+                    done
                 '';
             };
         }

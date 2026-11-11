@@ -221,9 +221,18 @@ Softdog runs on a kernel timer, so a lockup hard enough to stop timers is not
 recovered. The `hung_task`, `softlockup` and `hardlockup` panic sysctls and
 `panic=10` cover what they can of that gap.
 
-The same file streams the kernel log over netconsole and a memory trail to
-Heimdall, where `journalctl -u ragnarok-console` holds both, along with the
-firmware's console.
+One such lockup is known. Reading a block whose two btrfs copies are both
+bad logs a warning and an error per block, and with every console at info
+level and the journal forwarded to serial, a run of those froze the board
+three times on 2026-11-10 and 11, softdog included. The kernel has one
+console level for all consoles and the serial one runs at 115200 baud, so
+the level stays at the command line's 3: serial, HDMI and netconsole carry
+panics and oopses only, and the journal is not forwarded to serial.
+
+Everything else reaches Heimdall from userspace, where a flood cannot stall
+the kernel: `kernel-log-trail` sends each kernel log line and `memory-trail`
+sends memory use every five seconds. `journalctl -u ragnarok-console` on
+Heimdall holds both, along with netconsole and the firmware's console.
 
 ## Storage
 
