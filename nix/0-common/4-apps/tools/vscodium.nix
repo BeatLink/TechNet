@@ -143,6 +143,11 @@ in
                 "black-formatter.showNotifications" = "always";
                 "black-formatter.interpreter" = [ "${pkgs.python3}/bin/python3" ];
 
+                # Python language server -------------------------------------------------------------------------------------------------------------
+                # Without Pylance, ms-python falls back to its bundled Jedi, which the store build leaves out, so the server
+                # crash-loops; basedpyright serves the language instead.
+                "python.languageServer" = "None";
+
                 # Nix language server ----------------------------------------------------------------------------------------------------------------
                 # The old file pointed at ~/.nix-profile, which is not
                 # what installs these -- they come from home.packages
@@ -249,6 +254,7 @@ in
                                     anthropic.claude-code
                                     ms-python.python
                                     ms-python.black-formatter
+                                    detachhead.basedpyright
                                     brainytech.pycacheclear
                                     signageos.signageos-vscode-sops
                                     editorconfig.editorconfig
