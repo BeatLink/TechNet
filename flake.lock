@@ -1403,11 +1403,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794349756,
-        "narHash": "sha256-VGQEBynvBzNUxsy2LzH3KQoKXW814Oayeyo74uJuRr4=",
+        "lastModified": 1794372902,
+        "narHash": "sha256-RxEWMTxAf3Jt5MUM5bb876rsfUUM1wTVSsSVWH9+KG4=",
         "owner": "x-tech-laboratories",
         "repo": "X-Backups",
-        "rev": "8edb69713f77fb11eeefe252034bf355b3d65a71",
+        "rev": "af2e1f981e4087bb333ec8e874c682dd107bde0c",
         "type": "github"
       },
       "original": {
@@ -1424,11 +1424,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794363134,
-        "narHash": "sha256-3dbLYLVp2nADR2VIVy5uOWlkg1YqjUMl5lU9RBJewM8=",
+        "lastModified": 1794368086,
+        "narHash": "sha256-pCrpPO92V6UEKOJe20lYug7IN5scSYei/6d5MiYf9y8=",
         "owner": "x-tech-laboratories",
         "repo": "X-Fitness",
-        "rev": "d8ea650b6fc4b6274afc3a71ce9284b61c11db47",
+        "rev": "113f3a19ec057e17d56b6211c105e80049bb2a5f",
         "type": "github"
       },
       "original": {
@@ -1487,11 +1487,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794359861,
-        "narHash": "sha256-hhrDlW67i97FheqIr/fN4aVGCa6O8Yx2A4/ky/j5KK4=",
+        "lastModified": 1794372896,
+        "narHash": "sha256-d+qTOhAYRaDQ6aamOrr80tI9pCF1th6WFwyJfvUCsvI=",
         "owner": "x-tech-laboratories",
         "repo": "X-Nix",
-        "rev": "dedc292cc6118fde1994ce0fac16d5f03f2cba2f",
+        "rev": "89018e564f5493bdf9c691a8ba256a8389f56f14",
         "type": "github"
       },
       "original": {
