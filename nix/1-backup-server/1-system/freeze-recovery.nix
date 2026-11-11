@@ -8,7 +8,12 @@
 
         # Watchdog ###################################################################################################################################
         {
-            systemd.settings.Manager.RuntimeWatchdogSec = "30s"; # The DesignWare timer's own period
+            boot.initrd.kernelModules = [ "softdog" ];
+            boot.kernelParams = [ "softdog.soft_margin=30" ];
+            systemd.settings.Manager = {
+                RuntimeWatchdogSec = "30s";
+                WatchdogDevice = "/dev/watchdog1"; # The DesignWare timer is watchdog0, and its reset hangs the board instead of rebooting it
+            };
 
             boot.kernel.sysctl = {
                 "kernel.hung_task_panic" = 1;
