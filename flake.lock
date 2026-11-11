@@ -1424,11 +1424,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794368086,
-        "narHash": "sha256-pCrpPO92V6UEKOJe20lYug7IN5scSYei/6d5MiYf9y8=",
+        "lastModified": 1794373123,
+        "narHash": "sha256-LOZERXJdwt++ODahQPgPqbGdrwCPTekkTkw9L1kXrU4=",
         "owner": "x-tech-laboratories",
         "repo": "X-Fitness",
-        "rev": "113f3a19ec057e17d56b6211c105e80049bb2a5f",
+        "rev": "9e0f045101e724aea5c00ca149668234ed03a1f5",
         "type": "github"
       },
       "original": {
