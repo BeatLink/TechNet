@@ -1,7 +1,6 @@
 # Freeze Recovery ####################################################################################################################################
 #
-# Reboots the board when it freezes, and streams its kernel log and memory use to Heimdall and the serial console so whatever froze it is still on
-# record after the reboot.
+# Reboots the board when it freezes, and streams its kernel log and memory use to Heimdall so whatever froze it is still on record after the reboot.
 #
 { lib, pkgs, ... }:
 {
@@ -9,12 +8,7 @@
 
         # Watchdog ###################################################################################################################################
         {
-            boot.initrd.kernelModules = [ "softdog" ];
-            boot.kernelParams = [ "softdog.soft_margin=30" ];
-            systemd.settings.Manager = {
-                RuntimeWatchdogSec = "30s";
-                WatchdogDevice = "/dev/watchdog1"; # The DesignWare timer is watchdog0, and its reset hangs the board instead of rebooting it
-            };
+            systemd.settings.Manager.RuntimeWatchdogSec = "30s"; # The DesignWare timer's own period
 
             boot.kernel.sysctl = {
                 "kernel.hung_task_panic" = 1;
@@ -55,10 +49,13 @@
         # Memory Trail ###############################################################################################################################
         {
             systemd.services.memory-trail = {
-                description = "Log memory and swap use to the kernel log";
+                description = "Log memory and swap use to the journal and Heimdall";
                 wantedBy = [ "multi-user.target" ];
                 path = [ pkgs.gawk ];
-                serviceConfig.Restart = "always";
+                serviceConfig = {
+                    Restart = "always";
+                    SyslogLevel = "debug"; # Below journald's console level, so the lines stay off the serial login screen
+                };
                 script = ''
                     swap_pages() { awk '$1 == "pswpin" { i = $2 } $1 == "pswpout" { o = $2 } END { print i, o }' /proc/vmstat; }
                     read -r last_in last_out < <(swap_pages)
@@ -69,7 +66,9 @@
                         }' /proc/meminfo)
                         swapped="pages swapped in $((now_in - last_in)) out $((now_out - last_out))"
                         pressure=$(awk '{ split($2, avg, "="); printf " %s %s", $1, avg[2] }' /proc/pressure/memory)
-                        echo "<6>memory-trail: $memory, $swapped, pressure$pressure" > /dev/kmsg
+                        line="$memory, $swapped, pressure$pressure"
+                        echo "$line"
+                        echo "memory-trail: $line" > /dev/udp/192.168.0.2/6666 || true
                         last_in=$now_in
                         last_out=$now_out
                     done
