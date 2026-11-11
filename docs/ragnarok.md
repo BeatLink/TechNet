@@ -63,7 +63,9 @@ drive's SMART power counters (192 Power-Off_Retract_Count, 12
 Power_Cycle_Count) do not move across one, so it is not the drive losing
 power. The RK3328's USB 3 controller has no PHY driver in mainline Linux and
 is known to fail with two SuperSpeed disks behind a hub; lowering
-`max_sectors` from the 1024 the udev rule sets is the untried mitigation.
+`max_sectors` is the mitigation: the udev rule holds the adapter to 64
+sectors, 32 KiB a request, where it used to raise it to 1024. Whether that
+stops the resets is not yet known.
 
 Two things to know before touching it physically:
 
