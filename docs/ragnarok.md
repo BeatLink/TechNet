@@ -213,9 +213,15 @@ after it means the firmware ran and the kernel never started.
 [`freeze-recovery.nix`](../nix/1-backup-server/1-system/freeze-recovery.nix)
 reboots a frozen board through softdog, the kernel's software watchdog, which
 systemd feeds every 30s. The RK3328's own DesignWare watchdog is disabled in
-the device tree, because its reset leaves the board dead until a power cycle,
-even with the firmware selecting the reset a normal reboot uses; see
-[Tow-Boot](tow-boot.md). With that node disabled softdog is `/dev/watchdog0`.
+the device tree, because its reset leaves the board dead until a power cycle.
+With that node disabled softdog is `/dev/watchdog0`.
+
+Pointing the watchdog at the reset a normal reboot uses does not help. The
+firmware was built to set bit 14 of `CRU_GLB_CNT_TH`, which selects the first
+global reset over the default second one, and with the bit read back as set
+(`md.l 0xff440090` gave `3a984064`) starting the watchdog from the U-Boot
+prompt with `mw.l 0xff1a0000 1` still hung the board on 2026-11-11. The
+firmware change was reverted.
 
 Softdog runs on a kernel timer, so a lockup hard enough to stop timers is not
 recovered. The `hung_task`, `softlockup` and `hardlockup` panic sysctls and
