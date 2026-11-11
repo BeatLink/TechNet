@@ -1445,11 +1445,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794382694,
-        "narHash": "sha256-3AvfaMbA/0IXNDcK9LvckBXrq/EaAkkvzhArowkT1VI=",
+        "lastModified": 1794382893,
+        "narHash": "sha256-+6yNQzNPZimzLdnEaKGxef7W7PmMb825duveomrplgY=",
         "owner": "x-tech-laboratories",
         "repo": "X-Monitor",
-        "rev": "3351bef584be0487ac700cf817840158e81f485c",
+        "rev": "60830cf83c1fb790f9cea44cf2d02765de6789d6",
         "type": "github"
       },
       "original": {
