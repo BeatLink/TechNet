@@ -92,7 +92,7 @@ or partition layout required on the target media.
 It builds from a fork, on the `rock64-pinephone-fixes` branch — ROCK64/RK3328
 support on the fork's own Tow-Boot U-Boot tree (2026.04), with the Tow-Boot menu
 on HDMI and USB keyboard input. [Tow-Boot](tow-boot.md) describes the fork.
-Ragnarok's build adds netconsole on top, through
+Ragnarok's build sets its own preboot and drops network boot, through
 [`nix/1-backup-server/firmware.nix`](../nix/1-backup-server/firmware.nix):
 
 ```sh
@@ -124,40 +124,16 @@ It takes effect at the next reboot.
 
 ### Firmware console
 
-The Tow-Boot prompt and menu are on HDMI and serial, and USB is started before
-the prompt so a keyboard works from power-on. Because the board is off site,
-the firmware also opens U-Boot's netconsole: preboot asks DHCP for a lease and,
-if one arrives, adds `nc` to stdin, stdout and stderr. With `ncip` unset it
-broadcasts, so any host on the LAN Ragnarok is plugged into can follow it and
-type at it. WireGuard does not exist yet at that point, so nothing reaches it
-from Odin's side of the tunnel. From a machine on that LAN:
-
-```sh
-nc -u -l 6666                    # output, in one terminal
-nc -u <ragnarok-lan-ip> 6666     # input, in another
-```
-
-U-Boot's `tools/netconsole` script does both at once. Anyone on that LAN can
-drive the firmware console this way; both disks are LUKS, so what it exposes
-is the boot menu and the console, not data. If DHCP does not answer, preboot
-falls back to HDMI and serial once the single attempt times out.
-
-A board that is wedged rather than waiting ignores anything typed at it, so
-capture the output rather than expecting to drive it. `tcpdump -A udp port
-6666` on a LAN host catches the broadcast whatever the firewall there does.
-
-The DHCP lease is the firmware's own, not the one the booted system holds, so
-the address changes between boots. Broadcasting to the LAN reaches it whatever
-it got.
+The Tow-Boot prompt and menu are on HDMI and serial only, and USB is started
+before the prompt so a keyboard works from power-on. The firmware has no
+netconsole: U-Boot's sends the console as plain UDP and takes input from
+anyone on the LAN, so a host there could drive the boot menu and boot a kernel
+of its own, and there is no way to encrypt it.
 
 ### What preboot does
 
-The same preboot carries the rest of this board's firmware policy, in order:
-
-- **Scan USB**, so a keyboard is a console device before the boot prompt and
-  the root disk is there to boot from.
-- **Ask DHCP for an address**, which is what netconsole needs. Nothing is
-  downloaded and a silent LAN does not stall the boot.
+Preboot only scans USB, so a keyboard is a console device before the boot
+prompt and the root disk is there to boot from.
 
 The boot order itself is not set here. `TOW_BOOT_NETWORK_BOOT = no` drops PXE
 and DHCP from the order the firmware is built with, leaving eMMC, SD and USB,
@@ -199,14 +175,8 @@ the board. A bridge that a `usb reset` does not bring back needs the hub's
 supply unplugged and plugged back in.
 
 `usb reset`, followed by `usb storage` and `run bootcmd`, recovers a board by
-hand from the firmware console, which netconsole reaches from the LAN once
-the Tow-Boot menu's *Firmware Console* entry is chosen.
-
-Whether a failed boot reached Linux at all can be read from Heimdall without
-going near the board. U-Boot's preboot `dhcp` sends no hostname and the
-initrd's networkd sends `Ragnarok`, so in
-`/Storage/Services/PiHole/logs/pihole.log` a nameless lease with no named one
-after it means the firmware ran and the kernel never started.
+hand from the firmware console on serial, or on HDMI with a USB keyboard,
+once the Tow-Boot menu's *Firmware Console* entry is chosen.
 
 ## Freeze recovery
 
@@ -238,7 +208,7 @@ panics and oopses only, and the journal is not forwarded to serial.
 Everything else reaches Heimdall from userspace, where a flood cannot stall
 the kernel: `kernel-log-trail` sends each kernel log line and `memory-trail`
 sends memory use every five seconds. `journalctl -u ragnarok-console` on
-Heimdall holds both, along with netconsole and the firmware's console.
+Heimdall holds both, along with netconsole.
 
 ## Storage
 

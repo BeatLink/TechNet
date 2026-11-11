@@ -111,7 +111,7 @@ one from this repo, through
 nix-build nix/5-phone/firmware.nix -A pine64-pinephoneA64
 ```
 
-Ragnarok's adds netconsole, through
+Ragnarok's sets its own preboot, through
 [`nix/1-backup-server/firmware.nix`](../nix/1-backup-server/firmware.nix):
 
 ```sh

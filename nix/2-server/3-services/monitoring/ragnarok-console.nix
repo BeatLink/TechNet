@@ -1,6 +1,6 @@
 # Ragnarok Console ###################################################################################################################################
 #
-# Records what Ragnarok broadcasts on UDP 6666 into this host's journal: its firmware console during boot, and its kernel log once it is up.
+# Records what Ragnarok sends on UDP 6666 into this host's journal: its kernel log, memory use and netconsole.
 #
 { lib, pkgs, ... }:
 {
@@ -9,7 +9,7 @@
         # Capture ####################################################################################################################################
         {
             systemd.services.ragnarok-console = {
-                description = "Record Ragnarok's firmware and kernel console";
+                description = "Record Ragnarok's kernel log and memory use";
                 wantedBy = [ "multi-user.target" ];
                 after = [ "network.target" ];
                 serviceConfig = {
