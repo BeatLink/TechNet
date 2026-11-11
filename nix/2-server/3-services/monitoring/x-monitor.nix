@@ -133,6 +133,11 @@ in
         owner = "x-monitor";
     };
 
+    # Homepage's read token for the dashboard widget, which reads /api/summary; its hash is under settings.auth.tokens.
+    sops.secrets.x_monitor_homepage_token = {
+        sopsFile = "${config.technet.secrets.path}/x-monitor.yaml";
+    };
+
     # Signs the dashboard session cookies, so a X-Monitor restart or redeploy does not sign every browser out.
     sops.secrets.x_monitor_session_secret = {
         sopsFile = "${config.technet.secrets.path}/x-monitor.yaml";
@@ -176,6 +181,16 @@ in
             logging = {
                 metric_downsample_days = 7;
             };
+
+            # Bearer tokens for the clients that read the API without signing in. Only each token's SHA-256 is kept here; the token itself is
+            # the x_monitor_homepage_token secret, minted with `x-monitor token new homepage --scope read`.
+            auth.tokens = [
+                {
+                    name = "homepage";
+                    scope = "read";
+                    token_hash = "REPLACE_WITH_HASH_FROM_x-monitor_token_new";
+                }
+            ];
 
             # Every agent that may dial in. A monitor's `agent = "<id>"` refers
             # to an `id` here. `host` is a label only — X-Monitor never dials an
@@ -241,13 +256,6 @@ in
             ssh_defaults = {
                 username = "x-monitor-access";
                 key_path = config.sops.secrets.x_monitor_ssh_key.path;
-            };
-
-            theme = {
-                status_online = "lime";
-                status_warning = "gold";
-                status_failed = "red";
-                status_unavailable = "lightgray";
             };
 
             # Two roots over the same monitors: "By host" defines each one, and "By domain" links to them regrouped, so none is defined twice.
@@ -2528,12 +2536,7 @@ in
         '';
     };
 
-    # The agents' endpoint is served on the dashboard's own port, so Odin,
-    # Ragnarok and Thor need to reach 9611 — over WireGuard, and on the LAN,
-    # where split DNS sends them at home. Browsers keep using the TLS vhost below.
-    networking.firewall.interfaces."wireguard0".allowedTCPPorts = [ 9611 ];
-    networking.firewall.interfaces.enp2s0f1.allowedTCPPorts = [ 9611 ];
-
+    # Browsers and the other hosts' agents both come in through this TLS vhost; an agent refuses plain ws:// to anywhere but its own machine.
     nginx-vhosts.x-monitor = {
         domain = "monitor.heimdall.technet";
         port = 9611;
