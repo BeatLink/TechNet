@@ -310,6 +310,19 @@ in
                         // lib.optionalAttrs (host == "Thor") {
                             offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
                         };
+                    # A host's whole journal: new warning and error counts, and the search behind the Logs page. Online always, since every host logs errors.
+                    journal =
+                        host:
+                        {
+                            name = "Journal";
+                            id = "${lib.toLower host}-journal";
+                            type = "journal";
+                            interval = "5m";
+                            agent = lib.toLower host;
+                        }
+                        // lib.optionalAttrs (host == "Thor") {
+                            offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
+                        };
                     # Every host and the IoT sensors, as nested definitions: the one place each monitor is defined.
                     hostTree = [
                         {
@@ -564,6 +577,7 @@ in
                                             agent = "ragnarok";
                                         }
                                         (nixGc "Ragnarok")
+                                        (journal "Ragnarok")
                                     ];
                                 }
                                 {
@@ -1552,6 +1566,7 @@ in
                                             agent = "heimdall";
                                         }
                                         (nixGc "Heimdall")
+                                        (journal "Heimdall")
                                         {
                                             name = "Attic";
                                             id = "heimdall-svc-attic";
@@ -1980,6 +1995,7 @@ in
                                             agent = "odin";
                                         }
                                         (nixGc "Odin")
+                                        (journal "Odin")
                                     ];
                                 }
                                 {
@@ -2450,6 +2466,7 @@ in
                                             agent = "thor";
                                         }
                                         (nixGc "Thor")
+                                        (journal "Thor")
                                         {
                                             # The 28GB eMMC pool's real failure mode, and the one no other host needs pinned: every generation lands in this dataset.
                                             name = "/nix";
