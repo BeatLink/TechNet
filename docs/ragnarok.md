@@ -140,24 +140,22 @@ in two ways, both of which the firmware console shows:
   [`hardware-configuration.nix`](../nix/1-backup-server/1-system/hardware-configuration.nix)
   is for.
 
-Neither is a stall the firmware can clear. What works is cutting power to the
-bridge, which GPIO `A2` can do because it gates the 5V rail for every USB port
-on this board. The boot flow does this itself: the fork's `usb_boot` scans
-twice and runs `usb_rescan` between the passes, and this board's preboot sets
-that to
+Neither is a stall the firmware can clear; only a fresh enumeration brings the
+bridge back. The boot flow asks for one itself: the fork's `usb_boot` scans
+twice and runs `usb_rescan`, a plain `usb reset`, between the passes. The
+fork's storage layer also gives up on a device after eight failed transports
+in a row, so the first pass ends in seconds rather than the twelve minutes of
+bounded retries it used to cost; see [Tow-Boot](tow-boot.md).
 
-```sh
-gpio set A2; sleep 2; gpio clear A2; sleep 2; usb reset
-```
+The firmware cannot cut the drives' power. GPIO `A2` gates the 5V rail for
+every USB port on this board, but the drives sit behind a hub that runs from
+its own supply, with the 5V wire of its upstream cable cut so it cannot feed
+the board. A bridge that a `usb reset` does not bring back needs the hub's
+supply unplugged and plugged back in.
 
-The fork's storage layer also gives up on a device after eight failed
-transports in a row, so the first pass ends in seconds rather than the twelve
-minutes of bounded retries it used to cost. A warm reboot now takes the
-second pass and boots in about forty seconds; see [Tow-Boot](tow-boot.md).
-
-The same sequence, followed by `usb storage` and `run bootcmd`, recovers a
-board by hand from the firmware console, which netconsole reaches from the
-LAN once the Tow-Boot menu's *Firmware Console* entry is chosen.
+`usb reset`, followed by `usb storage` and `run bootcmd`, recovers a board by
+hand from the firmware console, which netconsole reaches from the LAN once
+the Tow-Boot menu's *Firmware Console* entry is chosen.
 
 Whether a failed boot reached Linux at all can be read from Heimdall without
 going near the board. U-Boot's preboot `dhcp` sends no hostname and the

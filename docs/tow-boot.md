@@ -42,7 +42,7 @@ them the firmware stops at `distro_bootcmd not defined` and ESC finds no menu.
 Anything upstream fixed on its own between 2023.07 and 2026.04 was dropped
 rather than ported.
 
-Five fixes on top are not Tow-Boot's own and would stand upstream:
+Six fixes on top are not Tow-Boot's own and would stand upstream:
 
 - **A keyboard silent while idle is kept.** Probing asks for the device's
   state and dropped the keyboard when nothing came back, which is what plenty
@@ -65,8 +65,11 @@ Five fixes on top are not Tow-Boot's own and would stand upstream:
   refused further commands.
 - **USB boot scans twice.** `usb_boot` runs the device scan a second time
   after `usb_rescan`, a plain `usb reset` by default, because the only thing
-  that brings such a bridge back is a fresh enumeration. Ragnarok overrides
-  the hook with a power cut of its USB rail; see [Ragnarok](ragnarok.md).
+  that brings such a bridge back is a fresh enumeration.
+- **The RK3328 watchdog resets the board.** Its reset defaults to the clock
+  controller's second global reset, which hangs the SoC until a power cycle.
+  SPL sets bit 14 of `CRU_GLB_CNT_TH` so it triggers the first global reset,
+  the one a normal reboot uses.
 
 `modules/tow-boot/src.nix` pins the tree by revision and hash. **Changing the
 tree means pushing it and bumping both**, or the build silently keeps using the
