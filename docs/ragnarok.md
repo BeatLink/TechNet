@@ -202,13 +202,13 @@ bad logs a warning and an error per block, and with every console at info
 level and the journal forwarded to serial, a run of those froze the board
 three times on 2026-11-10 and 11, softdog included. The kernel has one
 console level for all consoles and the serial one runs at 115200 baud, so
-the level stays at the command line's 3: serial, HDMI and netconsole carry
-panics and oopses only, and the journal is not forwarded to serial.
+the level stays at the command line's 3: serial and HDMI carry panics and
+oopses only, and the journal is not forwarded to serial.
 
-Everything else reaches Heimdall from userspace, where a flood cannot stall
-the kernel: `kernel-log-trail` sends each kernel log line and `memory-trail`
-sends memory use every five seconds. `journalctl -u ragnarok-console` on
-Heimdall holds both, along with netconsole.
+Nothing is sent over the network, since log lines can carry sensitive detail.
+Everything goes to the persistent journal on the board, which syncs to disk
+every five seconds so a hard lockup loses little, and `memory-trail` logs
+memory use to it every five seconds.
 
 ## Storage
 

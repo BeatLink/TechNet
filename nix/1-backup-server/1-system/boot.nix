@@ -20,7 +20,7 @@
         {
             services.journald.settings.Journal = {
                 Storage = "persistent";
-                SyncIntervalSec = "1min";
+                SyncIntervalSec = "5s";
             };
         }
     ];
