@@ -12,8 +12,28 @@
             boot.kernelParams = [ "softdog.soft_margin=30" ];
             systemd.settings.Manager = {
                 RuntimeWatchdogSec = "30s";
-                WatchdogDevice = "/dev/watchdog1"; # The DesignWare timer is watchdog0, and its reset hangs the board instead of rebooting it
+                WatchdogDevice = "/dev/watchdog0"; # softdog, only while the overlay below keeps the DesignWare timer from taking the number
             };
+
+            # The DesignWare timer's reset hangs the board until a power cycle, so the kernel never gets a device for it
+            hardware.deviceTree.overlays = [
+                {
+                    name = "no-hardware-watchdog";
+                    dtsText = ''
+                        /dts-v1/;
+                        /plugin/;
+                        / {
+                            compatible = "pine64,rock64", "rockchip,rk3328";
+                            fragment@0 {
+                                target-path = "/watchdog@ff1a0000";
+                                __overlay__ {
+                                    status = "disabled";
+                                };
+                            };
+                        };
+                    '';
+                }
+            ];
 
             boot.kernel.sysctl = {
                 "kernel.hung_task_panic" = 1;

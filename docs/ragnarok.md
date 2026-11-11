@@ -206,6 +206,23 @@ initrd's networkd sends `Ragnarok`, so in
 `/Storage/Services/PiHole/logs/pihole.log` a nameless lease with no named one
 after it means the firmware ran and the kernel never started.
 
+## Freeze recovery
+
+[`freeze-recovery.nix`](../nix/1-backup-server/1-system/freeze-recovery.nix)
+reboots a frozen board through softdog, the kernel's software watchdog, which
+systemd feeds every 30s. The RK3328's own DesignWare watchdog is disabled in
+the device tree, because its reset leaves the board dead until a power cycle,
+even with the firmware selecting the reset a normal reboot uses; see
+[Tow-Boot](tow-boot.md). With that node disabled softdog is `/dev/watchdog0`.
+
+Softdog runs on a kernel timer, so a lockup hard enough to stop timers is not
+recovered. The `hung_task`, `softlockup` and `hardlockup` panic sysctls and
+`panic=10` cover what they can of that gap.
+
+The same file streams the kernel log over netconsole and a memory trail to
+Heimdall, where `journalctl -u ragnarok-console` holds both, along with the
+firmware's console.
+
 ## Storage
 
 The root drive is btrfs subvolumes inside one LUKS container, selected by
