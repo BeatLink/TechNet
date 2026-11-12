@@ -197,6 +197,7 @@ in
             configurations = fleet;
             cache_url = cacheUrl;
             build_at = "04:00"; # The fleet's builds start after attic-gc at 03:00, whose database lock their uploads would contend with
+            eval_workers = 2; # Each worker can hold several GB, and on Odin they run beside the desktop and the builds; four pushed it out of memory
             # A hand-made build replaces the nightly one's root, so it stays rooted until deployed like that one would.
             build_root_dir = buildRoots;
             build_links = lib.genAttrs fleet lib.toLower;

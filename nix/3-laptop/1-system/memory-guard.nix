@@ -26,6 +26,16 @@
             OOMScoreAdjust = 500;
         };
 
+        # Evaluation Ceiling #########################################################################################################################
+        # X-Nix's nightly evaluation runs in its agent, outside nix-daemon, so it gets its own cap and dies before the desktop as the builds do.
+        #
+        systemd.services.x-nix-agent.serviceConfig = {
+            MemoryHigh = "30%";
+            MemoryMax = "40%";
+            MemorySwapMax = "4G";
+            OOMScoreAdjust = 500;
+        };
+
         # Build Width ################################################################################################################################
         # Three jobs of four threads fill the twelve threads once, rather than twelve jobs each spawning a compiler per thread.
         #
@@ -41,6 +51,9 @@
             enable = true;
             freeMemThreshold = 5;
             freeMemKillThreshold = 3;
+            # Swap is zram, which runs out of RAM to compress into long before it reads as full, so memory alone decides.
+            freeSwapThreshold = 100;
+            freeSwapKillThreshold = 100;
             # Desktop pop-ups would need systembus-notify, which the smartd setup keeps off; kills still land in the journal.
             enableNotifications = false;
             extraArgs = [
