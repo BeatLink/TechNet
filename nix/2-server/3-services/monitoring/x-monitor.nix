@@ -456,6 +456,19 @@ in
                                                     agent = "ragnarok";
                                                 }
                                                 {
+                                                    # The root SSD runs on UAS, which stalls, resets and recovers. Those lines are info level, so the
+                                                    # Journal monitor misses them; this fails when the boot logged one in the last day.
+                                                    name = "Root SSD Stalls";
+                                                    id = "ragnarok-uas-stalls";
+                                                    type = "command";
+                                                    interval = "10m";
+                                                    timeout = 30;
+                                                    command = ''
+                                                        ! journalctl -k -b --since "24 hours ago" --no-pager -o cat | grep -q uas_eh_device_reset_handler
+                                                    '';
+                                                    agent = "ragnarok";
+                                                }
+                                                {
                                                     name = "/";
                                                     id = "ragnarok-disk-root";
                                                     type = "disk_space";
