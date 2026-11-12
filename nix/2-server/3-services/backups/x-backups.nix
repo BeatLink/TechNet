@@ -20,7 +20,7 @@ let
     # Settings shared by every repository.
     borgBackup = {
         max_age = "1d";
-        cache_dir = "/var/cache/x-monitor-borg";
+        cache_dir = "/var/cache/x-backups-borg";
         require_sudo = true;
         exclude = config.backup-excludes.patterns;
         exclude_if_present = config.backup-excludes.markers;
@@ -30,7 +30,7 @@ let
         job_nice = 19;
         job_io_idle = true;
         inhibit_sleep = true;
-        job_lock = "/run/x-monitor-borg.lock"; # Also taken by Odin's Vorta replay, so the two never run borg at once
+        job_lock = "/run/x-backups-borg.lock";
     };
 
     # Heimdall's and Odin's borgmatic repositories.
@@ -164,7 +164,6 @@ in
                         hour = 4;
                     };
                 };
-
 
             odin-borgmatic-on-disk =
                 laptopBackup

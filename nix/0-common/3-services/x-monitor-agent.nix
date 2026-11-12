@@ -106,7 +106,6 @@ in
                 environment.HOME = "/var/lib/x-monitor-agent"; # nix and the detached job workdirs write under $HOME; the default /var/empty is immutable
                 serviceConfig = {
                     StateDirectory = "x-monitor-agent";
-                    CacheDirectory = "x-monitor-borg"; # Backs the borg monitors' cache_dir; without it each poll rebuilds the repo's chunks cache under mktemp and discards it
                     ProtectHome = lib.mkForce false; # true hides /home from borg source paths and makes /root read-only for the rebuild's nix cache
 
                     # Contention-only. A CPUQuota of 200% was here and had to go: it throttled the agent 679 times on Odin and 1625 on Heimdall, and every
@@ -119,21 +118,13 @@ in
             };
         })
 
-        # Backup Jobs ################################################################################################################################
+        # Sleep Inhibitor ############################################################################################################################
         (lib.mkIf (builtins.elem host agentHosts) {
-            # Shared with X-Backups' agent, so the two never run borg jobs on one host at once
-            users.groups."borg-job-lock" = { };
-            systemd.tmpfiles.settings."X-Monitor-Agent"."/run/x-monitor-borg.lock".f = {
-                user = "x-monitor-agent";
-                group = "borg-job-lock";
-                mode = "0660";
-            };
-
             security.polkit.extraConfig = ''
                 polkit.addRule(function (action, subject) {
                     if ((action.id == "org.freedesktop.login1.inhibit-block-sleep" ||
                          action.id == "org.freedesktop.login1.inhibit-block-shutdown") &&
-                        (subject.user == "x-monitor-agent" || subject.user == "x-backups-agent")) {
+                        subject.user == "x-monitor-agent") {
                         return polkit.Result.YES;
                     }
                 });

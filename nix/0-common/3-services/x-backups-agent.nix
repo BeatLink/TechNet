@@ -24,7 +24,11 @@ let
     };
 
     # Heimdall runs the server itself, so its own agent takes the short way round rather than depending on WireGuard being up.
-    url = if host == "Heimdall" then "ws://127.0.0.1:7710/api/agent" else "wss://backups.heimdall.technet/api/agent";
+    url =
+        if host == "Heimdall" then
+            "ws://127.0.0.1:7710/api/agent"
+        else
+            "wss://backups.heimdall.technet/api/agent";
 in
 {
     imports = [ inputs.x-backups.nixosModules.agent ];
@@ -40,11 +44,31 @@ in
             inherit url;
             host = agentNames.${host};
             keyFile = config.sops.secrets.x_backups_agent_key.path;
-            # Shares X-Monitor's job lock, so the two never run borg jobs on one host at once
-            extraGroups = [ "borg-job-lock" ];
             # sudo resolves `borg` on this PATH, and the sudo rule below names the system profile's borg
             path = [ "/run/current-system/sw" ];
         };
+
+        environment.persistence."/persistent".directories = [
+            {
+                directory = "/var/cache/x-backups-borg";
+                mode = "0700";
+            }
+        ];
+
+        systemd.tmpfiles.settings."X-Backups-Agent"."/run/x-backups-borg.lock".f = {
+            inherit (config.services.x-backups-agent) user group;
+            mode = "0600";
+        };
+
+        security.polkit.extraConfig = ''
+            polkit.addRule(function (action, subject) {
+                if ((action.id == "org.freedesktop.login1.inhibit-block-sleep" ||
+                     action.id == "org.freedesktop.login1.inhibit-block-shutdown") &&
+                    subject.user == "x-backups-agent") {
+                    return polkit.Result.YES;
+                }
+            });
+        '';
 
         security.sudo.extraRules = [
             {
