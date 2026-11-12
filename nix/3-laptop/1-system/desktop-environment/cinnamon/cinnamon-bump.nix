@@ -43,9 +43,13 @@ in
                     final.pam
                 ];
                 # nixpkgs cherry-picks the GIR 2.0 fix, which is already in 6.7.4
-                patches = prev.lib.filter (
-                    p: !prev.lib.hasSuffix "3a2d558aa575f0ea364c5b4e30d2eb3ee604ee58.patch" (toString p)
-                ) old.patches;
+                # Xorg 21.1.25 refuses a client's 33rd pointer barrier with BadAlloc, which aborts Cinnamon, and hot
+                # corners left their barriers to GC on every monitor change
+                patches =
+                    prev.lib.filter (
+                        p: !prev.lib.hasSuffix "3a2d558aa575f0ea364c5b4e30d2eb3ee604ee58.patch" (toString p)
+                    ) old.patches
+                    ++ [ ./patches/cinnamon-hot-corner-destroy-barriers.patch ];
                 # Three of nixpkgs' --replace-fail targets are gone in 6.7: Spices.py lost the double-quoted
                 # subprocess.run and msgfmt (now in the new python3/cinnamon module), and the printers applet
                 # calls lpstat directly instead of shipping python helpers.

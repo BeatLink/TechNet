@@ -1,0 +1,11 @@
+--- a/js/ui/hotCorner.js	2026-11-12 02:25:30.701549381 -0500
++++ b/js/ui/hotCorner.js	2026-11-12 02:25:30.741550201 -0500
+@@ -139,6 +139,8 @@
+     }
+ 
+     _onDestroy() {
++        this._vleg?.destroy();
++        this._hleg?.destroy();
+         this._vleg = null;
+         this._hleg = null;
+         Main.layoutManager.removeChrome(this);
