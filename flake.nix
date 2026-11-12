@@ -85,7 +85,8 @@
         };
         # Patches the Steam client so it loads CSS themes; Odin's Steam package comes from here
         millennium = {
-            url = "github:SteamClientHomebrew/Millennium?dir=packages/nix";
+            # Pinned: dee8e60's millennium-64 builds its LuaJIT with -m32, which cannot link in a 64-bit stdenv
+            url = "github:SteamClientHomebrew/Millennium/6d5379ec502896465c74dcc2462b94082c8caca2?dir=packages/nix";
             inputs.nixpkgs.follows = "nixpkgs";
         };
         # git+ and submodules=1, not github:, because the stock themes are a submodule and a tarball fetch drops them
