@@ -11,6 +11,7 @@
         HOMEPAGE_VAR_CALIBRE_PASS=${config.sops.placeholder.calibre_web_x_monitor_password}
         HOMEPAGE_VAR_PIHOLE_PASS=${config.sops.placeholder.pihole_web_password}
         HOMEPAGE_VAR_SYNCTHING_KEY=${config.sops.placeholder.syncthing_api_key}
+        HOMEPAGE_VAR_X_MONITOR_TOKEN=${config.sops.placeholder.x_monitor_homepage_token}
     '';
 
     services.homepage-dashboard = {
@@ -502,8 +503,7 @@
                             widget = {
                                 type = "customapi";
                                 url = "http://127.0.0.1:9611/api/summary";
-                                username = "admin";
-                                password = "{{HOMEPAGE_VAR_X_MONITOR_PASS}}";
+                                headers.Authorization = "Bearer {{HOMEPAGE_VAR_X_MONITOR_TOKEN}}";
                                 mappings = [
                                     {
                                         field = "total";

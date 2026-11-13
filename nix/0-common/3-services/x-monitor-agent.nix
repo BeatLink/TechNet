@@ -31,7 +31,8 @@ let
     agentId = lib.toLower host;
 
     # Heimdall runs the X-Monitor server itself, so its own agent takes the short way round rather than depending on WireGuard being up to monitor itself.
-    server = if host == "Heimdall" then "127.0.0.1" else "heimdall.technet";
+    # The others go through the TLS vhost: the agent allows plain ws:// only to its own machine.
+    serverUrl = if host == "Heimdall" then "ws://127.0.0.1:9611/api/agent/ws" else "wss://monitor.heimdall.technet/api/agent/ws";
 
     # A borg poll carries its deadline inside the sudo, so sudo matches `timeout` rather than `borg` and the plain borg rule below never fires. One spec
     # per digit count, because a `*` in place of the seconds would span the space after them and let any command follow.
@@ -68,7 +69,7 @@ in
 
             services.x-monitor-agent = {
                 enable = true;
-                url = "ws://${server}:9611/api/agent/ws";
+                url = serverUrl;
                 id = agentId;
                 keyFile = config.sops.secrets.x_monitor_agent_key.path;
 
