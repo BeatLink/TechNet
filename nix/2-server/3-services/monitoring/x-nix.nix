@@ -38,10 +38,12 @@ let
         "Thor"
     ];
 
-    # Rolls a switch back unless X-Nix can still reach the host's agent once it has activated.
+    # Rolls a switch back unless X-Nix can still reach the host's agent once it has activated, and frees the Nix store database when a newer Nix
+    # waits a minute to upgrade it while something such as nixd's daemon connections or attic watch-store holds it open.
     safety = {
         magic_rollback = true;
         confirm_timeout = "2m";
+        close_nix_lock_holders = true;
     };
 
     # A host the TechNet cache evaluates and builds nightly, whose own agent switches it from the cache once it drifts and the cache holds the closure.
