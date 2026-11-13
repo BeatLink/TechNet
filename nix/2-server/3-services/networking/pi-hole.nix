@@ -126,10 +126,8 @@
 
                 dns = {
                     # Stop appending every DNS query to pihole.log. The file had
-                    # reached 532MB, and it sits on the same HDD mirror
-                    # everything else contends for -- now that FTL is
-                    # prioritised those writes go to the front of the queue, so
-                    # it is worth not making them at all.
+                    # reached 532MB, and FTL's database already records every
+                    # query, so it is worth not making those writes at all.
                     #
                     # This is the key that emits dnsmasq's `log-queries`. A
                     # `log-queries=no` appended via misc.dnsmasq_lines does not
@@ -210,34 +208,24 @@
 
                 database.maxDBdays = 7; # Every query row is scanned at startup, and 90 days of them held FTL's API for 20 s.
             };
-            stateDirectory = "/Storage/Services/PiHole/state";
-            logDirectory = "/Storage/Services/PiHole/logs";
         };
 
     };
 
-    # Ensure the persistent storage is owned by pihole
-    systemd.tmpfiles.settings."PiHole" = {
-        "/Storage/Services/PiHole" = {
-            d = {
-                user = "pihole";
-                group = "pihole";
-                mode = "0750";
-            };
-            Z = {
-                user = "pihole";
-                group = "pihole";
-                mode = "0750";
-            };
-        };
-    };
-
-    environment.persistence."/Storage/Services/PiHole".directories = [
+    # The root SSD, not the data pool: FTL fsyncs its databases, and behind the SMR mirror's minutes-long txg syncs it hung in zil_commit and took
+    # DNS and DHCP down for every host. Everything here is rebuilt from this file or is query history that is fine to lose.
+    environment.persistence."/persistent".directories = [
         {
-            directory = "/etc/pihole";
+            directory = config.services.pihole-ftl.configDirectory;
             user = "pihole";
             group = "pihole";
-            mode = "0755";
+            mode = "0700";
+        }
+        {
+            directory = config.services.pihole-ftl.stateDirectory;
+            user = "pihole";
+            group = "pihole";
+            mode = "0700";
         }
     ];
 
