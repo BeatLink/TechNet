@@ -227,25 +227,32 @@ HEIMDALL = "heimdall.technet"
 RAGNAROK = "ragnarok.technet"
 THOR = "thor.technet"
 
-BORG_UNITS = {
-    HEIMDALL: ["borgmatic", "borgmatic-check"],
-    RAGNAROK: ["borg-check", "borg-check-data"],
-    LOCAL_HOST: ["borgmatic", "borgmatic-check", "borgmatic-check-data"],
-}
+# Ragnarok's own repository checks, which X-Backups does not schedule.
+BORG_UNITS = {RAGNAROK: ["borg-check", "borg-check-data"]}
+
+# X-Backups schedules every backup and check from Heimdall, and each host's agent holds this lock (x-backups.nix) for as long as borg runs there.
+X_BACKUPS = HEIMDALL
+X_BACKUPS_LOCK = "/run/x-backups-borg.lock"
+X_BACKUPS_HOSTS = [HEIMDALL, LOCAL_HOST, RAGNAROK]
 
 
 def pause_backups():
-    """Stops every borg timer and job on the three backup hosts, so nothing holds a repository while it changes."""
+    """Stops X-Backups and Ragnarok's checks, then waits out any borg job still holding a host's lock, so no repository is open while it changes."""
+    run(["systemctl", "stop", "x-backups.service"], host=X_BACKUPS, root=True)
     for host, units in BORG_UNITS.items():
         run(["systemctl", "stop", *[f"{unit}.timer" for unit in units], *[f"{unit}.service" for unit in units]], host=host, root=True)
-        say(f"{host}: backups paused")
+    for host in X_BACKUPS_HOSTS:
+        say(f"{host}: waiting for any running borg job to finish")
+        run(["flock", X_BACKUPS_LOCK, "true"], host=host, root=True)
+    say("backups paused")
 
 
 def resume_backups():
-    """Starts the borg timers again, reporting rather than stopping on a host that fails."""
-    for host, units in BORG_UNITS.items():
+    """Starts X-Backups and Ragnarok's check timers again, reporting rather than stopping on a host that fails."""
+    starts = [(X_BACKUPS, ["x-backups.service"])] + [(host, [f"{unit}.timer" for unit in units]) for host, units in BORG_UNITS.items()]
+    for host, units in starts:
         try:
-            run(["systemctl", "start", *[f"{unit}.timer" for unit in units]], host=host, root=True)
+            run(["systemctl", "start", *units], host=host, root=True)
             say(f"{host}: backups resumed")
         except RotateError as error:
             say(f"could not resume backups: {error}")
