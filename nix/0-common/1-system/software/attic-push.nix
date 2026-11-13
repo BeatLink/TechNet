@@ -1,8 +1,7 @@
 # Attic Push #########################################################################################################################################
 #
-# Uploads what this host builds to Heimdall's cache, so an overlay package is built once for the fleet instead of once per host per nixpkgs bump.
-#
-# Attic skips paths signed by an upstream cache, so watching the store mirrors what was built here and not the far larger set fetched from Hydra.
+# The endpoint and token this host pushes to Heimdall's cache with. X-Nix's TechNet cache does the pushing (push_command in x-nix.nix): it pushes
+# every closure it builds and pushes again any its checks find the cache still lacks paths of (retry_push), so no watcher or retry runs here.
 #
 {
     config,
@@ -24,7 +23,7 @@ let
 in
 {
     options.technet.atticPush = {
-        enable = lib.mkEnableOption "uploading locally built paths to Heimdall's Attic cache";
+        enable = lib.mkEnableOption "the endpoint and token for pushing to Heimdall's Attic cache";
 
         configDir = lib.mkOption {
             type = lib.types.path;
@@ -38,104 +37,5 @@ in
 
         # Each pusher has its own token, made with `atticadm make-token --sub <host>`, so Attic records which host uploaded each path.
         sops.secrets.attic_push_token.sopsFile = "${config.technet.secrets.path}/attic-push.yaml";
-
-        # Watcher ####################################################################################################################################
-        systemd.services.attic-watch-store = {
-            description = "Upload newly built store paths to the TechNet Attic cache";
-            wantedBy = [ "multi-user.target" ];
-            wants = [ "network-online.target" ];
-            after = [
-                "network-online.target"
-                "sops-install-secrets.service"
-            ];
-
-            serviceConfig = {
-                # Two uploads at a time: atticd writes through one SQLite connection, and five at once left the rest timing out on its pool.
-                ExecStart = "${pkgs.attic-client}/bin/attic watch-store --jobs 2 technet";
-                # Setting either threshold by hand also stops glibc raising them on the fly, which is what otherwise moves large blocks off
-                # mmap and onto the heap, where freeing them returns nothing. Capping the arenas keeps 19 threads from each holding a free list.
-                Environment = [
-                    "XDG_CONFIG_HOME=${cfg.configDir}"
-                    "MALLOC_ARENA_MAX=2"
-                    "MALLOC_MMAP_THRESHOLD_=131072"
-                    "MALLOC_TRIM_THRESHOLD_=131072"
-                ];
-
-                # Heimdall being unreachable is ordinary here, so the watcher retries forever rather than giving up and leaving the cache cold.
-                Restart = "always";
-                RestartSec = 30;
-
-                # Uploading is never worth slowing a build or a desktop for.
-                Nice = 19;
-                IOSchedulingClass = "idle";
-            };
-        };
-
-        # Retry ######################################################################################################################################
-        # The watcher uploads each path once and forgets a failure, so this pushes the running system and every build result again; paths the cache
-        # already holds are skipped, so a pass with nothing missing costs one query.
-        systemd.services.attic-push-retry = {
-            description = "Push anything the Attic watcher failed to upload";
-            after = [
-                "network-online.target"
-                "sops-install-secrets.service"
-            ];
-            wants = [ "network-online.target" ];
-            path = [
-                pkgs.attic-client
-                pkgs.gnugrep
-            ];
-            environment.XDG_CONFIG_HOME = cfg.configDir;
-            script = ''
-                {
-                    readlink -e /run/current-system
-                    for root in /nix/var/nix/gcroots/auto/*; do
-                        readlink -e "$root" || true # A result link deleted since leaves its root dangling
-                    done
-                } \
-                    | grep '^/nix/store/' \
-                    | attic push --jobs 2 --stdin technet
-            '';
-            serviceConfig = {
-                Type = "oneshot";
-                Nice = 19;
-                IOSchedulingClass = "idle";
-            };
-        };
-
-        systemd.timers.attic-push-retry = {
-            description = "Hourly retry of failed Attic uploads";
-            wantedBy = [ "timers.target" ];
-            timerConfig = {
-                OnCalendar = "hourly";
-                RandomizedDelaySec = "15m";
-                Persistent = true;
-            };
-        };
-
-        # Recycling ##################################################################################################################################
-        # Pushing a large closure grows the watcher's heap to match, and glibc hands almost none of it back: freed blocks stay on the allocator's
-        # free lists, so the pages remain mapped and dirty and the kernel can only move them to swap. One host was found holding 6.6GiB of swap
-        # against 18MiB resident, which is half its zram, and a full swap is what stops anything else being paged out.
-        #
-        # The allocator settings above should hold the growth down; this stays as a backstop, since the watcher keeps no state between paths and a
-        # bounce costs only whatever is uploading at the time.
-        systemd.services.attic-watch-store-recycle = {
-            description = "Restart the Attic watcher so it returns its heap";
-            serviceConfig = {
-                Type = "oneshot";
-                ExecStart = "${pkgs.systemd}/bin/systemctl try-restart attic-watch-store.service";
-            };
-        };
-
-        systemd.timers.attic-watch-store-recycle = {
-            description = "Hourly restart of the Attic watcher";
-            wantedBy = [ "timers.target" ];
-            timerConfig = {
-                OnCalendar = "hourly";
-                RandomizedDelaySec = "5m"; # The fleet pushes to one cache, so the hosts should not all bounce together
-                Persistent = true;
-            };
-        };
     };
 }

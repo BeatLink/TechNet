@@ -1567,24 +1567,6 @@ in
                                                     ];
                                                     agent = "heimdall";
                                                 }
-                                                {
-                                                    name = "Store Watcher";
-                                                    id = "heimdall-attic-watch-store";
-                                                    type = "systemd_service";
-                                                    interval = "1m";
-                                                    service_name = "attic-watch-store.service";
-                                                    agent = "heimdall";
-                                                }
-                                                {
-                                                    # Hourly oneshot that pushes whatever the watcher failed to upload.
-                                                    name = "Push Retry";
-                                                    id = "heimdall-attic-push-retry";
-                                                    type = "systemd_service";
-                                                    interval = "15m";
-                                                    service_name = "attic-push-retry.service";
-                                                    max_age = "3h"; # Hourly with up to 15m of jitter
-                                                    agent = "heimdall";
-                                                }
                                             ];
                                         }
                                     ];

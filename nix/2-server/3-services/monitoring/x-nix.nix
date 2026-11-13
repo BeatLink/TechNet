@@ -25,7 +25,7 @@ let
         gc_args = builtins.filter (a: a != "") (lib.splitString " " config.nix.gc.options);
     };
 
-    # Each nightly build links its closure here, replacing the last one, so it stays rooted until deployed and attic-push-retry can find it. Readable by
+    # Each nightly build links its closure here, replacing the last one, so it stays rooted until deployed and pushed. Readable by
     # all, since X-Monitor's cache check reads the closure lists of the targets kept only in the cache.
     buildRoots = "/var/lib/x-nix-build-roots";
 
@@ -40,7 +40,7 @@ let
     ];
 
     # Rolls a switch back unless X-Nix can still reach the host's agent once it has activated, and frees the Nix store database when a newer Nix
-    # waits a minute to upgrade it while something such as nixd's daemon connections or attic watch-store holds it open.
+    # waits a minute to upgrade it while something such as nixd's daemon connections holds it open.
     safety = {
         magic_rollback = true;
         confirm_timeout = "2m";
@@ -211,6 +211,7 @@ in
                 "Ragnarok"
                 "Thor"
             ];
+            # A check that finds a closure the cache lacks paths of pushes it again (retry_push, on by default).
             push_command = "env XDG_CONFIG_HOME=${config.technet.atticPush.configDir} ${pkgs.attic-client}/bin/attic push --jobs 2 technet";
         };
     };
