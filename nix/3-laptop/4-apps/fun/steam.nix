@@ -25,7 +25,6 @@ let
         "zfs-scrub.timer"
         "zpool-trim.timer"
         "fstrim.timer"
-        "nix-gc.timer"
     ];
 
     # Plain autostart programs rather than units, so they are signalled by name and not brought back afterwards.

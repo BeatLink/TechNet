@@ -15,8 +15,9 @@
 let
     port = 7720;
 
-    # The same store policy as X-Monitor's nix_gc monitors.
+    # Each host's store: X-Nix collects it daily at 03:30, between attic-gc at 03:00 and the nightly builds at 04:00, in place of the NixOS timer.
     gc = {
+        collect_at = "03:30";
         max_age = "2w";
         warning = 90;
         threshold = 96;

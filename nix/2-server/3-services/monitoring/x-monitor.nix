@@ -48,13 +48,10 @@
 # delivery probe, Radicale's WebDAV request, Pi-hole's resolution — so a unit
 # that is up but not working reads as a failure rather than averaging away.
 #
-# `Garbage Collection` under `NixOS` has no separate unit check either. The
-# `nix_gc` monitor already reads nix-gc.service's result and nix-gc.timer's
-# schedule itself, and dates the last collection from the journal — which a
-# `systemd_service` in oneshot mode cannot do, because systemd drops an
-# inactive unit's own timestamps across a re-exec and every host here shows
-# them empty. Pairing the two would mean a second monitor reporting a run that
-# succeeded as one that never happened.
+# There is no `Garbage Collection` monitor under `NixOS`: X-Nix collects each
+# host's store daily and watches it with the same limits (x-nix.nix), and its
+# collections never pass through nix-gc.service, so the `nix_gc` monitor, which
+# reads that unit's journal and timer, would only see a collector that stopped.
 #
 # The lights, sockets and sensors are not TechNet hosts and have no domains, so
 # they stay in one top-level `IoT Sensors` group of reachability checks.
@@ -256,23 +253,6 @@ in
             # Two roots over the same monitors: "By host" defines each one, and "By domain" links to them regrouped, so none is defined twice.
             plugins =
                 let
-                    # A host's store garbage collection, the same policy everywhere.
-                    nixGc =
-                        host:
-                        {
-                            name = "Garbage Collection";
-                            id = "${lib.toLower host}-nix-gc";
-                            type = "nix_gc";
-                            interval = "1h";
-                            max_age = "2w"; # nix.gc.dates is weekly, so this tolerates one missed run
-                            warning = 90; # Same policy as each host's Filesystems monitor, so the store's fill alarms once rather than twice
-                            threshold = 96;
-                            max_generation_age = "30d"; # --delete-older-than 7d, run weekly, should never leave one this old
-                            agent = lib.toLower host;
-                        }
-                        // lib.optionalAttrs (host == "Thor") {
-                            offset = "1m"; # Lands in the check-in window Thor wakes for at :00 and :30 on battery
-                        };
                     # A host's whole journal: new warning and error counts, and the search behind the Logs page. Online always, since every host logs errors.
                     journal =
                         host:
@@ -552,7 +532,6 @@ in
                                             eval_interval = "6h";
                                             agent = "ragnarok";
                                         }
-                                        (nixGc "Ragnarok")
                                         (journal "Ragnarok")
                                     ];
                                 }
@@ -1541,7 +1520,6 @@ in
                                             eval_interval = "6h";
                                             agent = "heimdall";
                                         }
-                                        (nixGc "Heimdall")
                                         (journal "Heimdall")
                                         {
                                             name = "Attic";
@@ -1970,7 +1948,6 @@ in
                                             eval_interval = "6h";
                                             agent = "odin";
                                         }
-                                        (nixGc "Odin")
                                         (journal "Odin")
                                     ];
                                 }
@@ -2376,7 +2353,6 @@ in
                                             eval_interval = "6h";
                                             agent = "thor";
                                         }
-                                        (nixGc "Thor")
                                         (journal "Thor")
                                         {
                                             # The 28GB eMMC pool's real failure mode, and the one no other host needs pinned: every generation lands in this dataset.
