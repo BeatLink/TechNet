@@ -2,7 +2,7 @@
 #
 # The NixOS deployment portal at nix.heimdall.technet, which runs the whole fleet's NixOS upkeep: it updates the flake, and the TechNet cache evaluates
 # and builds every host's closure nightly on Odin when it is up and on Heimdall otherwise, and pushes it to Attic, and each host switches once it drifts.
-# Heimdall switches itself; every other host is switched from the cache by its own X-Nix agent (x-nix-agent.nix). The X-Nix modules carry their own sudo
+# Heimdall switches itself; every other host is switched by its own X-Nix agent (x-nix-agent.nix), fetching what Odin, else Heimdall, built and pushed to the cache. The X-Nix modules carry their own sudo
 # rules.
 #
 {
@@ -47,7 +47,7 @@ let
         close_nix_lock_holders = true;
     };
 
-    # A host the TechNet cache evaluates and builds nightly, whose own agent switches it from the cache once it drifts and the cache holds the closure.
+    # A host the TechNet cache evaluates and builds nightly, whose own agent switches it once it drifts, fetching the system its build on the cache's hosts pushed.
     remote =
         name: tags:
         {
@@ -57,7 +57,6 @@ let
             configuration = name;
             cache = "technet";
             eval_agent = "heimdall"; # Evaluating the flake on the 2GB Rock64 swaps it to death, and on the phone takes it out of service
-            switch_from_cache = true;
             auto_switch = true;
             auto_switch_after = "0";
             health_commands = [ "systemctl is-active --quiet sshd.service" ];
