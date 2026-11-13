@@ -72,6 +72,9 @@ APPS = {
     "x-fitness": dict(title="X-Fitness", file="secrets/3-laptop/x-fitness.yaml", key="x_fitness_mcp_token", url="https://fitness.heimdall.technet/api/mcp"),
     "x-nix": dict(title="X-Nix", file="secrets/3-laptop/claude-mcp.yaml", key="x_nix_mcp_token", url="https://nix.heimdall.technet/api/mcp"),
     "x-backups": dict(title="X-Backups", file="secrets/3-laptop/claude-mcp.yaml", key="x_backups_mcp_token", url="https://backups.heimdall.technet/api/mcp"),
+    "x-media-tracker": dict(
+        title="X-Media-Tracker", file="secrets/3-laptop/claude-mcp.yaml", key="x_media_tracker_mcp_token", url="https://media-tracker.heimdall.technet/api/mcp"
+    ),
 }
 
 

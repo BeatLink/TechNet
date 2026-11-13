@@ -17,6 +17,10 @@
             sopsFile = "${config.technet.secrets.path}/claude-mcp.yaml";
             owner = "beatlink";
         };
+        x_media_tracker_mcp_token = {
+            sopsFile = "${config.technet.secrets.path}/claude-mcp.yaml";
+            owner = "beatlink";
+        };
     };
 
     environment.systemPackages = [
