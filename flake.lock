@@ -175,11 +175,11 @@
         "systems": "systems_3"
       },
       "locked": {
-        "lastModified": 1794520237,
-        "narHash": "sha256-GAAf1AnI59K6fAG9PJmrH7uIuepPwATlWwHlfEzjstA=",
+        "lastModified": 1794524492,
+        "narHash": "sha256-1/riKy6MLNQGmVifeDdqnyrgUJYJot1/cmk1r3pbxso=",
         "owner": "sadjow",
         "repo": "claude-code-nix",
-        "rev": "6e760b9ff5268802c05aad294479f0d65cf854e4",
+        "rev": "376fb1856b0aa2d4f233b303ba84194592bcd304",
         "type": "github"
       },
       "original": {
@@ -893,11 +893,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1793977579,
-        "narHash": "sha256-WrSODdZFVIs/Hh2NzC0bY+ROByi0bATg8WfePX8dPj8=",
+        "lastModified": 1794495034,
+        "narHash": "sha256-E0hYoioqUtM2XmPPvYYpJgdADF5AW9oOoPSEiM9dTHQ=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "4fe25e12eb9f4c744966dd3de5a05246cf098601",
+        "rev": "2074cc672349f14240fb7ea90d509e0b643e9dd4",
         "type": "github"
       },
       "original": {
@@ -1404,11 +1404,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794523508,
-        "narHash": "sha256-9J7CJnGo9k0PK8LTwKj50rVDqq89J09do+EJfJlUxsw=",
+        "lastModified": 1794528246,
+        "narHash": "sha256-zWwZdFkF4BkvuAUsIAmq0+ZwQss4RfKgiRrMmnA3xwU=",
         "owner": "x-tech-laboratories",
         "repo": "X-Backups",
-        "rev": "b0f530597be65776129a7053734ede7ce2382705",
+        "rev": "f66e664e2fc7595507a92dd56b02f73ceec38efe",
         "type": "github"
       },
       "original": {
