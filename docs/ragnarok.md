@@ -58,14 +58,18 @@ fixed:
 
 What remains is the occasional reset on the backup drive's adapter: five
 `Transfer error` lines on its bulk-in endpoint, then `reset SuperSpeed USB
-device`. The read is retried and no I/O error reaches the filesystem. The
+device`. The read is retried, and most of the time no I/O error is logged. The
 drive's SMART power counters (192 Power-Off_Retract_Count, 12
 Power_Cycle_Count) do not move across one, so it is not the drive losing
 power. The RK3328's USB 3 controller has no PHY driver in mainline Linux and
-is known to fail with two SuperSpeed disks behind a hub; lowering
-`max_sectors` is the mitigation: the udev rule holds the adapter to 64
-sectors, 32 KiB a request, where it used to raise it to 1024. Whether that
-stops the resets is not yet known.
+is known to fail with two SuperSpeed disks behind a hub.
+
+Holding the adapter to 64 sectors, 32 KiB a request, did not stop them: over
+the 47 hours from 2026-11-11 02:17 the backup drive's adapter was reset 26
+times, 25 of them on 2026-11-11 and one on 2026-11-12, at worst five in an
+hour, and the rule is back at 1024 sectors. The kernel logged 21 I/O
+errors on that drive in that time, and btrfs logged 260 reads corrected from
+its second copy.
 
 Two things to know before touching it physically:
 
@@ -485,10 +489,19 @@ it on usb-storage, which costs only throughput -- 237 MB/s in 1 MiB reads
 under UAS against 135 MB/s in the 120 KiB commands usb-storage defaults to.
 
 The SSD's present enclosure, `152d:0583`, runs UAS with the `f` quirk the
-kernel's own entry for that ID carries.
+kernel's own entry for that ID carries. It has two faults to know about. A
+capacity query is aborted and the enclosure reset about 38 seconds into every
+boot, and recovers. And on 2026-11-11, at 06:46 and again at 17:29, a stall
+aborted 30 queued reads and writes at once and reset the enclosure, 14 I/O
+errors in all, with no freeze. Reverting it to usb-storage (`152d:0583:u`)
+is the way back if that turns into a hang; TRIM may not survive the move,
+because the JMS576 bridge advertised no discard under usb-storage.
 
 TRIM is set up by a udev rule in the same file, written for the JMS561U and
-carried over to `152d:0583`, where it has not been verified yet. The
+carried over to `152d:0583`, where it works: on 2026-11-13 the SSD showed
+provisioning mode `unmap` and a 32 MiB discard limit, and `fstrim` released
+83.7 GiB from `/` and 4.4 GiB from `/persistent` with nothing in the kernel
+log. The
 JMS561U's firmware (0204) clears the provisioning bit in READ CAPACITY(16)
 while the VPD pages advertise UNMAP with a 65535-block limit, and the kernel
 trusts the capacity bit: provisioning mode stays `full`, `fstrim` reports

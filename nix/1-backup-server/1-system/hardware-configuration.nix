@@ -114,8 +114,8 @@ in
                 # Do not use the drive's timing as a source of randomness
                 ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${dataBridge}", ATTR{queue/add_random}="0"
 
-                # Keep each request to 32 KiB: with larger ones the adapter's bulk reads fail every so often behind the hub and the kernel resets it
-                ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${dataBridge}", ATTR{device/max_sectors}="64"
+                # Send the largest requests the adapter accepts, so big reads need fewer round trips
+                ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${dataBridge}", ATTR{device/max_sectors}="1024"
             '';
         }
 
