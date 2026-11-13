@@ -159,7 +159,7 @@
                             icon = "mdi-movie-open-outline";
                             description = "Movie and TV Tracker and Sync Server";
                             href = "https://media-tracker.heimdall.technet";
-                            siteMonitor = "https://media-tracker.heimdall.technet/login"; # The root redirects to the login page when signed out
+                            siteMonitor = "https://media-tracker.heimdall.technet"; # The page itself; sign-in happens within it
                             statusStyle = "dot";
                         };
                     }
