@@ -1,9 +1,5 @@
 # To Do
 
-## Decide how X-Nix treats a switch that exits 4
-
-- [ ] In the X-Nix repo, decide whether the agent should roll back when `switch-to-configuration` exits 4 (some units failed) instead of only when the switch itself fails; a single failed unit made Odin build and revert generations 505 to 513
-
 ## Finish the move from Vigil to X-Monitor
 
 - [ ] Update browser bookmarks from `vigil.heimdall.technet` and `x-monitor.heimdall.technet` to `monitor.heimdall.technet`; links in notifications sent before the switch stop working
@@ -17,70 +13,13 @@ the `vigil-self` monitor id and the Home Assistant automation and webhook ids, w
 
 - [ ] Point the X-Tasks desktop and Android apps' sync server at `tasks.heimdall.technet`; `x-tasks.heimdall.technet` no longer resolves
 
-## Finish moving X-Backups to its own SSH key
+## Confirm Odin's Ragnarok repository passes its monthly checks
 
-- [ ] Confirm Odin has switched to bf7c3ea8 or later, which authorizes `x-backups@technet` for `x-monitor-access`; until then X-Backups shows Odin's six repositories as unavailable at `backups.heimdall.technet`
+- [ ] Confirm X-Backups' extract check of `odin-borgmatic-ragnarok` on 2026-12-04 succeeds
+- [ ] Confirm its data check on 2026-12-11 succeeds
 
-## Confirm Ragnarok's Vorta rewrite finishes
-
-- [ ] Confirm the `borg recreate` from Odin against `ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Vorta`
-      finished and the `borg compact` after it ran
-- [ ] Confirm the lock is gone from `/Storage/Backups/Laptop/Vorta` on Ragnarok
-- [ ] Confirm Vorta's next "3. Ragnarok Backup" run succeeds
-
-The rewrite is `ragnarok-run.sh` from `/Storage/Files/Backups/Laptop/vorta-purge-2026-09-24/`, which
-was 31 of 77 archives in at 23:43 on 2026-09-24. Its log is
-`~/.claude/tmp/claude-1000/-Storage-Files-Projects-TechNet/18ceb386-f731-4c6c-8afa-e85f87c1f9ce/scratchpad/purge-ragnarok.log`,
-in a directory that had been deleted and was recreated by hand. A missing log directory
-makes bash skip any command redirected into it, so check the log ends with `compact exit 0` and
-`DONE`. If the compact did not run, run `borg compact` on that repository by hand.
-
-## Deploy the X-Monitor borg monitor extras
-
-- [ ] Deploy Heimdall and Odin, so they get commit `ff6c7f04` and X-Monitor `ee51de2` or later
-- [ ] Expect the restore checks to fail until the next scheduled backup includes each canary file,
-      then confirm every borg monitor's RESTORE CHECK card shows Passed
-- [ ] Decide whether Vorta's "2. Heimdall Backup" profile is right to keep no weekly or monthly
-      archives; `x-monitor.nix` was changed to match it, so if Vorta is wrong, fix the profile and put
-      back `keep_weekly = 2` and `keep_monthly = 3` on the `backup-laptop-heimdall` monitor
-
-The canary files are `/Storage/Services/.vigil-canary` on Heimdall, and `/Storage/System/.vigil-canary`
-and `/Storage/Files/.vigil-canary` on Odin. Heimdall's "Ragnarok" backup monitor stays failed until the
-repair below is done.
-
-## Repair the missing chunk in Ragnarok's server repository
-
-- [ ] Run the repair below on Ragnarok
-- [ ] Confirm Heimdall's next `borgmatic-check.service` run finishes successfully
-- [ ] Delete `/Storage/Backups/Server/Borgmatic.pre-repair-20260924` on Ragnarok
-
-Heimdall's `borgmatic-check.service` has failed on every run since at least 2026-09-22, because of
-one fault in Ragnarok's copy of the server repository (`ssh://borg@ragnarok.technet/Storage/Backups/Server/Borgmatic`).
-The failing run on 2026-09-24 reported:
-
-- The repository and data checks were clean: no segment problems, and all 181,966 chunks verified.
-- The archive check found one missing file chunk in archive `backup-2026-08-20T01:53:42`, in
-  `Storage/Services/Home-Assistant/config/backups/Automatic_backup_2026.8.1_2026-08-17_05.08_39003985.tar`
-  (bytes 146325898–147981586).
-
-Heimdall's local copy (`/Storage/Files/Backups/Server/Borgmatic`) passed the same checks and is not
-affected.
-
-Run this on Ragnarok as the `borg` user, so the repository files stay owned by `borg`:
-
-```sh
-R=/Storage/Backups/Server/Borgmatic
-sudo -u borg env BORG_PASSCOMMAND="cat /run/secrets/borg_repo_encryption_key" BORG_BASE_DIR=/var/lib/borg-check \
-  BORG_RELOCATED_REPO_ACCESS_IS_OK=yes BORG_CHECK_I_KNOW_WHAT_I_AM_DOING=YES sh -c "
-  borg with-lock --lock-wait 3600 $R cp -a --reflink=always $R $R.pre-repair-20260924 &&
-  borg check --repair --archives-only --lock-wait 3600 --info $R"
-```
-
-The first step takes an instant copy of the repository on btrfs while holding borg's lock, so the
-repair can be rolled back. The second step repairs only the archive metadata, because the
-repository check was clean. The repair fills the missing chunk with zeros, so that one tar in that
-one archive stays damaged. Once the X-Monitor borg monitors are deployed, the "Ragnarok" backup monitor
-under Heimdall's Backups group shows the check result.
+Both last failed while the Vorta replay held that repository: the extract check on 2026-11-04 exited 2, and the
+data check on 2026-11-11 timed out on the lock of `/Storage/Backups/Laptop/Borgmatic`. Its weekly check has passed.
 
 ## Install LNXlink on Ragnarok and Thor
 
