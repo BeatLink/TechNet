@@ -1,7 +1,7 @@
 # X-Media-Tracker ####################################################################################################################################
 #
-# The X-Media-Tracker web app and sync server. Its admins are the same accounts file as X-Fitness's, in secrets/2-server/x-fitness.yaml; browsers and
-# devices sign in as them.
+# The X-Media-Tracker web app and sync server. Its admins are the accounts file in secrets/2-server/x-media-tracker.yaml, beside the admin's
+# generated password; browsers and devices sign in as them.
 #
 {
     config,
@@ -12,10 +12,7 @@
 {
     imports = [ inputs.x-media-tracker.nixosModules.default ];
 
-    sops.secrets.x_media_tracker_password_hash = {
-        sopsFile = "${config.technet.secrets.path}/x-fitness.yaml";
-        key = "x_fitness_password_hash";
-    };
+    sops.secrets.x_media_tracker_password_hash.sopsFile = "${config.technet.secrets.path}/x-media-tracker.yaml";
 
     services.x-media-tracker = {
         enable = true;
