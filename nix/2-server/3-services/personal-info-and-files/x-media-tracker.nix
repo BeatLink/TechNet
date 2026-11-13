@@ -30,7 +30,7 @@
     ];
 
     nginx-vhosts.x-media-tracker = {
-        domain = "media.heimdall.technet";
+        domain = "media-tracker.heimdall.technet";
         port = 9004;
     };
 }
