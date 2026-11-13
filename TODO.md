@@ -15,11 +15,12 @@ the `vigil-self` monitor id and the Home Assistant automation and webhook ids, w
 
 ## Confirm Odin's Ragnarok repository passes its monthly checks
 
-- [ ] Confirm X-Backups' extract check of `odin-ragnarok` on 2026-12-04 succeeds
-- [ ] Confirm its data check on 2026-12-11 succeeds
+- [ ] Confirm X-Backups' data check of `odin-ragnarok`, started 2026-11-13 09:57 as run #1924, passed
+- [ ] Start its extract check through X-Backups once that run ends, and confirm it passes
 
 Both last failed while the Vorta replay held that repository: the extract check on 2026-11-04 exited 2, and the
-data check on 2026-11-11 timed out on the lock of its repository. Its weekly check has passed.
+data check on 2026-11-11 timed out on the lock of its repository. Its weekly check has passed. The target shows
+failed until both pass; they next run on their own on 2026-12-04 and 2026-12-11.
 
 ## Finish moving the fleet to X-Backups
 

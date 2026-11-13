@@ -1,7 +1,8 @@
 """Set MCP Token
 
-Takes an X-app's API token pasted at a hidden prompt, stores it in sops and points Claude Code's MCP server for that app at it; then commits,
-pushes and switches Odin so the token reaches /run/secrets. Run it on Odin, as beatlink, from the root of the TechNet main checkout.
+Takes an X-app's API token pasted at a hidden prompt, stores it in sops and points Claude Code's MCP server for that app at it; then commits
+and pushes; X-Nix switches Odin to the pushed commit, which puts the token in /run/secrets. Run it on Odin, as beatlink, from the root of the
+TechNet main checkout.
 A token only reaches sops on stdin, every command is a fixed argument list, and anything printed passes through a filter that masks it.
 """
 
@@ -54,15 +55,6 @@ def run(argv, data=None):
         lines = [line for line in result.stderr.strip().splitlines() if line.strip() and not line.startswith(DIAGNOSTIC_PREFIXES)]
         raise TokenError(f"{shlex.join(argv)} failed: {redact((lines or ['no error output'])[-1])}")
     return result.stdout
-
-
-def run_shown(argv):
-    """Runs a long command that takes no secret, showing its output line by line through the mask."""
-    with subprocess.Popen(argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True) as process:
-        for line in process.stdout:
-            print(redact(line), end="", flush=True)
-    if process.returncode != 0:
-        raise TokenError(f"{shlex.join(argv)} failed")
 
 
 # Apps ###############################################################################################################################################
@@ -124,13 +116,6 @@ def land(names, files):
     say("pushed")
 
 
-def switch_odin():
-    """Switches Odin to the checkout, which puts the tokens in /run/secrets."""
-    say("switching Odin")
-    run_shown(["nixos-rebuild", "switch", "--flake", f"{Path.cwd()}#Odin", "--sudo", "--use-substitutes", "--no-reexec", "--no-write-lock-file"])
-    say("Odin switched")
-
-
 # Main ###############################################################################################################################################
 
 
@@ -147,7 +132,7 @@ def preflight(files):
 
 
 def main(arguments):
-    """Sets the named apps' tokens, or all of them, then registers each with Claude Code, pushes and switches Odin."""
+    """Sets the named apps' tokens, or all of them, then registers each with Claude Code and pushes."""
     names = list(APPS) if arguments == ["all"] else arguments
     if not names or any(name not in APPS for name in names):
         print("Usage: set-mcp-token all | <" + "|".join(APPS) + ">...", file=sys.stderr)
@@ -159,11 +144,10 @@ def main(arguments):
         tokens = {name: prompt_token(APPS[name]) for name in names}
         for name in names:
             sops_store(APPS[name]["file"], APPS[name]["key"], tokens[name])
-        land(names, files)
-        switch_odin()
         for name in names:
             register(name, APPS[name])
-        say(f"finished: {', '.join(names)}; restart Claude Code to connect")
+        land(names, files)
+        say(f"finished: {', '.join(names)}; restart Claude Code once X-Nix has switched Odin to connect")
         return 0
     except TokenError as error:
         say(f"stopped: {error}")
