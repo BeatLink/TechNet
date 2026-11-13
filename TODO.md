@@ -112,11 +112,9 @@ check before deciding LNXlink covers everything.
 
 ## Keep Pi-hole responsive while Heimdall's data pool is busy
 
-- [ ] Move Pi-hole's state (`/Storage/Services/PiHole`, including `/etc/pihole`) off
-      `data-pool-Heimdall`, or otherwise stop its writes waiting behind bulk writes there
-      ([`pi-hole.nix`](nix/2-server/3-services/networking/pi-hole.nix))
 - [ ] Confirm Thor gets a DHCP lease and Odin resolves `.technet` names during a large Syncthing
-      catch-up
+      catch-up, now that Pi-hole's state is on the root SSD
+- [ ] Delete `/Storage/Services/PiHole` on Heimdall, the state it kept on `data-pool-Heimdall` before the move
 
 On 2026-09-26 Syncthing on Heimdall was pulling 10.5 GB of the Projects folder, and the data pool,
 a mirror with the SMR Toshiba MQ04, had I/O pressure near 90% with sync writes waiting 6-7s.
