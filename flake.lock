@@ -1438,11 +1438,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794528246,
-        "narHash": "sha256-zWwZdFkF4BkvuAUsIAmq0+ZwQss4RfKgiRrMmnA3xwU=",
+        "lastModified": 1794580519,
+        "narHash": "sha256-UDkjC6JufD28GkJNBl37XsCALrbd4eO5PG9S9tpPE50=",
         "owner": "x-tech-laboratories",
         "repo": "X-Backups",
-        "rev": "f66e664e2fc7595507a92dd56b02f73ceec38efe",
+        "rev": "5e0a7f088126789bba450530f0447b05e8933aa0",
         "type": "github"
       },
       "original": {
