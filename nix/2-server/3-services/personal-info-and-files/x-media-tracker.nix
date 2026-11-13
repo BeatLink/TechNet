@@ -32,5 +32,11 @@
     nginx-vhosts.x-media-tracker = {
         domain = "media-tracker.heimdall.technet";
         port = 9004;
+        extraConfig = {
+            # A library refresh or a Trakt import answers only once every title is done, which for a large library can pass nginx's 60s default.
+            extraConfig = ''
+                proxy_read_timeout 5m;
+            '';
+        };
     };
 }
