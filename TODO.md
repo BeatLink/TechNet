@@ -110,16 +110,6 @@ check before deciding LNXlink covers everything.
 - [ ] Notifications with action buttons, images and sound
 - [ ] Browsing media sources, not just controlling playback
 
-## Keep Pi-hole responsive while Heimdall's data pool is busy
-
-- [ ] Confirm Thor gets a DHCP lease and Odin resolves `.technet` names during a large Syncthing
-      catch-up, now that Pi-hole's state is on the root SSD
-
-On 2026-09-26 Syncthing on Heimdall was pulling 10.5 GB of the Projects folder, and the data pool,
-a mirror with the SMR Toshiba MQ04, had I/O pressure near 90% with sync writes waiting 6-7s.
-`pihole-FTL` sat in uninterruptible disk wait, so Thor's Wi-Fi associated but never got a lease and
-Odin could not resolve names.
-
 ## Find why Thor's ActivityWatch device id keeps changing
 
 - [ ] Find why Thor's aw-server lost its device id twice, and fix what loses it
