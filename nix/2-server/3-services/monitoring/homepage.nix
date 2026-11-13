@@ -154,6 +154,15 @@
                             statusStyle = "dot";
                         };
                     }
+                    {
+                        "X-Media-Tracker" = {
+                            icon = "mdi-movie-open-outline";
+                            description = "Movie and TV Tracker and Sync Server";
+                            href = "https://media.heimdall.technet";
+                            siteMonitor = "https://media.heimdall.technet/login"; # The root redirects to the login page when signed out
+                            statusStyle = "dot";
+                        };
+                    }
                 ];
             }
             {
