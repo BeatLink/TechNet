@@ -1480,11 +1480,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794548380,
-        "narHash": "sha256-kHtKzVTyLHOHGOzyl+Ubcyfu7PtlcfUim/guOSDhxT0=",
+        "lastModified": 1794548785,
+        "narHash": "sha256-4ZbFj0YmAj3ZSJLjIs6x2OtTKbFOJJsfwi0ni1gRiaM=",
         "owner": "x-tech-laboratories",
         "repo": "X-Media-Tracker",
-        "rev": "111252ab319f66b98d44b5f19ae76dcec60b61cd",
+        "rev": "78e23c29d97f62a7e20a6f97cbf85ce329deff59",
         "type": "github"
       },
       "original": {
