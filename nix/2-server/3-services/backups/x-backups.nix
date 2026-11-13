@@ -33,8 +33,8 @@ let
         job_lock = "/run/x-backups-borg.lock";
     };
 
-    # Heimdall's and Odin's borgmatic repositories.
-    borgmaticBackup = borgBackup // {
+    # Heimdall's and Odin's repositories.
+    hostBackup = borgBackup // {
         passphrase_command = "cat /run/secrets/borg_repo_encryption_key";
         # The sources hold nested datasets, which --one-file-system would silently leave out.
         one_file_system = false;
@@ -75,7 +75,7 @@ let
             ];
         };
 
-    serverBackup = borgmaticBackup // {
+    serverBackup = hostBackup // {
         host = "heimdall.technet";
         source_paths = [
             "/Storage/Services"
@@ -90,7 +90,7 @@ let
         keep_yearly = 1;
     };
 
-    laptopBackup = borgmaticBackup // {
+    laptopBackup = hostBackup // {
         host = "odin.technet";
         # All of /Storage, which Vorta used to back up.
         source_paths = [ "/Storage" ];
@@ -145,7 +145,7 @@ in
                 serverBackup
                 // onDisk
                 // {
-                    repo = "/Storage/Files/Backups/Server/Borgmatic";
+                    repo = "/Storage/Files/Backups/Heimdall";
                     tasks = backupTasks {
                         weekday = "mon";
                         day = 8;
@@ -156,7 +156,7 @@ in
                 serverBackup
                 // remote
                 // {
-                    repo = "ssh://borg@ragnarok.technet/Storage/Backups/Server/Borgmatic";
+                    repo = "ssh://borg@ragnarok.technet/Storage/Backups/Heimdall";
                     ssh_key = "/run/secrets/borg_repo_ssh_key"; # Heimdall's own borg key, which is all the repo server authorizes
                     tasks = backupTasks {
                         weekday = "tue";
@@ -165,22 +165,22 @@ in
                     };
                 };
 
-            odin-borgmatic-on-disk =
+            odin-on-disk =
                 laptopBackup
                 // onDisk
                 // {
-                    repo = "/Storage/Files/Backups/Laptop/Borgmatic";
+                    repo = "/Storage/Files/Backups/Odin";
                     tasks = backupTasks {
                         weekday = "sun";
                         day = 2;
                         hour = 13;
                     };
                 };
-            odin-borgmatic-heimdall =
+            odin-heimdall =
                 laptopBackup
                 // remote
                 // {
-                    repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Laptop/Borgmatic";
+                    repo = "ssh://borg@heimdall.technet/Storage/Files/Backups/Odin";
                     ssh_key = "/run/secrets/borg_repo_ssh_key"; # Odin's own borg key
                     tasks = backupTasks {
                         weekday = "sun";
@@ -188,11 +188,11 @@ in
                         hour = 13;
                     };
                 };
-            odin-borgmatic-ragnarok =
+            odin-ragnarok =
                 laptopBackup
                 // remote
                 // {
-                    repo = "ssh://borg@ragnarok.technet/Storage/Backups/Laptop/Borgmatic";
+                    repo = "ssh://borg@ragnarok.technet/Storage/Backups/Odin";
                     ssh_key = "/run/secrets/borg_repo_ssh_key";
                     # The long-term copy keeps Vorta's longer history.
                     keep_daily = 30;

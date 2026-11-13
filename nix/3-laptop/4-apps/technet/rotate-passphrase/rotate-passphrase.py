@@ -227,9 +227,6 @@ HEIMDALL = "heimdall.technet"
 RAGNAROK = "ragnarok.technet"
 THOR = "thor.technet"
 
-# Ragnarok's own repository checks, which X-Backups does not schedule.
-BORG_UNITS = {RAGNAROK: ["borg-check", "borg-check-data"]}
-
 # X-Backups schedules every backup and check from Heimdall, and each host's agent holds this lock (x-backups.nix) for as long as borg runs there.
 X_BACKUPS = HEIMDALL
 X_BACKUPS_LOCK = "/run/x-backups-borg.lock"
@@ -237,10 +234,8 @@ X_BACKUPS_HOSTS = [HEIMDALL, LOCAL_HOST, RAGNAROK]
 
 
 def pause_backups():
-    """Stops X-Backups and Ragnarok's checks, then waits out any borg job still holding a host's lock, so no repository is open while it changes."""
+    """Stops X-Backups, then waits out any borg job still holding a host's lock, so no repository is open while it changes."""
     run(["systemctl", "stop", "x-backups.service"], host=X_BACKUPS, root=True)
-    for host, units in BORG_UNITS.items():
-        run(["systemctl", "stop", *[f"{unit}.timer" for unit in units], *[f"{unit}.service" for unit in units]], host=host, root=True)
     for host in X_BACKUPS_HOSTS:
         say(f"{host}: waiting for any running borg job to finish")
         run(["flock", X_BACKUPS_LOCK, "true"], host=host, root=True)
@@ -248,14 +243,12 @@ def pause_backups():
 
 
 def resume_backups():
-    """Starts X-Backups and Ragnarok's check timers again, reporting rather than stopping on a host that fails."""
-    starts = [(X_BACKUPS, ["x-backups.service"])] + [(host, [f"{unit}.timer" for unit in units]) for host, units in BORG_UNITS.items()]
-    for host, units in starts:
-        try:
-            run(["systemctl", "start", *units], host=host, root=True)
-            say(f"{host}: backups resumed")
-        except RotateError as error:
-            say(f"could not resume backups: {error}")
+    """Starts X-Backups again, reporting rather than stopping if it fails."""
+    try:
+        run(["systemctl", "start", "x-backups.service"], host=X_BACKUPS, root=True)
+        say("backups resumed")
+    except RotateError as error:
+        say(f"could not resume backups: {error}")
 
 
 # Deploying ##########################################################################################################################################
@@ -358,23 +351,23 @@ def apply_odin(new):
 
 
 def apply_server_backups(new):
-    """Heimdall's borgmatic repositories, also opened by Ragnarok's checks."""
+    """Heimdall's repositories."""
     borg_rotate(
-        [(HEIMDALL, "root", "/Storage/Files/Backups/Server/Borgmatic"), (RAGNAROK, "borg", "/Storage/Backups/Server/Borgmatic")],
-        sops_value("secrets/2-server/borgmatic.yaml", "borg_repo_encryption_key"),
+        [(HEIMDALL, "root", "/Storage/Files/Backups/Heimdall"), (RAGNAROK, "borg", "/Storage/Backups/Heimdall")],
+        sops_value("secrets/2-server/borg.yaml", "borg_repo_encryption_key"),
         new,
     )
 
 
 def apply_laptop_backups(new):
-    """Odin's borgmatic repositories."""
+    """Odin's repositories."""
     borg_rotate(
         [
-            (LOCAL_HOST, "root", "/Storage/Files/Backups/Laptop/Borgmatic"),
-            (HEIMDALL, "borg", "/Storage/Files/Backups/Laptop/Borgmatic"),
-            (RAGNAROK, "borg", "/Storage/Backups/Laptop/Borgmatic"),
+            (LOCAL_HOST, "root", "/Storage/Files/Backups/Odin"),
+            (HEIMDALL, "borg", "/Storage/Files/Backups/Odin"),
+            (RAGNAROK, "borg", "/Storage/Backups/Odin"),
         ],
-        sops_value("secrets/3-laptop/borgmatic.yaml", "borg_repo_encryption_key"),
+        sops_value("secrets/3-laptop/borg.yaml", "borg_repo_encryption_key"),
         new,
     )
 
@@ -531,18 +524,15 @@ TARGETS = {
         make=random_passphrase,
         apply=apply_server_backups,
         borg=True,
-        hosts=["Heimdall", "Ragnarok"],
-        store=[
-            ("secrets/2-server/borgmatic.yaml", "borg_repo_encryption_key"),
-            ("secrets/1-backup-server/borg-check.yaml", "borg_repo_encryption_key"),
-        ],
+        hosts=["Heimdall"],
+        store=[("secrets/2-server/borg.yaml", "borg_repo_encryption_key")],
     ),
     "laptop-backups": dict(
         make=random_passphrase,
         apply=apply_laptop_backups,
         borg=True,
         hosts=["Odin"],
-        store=[("secrets/3-laptop/borgmatic.yaml", "borg_repo_encryption_key")],
+        store=[("secrets/3-laptop/borg.yaml", "borg_repo_encryption_key")],
     ),
     "heimdall": dict(
         make=lambda: prompt_new("Heimdall's disks"),

@@ -1,6 +1,6 @@
 # Borg ###############################################################################################################################################
 #
-# The borg CLI system-wide, because borgmatic bundles its own privately and X-Monitor's monitors need it on the system PATH.
+# The borg CLI system-wide, because X-Backups' agent runs borg from the system PATH.
 #
 
 { pkgs, ... }:

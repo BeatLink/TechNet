@@ -1,7 +1,7 @@
 # Laptop Backup ######################################################################################################################################
 #
-# What X-Monitor's scheduled backups of /Storage/System need on this host: the repository key and SSH key, and the restore canary. The schedule and
-# the backup set live with the monitors in x-monitor.nix.
+# What X-Backups' backups of /Storage need on this host: the repository key and SSH key, and the restore canary. The schedule and the backup set
+# live in Heimdall's x-backups.nix.
 #
 
 {
@@ -14,13 +14,13 @@
 
         # Repository Credentials #####################################################################################################################
         {
-            sops.secrets.borg_repo_encryption_key.sopsFile = "${config.technet.secrets.path}/borgmatic.yaml";
-            sops.secrets.borg_repo_ssh_key.sopsFile = "${config.technet.secrets.path}/borgmatic.yaml";
+            sops.secrets.borg_repo_encryption_key.sopsFile = "${config.technet.secrets.path}/borg.yaml";
+            sops.secrets.borg_repo_ssh_key.sopsFile = "${config.technet.secrets.path}/borg.yaml";
         }
 
         # Restore Canary #############################################################################################################################
         {
-            # X-Monitor restores this file from the newest archive and compares it with the live one, so its content must never change.
+            # X-Backups restores this file from the newest archive and compares it with the live one, so its content must never change.
             systemd.tmpfiles.settings."Vigil-Canary"."/Storage/System/.vigil-canary".f = {
                 user = "root";
                 group = "root";

@@ -64,7 +64,7 @@
 # Heimdall alone: it is only ever used to log INTO the monitored hosts, which
 # X-Monitor does from here, so no other host needs a copy.
 #
-# Heimdall's and Odin's borgmatic backups are run and watched by X-Backups (x-backups.nix); X-Monitor only checks X-Backups' health.
+# Heimdall's and Odin's borg backups are run and watched by X-Backups (x-backups.nix); X-Monitor only checks X-Backups' health.
 #
 {
     config,

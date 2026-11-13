@@ -59,7 +59,7 @@
             extraArgs = [
                 "--ignore-root-user"
                 "--ignore"
-                "(^|/)(borg|borgmatic|syncthing|rsync|sshd|systemd.*)$"
+                "(^|/)(borg|syncthing|rsync|sshd|systemd.*)$"
             ];
         };
     };

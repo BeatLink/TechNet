@@ -2,25 +2,21 @@
 #
 # Configures the Borg Server for other devices to connect
 #
-# Only each source host's own borg key is authorized per repo. A
-# X-Monitor-triggered backup deliberately reuses that same key rather than one of
-# X-Monitor's own: X-Monitor logs into the source host as `x-monitor-access` and runs
-# `borg create` there, and borg then authenticates here as the host always has.
-# X-Monitor therefore triggers the host's backup instead of performing its own, and
-# never holds write credentials to a backup repository.
+# Only each source host's own borg key is authorized per repo. X-Backups runs `borg create` on the source host through its agent, so borg
+# authenticates here as that host, and X-Backups never holds write credentials to a backup repository.
 #
 {
     services.borgbackup.repos = {
-        laptop-borgmatic = {
+        odin = {
             authorizedKeys = [
                 "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDhnn5URZ/2Dx4yFz4E2vfKhQGViGSDRgSixehg+wUXj odin-borg-repo-borgmatic"
             ];
-            path = "/Storage/Files/Backups/Laptop/Borgmatic";
+            path = "/Storage/Files/Backups/Odin";
             group = "borg";
         };
     };
 
-    systemd.tmpfiles.settings."Borg"."/Storage/Files/Backups/Laptop".Z = {
+    systemd.tmpfiles.settings."Borg"."/Storage/Files/Backups/Odin".Z = {
         user = "borg";
         group = "borg";
         mode = "0750";

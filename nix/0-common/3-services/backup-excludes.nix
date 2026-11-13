@@ -1,7 +1,7 @@
 # Backup Exclusions ##################################################################################################################################
 #
-# The one set of borg exclude patterns every backup in the fleet applies: borgmatic on each host and X-Monitor's backup runs, which both read it
-# from here. The "Vorta Preset" groups below came from Vorta's built-in presets, from when Vorta backed up Odin.
+# The one set of borg exclude patterns every backup in the fleet applies, which X-Backups reads from here. The "Vorta Preset" groups below came
+# from Vorta's built-in presets, from when Vorta backed up Odin.
 #
 
 { lib, ... }:

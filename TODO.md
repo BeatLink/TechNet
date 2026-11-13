@@ -15,30 +15,16 @@ the `vigil-self` monitor id and the Home Assistant automation and webhook ids, w
 
 ## Confirm Odin's Ragnarok repository passes its monthly checks
 
-- [ ] Confirm X-Backups' extract check of `odin-borgmatic-ragnarok` on 2026-12-04 succeeds
+- [ ] Confirm X-Backups' extract check of `odin-ragnarok` on 2026-12-04 succeeds
 - [ ] Confirm its data check on 2026-12-11 succeeds
 
 Both last failed while the Vorta replay held that repository: the extract check on 2026-11-04 exited 2, and the
-data check on 2026-11-11 timed out on the lock of `/Storage/Backups/Laptop/Borgmatic`. Its weekly check has passed.
+data check on 2026-11-11 timed out on the lock of its repository. Its weekly check has passed.
 
 ## Finish moving the fleet to X-Backups
 
-- [ ] Find which X-Backups check is failing, through X-Backups' MCP or its API, and fix it
-- [ ] Remove Ragnarok's own `borg-check` and `borg-check-data` timers from
-      [`borg.nix`](nix/1-backup-server/1-system/borg.nix), and drop them from `BORG_UNITS` in
-      [`rotate-passphrase.py`](nix/3-laptop/4-apps/technet/rotate-passphrase/rotate-passphrase.py); X-Backups already checks
-      the same repositories
-- [ ] Rename Odin's X-Backups jobs `odin-borgmatic-{on-disk,heimdall,ragnarok}` to `odin-{on-disk,heimdall,ragnarok}`, and
-      X-Monitor's `backup-laptop-borgmatic-*` ids to match
-- [ ] Move the `Laptop/Borgmatic` repository folders on Odin, Heimdall and Ragnarok off the Borgmatic name
-- [ ] Rename what else still says Borgmatic: the `borgmatic.yaml` secrets, the `laptop-borgmatic` repository users and
-      the `borgmatic-repo-group-read` unit
 - [ ] Remove X-Monitor's borg plugin from its TypeScript port (`src/monitors/borg/`) once that port lands; X-Monitor only
       checks X-Backups' health now
-
-The job ids key history rows in X-Backups and X-Monitor, so check whether a job can keep its old key under a new name
-first. Moving a folder relocates a borg repository: pause X-Backups, move it, deploy the new serve `path` and every `repo`
-URL together through X-Nix's MCP, then resume, expecting borg's relocated-repository prompt on each client.
 
 ## Confirm the November fixes held
 

@@ -85,7 +85,7 @@
     # symlink to it. Binding over /var/lib/atticd instead makes systemd try to migrate a mountpoint and fail the unit with EBUSY.
     environment.persistence."/Storage/Services/Attic".directories = [ "/var/lib/private/atticd" ];
 
-    # Cache contents are reproducible and large; the marker keeps borgmatic's `exclude_if_present` from pulling them into the repo.
+    # Cache contents are reproducible and large; the marker keeps X-Backups' `exclude_if_present` from pulling them into the repo.
     systemd.tmpfiles.settings."Attic" = {
         "/Storage/Services/Attic".d = {
             user = "root";
