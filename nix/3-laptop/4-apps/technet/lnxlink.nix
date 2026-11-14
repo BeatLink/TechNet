@@ -58,6 +58,7 @@
                     # Assistant reaches this over MQTT.
                     exclude = [
                         "beacondb"
+                        "brightness" # Its DDC/CI poll over the AMD i2c buses blanks the LG HDMI monitor on every update_interval
                         "gpu"
                         "restful"
                         "speech_recognition"
