@@ -193,11 +193,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1794675550,
-        "narHash": "sha256-i67TG0h7+AHEnlIEObjdBVSQ4f7WBVtrJJzCRV1M6bI=",
+        "lastModified": 1794679532,
+        "narHash": "sha256-XFHACOIF8CgAaVmL9ybyuXuJeFszy+nAE2wFoZrRqjI=",
         "owner": "x-tech-laboratories",
         "repo": "CODEX",
-        "rev": "05cb749a4752e3012dfce23ca7efc10731319531",
+        "rev": "3bccabcd5f4caa1ad0ba978e048e937ac917cb26",
         "type": "github"
       },
       "original": {
@@ -1522,11 +1522,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794675665,
-        "narHash": "sha256-lWcsV7uu+Jmmp3Ban8IjhB2O7P2TmIq2hEYGLf+7IlA=",
+        "lastModified": 1794679527,
+        "narHash": "sha256-h/AUKofNMQc8TWs9DZt0ttssQAVDW4rx5rKXZUjnUUc=",
         "owner": "x-tech-laboratories",
         "repo": "X-Music",
-        "rev": "e5525b7013f35bcfb40d2a6185e751bc9098d874",
+        "rev": "47cbdbee5ec1b3e763406b25caa1bec2adf9a9a9",
         "type": "github"
       },
       "original": {
