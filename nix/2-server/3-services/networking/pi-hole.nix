@@ -67,6 +67,12 @@
         # Pi-Hole ------------------------------------------------------------------------------------------------------------------------------------
         pihole-ftl = {
             enable = true;
+            # The module reads piholePackage.src.src.tag, which pihole 6.6 no longer nests; drop once nixpkgs fixes pihole-ftl.nix
+            piholePackage = pkgs.pihole // {
+                src = pkgs.pihole.src // {
+                    inherit (pkgs.pihole) src;
+                };
+            };
             openFirewallDNS = true;
             openFirewallDHCP = true;
             lists = [
