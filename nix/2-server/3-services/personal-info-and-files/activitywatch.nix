@@ -93,6 +93,23 @@ in
                     User = "beatlink";
                     Group = "beatlink";
                     RuntimeDirectory = "aw-sync";
+                    # aw-server counts as started before it listens, so a run the timer fires while it restarts fails and rolls back a switch
+                    ExecStartPre = lib.getExe (
+                        pkgs.writeShellApplication {
+                            name = "aw-server-wait";
+                            runtimeInputs = [ pkgs.curl ];
+                            text = ''
+                                for _ in $(seq 60); do
+                                    if curl --silent --fail --output /dev/null http://127.0.0.1:${toString port}/api/0/info; then
+                                        exit 0
+                                    fi
+                                    sleep 1
+                                done
+                                echo "aw-server still not answering after 60s" >&2
+                                exit 1
+                            '';
+                        }
+                    );
                     ExecStart = [
                         "${awServer}/bin/aw-sync --port ${toString port} --sync-dir ${syncDir} sync-advanced --mode pull"
                         pullNested
