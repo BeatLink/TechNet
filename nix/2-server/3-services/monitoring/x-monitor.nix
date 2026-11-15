@@ -207,11 +207,13 @@ in
                     id = "ragnarok";
                     host = "ragnarok.technet";
                     public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGjYBeNYewJv8nRs3WSGuTses1tH5I8E6yM8KiNB++0L vigil-agent-ragnarok";
+                    run_monitors = true;
                 }
                 {
                     id = "thor";
                     host = "thor.technet";
                     public_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDVIJJMSU0UaBuBXq6o2NQBGFELXZUeaabpRftvhrXat vigil-agent-thor";
+                    run_monitors = true;
                 }
             ];
 
