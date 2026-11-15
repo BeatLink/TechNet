@@ -50,7 +50,7 @@
             inputs.nixpkgs.follows = "nixpkgs";
         };
         halon = {
-            url = "github:BeatLink/Halon";
+            url = "github:x-tech-laboratories/X-Themes";
             inputs.nixpkgs.follows = "nixpkgs";
         };
         claude-chat-manager = {
@@ -258,7 +258,7 @@
                                     gmusicbrowser.homeManagerModules.gmusicbrowser
                                     lnxlink.homeModules.default
                                     linux-sidebar.homeManagerModules.default
-                                    halon.homeManagerModules.default
+                                    halon.homeManagerModules.halon
                                     nemo-trilium.homeManagerModules.default
                                 ];
                             };
@@ -268,7 +268,7 @@
                         impermanence.nixosModules.impermanence
                         sops-nix.nixosModules.sops
                         home-manager.nixosModules.home-manager
-                        halon.nixosModules.default
+                        halon.nixosModules.halon
                         nixos-hardware.nixosModules.lenovo-ideapad-15ach6
                         ./nix/0-common
                         ./nix/3-laptop
