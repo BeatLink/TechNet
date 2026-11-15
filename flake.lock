@@ -553,16 +553,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1794675468,
-        "narHash": "sha256-K8RGK/WciWGMk3IPSGzCl68wqVyWFpoITxH/z2yGAt0=",
-        "owner": "BeatLink",
-        "repo": "Halon",
-        "rev": "ae4d6ea142be4e6193ce98851c979c91ee21df61",
+        "lastModified": 1794701740,
+        "narHash": "sha256-y7qHvpalD0RVpF8N1Xa/DAoIv6hU3F4gGMWI+fzeJas=",
+        "owner": "x-tech-laboratories",
+        "repo": "X-Themes",
+        "rev": "209993bf3d8b694753c32e463d6dfd04ecb1d6ba",
         "type": "github"
       },
       "original": {
-        "owner": "BeatLink",
-        "repo": "Halon",
+        "owner": "x-tech-laboratories",
+        "repo": "X-Themes",
         "type": "github"
       }
     },
