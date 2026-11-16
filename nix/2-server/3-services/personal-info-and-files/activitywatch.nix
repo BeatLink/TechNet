@@ -129,6 +129,8 @@ in
             users.users.beatlink.openssh.authorizedKeys.keys = [
                 ''restrict,command="${pkgs.rrsync}/bin/rrsync -wo ${syncDir}" ${thorToHeimdall}''
             ];
+            # Thor's upload would otherwise start and stop beatlink's user manager every 5 minutes, failing any switch that reloads it then
+            users.users.beatlink.linger = true;
         }
 
         # Reverse Proxy ##############################################################################################################################
