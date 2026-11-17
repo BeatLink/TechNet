@@ -1,8 +1,7 @@
 """Set MCP Token
 
-Takes an X-app's API token pasted at a hidden prompt, stores it in sops and points Claude Code's MCP server for that app at it; then commits
-and pushes; X-Nix switches Odin to the pushed commit, which puts the token in /run/secrets. Run it on Odin, as beatlink, from the root of the
-TechNet main checkout.
+Takes an MCP server's API token pasted at a hidden prompt and stores it in sops, then commits and pushes; X-Nix switches Odin to the pushed
+commit, which renders the token into Claude Code's managed MCP file. Run it on Odin, as beatlink, from the root of the TechNet main checkout.
 A token only reaches sops on stdin, every command is a fixed argument list, and anything printed passes through a filter that masks it.
 """
 
@@ -59,21 +58,20 @@ def run(argv, data=None):
 
 # Apps ###############################################################################################################################################
 
-# Each app: its name on the page, where sops keeps its token, and the MCP endpoint the token opens.
+# Each server: the app and page its token is made on, and where sops keeps the token.
 APPS = {
-    "x-fitness": dict(title="X-Fitness", file="secrets/3-laptop/x-fitness.yaml", key="x_fitness_mcp_token", url="https://fitness.heimdall.technet/api/mcp"),
-    "x-nix": dict(title="X-Nix", file="secrets/3-laptop/claude-mcp.yaml", key="x_nix_mcp_token", url="https://nix.heimdall.technet/api/mcp"),
-    "x-backups": dict(title="X-Backups", file="secrets/3-laptop/claude-mcp.yaml", key="x_backups_mcp_token", url="https://backups.heimdall.technet/api/mcp"),
-    "x-media-tracker": dict(
-        title="X-Media-Tracker", file="secrets/3-laptop/claude-mcp.yaml", key="x_media_tracker_mcp_token", url="https://media-tracker.heimdall.technet/api/mcp"
-    ),
+    "x-nix": dict(title="X-Nix", page="Your account", file="secrets/3-laptop/claude-mcp.yaml", key="x_nix_mcp_token"),
+    "x-backups": dict(title="X-Backups", page="Your account", file="secrets/3-laptop/claude-mcp.yaml", key="x_backups_mcp_token"),
+    "x-media-tracker": dict(title="X-Media-Tracker", page="Your account", file="secrets/3-laptop/claude-mcp.yaml", key="x_media_tracker_mcp_token"),
+    "trilium": dict(title="Trilium", page="Options > ETAPI", file="secrets/3-laptop/claude-mcp.yaml", key="trilium_mcp_token"),
+    "trilium-sysadmin": dict(title="Trilium Sysadmin", page="Options > ETAPI", file="secrets/3-laptop/claude-mcp.yaml", key="trilium_sysadmin_mcp_token"),
 }
 
 
 def prompt_token(app):
     """Asks for an app's token at a hidden prompt."""
     while True:
-        value = getpass.getpass(f"Paste the {app['title']} token from its Your account page (hidden): ").strip()
+        value = getpass.getpass(f"Paste the {app['title']} token from its {app['page']} page (hidden): ").strip()
         if value:
             return secret(value)
         print("Nothing was pasted; try again.")
@@ -88,17 +86,6 @@ def sops_store(file, key, value):
     if digest(secret(run(["sops", "--decrypt", "--extract", f'["{key}"]', file]))) != digest(value):
         raise TokenError(f"{file} {key} did not read back as written")
     say(f"stored {key} in {file}")
-
-
-# Claude Code ########################################################################################################################################
-
-
-def register(name, app):
-    """Points Claude Code's user-scope MCP server for an app at its endpoint, with a headers helper that reads the token from /run/secrets."""
-    subprocess.run(["claude", "mcp", "remove", "-s", "user", name], capture_output=True, check=False)
-    server = {"type": "http", "url": app["url"], "headersHelper": f"mcp-token-header {app['key']}"}
-    run(["claude", "mcp", "add-json", "-s", "user", name, json.dumps(server)])
-    say(f"registered {name} with Claude Code")
 
 
 # Landing ############################################################################################################################################
@@ -132,7 +119,7 @@ def preflight(files):
 
 
 def main(arguments):
-    """Sets the named apps' tokens, or all of them, then registers each with Claude Code and pushes."""
+    """Sets the named servers' tokens, or all of them, and pushes."""
     names = list(APPS) if arguments == ["all"] else arguments
     if not names or any(name not in APPS for name in names):
         print("Usage: set-mcp-token all | <" + "|".join(APPS) + ">...", file=sys.stderr)
@@ -144,8 +131,6 @@ def main(arguments):
         tokens = {name: prompt_token(APPS[name]) for name in names}
         for name in names:
             sops_store(APPS[name]["file"], APPS[name]["key"], tokens[name])
-        for name in names:
-            register(name, APPS[name])
         land(names, files)
         say(f"finished: {', '.join(names)}; restart Claude Code once X-Nix has switched Odin to connect")
         return 0
