@@ -67,6 +67,11 @@ in
     environment.etc."claude-code/managed-mcp.json".source =
         config.sops.templates."claude-managed-mcp.json".path;
 
+    # npm's tools act on the registry with the token in ~/.npmrc, so every call waits for approval; managed rules outrank any user allow.
+    environment.etc."claude-code/managed-settings.json".text = builtins.toJSON {
+        permissions.ask = [ "mcp__npm" ];
+    };
+
     environment.systemPackages = [
         (pkgs.writeShellApplication {
             name = "set-mcp-token";
