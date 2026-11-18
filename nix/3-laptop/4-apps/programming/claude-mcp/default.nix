@@ -71,6 +71,8 @@ in
     environment.etc."claude-code/managed-settings.json".text = builtins.toJSON {
         permissions.ask = [ "mcp__npm" ];
     };
+    # A symlink makes Claude Code watch /nix/store and balloon to gigabytes on every store change (anthropics/claude-code#98701).
+    environment.etc."claude-code/managed-settings.json".mode = "0444";
 
     environment.systemPackages = [
         (pkgs.writeShellApplication {
