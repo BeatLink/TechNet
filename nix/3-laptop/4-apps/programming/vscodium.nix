@@ -47,7 +47,6 @@
                         ".vscode-oss-shared"
                         ".claude"
                     ];
-                    files = [ ".config/npmrc" ];
                 };
             };
         };
