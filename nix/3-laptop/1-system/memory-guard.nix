@@ -15,24 +15,23 @@
             MemorySwapMax = "8G";
         };
 
-        # Build Ceiling ##############################################################################################################################
-        # Every build runs inside nix-daemon, so this caps the compilers the session ceiling never sees, and a build that hits it fails on its own.
+        # Nix Work Ceiling ###########################################################################################################################
+        # X-Nix's evaluation and every build it starts share one cap, so together they can never take more than this from the desktop.
         #
-        systemd.services.nix-daemon.serviceConfig = {
-            MemoryHigh = "45%";
-            MemoryMax = "55%";
+        systemd.slices.nix-work.sliceConfig = {
+            MemoryHigh = "30%";
+            MemoryMax = "40%";
             MemorySwapMax = "4G";
+        };
+
+        systemd.services.nix-daemon.serviceConfig = {
+            Slice = "nix-work.slice";
             # Builds inherit this, so a host-wide shortage kills a compiler before the editor or a terminal.
             OOMScoreAdjust = 500;
         };
 
-        # Evaluation Ceiling #########################################################################################################################
-        # X-Nix's nightly evaluation runs in its agent, outside nix-daemon, so it gets its own cap and dies before the desktop as the builds do.
-        #
         systemd.services.x-nix-agent.serviceConfig = {
-            MemoryHigh = "30%";
-            MemoryMax = "40%";
-            MemorySwapMax = "4G";
+            Slice = "nix-work.slice";
             OOMScoreAdjust = 500;
         };
 
@@ -49,8 +48,9 @@
         #
         services.earlyoom = {
             enable = true;
-            freeMemThreshold = 5;
-            freeMemKillThreshold = 3;
+            # Below 10 the kernel's own OOM killer fires first, because zram and the ZFS ARC hide from earlyoom's total.
+            freeMemThreshold = 10;
+            freeMemKillThreshold = 5;
             # Swap is zram, which runs out of RAM to compress into long before it reads as full, so memory alone decides.
             freeSwapThreshold = 100;
             freeSwapKillThreshold = 100;
@@ -60,6 +60,9 @@
                 "--ignore-root-user"
                 "--ignore"
                 "(^|/)(borg|syncthing|rsync|sshd|systemd.*)$"
+                # Without this, Chromium's raised score makes every editor window die before a leaking agent or compiler.
+                "--prefer"
+                "(^|/)(claude|nix|rustc|ld|cc1plus)$"
             ];
         };
     };
