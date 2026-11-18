@@ -38,6 +38,14 @@ let
             url = "http://127.0.0.1:12351/mcp";
             headers.Authorization = config.sops.placeholder.trilium_sysadmin_mcp_token;
         };
+        npm = {
+            type = "stdio";
+            command = "${pkgs.nodejs}/bin/npx";
+            args = [
+                "-y"
+                "@mikusnuz/npm-mcp@1.4.0"
+            ];
+        };
     };
 in
 {
