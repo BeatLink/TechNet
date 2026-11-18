@@ -1522,11 +1522,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794961564,
-        "narHash": "sha256-UnC0/qHGoGIPrMMsAMJDV7E6zV/GpjXswuHMUxnpX0c=",
+        "lastModified": 1794961925,
+        "narHash": "sha256-KpPWfEcZa7h25XDSdV9qvpnr8V07C/gue0anMV0zX6w=",
         "owner": "x-tech-laboratories",
         "repo": "X-Music",
-        "rev": "edfa87e7039076edb68419651613ea17afe1dc09",
+        "rev": "1fc27b976b34654410b1228a92a6e93dad66e2af",
         "type": "github"
       },
       "original": {
