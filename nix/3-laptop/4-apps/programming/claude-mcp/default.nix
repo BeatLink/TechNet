@@ -38,6 +38,14 @@ let
             url = "http://127.0.0.1:12351/mcp";
             headers.Authorization = config.sops.placeholder.trilium_sysadmin_mcp_token;
         };
+        npm = {
+            type = "stdio";
+            command = "${pkgs.nodejs}/bin/npx";
+            args = [
+                "-y"
+                "@mikusnuz/npm-mcp@1.4.0"
+            ];
+        };
     };
 in
 {
@@ -58,6 +66,11 @@ in
     # sops-nix makes no parent folders for a template path, so /etc/claude-code comes from here, linked to the rendered file.
     environment.etc."claude-code/managed-mcp.json".source =
         config.sops.templates."claude-managed-mcp.json".path;
+
+    # npm's tools act on the registry with the token in ~/.npmrc, so every call waits for approval; managed rules outrank any user allow.
+    environment.etc."claude-code/managed-settings.json".text = builtins.toJSON {
+        permissions.ask = [ "mcp__npm" ];
+    };
 
     environment.systemPackages = [
         (pkgs.writeShellApplication {
