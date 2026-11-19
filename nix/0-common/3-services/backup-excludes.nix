@@ -23,6 +23,8 @@
                 "pf:/Storage/Files/Backups"
                 "pf:/Storage/.pnpm-store"
                 "pf:/Storage/Apps/Fun/Steam/home/beatlink/.local/share/Steam/steamapps/common"
+                "re:^Storage/Apps/Fun/Heroic/home/beatlink/Games/Heroic/(?!Prefixes(/|$))"
+                "pf:/Storage/Apps/Fun/Heroic/home/beatlink/.config/heroic/tools"
 
                 # Regenerable App Data ###############################################################################################################
                 "fm:*/.stremio-server/stremio-cache"
