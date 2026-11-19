@@ -16,6 +16,21 @@ let
         "wikidata_mcp_token"
     ];
     bearer = token: { Authorization = "Bearer ${config.sops.placeholder.${token}}"; };
+
+    # ProfessionalWiki's MediaWiki server, built from the lockfile in ./mediawiki rather than fetched by npx, so it can be patched.
+    # Its mwn client sends maxlag=5 on every request, and Wikidata counts its query service's lag (often 10 s or more) against that, so even reads
+    # fail for hours at a time. The patch drops maxlag from reads and raises it to 30 s for writes, which are the requests that carry a CSRF token;
+    # every write is approved by hand, so they are never the high-volume traffic maxlag exists to slow down.
+    mediawikiModules = pkgs.importNpmLock.buildNodeModules {
+        npmRoot = ./mediawiki;
+        inherit (pkgs) nodejs;
+        derivationArgs.postInstall = ''
+            substituteInPlace $out/node_modules/@professional-wiki/mediawiki-mcp-server/dist/wikis/mwnProvider.js \
+                --replace-fail "const instance = this.createMwn(options);" \
+                    "const instance = this.createMwn(options); const request = instance.request.bind(instance); instance.request = (params, opts) => request({ maxlag: params.token ? 30 : undefined, ...params }, opts);"
+        '';
+    };
+
     servers = {
         x-nix = {
             url = "https://nix.heimdall.technet/api/mcp";
@@ -47,14 +62,11 @@ let
                 "@mikusnuz/npm-mcp@1.4.0"
             ];
         };
-        # ProfessionalWiki's MediaWiki server reads its wikis and their tokens from a config file, rendered from sops below.
+        # The MediaWiki server reads its wikis and their tokens from a config file, rendered from sops below.
         mediawiki = {
             type = "stdio";
-            command = "${pkgs.nodejs}/bin/npx";
-            args = [
-                "-y"
-                "@professional-wiki/mediawiki-mcp-server@0.21.0"
-            ];
+            command = "${pkgs.nodejs}/bin/node";
+            args = [ "${mediawikiModules}/node_modules/@professional-wiki/mediawiki-mcp-server/dist/index.js" ];
             env.CONFIG = config.sops.templates."mediawiki-mcp.json".path;
         };
     };
