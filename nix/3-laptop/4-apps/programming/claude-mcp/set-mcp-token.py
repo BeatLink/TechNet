@@ -65,9 +65,7 @@ APPS = {
     "x-media-tracker": dict(title="X-Media-Tracker", page="Your account", file="secrets/3-laptop/claude-mcp.yaml", key="x_media_tracker_mcp_token"),
     "trilium": dict(title="Trilium", page="Options > ETAPI", file="secrets/3-laptop/claude-mcp.yaml", key="trilium_mcp_token"),
     "trilium-sysadmin": dict(title="Trilium Sysadmin", page="Options > ETAPI", file="secrets/3-laptop/claude-mcp.yaml", key="trilium_sysadmin_mcp_token"),
-    # An owner-only OAuth 2 consumer proposed on Meta-Wiki works on every Wikimedia wiki, so the same token can serve both.
     "wikidata": dict(title="Wikidata", page="Meta-Wiki Special:OAuthConsumerRegistration", file="secrets/3-laptop/claude-mcp.yaml", key="wikidata_mcp_token"),
-    "test-wikidata": dict(title="Test Wikidata", page="Meta-Wiki Special:OAuthConsumerRegistration", file="secrets/3-laptop/claude-mcp.yaml", key="test_wikidata_mcp_token"),
 }
 
 
