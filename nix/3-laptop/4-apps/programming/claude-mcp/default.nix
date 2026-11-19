@@ -13,8 +13,16 @@ let
         "x_media_tracker_mcp_token"
         "trilium_mcp_token"
         "trilium_sysadmin_mcp_token"
+        "wikidata_mcp_token"
+        "test_wikidata_mcp_token"
     ];
     bearer = token: { Authorization = "Bearer ${config.sops.placeholder.${token}}"; };
+    wikimedia = sitename: server: token: {
+        inherit sitename server;
+        articlepath = "/wiki";
+        scriptpath = "/w";
+        token = config.sops.placeholder.${token};
+    };
     servers = {
         x-nix = {
             url = "https://nix.heimdall.technet/api/mcp";
@@ -46,6 +54,16 @@ let
                 "@mikusnuz/npm-mcp@1.4.0"
             ];
         };
+        # ProfessionalWiki's MediaWiki server reads its wikis and their tokens from a config file, rendered from sops below.
+        mediawiki = {
+            type = "stdio";
+            command = "${pkgs.nodejs}/bin/npx";
+            args = [
+                "-y"
+                "@professional-wiki/mediawiki-mcp-server@0.21.0"
+            ];
+            env.CONFIG = config.sops.templates."mediawiki-mcp.json".path;
+        };
     };
 in
 {
@@ -60,6 +78,19 @@ in
         owner = "beatlink";
         content = builtins.toJSON {
             mcpServers = builtins.mapAttrs (_: server: { type = "http"; } // server) servers;
+        };
+    };
+
+    # Test Wikidata is the default, so an edit that names no wiki lands on the sandbox rather than on Wikidata itself.
+    sops.templates."mediawiki-mcp.json" = {
+        owner = "beatlink";
+        content = builtins.toJSON {
+            defaultWiki = "test.wikidata.org";
+            allowWikiManagement = false;
+            wikis = {
+                "www.wikidata.org" = wikimedia "Wikidata" "https://www.wikidata.org" "wikidata_mcp_token";
+                "test.wikidata.org" = wikimedia "Test Wikidata" "https://test.wikidata.org" "test_wikidata_mcp_token";
+            };
         };
     };
 
