@@ -100,7 +100,25 @@ in
 
     # npm's tools act on the registry with the token in ~/.npmrc, so every call waits for approval; managed rules outrank any user allow.
     environment.etc."claude-code/managed-settings.json".text = builtins.toJSON {
-        permissions.ask = [ "mcp__npm" ];
+        permissions.ask = [
+            "mcp__npm"
+        ]
+        # MediaWiki's reads run freely, but every tool it does not mark read-only waits, so each wiki edit is approved after reading it.
+        ++ map (tool: "mcp__mediawiki__${tool}") [
+            "add-wiki"
+            "create-page"
+            "delete-page"
+            "move-page"
+            "oauth-logout"
+            "protect-page"
+            "remove-wiki"
+            "undelete-page"
+            "update-file"
+            "update-file-from-url"
+            "update-page"
+            "upload-file"
+            "upload-file-from-url"
+        ];
     };
     # A symlink makes Claude Code watch /nix/store and balloon to gigabytes on every store change (anthropics/claude-code#98701).
     environment.etc."claude-code/managed-settings.json".mode = "0444";
