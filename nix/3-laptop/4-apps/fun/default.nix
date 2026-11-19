@@ -5,6 +5,7 @@
         ./ckan.nix
         ./freetube.nix
         ./gmusicbrowser.nix
+        ./heroic.nix
         ./itch.nix
         ./lmms.nix
         ./newsflash.nix
