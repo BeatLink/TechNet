@@ -1,0 +1,8 @@
+{
+    "name": "mediawiki-mcp",
+    "version": "0.21.0",
+    "private": true,
+    "dependencies": {
+        "@professional-wiki/mediawiki-mcp-server": "0.21.0"
+    }
+}
