@@ -14,15 +14,8 @@ let
         "trilium_mcp_token"
         "trilium_sysadmin_mcp_token"
         "wikidata_mcp_token"
-        "test_wikidata_mcp_token"
     ];
     bearer = token: { Authorization = "Bearer ${config.sops.placeholder.${token}}"; };
-    wikimedia = sitename: server: token: {
-        inherit sitename server;
-        articlepath = "/wiki";
-        scriptpath = "/w";
-        token = config.sops.placeholder.${token};
-    };
     servers = {
         x-nix = {
             url = "https://nix.heimdall.technet/api/mcp";
@@ -81,15 +74,17 @@ in
         };
     };
 
-    # Test Wikidata is the default, so an edit that names no wiki lands on the sandbox rather than on Wikidata itself.
     sops.templates."mediawiki-mcp.json" = {
         owner = "beatlink";
         content = builtins.toJSON {
-            defaultWiki = "test.wikidata.org";
+            defaultWiki = "www.wikidata.org";
             allowWikiManagement = false;
-            wikis = {
-                "www.wikidata.org" = wikimedia "Wikidata" "https://www.wikidata.org" "wikidata_mcp_token";
-                "test.wikidata.org" = wikimedia "Test Wikidata" "https://test.wikidata.org" "test_wikidata_mcp_token";
+            wikis."www.wikidata.org" = {
+                sitename = "Wikidata";
+                server = "https://www.wikidata.org";
+                articlepath = "/wiki";
+                scriptpath = "/w";
+                token = config.sops.placeholder.wikidata_mcp_token;
             };
         };
     };
