@@ -109,6 +109,10 @@ in
             "create-page"
             "delete-page"
             "move-page"
+            "neowiki-create-subject"
+            "neowiki-delete-subject"
+            "neowiki-set-main-subject"
+            "neowiki-update-subject"
             "oauth-logout"
             "protect-page"
             "remove-wiki"
@@ -118,6 +122,8 @@ in
             "update-page"
             "upload-file"
             "upload-file-from-url"
+            "wikibase-add-statement"
+            "wikibase-edit-entity"
         ];
     };
     # A symlink makes Claude Code watch /nix/store and balloon to gigabytes on every store change (anthropics/claude-code#98701).
