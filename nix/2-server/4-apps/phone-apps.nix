@@ -253,6 +253,10 @@ in
         # Pix ----------------------------------------------------------------------------------------------------------------------------------------
         {
             environment.systemPackages = [ pkgs.pix ];
+            home-manager.users.beatlink.dconf.settings."org/x/pix/browser" = {
+                sort-type = "file::size";
+                sort-inverse = false;
+            };
         }
         (persist "Pix" [ ".config/pix" ])
 
