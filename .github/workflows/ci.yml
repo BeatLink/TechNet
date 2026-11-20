@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - name: Evaluate every host
+        run: nix flake check --no-build --all-systems
+
+  build:
+    needs: check
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - host: Heimdall
+            system: x86_64-linux
+            runner: ubuntu-latest
+          - host: Odin
+            system: x86_64-linux
+            runner: ubuntu-latest
+          - host: Ragnarok
+            system: aarch64-linux
+            runner: ubuntu-24.04-arm
+          - host: Thor
+            system: aarch64-linux
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+      # A host's closure is tens of GiB unpacked, more than a stock runner has free
+      - uses: wimpysworld/nothing-but-nix@v12
+      - uses: cachix/install-nix-action@v31
+        with:
+          extra_nix_config: |
+            extra-substituters = https://claude-code.cachix.org
+            extra-trusted-public-keys = claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk=
+      - name: Build ${{ matrix.host }}
+        run: nix build --keep-going --no-link ".#checks.${{ matrix.system }}.${{ matrix.host }}"

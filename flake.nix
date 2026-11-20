@@ -289,5 +289,28 @@
                     ];
                 };
             };
+
+            # What CI builds: each host's system, under the platform it runs on
+            checks =
+                let
+                    toplevel = host: host.config.system.build.toplevel;
+                in
+                {
+                    x86_64-linux = {
+                        Heimdall = toplevel self.nixosConfigurations.Heimdall;
+                        Odin = toplevel (
+                            self.nixosConfigurations.Odin.extendModules {
+                                modules = [
+                                    # Packet Tracer's installer is added to the store by hand (docs/odin.md), so a runner cannot build it
+                                    { nixpkgs.overlays = [ (_final: prev: { cisco-packet-tracer_9 = prev.emptyDirectory; }) ]; }
+                                ];
+                            }
+                        );
+                    };
+                    aarch64-linux = {
+                        Ragnarok = toplevel self.nixosConfigurations.Ragnarok;
+                        Thor = toplevel self.nixosConfigurations.Thor;
+                    };
+                };
         };
 }
