@@ -19,6 +19,7 @@
                     downloadSelfUpdates = true;
                     offlineMode = false;
                     isolateApps = true;
+                    linuxSandboxType = "bubblewrap";
                     closeToTray = true;
                     readyNotification = true;
                     showAdvanced = false;
