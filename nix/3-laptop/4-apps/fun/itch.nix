@@ -18,17 +18,18 @@
                     defaultInstallLocation = "appdata";
                     downloadSelfUpdates = true;
                     offlineMode = false;
-                    isolateApps = false;
+                    isolateApps = true;
                     closeToTray = true;
                     readyNotification = true;
                     showAdvanced = false;
                     openAtLogin = false;
                     openAsHidden = false;
-                    manualGameUpdates = false;
+                    manualGameUpdates = true;
                     preventDisplaySleep = true;
                     preferOptimizedPatches = false;
                     disableBrowser = false;
-                    enableTabs = false;
+                    disableHardwareAcceleration = false;
+                    enableTabs = true;
                 }
             );
         in
