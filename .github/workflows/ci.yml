@@ -12,16 +12,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: cachix/install-nix-action@v31
-      - name: Evaluate every host
-        run: nix flake check --no-build --all-systems
-
+  # Each host is evaluated on a runner of its own platform, since Thor's evaluation reads a file out of an aarch64 source (nix/5-phone/1-system/gnss.nix)
   build:
-    needs: check
     strategy:
       fail-fast: false
       matrix:
@@ -48,5 +40,7 @@ jobs:
           extra_nix_config: |
             extra-substituters = https://claude-code.cachix.org
             extra-trusted-public-keys = claude-code.cachix.org-1:YeXf2aNu7UTX8Vwrze0za1WEDS+4DuI2kVeWEE4fsRk=
+      - name: Evaluate ${{ matrix.host }}
+        run: nix eval --raw ".#checks.${{ matrix.system }}.${{ matrix.host }}.drvPath"
       - name: Build ${{ matrix.host }}
         run: nix build --keep-going --no-link ".#checks.${{ matrix.system }}.${{ matrix.host }}"
