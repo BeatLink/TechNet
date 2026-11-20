@@ -309,7 +309,18 @@
                     };
                     aarch64-linux = {
                         Ragnarok = toplevel self.nixosConfigurations.Ragnarok;
-                        Thor = toplevel self.nixosConfigurations.Thor;
+                        Thor = toplevel (
+                            self.nixosConfigurations.Thor.extendModules {
+                                modules = [
+                                    # QFirehose's only download host is gone and its source survives only in Attic, which a runner cannot reach
+                                    {
+                                        nixpkgs.overlays = nixpkgs.lib.mkAfter [
+                                            (_final: prev: { pinephone-qfirehose = prev.emptyDirectory; })
+                                        ];
+                                    }
+                                ];
+                            }
+                        );
                     };
                 };
         };
