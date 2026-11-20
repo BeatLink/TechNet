@@ -48,10 +48,5 @@
 
                 };
             };
-
-            dconf.settings."org/x/pix/browser" = {
-                sort-type = "file::size";
-                sort-inverse = false;
-            };
         };
 }
