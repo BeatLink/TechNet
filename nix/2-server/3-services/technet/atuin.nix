@@ -25,15 +25,30 @@
 
         # Database ###################################################################################################################################
         {
-            # The root SSD, not the data pool: this is SQLite-shaped 8K page writes, which a 1M recordsize with copies=2 turns into megabytes each.
-            environment.persistence."/persistent".directories = [
-                {
-                    directory = "/var/lib/postgresql";
+            services.postgresql.dataDir = "/Storage/Services/PostgreSQL/${config.services.postgresql.package.psqlSchema}";
+
+            # Its own hand-made dataset with recordsize=16K, so an 8K page write does not rewrite a whole 128K record.
+            fileSystems."/Storage/Services/PostgreSQL" = {
+                device = "data-pool-Heimdall/storage/postgresql";
+                fsType = "zfs";
+                options = [
+                    "zfsutil"
+                    "nofail"
+                ];
+            };
+
+            systemd.tmpfiles.settings."PostgreSQL" = {
+                "/Storage/Services/PostgreSQL".d = {
                     user = "postgres";
                     group = "postgres";
                     mode = "0750";
-                }
-            ];
+                };
+                "${config.services.postgresql.dataDir}".d = {
+                    user = "postgres";
+                    group = "postgres";
+                    mode = "0750";
+                };
+            };
         }
     ];
 }

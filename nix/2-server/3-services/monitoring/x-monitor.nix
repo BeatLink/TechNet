@@ -676,7 +676,7 @@ in
                                                     id = "heimdall-disk-io-root";
                                                     type = "disk_io";
                                                     interval = "30s";
-                                                    device = "/dev/disk/by-id/ata-Dogfish_SSD_64GB_5E56255506071556041"; # root-pool-Heimdall
+                                                    device = "/dev/disk/by-id/nvme-SAMSUNG_MZALQ256HAJD-000L2_S4ULNF0NB92732"; # root-pool-Heimdall
                                                     agent = "heimdall";
                                                 }
                                                 {

@@ -25,13 +25,14 @@ the move.
 | Backup drive | 5 TB 2.5" SATA HDD, `ST5000LM000`  | `wwn-0x5000c500e81e231d`         |
 
 The laptop has three SATA ports: the internal 2.5" bay, the DVD-bay caddy and
-the M.2 slot. The backup drive is 15 mm thick and fits neither bay, so it stays
-in its USB adapter, a Sabrent JMicron JMS576 `152d:0576`.
+the M.2 slot. The SSD sits on internal SATA. The backup drive is 15 mm thick
+and fits neither bay, so it runs over USB in a Sabrent JMicron enclosure,
+`152d:0583`, the one that held the root SSD on the Rock64.
 [`hardware-configuration.nix`](../nix/1-backup-server/1-system/hardware-configuration.nix)
-keeps the settings that adapter needed on the Rock64: the plain usb-storage
-protocol, slower USB setup, a three-minute command timeout. It also keeps the
-rules for the root SSD's enclosure, `152d:0583`; they match on USB ids, so they
-do nothing once the SSD sits on an internal SATA port.
+gives that enclosure a three-minute command timeout, because the shingled drive
+pauses for long stretches while rewriting, and leaves it on UAS. The drive's
+adapter from the Rock64, a JMS576 `152d:0576`, and the spare JMS561U enclosure
+keep their entries there so they stay usable.
 
 | Part     | Device                        | Driver  |
 | -------- | ----------------------------- | ------- |
