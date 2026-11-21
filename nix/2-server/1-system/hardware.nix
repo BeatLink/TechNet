@@ -6,6 +6,8 @@
                 "ahci"
                 "nvme"
                 "sd_mod"
+                "usb_storage" # The root drive sits in a USB enclosure; without these the initrd cannot see it and the root pool import fails
+                "uas"
                 "rtsx_pci_sdmmc"
             ];
         };
