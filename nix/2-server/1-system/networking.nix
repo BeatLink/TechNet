@@ -26,10 +26,14 @@
         # a peer may legitimately be down or still locked itself.
         probe.address = "192.168.0.1";
         reconfigureLinks = [
-            "enp2s0f1"
+            "lan0"
             "wireguard0"
         ];
-        kernelModules = [ "r8169" ]; # Ethernet NIC driver
+        # Ethernet NIC drivers: Intel onboard and Realtek
+        kernelModules = [
+            "e1000e"
+            "r8169"
+        ];
     };
 
     # Prevents conflicts with pihole
@@ -55,14 +59,14 @@
         firewall = {
             allowedUDPPorts = [ 51820 ]; # Allows Wireguard on Firewall
             extraCommands = ''
-                iptables -t nat -A POSTROUTING -o enp2s0f1 -j MASQUERADE
-                ip46tables -A FORWARD -i enp2s0f1 -o wireguard0 -j ACCEPT
+                iptables -t nat -A POSTROUTING -o lan0 -j MASQUERADE
+                ip46tables -A FORWARD -i lan0 -o wireguard0 -j ACCEPT
                 ip46tables -A FORWARD -i wireguard0 -j ACCEPT
             '';
             #flush the chain then remove it
             extraStopCommands = ''
-                iptables -t nat -D POSTROUTING -o enp2s0f1 -j MASQUERADE
-                ip46tables -D FORWARD -i enp2s0f1 -o wireguard0 -j ACCEPT
+                iptables -t nat -D POSTROUTING -o lan0 -j MASQUERADE
+                ip46tables -D FORWARD -i lan0 -o wireguard0 -j ACCEPT
                 ip46tables -D FORWARD -i wireguard0 -j ACCEPT
             '';
             trustedInterfaces = [ "wireguard0" ];
@@ -81,6 +85,14 @@
 
     systemd = {
         network = {
+            # Named by type, not by PCI slot, so the address and firewall rules follow the wired NIC onto different hardware
+            links."01-lan" = {
+                matchConfig = {
+                    Type = "ether";
+                    Kind = "!*";
+                };
+                linkConfig.Name = "lan0";
+            };
             netdevs."01-wireguard" = {
                 netdevConfig = {
                     Kind = "wireguard";
@@ -202,8 +214,8 @@
                 ];
             };
             networks = {
-                "01-enp2s0f1" = {
-                    matchConfig.Name = "enp2s0f1";
+                "01-lan0" = {
+                    matchConfig.Name = "lan0";
                     address = [ "192.168.0.2/24" ];
                     gateway = [ "192.168.0.1" ];
                     linkConfig.RequiredForOnline = "routable";

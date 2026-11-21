@@ -4,6 +4,7 @@
             availableKernelModules = [
                 "xhci_pci"
                 "ahci"
+                "nvme"
                 "sd_mod"
                 "rtsx_pci_sdmmc"
             ];

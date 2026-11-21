@@ -2534,7 +2534,7 @@ in
     # Ragnarok and Thor need to reach 9611 — over WireGuard, and on the LAN,
     # where split DNS sends them at home. Browsers keep using the TLS vhost below.
     networking.firewall.interfaces."wireguard0".allowedTCPPorts = [ 9611 ];
-    networking.firewall.interfaces.enp2s0f1.allowedTCPPorts = [ 9611 ];
+    networking.firewall.interfaces.lan0.allowedTCPPorts = [ 9611 ];
 
     nginx-vhosts.x-monitor = {
         domain = "monitor.heimdall.technet";

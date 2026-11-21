@@ -14,7 +14,7 @@
     # wireguard0, a trusted interface. Authentication and the per-user ACLs in
     # broker.nix are what stand between a client and the topic tree, not the
     # firewall.
-    networking.firewall.interfaces.enp2s0f1.allowedTCPPorts = [ 8883 ];
+    networking.firewall.interfaces.lan0.allowedTCPPorts = [ 8883 ];
 
     services.nginx.streamConfig = ''
         server {
