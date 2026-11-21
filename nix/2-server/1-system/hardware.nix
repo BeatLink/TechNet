@@ -6,7 +6,7 @@
                 "ahci"
                 "nvme"
                 "sd_mod"
-                "usb_storage" # The root drive sits in a USB enclosure; without these the initrd cannot see it and the root pool import fails
+                "usb_storage" # Unused by the internal NVMe root; kept so the root drive can still boot from a USB enclosure
                 "uas"
                 "rtsx_pci_sdmmc"
             ];
