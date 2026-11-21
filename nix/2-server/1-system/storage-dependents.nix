@@ -31,6 +31,7 @@
                         "pihole-ftl"
                         "pihole-ftl-setup"
                         "pihole-gravity"
+                        "postgresql"
                         "qbittorrent"
                         "radicale"
                         "syncthing"

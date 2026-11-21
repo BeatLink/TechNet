@@ -138,7 +138,8 @@ Heimdall runs [Atuin](../nix/2-server/3-services/technet/atuin.nix) at
 `https://atuin.heimdall.technet/` as the fleet's shell history store. Every host
 records `beatlink` and `root` shell commands into it end-to-end encrypted, so
 Ctrl-R on any host searches the whole fleet's history. Plain `HISTFILE` is left
-in place alongside it and still backs the up-arrow.
+in place alongside it and still backs the up-arrow. Its Postgres instance, which
+Comet shares, keeps its data on the data pool at `/Storage/Services/PostgreSQL/16`.
 
 Registration is not declarative, and the server refuses it by default. Open it
 for one call, register, then take the override away:
