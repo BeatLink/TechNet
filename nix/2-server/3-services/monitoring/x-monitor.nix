@@ -664,19 +664,11 @@ in
                                             children = [
                                                 {
                                                     # One monitor per drive, because the plugin charts a single device and an unpinned one picks whichever is busiest.
-                                                    name = "Disk I/O (Data 1)";
-                                                    id = "heimdall-disk-io";
-                                                    type = "disk_io";
-                                                    interval = "30s";
-                                                    device = "/dev/disk/by-id/ata-TOSHIBA_MQ04ABF100_18BPSDNPS"; # One half of the data-pool mirror
-                                                    agent = "heimdall";
-                                                }
-                                                {
-                                                    name = "Disk I/O (Data 2)";
+                                                    name = "Disk I/O (Data)";
                                                     id = "heimdall-disk-io-data2";
                                                     type = "disk_io";
                                                     interval = "30s";
-                                                    device = "/dev/disk/by-id/ata-ADATA_SU720_2K442LSNKEEX"; # The mirror's other half, an SSD, so reads land here and not on the spinning half
+                                                    device = "/dev/disk/by-id/ata-ADATA_SU720_2K442LSNKEEX"; # data-pool-Heimdall
                                                     agent = "heimdall";
                                                 }
                                                 {
