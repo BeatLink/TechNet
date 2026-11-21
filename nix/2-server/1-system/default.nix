@@ -6,6 +6,8 @@
         ./storage-dependents.nix
         ./software.nix
         ./networking.nix
+        ./wifi.nix
+        ./serial-console.nix
         ./utilities.nix
         ./sound.nix
         ./display.nix
