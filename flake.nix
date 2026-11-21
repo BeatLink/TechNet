@@ -309,9 +309,17 @@
                 let
                     inherit (nixpkgs) lib;
                     ciModules = {
-                        # Packet Tracer's installer is added to the store by hand (docs/odin.md), so a runner cannot build it
                         Odin = [
-                            { nixpkgs.overlays = [ (_final: prev: { cisco-packet-tracer_9 = prev.emptyDirectory; }) ]; }
+                            {
+                                nixpkgs.overlays = lib.mkAfter [
+                                    (_final: prev: {
+                                        # Packet Tracer's installer is added to the store by hand (docs/odin.md), so a runner cannot build it
+                                        cisco-packet-tracer_9 = prev.emptyDirectory;
+                                        # The pinned Millennium's Bun dependencies no longer fetch to their recorded hash; only Attic still holds them
+                                        millennium-steam = prev.steam;
+                                    })
+                                ];
+                            }
                         ];
                         # QFirehose's only download host is gone and its source survives only in Attic, which a runner cannot reach
                         Thor = [
