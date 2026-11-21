@@ -32,7 +32,7 @@
         };
     };
 
-    networking.firewall.interfaces.enp2s0f1.allowedTCPPorts = [ 5055 ];
+    networking.firewall.interfaces.lan0.allowedTCPPorts = [ 5055 ];
 
     environment.persistence."/Storage/Services/Traccar".directories = [ "/var/lib/private/traccar" ];
 
