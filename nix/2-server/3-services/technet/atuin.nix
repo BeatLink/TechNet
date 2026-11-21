@@ -27,6 +27,16 @@
         {
             services.postgresql.dataDir = "/Storage/Services/PostgreSQL/${config.services.postgresql.package.psqlSchema}";
 
+            # Its own hand-made dataset with recordsize=16K, so an 8K page write does not rewrite a whole 128K record.
+            fileSystems."/Storage/Services/PostgreSQL" = {
+                device = "data-pool-Heimdall/storage/postgresql";
+                fsType = "zfs";
+                options = [
+                    "zfsutil"
+                    "nofail"
+                ];
+            };
+
             systemd.tmpfiles.settings."PostgreSQL" = {
                 "/Storage/Services/PostgreSQL".d = {
                     user = "postgres";
