@@ -44,9 +44,11 @@ networks once the system has booted, with a higher route metric than `lan0`, so
 Wi-Fi only carries traffic when the wired link is down. It does not run in the
 initrd.
 
-The hardware clock is not trustworthy: the machine has booted with the date
-set to 2019 and only corrects itself once NTP answers. Units that need a valid
-date before then, such as `unbound-root-hints`, can fail on such a boot.
+On its first boot here the hardware clock read 2019-12-17, almost seven years
+behind, and units that need a valid date early, such as `unbound-root-hints`,
+failed. NTP corrected the system time and the kernel wrote it back to the
+hardware clock. If the wrong date returns after the machine has been unplugged,
+the CMOS battery is flat and needs replacing.
 
 ## Role in the network
 
