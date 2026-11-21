@@ -288,7 +288,11 @@ closes that gap: daily, it downloads the release asset for whatever revision the
 flake has locked, imports it, and pushes the three kernel outputs into Attic.
 The fleet then substitutes the kernel from Heimdall at LAN speed. It only
 downloads when the paths are absent from the store, so this is a cost per kernel
-bump rather than a daily one.
+bump rather than a daily one. A commit that has no release of its own, such as
+one made while the kernel repository's CI was not running, falls back to the
+newest release, which only succeeds if that release holds the exact same paths.
+The timer keeps a fixed random delay, so a switch's reload cannot fire it
+mid-switch.
 
 ## Unlocking
 
