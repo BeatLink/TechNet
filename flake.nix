@@ -298,6 +298,7 @@
                 {
                     x86_64-linux = {
                         Heimdall = toplevel self.nixosConfigurations.Heimdall;
+                        Ragnarok = toplevel self.nixosConfigurations.Ragnarok;
                         Odin = toplevel (
                             self.nixosConfigurations.Odin.extendModules {
                                 modules = [
@@ -308,7 +309,6 @@
                         );
                     };
                     aarch64-linux = {
-                        Ragnarok = toplevel self.nixosConfigurations.Ragnarok;
                         Thor = toplevel (
                             self.nixosConfigurations.Thor.extendModules {
                                 modules = [
