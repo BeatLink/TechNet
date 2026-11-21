@@ -1,8 +1,8 @@
-# Builds Ragnarok's Tow-Boot firmware with personal overrides layered on the
+# Builds the Rock64's Tow-Boot firmware with personal overrides layered on the
 # rock64-pinephone-fixes branch. Not part of the NixOS closure; the image is
-# written to the SD card out-of-band per docs/ragnarok.md:
+# written to the SD card out-of-band per docs/rock64.md:
 #
-#   nix-build nix/1-backup-server/firmware.nix -A pine64-rock64
+#   nix-build nix/6-rock64/firmware.nix -A pine64-rock64
 {
     src ? null,
 }:

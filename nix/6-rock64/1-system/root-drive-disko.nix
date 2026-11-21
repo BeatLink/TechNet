@@ -1,0 +1,37 @@
+# Root Drive #########################################################################################################################################
+#
+# The layout of the drive holding the system. The board has no drive of its own any more: the SSD it booted from moved to the Acer with Ragnarok.
+#
+
+{ lib, ... }:
+{
+    config = lib.mkMerge [
+
+        # Disko Target ###############################################################################################################################
+        # btrfs on LUKS rather than a ZFS pool: the A53 has aes and pmull, but OpenZFS carries its own crypto and never calls the kernel crypto API, so its
+        # AES-GCM runs as generic C and took 53% of this board's CPU. dm-crypt does reach the instructions -- `cryptsetup benchmark` here reads aes-xts-256
+        # at 142/92 MiB/s where aes-cbc manages 31 on the same run.
+        {
+            technet.storage = {
+                backend = "btrfs-luks";
+                zfsDataPool = false; # No data drive is attached
+            };
+
+            # A placeholder: set this to the by-id path of the drive the board gets before installing
+            disko.devices.disk.root-drive.device = "/dev/disk/by-id/rock64-root-drive-not-chosen";
+        }
+
+        # Swap Partition #############################################################################################################################
+        # The shared layout is the ESP then a container sized to the remainder; disko places the ESP at priority 1000 and a 100% partition at 9001, so this sits between.
+        {
+            disko.devices.disk.root-drive.content.partitions.swap = {
+                priority = 2000;
+                size = "16G";
+                content = {
+                    type = "swap";
+                    randomEncryption = true; # A fresh dm-crypt key every boot: nothing to store or unlock, and the kernel line already carries nohibernate
+                };
+            };
+        }
+    ];
+}
