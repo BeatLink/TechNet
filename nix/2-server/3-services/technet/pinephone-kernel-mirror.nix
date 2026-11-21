@@ -22,8 +22,9 @@ let
         map (name: builtins.unsafeDiscardStringContext kernel.${name}.outPath) kernel.outputs
     );
 
-    # The release tag carries the commit, so the locked input revision is the whole address; no API call and no "latest" to race against.
-    releaseUrl = "https://github.com/BeatLink/PinePhoneKernel/releases/download/cache-${inputs.pinephone-kernel.rev}/binary-cache.tar.zst";
+    releases = "https://github.com/BeatLink/PinePhoneKernel/releases";
+    releaseUrl = "${releases}/download/cache-${inputs.pinephone-kernel.rev}/binary-cache.tar.zst";
+    latestReleaseUrl = "${releases}/latest/download/binary-cache.tar.zst";
 
     cacheKey = "pinephone-kernel-1:Bh9JYKdNDBNwefy+ZrjHKjVUR453bPDXRMZ+kO9K33w=";
 in
@@ -52,11 +53,14 @@ in
             if nix path-info ${kernelPaths} > /dev/null 2>&1; then
                 echo "kernel already in the local store, skipping the download"
             else
+                archive="$CACHE_DIRECTORY/binary-cache.tar.zst"
                 unpacked="$CACHE_DIRECTORY/binary-cache"
                 rm -rf "$unpacked" && mkdir -p "$unpacked"
-                curl -fsSL ${releaseUrl} | tar -x --zstd -C "$unpacked"
+                # A commit whose CI did not run has no release of its own; nix copy still refuses a newest release without these exact paths.
+                curl -fsSL -o "$archive" ${releaseUrl} || curl -fsSL -o "$archive" ${latestReleaseUrl}
+                tar -x --zstd -f "$archive" -C "$unpacked"
                 nix copy --from "file://$unpacked" --extra-trusted-public-keys "${cacheKey}" ${kernelPaths}
-                rm -rf "$unpacked"
+                rm -rf "$unpacked" "$archive"
             fi
 
             attic push technet ${kernelPaths}
@@ -67,5 +71,7 @@ in
     systemd.timers.pinephone-kernel-mirror.timerConfig = {
         Persistent = true;
         RandomizedDelaySec = "1h";
+        # Without it every switch re-rolls the delay and can fire the mirror mid-switch, which fails the switch.
+        FixedRandomDelay = true;
     };
 }
