@@ -11,7 +11,9 @@ dialling in to Heimdall.
 
 It ran on a Pine64 Rock64 until the Acer, which had been Heimdall, took the
 role over. Both drives moved across as they were, so the disk layout and much
-of the history on this page come from the Rock64.
+of the history on this page come from the Rock64. The Rock64's Ethernet MAC
+was `b6:9e:63:ff:6b:90`, the address Pi-hole reserved `192.168.0.7` for until
+the move.
 
 ## Hardware
 
