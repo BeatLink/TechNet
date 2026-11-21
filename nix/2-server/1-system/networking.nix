@@ -217,7 +217,13 @@
                 "01-lan0" = {
                     matchConfig.Name = "lan0";
                     address = [ "192.168.0.2/24" ];
-                    gateway = [ "192.168.0.1" ];
+                    routes = [
+                        {
+                            Gateway = "192.168.0.1";
+                            # Between the Thor hotspot's 100 and home Wi-Fi's 2048, so wifi-failover's route wins
+                            Metric = 1024;
+                        }
+                    ];
                     linkConfig.RequiredForOnline = "routable";
                 };
                 "01-wireguard" = {

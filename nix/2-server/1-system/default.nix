@@ -8,6 +8,7 @@
         ./software.nix
         ./networking.nix
         ./wifi.nix
+        ./bluetooth.nix
         ./serial-console.nix
         ./utilities.nix
         ./sound.nix
