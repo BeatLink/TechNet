@@ -56,7 +56,7 @@ let
             flake = "technet-config";
             configuration = name;
             cache = "technet";
-            eval_agent = "heimdall"; # Evaluating the flake on the 2GB Rock64 swaps it to death, and on the phone takes it out of service
+            eval_agent = "heimdall"; # Evaluating the flake on the phone takes it out of service, so Heimdall evaluates for every remote host
             auto_switch = true;
             auto_switch_after = "0";
             health_commands = [ "systemctl is-active --quiet sshd.service" ];
@@ -170,7 +170,7 @@ in
         }
         // safety;
         deployments.odin = remote "Odin" [ "desktop" ];
-        deployments.ragnarok = remote "Ragnarok" [ "arm" ];
+        deployments.ragnarok = remote "Ragnarok" [ "backup" ];
         deployments.thor = remote "Thor" [ "arm" ] // {
             interval = "30m"; # The phone wakes on battery only every half hour
             post_switch = "systemctl is-active -q phosh.service || systemctl restart phosh.service"; # A switch that touches phosh stops it and leaves the screen dark
@@ -181,6 +181,7 @@ in
         };
         fleet.stages = [
             "@arm"
+            "@backup"
             "@desktop"
             "@server"
         ];

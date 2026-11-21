@@ -8,9 +8,8 @@
     config = lib.mkMerge [
 
         # Disko Target ###############################################################################################################################
-        # btrfs on LUKS rather than a ZFS pool: the A53 has aes and pmull, but OpenZFS carries its own crypto and never calls the kernel crypto API, so its
-        # AES-GCM runs as generic C and took 53% of this board's CPU. dm-crypt does reach the instructions -- `cryptsetup benchmark` here reads aes-xts-256
-        # at 142/92 MiB/s where aes-cbc manages 31 on the same run. The backup drive followed in data-drive.nix, so no pool is left.
+        # btrfs on LUKS rather than a ZFS pool: both drives were laid out this way for the Rock64 this host first ran on, whose CPU ran OpenZFS's own
+        # AES-GCM as generic C. They moved to the Acer as they were, so the layout stays; x86 would be as fast on ZFS, but switching means a reformat.
         {
             technet.storage.backend = "btrfs-luks";
 

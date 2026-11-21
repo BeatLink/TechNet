@@ -10,8 +10,8 @@
         }
 
         # Aarch64 Builds #############################################################################################################################
-        # Emulated here rather than sent to Ragnarok, which measured 1053s against Odin's 691s for the same package -- three A53 cores and 2GB of RAM
-        # lose to twelve Zen 3 threads even at a 10-20x emulation penalty.
+        # Emulated here rather than sent to an ARM board: the Rock64 measured 1053s against Odin's 691s for the same package -- three A53 cores and 2GB
+        # of RAM lose to twelve Zen 3 threads even at a 10-20x emulation penalty.
         {
             nix.distributedBuilds = false;
             boot.binfmt = {
