@@ -17,8 +17,8 @@
         {
             boot.kernelParams = [
                 "zswap.enabled=1"
-                "zswap.compressor=zstd" # Built in; the 1.85x zram measured is the ratio that matters on 1.9GB, and lz4 is a module that trades it for CPU
-                "zswap.max_pool_percent=25" # ~480MB of compressed pages; zram at 50% was itself the largest single consumer of memory on the box
+                "zswap.compressor=zstd" # Built in, and it compresses better than lz4, which is a module that trades ratio for CPU
+                "zswap.max_pool_percent=25" # A quarter of RAM at most for compressed pages, so the cache cannot become the largest consumer of memory itself
                 "zswap.shrinker_enabled=1" # Proactive writeback of the coldest pages to the partition, rather than only once the pool is full
             ];
         }

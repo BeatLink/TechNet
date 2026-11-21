@@ -1,6 +1,6 @@
 # Freeze Recovery ####################################################################################################################################
 #
-# Reboots the board when it freezes, and logs its memory use to the journal so whatever froze it is still on record after the reboot.
+# Reboots the machine when it freezes, and logs its memory use to the journal so whatever froze it is still on record after the reboot.
 #
 { lib, pkgs, ... }:
 {
@@ -12,28 +12,8 @@
             boot.kernelParams = [ "softdog.soft_margin=30" ];
             systemd.settings.Manager = {
                 RuntimeWatchdogSec = "30s";
-                WatchdogDevice = "/dev/watchdog0"; # softdog, only while the overlay below keeps the DesignWare timer from taking the number
+                WatchdogDevice = "/dev/watchdog0"; # softdog, which takes the first number by loading from the initrd, ahead of the chipset's iTCO timer
             };
-
-            # The DesignWare timer's reset hangs the board until a power cycle, so the kernel never gets a device for it
-            hardware.deviceTree.overlays = [
-                {
-                    name = "no-hardware-watchdog";
-                    dtsText = ''
-                        /dts-v1/;
-                        /plugin/;
-                        / {
-                            compatible = "pine64,rock64", "rockchip,rk3328";
-                            fragment@0 {
-                                target-path = "/watchdog@ff1a0000";
-                                __overlay__ {
-                                    status = "disabled";
-                                };
-                            };
-                        };
-                    '';
-                }
-            ];
 
             boot.kernel.sysctl = {
                 "kernel.hung_task_panic" = 1;
@@ -50,7 +30,7 @@
                 path = [ pkgs.gawk ];
                 serviceConfig = {
                     Restart = "always";
-                    SyslogLevel = "debug"; # Below journald's console level, so the lines stay off the serial login screen
+                    SyslogLevel = "debug"; # Below journald's console level, so the lines stay off the console login screen
                 };
                 script = ''
                     swap_pages() { awk '$1 == "pswpin" { i = $2 } $1 == "pswpout" { o = $2 } END { print i, o }' /proc/vmstat; }

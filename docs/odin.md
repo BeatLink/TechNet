@@ -150,9 +150,8 @@ given that boot, so `install-nixos` prompts for it.
 ## Cross-architecture builds
 
 `boot.binfmt.emulatedSystems` includes `aarch64-linux`, and `nix.settings.extra-platforms`
-lists it too, so Odin can build closures for Ragnarok and Thor. This is qemu
-emulation and therefore slow; Ragnarok is native aarch64 and could serve as a
-remote builder via `nix.buildMachines` if that ever becomes worth setting up.
+lists it too, so Odin can build Thor's closure. This is qemu emulation and
+therefore slow.
 
 Note the limits of emulation: it works for *building*, but not for running
 foreign-architecture tools that talk to the host kernel. See the disko

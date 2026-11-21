@@ -216,7 +216,7 @@
                 Ragnarok = nixpkgs.lib.nixosSystem {
                     specialArgs = { inherit inputs; };
                     modules = [
-                        { nixpkgs.hostPlatform = "aarch64-linux"; }
+                        { nixpkgs.hostPlatform = "x86_64-linux"; }
                         { home-manager.extraSpecialArgs = { inherit inputs; }; }
                         nix-index-database.nixosModules.nix-index
                         disko.nixosModules.disko

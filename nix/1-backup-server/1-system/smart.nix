@@ -1,6 +1,6 @@
 # SMART Monitoring ###################################################################################################################################
 #
-# Names both USB disks explicitly, because smartd's own device scan misreads the JMicron bridge and leaves the data drive unmonitored.
+# Names both disks explicitly, because smartd's own device scan misreads the JMicron USB bridge and leaves the data drive unmonitored.
 #
 
 {

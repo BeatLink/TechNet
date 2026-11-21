@@ -5,5 +5,5 @@
 
 { ... }:
 {
-    boot.loader.efi.canTouchEfiVariables = false; # Tow-Boot on the ARM boards and Heimdall's firmware break if written to; only the laptop overrides this
+    boot.loader.efi.canTouchEfiVariables = false; # Tow-Boot on the phone and the Acer's firmware under Ragnarok break if written to; only the laptop overrides this
 }

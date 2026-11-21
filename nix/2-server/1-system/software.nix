@@ -12,7 +12,7 @@
         }
 
         # Emulation ##################################################################################################################################
-        # X-Monitor's nightly builds compile Thor's and Ragnarok's closures here, since neither builds its own and Ragnarok natively is slower.
+        # The nightly builds compile Thor's closure here, since the phone does not build its own.
         {
             boot.binfmt = {
                 emulatedSystems = [ "aarch64-linux" ];
