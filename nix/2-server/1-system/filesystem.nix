@@ -1,7 +1,7 @@
 # Filesystem
 #
-# Points disko at the root drive and tunes the ZFS queue depths for this host's data pool, a mirror of one SSD and one
-# shingled hard disk. The mount itself comes from the shared module in 0-common.
+# Points disko at the root drive and tunes the ZFS queue depths for this host's data pool. The mount itself comes from the shared module in
+# 0-common.
 #
 
 {
@@ -9,7 +9,8 @@
     # rather than with the network config because it is a filesystem concern.
     networking.hostId = "e5aa3553";
 
-    disko.devices.disk.root-drive.device = "/dev/disk/by-id/ata-Dogfish_SSD_64GB_5E56255506071556041";
+    disko.devices.disk.root-drive.device =
+        "/dev/disk/by-id/nvme-SAMSUNG_MZALQ256HAJD-000L2_S4ULNF0NB92732";
 
     # Deep queues let the disks sort requests by head position, which is the only thing that makes the shingled drive keep up
     boot.extraModprobeConfig = ''

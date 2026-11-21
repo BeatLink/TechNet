@@ -18,14 +18,13 @@ Heimdall moved from an Acer Aspire E5-575 to the M710q on 2026-11-20. It has
 
 | Use | Drive | Connection |
 | --- | --- | --- |
-| Root pool, `root-pool-Heimdall` | Dogfish 64 GB M.2 SATA SSD | USB enclosure |
+| Root pool, `root-pool-Heimdall` | Samsung PM991 256 GB NVMe SSD | Internal M.2 slot |
 | Data pool, `data-pool-Heimdall` | ADATA SU720 1 TB 2.5" SATA SSD | Internal 2.5" bay |
 
-The M710q's M.2 slot takes NVMe drives only, so the SATA root drive cannot go
-in it and boots from a USB enclosure until an NVMe drive replaces it. That is
-why [`hardware.nix`](../nix/2-server/1-system/hardware.nix) loads `usb_storage`
-and `uas` in the initrd: without them the initrd cannot see the root drive and
-the root pool import fails.
+The root drive was a 64 GB M.2 SATA SSD in a USB enclosure until the NVMe drive
+replaced it, as the M.2 slot takes NVMe only.
+[`hardware.nix`](../nix/2-server/1-system/hardware.nix) still loads `usb_storage`
+and `uas` in the initrd so the root drive can boot from an enclosure again.
 
 The data pool was a mirror of the ADATA SSD and a Toshiba MQ04ABF100 hard disk.
 The M710q has one 2.5" bay, so the hard disk was detached and the pool is now a
