@@ -3,9 +3,22 @@
 # The 5TB backup disk: one btrfs subvolume inside a LUKS container.
 #
 
-{ lib, pkgs, ... }:
+{
+    config,
+    lib,
+    pkgs,
+    ...
+}:
 let
     luksPartition = "/dev/disk/by-partuuid/b701e0a4-fa98-467d-afd6-36cbca0f0737";
+
+    tmpfiles = "${config.systemd.package}/bin/systemd-tmpfiles";
+
+    # The units storage-recover starts once it has mounted the drive late, since a unit that failed on the missing mount is not retried by itself
+    dependents = [
+        "syncthing.service"
+    ]
+    ++ map (name: "borgbackup-repo-${name}.service") (builtins.attrNames config.services.borgbackup.repos);
 in
 {
     config = lib.mkMerge [
@@ -55,6 +68,7 @@ in
 
                     [ -e /dev/mapper/cryptstorage ] || clevis luks unlock -d ${luksPartition} -n cryptstorage
                     systemctl start Storage.mount
+                    systemctl start --no-block storage-directories.service ${lib.concatStringsSep " " dependents}
                 '';
             };
 
@@ -73,12 +87,47 @@ in
         }
 
         # Storage Dependents #########################################################################################################################
+        # Everything that writes under /Storage is bound to the mount, so with the drive missing each of them fails rather than writing into the empty
+        # mountpoint on the root SSD: Syncthing there builds a fresh config and syncs every folder onto it.
         {
-            # Bound to the mount so neither starts while the drive is missing: Syncthing then builds a fresh config under the empty mountpoint and
-            # syncs every folder onto the root SSD
-            systemd.services = lib.genAttrs [ "syncthing" "syncthing-init" ] (_: {
-                unitConfig.RequiresMountsFor = [ "/Storage" ];
-            });
+            systemd.services =
+                lib.genAttrs
+                    (
+                        [
+                            "storage-directories"
+                            "syncthing"
+                            "syncthing-init"
+                        ]
+                        ++ map (name: "borgbackup-repo-${name}") (builtins.attrNames config.services.borgbackup.repos)
+                    )
+                    (_: {
+                        unitConfig.RequiresMountsFor = [ "/Storage" ];
+                    });
+        }
+
+        # Folder Structure ###########################################################################################################################
+        # The tmpfiles rules under /Storage are taken out of the boot-time and switch-time runs and applied by their own unit, which needs the mount.
+        {
+            systemd.services = {
+                systemd-tmpfiles-setup.serviceConfig.ExecStart = [
+                    ""
+                    "${tmpfiles} --create --remove --boot --exclude-prefix=/dev --exclude-prefix=/Storage"
+                ];
+                systemd-tmpfiles-resetup.serviceConfig.ExecStart = [
+                    ""
+                    "${tmpfiles} --create --remove --exclude-prefix=/dev --exclude-prefix=/Storage"
+                ];
+
+                storage-directories = {
+                    description = "Create the folder structure under /Storage";
+                    wantedBy = [ "multi-user.target" ];
+                    before = dependents;
+                    serviceConfig = {
+                        Type = "oneshot";
+                        ExecStart = "${tmpfiles} --create --prefix=/Storage";
+                    };
+                };
+            };
         }
 
         # Scrub State ################################################################################################################################
