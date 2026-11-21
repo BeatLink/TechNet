@@ -72,6 +72,6 @@ rec {
             let
                 name = lib.removeSuffix ".nix" file;
             in
-            lib.nameValuePair "${name}.yaml" (renderConfig name (loadConfig "${dir}/${file}"))
+            lib.nameValuePair "${name}.yaml" (renderConfig name (loadConfig (dir + "/${file}")))
         ) (lib.filterAttrs (file: _: lib.hasSuffix ".nix" file) (builtins.readDir dir));
 }

@@ -303,5 +303,32 @@
                     ];
                 };
             };
+
+            # What CI builds: every host's system, grouped by the platform it runs on, so a host joins CI as soon as it is added
+            checks =
+                let
+                    inherit (nixpkgs) lib;
+                    ciModules = {
+                        # Packet Tracer's installer is added to the store by hand (docs/odin.md), so a runner cannot build it
+                        Odin = [
+                            { nixpkgs.overlays = [ (_final: prev: { cisco-packet-tracer_9 = prev.emptyDirectory; }) ]; }
+                        ];
+                        # QFirehose's only download host is gone and its source survives only in Attic, which a runner cannot reach
+                        Thor = [
+                            {
+                                nixpkgs.overlays = lib.mkAfter [ (_final: prev: { pinephone-qfirehose = prev.emptyDirectory; }) ];
+                            }
+                        ];
+                    };
+                    ciSystem =
+                        name: host:
+                        (host.extendModules { modules = ciModules.${name} or [ ]; }).config.system.build.toplevel;
+                in
+                lib.genAttrs [ "x86_64-linux" "aarch64-linux" ] (
+                    system:
+                    lib.mapAttrs ciSystem (
+                        lib.filterAttrs (_: host: host.pkgs.stdenv.hostPlatform.system == system) self.nixosConfigurations
+                    )
+                );
         };
 }

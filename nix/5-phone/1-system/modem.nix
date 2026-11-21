@@ -17,7 +17,13 @@
         patches = (old.patches or [ ]) ++ [ ./patches/modemmanager-sim-optional.patch ];
     });
 
-    environment.systemPackages = [
-        (pkgs.callPackage "${inputs.mobile-nixos}/devices/pine64-pinephone/overlay/qfirehose" { })
+    nixpkgs.overlays = [
+        (final: _prev: {
+            pinephone-qfirehose =
+                final.callPackage "${inputs.mobile-nixos}/devices/pine64-pinephone/overlay/qfirehose"
+                    { };
+        })
     ];
+
+    environment.systemPackages = [ pkgs.pinephone-qfirehose ];
 }
