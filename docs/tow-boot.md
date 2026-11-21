@@ -1,10 +1,10 @@
-# Tow-Boot — firmware for Thor and Ragnarok
+# Tow-Boot — firmware for Thor and the Rock64
 
 Both aarch64 boards in the network boot through Tow-Boot, built from a personal
 fork rather than upstream releases. This is the state of that fork: what it
 builds, where it lives, and how firmware reaches a board.
 
-Per-host context is in [Thor](thor.md) and [Ragnarok](ragnarok.md); this page is
+Per-host context is in [Thor](thor.md) and [Rock64](rock64.md); this page is
 the firmware itself, common to both.
 
 ## Repositories and branches
@@ -86,7 +86,7 @@ tree handed to Linux gets `rotation = <90>` on the panel so the kernel's panel
 orientation, Plymouth and phoc start the same way. Holding volume up at power-on
 still enters USB mass storage, which is what Thor's install procedure depends on.
 
-**`pine64-rock64`** (Ragnarok) — RK3328 support: board file, RK3328 ATF, the SPI
+**`pine64-rock64`** (Rock64) — RK3328 support: board file, RK3328 ATF, the SPI
 SD-layout install path, HDMI output with USB keyboard input and a
 serial/vidconsole mux, and an LPDDR3-666 memory timing fix. The bootstd
 `bootflow scan` overrides apply only to stock builds, so this build keeps the
@@ -111,11 +111,11 @@ one from this repo, through
 nix-build nix/5-phone/firmware.nix -A pine64-pinephoneA64
 ```
 
-Ragnarok's sets its own preboot, through
-[`nix/1-backup-server/firmware.nix`](../nix/1-backup-server/firmware.nix):
+The Rock64's sets its own preboot, through
+[`nix/6-rock64/firmware.nix`](../nix/6-rock64/firmware.nix):
 
 ```sh
-nix-build nix/1-backup-server/firmware.nix -A pine64-rock64
+nix-build nix/6-rock64/firmware.nix -A pine64-rock64
 ```
 
 NixTool's `formatting/flash-towboot` builds from the same checkout, via its
@@ -142,8 +142,8 @@ Installing the current firmware there — the procedure is in [Thor](thor.md) �
 means giving that up, so it is worth leaving until this build has been lived
 with.
 
-Ragnarok has no SPI flash, so its firmware is the shared disk image written to
-its own SD card; see [Ragnarok](ragnarok.md).
+The Rock64 has no SPI flash, so its firmware is the shared disk image written to
+its own SD card; see [Rock64](rock64.md).
 
 ## Provenance
 

@@ -227,6 +227,20 @@
                         ./nix/1-backup-server
                     ];
                 };
+                Rock64 = nixpkgs.lib.nixosSystem {
+                    specialArgs = { inherit inputs; };
+                    modules = [
+                        { nixpkgs.hostPlatform = "aarch64-linux"; }
+                        { home-manager.extraSpecialArgs = { inherit inputs; }; }
+                        nix-index-database.nixosModules.nix-index
+                        disko.nixosModules.disko
+                        impermanence.nixosModules.impermanence
+                        sops-nix.nixosModules.sops
+                        home-manager.nixosModules.home-manager
+                        ./nix/0-common
+                        ./nix/6-rock64
+                    ];
+                };
                 Heimdall = nixpkgs.lib.nixosSystem {
                     specialArgs = { inherit inputs; };
                     modules = [

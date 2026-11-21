@@ -16,6 +16,7 @@ Configured by this repo, one flake output each:
 | [Odin](docs/odin.md)         | Laptop — workstation, deploy host, tang server      | `x86_64-linux`  | [`3-laptop`](nix/3-laptop)               |
 | [Ragnarok](docs/ragnarok.md) | Backup server — Acer Aspire E5-575, off site        | `x86_64-linux`  | [`1-backup-server`](nix/1-backup-server) |
 | [Thor](docs/thor.md)         | PinePhone                                            | `aarch64-linux` | [`5-phone`](nix/5-phone)                 |
+| [Rock64](docs/rock64.md)     | Spare SBC — basic system, not deployed               | `aarch64-linux` | [`6-rock64`](nix/6-rock64)               |
 
 Every host also imports [`0-common`](nix/0-common).
 

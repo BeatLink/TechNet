@@ -31,10 +31,15 @@ The data pool was a mirror of the ADATA SSD and a Toshiba MQ04ABF100 hard disk.
 The M710q has one 2.5" bay, so the hard disk was detached and the pool is now a
 single drive with no redundancy; the backups are its only second copy.
 
-| Interface | Device | Driver | Address |
-| --- | --- | --- | --- |
-| `lan0` | Intel I219-V Ethernet | `e1000e` | `192.168.0.2`, static |
-| `wlp1s0` | Intel Wireless-AC 8265 | `iwlwifi` | DHCP, fallback only |
+| Interface | Device | Driver | MAC | Address |
+| --- | --- | --- | --- | --- |
+| `lan0` | Intel I219-V Ethernet | `e1000e` | `00:23:24:df:00:10` | `192.168.0.2`, static |
+| `wlp1s0` | Intel Wireless-AC 8265 | `iwlwifi` | `5c:87:9c:15:09:3c` | DHCP, fallback only |
+
+Both are the permanent addresses the kernel reads from the cards. The machine
+is also recorded with the MAC `6C:4B:90:AD:5F:36`, which neither interface
+reports; a DHCP reservation made for it matches nothing, and `lan0` does not
+need one because its address is static.
 
 [`networking.nix`](../nix/2-server/1-system/networking.nix) renames the wired
 NIC to `lan0` by type, not by PCI slot, so the address and the firewall rules
