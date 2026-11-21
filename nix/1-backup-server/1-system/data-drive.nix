@@ -72,6 +72,15 @@ in
             };
         }
 
+        # Storage Dependents #########################################################################################################################
+        {
+            # Bound to the mount so neither starts while the drive is missing: Syncthing then builds a fresh config under the empty mountpoint and
+            # syncs every folder onto the root SSD
+            systemd.services = lib.genAttrs [ "syncthing" "syncthing-init" ] (_: {
+                unitConfig.RequiresMountsFor = [ "/Storage" ];
+            });
+        }
+
         # Scrub State ################################################################################################################################
         {
             environment.persistence."/persistent".directories = [ "/var/lib/btrfs" ];
