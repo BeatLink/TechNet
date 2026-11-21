@@ -1,7 +1,7 @@
 # Hardware Configuration #############################################################################################################################
 #
-# The Rock64 board, the drivers it needs before the disks can be unlocked, and the fixes its USB 3 controller and three USB-to-SATA adapters need
-# to work reliably.
+# The Acer Aspire E5-575 this host runs on, the drivers it needs before the disks can be unlocked, and the fixes the USB-to-SATA adapters its drives
+# arrived in need to work reliably. The adapter rules match on USB ids, so they do nothing for a drive moved onto an internal SATA port.
 #
 
 { lib, pkgs, ... }:
@@ -34,62 +34,38 @@ in
 
         # Platform ###################################################################################################################################
         {
-            nixpkgs.hostPlatform = lib.mkDefault "aarch64-linux";
-        }
+            nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
 
-        # HDMI Output ################################################################################################################################
-        {
-            boot.initrd.kernelModules = [
-                "phy_rockchip_inno_hdmi" # Must load before rockchipdrm or the HDMI probe defers and the screen stays blank
-                "rockchipdrm"
-            ];
-        }
+            boot.kernelModules = [ "kvm-intel" ];
 
-        # Network ####################################################################################################################################
-        {
-            # Loaded at the very start of boot so the disks and the network are ready when the unlock needs them
-            boot.initrd.kernelModules = [
-                "stmmac"
-                "stmmac_platform"
-                "dwmac_rk"
-            ];
+            hardware = {
+                cpu.intel.updateMicrocode = true;
+                enableRedistributableFirmware = true;
+            };
         }
 
         # Storage ####################################################################################################################################
         {
-            # Loaded at the very start of boot so the disks and the network are ready when the unlock needs them
-            boot.initrd.kernelModules = [
+            # Available from the very start of boot so the disks are ready when the unlock needs them, on the internal SATA ports and over USB alike
+            boot.initrd.availableKernelModules = [
+                "xhci_pci"
+                "ahci"
+                "sd_mod"
                 "uas"
                 "usb_storage"
             ];
         }
 
-        # USB 3 Controller ###########################################################################################################################
+        # Lid and Screen #############################################################################################################################
         {
-            # Stop the controller parking on one SuperSpeed bulk pipe: with both drives behind the hub under load, the controller stops answering and
-            # the kernel declares it dead, dropping every disk at once. Mainline carries the fix but leaves it to each board's device tree.
-            hardware.deviceTree = {
-                # Without the name, systemd-boot leaves the firmware's device tree in place and the overlay never reaches the kernel
-                name = "rockchip/rk3328-rock64.dtb";
-                overlays = [
-                    {
-                        name = "usb3-no-park-mode";
-                        dtsText = ''
-                            /dts-v1/;
-                            /plugin/;
-                            / {
-                                compatible = "pine64,rock64", "rockchip,rk3328";
-                                fragment@0 {
-                                    target-path = "/usb@ff600000";
-                                    __overlay__ {
-                                        snps,parkmode-disable-ss-quirk;
-                                    };
-                                };
-                            };
-                        '';
-                    }
-                ];
+            # A laptop run as a server with its lid shut: closing the lid must not suspend it
+            services.logind.settings.Login = {
+                HandleLidSwitch = "ignore";
+                HandleLidSwitchExternalPower = "ignore";
+                HandleLidSwitchDocked = "ignore";
             };
+
+            boot.kernelParams = [ "consoleblank=60" ]; # Turns the built-in panel off after a minute, lid open or shut
         }
 
         # Disk Protocol ##############################################################################################################################
@@ -124,13 +100,6 @@ in
             # Applied in early boot as well, because the encrypted root copies these settings from the drive at the moment it is opened
             services.udev.extraRules = rootBridgeRules;
             boot.initrd.services.udev.rules = rootBridgeRules;
-        }
-
-        # Clock ######################################################################################################################################
-        {
-            # This RTC has no battery, so after a power cut it reads 2016 and RTC_HCTOSYS sets the clock backwards to it, which journald answers by
-            # rotating the log it is writing. Keeping the driver out means nothing reads it; timesyncd's persisted clock file is the floor instead.
-            boot.blacklistedKernelModules = [ "rtc_rk808" ];
         }
 
     ];

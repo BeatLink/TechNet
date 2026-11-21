@@ -27,6 +27,7 @@
                     interface = "wg0"; # Pinned, so recovery tests the tunnel itself rather than whatever route happens to be up
                 };
                 reconfigureLinks = [ "wg0" ];
+                kernelModules = [ "r8169" ]; # Ethernet NIC driver
 
                 # Heimdall, whose endpoint is the home connection's dynamic-DNS name: the module renders the peer from sops so the name stays out of the store.
                 peer = {
@@ -57,14 +58,23 @@
 
         # Ethernet ###################################################################################################################################
         {
-            systemd.network.networks."01-end0" = {
-                matchConfig.Name = "end0";
+            # Named by type, not by PCI slot, so the network settings follow the wired NIC onto different hardware
+            systemd.network.links."01-lan" = {
+                matchConfig = {
+                    Type = "ether";
+                    Kind = "!*";
+                };
+                linkConfig.Name = "lan0";
+            };
+
+            systemd.network.networks."01-lan0" = {
+                matchConfig.Name = "lan0";
                 networkConfig.DHCP = "ipv4";
                 linkConfig.RequiredForOnline = "routable";
             };
 
             # Locks wait online to ethernet being routable
-            boot.initrd.systemd.network.wait-online.extraArgs = [ "--interface=end0:routable" ];
+            boot.initrd.systemd.network.wait-online.extraArgs = [ "--interface=lan0:routable" ];
         }
 
         # DNS ########################################################################################################################################
