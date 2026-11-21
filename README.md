@@ -44,7 +44,7 @@ accessories.
 - [Backup map](docs/backup-map.html) — which data each host backs up to which
   borg repository, today and once Odin's Vorta merge is finished; open it in a
   browser
-- [Tow-Boot](docs/tow-boot.md) — the firmware fork Thor and Ragnarok boot
+- [Tow-Boot](docs/tow-boot.md) — the firmware fork Thor and the Rock64 boot
   through, and how to build and deploy it
 - [Thor — Firefox tuning](docs/thor-firefox.md)
 - [Thor — waypipe apps](docs/thor-waypipe-apps.md) — which of Odin's
