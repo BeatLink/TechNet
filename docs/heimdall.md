@@ -33,7 +33,7 @@ single drive with no redundancy; the backups are its only second copy.
 | Interface | Device | Driver | MAC | Address |
 | --- | --- | --- | --- | --- |
 | `lan0` | Intel I219-V Ethernet | `e1000e` | `00:23:24:df:00:10` | `192.168.0.2`, static |
-| `wlp1s0` | Intel Wireless-AC 8265 | `iwlwifi` | `5c:87:9c:15:09:3c` | DHCP, fallback only |
+| `wlp2s0` | Intel Wireless-AC 8265 | `iwlwifi` | `5c:87:9c:15:09:3c` | DHCP, fallback only |
 
 Both are the permanent addresses the kernel reads from the cards. The machine
 is also recorded with the MAC `6C:4B:90:AD:5F:36`, which neither interface
@@ -47,6 +47,43 @@ follow it onto other hardware. Both `e1000e` and `r8169` are in the initrd.
 networks once the system has booted, with a higher route metric than `lan0`, so
 Wi-Fi only carries traffic when the wired link is down. It does not run in the
 initrd.
+
+### Failover to the Thor hotspot
+
+When the home internet goes down, both `lan0` and the home Wi-Fi go through the
+same dead router, so the `wifi-failover` service in `wifi.nix` moves Heimdall's
+own traffic onto the hotspot ThorX broadcasts as `Thor`:
+
+1. Every minute it pings 1.1.1.1, 8.8.8.8 and 9.9.9.9. Once none has answered
+   for 5 minutes, it tells wpa_supplicant to join `Thor`.
+2. networkd matches that SSID with `02-wifi-thor`, whose default route has
+   metric 100, below `lan0`'s 1024, so the hotspot carries the traffic.
+3. Every 2 minutes it pings the same hosts through `lan0` only. Once one
+   answers, it reloads wpa_supplicant's config, which rejoins the home
+   networks and leaves `Thor` disabled again.
+
+`Thor` is disabled in wpa_supplicant's config, so Heimdall never joins it on
+its own. The hotspot has to be switched on by hand on ThorX. Stopping the
+service also rejoins the home networks. Follow it with
+`journalctl -u wifi-failover`.
+
+Only Heimdall's own traffic fails over. WireGuard peers dial the home
+connection's address, so remote access stays down until it returns.
+
+## Bluetooth
+
+[`bluetooth.nix`](../nix/2-server/1-system/bluetooth.nix) turns on the 8265's
+Bluetooth radio (`hci0`, USB `8087:0a2b`) for Home Assistant.
+[`presence.nix`](../nix/2-server/3-services/home-automation/home-assistant/presence.nix)
+adds two presence entities:
+
+| Entity | How it is detected | Limit |
+| --- | --- | --- |
+| `binary_sensor.thor_nearby` | `l2ping` to Thor's address every minute | Thor starts with Bluetooth off, so it only shows while switched on |
+| `device_tracker.pinetime` | The watch's BLE advertisement, through `bluetooth_le_tracker` | The watch stops advertising while a phone is connected to it |
+
+Tracked BLE devices are declared in `knownDevices` in the Home Assistant
+module, which links them in as a read-only `known_devices.yaml`.
 
 On its first boot here the hardware clock read 2019-12-17, almost seven years
 behind, and units that need a valid date early, such as `unbound-root-hints`,

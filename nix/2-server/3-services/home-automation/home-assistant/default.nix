@@ -15,6 +15,13 @@ let
     fanSpeedButtonsUrl = "/local/fan-speed-buttons.js?${
         builtins.substring 0 8 (baseNameOf "${fanSpeedButtons}")
     }";
+    knownDevices = (pkgs.formats.yaml { }).generate "known_devices.yaml" {
+        pinetime = {
+            name = "PineTime";
+            mac = "BLE_FC:9B:D8:FD:4A:F8";
+            track = true;
+        };
+    };
 in
 {
     services.home-assistant = {
@@ -56,6 +63,7 @@ in
                 # Packages hold whole features as one unit; each is its own file beside this one.
                 packages.bedroom_fan = import ./bedroom-fan.nix;
                 packages.x_monitor_alerts = import ./x-monitor-alerts.nix;
+                packages.presence = import ./presence.nix { inherit pkgs; };
             };
 
             sensor = [
@@ -146,6 +154,9 @@ in
             "open_meteo"
             "vlc_telnet"
             "motioneye"
+            "bluetooth"
+            "bluetooth_le_tracker"
+            "command_line"
             # "traccar"                                                 # Traccar is switched off (see traccar.nix)
         ];
         customComponents = [
@@ -171,6 +182,7 @@ in
     # Linked into www the same way the module links its Lovelace modules, so /local serves it.
     systemd.services.home-assistant.preStart = lib.mkAfter ''
         ln -fns ${fanSpeedButtons} "${config.services.home-assistant.configDir}/www/fan-speed-buttons.js"
+        ln -fns ${knownDevices} "${config.services.home-assistant.configDir}/known_devices.yaml"
     '';
 
     systemd.tmpfiles.settings."Home-Assistant" = {
