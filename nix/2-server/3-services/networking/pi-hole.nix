@@ -210,6 +210,8 @@
                 # The name is a secret, so it arrives as an extra hosts file rendered by sops rather than as a `dns.hosts` entry baked into the store.
                 misc.dnsmasq_lines = [
                     "addn-hosts=${config.sops.templates."pihole-ddns-hosts".path}"
+                    # Heimdall's Wi-Fi sits on the same LAN as lan0, so answering DHCP there too sends every client a second offer.
+                    "no-dhcp-interface=wl*"
                 ];
 
                 database.maxDBdays = 7; # Every query row is scanned at startup, and 90 days of them held FTL's API for 20 s.
