@@ -12,24 +12,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  hosts:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.list.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: cachix/install-nix-action@v31
+      - name: List every host and its platform
+        id: list
+        run: |
+          echo "matrix=$(nix eval --json .#checks --apply 'checks: builtins.concatMap (system: map (host: {
+            inherit host system;
+            runner = if system == "aarch64-linux" then "ubuntu-24.04-arm" else "ubuntu-latest";
+          }) (builtins.attrNames checks.${system})) (builtins.attrNames checks)')" >> "$GITHUB_OUTPUT"
+
   # Each host is evaluated on a runner of its own platform, since Thor's evaluation reads a file out of an aarch64 source (nix/5-phone/1-system/gnss.nix)
   build:
+    needs: hosts
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - host: Heimdall
-            system: x86_64-linux
-            runner: ubuntu-latest
-          - host: Odin
-            system: x86_64-linux
-            runner: ubuntu-latest
-          - host: Ragnarok
-            system: x86_64-linux
-            runner: ubuntu-latest
-          - host: Thor
-            system: aarch64-linux
-            runner: ubuntu-24.04-arm
+        include: ${{ fromJSON(needs.hosts.outputs.matrix) }}
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v7
