@@ -5,15 +5,15 @@
 | Device   | Acer Aspire E5-575 laptop, Intel Core i3-7100U                                      |
 | Platform | `x86_64-linux`                                                                      |
 | Modules  | [`nix/0-common`](../nix/0-common) + [`nix/1-backup-server`](../nix/1-backup-server) |
+| Address  | `ragnarok.technet`, `10.100.100.6` over WireGuard, `192.168.0.7` on the LAN         |
 
 Ragnarok is the machine whose job is to hold backups. It is a WireGuard client,
-dialling in to Heimdall.
+dialling in to Heimdall. It receives borg backups from Heimdall and Odin and
+holds receive-only copies of the Syncthing folders.
 
-It ran on a Pine64 [Rock64](rock64.md) until the Acer, which had been Heimdall, took the
-role over. Both drives moved across as they were, so the disk layout and much
-of the history on this page come from the Rock64. The Rock64's Ethernet MAC
-was `b6:9e:63:ff:6b:90`, the address Pi-hole reserved `192.168.0.7` for until
-the move.
+It ran on a Pine64 [Rock64](rock64.md) until 2026-11-21, when the Acer, which
+had been Heimdall, took the role over. Both drives moved across as they were,
+so the disk layout and much of the history on this page come from the Rock64.
 
 ## Hardware
 
@@ -27,12 +27,15 @@ the move.
 The laptop has three SATA ports: the internal 2.5" bay, the DVD-bay caddy and
 the M.2 slot. The SSD sits on internal SATA. The backup drive is 15 mm thick
 and fits neither bay, so it runs over USB in a Sabrent JMicron enclosure,
-`152d:0583`, the one that held the root SSD on the Rock64.
+`152d:0583`, the one that held the root SSD on the Rock64. The enclosure takes
+its power from the USB port.
+
 [`hardware-configuration.nix`](../nix/1-backup-server/1-system/hardware-configuration.nix)
-gives that enclosure a three-minute command timeout, because the shingled drive
-pauses for long stretches while rewriting, and leaves it on UAS. The drive's
-adapter from the Rock64, a JMS576 `152d:0576`, and the spare JMS561U enclosure
-keep their entries there so they stay usable.
+keeps that enclosure on UAS, with the `f` quirk the kernel's own entry for the
+ID carries, and gives it a three-minute command timeout, because the shingled
+drive pauses for long stretches while rewriting. The drive's adapter from the
+Rock64, a JMS576 `152d:0576`, and the spare JMS561U enclosure, `152d:1561`, keep
+their quirk entries there so they stay usable if plugged in.
 
 | Part     | Device                        | Driver  |
 | -------- | ----------------------------- | ------- |
@@ -41,14 +44,16 @@ keep their entries there so they stay usable.
 | Clock    | CMOS clock with its own battery | `rtc_cmos` |
 
 [`networking.nix`](../nix/1-backup-server/1-system/networking.nix) renames the
-wired NIC to `lan0` by type and takes its address by DHCP; Pi-hole on Heimdall
-reserves `192.168.0.7` for the MAC above. `r8169` is in the initrd so the
-tunnel has a link to run over.
+wired NIC to `lan0` by type and takes its address by DHCP. Pi-hole on Heimdall
+serves DHCP for the LAN and reserves `192.168.0.7` for the MAC above. The
+initrd and the booted system each ask for a lease under a different client ID;
+the reservation matches on the MAC, so both get `.7` and Pi-hole drops the
+initrd's lease when the system asks. `r8169` is in the initrd so the tunnel has
+a link to run over.
 
 The laptop runs with its lid shut. logind ignores the lid switch, so closing it
 does not suspend the machine, and the console blanks the built-in panel after
-a minute. The battery was absent when this was Heimdall, so a power cut is a
-hard power-off.
+a minute. There is no battery fitted, so a power cut is a hard power-off.
 
 The firmware breaks if EFI variables are written, which is why
 `boot.loader.efi.canTouchEfiVariables` stays false and the machine boots the
@@ -70,342 +75,94 @@ Everything goes to the persistent journal, which syncs to disk every five
 seconds so a hard lockup loses little, and `memory-trail` logs memory use to it
 every five seconds.
 
-## Storage
+## Root drive
 
-The root drive is btrfs subvolumes inside one LUKS container, selected by
-`technet.storage.backend = "btrfs-luks"` in
-[`root-drive-disko.nix`](../nix/1-backup-server/1-system/root-drive-disko.nix).
-The backup drive followed a day later and is now its own LUKS container holding
-btrfs -- see [Data drive](#data-drive). Nothing on this host is ZFS any more,
-which is what `technet.storage.zfsDataPool = false` says in
-[`data-drive.nix`](../nix/1-backup-server/1-system/data-drive.nix).
+The root drive is btrfs subvolumes inside one LUKS container, `cryptroot`,
+selected by `technet.storage.backend = "btrfs-luks"` in
+[`root-drive-disko.nix`](../nix/1-backup-server/1-system/root-drive-disko.nix),
+plus a 16 GB swap partition encrypted with a fresh key every boot. The layout
+was chosen for the Rock64, whose CPU ran OpenZFS's own AES-GCM as generic C
+(see [Rock64](rock64.md#storage)); it came across unchanged, and moving this
+host back to ZFS would mean a reformat. Nothing on this host is ZFS.
 
-The root drive moved off ZFS because OpenZFS carries its own crypto and never
-calls the kernel crypto API, so its AES-GCM runs as generic C on a CPU that has
-`aes` and `pmull` sitting idle — 53% of this board's CPU went to
-`gcm_generic_mul` and friends under load. dm-crypt is GPL kernel code and does
-reach those instructions. `cryptsetup benchmark` on Ragnarok, under a load
-average of 5:
+`btrfs-scrub@-.timer` and `btrfs-scrub@Storage.timer` scrub both filesystems
+monthly.
 
-| cipher       | encryption  | decryption |
-| ------------ | ----------- | ---------- |
-| aes-xts 256b | 142.4 MiB/s | 91.9 MiB/s |
-| aes-cbc 256b | 31.5 MiB/s  | 31.3 MiB/s |
-
-`/proc/crypto` here offers `xts-aes-ce`, which is the driver doing the work —
-`aes-cbc` in the same run shows what the same CPU manages without it. Thor
-measured 21.8/23.8 MB/s writing and reading through a ZFS `aes-256-gcm` dataset
-on the same Cortex-A53 silicon; a cipher benchmark and a filesystem are not the
-same measurement, but they point the same way.
-
-Since `encryption` is immutable on a ZFS dataset, the change is a reinstall.
-The backup drive is untouched by it, so what has to survive is
-`/persistent` — see below.
-
-That also means the configuration cannot be *switched* into. A running ZFS
-Ragnarok rebuilt against `btrfs-luks` gets a `fileSystems` table pointing at a
-`/dev/mapper/cryptroot` that does not exist, and boots no further. The install
-below is how this lands, and nothing before it should be deployed with
-`nixos-rebuild switch`.
-
-## Installing NixOS
-
-Installed from Odin, the same way Thor is: the root SSD is USB-attached, so it
-can simply be moved. These are `install/install-local`'s own steps, split apart
-because one thing has to happen in the middle of them — step 3 says what. The
-board's own installer path still works and is described at the end, but it
-builds on a 2 GB Rock64.
-
-Done this way on 2026-09-09, moving the root drive off ZFS.
-
-### 1. Rescue /persistent
-
-Roughly 250 MB, and almost none of it is reproducible. The drive is USB, so this
-works with it already pulled and attached to Odin — import the old pool
-read-only rather than needing the board up:
-
-```sh
-sudo zpool import -f -N -o readonly=on -R /mnt/ragnarok-old -d /dev/sdX3 root-pool-Ragnarok
-sudo zfs load-key -L file:///run/secrets/ragnarok_zfs_passphrase root-pool-Ragnarok/root
-sudo zfs mount root-pool-Ragnarok/root/persistent
-sudo cp -a --preserve=all /mnt/ragnarok-old/persistent/. ./ragnarok-persistent/
-sudo zpool export root-pool-Ragnarok
-```
-
-By name and by device, never `zpool import -a`: Odin's own pools are imported.
-
-Two things in there are the reason this step exists.
-`var/lib/syncthing-database` is 221 MB of index; lose it and Syncthing rehashes
-the whole share on a shingled USB disk attached to a 2 GB board.
-`var/lib/nixos/uid-map` records `borg` at uid 999, and `borg` owns every byte of
-`/Storage/Backups` on a pool this install does not touch — lose the map and a
-fresh install can allocate `borg` a different uid, at which point the `Z` rule in
-[`data-drive.nix`](../nix/1-backup-server/1-system/data-drive.nix) recursively
-chowns 1.9 TB to repair it.
-
-### 2. Nothing to seed
-
-A LUKS container carries its clevis binding inside its own header, written by
-`clevis luks bind`, so unlike the ZFS install nothing has to be copied into
-`/persistent` and no rebuild waits on a file existing first, which is what
-used to force clevis off during an install.
-
-The binding can be added at either end: from Odin right after partitioning,
-while disko still has the container open and tang is local (step 3), or after
-the first boot with `rebind-clevis Ragnarok` on Odin, which needs tang
-reachable and otherwise leaves the board sitting on a prompt it can answer
-over the initrd sshd.
-
-### 3. Partition, bind, install
-
-The header work has to land between partitioning and `nixos-install`, which
-`install/install-local` runs as one command, so these are its own steps. They
-are otherwise exactly what the tool does.
-
-```sh
-nix build --no-link --print-out-paths \
-  /Storage/Files/Projects/TechNet#nixosConfigurations.Ragnarok.config.system.build.toplevel
-
-sops -d --extract '["ragnarok_encryption_key"]' /Storage/Files/Projects/TechNet/secrets/admin/nixtool.yaml | sudo install -m 600 /dev/stdin /tmp/encryption.key
-
-sudo "$(nix build --impure --no-link --print-out-paths --expr \
-  '((builtins.getFlake "/Storage/Files/Projects/TechNet").nixosConfigurations."Ragnarok".extendModules {
-      modules = [ ({ lib, ... }: {
-        nixpkgs.hostPlatform = lib.mkForce builtins.currentSystem;
-        disko.devices.disk.root-drive.device = lib.mkForce "/dev/sdX";
-      }) ];
-    }).config.system.build.diskoScript')"
-```
-
-`hostPlatform` is forced to Odin's because the partitioning runs here; built
-from Ragnarok's own platform the script carries aarch64 binaries. The disk is
-identified by serial — `SATA_SSD`, `22020812000605` — and it is a local disk on
-Odin, so a wrong path destroys Odin's data.
-
-disko leaves everything mounted under `/mnt` and `cryptroot` open. Two header
-operations belong here, before the drive goes back to the board. Both
-`cryptsetup` and `clevis` size their key derivation for the machine they run
-on: the passphrase slot disko just made is argon2id at 1 GiB and five passes,
-which is two seconds on Odin and nineteen on a Rock64 with 2 GB of RAM, so
-retune it with the memory capped -- `luksConvertKey` keeps the passphrase and
-re-derives the slot, and the iteration count is still a benchmark, so run it
-on the board afterwards if it was done here. Clevis' own slot is pbkdf2 at a
-fixed 1000 iterations and costs nothing anywhere.
-
-```sh
-sudo cryptsetup luksConvertKey --key-slot 0 --key-file /tmp/encryption.key --pbkdf argon2id --pbkdf-memory 262144 /dev/sdX2
-sudo clevis luks bind -y -k /tmp/encryption.key -d /dev/sdX2 sss \
-  '{"t":1,"pins":{"tang":[{"url":"http://10.100.100.2:7654"},{"url":"http://192.168.0.3:7654"}]}}'
-sudo clevis luks list -d /dev/sdX2
-```
-
-The pin JSON is what `technet.tang.urls` expands to; `rebind-clevis` writes the
-same thing, so binding here or there gives the same header. Then restore and
-install:
-
-```sh
-sudo cp -a --preserve=all ./ragnarok-persistent/. /mnt/persistent/
-
-sudo nixos-install --root /mnt --no-root-passwd --system /nix/store/…-nixos-system-Ragnarok-…
-sudo umount -R /mnt && sudo cryptsetup close cryptroot && sudo rm -f /tmp/encryption.key
-```
-
-The restore carries the real `machine-id` in with it, so this never leaves the
-literal string `uninitialized` in `/persistent/etc/machine-id` the way a bare
-install does.
-
-### 4. Check the initrd before unplugging
-
-Remote unlock rests on two files having been appended to the initrd, so look
-rather than hope:
-
-```sh
-zstd -dc /mnt/boot/EFI/nixos/*-initrd.efi | strings | grep -oE "\.initrd-secrets/[a-zA-Z0-9/_.-]+"
-```
-
-`persistent/etc/ssh/ssh_initrd_host_ed25519_key` and
-`run/secrets/wireguard_private_key` both have to be there. They are decrypted
-by sops during the install, which only works because the host key was restored
-in step 3 — the file in `/boot` being named by hash rather than by store path
-is what says the append ran at all. The clevis bindings are not files; `clevis
-luks list` on each container is their check.
-
-### 5. First boot
-
-Reattach the drive to the Rock64 and power it on. Nothing should need typing:
-clevis-luks-askpass answers both password prompts from the header bindings once
-tang is reachable. Then check that `/Storage` came back, that `borg` still owns
-it by name *and* by number, and that `btrfs-scrub-root.timer` is armed.
-
-If it does sit on a password prompt, the tang servers were unreachable. The
-prompt is on HDMI and serial, `ssh ragnarok-boot` lands on it too, and askpass
-keeps retrying behind it — see [Unlocking](#unlocking).
-
-### The installer path
-
-Still available, and the only option if the SSD cannot be moved: NixOS Minimal
-aarch64 on a USB stick, all other drives disconnected, root drive attached after
-the boot screen loads, `passwd` for root, then swap on a spare partition and
-`mount -o remount,size=10G,noatime /nix/.rw-store` before installing. Building
-on 2 GB of RAM is the reason this is the fallback.
-
-## Backups
-
-Borg is configured in [`borg.nix`](../nix/1-backup-server/1-system/borg.nix),
-with the repository living on the data drive from
-[`data-drive.nix`](../nix/1-backup-server/1-system/data-drive.nix). Other
-hosts push to it; the `borg` group on each client grants repo access.
-
-### Integrity checks
-
-`borg-check.timer` verifies the server repository every Sunday, and
-`borg-check-data.timer` adds `--verify-data` on the first Sunday of the month.
-Both run here rather than only on Heimdall because a check takes hours on this
-board, and run inline it held Heimdall's backup service open across its own
-3-hourly schedule. Heimdall still checks the same repository from its side on
-weekdays; the Sunday slot keeps the two off each other's exclusive repo lock.
-
-These need the repository passphrase, so `borg_repo_encryption_key` in
-`secrets/1-backup-server/borg-check.yaml` is the same value Heimdall keeps in
-`secrets/2-server/borgmatic.yaml`. Changing it means changing both.
-
-btrfs cannot stand in for this. A segment whose bytes were already wrong when
-borg handed them over checksums clean at the filesystem layer, which is how a
-`Segment entry checksum mismatch` sat undetected in this repository from
-2026-09-06 until a borg check found it.
-
-## Unlocking
-
-Both containers are made with the same passphrase, `ragnarok_encryption_key`
-in `secrets/admin/nixtool.yaml`, and each carries a clevis binding to Odin's
-tang server in its LUKS2 header, written by `rebind-clevis Ragnarok` on Odin
-through [`clevis.nix`](../nix/1-backup-server/1-system/clevis.nix). At boot,
-systemd-cryptsetup puts up a password prompt for each container as its disk
-appears, and three things can answer it:
-
-- **The console.** Plymouth shows the prompt on HDMI and on the serial console.
-- **The initrd sshd.** `ssh ragnarok-boot` reaches it over WireGuard at
-  `10.100.100.6`, or on the LAN at whatever DHCP handed out; logging in runs
-  the password agent first and drops to bash once nothing is pending.
-- **Tang.** nixpkgs' `boot.initrd.clevisLuksAskpass` runs clevis' own
-  askpass loop, which watches the prompts and answers them from the header
-  bindings. It retries for as long as a prompt is pending, paced by the tang
-  connect timeout, and reaches Odin over the LAN at `192.168.0.3` or through
-  the tunnel at `10.100.100.2`, whichever answers first. It never touches the
-  cryptsetup unit, so the prompt stays open for the other two the whole time.
-
-Typing the passphrase once is enough: systemd-cryptsetup caches an entered
-passphrase in the kernel keyring for 2.5 minutes, and the other container's
-prompt re-checks the keyring the moment the first is answered.
-
-Because tang runs on Odin and stops when Odin's session locks, Ragnarok
-**will not unlock on its own** unless Odin is up and unlocked, or someone
-types. The WireGuard recovery loop from the shared module restarts networkd
-from 45s into the initrd if the tunnel is not carrying traffic, so a tunnel
-that came up before DNS did is not a dead end.
-
-If the boot is stuck with no prompt pending, the root SSD is probably the
-reason: on 2026-09-10 its bridge came up at 5 Gbps but never accepted its USB
-configuration (`usb 5-1: can't set config #1, error -71`), so there was no
-disk to prompt for and cryptroot timed out at 99s. From the initrd sshd this
-brought it back and finished the boot; `--no-block` matters, because a
-blocking `systemctl start` attaches the password prompt to the SSH terminal and
-eats whatever is typed next as passphrase attempts:
-
-```sh
-echo 1 > /sys/bus/usb/devices/5-1/remove
-echo 1 > /sys/bus/usb/devices/usb5/5-0:1.0/usb5-port1/disable; sleep 3
-echo 0 > /sys/bus/usb/devices/usb5/5-0:1.0/usb5-port1/disable; sleep 10
-ls /dev/disk/by-partlabel/                      # disk-root-drive-cryptroot should be back
-systemctl reset-failed
-systemctl start --no-block systemd-cryptsetup@cryptroot.service   # askpass answers it
-systemctl start --no-block initrd.target                          # re-runs rollback, mounts, switch-root
-```
-
-`rebind-clevis Ragnarok` on Odin rebinds both headers against the current tang keys, and
-is also how a fresh container gets its first binding; it needs tang reachable.
-`clevis luks list -d <device>` shows the binding, and
-`journalctl -b -u clevis-luks-askpass` shows what askpass did during the boot.
-
-Two hardware notes that shape the timing. The passphrase slots were re-derived
-on the board itself with the argon2id memory capped at 256 MiB, because a slot
-derived on Odin took nineteen seconds and half the RAM here; redo that with
-`cryptsetup luksConvertKey --pbkdf-memory 262144` after any `luksChangeKey`.
-And the JMS561U enclosure the root SSD used to sit in was the weak part of the
-machine, which is why it is now the spare. On about half the boots it aborted
-and reset under UAS, 30s before the disk existed; twice on 2026-09-10 it came
-up at SuperSpeed and refused `SET_CONFIGURATION` with `error -71` 15ms later,
-after which nothing retries and the boot above is the result.
-`usbcore.quirks=152d:1561:gn` in
-[`hardware-configuration.nix`](../nix/1-backup-server/1-system/hardware-configuration.nix)
-delays descriptor fetching and every control message for that device; set live
-through `/sys/module/usbcore/parameters/quirks` and followed by the
-re-enumeration above, it configured the bridge first time. The same file keeps
-it on usb-storage, which costs only throughput -- 237 MB/s in 1 MiB reads
-under UAS against 135 MB/s in the 120 KiB commands usb-storage defaults to.
-
-The SSD's present enclosure, `152d:0583`, runs UAS with the `f` quirk the
-kernel's own entry for that ID carries. It has two faults to know about. A
-capacity query is aborted and the enclosure reset about 38 seconds into every
-boot, and recovers. And on 2026-11-11, at 06:46 and again at 17:29, a stall
-aborted 30 queued reads and writes at once and reset the enclosure, 14 I/O
-errors in all, with no freeze. Reverting it to usb-storage (`152d:0583:u`)
-is the way back if that turns into a hang; TRIM may not survive the move,
-because the JMS576 bridge advertised no discard under usb-storage.
-
-TRIM is set up by a udev rule in the same file, written for the JMS561U and
-carried over to `152d:0583`, where it works: on 2026-11-13 the SSD showed
-provisioning mode `unmap` and a 32 MiB discard limit, and `fstrim` released
-83.7 GiB from `/` and 4.4 GiB from `/persistent` with nothing in the kernel
-log. The
-JMS561U's firmware (0204) clears the provisioning bit in READ CAPACITY(16)
-while the VPD pages advertise UNMAP with a 65535-block limit, and the kernel
-trusts the capacity bit: provisioning mode stays `full`, `fstrim` reports
-discard unsupported, and the unmap limit is never recorded. The rule forces
-the mode to `unmap` and caps `discard_max_bytes` at 8191 × 4 KiB, the largest
-granular value under that limit -- without the cap the kernel sent 64 MiB
-descriptors and that bridge answered ILLEGAL REQUEST. Verified there on
-2026-09-10: a 16 MiB discard inside the swap partition succeeded, a 64 MiB one
-was refused, and `fstrim` then released 90 GiB from the root filesystem with a
-clean scrub afterwards. The rule runs in both stages because dm-crypt stacks
-the discard limits when the container is opened.
-
-## Data drive
+## Backup drive
 
 The backup drive is a single LUKS2 container holding one btrfs filesystem with
 `dup` data *and* metadata, and a single subvolume `@storage` mounted at
-`/Storage`. It replaced `data-pool-Ragnarok`, a ZFS pool, on 2026-09-10, for the
-same reason the root drive moved: OpenZFS never calls the kernel crypto API, so
-its AES-GCM ran as generic C on a CPU whose `aes`/`pmull` instructions sat idle.
-
-`dup` is the btrfs equivalent of the `copies=2` the ZFS dataset carried, and it
-exists for the same reason: one disk, no vdev redundancy, so without a second
-copy a checksum failure is detected and *not* repairable. It halves the drive —
-2.3 TiB usable of 4.55 TiB raw — which is ample for ~970 GiB of data.
+`/Storage`. `dup` exists because there is one disk and no redundancy: without a
+second copy a checksum failure is detected and *not* repairable. It halves the
+drive, 2.3 TiB usable of 4.55 TiB raw, which holds the ~850 GiB stored
+(2026-11-21) with room to spare.
 
 |               |                                                                                                    |
 | ------------- | -------------------------------------------------------------------------------------------------- |
-| device        | `ST5000LM000-2U8170`, serial `WCJ9HXR9`, USB via SABRENT JMS576 `152d:0576`                        |
+| device        | `ST5000LM000-2U8170`, serial `WCJ9HXR9`, USB via Sabrent JMicron `152d:0583`                       |
 | partition     | GPT, one partition, partlabel `ragnarok-cryptstorage`                                              |
 | PARTUUID      | `b701e0a4-fa98-467d-afd6-36cbca0f0737`                                                             |
 | LUKS          | LUKS2, `aes-xts-plain64`, 512-bit key, **4096-byte sectors**                                       |
-| LUKS KDF      | argon2id, 4 passes, ~83 MiB, 4 threads -- re-derived on the board, see [Unlocking](#unlocking)     |
+| LUKS KDF      | argon2id, 4 passes, ~188 MiB, 4 threads                                                            |
 | LUKS UUID     | `340cfb19-e5bd-479a-a9ee-f04607540e1b`                                                             |
 | mapper name   | `cryptstorage`                                                                                     |
 | btrfs         | `-d dup -m dup`, label `RagnarokStorage`, crc32c                                                   |
 | btrfs UUID    | `805e41b1-8d1e-4719-a557-0218ea7154ae`                                                             |
 | subvolume     | `@storage`                                                                                         |
-| mount options | `compress=zstd,noatime`                                                                            |
-| discard       | **off** — the USB bridge passes none, so `allowDiscards` would leak the free-space map for nothing |
+| mount options | `compress=zstd,noatime,nofail`                                                                     |
+| discard       | off                                                                                                |
+
+`/Storage/Backups` holds one borg repository per source host, and
+`/Storage/Services/Syncthing` holds Syncthing's config and data directory.
+
+### Mounting
+
+[`data-drive.nix`](../nix/1-backup-server/1-system/data-drive.nix) opens the
+container in the initrd as `cryptstorage`, with `nofail`, and mounts `/Storage`
+with `nofail` and a 90 s device timeout, so a missing drive does not stop the
+boot. If the initrd went on without it, `storage-recover` runs once the network
+is online: it unbinds and rebinds any JMicron adapter that was left
+unconfigured, waits up to a minute for the partition, unlocks it with clevis
+against tang, mounts `/Storage` and starts the units that need it.
+
+### Storage guard
+
+On 2026-11-21, while `/Storage` was not mounted, Syncthing built a fresh config
+in the empty mountpoint and started syncing every folder onto the root SSD.
+Since then everything that writes under `/Storage` is bound to the mount:
+
+- `syncthing`, `syncthing-init`, `storage-directories` and each
+  `borgbackup-repo-*` unit carry `RequiresMountsFor=/Storage`, so with the
+  drive missing they fail instead of writing to the root drive.
+- The tmpfiles rules under `/Storage` are taken out of the boot-time and
+  switch-time `systemd-tmpfiles` runs and applied by `storage-directories`,
+  which needs the mount.
+
+### Recovery of 2026-11-21
+
+The filesystem lost writes and its extent tree had to be rebuilt with
+`btrfs check --repair --init-extent-tree`. A full scrub afterwards (started
+10:31, 4 h 11 min) found 13,390 checksum errors: 4,802 corrected from the
+second copy and **8,588 uncorrectable**. Every path the kernel logged for an
+uncorrectable block was a borg segment file under `Backups/Heimdall/data` or
+`Backups/Odin/data`.
+
+As of 2026-11-21 the two borg repositories hold those damaged segments and have
+not been repaired: until a `borg check --repair` has run against each and a
+later check passes, treat the archives in them as unverified. Run
+`btrfs scrub status /Storage` and `btrfs device stats /Storage` for the
+current figures.
+
+On the same day the drive dropped off USB once (`usb 2-2: USB disconnect` at
+14:49).
 
 ### Creating it
 
-Run from Odin with the drive attached there, because the Rock64 only has one
-USB 3 port and its own root SSD occupies it. `152d:0583` needs its UAS quirk on
-whatever host it is plugged into or it comes up unusable:
+`152d:0583` needs its quirk on whatever host it is plugged into or it comes up
+unusable:
 
 ```sh
-echo "152d:0583:uf" | sudo tee /sys/module/usb_storage/parameters/quirks
+echo "152d:0583:f" | sudo tee /sys/module/usb_storage/parameters/quirks
 ```
 
 The passphrase is the host's `ragnarok_encryption_key`, and should stay that way: it is
@@ -422,7 +179,7 @@ LAST=$((TOTAL - 34)); END=$((LAST - ((LAST - 7) % 8)))
 sudo sgdisk --zap-all /dev/sdX
 sudo sgdisk --new=1:2048:$END --typecode=1:8309 --change-name=1:ragnarok-cryptstorage /dev/sdX
 sudo partprobe /dev/sdX && sudo udevadm settle
-sudo wipefs -a /dev/sdX1                      # old ZFS labels survive repartitioning at the same offset
+sudo wipefs -a /dev/sdX1
 
 sudo cryptsetup luksFormat --type luks2 --sector-size 4096 \
     --pbkdf argon2id --pbkdf-memory 262144 --pbkdf-parallel 4 \
@@ -436,7 +193,11 @@ sudo umount /mnt/newstorage
 sudo mount -o subvol=@storage,compress=zstd,noatime /dev/mapper/cryptstorage /mnt/newstorage
 ```
 
-Three things that are not obvious:
+A new container gets a new PARTUUID, which
+[`data-drive.nix`](../nix/1-backup-server/1-system/data-drive.nix) names, and
+its tang binding from `rebind-clevis Ragnarok` on Odin.
+
+Things that are not obvious:
 
 **4096-byte sectors, and the alignment arithmetic.** The drive reports
 `4096-byte physical blocks`, but `cryptsetup` defaults to 512-byte sectors,
@@ -448,84 +209,104 @@ sector, which generally is not aligned. With `start = 2048`, the size is a
 multiple of 8 sectors only when `end ≡ 7 (mod 8)` — which is what the `END`
 arithmetic above produces.
 
-**The KDF cost is capped on purpose.** `cryptsetup` benchmarks the machine it
-runs on to pick argon2 parameters, and this container is created on Odin but
-unlocked in Ragnarok's initrd — 2 GB of RAM on a Cortex-A53. `--pbkdf-memory
-262144` (256 MiB) keeps the memory inside what that board can afford, but the
-pass count is still Odin's two seconds, which was 32 on this drive and half a
-minute at boot; `luksConvertKey` on the board itself brought it to four. Nothing
-is really lost: the passphrase is 50 bytes of sops-held entropy, so KDF
-hardening is not what stands between an attacker and the disk.
-
 **Verify, do not trust a chained `echo`.** `cryptsetup ... | tail` reports
 `tail`'s exit status, so a `&& echo OK` after a pipeline will happily print OK
 over a failed format. Check `$?` on the command itself, or `cryptsetup luksDump`
 afterwards.
 
-### Migrating the data
+**Copying the backup tree needs `--numeric-ids`.** `borg` is uid 999 here and
+999 is `colord` on Odin, so an `rsync` by name rewrites ownership of the whole
+tree. Use `rsync -aHAX --numeric-ids`, and `--delete-before` when refreshing a
+stale copy, because borg compacts and the old segments have to go before the
+new ones land.
 
-There is one drive, so the data has to go somewhere else and come back. It was
-staged on a 1 TB SSD (`/Storage/Backups`, which fits with ~15 GiB spare) and on
-Odin's own pool (`/Storage/Files`, 76.5 GB), then written back after the format.
+**`dup` on a shingled drive slows as it fills.** Both copies are written, so
+the logical rate is half the disk rate, and the disk rate fell from about
+90 MB/s to about 34 MB/s as the platter filled. Budget about 11 hours to write
+966 GB.
 
-```sh
-# stage, with the source imported read-only so it stays a rollback
-sudo zpool import -f -N -o readonly=on -R /mnt/src -d /dev/sdX1 data-pool-Ragnarok
-sudo zfs load-key -L file:///run/secrets/ragnarok_zfs_passphrase data-pool-Ragnarok/storage
-sudo zfs mount data-pool-Ragnarok/storage
-sudo rsync -aHAX --numeric-ids --delete-before /mnt/src/Storage/Backups/ /mnt/stage/Backups/
-sudo rsync -n -aHAX --numeric-ids --delete-before -i /mnt/src/Storage/Backups/ /mnt/stage/Backups/   # verify: no output
-sudo zpool export data-pool-Ragnarok
-# ... format per above ...
-sudo rsync -aHAX --numeric-ids /mnt/stage/Backups/ /mnt/newstorage/Backups/
-```
+## Backups
 
-`--numeric-ids` is not optional: `borg` is uid 999 on Ragnarok and 999 is
-`colord` on Odin, so names would rewrite ownership of the whole backup tree.
-`--delete-before` rather than the default `--delete-during`, because borg
-compacts its repo — a stale copy holds segments that no longer exist upstream,
-and on a nearly-full staging disk those have to be freed *before* the new ones
-land.
+Borg is configured in [`borg.nix`](../nix/1-backup-server/1-system/borg.nix):
+one repository per source host, `/Storage/Backups/Heimdall` and
+`/Storage/Backups/Odin`, each authorised only for that host's own borg key. The
+`Z` tmpfiles rule there keeps the whole tree owned by `borg`.
 
-### Putting it back on Ragnarok
+The backups, prunes, compacts and checks are driven by X-Backups on Heimdall
+([`x-backups.nix`](../nix/2-server/3-services/backups/x-backups.nix)) as the
+`heimdall-ragnarok` and `odin-ragnarok` repositories, which also hold the
+weekly repository and archive checks and the monthly extract and
+`--verify-data` checks.
 
-The binding lives in the header, so it can be written on Odin while the drive
-is still attached there, exactly as for the root drive:
+btrfs cannot stand in for those checks. A segment whose bytes were already
+wrong when borg handed them over checksums clean at the filesystem layer, which
+is how a `Segment entry checksum mismatch` sat undetected in this repository
+from 2026-09-06 until a borg check found it.
 
-```sh
-sudo cryptsetup luksConvertKey --key-slot 0 --key-file /tmp/dk.key --pbkdf argon2id --pbkdf-memory 262144 /dev/sdX1
-sudo clevis luks bind -y -k /tmp/dk.key -d /dev/sdX1 sss \
-  '{"t":1,"pins":{"tang":[{"url":"http://10.100.100.2:7654"},{"url":"http://192.168.0.3:7654"}]}}'
-```
+## Unlocking
 
-or afterwards with `rebind-clevis Ragnarok` on Odin, which does both containers
-at once. Nothing in `data-drive.nix` depends on the binding existing, so the
-config can be deployed in either order: an unbound drive simply prompts, and
-`/Storage` is `nofail`, so the host comes up without it rather than stalling.
+Both containers are made with the same passphrase, `ragnarok_encryption_key`
+in `secrets/admin/nixtool.yaml`, and each carries a clevis binding to Odin's
+tang server in its LUKS2 header, written by `rebind-clevis Ragnarok` on Odin
+through [`clevis.nix`](../nix/1-backup-server/1-system/clevis.nix). At boot,
+systemd-cryptsetup puts up a password prompt for each container as its disk
+appears, and three things can answer it:
 
-Two measurements worth keeping:
+- **The console.** Plymouth shows the prompt on the laptop's screen.
+- **The initrd sshd.** `ssh ragnarok-boot` reaches it over WireGuard at
+  `10.100.100.6`, or on the LAN at `192.168.0.7`; logging in runs the password
+  agent first and drops to bash once nothing is pending.
+- **Tang.** nixpkgs' `boot.initrd.clevisLuksAskpass` runs clevis' own
+  askpass loop, which watches the prompts and answers them from the header
+  bindings. It retries for as long as a prompt is pending and reaches Odin
+  through the tunnel at `10.100.100.2` or on the LAN at `192.168.0.3`. It never
+  touches the cryptsetup unit, so the prompt stays open for the other two the
+  whole time.
 
-**The staging SSD needs UAS, not for speed but for TRIM.** Under `usb-storage`
-(BOT) the bridge advertises `DISC-GRAN 0B`, so the ~150 GB `--delete-before`
-freed stayed invisible to the controller and writes collapsed to 17 MB/s
-fighting garbage collection. Quirking `152d:0576` with `f` instead of `uf` keeps
-it on `uas`, where discard works: `fstrim` released 149.8 GiB in 18 seconds and
-writes went to 195 MB/s. An SSD filled past ~96% slows down again regardless,
-and no amount of trimming helps that.
+Typing the passphrase once is enough: systemd-cryptsetup caches an entered
+passphrase in the kernel keyring, and the other container's prompt re-checks
+the keyring the moment the first is answered.
 
-**`dup` on a shingled drive is not disproportionately slow, but it does decay.**
-The drive writes both copies, so the logical rate is always half the disk rate.
-It started at 90.7 MB/s to the disk (45 MB/s logical) and ended near 34 MB/s
-(17 MB/s logical) as the platter filled, because a filling disk writes nearer
-the spindle and the shingled bands need rewriting. Budget **~11 hours** for
-966 GB, not the ~6 the opening rate suggests. The instantaneous figure swings
-between roughly 2 and 50 MB/s, so pace it off bytes written over elapsed time.
-Reading the source over USB 3 on Odin managed 128 MB/s, against roughly
-35-40 MB/s on the Rock64, whose only USB 3 port is taken by the root SSD.
+Odin's tang only serves while it has been switched on from Odin's panel applet,
+so Ragnarok **will not unlock on its own** unless that is on, or someone types.
+The WireGuard recovery loop from the shared module restarts networkd from 45s
+into the initrd if the tunnel is not carrying traffic, so a tunnel that came up
+before DNS did is not a dead end. A backup drive that missed the initrd is
+unlocked later by `storage-recover`, also against tang.
+
+`rebind-clevis Ragnarok` on Odin rebinds both headers against the current tang
+keys and is also how a fresh container gets its first binding; it needs tang
+reachable. `clevis luks list -d <device>` shows the binding, and
+`journalctl -b -u clevis-luks-askpass` shows what askpass did during the boot.
+
+## Planned move
+
+Ragnarok is to move to another house as the off-site backup. The move waits on
+the backup drive: the repositories have to be repaired and checked clean first.
+There it has to unlock unattended, which today depends on Odin's tang being
+switched on and reachable over WireGuard; until that changes, a reboot there
+waits on the console or on someone answering over `ssh ragnarok-boot`.
+
+## Reinstalling
+
+The root SSD can be taken out and reinstalled from Odin with disko and
+`nixos-install`, as it was on 2026-09-09. Before wiping it, copy `/persistent`
+off:
+
+- `etc/ssh/`, the host and initrd host keys; sops decrypts this host's secrets
+  with the host key, and the initrd secrets are appended at install time.
+- `var/lib/nixos/uid-map`, which records `borg` at uid 999. Lose it and a fresh
+  install can give `borg` another uid, after which the `Z` rule in
+  [`borg.nix`](../nix/1-backup-server/1-system/borg.nix) recursively chowns the
+  whole backup tree.
+- `var/lib/syncthing-database`, the Syncthing index, which otherwise means
+  rehashing every folder on the shingled drive.
+
+Restore them into `/mnt/persistent/` before `nixos-install`, then bind the new
+container with `rebind-clevis Ragnarok`. The backup drive is untouched by a
+root reinstall.
 
 ## Rebuilding
 
-```sh
-nixtool run maintenance/rebuild --host Ragnarok --action dry-activate
-nixtool run maintenance/rebuild --host Ragnarok --action switch
-```
+Ragnarok is the `ragnarok` deployment in X-Nix, built on Odin and switched by
+its own agent; it switches automatically when the flake changes.

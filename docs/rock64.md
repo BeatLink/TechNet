@@ -78,6 +78,23 @@ hour, and the rule is back at 1024 sectors. The kernel logged 21 I/O
 errors on that drive in that time, and btrfs logged 260 reads corrected from
 its second copy.
 
+The JMS561U is kept on usb-storage, with `usbcore.quirks=152d:1561:gn` delaying
+its descriptor fetch and control messages; under UAS it read at 237 MB/s in
+1 MiB reads, against 135 MB/s in usb-storage's default 120 KiB commands, but it
+aborted and reset on about half the boots.
+
+### Root SSD TRIM
+
+A udev rule in
+[`hardware-configuration.nix`](../nix/6-rock64/1-system/hardware-configuration.nix)
+forces the root SSD's enclosure, `152d:0583`, to provisioning mode `unmap` and
+caps `discard_max_bytes` at 8191 × 4 KiB, the largest 4 KiB multiple under a
+SATA erase range's 65535-sector limit; without the cap the kernel sent 64 MiB
+discards that a JMicron bridge answered with ILLEGAL REQUEST. The rule runs in
+the initrd as well, because dm-crypt copies the discard limits when the
+container is opened. On 2026-11-13 `fstrim` released 83.7 GiB from `/` through
+it with nothing in the kernel log.
+
 Two things to know before touching it physically:
 
 - It will not drive certain monitors over HDMI directly. An Xtech HDMI-to-VGA
@@ -92,6 +109,36 @@ Two things to know before touching it physically:
 References — [product page](https://pine64.com/product/rock64-2gb-single-board-computer/),
 [ROCK64 wiki](https://wiki.pine64.org/wiki/ROCK64),
 [software releases](https://wiki.pine64.org/wiki/ROCK64_Software_Releases).
+
+## Storage
+
+[`root-drive-disko.nix`](../nix/6-rock64/1-system/root-drive-disko.nix) lays
+the root drive out as btrfs on LUKS rather than ZFS. The A53 has `aes` and
+`pmull`, but OpenZFS carries its own crypto and never calls the kernel crypto
+API, so its AES-GCM ran as generic C and took 53% of the CPU under load.
+dm-crypt reaches the instructions. `cryptsetup benchmark` on this board, under
+a load average of 5:
+
+| cipher       | encryption  | decryption |
+| ------------ | ----------- | ---------- |
+| aes-xts 256b | 142.4 MiB/s | 91.9 MiB/s |
+| aes-cbc 256b | 31.5 MiB/s  | 31.3 MiB/s |
+
+`cryptsetup` and `clevis` size their key derivation for the machine they run
+on, so a LUKS slot made on Odin cost nineteen seconds and half the RAM to open
+here. Cap the argon2id memory when creating or re-deriving a slot for this
+board, `--pbkdf-memory 262144` (256 MiB), and run `cryptsetup luksConvertKey`
+on the board itself so the pass count is benchmarked here.
+
+## Installing
+
+The simplest path is to install the root drive from Odin with disko and
+`nixos-install`, forcing `nixpkgs.hostPlatform` to Odin's for the partitioning
+script, since built for this board it carries aarch64 binaries. Without a
+movable drive, boot NixOS Minimal aarch64 from a USB stick with all other
+drives disconnected, attach the root drive after the boot screen loads, and add
+swap and `mount -o remount,size=10G,noatime /nix/.rw-store` before installing:
+building on 2 GB of RAM is the reason this is the fallback.
 
 ## Tow-Boot
 
