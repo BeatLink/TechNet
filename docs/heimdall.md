@@ -2,13 +2,51 @@
 
 | | |
 | --- | --- |
+| Device | Lenovo ThinkCentre M710q Tiny, Intel Core i3-7100T |
 | Platform | `x86_64-linux` |
 | Modules | [`nix/0-common`](../nix/0-common) + [`nix/2-server`](../nix/2-server) |
-| Address | `heimdall.technet`, `10.100.100.1` over WireGuard |
+| Address | `heimdall.technet`, `10.100.100.1` over WireGuard, `192.168.0.2` on the LAN |
 
 Heimdall is the always-on server and the hub of the network. It terminates the
 WireGuard tunnel that every other host dials into, serves DNS, and runs the
 services in [`3-services`](../nix/2-server/3-services).
+
+## Hardware
+
+Heimdall moved from an Acer Aspire E5-575 to the M710q on 2026-11-20. It has
+32 GB of RAM and two drives:
+
+| Use | Drive | Connection |
+| --- | --- | --- |
+| Root pool, `root-pool-Heimdall` | Dogfish 64 GB M.2 SATA SSD | USB enclosure |
+| Data pool, `data-pool-Heimdall` | ADATA SU720 1 TB 2.5" SATA SSD | Internal 2.5" bay |
+
+The M710q's M.2 slot takes NVMe drives only, so the SATA root drive cannot go
+in it and boots from a USB enclosure until an NVMe drive replaces it. That is
+why [`hardware.nix`](../nix/2-server/1-system/hardware.nix) loads `usb_storage`
+and `uas` in the initrd: without them the initrd cannot see the root drive and
+the root pool import fails.
+
+The data pool was a mirror of the ADATA SSD and a Toshiba MQ04ABF100 hard disk.
+The M710q has one 2.5" bay, so the hard disk was detached and the pool is now a
+single drive with no redundancy; the backups are its only second copy.
+
+| Interface | Device | Driver | Address |
+| --- | --- | --- | --- |
+| `lan0` | Intel I219-V Ethernet | `e1000e` | `192.168.0.2`, static |
+| `wlp1s0` | Intel Wireless-AC 8265 | `iwlwifi` | DHCP, fallback only |
+
+[`networking.nix`](../nix/2-server/1-system/networking.nix) renames the wired
+NIC to `lan0` by type, not by PCI slot, so the address and the firewall rules
+follow it onto other hardware. Both `e1000e` and `r8169` are in the initrd.
+[`wifi.nix`](../nix/2-server/1-system/wifi.nix) joins the fleet's known Wi-Fi
+networks once the system has booted, with a higher route metric than `lan0`, so
+Wi-Fi only carries traffic when the wired link is down. It does not run in the
+initrd.
+
+The hardware clock is not trustworthy: the machine has booted with the date
+set to 2019 and only corrects itself once NTP answers. Units that need a valid
+date before then, such as `unbound-root-hints`, can fail on such a boot.
 
 ## Role in the network
 
@@ -259,6 +297,13 @@ boot, so it will unlock on its own once tang appears.
 
 Initrd WireGuard plus initrd SSH mean a stuck boot can be fixed remotely, which
 is the reason that combination exists.
+
+With no network and no display there is a third way in, from
+[`serial-console.nix`](../nix/2-server/1-system/serial-console.nix): a USB
+serial adapter plugged into Heimdall as `ttyUSB0` answers the boot password
+prompts in the initrd and carries a login prompt once booted, at 115200 baud.
+Wire it to a second adapter on another machine with TX to RX, RX to TX and
+ground to ground. This path has not been tested on the hardware yet.
 
 ## Rebuilding
 
