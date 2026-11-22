@@ -24,6 +24,7 @@ PRESS_END_SECONDS = 0.25
 FRAME_GAP = 6_000
 FALLBACK_GAP = 20_000
 DEFAULT_CARRIER = 38_000
+PRONTO_UNIT = 0.241246
 
 
 # Recording ##########################################################################################################################################
@@ -136,6 +137,15 @@ def code_from_press(durations, carrier):
         "durations": [round(length) for length in evened(first[:-1])] + [round(gap)],
         "repeat": sum(len(frame) == len(first) for frame in frames),
     }
+
+
+# A raw Pronto hex code for a learned code, with every pair in the once-only part.
+def to_pronto(code):
+    frequency_word = round(1e6 / (code["carrier"] * PRONTO_UNIT))
+    unit = frequency_word * PRONTO_UNIT
+    durations = code["durations"]
+    words = [0, frequency_word, len(durations) // 2, 0] + [max(1, round(duration / unit)) for duration in durations]
+    return " ".join(f"{word:04X}" for word in words)
 
 
 # Protocols ##########################################################################################################################################
@@ -357,7 +367,7 @@ class Handler(BaseHTTPRequestHandler):
                 prepare_mixer(self.mixer_card)
             samples = record_press(self.device, float(body.get("timeout", 30)))
             code = code_from_press(envelope(samples), round(float(body.get("carrier", DEFAULT_CARRIER))))
-            result = {"code": code, "decoded": decode(code)}
+            result = {"code": code, "decoded": decode(code), "pronto": to_pronto(code)}
             if body.get("name"):
                 request = urllib.request.Request(
                     f"{body.get('blaster', self.blaster)}/codes/{urllib.parse.quote(body['name'], safe='')}",
