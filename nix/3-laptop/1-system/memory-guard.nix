@@ -24,22 +24,13 @@
             MemorySwapMax = "4G";
             CPUWeight = "idle";
             IOWeight = 10;
-            ManagedOOMMemoryPressure = "kill";
             ManagedOOMSwap = "kill";
         };
 
         nix.daemonCPUSchedPolicy = "idle";
         nix.daemonIOSchedClass = "idle";
 
-        systemd.services.nix-daemon.serviceConfig = {
-            Slice = "nix-work.slice";
-            # Builds inherit this, so a host-wide shortage kills a compiler before the editor or a terminal.
-            OOMScoreAdjust = 500;
-        };
-
         systemd.services.x-nix-agent.serviceConfig = {
-            Slice = "nix-work.slice";
-            OOMScoreAdjust = 500;
             CPUSchedulingPolicy = "idle";
             IOSchedulingClass = "idle";
         };
