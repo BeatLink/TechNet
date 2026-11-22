@@ -2,19 +2,22 @@
 #
 # The agent X-Nix on Heimdall reads, switches, collects and reboots this host through. It dials out to Heimdall over one WebSocket and signs in with its
 # own ed25519 key, whose private half lives only in this host's x-nix-agent.yaml. It switches this host from the Attic cache with the closure X-Nix
-# evaluated and built, and the module carries the sudo rules for that. On Odin it also builds and pushes the TechNet cache whenever Odin is up. Heimdall
-# runs X-Nix itself and needs no agent.
+# evaluated and built, and the module carries the sudo rules for that. On Odin it also builds and pushes the TechNet cache whenever Odin is up. On
+# Heimdall it dials X-Nix on the same machine, so X-Nix itself runs nothing as root, and it runs the jobs Heimdall takes: flake updates, the cache's
+# builds when Odin is away, and installs.
 #
 {
     config,
     inputs,
     lib,
+    pkgs,
     ...
 }:
 let
     host = config.networking.hostName;
 
     agentHosts = [
+        "Heimdall"
         "Odin"
         "Ragnarok"
         "Thor"
@@ -22,6 +25,9 @@ let
 
     # Where the TechNet cache roots each build, the same folder as on Heimdall (x-nix.nix).
     buildRoots = "/var/lib/x-nix-build-roots";
+
+    # The key my commits are signed with, the only signature pull mode switches to.
+    allowedSigners = pkgs.writeText "x-nix-allowed-signers" "beatlink ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICnv2wHMWS+X9GoKi9Oelfzg5WGz9mpdR4QywPaAvL5g\n";
 in
 {
     imports = [ inputs.x-nix.nixosModules.agent ];
@@ -34,7 +40,7 @@ in
 
         services.x-nix-agent = {
             enable = true;
-            url = "wss://nix.heimdall.technet/api/agent";
+            url = if host == "Heimdall" then "ws://127.0.0.1:7720/api/agent" else "wss://nix.heimdall.technet/api/agent";
             keyFile = config.sops.secrets.x_nix_agent_key.path;
             # Deploys from GitHub by itself once Heimdall has been gone half a day; only the laptop can evaluate the flake in reasonable time.
             pull = lib.mkIf (host == "Odin") {
@@ -48,6 +54,7 @@ in
                 after = "12h";
                 configuration = host;
                 rebuildArgs = [ "--no-write-lock-file" ];
+                allowedSignersFile = allowedSigners;
             };
         };
 

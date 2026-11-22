@@ -30,6 +30,7 @@ let
         "x-monitor-access" = 976;
         "x-monitor-agent" = 975;
         "x-nix" = 973;
+        "x-nix-agent" = 971;
     };
 
     groupIds = {
@@ -60,6 +61,7 @@ let
         "x-monitor-agent" = 968;
         "x-monitor-credentials" = 967;
         "x-nix" = 964;
+        "x-nix-agent" = 962;
     };
 
     unnumberedUsers = lib.attrNames (lib.filterAttrs (_: user: user.uid == null) config.users.users);

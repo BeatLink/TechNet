@@ -2,8 +2,8 @@
 #
 # The NixOS deployment portal at nix.heimdall.technet, which runs the whole fleet's NixOS upkeep: it updates the flake, and the TechNet cache evaluates
 # and builds every host's closure nightly on Odin when it is up and on Heimdall otherwise, and pushes it to Attic, and each host switches once it drifts.
-# Heimdall switches itself; every other host is switched by its own X-Nix agent (x-nix-agent.nix), fetching what Odin, else Heimdall, built and pushed to the cache. The X-Nix modules carry their own sudo
-# rules.
+# Every host, Heimdall included, is switched by its own X-Nix agent (x-nix-agent.nix), fetching what Odin, else Heimdall, built and pushed to the cache;
+# Heimdall's agent dials X-Nix on the same machine, so the server answering the web runs nothing as root. The agent module carries the sudo rules.
 #
 {
     config,
@@ -68,23 +68,23 @@ in
 
     sops.secrets.x_nix_password_hash.sopsFile = "${config.technet.secrets.path}/x-nix.yaml";
 
-    # Write deploy key on the TechNet repo that Update Flake pushes the new lock with.
+    # Write deploy key on the TechNet repo that Update Flake pushes the new lock with, as Heimdall's agent runs it.
     sops.secrets.x_monitor_flake_deploy_key = {
         sopsFile = "${config.technet.secrets.path}/x-monitor.yaml";
-        owner = "x-nix";
+        owner = "x-nix-agent";
     };
 
-    # The GitHub token's nix.conf include again, readable by X-Nix, so updating the flake does not run into the API's rate limit for anonymous callers.
+    # The GitHub token's nix.conf include again, readable by Heimdall's agent, so updating the flake does not run into the API's rate limit for anonymous callers.
     sops.secrets.x_nix_github_access_token_conf = {
         sopsFile = "${config.technet.secrets.commonPath}/github.yaml";
         key = "github_access_token_conf";
-        owner = "x-nix";
+        owner = "x-nix-agent";
     };
 
-    # The key the Provision page logs in to a machine being installed with; its public half goes in that machine's installer.
+    # The key the Provision page logs in to a machine being installed with, as Heimdall's agent runs the install; its public half goes in that machine's installer.
     sops.secrets.x_nix_provision_key = {
         sopsFile = "${config.technet.secrets.path}/x-nix.yaml";
-        owner = "x-nix";
+        owner = "x-nix-agent";
     };
 
     services.x-nix = {
@@ -94,7 +94,10 @@ in
         passwordHashFile = config.sops.secrets.x_nix_password_hash.path;
         # Each agent's key, whose private half is in that host's x-nix-agent.yaml.
         hosts = {
-            heimdall = { inherit gc; };
+            heimdall = {
+                agent_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJBLvJeqLMrvGVmcrJH5bMVBQkt9TEIS+jfEGGNrLhD/ x-nix-agent-heimdall";
+                inherit gc;
+            };
             odin = {
                 agent_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAQiMXi+0bu88Gkiuh+jXXEWROogQ0Uj/icnNZbAQrmJ x-nix-agent-odin";
                 inherit gc;
@@ -217,8 +220,8 @@ in
     };
 
     systemd.tmpfiles.settings."X-Nix".${buildRoots}.d = {
-        user = "x-nix";
-        group = "x-nix";
+        user = "x-nix-agent";
+        group = "x-nix-agent";
         mode = "0755";
     };
 
@@ -231,9 +234,23 @@ in
         }
         {
             directory = buildRoots;
-            user = "x-nix";
-            group = "x-nix";
+            user = "x-nix-agent";
+            group = "x-nix-agent";
             mode = "0755";
+        }
+        # The agent's long runs and switch folders, so a switch running across a reboot is still followed.
+        {
+            directory = "/var/lib/x-nix-agent";
+            user = "x-nix-agent";
+            group = "x-nix-agent";
+            mode = "0700";
+        }
+        # The links that keep install media in the store, which the agent makes and X-Nix removes.
+        {
+            directory = "/var/lib/x-nix-media";
+            user = "x-nix-agent";
+            group = "x-nix";
+            mode = "0770";
         }
     ];
 
