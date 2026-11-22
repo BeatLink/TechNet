@@ -42,7 +42,8 @@
                 body: JSON.stringify({ name: document.getElementById("name").value.trim(), carrier: Number(document.getElementById("carrier").value) }),
             });
             const body = await response.json();
-            status.textContent = !response.ok ? `Failed: ${body.error}` : body.stored ? "Learned and stored on the blaster." : "Learned.";
+            const protocol = body.decoded ? ` as ${body.decoded.protocol}` : " (no known protocol)";
+            status.textContent = !response.ok ? `Failed: ${body.error}` : `Learned${protocol}${body.stored ? " and stored on the blaster" : ""}.`;
             result.textContent = JSON.stringify(body, null, 4);
             result.hidden = false;
         } catch (error) {
