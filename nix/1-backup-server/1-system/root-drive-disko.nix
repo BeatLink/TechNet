@@ -1,6 +1,6 @@
 # Root Drive #########################################################################################################################################
 #
-# Points disko at the SSD holding the system; the bridge's quirks live in hardware-configuration.nix.
+# Points disko at the SSD holding the system.
 #
 
 { lib, ... }:

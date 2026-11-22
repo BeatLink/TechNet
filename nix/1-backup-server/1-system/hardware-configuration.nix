@@ -1,21 +1,10 @@
 # Hardware Configuration #############################################################################################################################
 #
-# The Acer Aspire E5-575 this host runs on, the drivers it needs before the disks can be unlocked, and the settings the backup drive's USB enclosure
-# needs to work reliably. The root SSD sits on an internal SATA port and needs none.
+# The Acer Aspire E5-575 this host runs on, the drivers it needs before the disks can be unlocked, and the settings the backup drive needs. Both
+# disks sit on the internal SATA ports.
 #
 
-{ lib, pkgs, ... }:
-let
-    # The enclosure the backup drive is plugged in through, a Sabrent JMicron one that held the root SSD on the Rock64
-    dataBridge = "0583";
-
-    # The adapter the backup drive used on the Rock64, and the spare enclosure; neither is in use, and their entries keep them usable
-    formerDataBridge = "0576";
-    spareBridge = "1561";
-
-    # One setting for every adapter, because a second usb-storage.quirks on the command line replaces the first instead of adding to it
-    storageQuirks = "152d:${dataBridge}:fu,152d:${formerDataBridge}:u,152d:${spareBridge}:u";
-in
+{ lib, ... }:
 {
     config = lib.mkMerge [
 
@@ -33,13 +22,11 @@ in
 
         # Storage ####################################################################################################################################
         {
-            # Available from the very start of boot so the disks are ready when the unlock needs them, on the internal SATA ports and over USB alike
+            # Available from the very start of boot so the disks are ready when the unlock needs them
             boot.initrd.availableKernelModules = [
                 "xhci_pci"
                 "ahci"
                 "sd_mod"
-                "uas"
-                "usb_storage"
             ];
         }
 
@@ -55,31 +42,14 @@ in
             boot.kernelParams = [ "consoleblank=60" ]; # Turns the built-in panel off after a minute, lid open or shut
         }
 
-        # Disk Protocol ##############################################################################################################################
-        {
-            boot.kernelParams = [
-                # Every adapter runs the older, simpler USB disk protocol (u). On the fast one the backup drive's enclosure dropped off the bus under
-                # sustained reads while the drive stayed powered. The f keeps a kernel default for that enclosure which this list would otherwise drop.
-                "usb-storage.quirks=${storageQuirks}"
-
-                # Slow down the first moments of USB setup for the unused adapters; without it they sometimes reject the setup and the drive never appears.
-                # One setting for both, because a second usbcore.quirks on the command line replaces the first.
-                "usbcore.quirks=152d:${spareBridge}:gn,152d:${formerDataBridge}:gn"
-            ];
-        }
-
-        # Backup Drive Enclosure #####################################################################################################################
+        # Backup Drive ###############################################################################################################################
         {
             services.udev.extraRules = ''
                 # Give the drive three minutes to answer: it pauses for long stretches while rewriting, and a timeout would disconnect it mid-write
-                ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${dataBridge}", ATTR{device/timeout}="180"
+                ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ENV{ID_SERIAL_SHORT}=="WCJ9HXR9", ATTR{device/timeout}="180"
 
                 # Do not use the drive's timing as a source of randomness
-                ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${dataBridge}", ATTR{queue/add_random}="0"
-
-                # With its write cache on, any power cut, unplug or reset drops writes the drive already reported done. The keep flag stops the link
-                # resets the enclosure issues from switching the cache back on, which they did after a reboot.
-                ACTION=="add", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${dataBridge}", RUN+="${pkgs.hdparm}/bin/hdparm -K1 -W0 /dev/%k"
+                ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ENV{ID_SERIAL_SHORT}=="WCJ9HXR9", ATTR{queue/add_random}="0"
             '';
         }
 

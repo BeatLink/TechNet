@@ -5,7 +5,6 @@
         ./root-drive-disko.nix
         ./swap.nix
         ./data-drive.nix
-        ./smart.nix
         ./software.nix
         ./networking.nix
         ./borg.nix
