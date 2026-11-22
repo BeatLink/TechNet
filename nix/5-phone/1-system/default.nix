@@ -17,6 +17,7 @@
         ./keyboard-firmware.nix
         ./kernel.nix
         ./phosh-bump.nix
+        ./screen-off.nix
         ./calls.nix
         ./data-drive.nix
         ./mobile-data.nix

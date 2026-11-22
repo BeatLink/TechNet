@@ -111,6 +111,7 @@ in
                 wake_on_lan = {
                     mac = "02:ba:38:78:9f:56";
                     broadcast = "192.168.0.255";
+                    screen_off = "sudo -n -u beatlink /run/current-system/sw/bin/screen-off"; # The phone lights its screen as it wakes; a job turns it back off
                 };
                 interval = "30m"; # The phone wakes on battery only every half hour
                 inherit gc;
