@@ -17,8 +17,11 @@ let
     # The units storage-recover starts once it has mounted the drive late, since a unit that failed on the missing mount is not retried by itself
     dependents = [
         "syncthing.service"
+        "ir-blaster.service"
     ]
-    ++ map (name: "borgbackup-repo-${name}.service") (builtins.attrNames config.services.borgbackup.repos);
+    ++ map (name: "borgbackup-repo-${name}.service") (
+        builtins.attrNames config.services.borgbackup.repos
+    );
 in
 {
     config = lib.mkMerge [
