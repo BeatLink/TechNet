@@ -85,7 +85,7 @@ Heimdall's dry-run.
 | --- | --- | --- |
 | `cinnamon-bump.nix` | **46** downstream of `xapp`; 27 of `muffin`, 26 of `cinnamon` | Ten packages re-sourced at Mint 6.7.x plus two local patches. `muffin-6.7.4` is 404 on both cache.nixos.org and the Attic. The largest overlay in the tree. |
 | `phosh-bump.nix` | aarch64 only | `phosh`, `phoc` and `phosh-mobile-settings` are all "will be built" for Thor today; `wlroots_0_20` and `stevia` are already in the Attic. |
-| `steam.nix` | 6 (gamemode) + ~20 | The `millennium` input builds its Rust tree crate by crate — `oxc_*`, `phf_*`, `rmp*` all trace back to `millennium-3.4.1`'s `cargo-vendor-dir`. |
+| `steam.nix` | 6 (gamemode) | The `gamemode` rpath patch rebuilds the library and what links it. |
 | `nemo/default.nix` (`nemo-preview`) | 7 | One `preFixup` line costs the whole wrapper chain. |
 | `quodlibet.nix` + `2-server/4-apps/phone-apps.nix` | 7 | Same variant on both hosts, so the Attic shares one build. |
 | `vscodium.nix` (`poetry`) | 7 | `doCheck = false` is what takes it off Hydra. |
