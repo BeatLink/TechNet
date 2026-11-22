@@ -87,12 +87,6 @@
             url = "github:BeatLink/BattleTime";
             inputs.nixpkgs.follows = "nixpkgs";
         };
-        # Patches the Steam client so it loads CSS themes; Odin's Steam package comes from here
-        millennium = {
-            # Pinned to the 3.6.3 release: dee8e60's millennium-64 built its LuaJIT with -m32, which cannot link in a 64-bit stdenv
-            url = "github:SteamClientHomebrew/Millennium/6522c24e8bd3de41a7601ceb4e78a619930f1704?dir=packages/nix";
-            inputs.nixpkgs.follows = "nixpkgs";
-        };
         # git+ and submodules=1, not github:, because the stock themes are a submodule and a tarball fetch drops them
         web-greeter = {
             url = "git+https://github.com/BeatLink/web-greeter?ref=nix-flake&submodules=1";
