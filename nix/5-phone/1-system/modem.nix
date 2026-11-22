@@ -20,8 +20,18 @@
     nixpkgs.overlays = [
         (final: _prev: {
             pinephone-qfirehose =
-                final.callPackage "${inputs.mobile-nixos}/devices/pine64-pinephone/overlay/qfirehose"
-                    { };
+                (final.callPackage "${inputs.mobile-nixos}/devices/pine64-pinephone/overlay/qfirehose" { })
+                .overrideAttrs
+                    (old: {
+                        # universe2.us no longer answers, and curl retries it for minutes; the Wayback Machine holds the same tarball, so the hash and store path are unchanged
+                        src = final.fetchurl {
+                            urls = [
+                                "https://web.archive.org/web/20201018192757/https://universe2.us/collector/qfirehose_good.tar.zst"
+                            ]
+                            ++ old.src.urls;
+                            inherit (old.src) outputHash outputHashAlgo;
+                        };
+                    });
         })
     ];
 
