@@ -321,12 +321,6 @@
                                 ];
                             }
                         ];
-                        # QFirehose's only download host is gone and its source survives only in Attic, which a runner cannot reach
-                        Thor = [
-                            {
-                                nixpkgs.overlays = lib.mkAfter [ (_final: prev: { pinephone-qfirehose = prev.emptyDirectory; }) ];
-                            }
-                        ];
                     };
                     ciSystem =
                         name: host:
