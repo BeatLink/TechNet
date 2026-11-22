@@ -12,7 +12,7 @@
                 options = "-d sat";
             }
             {
-                device = "/dev/disk/by-id/ata-SATA_SSD_22020812000605";
+                device = "/dev/disk/by-id/ata-Dogfish_SSD_64GB_5E56255506071556041";
                 options = "-d sat";
             }
         ];
