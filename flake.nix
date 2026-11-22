@@ -89,8 +89,8 @@
         };
         # Patches the Steam client so it loads CSS themes; Odin's Steam package comes from here
         millennium = {
-            # Pinned: dee8e60's millennium-64 builds its LuaJIT with -m32, which cannot link in a 64-bit stdenv
-            url = "github:SteamClientHomebrew/Millennium/6d5379ec502896465c74dcc2462b94082c8caca2?dir=packages/nix";
+            # Pinned to the 3.6.3 release: dee8e60's millennium-64 built its LuaJIT with -m32, which cannot link in a 64-bit stdenv
+            url = "github:SteamClientHomebrew/Millennium/6522c24e8bd3de41a7601ceb4e78a619930f1704?dir=packages/nix";
             inputs.nixpkgs.follows = "nixpkgs";
         };
         # git+ and submodules=1, not github:, because the stock themes are a submodule and a tarball fetch drops them
@@ -315,8 +315,6 @@
                                     (_final: prev: {
                                         # Packet Tracer's installer is added to the store by hand (docs/odin.md), so a runner cannot build it
                                         cisco-packet-tracer_9 = prev.emptyDirectory;
-                                        # The pinned Millennium's Bun dependencies no longer fetch to their recorded hash; only Attic still holds them
-                                        millennium-steam = prev.steam;
                                     })
                                 ];
                             }
