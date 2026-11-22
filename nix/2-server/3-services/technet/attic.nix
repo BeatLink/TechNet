@@ -17,9 +17,9 @@
     # Heimdall pushes too, so X-Nix's nightly builds of every host land in the cache rather than only in Heimdall's own store.
     technet.atticPush.enable = true;
 
-    # X-Nix's TechNet cache pushes each build with this host's token, as its own user.
+    # X-Nix's TechNet cache pushes each build with this host's token, as Heimdall's agent.
     sops.secrets.attic_push_token = {
-        group = "x-nix";
+        group = "x-nix-agent";
         mode = "0440";
     };
 
