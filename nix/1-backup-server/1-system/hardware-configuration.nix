@@ -77,8 +77,9 @@ in
                 # Do not use the drive's timing as a source of randomness
                 ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${dataBridge}", ATTR{queue/add_random}="0"
 
-                # The bus-powered drive loses power under load, and with its write cache on every loss drops writes it already reported done
-                ACTION=="add", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${dataBridge}", RUN+="${pkgs.smartmontools}/bin/smartctl -d sat -s wcache,off /dev/%k"
+                # With its write cache on, any power cut, unplug or reset drops writes the drive already reported done. The keep flag stops the link
+                # resets the enclosure issues from switching the cache back on, which they did after a reboot.
+                ACTION=="add", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${dataBridge}", RUN+="${pkgs.hdparm}/bin/hdparm -K1 -W0 /dev/%k"
             '';
         }
 
