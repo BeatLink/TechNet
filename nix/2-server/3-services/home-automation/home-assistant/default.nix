@@ -165,6 +165,7 @@ in
                     "--deselect=tests/test_integration_services.py::test_review_summarize_service_version_check"
                     "--deselect=tests/test_integration_services.py::test_review_summarize_service_no_integration"
                     "--deselect=tests/test_diagnostics.py::test_diagnostics"
+                    "--deselect=tests/test_api.py::test_async_get_stats"     # Times out at 10 s on a busy CI runner
                 ];
             }))
 
