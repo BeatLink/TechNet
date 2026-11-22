@@ -5,6 +5,7 @@
         ./directories.nix
         ./performance.nix
         ./memory-guard.nix
+        ./app-slices.nix
         ./sops.nix
         ./software.nix
         ./networking.nix

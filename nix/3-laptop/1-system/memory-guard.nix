@@ -16,24 +16,35 @@
         };
 
         # Nix Work Ceiling ###########################################################################################################################
-        # X-Nix's evaluation and every build it starts share one cap, so together they can never take more than this from the desktop.
+        # X-Nix's evaluation and every build it starts, emulated ones included, share one cap and only use CPU the desktop leaves idle.
         #
         systemd.slices.nix-work.sliceConfig = {
             MemoryHigh = "30%";
             MemoryMax = "40%";
             MemorySwapMax = "4G";
+            CPUWeight = "idle";
+            IOWeight = 10;
+            ManagedOOMSwap = "kill";
         };
 
-        systemd.services.nix-daemon.serviceConfig = {
-            Slice = "nix-work.slice";
-            # Builds inherit this, so a host-wide shortage kills a compiler before the editor or a terminal.
-            OOMScoreAdjust = 500;
-        };
+        nix.daemonCPUSchedPolicy = "idle";
+        nix.daemonIOSchedClass = "idle";
 
         systemd.services.x-nix-agent.serviceConfig = {
-            Slice = "nix-work.slice";
-            OOMScoreAdjust = 500;
+            CPUSchedulingPolicy = "idle";
+            IOSchedulingClass = "idle";
         };
+
+        # Pressure Kills #############################################################################################################################
+        # Thrashing on zram never trips earlyoom's percentages, so stalls and swap use decide instead.
+        #
+        systemd.oomd = {
+            enable = true;
+            enableUserSlices = true;
+            settings.OOM.SwapUsedLimit = "80%";
+        };
+
+        systemd.slices.user.sliceConfig.ManagedOOMSwap = "kill";
 
         # Build Width ################################################################################################################################
         # Three jobs of four threads fill the twelve threads once, rather than twelve jobs each spawning a compiler per thread.
@@ -48,7 +59,7 @@
         #
         services.earlyoom = {
             enable = true;
-            # Below 10 the kernel's own OOM killer fires first, because zram and the ZFS ARC hide from earlyoom's total.
+            # Reclaimable slab and a shrinking total keep this above 10% through a zram thrash, so oomd is the real guard.
             freeMemThreshold = 10;
             freeMemKillThreshold = 5;
             # Swap is zram, which runs out of RAM to compress into long before it reads as full, so memory alone decides.
