@@ -20,7 +20,10 @@
             };
 
             boot.kernel.sysctl = {
-                "kernel.hung_task_panic" = 1;
+                # Reports any task stuck 20 s, inside the watchdog's 30 s, so its stack is in the log the watchdog's panic saves; softdog does the reset
+                "kernel.hung_task_timeout_secs" = 20;
+                "kernel.hung_task_all_cpu_backtrace" = 1;
+                "kernel.hung_task_panic" = 0;
                 "kernel.softlockup_panic" = 1;
                 "kernel.hardlockup_panic" = 1;
             };
