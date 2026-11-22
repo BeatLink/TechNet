@@ -9,7 +9,11 @@
         # Watchdog ###################################################################################################################################
         {
             boot.initrd.kernelModules = [ "softdog" ];
-            boot.kernelParams = [ "softdog.soft_margin=30" ];
+            # Panics instead of resetting quietly, so the stack of whatever froze the machine is kept in the EFI store for the next boot to log
+            boot.kernelParams = [
+                "softdog.soft_margin=30"
+                "softdog.soft_panic=1"
+            ];
             systemd.settings.Manager = {
                 RuntimeWatchdogSec = "30s";
                 WatchdogDevice = "/dev/watchdog0"; # softdog, which takes the first number by loading from the initrd, ahead of the chipset's iTCO timer
