@@ -24,6 +24,7 @@ PRESS_END_SECONDS = 0.25
 FRAME_GAP = 6_000
 FALLBACK_GAP = 20_000
 DEFAULT_CARRIER = 38_000
+PRONTO_UNIT = 0.241246
 
 
 # Recording ##########################################################################################################################################
@@ -138,6 +139,192 @@ def code_from_press(durations, carrier):
     }
 
 
+# A raw Pronto hex code for a learned code, with every pair in the once-only part.
+def to_pronto(code):
+    frequency_word = round(1e6 / (code["carrier"] * PRONTO_UNIT))
+    unit = frequency_word * PRONTO_UNIT
+    durations = code["durations"]
+    words = [0, frequency_word, len(durations) // 2, 0] + [max(1, round(duration / unit)) for duration in durations]
+    return " ".join(f"{word:04X}" for word in words)
+
+
+# Protocols ##########################################################################################################################################
+
+# Whether a measured length is close enough to a protocol's nominal one.
+def near(length, nominal):
+    return abs(length - nominal) <= max(0.3 * nominal, 150)
+
+
+# The number whose bits are given, least significant first.
+def lsb_first(bits):
+    return sum(bit << index for index, bit in enumerate(bits))
+
+
+# The number whose bits are given, most significant first.
+def msb_first(bits):
+    return lsb_first(bits[::-1])
+
+
+# Bits from a header, fixed marks and two space lengths, ending with a stop mark, or None when the frame is not shaped that way.
+def pulse_distance(durations, header, mark, zero, one):
+    if header:
+        if not (near(durations[0], header[0]) and near(durations[1], header[1])):
+            return None
+        durations = durations[2:]
+    if len(durations) < 4 or len(durations) % 2:
+        return None
+    bits = []
+    for index in range(0, len(durations) - 2, 2):
+        if not near(durations[index], mark):
+            return None
+        if near(durations[index + 1], zero):
+            bits.append(0)
+        elif near(durations[index + 1], one):
+            bits.append(1)
+        else:
+            return None
+    return bits if near(durations[-2], mark) else None
+
+
+# Bits from a header and marks of two lengths, each followed by a fixed space, or None when the frame is not shaped that way.
+def pulse_width(durations, header, space, zero, one):
+    if not (near(durations[0], header[0]) and near(durations[1], header[1])):
+        return None
+    bits = []
+    for index in range(2, len(durations), 2):
+        if near(durations[index], zero):
+            bits.append(0)
+        elif near(durations[index], one):
+            bits.append(1)
+        else:
+            return None
+        if index + 2 < len(durations) and not near(durations[index + 1], space):
+            return None
+    return bits
+
+
+# Carrier levels in half-bit units, marks as True, or None when a length is not a whole number of units.
+def half_bits(durations, unit, longest):
+    levels = []
+    for index, length in enumerate(durations):
+        count = round(length / unit)
+        if not 1 <= count <= longest or not near(length, count * unit):
+            return None
+        levels += [index % 2 == 0] * count
+    return levels
+
+
+# Manchester bits from levels, each the given number of halves wide, with a mark first meaning one when mark_first is set.
+def manchester(levels, width, mark_first):
+    bits = []
+    for start in range(0, len(levels), 2 * width):
+        first = levels[start:start + width]
+        second = levels[start + width:start + 2 * width]
+        if len(second) < width or len(set(first)) != 1 or len(set(second)) != 1 or first[0] == second[0]:
+            return None
+        bits.append(int(first[0] == mark_first))
+    return bits
+
+
+# NEC, NECx and Samsung frames: a header and 32 bits holding an address and a command with its inverse.
+def decode_nec(durations):
+    for protocol, header in (("NEC", (9000, 4500)), ("Samsung", (4500, 4500))):
+        bits = pulse_distance(durations, header, 560, 560, 1690)
+        if bits is None or len(bits) != 32:
+            continue
+        address, inverse_address, command, inverse_command = (lsb_first(bits[start:start + 8]) for start in range(0, 32, 8))
+        if command ^ inverse_command != 0xFF:
+            return {"protocol": protocol + "-raw", "data": lsb_first(bits)}
+        if protocol == "NEC" and address ^ inverse_address != 0xFF:
+            return {"protocol": "NECx", "address": lsb_first(bits[:16]), "command": command}
+        return {"protocol": protocol, "address": address, "command": command}
+    return None
+
+
+# JVC frames: a header and 16 bits holding an address and a command.
+def decode_jvc(durations):
+    bits = pulse_distance(durations, (8400, 4200), 525, 525, 1575)
+    if bits is None or len(bits) != 16:
+        return None
+    return {"protocol": "JVC", "address": lsb_first(bits[:8]), "command": lsb_first(bits[8:])}
+
+
+# Kaseikyo frames, used by Panasonic and others: a header and 48 bits starting with a vendor id.
+def decode_kaseikyo(durations):
+    bits = pulse_distance(durations, (3456, 1728), 432, 432, 1296)
+    if bits is None or len(bits) != 48:
+        return None
+    return {"protocol": "Kaseikyo", "vendor": lsb_first(bits[:16]), "data": [lsb_first(bits[start:start + 8]) for start in range(16, 48, 8)]}
+
+
+# Sharp frames: no header and 15 bits holding an address, a command and two check bits.
+def decode_sharp(durations):
+    bits = pulse_distance([0, 0] + durations, (0, 0), 320, 680, 1680)
+    if bits is None or len(bits) != 15:
+        return None
+    return {"protocol": "Sharp", "address": lsb_first(bits[:5]), "command": lsb_first(bits[5:13])}
+
+
+# Sony SIRC frames: a header and 12, 15 or 20 pulse-width bits holding a command and an address.
+def decode_sony(durations):
+    bits = pulse_width(durations, (2400, 600), 600, 600, 1200)
+    if bits is None or len(bits) not in (12, 15, 20):
+        return None
+    decoded = {"protocol": f"Sony{len(bits)}", "command": lsb_first(bits[:7])}
+    if len(bits) == 20:
+        return {**decoded, "address": lsb_first(bits[7:12]), "extended": lsb_first(bits[12:])}
+    return {**decoded, "address": lsb_first(bits[7:])}
+
+
+# Philips RC5 frames: 14 Manchester bits of 1778 us, whose leading space the receiver cannot see.
+def decode_rc5(durations):
+    levels = half_bits(durations[:-1], 889, 2)
+    if levels is None:
+        return None
+    levels = [False] + levels
+    levels += [False] * (28 - len(levels))
+    bits = manchester(levels, 1, False) if len(levels) == 28 else None
+    if bits is None or bits[0] != 1:
+        return None
+    return {"protocol": "RC5", "address": msb_first(bits[3:8]), "command": msb_first(bits[8:]) + (0 if bits[1] else 64), "toggle": bits[2]}
+
+
+# Philips RC6 frames: a leader, a start bit, three mode bits, a double-width toggle bit and Manchester data bits of 889 us.
+def decode_rc6(durations):
+    if len(durations) < 4 or not (near(durations[0], 2666) and near(durations[1], 889)):
+        return None
+    levels = half_bits(durations[2:-1], 444, 3)
+    if levels is None:
+        return None
+    for data_bits in (16, 20, 24, 32):
+        total = 8 + 4 + 2 * data_bits
+        if len(levels) > total:
+            continue
+        padded = levels + [False] * (total - len(levels))
+        head = manchester(padded[:8], 1, True)
+        toggle = manchester(padded[8:12], 2, True)
+        data = manchester(padded[12:], 1, True)
+        if head is None or toggle is None or data is None or head[0] != 1:
+            return None
+        mode = msb_first(head[1:])
+        if data_bits == 16:
+            return {"protocol": f"RC6-{mode}", "address": msb_first(data[:8]), "command": msb_first(data[8:]), "toggle": toggle[0]}
+        return {"protocol": f"RC6-{mode}-{data_bits}", "data": msb_first(data), "toggle": toggle[0]}
+    return None
+
+
+# The protocol, address and command a code's frame carries, or None when it matches no protocol known here.
+def decode(code):
+    durations = code["durations"]
+    if len(durations) < 4:
+        return None
+    for decoder in (decode_nec, decode_jvc, decode_kaseikyo, decode_sony, decode_rc6, decode_rc5, decode_sharp):
+        decoded = decoder(durations)
+        if decoded:
+            return decoded
+    return None
+
+
 # API ################################################################################################################################################
 
 class Handler(BaseHTTPRequestHandler):
@@ -180,7 +367,7 @@ class Handler(BaseHTTPRequestHandler):
                 prepare_mixer(self.mixer_card)
             samples = record_press(self.device, float(body.get("timeout", 30)))
             code = code_from_press(envelope(samples), round(float(body.get("carrier", DEFAULT_CARRIER))))
-            result = {"code": code}
+            result = {"code": code, "decoded": decode(code), "pronto": to_pronto(code)}
             if body.get("name"):
                 request = urllib.request.Request(
                     f"{body.get('blaster', self.blaster)}/codes/{urllib.parse.quote(body['name'], safe='')}",
