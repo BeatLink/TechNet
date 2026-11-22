@@ -6,6 +6,7 @@
 {
     imports = [
         ./backup-excludes.nix
+        ./ir-learn
         ./ssh.nix
         ./syncthing.nix
         ./x-backups-agent.nix
