@@ -13,20 +13,20 @@
         {
             technet.storage.backend = "btrfs-luks";
 
-            disko.devices.disk.root-drive.device = "/dev/disk/by-id/ata-SATA_SSD_22020812000605";
+            disko.devices.disk.root-drive.device = "/dev/disk/by-id/ata-Dogfish_SSD_64GB_5E56255506071556041";
         }
 
         # Swap Partition #############################################################################################################################
         # The shared layout is the ESP then a container sized to the remainder; disko places the ESP at priority 1000 and a 100% partition at 9001, so this sits between.
-        {
-            disko.devices.disk.root-drive.content.partitions.swap = {
-                priority = 2000;
-                size = "16G";
-                content = {
-                    type = "swap";
-                    randomEncryption = true; # A fresh dm-crypt key every boot: nothing to store or unlock, and the kernel line already carries nohibernate
-                };
-            };
-        }
+        #{
+        #    disko.devices.disk.root-drive.content.partitions.swap = {
+        #        priority = 2000;
+        #        size = "16G";
+        #        content = {
+        #            type = "swap";
+        #            randomEncryption = true; # A fresh dm-crypt key every boot: nothing to store or unlock, and the kernel line already carries nohibernate
+        #        };
+        #    };
+        #}
     ];
 }
