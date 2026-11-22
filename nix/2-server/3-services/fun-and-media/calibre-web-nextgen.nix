@@ -29,7 +29,21 @@
     services.calibre-web-nextgen = {
         enable = true;
         package = inputs.calibre-web-nextgen.packages.${pkgs.stdenv.hostPlatform.system}.default.override {
-            calibre = pkgs.calibre.override { speechSupport = false; }; # calibre's speech stack (piper-tts, speechd) fails its tests in this nixpkgs, and the server never reads aloud
+            calibre =
+                (pkgs.calibre.override {
+                    speechSupport = false; # calibre's speech stack (piper-tts, speechd) fails its tests in this nixpkgs, and the server never reads aloud
+                }).overrideAttrs
+                    (old: {
+                        # Both wait a fixed time for full-text indexing to finish, which a busy builder misses
+                        installCheckPhase =
+                            assert lib.hasInfix "python setup.py test " old.installCheckPhase;
+                            builtins.replaceStrings
+                                [ "python setup.py test " ]
+                                [
+                                    "python setup.py test --exclude-test-name test_fts_search --exclude-test-name test_export_import "
+                                ]
+                                old.installCheckPhase;
+                    });
         };
         port = 8083;
         listenAddress = "127.0.0.1"; # Only nginx reaches it; exposed directly over WireGuard it holds half-open requests forever
