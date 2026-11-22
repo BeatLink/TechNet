@@ -11,8 +11,6 @@
     ...
 }:
 let
-    halonSteamTheme = inputs.halon.packages.${pkgs.stdenv.hostPlatform.system}.halon-steam-theme;
-
     pausedUserUnits = [
         "syncthing.service"
         "syncthingtray.service"
@@ -65,7 +63,6 @@ in
         {
             programs.steam = {
                 enable = true;
-                package = pkgs.millennium-steam; # Stock Steam plus Millennium's loader, which is what reads the theme below
                 remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
                 dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
                 localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
@@ -136,19 +133,6 @@ in
                         '';
                     });
                 })
-            ];
-        }
-
-        # Millennium #################################################################################################################################
-        # The loader that lets the Steam client wear a CSS theme, and Halon as the theme it wears.
-        {
-            nixpkgs.overlays = [ inputs.millennium.overlays.default ];
-
-            # Millennium creates its themes directory itself on first run, so the link is a tmpfiles
-            # rule that re-asserts itself at every login rather than something written once.
-            # Millennium's own docs still give the 2.x location, steamui/skins; 3.x reads this one.
-            systemd.user.tmpfiles.rules = [
-                "L+ %h/.local/share/Steam/millennium/themes/Halon - - - - ${halonSteamTheme}/share/halon/steam"
             ];
         }
 
