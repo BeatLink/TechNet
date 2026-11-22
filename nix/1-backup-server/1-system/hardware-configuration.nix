@@ -4,7 +4,7 @@
 # needs to work reliably. The root SSD sits on an internal SATA port and needs none.
 #
 
-{ lib, ... }:
+{ lib, pkgs, ... }:
 let
     # The enclosure the backup drive is plugged in through, a Sabrent JMicron one that held the root SSD on the Rock64
     dataBridge = "0583";
@@ -76,6 +76,9 @@ in
 
                 # Do not use the drive's timing as a source of randomness
                 ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${dataBridge}", ATTR{queue/add_random}="0"
+
+                # The bus-powered drive loses power under load, and with its write cache on every loss drops writes it already reported done
+                ACTION=="add", SUBSYSTEM=="block", KERNEL=="sd[a-z]", ATTRS{idVendor}=="152d", ATTRS{idProduct}=="${dataBridge}", RUN+="${pkgs.smartmontools}/bin/smartctl -d sat -s wcache,off /dev/%k"
             '';
         }
 
