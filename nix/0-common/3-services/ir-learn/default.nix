@@ -1,5 +1,5 @@
 # IR Learn ###########################################################################################################################################
-# An HTTP API on port 9621 that learns an infrared code from one button press, heard through a receiver wired into a USB sound card's mic input.
+# An HTTP API and web page on port 9621 that learn an infrared code from one button press, heard through a receiver wired into a USB sound card's mic input.
 # It answers over WireGuard only and can hand each code to an ir-blaster to store.
 #
 {
@@ -45,7 +45,7 @@ in
             after = [ "network.target" ];
             path = [ pkgs.alsa-utils ];
             serviceConfig = {
-                ExecStart = "${irLearn}/bin/ir-learn --device ${cfg.device} --mixer-card ${cfg.mixerCard} --blaster ${cfg.blaster}";
+                ExecStart = "${irLearn}/bin/ir-learn --device ${cfg.device} --mixer-card ${cfg.mixerCard} --blaster ${cfg.blaster} --page ${./ir-learn.html}";
                 DynamicUser = true;
                 SupplementaryGroups = [ "audio" ];
                 Restart = "on-failure";

@@ -1,6 +1,6 @@
 # IR Learn ###########################################################################################################################################
 #
-# An HTTP API that records one button press from an infrared receiver wired into an audio input and returns it as a code, optionally storing it on a blaster.
+# An HTTP API and web page that record one button press from an infrared receiver wired into an audio input and return it as a code, optionally storing it on a blaster.
 # The receiver passes the remote's carrier straight through, so a mark is wherever the recording carries it.
 #
 
@@ -144,12 +144,26 @@ class Handler(BaseHTTPRequestHandler):
     device = None
     mixer_card = None
     blaster = None
+    page = None
 
     # Answers with a status and a JSON body.
     def reply(self, status, body):
         payload = json.dumps(body, indent=4).encode()
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(payload)))
+        self.end_headers()
+        self.wfile.write(payload)
+
+    # Serves the learning page.
+    def do_GET(self):
+        if urllib.parse.urlparse(self.path).path != "/":
+            self.reply(404, {"error": "no such endpoint"})
+            return
+        with open(self.page, "rb") as page_file:
+            payload = page_file.read()
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Content-Length", str(len(payload)))
         self.end_headers()
         self.wfile.write(payload)
@@ -191,12 +205,14 @@ def main():
     parser.add_argument("--device", required=True)
     parser.add_argument("--mixer-card")
     parser.add_argument("--blaster", default="http://127.0.0.1:9620")
+    parser.add_argument("--page", required=True)
     parser.add_argument("--listen", default="0.0.0.0")
     parser.add_argument("--port", type=int, default=9621)
     arguments = parser.parse_args()
     Handler.device = arguments.device
     Handler.mixer_card = arguments.mixer_card
     Handler.blaster = arguments.blaster
+    Handler.page = arguments.page
     ThreadingHTTPServer((arguments.listen, arguments.port), Handler).serve_forever()
 
 

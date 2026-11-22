@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IR Learn</title>
+<style>
+    :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+    body { max-width: 40rem; margin: 2rem auto; padding: 0 1rem; }
+    label { display: block; margin: 0.75rem 0 0.25rem; }
+    input { width: 100%; box-sizing: border-box; padding: 0.5rem; font-size: 1rem; }
+    button { margin-top: 1rem; padding: 0.6rem 1.2rem; font-size: 1rem; }
+    pre { white-space: pre-wrap; word-break: break-all; background: rgba(127, 127, 127, 0.15); padding: 0.75rem; }
+</style>
+</head>
+<body>
+<h1>IR Learn</h1>
+<p>Press Learn, then point the remote at the receiver and press the button once.</p>
+<form id="learn">
+    <label for="name">Name to store it under on the blaster (leave empty to only show the code)</label>
+    <input id="name" autocomplete="off">
+    <label for="carrier">Carrier frequency in Hz</label>
+    <input id="carrier" type="number" value="38000" min="20000" max="100000">
+    <button id="button" type="submit">Learn</button>
+</form>
+<p id="status"></p>
+<pre id="result" hidden></pre>
+<script>
+    const form = document.getElementById("learn");
+    const button = document.getElementById("button");
+    const status = document.getElementById("status");
+    const result = document.getElementById("result");
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        button.disabled = true;
+        result.hidden = true;
+        status.textContent = "Listening — press the remote button now (30 s)…";
+        try {
+            const response = await fetch("learn", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name: document.getElementById("name").value.trim(), carrier: Number(document.getElementById("carrier").value) }),
+            });
+            const body = await response.json();
+            status.textContent = !response.ok ? `Failed: ${body.error}` : body.stored ? "Learned and stored on the blaster." : "Learned.";
+            result.textContent = JSON.stringify(body, null, 4);
+            result.hidden = false;
+        } catch (error) {
+            status.textContent = `Failed: ${error}`;
+        } finally {
+            button.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>
