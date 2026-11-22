@@ -1,4 +1,26 @@
-{ config, ... }:
+{
+    config,
+    inputs,
+    pkgs,
+    ...
+}:
+let
+    xAppIcons = pkgs.linkFarm "x-app-icons" (
+        map
+            (app: {
+                name = "${app}.svg";
+                path = "${inputs.${app}}/resources/icon.svg";
+            })
+            [
+                "x-tasks"
+                "x-fitness"
+                "x-media-tracker"
+                "x-nix"
+                "x-backups"
+                "x-monitor"
+            ]
+    );
+in
 {
     sops.secrets.homepage_env = {
         sopsFile = "${config.technet.secrets.path}/homepage.yaml";
@@ -138,7 +160,7 @@
                     }
                     {
                         "X-Tasks" = {
-                            icon = "mdi-checkbox-marked-outline";
+                            icon = "/x-app-icons/x-tasks.svg";
                             description = "Task Manager and Sync Server";
                             href = "https://tasks.heimdall.technet";
                             siteMonitor = "https://tasks.heimdall.technet/login"; # The root redirects to the login page when signed out
@@ -147,19 +169,10 @@
                     }
                     {
                         "X-Fitness" = {
-                            icon = "mdi-dumbbell";
+                            icon = "/x-app-icons/x-fitness.svg";
                             description = "Workout, Diet and Body Tracker and Sync Server";
                             href = "https://fitness.heimdall.technet";
                             siteMonitor = "https://fitness.heimdall.technet/login"; # The root redirects to the login page when signed out
-                            statusStyle = "dot";
-                        };
-                    }
-                    {
-                        "X-Media-Tracker" = {
-                            icon = "mdi-movie-open-outline";
-                            description = "Movie and TV Tracker and Sync Server";
-                            href = "https://media-tracker.heimdall.technet";
-                            siteMonitor = "https://media-tracker.heimdall.technet"; # The page itself; sign-in happens within it
                             statusStyle = "dot";
                         };
                     }
@@ -335,6 +348,15 @@
                             };
                         };
                     }
+                    {
+                        "X-Media-Tracker" = {
+                            icon = "/x-app-icons/x-media-tracker.svg";
+                            description = "Movie and TV Tracker and Sync Server";
+                            href = "https://media-tracker.heimdall.technet";
+                            siteMonitor = "https://media-tracker.heimdall.technet"; # The page itself; sign-in happens within it
+                            statusStyle = "dot";
+                        };
+                    }
                 ];
             }
             {
@@ -476,7 +498,7 @@
                     }
                     {
                         "X-Nix" = {
-                            icon = "https://nix.heimdall.technet/icon.svg";
+                            icon = "/x-app-icons/x-nix.svg";
                             href = "https://nix.heimdall.technet";
                             description = "NixOS Deployment Portal";
                             siteMonitor = "https://nix.heimdall.technet/health";
@@ -485,7 +507,7 @@
                     }
                     {
                         "X-Backups" = {
-                            icon = "mdi-backup-restore";
+                            icon = "/x-app-icons/x-backups.svg";
                             href = "https://backups.heimdall.technet";
                             description = "Borg Backup Manager";
                             siteMonitor = "https://backups.heimdall.technet";
@@ -494,7 +516,7 @@
                     }
                     {
                         "X-Monitor" = {
-                            icon = "uptime-kuma.png";
+                            icon = "/x-app-icons/x-monitor.svg";
                             href = "https://monitor.heimdall.technet";
                             description = "Network and Systems Monitor";
                             siteMonitor = "https://monitor.heimdall.technet";
@@ -548,6 +570,7 @@
         domain = "dashboard.heimdall.technet";
         port = 9610;
     };
+    services.nginx.virtualHosts.homepage.locations."/x-app-icons/".alias = "${xAppIcons}/";
     services.nginx.virtualHosts.homepage.serverAliases = [
         "heimdall.technet"
         "www.heimdall.technet"
