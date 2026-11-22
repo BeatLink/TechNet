@@ -193,11 +193,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1795318772,
-        "narHash": "sha256-LJYSYHaOLKXdMDisQdZ+SHThreyc5fIlpJd/KHED0nA=",
+        "lastModified": 1795319133,
+        "narHash": "sha256-CchuQAsB0PGGdvkBkpvqDP0zn3bevoDY4xA9VqWHQWA=",
         "owner": "x-tech-laboratories",
         "repo": "CODEX",
-        "rev": "f7f42f26a63bc4073bd3bfb292898a26f117887c",
+        "rev": "b33c97317ac79145fe1a21822ff751c822d52460",
         "type": "github"
       },
       "original": {
@@ -733,35 +733,35 @@
       },
       "locked": {
         "dir": "packages/nix",
-        "lastModified": 1794417982,
-        "narHash": "sha256-3Awg1ebfAywMKK429nxrtNWHYtM2V97GsX03qr8FuyQ=",
+        "lastModified": 1794588209,
+        "narHash": "sha256-i0Y49re/VXOTBGSjsYdEoIrP9IaNejmCeUHFssGQ+NQ=",
         "owner": "SteamClientHomebrew",
         "repo": "Millennium",
-        "rev": "6d5379ec502896465c74dcc2462b94082c8caca2",
+        "rev": "6522c24e8bd3de41a7601ceb4e78a619930f1704",
         "type": "github"
       },
       "original": {
         "dir": "packages/nix",
         "owner": "SteamClientHomebrew",
         "repo": "Millennium",
-        "rev": "6d5379ec502896465c74dcc2462b94082c8caca2",
+        "rev": "6522c24e8bd3de41a7601ceb4e78a619930f1704",
         "type": "github"
       }
     },
     "millennium-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1792710296,
-        "narHash": "sha256-e79vMkWWeK7Rk3OjbK82yC+EgVgCCtG9wRMxO1ZP+vE=",
+        "lastModified": 1794587997,
+        "narHash": "sha256-UZQSHMsAaYTcx1TDAI7FTqVRsMpB1jLBL8kYKivwbYo=",
         "owner": "SteamClientHomebrew",
         "repo": "Millennium",
-        "rev": "3858d60a2081f612739f07386ceac9b79f68274b",
+        "rev": "ac5e1ad646b1d1dd76a04aecf32d9e5e41779201",
         "type": "github"
       },
       "original": {
         "owner": "SteamClientHomebrew",
         "repo": "Millennium",
-        "rev": "3858d60a2081f612739f07386ceac9b79f68274b",
+        "rev": "ac5e1ad646b1d1dd76a04aecf32d9e5e41779201",
         "type": "github"
       }
     },
@@ -1438,11 +1438,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795318654,
-        "narHash": "sha256-f6mfFtl6prz0fBkim2qeG0xExJJFd4nwbbfdN5cjg9Y=",
+        "lastModified": 1795318965,
+        "narHash": "sha256-0H5WqOW4K6abQmQVeDCOZuPjx1sBXBgKJ602xkjcwBg=",
         "owner": "x-tech-laboratories",
         "repo": "X-Backups",
-        "rev": "a752230e18869462059534a6e9ab94ea6280581d",
+        "rev": "1d965999cbc472afe8b2d3f5c5ebafcf6c7b99df",
         "type": "github"
       },
       "original": {
@@ -1501,11 +1501,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795318704,
-        "narHash": "sha256-rk4oe5RBzGcE4N6JBAJg+SdW+t82djQ5aU0RT6nqOuY=",
+        "lastModified": 1795319468,
+        "narHash": "sha256-YrMi6jWSb4rxM7E3M9tL3UXpf5n+JYykqCZbAf/N6ig=",
         "owner": "x-tech-laboratories",
         "repo": "X-Monitor",
-        "rev": "d17853d8b0d653a55408e6d443b8b6d7fe7f7845",
+        "rev": "f424a826e03b5f001b306f625f7f0e9a0e5f2d7b",
         "type": "github"
       },
       "original": {
@@ -1522,11 +1522,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795318753,
-        "narHash": "sha256-izdJRD/R1S43ZAub8fs75YglR35SZnYkTXFI7W9dhB4=",
+        "lastModified": 1795319473,
+        "narHash": "sha256-9kxqSD6LpjlH9mqhQlFJn00Y5EO4JhbJQztv4SehbSc=",
         "owner": "x-tech-laboratories",
         "repo": "X-Music",
-        "rev": "8180dd29d04ce649eb0e90aad5df2f3e1ce540ea",
+        "rev": "b724d375fe2639a9a6e49850147956686ef8862e",
         "type": "github"
       },
       "original": {
@@ -1543,11 +1543,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795321869,
-        "narHash": "sha256-DEpx7sxT+bpg8nQWNTQI7zk6/7/B0zrYyZqI7JHBSWM=",
+        "lastModified": 1795322079,
+        "narHash": "sha256-VU9oCDqcEOadWjIu2XC/Bcdx6gIWioyWtsh3HigON0c=",
         "owner": "x-tech-laboratories",
         "repo": "X-Nix",
-        "rev": "920a0f2ad27045a4a0e8ff2bd052c1d2152444c9",
+        "rev": "c9e25113d0fd183711ed96fe4aa9416247cc8b75",
         "type": "github"
       },
       "original": {
