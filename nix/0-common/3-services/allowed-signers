@@ -1,0 +1,4 @@
+# The keys TechNet's commits are signed with, in Git's allowed signers format; Odin's X-Nix pull mode switches only to commits these signed
+47278150+BeatLink@users.noreply.github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICnv2wHMWS+X9GoKi9Oelfzg5WGz9mpdR4QywPaAvL5g
+47278150+BeatLink@users.noreply.github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDFORvdrZmy94/5LqaKUfTh43qiTCsNFenNAb2Dxem0M
+x-nix@localhost ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHEjOz+GIZC3Yff3MMX9jhXLKMEJ2emXNPk0/pOoojc5

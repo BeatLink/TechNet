@@ -74,6 +74,12 @@ in
         owner = "x-nix-agent";
     };
 
+    # The key Update Flake signs its commits with, listed in allowed-signers, so Odin's pull mode can deploy the heads X-Nix pushes.
+    sops.secrets.x_nix_commit_signing_key = {
+        sopsFile = "${config.technet.secrets.path}/x-nix-signing.yaml";
+        owner = "x-nix-agent";
+    };
+
     # The GitHub token's nix.conf include again, readable by Heimdall's agent, so updating the flake does not run into the API's rate limit for anonymous callers.
     sops.secrets.x_nix_github_access_token_conf = {
         sopsFile = "${config.technet.secrets.commonPath}/github.yaml";
@@ -122,6 +128,7 @@ in
             url = config.technet.flake;
             update_at = "02:00";
             push_ssh_key = config.sops.secrets.x_monitor_flake_deploy_key.path; # Lives on Heimdall alone, which updates the flake for the whole fleet
+            commit_signing_key = config.sops.secrets.x_nix_commit_signing_key.path;
             access_tokens_file = config.sops.secrets.x_nix_github_access_token_conf.path;
             # Only my own repositories update the flake as soon as they move; everything upstream waits for update_at.
             watch_inputs = [

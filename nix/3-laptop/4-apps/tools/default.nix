@@ -5,6 +5,7 @@
         ./czkawka.nix
         ./drawio.nix
         ./gallery-dl.nix
+        ./git-signing.nix
         ./inkscape.nix
         ./libreoffice.nix
         ./packet-tracer.nix
