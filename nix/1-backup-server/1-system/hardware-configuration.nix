@@ -14,7 +14,7 @@ let
     spareBridge = "1561";
 
     # One setting for every adapter, because a second usb-storage.quirks on the command line replaces the first instead of adding to it
-    storageQuirks = "152d:${dataBridge}:f,152d:${formerDataBridge}:u,152d:${spareBridge}:u";
+    storageQuirks = "152d:${dataBridge}:fu,152d:${formerDataBridge}:u,152d:${spareBridge}:u";
 in
 {
     config = lib.mkMerge [
@@ -58,8 +58,8 @@ in
         # Disk Protocol ##############################################################################################################################
         {
             boot.kernelParams = [
-                # The backup drive's enclosure runs the fast USB disk protocol, where the f keeps a kernel default this list would otherwise drop. The
-                # two unused adapters stay on the older, simpler one, under which they were the only reliable.
+                # Every adapter runs the older, simpler USB disk protocol (u). On the fast one the backup drive's enclosure dropped off the bus under
+                # sustained reads while the drive stayed powered. The f keeps a kernel default for that enclosure which this list would otherwise drop.
                 "usb-storage.quirks=${storageQuirks}"
 
                 # Slow down the first moments of USB setup for the unused adapters; without it they sometimes reject the setup and the drive never appears.
