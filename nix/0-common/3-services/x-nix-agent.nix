@@ -25,9 +25,6 @@ let
 
     # Where the TechNet cache roots each build, the same folder as on Heimdall (x-nix.nix).
     buildRoots = "/var/lib/x-nix-build-roots";
-
-    # The key my commits are signed with, the only signature pull mode switches to.
-    allowedSigners = pkgs.writeText "x-nix-allowed-signers" "beatlink ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICnv2wHMWS+X9GoKi9Oelfzg5WGz9mpdR4QywPaAvL5g\n";
 in
 {
     imports = [ inputs.x-nix.nixosModules.agent ];
@@ -40,7 +37,11 @@ in
 
         services.x-nix-agent = {
             enable = true;
-            url = if host == "Heimdall" then "ws://127.0.0.1:7720/api/agent" else "wss://nix.heimdall.technet/api/agent";
+            url =
+                if host == "Heimdall" then
+                    "ws://127.0.0.1:7720/api/agent"
+                else
+                    "wss://nix.heimdall.technet/api/agent";
             keyFile = config.sops.secrets.x_nix_agent_key.path;
             # Deploys from GitHub by itself once Heimdall has been gone half a day; only the laptop can evaluate the flake in reasonable time.
             pull = lib.mkIf (host == "Odin") {
@@ -54,7 +55,7 @@ in
                 after = "12h";
                 configuration = host;
                 rebuildArgs = [ "--no-write-lock-file" ];
-                allowedSignersFile = allowedSigners;
+                allowedSignersFile = ./allowed-signers;
             };
         };
 

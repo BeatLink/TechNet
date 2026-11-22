@@ -3,7 +3,7 @@
 # Version control system for beatlink, using the full build for its extra commands.
 #
 
-{ pkgs, ... }:
+{ lib, pkgs, ... }:
 {
     home-manager.users.beatlink.programs.git = {
         enable = true;
@@ -15,8 +15,9 @@
             core = {
                 autocrlf = "input";
             };
+            gpg.ssh.allowedSignersFile = "${../../3-services/allowed-signers}";
         };
-        signing.format = null;
+        signing.format = lib.mkDefault null;
         package = pkgs.gitFull;
     };
 }
