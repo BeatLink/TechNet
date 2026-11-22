@@ -20,6 +20,7 @@ DEFAULT_CARRIER = 38_000
 MARK_PATTERNS = [bytes([0xFF, 0xFF, 0x00, 0x00]), bytes([0xFF, 0x00])]
 SEND_PADDING_SECONDS = 0.02
 FALLBACK_GAP = 20_000
+FRAME_GAP = 40_000
 
 
 # Codes ##############################################################################################################################################
@@ -45,9 +46,11 @@ def to_pronto(code):
     return " ".join(f"{word:04X}" for word in words)
 
 
-# A stored code from an API body holding either a Pronto string or a carrier and durations.
+# A stored code from an API body holding a protocol and its fields, a Pronto string, or a carrier and durations.
 def code_from_body(body):
-    if "pronto" in body:
+    if "protocol" in body:
+        code = encode(body)
+    elif "pronto" in body:
         code = from_pronto(body["pronto"])
     else:
         durations = [round(float(duration)) for duration in body["durations"]]
@@ -60,6 +63,132 @@ def code_from_body(body):
     if not 20_000 <= code["carrier"] <= 100_000 or code["repeat"] < 1:
         raise ValueError("carrier must be 20-100 kHz and repeat at least 1")
     return code
+
+
+# Protocols ##########################################################################################################################################
+
+# The bits of a value, least significant first.
+def bits_lsb(value, count):
+    return [(value >> index) & 1 for index in range(count)]
+
+
+# The bits of a value, most significant first.
+def bits_msb(value, count):
+    return bits_lsb(value, count)[::-1]
+
+
+# A whole number field from an API body, checked to fit in a number of bits.
+def field(body, name, bits):
+    value = int(body.get(name, 0))
+    if not 0 <= value < 1 << bits:
+        raise ValueError(f"{name} must fit in {bits} bits")
+    return value
+
+
+# A frame of a header, a fixed mark and two space lengths for zero and one, ending with a stop mark and the gap.
+def pulse_distance_frame(header, mark, zero, one, bits):
+    durations = list(header)
+    for bit in bits:
+        durations += [mark, one if bit else zero]
+    return durations + [mark, FRAME_GAP]
+
+
+# A frame of a header and marks of two lengths for zero and one, each followed by a fixed space, with the last space stretched to the gap.
+def pulse_width_frame(header, space, zero, one, bits):
+    durations = list(header)
+    for bit in bits:
+        durations += [one if bit else zero, space]
+    durations[-1] = FRAME_GAP
+    return durations
+
+
+# Alternating mark and space lengths from carrier levels of one unit each, starting at the first mark and ending with the gap.
+def level_runs(levels, unit):
+    if not levels[0]:
+        levels = levels[1:]
+    durations = []
+    previous = None
+    for level in levels:
+        if level == previous:
+            durations[-1] += unit
+        else:
+            durations.append(unit)
+            previous = level
+    if len(durations) % 2:
+        durations.append(FRAME_GAP)
+    else:
+        durations[-1] += FRAME_GAP
+    return durations
+
+
+# Carrier levels for Manchester bits, each a number of units wide, with a mark first meaning one when mark_first is set.
+def manchester_levels(bits, width, mark_first):
+    levels = []
+    for bit in bits:
+        first = bool(bit) == mark_first
+        levels += [first] * width + [not first] * width
+    return levels
+
+
+# A code from NEC, NECx or Samsung fields, with the address and command followed by their inverses where the protocol sends them.
+def encode_nec(body, protocol):
+    header = (9000, 4500) if protocol.startswith("NEC") else (4500, 4500)
+    if protocol.endswith("-raw"):
+        bits = bits_lsb(field(body, "data", 32), 32)
+    else:
+        command = field(body, "command", 8)
+        if protocol == "NECx":
+            address_bits = bits_lsb(field(body, "address", 16), 16)
+        else:
+            address = field(body, "address", 8)
+            address_bits = bits_lsb(address, 8) + bits_lsb(address if protocol == "Samsung" else address ^ 0xFF, 8)
+        bits = address_bits + bits_lsb(command, 8) + bits_lsb(command ^ 0xFF, 8)
+    return {"carrier": 38_000, "durations": pulse_distance_frame(header, 560, 560, 1690, bits)}
+
+
+# A code for a protocol and its fields, such as NEC with an address and a command, or Sony12 and RC5, using the same names ir-learn reports.
+def encode(body):
+    protocol = str(body["protocol"])
+    if protocol in ("NEC", "NECx", "Samsung", "NEC-raw", "Samsung-raw"):
+        return encode_nec(body, protocol)
+    if protocol == "JVC":
+        bits = bits_lsb(field(body, "address", 8), 8) + bits_lsb(field(body, "command", 8), 8)
+        return {"carrier": 38_000, "durations": pulse_distance_frame((8400, 4200), 525, 525, 1575, bits)}
+    if protocol == "Kaseikyo":
+        data = body.get("data", [0, 0, 0, 0])
+        if len(data) != 4 or any(not 0 <= byte < 256 for byte in data):
+            raise ValueError("data must be four bytes")
+        bits = bits_lsb(field(body, "vendor", 16), 16) + [bit for byte in data for bit in bits_lsb(byte, 8)]
+        return {"carrier": 37_000, "durations": pulse_distance_frame((3456, 1728), 432, 432, 1296, bits)}
+    if protocol == "Sharp":
+        bits = bits_lsb(field(body, "address", 5), 5) + bits_lsb(field(body, "command", 8), 8) + [1, 0]
+        return {"carrier": 38_000, "durations": pulse_distance_frame((), 320, 680, 1680, bits)}
+    if protocol in ("Sony12", "Sony15", "Sony20"):
+        address_bits = 8 if protocol == "Sony15" else 5
+        bits = bits_lsb(field(body, "command", 7), 7) + bits_lsb(field(body, "address", address_bits), address_bits)
+        if protocol == "Sony20":
+            bits += bits_lsb(field(body, "extended", 8), 8)
+        return {"carrier": 40_000, "durations": pulse_width_frame((2400, 600), 600, 600, 1200, bits), "repeat": 3}
+    if protocol == "RC5":
+        command = field(body, "command", 7)
+        bits = [1, int(command < 64), field(body, "toggle", 1)] + bits_msb(field(body, "address", 5), 5) + bits_msb(command & 63, 6)
+        return {"carrier": 36_000, "durations": level_runs(manchester_levels(bits, 1, False), 889)}
+    if protocol.startswith("RC6-"):
+        parts = protocol.split("-")
+        if not all(part.isdigit() for part in parts[1:]) or len(parts) > 3:
+            raise ValueError(f"unknown protocol {protocol}")
+        mode = int(parts[1])
+        data_bits = int(parts[2]) if len(parts) == 3 else 16
+        if mode > 7 or data_bits not in (16, 20, 24, 32):
+            raise ValueError(f"unknown protocol {protocol}")
+        if len(parts) == 3:
+            data = bits_msb(field(body, "data", data_bits), data_bits)
+        else:
+            data = bits_msb(field(body, "address", 8), 8) + bits_msb(field(body, "command", 8), 8)
+        levels = manchester_levels([1] + bits_msb(mode, 3), 1, True)
+        levels += manchester_levels([field(body, "toggle", 1)], 2, True) + manchester_levels(data, 1, True)
+        return {"carrier": 36_000, "durations": [2666, 889] + level_runs(levels, 444)}
+    raise ValueError(f"unknown protocol {protocol}")
 
 
 # Transmitting #######################################################################################################################################
