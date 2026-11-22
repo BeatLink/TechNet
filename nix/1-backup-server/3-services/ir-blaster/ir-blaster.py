@@ -191,6 +191,95 @@ def encode(body):
     raise ValueError(f"unknown protocol {protocol}")
 
 
+# Importing ##########################################################################################################################################
+
+# Flipper protocol names mapped to the protocol names encode() accepts.
+FLIPPER_PROTOCOLS = {"NEC": "NEC", "NECext": "NECx", "Samsung32": "Samsung", "SIRC": "Sony12", "SIRC15": "Sony15", "SIRC20": "Sony20", "RC5": "RC5", "RC6": "RC6-0"}
+
+
+# An API body for one signal of a Flipper .ir file, raw or parsed.
+def flipper_body(block):
+    if block.get("type") == "raw":
+        return {"carrier": block["frequency"], "durations": block["data"].split()}
+    protocol = FLIPPER_PROTOCOLS.get(block.get("protocol"))
+    if protocol is None:
+        raise ValueError(f"unsupported protocol {block.get('protocol')}")
+    address, command = (int.from_bytes(bytes.fromhex(block[key].replace(" ", "")), "little") for key in ("address", "command"))
+    if protocol == "Sony20":
+        return {"protocol": protocol, "address": address & 31, "extended": address >> 5, "command": command}
+    return {"protocol": protocol, "address": address, "command": command}
+
+
+# API bodies by name from a Flipper .ir file, and the names it could not convert with the reason.
+def parse_flipper(text):
+    blocks = []
+    block = {}
+    for line in text.splitlines() + ["#"]:
+        line = line.strip()
+        if not line or line.startswith("#"):
+            if "name" in block:
+                blocks.append(block)
+            block = {}
+        else:
+            key, _, value = line.partition(":")
+            block[key.strip().lower()] = value.strip()
+    bodies = {}
+    skipped = {}
+    for block in blocks:
+        try:
+            bodies[block["name"]] = flipper_body(block)
+        except (KeyError, ValueError) as error:
+            skipped[block["name"]] = str(error)
+    return bodies, skipped
+
+
+# API bodies by name from a LIRC remote with raw codes.
+def parse_lirc(text):
+    bodies = {}
+    carrier = DEFAULT_CARRIER
+    name = None
+    durations = []
+    inside = False
+    for line in text.splitlines() + ["end raw_codes"]:
+        words = line.split("#")[0].split()
+        if not words:
+            continue
+        if words[:2] == ["begin", "raw_codes"]:
+            inside = True
+        elif words[:2] == ["end", "raw_codes"]:
+            if name is not None:
+                bodies[name] = {"carrier": carrier, "durations": durations}
+            name = None
+            inside = False
+        elif words[0] == "frequency" and len(words) > 1 and words[1].isdigit():
+            carrier = int(words[1]) or DEFAULT_CARRIER
+        elif inside and words[0] == "name" and len(words) > 1:
+            if name is not None:
+                bodies[name] = {"carrier": carrier, "durations": durations}
+            name = words[1]
+            durations = []
+        elif inside and all(word.isdigit() for word in words):
+            durations += words
+    return bodies, {}
+
+
+# The codes by name in a Flipper .ir or LIRC raw-codes file, and the names skipped with the reason.
+def import_codes(text):
+    if "begin raw_codes" in text:
+        bodies, skipped = parse_lirc(text)
+    elif "type:" in text:
+        bodies, skipped = parse_flipper(text)
+    else:
+        raise ValueError("only Flipper .ir files and LIRC remotes with raw codes are supported")
+    codes = {}
+    for name, body in bodies.items():
+        try:
+            codes[name] = code_from_body(body)
+        except (KeyError, ValueError) as error:
+            skipped[name] = str(error)
+    return codes, skipped
+
+
 # Transmitting #######################################################################################################################################
 
 # Bit times the CH340 spends sending one byte at a baud.
@@ -323,6 +412,11 @@ class Handler(BaseHTTPRequestHandler):
         blaster = self.blaster
         if method == "GET" and parts == ["codes"]:
             return {name: {**code, "pronto": to_pronto(code)} for name, code in blaster.codes().items()}
+        if method == "POST" and parts == ["import"]:
+            codes, skipped = import_codes(str(self.body().get("text", "")))
+            for name, code in codes.items():
+                blaster.store(name, code)
+            return {"imported": sorted(codes), "skipped": skipped}
         if method == "POST" and parts == ["send"]:
             code = code_from_body(self.body())
             return blaster.send(code, code["repeat"])
