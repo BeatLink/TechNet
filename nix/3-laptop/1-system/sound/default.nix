@@ -37,7 +37,6 @@
                     };
                     "/Storage/Apps/System/EasyEffects" = {
                         directories = [
-                            ".local/state/wireplumber"
                             ".config/easyeffects" # Presets, autoload rules, and pipeline configs
                             ".local/share/easyeffects" # Custom impulse response (IRS) and RNNoise files
                         ];
