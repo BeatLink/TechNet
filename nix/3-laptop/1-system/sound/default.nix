@@ -14,7 +14,10 @@
     };
 
     # PipeWire's pulse server has no client tools of its own, and Steam shells out to pactl to find the audio devices.
-    environment.systemPackages = [ pkgs.pulseaudio ];
+    environment.systemPackages = [
+        pkgs.pulseaudio
+        pkgs.easyeffects
+    ];
 
     home-manager.users.beatlink =
         { pkgs, ... }:
@@ -29,6 +32,14 @@
                     "/Storage/Apps/System/Pipewire" = {
                         directories = [
                             ".local/state/wireplumber"
+                        ];
+
+                    };
+                    "/Storage/Apps/System/EasyEffects" = {
+                        directories = [
+                            ".local/state/wireplumber"
+                            ".config/easyeffects" # Presets, autoload rules, and pipeline configs
+                            ".local/share/easyeffects" # Custom impulse response (IRS) and RNNoise files
                         ];
 
                     };
