@@ -60,12 +60,14 @@
             allowedUDPPorts = [ 51820 ]; # Allows Wireguard on Firewall
             extraCommands = ''
                 iptables -t nat -A POSTROUTING -o lan0 -j MASQUERADE
+                iptables -t nat -A POSTROUTING -o wlp2s0 -j MASQUERADE
                 ip46tables -A FORWARD -i lan0 -o wireguard0 -j ACCEPT
                 ip46tables -A FORWARD -i wireguard0 -j ACCEPT
             '';
             #flush the chain then remove it
             extraStopCommands = ''
                 iptables -t nat -D POSTROUTING -o lan0 -j MASQUERADE
+                iptables -t nat -D POSTROUTING -o wlp2s0 -j MASQUERADE
                 ip46tables -D FORWARD -i lan0 -o wireguard0 -j ACCEPT
                 ip46tables -D FORWARD -i wireguard0 -j ACCEPT
             '';
