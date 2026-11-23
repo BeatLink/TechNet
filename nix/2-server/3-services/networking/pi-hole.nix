@@ -170,7 +170,6 @@
                     ];
                     # Every other name is generated from nginx-vhosts, which emits its own cname per service.
                     cnameRecords = [
-                        "trilium-sysadmin.heimdall.technet,heimdall.technet"
                     ];
                     domain = {
                         name = "technet";
