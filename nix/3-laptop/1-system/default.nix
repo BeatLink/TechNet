@@ -11,7 +11,7 @@
         ./networking.nix
         ./display.nix
         ./ideapad.nix
-        ./sound
+        ./sound.nix
         ./bluetooth.nix
         ./fuse.nix
         ./tang.nix
