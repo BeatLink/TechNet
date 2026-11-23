@@ -1,4 +1,19 @@
 { config, pkgs, ... }:
+let
+    triliumServerPackage = pkgs.trilium-server.overrideAttrs (previous: {
+        preFixup = (previous.preFixup or "") + ''
+            export PATH=${
+                pkgs.patchelf.overrideAttrs (_: rec {
+                    version = "0.15.2";
+                    src = pkgs.fetchurl {
+                        url = "https://github.com/NixOS/patchelf/releases/download/${version}/patchelf-${version}.tar.bz2";
+                        hash = "sha256-F3RfVkFZyOIo/EEtplogSLhGxLa0Igt3y/IkFuAvLXw=";
+                    };
+                })
+            }/bin:$PATH
+        '';
+    });
+in
 {
     # X-Monitor's `trilium` plugin reads /etapi/metrics to check the note
     # database is actually being modified, not just that the server answers.
@@ -18,24 +33,29 @@
         host = "127.0.0.1";
         port = 8080;
         dataDir = "/Storage/Services/Trilium/data";
-        # Drop once nixpkgs' patchelf stops overlapping node's first two segments; every release after 0.15.2 does, and it segfaults in ld.so before starting.
-        package = pkgs.trilium-server.overrideAttrs (previous: {
-            preFixup = (previous.preFixup or "") + ''
-                export PATH=${
-                    pkgs.patchelf.overrideAttrs (_: rec {
-                        version = "0.15.2";
-                        src = pkgs.fetchurl {
-                            url = "https://github.com/NixOS/patchelf/releases/download/${version}/patchelf-${version}.tar.bz2";
-                            hash = "sha256-F3RfVkFZyOIo/EEtplogSLhGxLa0Igt3y/IkFuAvLXw=";
-                        };
-                    })
-                }/bin:$PATH
-            '';
-        });
+        package = triliumServerPackage;
     };
 
-    # Backend scripts run as the trilium user with full filesystem, network and OS access.
-    systemd.services.trilium-server.environment.TRILIUM_SECURITY_BACKEND_SCRIPTING_ENABLED = "true";
+    systemd.services.trilium-server-sysadmin = {
+        description = "Trilium Sysadmin Notes Server";
+        wantedBy = [ "multi-user.target" ];
+        after = [ "network.target" ];
+        requires = [ "network.target" ];
+        unitConfig.RequiresMountsFor = [ "/Storage/Services/Trilium-Sysadmin" ];
+        environment = {
+            TRILIUM_DATA_DIR = "/Storage/Services/Trilium-Sysadmin/data";
+            TRILIUM_PORT = "12351";
+            TRILIUM_SECURITY_BACKEND_SCRIPTING_ENABLED = "true";
+        };
+        serviceConfig = {
+            User = "trilium";
+            Group = "trilium";
+            WorkingDirectory = triliumServerPackage;
+            ExecStart = "${triliumServerPackage}/bin/trilium-server";
+            Restart = "on-failure";
+            RestartSec = 5;
+        };
+    };
 
     systemd.services.trilium-stale-config-ini = {
         description = "Move aside a stale Trilium config.ini";
@@ -57,7 +77,18 @@
         port = 8080;
     };
 
+    nginx-vhosts.trilium-sysadmin = {
+        domain = "trilium-sysadmin.heimdall.technet";
+        port = 12351;
+    };
+
     systemd.tmpfiles.settings."Trilium"."/Storage/Services/Trilium".Z = {
+        user = "trilium";
+        group = "trilium";
+        mode = "0750";
+    };
+
+    systemd.tmpfiles.settings."Trilium-Sysadmin"."/Storage/Services/Trilium-Sysadmin".Z = {
         user = "trilium";
         group = "trilium";
         mode = "0750";
