@@ -1,7 +1,7 @@
 # Syncthing ##########################################################################################################################################
 #
 # Ragnarok's leg of the sync mesh. Device IDs, folders and the settings that must agree across peers come from the shared module in 0-common; what is
-# here is where the data lives, versioning, and scan scheduling tuned like Heimdall's.
+# here is where the data lives, versioning, and scan scheduling for the shingled backup drive.
 # Versioning is the reason this host runs Syncthing at all: it is a second backup tier that catches a delete or overwrite as a peer propagates it,
 # where borg would only have the previous scheduled snapshot.
 #
@@ -129,7 +129,7 @@
         }
 
         # Scan Scheduling ############################################################################################################################
-        # Matches Heimdall: the shingled backup drive is still the slow part, so scanning is scheduled and the hasher and copier pools kept to one.
+        # Parallel hashers and copiers on the shingled backup drive turn into seeks, so scanning is scheduled and each pool kept to one.
         {
             syncthing-mesh.folderOptions = {
                 rescanIntervalS = 86400;
@@ -146,17 +146,6 @@
                     maxConcurrentIncomingRequestKiB = 32768;
                     progressUpdateIntervalS = 30;
                 };
-            };
-        }
-
-        # Scheduling Priority ########################################################################################################################
-        {
-            systemd.services.syncthing.serviceConfig = {
-                Nice = 10;
-                IOSchedulingClass = "best-effort";
-                IOSchedulingPriority = 6;
-                IOWeight = 50;
-                CPUWeight = 50;
             };
         }
     ];

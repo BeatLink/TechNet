@@ -4,8 +4,7 @@
 # also acts as a first line backup mechanism
 #
 # The device IDs, folder set and the settings that have to agree across peers come from the shared mesh module in 0-common; what is left
-# here is Heimdall-specific -- where the data lives, the web UI, and the tuning that exists because this host's storage is a spinning
-# mirror.
+# here is Heimdall-specific -- where the data lives, the web UI, the API key X-Monitor reads, and the GUI proxies for the other peers.
 #
 {
     config,
@@ -55,14 +54,11 @@
             rescanIntervalS = 86400;
             fsWatcherEnabled = true;
             fsWatcherDelayS = 60;
-            hashers = 1;
-            copiers = 1;
         };
     };
 
     services.syncthing.settings = lib.recursiveUpdate config.syncthing-mesh.settings {
         options = {
-            maxFolderConcurrency = 1;
             maxConcurrentIncomingRequestKiB = 32768;
             progressUpdateIntervalS = 30;
         };
@@ -73,11 +69,6 @@
     };
 
     systemd.services.syncthing.serviceConfig = {
-        Nice = 10;
-        IOSchedulingClass = "best-effort";
-        IOSchedulingPriority = 6;
-        IOWeight = 50;
-        CPUWeight = 50;
         UMask = "0002"; # Files it pulls into eBooks must stay writable by the other ebooks-group services (see 1-system/directories.nix); this applies to every folder it writes
     };
 
