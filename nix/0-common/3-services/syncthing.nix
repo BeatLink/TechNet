@@ -200,6 +200,20 @@ in
             readOnly = true;
             description = "Function from { config_file, key_file, on_change } to a script that sets Syncthing's API key to the one in key_file.";
         };
+
+        environment = lib.mkOption {
+            type = lib.types.attrsOf lib.types.str;
+            readOnly = true;
+            description = "Environment for every peer's Syncthing process; system services get it here, Home Manager hosts read it into their user unit.";
+        };
+    };
+
+    config.syncthing-mesh.environment = {
+        STDBDELETERETENTIONINTERVAL = "2160h"; # A peer offline longer than this can bring back files the mesh deleted
+    };
+
+    config.systemd.services = lib.mkIf config.services.syncthing.enable {
+        syncthing.environment = cfg.environment;
     };
 
     # Syncthing generates its own API key, so this swaps in the one from sops through the REST API whenever the two differ.
