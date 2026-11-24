@@ -1,11 +1,12 @@
 # Flakes #############################################################################################################################################
 #
-# Enables flakes and pins nixpkgs to the flake's own input.
+# Enables flakes, pins nixpkgs to the flake's own input, and keeps Nix's profile links under ~/.local/state.
 #
 
 { inputs, ... }:
 {
     nix = {
+        settings.use-xdg-base-directories = true;
         extraOptions = ''
             experimental-features = nix-command flakes
         '';

@@ -216,6 +216,13 @@ in
                 curl
                 wget
             ];
+
+            home-manager.users.beatlink =
+                { config, ... }:
+                {
+                    xdg.configFile."wgetrc".text = "hsts-file = ${config.xdg.cacheHome}/wget-hsts\n";
+                    home.sessionVariables.WGETRC = "${config.xdg.configHome}/wgetrc";
+                };
         }
     ];
 }
