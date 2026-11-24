@@ -100,6 +100,9 @@ let
             ];
             # Holds live git repositories, so batch their constant .git rewrites instead of announcing each one.
             fsWatcherDelayS = 60;
+            ignorePatterns = [
+                "(?d)/**/.claude/worktrees"
+            ];
         };
         Sounds = { };
         # Heimdall seeds and Ragnarok keeps a versioned copy; Odin's copy carries a .nobackup marker, so no borg backup takes it. The phone has no use for the tree.
