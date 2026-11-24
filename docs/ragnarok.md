@@ -12,30 +12,30 @@ dialling in to Heimdall. It receives borg backups from Heimdall and Odin and
 holds receive-only copies of the Syncthing folders.
 
 It ran on a Pine64 [Rock64](rock64.md) until 2026-11-21, when the Acer, which
-had been Heimdall, took the role over. Both drives moved across as they were,
-so the disk layout and much of the history on this page come from the Rock64.
+had been Heimdall, took the role over. The backup drive moved across as it
+was, so its layout and much of the history on this page come from the Rock64.
+On 2026-11-22 the root moved to Heimdall's old 64 GB Dogfish SSD and the backup
+drive went into the laptop's internal bay, so both disks are now on SATA.
 
 ## Hardware
 
-12 GB RAM and two drives, the same two the Rock64 used:
+12 GB RAM and two drives, both on the chipset's AHCI controller:
 
-| Use          | Drive                              | Identifier                       |
-| ------------ | ---------------------------------- | -------------------------------- |
-| NixOS        | 128 GB 2.5" SATA SSD               | `ata-SATA_SSD_22020812000605`    |
-| Backup drive | 5 TB 2.5" SATA HDD, `ST5000LM000`  | `wwn-0x5000c500e81e231d`         |
+| Use          | Drive                             | Port                   | Identifier                                  |
+| ------------ | --------------------------------- | ---------------------- | ------------------------------------------- |
+| NixOS        | 64 GB Dogfish M.2 SATA SSD        | `ata3`, M.2, 6.0 Gbps  | `ata-Dogfish_SSD_64GB_5E56255506071556041`  |
+| Backup drive | 5 TB 2.5" SATA HDD, `ST5000LM000` | `ata1`, bay, 3.0 Gbps  | `wwn-0x5000c500e81e231d`                    |
 
 The laptop has three SATA ports: the internal 2.5" bay, the DVD-bay caddy and
-the M.2 slot. The SSD sits on internal SATA. The backup drive is 15 mm thick
-and fits neither bay, so it runs over USB in a Sabrent JMicron enclosure,
-`152d:0583`, the one that held the root SSD on the Rock64. The enclosure takes
-its power from the USB port.
+the M.2 slot, which takes M.2 SATA. The backup drive is 15 mm thick, more than
+the bay is built for, but it fits with some force. 3.0 Gbps is the drive's own
+limit. No USB storage is involved any more, so the enclosure quirks, the
+`storage-recover` re-probe and the explicit smartd device list from the Rock64
+are gone; smartd's autodetect from the shared module finds both disks.
 
 [`hardware-configuration.nix`](../nix/1-backup-server/1-system/hardware-configuration.nix)
-keeps that enclosure on UAS, with the `f` quirk the kernel's own entry for the
-ID carries, and gives it a three-minute command timeout, because the shingled
-drive pauses for long stretches while rewriting. The drive's adapter from the
-Rock64, a JMS576 `152d:0576`, and the spare JMS561U enclosure, `152d:1561`, keep
-their quirk entries there so they stay usable if plugged in.
+matches the backup drive by serial and gives it a three-minute command timeout,
+because the shingled drive pauses for long stretches while rewriting.
 
 | Part     | Device                        | Driver  |
 | -------- | ----------------------------- | ------- |
@@ -80,7 +80,10 @@ every five seconds.
 The root drive is btrfs subvolumes inside one LUKS container, `cryptroot`,
 selected by `technet.storage.backend = "btrfs-luks"` in
 [`root-drive-disko.nix`](../nix/1-backup-server/1-system/root-drive-disko.nix),
-plus a 16 GB swap partition encrypted with a fresh key every boot. The layout
+on the 64 GB Dogfish SSD. There is no swap: the swap partition is commented out
+of the disko layout, and
+[`swap.nix`](../nix/1-backup-server/1-system/swap.nix) turns zram off in
+favour of zswap, which has no device to write to without it. The layout
 was chosen for the Rock64, whose CPU ran OpenZFS's own AES-GCM as generic C
 (see [Rock64](rock64.md#storage)); it came across unchanged, and moving this
 host back to ZFS would mean a reformat. Nothing on this host is ZFS.
@@ -99,7 +102,7 @@ drive, 2.3 TiB usable of 4.55 TiB raw, which holds the ~850 GiB stored
 
 |               |                                                                                                    |
 | ------------- | -------------------------------------------------------------------------------------------------- |
-| device        | `ST5000LM000-2U8170`, serial `WCJ9HXR9`, USB via Sabrent JMicron `152d:0583`                       |
+| device        | `ST5000LM000-2U8170`, serial `WCJ9HXR9`, internal SATA bay                                         |
 | partition     | GPT, one partition, partlabel `ragnarok-cryptstorage`                                              |
 | PARTUUID      | `b701e0a4-fa98-467d-afd6-36cbca0f0737`                                                             |
 | LUKS          | LUKS2, `aes-xts-plain64`, 512-bit key, **4096-byte sectors**                                       |
@@ -120,10 +123,9 @@ drive, 2.3 TiB usable of 4.55 TiB raw, which holds the ~850 GiB stored
 [`data-drive.nix`](../nix/1-backup-server/1-system/data-drive.nix) opens the
 container in the initrd as `cryptstorage`, with `nofail`, and mounts `/Storage`
 with `nofail` and a 90 s device timeout, so a missing drive does not stop the
-boot. If the initrd went on without it, `storage-recover` runs once the network
-is online: it unbinds and rebinds any JMicron adapter that was left
-unconfigured, waits up to a minute for the partition, unlocks it with clevis
-against tang, mounts `/Storage` and starts the units that need it.
+boot. The timeout waits on the clevis unlock, which takes about 35 s, not on
+the disk. Nothing retries a missed unlock after boot; unlock by hand and start
+`Storage.mount` if it happens.
 
 ### Storage guard
 
@@ -154,16 +156,26 @@ later check passes, treat the archives in them as unverified. Run
 current figures.
 
 On the same day the drive dropped off USB once (`usb 2-2: USB disconnect` at
-14:49).
+14:49), one of the reasons it moved to internal SATA.
+
+### Since the move to SATA
+
+A second full scrub on 2026-11-22 (started 13:37, 6 h 8 min, 1.64 TiB) found
+3,274 checksum errors, **all corrected** from the second copy, none
+uncorrectable.
+
+Corrected checksum errors kept turning up after that scrub: about 230 between
+2026-11-22 19:46 and 2026-11-24 04:10, always on mirror 1, never the same
+sector twice, all in borg segments under `Backups/Odin/data` and
+`Backups/Heimdall/data` written between 2026-10-29 and 2026-11-07. The scrub
+had read and fixed those files, so mirror 1 went bad again after it, or reads
+are coming back wrong intermittently. Whether the drive, the RAM or the read
+path is at fault is not yet known. SMART reports `PASSED` with 104 reallocated
+sectors, no pending or uncorrectable sectors and no CRC errors (2026-11-24).
+`btrfs device stats /Storage` counts `corruption_errs` cumulatively since the
+filesystem was made, so watch its growth rather than its value.
 
 ### Creating it
-
-`152d:0583` needs its quirk on whatever host it is plugged into or it comes up
-unusable:
-
-```sh
-echo "152d:0583:f" | sudo tee /sys/module/usb_storage/parameters/quirks
-```
 
 The passphrase is the host's `ragnarok_encryption_key`, and should stay that way: it is
 what `rebind-clevis` presents when it adds the tang binding, and what lets one
@@ -271,8 +283,8 @@ Odin's tang only serves while it has been switched on from Odin's panel applet,
 so Ragnarok **will not unlock on its own** unless that is on, or someone types.
 The WireGuard recovery loop from the shared module restarts networkd from 45s
 into the initrd if the tunnel is not carrying traffic, so a tunnel that came up
-before DNS did is not a dead end. A backup drive that missed the initrd is
-unlocked later by `storage-recover`, also against tang.
+before DNS did is not a dead end. A backup drive that missed the initrd stays
+locked until someone unlocks it.
 
 `rebind-clevis Ragnarok` on Odin rebinds both headers against the current tang
 keys and is also how a fresh container gets its first binding; it needs tang
@@ -282,7 +294,9 @@ reachable. `clevis luks list -d <device>` shows the binding, and
 ## Planned move
 
 Ragnarok is to move to another house as the off-site backup. The move waits on
-the backup drive: the repositories have to be repaired and checked clean first.
+the backup drive: the repositories have to be repaired and checked clean first,
+and the checksum errors that continue after the 2026-11-22 scrub have to be
+explained.
 There it has to unlock unattended, which today depends on Odin's tang being
 switched on and reachable over WireGuard; until that changes, a reboot there
 waits on the console or on someone answering over `ssh ragnarok-boot`.
@@ -290,8 +304,10 @@ waits on the console or on someone answering over `ssh ragnarok-boot`.
 ## Reinstalling
 
 The root SSD can be taken out and reinstalled from Odin with disko and
-`nixos-install`, as it was on 2026-09-09. Before wiping it, copy `/persistent`
-off:
+`nixos-install`, as it was on 2026-09-09 and again onto the Dogfish on
+2026-11-22 with
+[`install-ragnarok-dogfish.sh`](../scripts/install-ragnarok-dogfish.sh). Before
+wiping it, copy `/persistent` off:
 
 - `etc/ssh/`, the host and initrd host keys; sops decrypts this host's secrets
   with the host key, and the initrd secrets are appended at install time.
