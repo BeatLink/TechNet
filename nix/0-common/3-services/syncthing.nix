@@ -206,14 +206,42 @@ in
             readOnly = true;
             description = "Environment for every peer's Syncthing process; system services get it here, Home Manager hosts read it into their user unit.";
         };
+
+        serviceConfig = lib.mkOption {
+            type = lib.types.attrs;
+            readOnly = true;
+            description = "Scheduling for every peer's Syncthing; system services get it here, Home Manager hosts read it into their user unit.";
+        };
     };
 
     config.syncthing-mesh.environment = {
         STDBDELETERETENTIONINTERVAL = "2160h"; # A peer offline longer than this can bring back files the mesh deleted
     };
 
+    # Weights rather than ceilings, so Syncthing runs at full speed on an idle host and yields only while something else wants the CPU or disk.
+    # SCHED_IDLE is avoided: a TLS handshake it cannot schedule inside the peer's timeout drops as EOF and the mesh loses the connection.
+    config.syncthing-mesh.serviceConfig = {
+        Nice = 19;
+        CPUSchedulingPolicy = "batch";
+        IOSchedulingClass = "best-effort";
+        IOSchedulingPriority = 7;
+    };
+
+    # A top-level slice, because weights only compete among siblings: inside system.slice it could not yield to borg sessions in user.slice.
+    config.systemd.slices = lib.mkIf config.services.syncthing.enable {
+        sync.sliceConfig = {
+            CPUWeight = 20;
+            IOWeight = 20;
+        };
+    };
+
     config.systemd.services = lib.mkIf config.services.syncthing.enable {
-        syncthing.environment = cfg.environment;
+        syncthing = {
+            environment = cfg.environment;
+            serviceConfig = cfg.serviceConfig // {
+                Slice = "sync.slice";
+            };
+        };
     };
 
     # Syncthing generates its own API key, so this swaps in the one from sops through the REST API whenever the two differ.

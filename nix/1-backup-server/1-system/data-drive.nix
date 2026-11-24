@@ -99,5 +99,14 @@ in
         {
             environment.persistence."/persistent".directories = [ "/var/lib/btrfs" ];
         }
+
+        # I/O Scheduler ##############################################################################################################################
+        # BFQ is the scheduler that honours cgroup IOWeight, so Syncthing's slice yields the backup drive to borg; the root SSD keeps the default.
+        {
+            boot.kernelModules = [ "bfq" ];
+            services.udev.extraRules = ''
+                ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
+            '';
+        }
     ];
 }
