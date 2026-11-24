@@ -57,7 +57,14 @@
             };
         };
         systemd.user.startServices = "sd-switch";
-        xdg.userDirs.setSessionVariables = false;
+        xdg = {
+            enable = true; # Exports the XDG_*_HOME variables, which some apps need set before they leave the home root
+            userDirs.setSessionVariables = false;
+        };
+
+        # The X11 compose cache, which falls back to ~/.compose-cache if this directory is missing
+        home.sessionVariables.XCOMPOSECACHE = "/home/beatlink/.cache/X11/xcompose";
+        systemd.user.tmpfiles.rules = [ "d %C/X11/xcompose - - - -" ];
 
     };
 }

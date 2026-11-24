@@ -35,6 +35,11 @@
                 });
             };
             systemd.services.nvidia-powerd.restartIfChanged = false; # A restart after a kernel bump fails against the old module and rolls the deploy back
+            home-manager.users.beatlink =
+                { config, ... }:
+                {
+                    home.sessionVariables.CUDA_CACHE_PATH = "${config.xdg.cacheHome}/nv";
+                };
         }
 
         # External Monitor ###########################################################################################################################

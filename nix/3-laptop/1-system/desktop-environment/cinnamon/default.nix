@@ -59,6 +59,7 @@ in
                 # module's own, so it wins.
                 extraConfig = ''
                     minimum-vt = 7
+                    user-authority-in-system-dir = true
                 '';
                 # The seat default is only web-greeter's last fallback, behind the user's own AccountsService session, so it needs the stamp below.
                 extraSeatDefaults = ''

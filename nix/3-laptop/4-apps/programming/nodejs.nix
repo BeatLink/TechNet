@@ -6,13 +6,19 @@
         nodejs
     ];
 
-    home-manager.users.beatlink = {
-        home = {
-            persistence."/Storage/Apps/Programming/NodeJS" = {
-                files = [
-                    ".npmrc" # registry auth tokens and npm CLI settings
-                ];
+    home-manager.users.beatlink =
+        { config, ... }:
+        {
+            home = {
+                sessionVariables = {
+                    NPM_CONFIG_USERCONFIG = "${config.xdg.configHome}/npm/npmrc";
+                    npm_config_cache = "${config.xdg.cacheHome}/npm";
+                };
+                persistence."/Storage/Apps/Programming/NodeJS" = {
+                    files = [
+                        ".config/npm/npmrc" # registry auth tokens and npm CLI settings
+                    ];
+                };
             };
         };
-    };
 }
