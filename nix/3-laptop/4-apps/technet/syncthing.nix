@@ -118,6 +118,9 @@
                 overrideFolders = true;
                 settings = config.syncthing-mesh.settings;
             };
+            systemd.user.services.syncthing.Service.Environment = lib.mapAttrsToList (
+                name: value: "${name}=${value}"
+            ) config.syncthing-mesh.environment;
             home = {
                 persistence."/Storage/Apps/TechNet/SyncThing" = {
                     directories = [

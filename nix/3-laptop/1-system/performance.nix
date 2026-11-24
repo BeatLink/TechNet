@@ -13,7 +13,7 @@
         # The dnode limit defaults to 10% of the cap, which this host's metadata working set exceeds roughly twofold, and ZFS then spins arc_prune at a
         # full core trying to evict below a limit the workload immediately refills. Raising it costs no extra ARC, so the cap above still holds.
         boot.extraModprobeConfig = ''
-            options zfs zfs_arc_max=4294967296 zfs_arc_dnode_limit=1073741824
+            options zfs zfs_arc_max=8589934592 zfs_arc_dnode_limit=1073741824
         '';
 
         # Default Power Profile ######################################################################################################################
