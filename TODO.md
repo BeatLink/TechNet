@@ -115,3 +115,11 @@ Until then the app's weather uses a place chosen by name, which already works.
 It is the only device not flashed since `.lan` was folded into `.technet`. Home Assistant and X-Monitor
 already reach it as `socket-ragnarok.technet` over WireGuard (`10.100.100.18`), so the flash only
 updates the name the firmware reports. Until it is online, X-Monitor's "IoT Sensors" group stays failed.
+
+## Move Claude Code's folder out of the home root
+
+- [ ] Point `CLAUDE_CONFIG_DIR` and `CLAUDE_CODE_TMPDIR` at `~/.config/claude` and persist that path instead of `.claude`
+      ([`vscodium.nix`](nix/3-laptop/4-apps/programming/vscodium.nix))
+- [ ] Move `/Storage/Apps/Programming/VsCodium/home/beatlink/.claude` to `.config/claude` under the same root before deploying
+- [ ] Update every path that names `~/.claude`: the global `CLAUDE.md`, its memory links, hooks and scripts in `settings.json`
+- [ ] Do the move with no Claude session running, since every open session writes into the old folder
