@@ -80,10 +80,13 @@ every five seconds.
 The root drive is btrfs subvolumes inside one LUKS container, `cryptroot`,
 selected by `technet.storage.backend = "btrfs-luks"` in
 [`root-drive-disko.nix`](../nix/1-backup-server/1-system/root-drive-disko.nix),
-on the 64 GB Dogfish SSD. There is no swap: the swap partition is commented out
-of the disko layout, and
-[`swap.nix`](../nix/1-backup-server/1-system/swap.nix) turns zram off in
-favour of zswap, which has no device to write to without it. The layout
+on the 64 GB Dogfish SSD. Swap is an 8 GiB swapfile on its own `@swap`
+subvolume, mounted at `/swap`, so it sits inside the LUKS container and outside
+the `@root` rollback.
+[`swap.nix`](../nix/1-backup-server/1-system/swap.nix) puts zswap in front of it
+in place of the fleet's zram. disko only creates the swapfile at format time;
+the one in use was made by hand on 2026-11-24 with
+`btrfs filesystem mkswapfile --size 8G`. The layout
 was chosen for the Rock64, whose CPU ran OpenZFS's own AES-GCM as generic C
 (see [Rock64](rock64.md#storage)); it came across unchanged, and moving this
 host back to ZFS would mean a reformat. Nothing on this host is ZFS.

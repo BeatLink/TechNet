@@ -1,7 +1,8 @@
 # Swap ###############################################################################################################################################
 #
-# Zswap in front of the encrypted swap partition disko declares on the SSD, in place of the fleet's zram. Zram is a fixed-size compressed block device
-# that is itself the swap; zswap is a compressed cache ahead of a real device, so hot pages keep RAM and the shrinker writes the coldest out to disk.
+# Zswap in front of the swapfile disko declares on the SSD's @swap subvolume, in place of the fleet's zram. Zram is a fixed-size compressed block
+# device that is itself the swap; zswap is a compressed cache ahead of a real device, so hot pages keep RAM and the shrinker writes the coldest out to
+# disk.
 #
 
 { lib, ... }:
