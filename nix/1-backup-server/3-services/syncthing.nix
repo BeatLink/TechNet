@@ -62,9 +62,9 @@
                 configDir = "/Storage/Services/Syncthing/Config";
             };
 
-            # The index is SQLite writing 4K pages, which the data pool's 1M recordsize and copies=2 turn into a megabyte read-modify-write done twice;
-            # the root SSD's persistent dataset is 128K and copies=1, so the same page costs an eighth of the I/O and half the writes. Derived data, but
-            # rebuilding it means rehashing every folder, so it is persisted rather than left on the wiped root.
+            # The index is SQLite rewriting scattered 4K pages, which the backup drive's dup profile writes twice and its shingled bands turn into
+            # band rewrites; on the root SSD each page is one small write. Derived data, but rebuilding it means rehashing every folder, so it is
+            # persisted rather than left on the wiped root.
             environment.persistence."/persistent".directories = [
                 {
                     directory = "/var/lib/syncthing-database";
@@ -123,7 +123,7 @@
                 type = "staggered";
                 params = {
                     cleanInterval = "3600";
-                    maxAge = "0"; # Never expire a version by age; watch pool usage with zfs list rather than assuming it stays small
+                    maxAge = "0"; # Never expire a version by age; watch btrfs filesystem usage /Storage rather than assuming it stays small
                 };
             };
         }
@@ -137,8 +137,8 @@
                 fsWatcherDelayS = 60;
                 hashers = 1;
                 copiers = 1;
-                copyRangeMethod = "copy_file_range"; # Needs feature@block_cloning on the pool; falls back to standard copying without it
-                caseSensitiveFS = true; # Data loss if the pool is ever rebuilt with casesensitivity=insensitive
+                copyRangeMethod = "copy_file_range"; # btrfs clones the extents instead of copying the data
+                caseSensitiveFS = true; # btrfs has no case-insensitive mode, so Syncthing's case-conflict checks are skipped
             };
 
             services.syncthing.settings = lib.recursiveUpdate config.syncthing-mesh.settings {
