@@ -2,7 +2,7 @@
 #
 # Moves mail off Gmail and Outlook.com into a Dovecot mailbox on Heimdall. imapsync copies every folder from each account on a timer, then deletes
 # what it copied from the account once delete_from_source is on. Mail clients read the mailbox over IMAP at mail.heimdall.technet:993, and a
-# browser at webmail.heimdall.technet, on the LAN and over WireGuard; sending still goes through each account's own SMTP server.
+# browser at https://mail.heimdall.technet, on the LAN and over WireGuard; sending still goes through each account's own SMTP server.
 #
 
 {
@@ -198,22 +198,20 @@ in
             # Roundcube reads the same mailbox over loopback and keeps its settings in the shared Postgres instance
             services.roundcube = {
                 enable = true;
-                hostName = "webmail.heimdall.technet";
+                hostName = "mail.heimdall.technet";
                 extraConfig = ''
                     $config['imap_host'] = 'localhost:${toString imap_port}';
                     $config['product_name'] = 'Heimdall Mail';
                 '';
             };
 
-            services.nginx.virtualHosts."webmail.heimdall.technet" = {
+            services.nginx.virtualHosts."mail.heimdall.technet" = {
                 forceSSL = false;
                 enableACME = false;
                 addSSL = true;
                 sslCertificate = config.sops.secrets.https_certificate.path;
                 sslCertificateKey = config.sops.secrets.https_certificate_key.path;
             };
-
-            services.pihole-ftl.settings.dns.cnameRecords = [ "webmail.heimdall.technet,heimdall.technet" ];
         }
 
         # Gmail ######################################################################################################################################
