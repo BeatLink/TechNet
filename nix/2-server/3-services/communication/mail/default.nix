@@ -68,7 +68,7 @@ let
                     ${placeholder_check ([ "mail_username" "mail_password" ] ++ secret_names)}
                     ${prepare}
                     imapsync \
-                        ${source_arguments} \
+                        ${lib.trim source_arguments} \
                         --host2 127.0.0.1 --port2 ${toString imap_port} --nossl2 --notls2 \
                         --user2 "$(< ${secret "mail_username"})" --passfile2 ${secret "mail_password"} \
                         --subfolder2 ${description} \
