@@ -193,11 +193,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1795577688,
-        "narHash": "sha256-DBIH2mdzj98tDhWA0n7h/fOE+wRWqyCDJQTRp081re8=",
+        "lastModified": 1795578443,
+        "narHash": "sha256-ymfdgS0FPTeWHkjWlxNdOtK/bEp2dGMhRaYF3Nb7MOs=",
         "owner": "x-tech-laboratories",
         "repo": "CODEX",
-        "rev": "7a462cec2189d4a23b73d90d3049bc7f098190ce",
+        "rev": "694948d5cb304a1d1f60017e51405ce7dc721cab",
         "type": "github"
       },
       "original": {
