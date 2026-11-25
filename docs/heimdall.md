@@ -108,7 +108,7 @@ Grouped by directory under [`3-services`](../nix/2-server/3-services):
 | Group | Services |
 | --- | --- |
 | `networking` | nginx, nginx-vhosts, pi-hole, unbound |
-| `communication` | mail (dovecot, imapsync), matrix (synapse, mautrix bridges) |
+| `communication` | mail (dovecot, imapsync, roundcube), matrix (synapse, mautrix bridges) |
 | `personal-info-and-files` | blockurl, radicale, syncthing, trilium |
 | `fun-and-media` | calibre-web-automated, comet, freshrss, jackett, qbittorrent, stremio, vlc |
 | `home-automation` | esphome, frigate, home-assistant, lnxlink, mosquitto |
@@ -223,8 +223,9 @@ it behaves like the official apps:
 Outlook.com into a Dovecot mailbox on Heimdall. Every 10 minutes imapsync copies
 each account's folders into a top-level `Gmail` or `Outlook` folder of that
 mailbox. Read it from any IMAP client at `mail.heimdall.technet`, port 993 with
-SSL/TLS, on the LAN or over WireGuard. Sending still goes through each account's
-own SMTP server. The mail sits as Maildir files under `/Storage/Services/Mail`,
+SSL/TLS, or in a browser at `https://webmail.heimdall.technet/` (Roundcube), on
+the LAN or over WireGuard; both sign in with `mail_username` and `mail_password`.
+Sending still goes through each account's own SMTP server. The mail sits as Maildir files under `/Storage/Services/Mail`,
 which the `/Storage/Services` backups cover.
 
 `secrets/2-server/mail.yaml` ships with `CHANGEME` placeholders, and every mail
