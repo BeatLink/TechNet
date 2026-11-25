@@ -1,3 +1,6 @@
 {
-    imports = [ ./matrix.nix ];
+    imports = [
+        ./mail
+        ./matrix.nix
+    ];
 }
