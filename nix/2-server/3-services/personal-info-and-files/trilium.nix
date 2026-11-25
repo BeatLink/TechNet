@@ -36,27 +36,6 @@ in
         package = triliumServerPackage;
     };
 
-    systemd.services.trilium-server-sysadmin = {
-        description = "Trilium Sysadmin Notes Server";
-        wantedBy = [ "multi-user.target" ];
-        after = [ "network.target" ];
-        requires = [ "network.target" ];
-        unitConfig.RequiresMountsFor = [ "/Storage/Services/Trilium-Sysadmin" ];
-        environment = {
-            TRILIUM_DATA_DIR = "/Storage/Services/Trilium-Sysadmin/data";
-            TRILIUM_PORT = "12351";
-            TRILIUM_SECURITY_BACKEND_SCRIPTING_ENABLED = "true";
-        };
-        serviceConfig = {
-            User = "trilium";
-            Group = "trilium";
-            WorkingDirectory = triliumServerPackage;
-            ExecStart = "${triliumServerPackage}/bin/trilium-server";
-            Restart = "on-failure";
-            RestartSec = 5;
-        };
-    };
-
     systemd.services.trilium-stale-config-ini = {
         description = "Move aside a stale Trilium config.ini";
         wantedBy = [ "trilium-server.service" ];
@@ -77,18 +56,7 @@ in
         port = 8080;
     };
 
-    nginx-vhosts.trilium-sysadmin = {
-        domain = "trilium-sysadmin.heimdall.technet";
-        port = 12351;
-    };
-
     systemd.tmpfiles.settings."Trilium"."/Storage/Services/Trilium".Z = {
-        user = "trilium";
-        group = "trilium";
-        mode = "0750";
-    };
-
-    systemd.tmpfiles.settings."Trilium-Sysadmin"."/Storage/Services/Trilium-Sysadmin".Z = {
         user = "trilium";
         group = "trilium";
         mode = "0750";

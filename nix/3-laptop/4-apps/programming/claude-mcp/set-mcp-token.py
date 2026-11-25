@@ -64,7 +64,6 @@ APPS = {
     "x-backups": dict(title="X-Backups", page="Your account", file="secrets/3-laptop/claude-mcp.yaml", key="x_backups_mcp_token"),
     "x-media-tracker": dict(title="X-Media-Tracker", page="Your account", file="secrets/3-laptop/claude-mcp.yaml", key="x_media_tracker_mcp_token"),
     "trilium": dict(title="Trilium", page="Options > ETAPI", file="secrets/3-laptop/claude-mcp.yaml", key="trilium_mcp_token"),
-    "trilium-sysadmin": dict(title="Trilium Sysadmin", page="Options > ETAPI", file="secrets/3-laptop/claude-mcp.yaml", key="trilium_sysadmin_mcp_token"),
     "wikidata": dict(title="Wikidata", page="Meta-Wiki Special:OAuthConsumerRegistration", file="secrets/3-laptop/claude-mcp.yaml", key="wikidata_mcp_token"),
 }
 

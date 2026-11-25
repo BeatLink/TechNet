@@ -40,7 +40,6 @@
                         "syncthing"
                         "traccar"
                         "trilium-server"
-                        "trilium-server-sysadmin"
                         "unbound"
                         "unbound-root-hints"
                         "vlc-audio"
