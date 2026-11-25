@@ -34,7 +34,7 @@ let
         done
     '';
 
-    # One imapsync run that copies an account into its own top-level folder of the Heimdall mailbox
+    # One imapsync run that copies an account into its own top-level folder of the Heimdall mailbox, prefixed by hand since --subfolder2 skips any source folder matching its name
     fetch_account =
         {
             name,
@@ -71,7 +71,7 @@ let
                         ${lib.trim source_arguments} \
                         --host2 127.0.0.1 --port2 ${toString imap_port} --nossl2 --notls2 \
                         --user2 "$(< ${secret "mail_username"})" --passfile2 ${secret "mail_password"} \
-                        --subfolder2 ${description} \
+                        --regextrans2 's,^,${description}/,' \
                         --addheader --nolog --tmpdir "$RUNTIME_DIRECTORY" \
                         ${lib.optionalString delete_from_source "--delete1"}
                 '';
@@ -104,6 +104,7 @@ in
                     (_: {
                         sopsFile = secrets_file;
                         owner = "vmail";
+                        restartUnits = [ "dovecot-users.service" ];
                     });
 
             services.dovecot2 = {
@@ -223,12 +224,13 @@ in
                 "gmail_app_password"
             ];
 
-            # Each label is its own folder, and All Mail goes last so it only holds the archived mail that has no label
+            # Each label is its own folder, Gmail's own folders lose their [Gmail] prefix, and All Mail goes last so it only holds unlabelled archived mail
             source_arguments = ''
                 --host1 imap.gmail.com --ssl1 \
                 --user1 "$(< ${secret "gmail_address"})" --passfile1 ${secret "gmail_app_password"} \
                 --exclude '^\[Gmail\]$' --exclude '^\[Gmail\]/(Important|Starred|Spam|Trash|Chats)$' \
-                --folderlast '[Gmail]/All Mail' --f1f2 '[Gmail]/All Mail=Gmail/Archive'
+                --folderlast '[Gmail]/All Mail' --f1f2 '[Gmail]/All Mail=Gmail/Archive' \
+                --regextrans2 's,^\[Gmail\]/,,'
             '';
         })
 
