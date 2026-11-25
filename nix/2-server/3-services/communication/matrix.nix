@@ -97,13 +97,16 @@ in
             # Creates the account from the secrets file when it is missing, and leaves an existing one untouched
             systemd.services.matrix-synapse-account = {
                 description = "Create the Matrix account";
-                requires = [ "matrix-synapse.service" ];
+                wants = [ "matrix-synapse.service" ];
                 after = [ "matrix-synapse.service" ];
                 wantedBy = [ "multi-user.target" ];
+                # Retries while Synapse is still restarting, as it does once on first start while the bridges write their registrations
                 serviceConfig = {
                     Type = "oneshot";
                     RemainAfterExit = true;
                     User = "matrix-synapse";
+                    Restart = "on-failure";
+                    RestartSec = "1min";
                 };
                 script = ''
                     username=$(< ${config.sops.secrets.matrix_username.path})
