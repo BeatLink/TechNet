@@ -7,5 +7,6 @@
         ./camera.nix
         ./phone.nix
         ./sms.nix
+        ./x-tasks.nix
     ];
 }
