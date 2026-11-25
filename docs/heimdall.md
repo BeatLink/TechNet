@@ -108,6 +108,7 @@ Grouped by directory under [`3-services`](../nix/2-server/3-services):
 | Group | Services |
 | --- | --- |
 | `networking` | nginx, nginx-vhosts, pi-hole, unbound |
+| `communication` | mail (dovecot, imapsync), matrix (synapse, mautrix bridges) |
 | `personal-info-and-files` | blockurl, radicale, syncthing, trilium |
 | `fun-and-media` | calibre-web-automated, comet, freshrss, jackett, qbittorrent, stremio, vlc |
 | `home-automation` | esphome, frigate, home-assistant, lnxlink, mosquitto |
@@ -168,6 +169,107 @@ dominate the repo. The persisted path is `/var/lib/private/atticd`, not
 `/var/lib/atticd`: atticd runs under `DynamicUser`, so systemd owns the private
 path and leaves the shorter one as a symlink. Binding over `/var/lib/atticd`
 makes systemd try to migrate a mountpoint and the unit dies with `EBUSY`.
+
+## Matrix
+
+Heimdall runs a private [Matrix](../nix/2-server/3-services/communication/matrix.nix)
+homeserver, Synapse, at `https://matrix.heimdall.technet/`. Federation is off, so
+it is reachable only over WireGuard and talks to no other Matrix server. Bridges
+bring WhatsApp and Discord chats into it as ordinary rooms, so one Matrix
+client covers both. Synapse keeps its data
+in the shared Postgres instance; the bridges keep theirs under
+`/Storage/Services/Matrix`.
+
+The account's username and password are `matrix_username` and `matrix_password`
+in `secrets/2-server/matrix.yaml`, which ships with `CHANGEME` placeholders
+(edit it with `sops secrets/2-server/matrix.yaml`). On each switch,
+`matrix-synapse-account` creates the account if it is missing and leaves an
+existing one alone; it sits in `failed` until the placeholders are replaced.
+Later password changes are made from the client. Sign in from Element (or any
+Matrix client) with homeserver `https://matrix.heimdall.technet`.
+
+Each bridge is linked by messaging its bot from that account and sending `login`:
+
+| Network | Bot | Login |
+| --- | --- | --- |
+| WhatsApp | `@whatsappbot:matrix.heimdall.technet` | QR code, scanned from WhatsApp > Linked devices |
+| Discord | `@discordbot:matrix.heimdall.technet` | `login-qr` instead of `login`, scanned from the Discord mobile app |
+
+The Discord bridge signs in as the user account, which Discord's terms forbid.
+
+Double puppeting is on for every bridge: messages sent from the phone apps show
+in Matrix as sent by the Matrix account itself, not by a bridge ghost, and reads
+sync both ways. It runs through a `doublepuppet` app service whose token
+`matrix-double-puppet` makes on first start under `/var/lib/matrix-synapse`;
+nothing about it is in the repository or in sops.
+
+### Keeping the linked accounts safe
+
+Each bridge is one more logged-in device, so it draws the least attention when
+it behaves like the official apps:
+
+- Link each account from home, so the bridge's address is one the account
+  already uses.
+- Link each network once and leave it linked; repeated logins trip account checks.
+- Bridge Discord servers one at a time with `guilds bridge <id>`, only the ones
+  actually read.
+- Send at a human pace: no scripts, bots or mass invites through bridged accounts.
+- History stays shallow: WhatsApp takes what the phone hands any new linked
+  device, Discord none.
+
+## Mail
+
+[`mail`](../nix/2-server/3-services/communication/mail) moves mail off Gmail and
+Outlook.com into a Dovecot mailbox on Heimdall. Every 10 minutes imapsync copies
+each account's folders into a top-level `Gmail` or `Outlook` folder of that
+mailbox. Read it from any IMAP client at `mail.heimdall.technet`, port 993 with
+SSL/TLS, on the LAN or over WireGuard. Sending still goes through each account's
+own SMTP server. The mail sits as Maildir files under `/Storage/Services/Mail`,
+which the `/Storage/Services` backups cover.
+
+`secrets/2-server/mail.yaml` ships with `CHANGEME` placeholders, and every mail
+unit sits in `failed` until they are replaced (`sops secrets/2-server/mail.yaml`):
+
+| Key | Value |
+| --- | --- |
+| `mail_username`, `mail_password` | The login mail clients use on Heimdall |
+| `gmail_address`, `gmail_app_password` | An app password from Google Account > Security > App passwords, which needs 2-Step Verification |
+| `outlook_address` | The Outlook.com address |
+
+### Gmail
+
+Each label shows up as its own folder, so a message with two labels is copied
+twice. `[Gmail]/All Mail` goes last and lands in `Gmail/Archive`, holding only
+archived mail with no label. Before deletion is switched on, set Gmail's
+Settings > Forwarding and POP/IMAP to auto-expunge and to *Immediately delete
+the message forever*, and untick *Show in IMAP* for Important and Starred;
+otherwise a deleted message only loses its label and stays in Gmail.
+
+### Outlook
+
+Outlook.com accepts only OAuth for IMAP, and personal accounts cannot register
+an OAuth app of their own. The sign-in needs a client ID from either an app
+registered in a free Entra ID tenant (multi-tenant with personal accounts,
+public client, redirect `http://localhost`) or a published open-source mail
+client's public ID. Sign in once on Heimdall, then open the printed address in
+any browser and paste back the address it lands on:
+
+```sh
+sudo -u vmail mail-oauth init /Storage/Services/Mail/oauth/outlook.json \
+    --client-id <client id> --redirect-uri http://localhost
+```
+
+Each run refreshes the token, so the sign-in lasts as long as it is used at
+least every 90 days. Run `init` again if `mail-fetch-outlook` reports
+`invalid_grant`.
+
+### Moving the mail off
+
+`delete_from_source` in the module starts off, so the first runs only copy.
+Once `journalctl -u mail-fetch-gmail -u mail-fetch-outlook` shows matching
+message counts on both sides and a backup of `/Storage/Services` has run, set
+it to `true`; each later run then deletes what it copied from the account.
+Afterwards empty Outlook's Deleted Items and Recoverable Items by hand.
 
 ## Shell history
 

@@ -16,6 +16,8 @@ let
         freshrss = 996;
         frigate = 995;
         "fwupd-refresh" = 994;
+        "mautrix-discord" = 970;
+        "mautrix-whatsapp" = 967;
         nscd = 991;
         pihole = 989;
         radicale = 987;
@@ -24,6 +26,7 @@ let
         "systemd-oom" = 984;
         trilium = 983;
         unbound = 982;
+        vmail = 966;
         wpa_supplicant = 972;
         "x-backups-agent" = 974;
         "x-monitor" = 977;
@@ -44,6 +47,8 @@ let
         freshrss = 996;
         frigate = 995;
         "fwupd-refresh" = 994;
+        "mautrix-discord" = 966;
+        "mautrix-whatsapp" = 959;
         nscd = 990;
         pihole = 988;
         polkituser = 987;
@@ -54,6 +59,7 @@ let
         "systemd-oom" = 981;
         trilium = 980;
         unbound = 979;
+        vmail = 958;
         wpa_supplicant = 963;
         "x-backups-agent" = 965;
         "x-monitor" = 970;

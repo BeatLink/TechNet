@@ -11,37 +11,21 @@ let
     };
 in
 {
-    technet.desktop.apps = {
-        # Electron takes both the wm_class and the userData name from the asar's package.json, so a build handing it a loose main.cjs instead breaks the panel match and the persisted path at once
-        trilium = {
-            description = "Trilium Notes";
-            command = "${trilium-desktop}/bin/trilium";
-            desktopFile = "${trilium-desktop}/share/applications/Trilium.desktop";
-            socket = "$HOME/.config/trilium-37840/SingletonSocket";
-        };
-        trilium-sysadmin = {
-            description = "Trilium Sysadmin Notes";
-            command = "${trilium-desktop}/bin/trilium";
-        };
+    # Electron takes both the wm_class and the userData name from the asar's package.json, so a build handing it a loose main.cjs instead breaks the panel match and the persisted path at once
+    technet.desktop.apps.trilium = {
+        description = "Trilium Notes";
+        command = "${trilium-desktop}/bin/trilium";
+        desktopFile = "${trilium-desktop}/share/applications/Trilium.desktop";
+        socket = "$HOME/.config/trilium-37840/SingletonSocket";
     };
 
-    home-manager.users.beatlink = {
-        home = {
-            packages = [ trilium-desktop ];
-            persistence."/Storage/Apps/Core/Trilium" = {
-                directories = [
-                    ".local/share/trilium-data"
-                    ".local/share/trilium-data-sysadmin"
-                    ".config/trilium-37840" # Electron userData; Trilium names it after its port, so TRILIUM_PORT changes this path
-                    ".config/trilium-12351"
-                ];
-            };
+    home-manager.users.beatlink.home = {
+        packages = [ trilium-desktop ];
+        persistence."/Storage/Apps/Core/Trilium" = {
+            directories = [
+                ".local/share/trilium-data"
+                ".config/trilium-37840" # Electron userData; Trilium names it after its port, so TRILIUM_PORT changes this path
+            ];
         };
-
-        systemd.user.services.trilium-sysadmin.Service.Environment = [
-            "TRILIUM_PORT=12351"
-            "TRILIUM_DATA_DIR=/home/beatlink/.local/share/trilium-data-sysadmin"
-            "TRILIUM_ELECTRON_DATA_DIR=/home/beatlink/.config/trilium-12351"
-        ];
     };
 }

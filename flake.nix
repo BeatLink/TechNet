@@ -69,6 +69,10 @@
             url = "github:x-tech-laboratories/X-Tasks";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        x-context = {
+            url = "github:x-tech-laboratories/X-Context";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
         x-fitness = {
             url = "github:x-tech-laboratories/X-Fitness";
             inputs.nixpkgs.follows = "nixpkgs";

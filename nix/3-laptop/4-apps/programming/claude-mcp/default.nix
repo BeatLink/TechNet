@@ -12,7 +12,6 @@ let
         "x_backups_mcp_token"
         "x_media_tracker_mcp_token"
         "trilium_mcp_token"
-        "trilium_sysadmin_mcp_token"
         "wikidata_mcp_token"
     ];
     bearer = token: { Authorization = "Bearer ${config.sops.placeholder.${token}}"; };
@@ -45,15 +44,12 @@ let
             headers = bearer "x_media_tracker_mcp_token";
         };
         x-dev.url = "http://127.0.0.1:3921/mcp";
+        x-context.url = "http://127.0.0.1:3922/mcp";
         x-fitness.url = "http://127.0.0.1:3918/mcp";
         X-Tasks.url = "http://127.0.0.1:3917/mcp";
         trilium = {
             url = "http://127.0.0.1:37840/mcp";
             headers.Authorization = config.sops.placeholder.trilium_mcp_token;
-        };
-        trilium-sysadmin = {
-            url = "http://127.0.0.1:12351/mcp";
-            headers.Authorization = config.sops.placeholder.trilium_sysadmin_mcp_token;
         };
         npm = {
             type = "stdio";

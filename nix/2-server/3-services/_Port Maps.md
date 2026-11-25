@@ -16,6 +16,16 @@ column, and their service definition lives in that host's own directory.
 | Nginx (HTTP)  | 80  | Redirects to HTTPS |
 | Nginx (HTTPS) | 443 | Front door for all `*.heimdall.technet` vhosts |
 
+## Communication
+
+| Service | Port | Vhost / Notes |
+|---------|------|---------------|
+| Synapse (Matrix)       | 8008  | 127.0.0.1; matrix.heimdall.technet — client API only, federation off |
+| mautrix-whatsapp       | 29318 | 127.0.0.1 |
+| mautrix-discord        | 29334 | 127.0.0.1 |
+| Dovecot (IMAP)         | 143   | 127.0.0.1 |
+| Dovecot (IMAP over TLS) | 993  | nginx `stream`, proxied to 143; mail.heimdall.technet |
+
 ## Monitoring
 
 | Service | Port | Vhost |
@@ -80,6 +90,7 @@ column, and their service definition lives in that host's own directory.
 | X-Tasks      | 9002 | tasks.heimdall.technet |
 | X-Fitness    | 9003 | fitness.heimdall.technet |
 | X-Media-Tracker | 9004 | media-tracker.heimdall.technet |
+| X-Context    | 9005 | context.heimdall.technet |
 | ActivityWatch | 5600 | 127.0.0.1; activitywatch.heimdall.technet |
 
 ## X-Monitor Reachability Checks

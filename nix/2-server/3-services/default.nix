@@ -1,6 +1,7 @@
 {
     imports = [
         ./backups
+        ./communication
         ./fun-and-media
         ./home-automation
         ./monitoring
