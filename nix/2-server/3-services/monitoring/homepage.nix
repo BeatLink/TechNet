@@ -211,9 +211,9 @@ in
                     {
                         "Matrix" = {
                             icon = "matrix.png";
-                            href = "https://app.element.io";
+                            href = "https://matrix.heimdall.technet";
                             description = "Matrix";
-                            siteMonitor = "https://app.element.io";
+                            siteMonitor = "https://matrix.heimdall.technet";
                             statusStyle = "dot";
                         };
                     }
