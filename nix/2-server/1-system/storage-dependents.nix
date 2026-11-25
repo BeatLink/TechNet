@@ -30,8 +30,6 @@
                         "lnxlink"
                         "matrix-synapse"
                         "mautrix-discord"
-                        "mautrix-meta-facebook"
-                        "mautrix-meta-instagram"
                         "mautrix-whatsapp"
                         "pihole-ftl"
                         "pihole-ftl-setup"

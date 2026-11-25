@@ -1,8 +1,7 @@
 # Matrix ##############################################################################################################################################
 #
-# A private Matrix homeserver for the TechNet, reachable only over WireGuard, with bridges that bring WhatsApp, Discord, Facebook Messenger and
-# Instagram chats into it as ordinary rooms. Federation is off: the only users on it are the account in secrets/2-server/matrix.yaml and the
-# bridges' puppets.
+# A private Matrix homeserver for the TechNet, reachable only over WireGuard, with bridges that bring WhatsApp and Discord chats into it as
+# ordinary rooms. Federation is off: the only users on it are the account in secrets/2-server/matrix.yaml and the bridges' puppets.
 #
 
 {
@@ -29,10 +28,6 @@ let
         "mautrix-whatsapp"
         "mautrix-discord"
         "mautrix-discord-registration"
-        "mautrix-meta-facebook"
-        "mautrix-meta-facebook-registration"
-        "mautrix-meta-instagram"
-        "mautrix-meta-instagram-registration"
     ];
 
     persisted_state = user: group: directory: {
@@ -244,32 +239,9 @@ in
                 };
             };
 
-            services.mautrix-meta.instances = lib.genAttrs [ "facebook" "instagram" ] (_: {
-                enable = true;
-                environmentFile = double_puppet_environment;
-                settings = {
-                    homeserver = {
-                        address = synapse_address;
-                        domain = server_name;
-                    };
-                    appservice.hostname = "127.0.0.1";
-                    bridge.permissions = bridge_permissions;
-                    double_puppet.secrets."${server_name}" = double_puppet_secret;
-
-                    # A short history per chat and no queue paging further back, so the bridge fetches about as much as the app does
-                    backfill = {
-                        enabled = true;
-                        max_initial_messages = 20;
-                        queue.enabled = false;
-                    };
-                };
-            });
-
             environment.persistence."/Storage/Services/Matrix".directories = [
                 (persisted_state "mautrix-whatsapp" "mautrix-whatsapp" "/var/lib/mautrix-whatsapp")
                 (persisted_state "mautrix-discord" "mautrix-discord" "/var/lib/mautrix-discord")
-                (persisted_state "mautrix-meta-facebook" "mautrix-meta" "/var/lib/mautrix-meta-facebook")
-                (persisted_state "mautrix-meta-instagram" "mautrix-meta" "/var/lib/mautrix-meta-instagram")
             ];
         }
     ];
