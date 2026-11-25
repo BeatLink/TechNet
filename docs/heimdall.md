@@ -213,14 +213,6 @@ it behaves like the official apps:
 - Send at a human pace: no scripts, bots or mass invites through bridged accounts.
 - History stays shallow: WhatsApp takes what the phone hands any new linked
   device, Messenger and Instagram 20 messages per chat, Discord none.
-
-Telegram is wired but off. It needs an app's API id and hash from
-<https://my.telegram.org>, set as `telegram_api_id` and `telegram_api_hash` in
-`secrets/2-server/matrix.yaml`; then set `telegram_enabled = true` in the
-module, give the `mautrix-telegram` user and group fixed ids in
-[`account-ids.nix`](../nix/2-server/1-system/account-ids.nix), and redeploy.
-Its bot is `@telegrambot:matrix.heimdall.technet`.
-
 ## Shell history
 
 Heimdall runs [Atuin](../nix/2-server/3-services/technet/atuin.nix) at

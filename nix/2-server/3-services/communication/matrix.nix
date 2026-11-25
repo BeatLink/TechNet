@@ -1,8 +1,8 @@
 # Matrix ##############################################################################################################################################
 #
-# A private Matrix homeserver for the TechNet, reachable only over WireGuard, with bridges that bring WhatsApp, Discord, Facebook Messenger, Instagram
-# and Telegram chats into it as ordinary rooms. Federation is off: the only users on it are the account in secrets/2-server/matrix.yaml
-# and the bridges' puppets.
+# A private Matrix homeserver for the TechNet, reachable only over WireGuard, with bridges that bring WhatsApp, Discord, Facebook Messenger and
+# Instagram chats into it as ordinary rooms. Federation is off: the only users on it are the account in secrets/2-server/matrix.yaml and the
+# bridges' puppets.
 #
 
 {
@@ -18,9 +18,6 @@ let
     data_directory = "/var/lib/matrix-synapse";
     registration_secret_file = "${data_directory}/registration_shared_secret";
     secrets_file = "${config.technet.secrets.path}/matrix.yaml";
-
-    # Telegram needs an app's API id and hash from my.telegram.org, stored as telegram_api_id and telegram_api_hash in secrets/2-server/matrix.yaml.
-    telegram_enabled = false;
 
     # Every account on this server may use the bridges fully, which keeps the account's name out of the repository
     bridge_permissions."${server_name}" = "admin";
@@ -152,7 +149,7 @@ in
 
         # Bridges ####################################################################################################################################
         {
-            # The Discord and Telegram bridges link libolm, which is only used for encrypted rooms and encryption is off on these bridges
+            # The Discord bridge links libolm, which is only used for encrypted rooms and encryption is off on it
             nixpkgs.config.permittedInsecurePackages = [ "olm-3.2.16" ];
 
             services.mautrix-whatsapp = {
@@ -213,41 +210,5 @@ in
                 (persisted_state "mautrix-meta-instagram" "mautrix-meta" "/var/lib/mautrix-meta-instagram")
             ];
         }
-
-        # Telegram Bridge ############################################################################################################################
-        (lib.mkIf telegram_enabled {
-            sops.secrets.telegram_api_id.sopsFile = secrets_file;
-            sops.secrets.telegram_api_hash.sopsFile = secrets_file;
-
-            sops.templates."mautrix-telegram.env" = {
-                owner = "mautrix-telegram";
-                content = ''
-                    MAUTRIX_TELEGRAM_TELEGRAM_API_ID=${config.sops.placeholder.telegram_api_id}
-                    MAUTRIX_TELEGRAM_TELEGRAM_API_HASH=${config.sops.placeholder.telegram_api_hash}
-                '';
-            };
-
-            services.mautrix-telegram = {
-                enable = true;
-                environmentFile = config.sops.templates."mautrix-telegram.env".path;
-                settings = {
-                    homeserver = {
-                        address = synapse_address;
-                        domain = server_name;
-                    };
-                    # Moved off the default 8080, which Trilium holds
-                    appservice = {
-                        port = 29317;
-                        address = "http://127.0.0.1:29317";
-                        hostname = "127.0.0.1";
-                    };
-                    bridge.permissions = bridge_permissions;
-                };
-            };
-
-            environment.persistence."/Storage/Services/Matrix".directories = [
-                (persisted_state "mautrix-telegram" "mautrix-telegram" "/var/lib/mautrix-telegram")
-            ];
-        })
     ];
 }

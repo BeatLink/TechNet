@@ -21,7 +21,6 @@ column, and their service definition lives in that host's own directory.
 | Service | Port | Vhost / Notes |
 |---------|------|---------------|
 | Synapse (Matrix)       | 8008  | 127.0.0.1; matrix.heimdall.technet — client API only, federation off |
-| mautrix-telegram       | 29317 | 127.0.0.1; off until its API keys are in secrets |
 | mautrix-whatsapp       | 29318 | 127.0.0.1 |
 | mautrix-meta (Instagram) | 29320 | 127.0.0.1 |
 | mautrix-meta (Facebook)  | 29321 | 127.0.0.1 |

@@ -32,7 +32,6 @@
                         "mautrix-discord"
                         "mautrix-meta-facebook"
                         "mautrix-meta-instagram"
-                        "mautrix-telegram"
                         "mautrix-whatsapp"
                         "pihole-ftl"
                         "pihole-ftl-setup"
