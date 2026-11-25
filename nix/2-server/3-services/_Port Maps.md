@@ -25,6 +25,7 @@ column, and their service definition lives in that host's own directory.
 | mautrix-discord        | 29334 | 127.0.0.1 |
 | Dovecot (IMAP)         | 143   | 127.0.0.1 |
 | Dovecot (IMAP over TLS) | 993  | nginx `stream`, proxied to 143; mail.heimdall.technet |
+| Roundcube (webmail)    | —     | php-fpm via nginx; mail.heimdall.technet |
 
 ## Monitoring
 

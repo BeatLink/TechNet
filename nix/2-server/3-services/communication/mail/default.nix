@@ -1,8 +1,8 @@
 # Mail ###############################################################################################################################################
 #
 # Moves mail off Gmail and Outlook.com into a Dovecot mailbox on Heimdall. imapsync copies every folder from each account on a timer, then deletes
-# what it copied from the account once delete_from_source is on. Mail clients read the mailbox over IMAP at mail.heimdall.technet:993 on the LAN
-# and over WireGuard; sending still goes through each account's own SMTP server.
+# what it copied from the account once delete_from_source is on. Mail clients read the mailbox over IMAP at mail.heimdall.technet:993, and a
+# browser at https://mail.heimdall.technet, on the LAN and over WireGuard; sending still goes through each account's own SMTP server.
 #
 
 {
@@ -68,7 +68,7 @@ let
                     ${placeholder_check ([ "mail_username" "mail_password" ] ++ secret_names)}
                     ${prepare}
                     imapsync \
-                        ${source_arguments} \
+                        ${lib.trim source_arguments} \
                         --host2 127.0.0.1 --port2 ${toString imap_port} --nossl2 --notls2 \
                         --user2 "$(< ${secret "mail_username"})" --passfile2 ${secret "mail_password"} \
                         --subfolder2 ${description} \
@@ -191,6 +191,27 @@ in
             '';
 
             services.pihole-ftl.settings.dns.cnameRecords = [ "mail.heimdall.technet,heimdall.technet" ];
+        }
+
+        # Webmail ####################################################################################################################################
+        {
+            # Roundcube reads the same mailbox over loopback and keeps its settings in the shared Postgres instance
+            services.roundcube = {
+                enable = true;
+                hostName = "mail.heimdall.technet";
+                extraConfig = ''
+                    $config['imap_host'] = 'localhost:${toString imap_port}';
+                    $config['product_name'] = 'Heimdall Mail';
+                '';
+            };
+
+            services.nginx.virtualHosts."mail.heimdall.technet" = {
+                forceSSL = false;
+                enableACME = false;
+                addSSL = true;
+                sslCertificate = config.sops.secrets.https_certificate.path;
+                sslCertificateKey = config.sops.secrets.https_certificate_key.path;
+            };
         }
 
         # Gmail ######################################################################################################################################
