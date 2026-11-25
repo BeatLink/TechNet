@@ -63,6 +63,22 @@ let
                 "@mikusnuz/npm-mcp@1.4.0"
             ];
         };
+        # FoxMCP drives the running Firefox through its add-on, installed below. --single-instance makes every session join one shared worker
+        # holding the add-on's WebSocket on port 8765, instead of each session fighting for the port. uv's own Python builds do not run on NixOS.
+        foxmcp = {
+            type = "stdio";
+            command = "${pkgs.uv}/bin/uvx";
+            args = [
+                "--python"
+                "${pkgs.python3}/bin/python3"
+                "--from"
+                "foxmcp==1.7.0"
+                "foxmcp"
+                "--stdio"
+                "--single-instance"
+            ];
+            env.UV_PYTHON_DOWNLOADS = "never";
+        };
         # The MediaWiki server reads its wikis and their tokens from a config file, rendered from sops below.
         mediawiki = {
             type = "stdio";
@@ -100,6 +116,12 @@ in
                 token = config.sops.placeholder.wikidata_mcp_token;
             };
         };
+    };
+
+    # The add-on half of FoxMCP. Firefox updates it from AMO; keep the server pin above on a version whose protocol matches.
+    programs.firefox.policies.ExtensionSettings."foxmcp@codemud.org" = {
+        installation_mode = "normal_installed";
+        install_url = "https://addons.mozilla.org/firefox/downloads/latest/foxmcp/latest.xpi";
     };
 
     # sops-nix makes no parent folders for a template path, so /etc/claude-code comes from here, linked to the rendered file.
