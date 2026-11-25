@@ -90,6 +90,7 @@ column, and their service definition lives in that host's own directory.
 | X-Tasks      | 9002 | tasks.heimdall.technet |
 | X-Fitness    | 9003 | fitness.heimdall.technet |
 | X-Media-Tracker | 9004 | media-tracker.heimdall.technet |
+| X-Context    | 9005 | context.heimdall.technet |
 | ActivityWatch | 5600 | 127.0.0.1; activitywatch.heimdall.technet |
 
 ## X-Monitor Reachability Checks
