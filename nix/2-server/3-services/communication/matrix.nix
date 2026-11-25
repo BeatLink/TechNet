@@ -18,9 +18,22 @@ let
     data_directory = "/var/lib/matrix-synapse";
     registration_secret_file = "${data_directory}/registration_shared_secret";
     secrets_file = "${config.technet.secrets.path}/matrix.yaml";
+    double_puppet_registration = "${data_directory}/double-puppet-registration.yaml";
+    double_puppet_environment = "${data_directory}/double-puppet.env";
+    double_puppet_secret = "as_token:$DOUBLE_PUPPET_AS_TOKEN";
 
     # Every account on this server may use the bridges fully, which keeps the account's name out of the repository
     bridge_permissions."${server_name}" = "admin";
+
+    bridge_units = [
+        "mautrix-whatsapp"
+        "mautrix-discord"
+        "mautrix-discord-registration"
+        "mautrix-meta-facebook"
+        "mautrix-meta-facebook-registration"
+        "mautrix-meta-instagram"
+        "mautrix-meta-instagram-registration"
+    ];
 
     persisted_state = user: group: directory: {
         inherit directory user group;
@@ -85,6 +98,44 @@ in
             environment.persistence."/Storage/Services/Matrix".directories = [
                 (persisted_state "matrix-synapse" "matrix-synapse" data_directory)
             ];
+        }
+
+        # Double Puppeting ###########################################################################################################################
+        {
+            # An app service with no address whose token lets the bridges post as the real account, so messages sent from the phones show as its own
+            services.matrix-synapse.settings.app_service_config_files = [ double_puppet_registration ];
+
+            # Makes the token on first start and keeps it on Heimdall; systemd reads the environment file for the bridges as root
+            systemd.services.matrix-double-puppet = {
+                description = "Create the Matrix double puppeting token";
+                requiredBy = [ "matrix-synapse.service" ] ++ map (unit: "${unit}.service") bridge_units;
+                before = [ "matrix-synapse.service" ] ++ map (unit: "${unit}.service") bridge_units;
+                unitConfig.RequiresMountsFor = [ data_directory ];
+                serviceConfig = {
+                    Type = "oneshot";
+                    RemainAfterExit = true;
+                };
+                script = ''
+                    if [ ! -s ${double_puppet_environment} ]; then
+                        umask 077
+                        token=$(${pkgs.openssl}/bin/openssl rand -hex 32)
+                        printf 'DOUBLE_PUPPET_AS_TOKEN=%s\n' "$token" > ${double_puppet_environment}
+                        cat > ${double_puppet_registration} <<EOF
+                    id: doublepuppet
+                    url: null
+                    as_token: $token
+                    hs_token: $(${pkgs.openssl}/bin/openssl rand -hex 32)
+                    sender_localpart: $(${pkgs.openssl}/bin/openssl rand -hex 16)
+                    rate_limited: false
+                    namespaces:
+                      users:
+                        - regex: '@.*:${lib.escape [ "." ] server_name}'
+                          exclusive: false
+                    EOF
+                        chown matrix-synapse:matrix-synapse ${double_puppet_registration}
+                    fi
+                '';
+            };
         }
 
         # Account ####################################################################################################################################
@@ -157,10 +208,12 @@ in
 
             services.mautrix-whatsapp = {
                 enable = true;
+                environmentFile = double_puppet_environment;
                 settings = {
                     homeserver.address = synapse_address;
                     appservice.hostname = "127.0.0.1";
                     bridge.permissions = bridge_permissions;
+                    double_puppet.secrets."${server_name}" = double_puppet_secret;
 
                     # Takes only the recent history the phone pushes to any new linked device, not the whole archive
                     network.history_sync.request_full_sync = false;
@@ -174,6 +227,7 @@ in
             # Its defaults already backfill nothing and bridge no server until asked with `guilds bridge`
             services.mautrix-discord = {
                 enable = true;
+                environmentFile = double_puppet_environment;
                 settings = {
                     homeserver = {
                         address = synapse_address;
@@ -183,12 +237,16 @@ in
                         address = "http://127.0.0.1:29334";
                         hostname = "127.0.0.1";
                     };
-                    bridge.permissions = bridge_permissions;
+                    bridge = {
+                        permissions = bridge_permissions;
+                        login_shared_secret_map."${server_name}" = double_puppet_secret;
+                    };
                 };
             };
 
             services.mautrix-meta.instances = lib.genAttrs [ "facebook" "instagram" ] (_: {
                 enable = true;
+                environmentFile = double_puppet_environment;
                 settings = {
                     homeserver = {
                         address = synapse_address;
@@ -196,6 +254,7 @@ in
                     };
                     appservice.hostname = "127.0.0.1";
                     bridge.permissions = bridge_permissions;
+                    double_puppet.secrets."${server_name}" = double_puppet_secret;
 
                     # A short history per chat and no queue paging further back, so the bridge fetches about as much as the app does
                     backfill = {
