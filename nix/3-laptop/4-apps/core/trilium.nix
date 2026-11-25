@@ -17,9 +17,7 @@ in
             persistence."/Storage/Apps/Core/Trilium" = {
                 directories = [
                     ".local/share/trilium-data"
-                    ".local/share/trilium-data-sysadmin"
                     ".config/trilium-37840" # Electron userData; Trilium names it after its port, so TRILIUM_PORT changes this path
-                    ".config/trilium-12351"
                 ];
             };
         };
@@ -34,26 +32,6 @@ in
                 After = [ "display.target" ];
             };
             Service = {
-                ExecStart = "${trilium-desktop}/bin/trilium";
-                Restart = "on-failure";
-                RestartSec = 5;
-            };
-            Install.WantedBy = [ "display.target" ];
-        };
-
-        systemd.user.services.trilium-sysadmin = {
-            Unit = {
-                Description = "Trilium Sysadmin Notes";
-                PartOf = [ "graphical-session.target" ];
-                Requires = [ "display.target" ];
-                After = [ "display.target" ];
-            };
-            Service = {
-                Environment = [
-                    "TRILIUM_PORT=12351"
-                    "TRILIUM_DATA_DIR=/home/beatlink/.local/share/trilium-data-sysadmin"
-                    "TRILIUM_ELECTRON_DATA_DIR=/home/beatlink/.config/trilium-12351"
-                ];
                 ExecStart = "${trilium-desktop}/bin/trilium";
                 Restart = "on-failure";
                 RestartSec = 5;
