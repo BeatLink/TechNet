@@ -35,6 +35,7 @@ let
     '';
 
     # One imapsync run that copies an account into its own top-level folder of the Heimdall mailbox, prefixed by hand since --subfolder2 skips any source folder matching its name
+    # main_folders renames the account's main folders with a number so mail clients list them first and in the usual order
     fetch_account =
         {
             name,
@@ -42,6 +43,7 @@ let
             secret_names,
             prepare ? "",
             source_arguments,
+            main_folders,
         }:
         {
             systemd.services."mail-fetch-${name}" = {
@@ -69,6 +71,7 @@ let
                     ${prepare}
                     imapsync \
                         ${lib.trim source_arguments} \
+                        ${lib.concatMapStringsSep " " (folder: lib.escapeShellArg "--f1f2=${folder.name}=${description}/${folder.value}") (lib.attrsToList main_folders)} \
                         --host2 127.0.0.1 --port2 ${toString imap_port} --nossl2 --notls2 \
                         --user2 "$(< ${secret "mail_username"})" --passfile2 ${secret "mail_password"} \
                         --regextrans2 's,^,${description}/,' \
@@ -122,6 +125,9 @@ in
                     mail_driver = "maildir";
                     mail_home = "${mail_directory}/%{user | username}";
                     mail_path = "~/Maildir";
+
+                    # Lets folder names such as "1. Inbox" hold a dot, which Maildir otherwise uses between folder levels
+                    mailbox_list_storage_escape_char = "%";
                     mail_uid = "vmail";
                     mail_gid = "vmail";
 
@@ -224,14 +230,20 @@ in
                 "gmail_app_password"
             ];
 
-            # Each label is its own folder, Gmail's own folders lose their [Gmail] prefix, and All Mail goes last so it only holds unlabelled archived mail
+            # Each label is its own folder, Gmail's other folders lose their [Gmail] prefix, and All Mail goes last so it only holds unlabelled archived mail
             source_arguments = ''
                 --host1 imap.gmail.com --ssl1 \
                 --user1 "$(< ${secret "gmail_address"})" --passfile1 ${secret "gmail_app_password"} \
                 --exclude '^\[Gmail\]$' --exclude '^\[Gmail\]/(Important|Starred|Spam|Trash|Chats)$' \
-                --folderlast '[Gmail]/All Mail' --f1f2 '[Gmail]/All Mail=Gmail/Archive' \
+                --folderlast '[Gmail]/All Mail' \
                 --regextrans2 's,^\[Gmail\]/,,'
             '';
+            main_folders = {
+                "INBOX" = "1. Inbox";
+                "[Gmail]/Drafts" = "2. Drafts";
+                "[Gmail]/Sent Mail" = "3. Sent";
+                "[Gmail]/All Mail" = "4. Archive";
+            };
         })
 
         # Outlook ####################################################################################################################################
@@ -246,8 +258,15 @@ in
                 --host1 outlook.office365.com --ssl1 \
                 --user1 "$(< ${secret "outlook_address"})" \
                 --authmech1 XOAUTH2 --oauthaccesstoken1 "$RUNTIME_DIRECTORY/access-token" \
-                --exclude '^(Deleted Items|Junk Email|Outbox)$' --exclude '^Sync Issues'
+                --exclude '^(Deleted|Deleted Items|Junk|Junk Email|Outbox)$' --exclude '^Sync Issues'
             '';
+            main_folders = {
+                "INBOX" = "1. Inbox";
+                "Inbox" = "1. Inbox";
+                "Drafts" = "2. Drafts";
+                "Sent" = "3. Sent";
+                "Archive" = "4. Archive";
+            };
         })
     ];
 }
