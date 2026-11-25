@@ -6,6 +6,13 @@
 }:
 {
     environment.systemPackages = with pkgs; [ variety ];
+
+    technet.desktop.apps.variety = {
+        description = "Variety wallpaper changer";
+        command = "${pkgs.variety}/bin/variety";
+        desktopFile = "${pkgs.variety}/share/applications/variety.desktop";
+    };
+
     home-manager.users.beatlink =
         {
             config,
@@ -35,21 +42,6 @@
                 };
             };
 
-            # A unit rather than an autostart .desktop, so its fetching and scaling run niced in a cgroup of their own.
-            systemd.user.services.variety = {
-                Unit = {
-                    Description = "Variety wallpaper changer";
-                    PartOf = [ "graphical-session.target" ];
-                    Requires = [ "display.target" ];
-                    After = [ "display.target" ];
-                };
-                Service = {
-                    ExecStart = "${pkgs.variety}/bin/variety";
-                    Restart = "on-failure";
-                    RestartSec = 5;
-                    Nice = 10;
-                };
-                Install.WantedBy = [ "display.target" ];
-            };
+            systemd.user.services.variety.Service.Nice = 10;
         };
 }

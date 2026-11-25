@@ -37,8 +37,16 @@
 # kwallet is disabled for the same reason from the KDE side: nothing here uses
 # it, and it otherwise inserts itself into the login PAM stack.
 #
-{ lib, ... }:
+{ lib, pkgs, ... }:
 {
+    technet.desktop.apps.keepassxc = {
+        description = "KeePassXC password manager";
+        command = "${pkgs.keepassxc}/bin/keepassxc";
+        desktopFile = "${pkgs.keepassxc}/share/applications/org.keepassxc.KeePassXC.desktop";
+        # Load-bearing: KeePassXC's own check for a running copy gives up after 200ms and a second copy fights it for the secrets bus name.
+        socket = "\${TMPDIR:-/tmp}/keepassxc-$USER.socket";
+    };
+
     services.gnome.gnome-keyring.enable = lib.mkForce false;
     security.pam.services.login.kwallet.enable = false;
 
@@ -59,53 +67,9 @@
                 };
             };
 
-            # The menu entry shows the service's window; KeePassXC's own check for a running copy gives up after 200ms and starts a second one that fights it for the secrets bus name.
-            xdg.desktopEntries."org.keepassxc.KeePassXC" = {
-                name = "KeePassXC";
-                genericName = "Password Manager";
-                exec = "${
-                    pkgs.writeShellApplication {
-                        name = "keepassxc-show";
-                        runtimeInputs = [ pkgs.socat ];
-                        text = ''
-                            if [ $# -gt 0 ]; then exec ${pkgs.keepassxc}/bin/keepassxc "$@"; fi
-                            systemctl --user start keepassxc.service
-                            for _ in $(seq 50); do
-                                socat -u /dev/null UNIX-CONNECT:"''${TMPDIR:-/tmp}/keepassxc-$USER.socket" 2>/dev/null && exit 0
-                                sleep 0.2
-                            done
-                        '';
-                    }
-                }/bin/keepassxc-show %f";
-                icon = "keepassxc";
-                terminal = false;
-                categories = [
-                    "Utility"
-                    "Security"
-                    "Qt"
-                ];
-                mimeType = [ "application/x-keepass2" ];
-                settings.StartupWMClass = "keepassxc";
-            };
-
-            # A unit rather than an autostart .desktop, so the agent socket it adds the database's keys to is ordered before it.
-            systemd.user.services.keepassxc = {
-                Unit = {
-                    Description = "KeePassXC password manager";
-                    PartOf = [ "graphical-session.target" ];
-                    Requires = [ "display.target" ];
-                    Wants = [ "gcr-ssh-agent.socket" ];
-                    After = [
-                        "display.target"
-                        "gcr-ssh-agent.socket"
-                    ];
-                };
-                Service = {
-                    ExecStart = "${pkgs.keepassxc}/bin/keepassxc";
-                    Restart = "on-failure";
-                    RestartSec = 5;
-                };
-                Install.WantedBy = [ "display.target" ];
+            systemd.user.services.keepassxc.Unit = {
+                Wants = [ "gcr-ssh-agent.socket" ];
+                After = [ "gcr-ssh-agent.socket" ];
             };
         };
 }

@@ -11,6 +11,20 @@ let
     };
 in
 {
+    technet.desktop.apps = {
+        # Electron takes both the wm_class and the userData name from the asar's package.json, so a build handing it a loose main.cjs instead breaks the panel match and the persisted path at once
+        trilium = {
+            description = "Trilium Notes";
+            command = "${trilium-desktop}/bin/trilium";
+            desktopFile = "${trilium-desktop}/share/applications/Trilium.desktop";
+            socket = "$HOME/.config/trilium-37840/SingletonSocket";
+        };
+        trilium-sysadmin = {
+            description = "Trilium Sysadmin Notes";
+            command = "${trilium-desktop}/bin/trilium";
+        };
+    };
+
     home-manager.users.beatlink = {
         home = {
             packages = [ trilium-desktop ];
@@ -24,41 +38,10 @@ in
             };
         };
 
-        # A unit rather than an autostart .desktop, so this Electron app runs in a cgroup of its own.
-        # Electron takes both the wm_class and the userData name from the asar's package.json, so a build handing it a loose main.cjs instead breaks the panel match and the persisted path at once
-        systemd.user.services.trilium = {
-            Unit = {
-                Description = "Trilium Notes";
-                PartOf = [ "graphical-session.target" ];
-                Requires = [ "display.target" ];
-                After = [ "display.target" ];
-            };
-            Service = {
-                ExecStart = "${trilium-desktop}/bin/trilium";
-                Restart = "on-failure";
-                RestartSec = 5;
-            };
-            Install.WantedBy = [ "display.target" ];
-        };
-
-        systemd.user.services.trilium-sysadmin = {
-            Unit = {
-                Description = "Trilium Sysadmin Notes";
-                PartOf = [ "graphical-session.target" ];
-                Requires = [ "display.target" ];
-                After = [ "display.target" ];
-            };
-            Service = {
-                Environment = [
-                    "TRILIUM_PORT=12351"
-                    "TRILIUM_DATA_DIR=/home/beatlink/.local/share/trilium-data-sysadmin"
-                    "TRILIUM_ELECTRON_DATA_DIR=/home/beatlink/.config/trilium-12351"
-                ];
-                ExecStart = "${trilium-desktop}/bin/trilium";
-                Restart = "on-failure";
-                RestartSec = 5;
-            };
-            Install.WantedBy = [ "display.target" ];
-        };
+        systemd.user.services.trilium-sysadmin.Service.Environment = [
+            "TRILIUM_PORT=12351"
+            "TRILIUM_DATA_DIR=/home/beatlink/.local/share/trilium-data-sysadmin"
+            "TRILIUM_ELECTRON_DATA_DIR=/home/beatlink/.config/trilium-12351"
+        ];
     };
 }

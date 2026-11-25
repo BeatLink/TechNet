@@ -5,6 +5,7 @@
 
 {
     imports = [
+        ./apps.nix
         ./cinnamon
         ./display-wait.nix
         ./theme.nix
