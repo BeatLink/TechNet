@@ -108,6 +108,7 @@ Grouped by directory under [`3-services`](../nix/2-server/3-services):
 | Group | Services |
 | --- | --- |
 | `networking` | nginx, nginx-vhosts, pi-hole, unbound |
+| `communication` | matrix (synapse, mautrix bridges) |
 | `personal-info-and-files` | blockurl, radicale, syncthing, trilium |
 | `fun-and-media` | calibre-web-automated, comet, freshrss, jackett, qbittorrent, stremio, vlc |
 | `home-automation` | esphome, frigate, home-assistant, lnxlink, mosquitto |
@@ -168,6 +169,57 @@ dominate the repo. The persisted path is `/var/lib/private/atticd`, not
 `/var/lib/atticd`: atticd runs under `DynamicUser`, so systemd owns the private
 path and leaves the shorter one as a symlink. Binding over `/var/lib/atticd`
 makes systemd try to migrate a mountpoint and the unit dies with `EBUSY`.
+
+## Matrix
+
+Heimdall runs a private [Matrix](../nix/2-server/3-services/communication/matrix.nix)
+homeserver, Synapse, at `https://matrix.heimdall.technet/`. Federation is off, so
+it is reachable only over WireGuard and talks to no other Matrix server. Bridges
+bring WhatsApp, Discord, Facebook Messenger and Instagram chats into it as
+ordinary rooms, so one Matrix client covers all of them. Synapse keeps its data
+in the shared Postgres instance; the bridges keep theirs under
+`/Storage/Services/Matrix`.
+
+The account's username and password are `matrix_username` and `matrix_password`
+in `secrets/2-server/matrix.yaml`, which ships with `CHANGEME` placeholders
+(edit it with `sops secrets/2-server/matrix.yaml`). On each switch,
+`matrix-synapse-account` creates the account if it is missing and leaves an
+existing one alone; it sits in `failed` until the placeholders are replaced.
+Later password changes are made from the client. Sign in from Element (or any
+Matrix client) with homeserver `https://matrix.heimdall.technet`.
+
+Each bridge is linked by messaging its bot from that account and sending `login`:
+
+| Network | Bot | Login |
+| --- | --- | --- |
+| WhatsApp | `@whatsappbot:matrix.heimdall.technet` | QR code, scanned from WhatsApp > Linked devices |
+| Discord | `@discordbot:matrix.heimdall.technet` | `login-qr` instead of `login`, scanned from the Discord mobile app |
+| Messenger | `@facebookbot:matrix.heimdall.technet` | Browser cookies, as the bot explains |
+| Instagram | `@instagrambot:matrix.heimdall.technet` | Browser cookies, as the bot explains |
+
+The Discord bridge signs in as the user account, which Discord's terms forbid.
+
+### Keeping the linked accounts safe
+
+Each bridge is one more logged-in device, so it draws the least attention when
+it behaves like the official apps:
+
+- Link each account from home, so the bridge's address is one the account
+  already uses, and link Messenger and Instagram with cookies from a browser
+  that is already signed in there.
+- Link each network once and leave it linked; repeated logins trip account checks.
+- Bridge Discord servers one at a time with `guilds bridge <id>`, only the ones
+  actually read.
+- Send at a human pace: no scripts, bots or mass invites through bridged accounts.
+- History stays shallow: WhatsApp takes what the phone hands any new linked
+  device, Messenger and Instagram 20 messages per chat, Discord none.
+
+Telegram is wired but off. It needs an app's API id and hash from
+<https://my.telegram.org>, set as `telegram_api_id` and `telegram_api_hash` in
+`secrets/2-server/matrix.yaml`; then set `telegram_enabled = true` in the
+module, give the `mautrix-telegram` user and group fixed ids in
+[`account-ids.nix`](../nix/2-server/1-system/account-ids.nix), and redeploy.
+Its bot is `@telegrambot:matrix.heimdall.technet`.
 
 ## Shell history
 
