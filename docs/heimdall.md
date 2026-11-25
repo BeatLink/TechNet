@@ -175,8 +175,8 @@ makes systemd try to migrate a mountpoint and the unit dies with `EBUSY`.
 Heimdall runs a private [Matrix](../nix/2-server/3-services/communication/matrix.nix)
 homeserver, Synapse, at `https://matrix.heimdall.technet/`. Federation is off, so
 it is reachable only over WireGuard and talks to no other Matrix server. Bridges
-bring WhatsApp, Discord, Facebook Messenger and Instagram chats into it as
-ordinary rooms, so one Matrix client covers all of them. Synapse keeps its data
+bring WhatsApp and Discord chats into it as ordinary rooms, so one Matrix
+client covers both. Synapse keeps its data
 in the shared Postgres instance; the bridges keep theirs under
 `/Storage/Services/Matrix`.
 
@@ -194,8 +194,6 @@ Each bridge is linked by messaging its bot from that account and sending `login`
 | --- | --- | --- |
 | WhatsApp | `@whatsappbot:matrix.heimdall.technet` | QR code, scanned from WhatsApp > Linked devices |
 | Discord | `@discordbot:matrix.heimdall.technet` | `login-qr` instead of `login`, scanned from the Discord mobile app |
-| Messenger | `@facebookbot:matrix.heimdall.technet` | Browser cookies, as the bot explains |
-| Instagram | `@instagrambot:matrix.heimdall.technet` | Browser cookies, as the bot explains |
 
 The Discord bridge signs in as the user account, which Discord's terms forbid.
 
@@ -211,14 +209,14 @@ Each bridge is one more logged-in device, so it draws the least attention when
 it behaves like the official apps:
 
 - Link each account from home, so the bridge's address is one the account
-  already uses, and link Messenger and Instagram with cookies from a browser
-  that is already signed in there.
+  already uses.
 - Link each network once and leave it linked; repeated logins trip account checks.
 - Bridge Discord servers one at a time with `guilds bridge <id>`, only the ones
   actually read.
 - Send at a human pace: no scripts, bots or mass invites through bridged accounts.
 - History stays shallow: WhatsApp takes what the phone hands any new linked
-  device, Messenger and Instagram 20 messages per chat, Discord none.
+  device, Discord none.
+
 ## Mail
 
 [`mail`](../nix/2-server/3-services/communication/mail) moves mail off Gmail and

@@ -17,8 +17,6 @@ let
         frigate = 995;
         "fwupd-refresh" = 994;
         "mautrix-discord" = 970;
-        "mautrix-meta-facebook" = 969;
-        "mautrix-meta-instagram" = 968;
         "mautrix-whatsapp" = 967;
         nscd = 991;
         pihole = 989;
@@ -50,8 +48,6 @@ let
         frigate = 995;
         "fwupd-refresh" = 994;
         "mautrix-discord" = 966;
-        "mautrix-meta" = 961;
-        "mautrix-meta-registration" = 960;
         "mautrix-whatsapp" = 959;
         nscd = 990;
         pihole = 988;
