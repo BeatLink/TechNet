@@ -199,6 +199,12 @@ Each bridge is linked by messaging its bot from that account and sending `login`
 
 The Discord bridge signs in as the user account, which Discord's terms forbid.
 
+Double puppeting is on for every bridge: messages sent from the phone apps show
+in Matrix as sent by the Matrix account itself, not by a bridge ghost, and reads
+sync both ways. It runs through a `doublepuppet` app service whose token
+`matrix-double-puppet` makes on first start under `/var/lib/matrix-synapse`;
+nothing about it is in the repository or in sops.
+
 ### Keeping the linked accounts safe
 
 Each bridge is one more logged-in device, so it draws the least attention when
