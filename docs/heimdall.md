@@ -108,7 +108,7 @@ Grouped by directory under [`3-services`](../nix/2-server/3-services):
 | Group | Services |
 | --- | --- |
 | `networking` | nginx, nginx-vhosts, pi-hole, unbound |
-| `communication` | matrix (synapse, mautrix bridges) |
+| `communication` | mail (dovecot, imapsync), matrix (synapse, mautrix bridges) |
 | `personal-info-and-files` | blockurl, radicale, syncthing, trilium |
 | `fun-and-media` | calibre-web-automated, comet, freshrss, jackett, qbittorrent, stremio, vlc |
 | `home-automation` | esphome, frigate, home-assistant, lnxlink, mosquitto |
@@ -216,6 +216,60 @@ it behaves like the official apps:
 - Send at a human pace: no scripts, bots or mass invites through bridged accounts.
 - History stays shallow: WhatsApp takes what the phone hands any new linked
   device, Discord none.
+
+## Mail
+
+[`mail`](../nix/2-server/3-services/communication/mail) moves mail off Gmail and
+Outlook.com into a Dovecot mailbox on Heimdall. Every 10 minutes imapsync copies
+each account's folders into a top-level `Gmail` or `Outlook` folder of that
+mailbox. Read it from any IMAP client at `mail.heimdall.technet`, port 993 with
+SSL/TLS, on the LAN or over WireGuard. Sending still goes through each account's
+own SMTP server. The mail sits as Maildir files under `/Storage/Services/Mail`,
+which the `/Storage/Services` backups cover.
+
+`secrets/2-server/mail.yaml` ships with `CHANGEME` placeholders, and every mail
+unit sits in `failed` until they are replaced (`sops secrets/2-server/mail.yaml`):
+
+| Key | Value |
+| --- | --- |
+| `mail_username`, `mail_password` | The login mail clients use on Heimdall |
+| `gmail_address`, `gmail_app_password` | An app password from Google Account > Security > App passwords, which needs 2-Step Verification |
+| `outlook_address` | The Outlook.com address |
+
+### Gmail
+
+Each label shows up as its own folder, so a message with two labels is copied
+twice. `[Gmail]/All Mail` goes last and lands in `Gmail/Archive`, holding only
+archived mail with no label. Before deletion is switched on, set Gmail's
+Settings > Forwarding and POP/IMAP to auto-expunge and to *Immediately delete
+the message forever*, and untick *Show in IMAP* for Important and Starred;
+otherwise a deleted message only loses its label and stays in Gmail.
+
+### Outlook
+
+Outlook.com accepts only OAuth for IMAP, and personal accounts cannot register
+an OAuth app of their own. The sign-in needs a client ID from either an app
+registered in a free Entra ID tenant (multi-tenant with personal accounts,
+public client, redirect `http://localhost`) or a published open-source mail
+client's public ID. Sign in once on Heimdall, then open the printed address in
+any browser and paste back the address it lands on:
+
+```sh
+sudo -u vmail mail-oauth init /Storage/Services/Mail/oauth/outlook.json \
+    --client-id <client id> --redirect-uri http://localhost
+```
+
+Each run refreshes the token, so the sign-in lasts as long as it is used at
+least every 90 days. Run `init` again if `mail-fetch-outlook` reports
+`invalid_grant`.
+
+### Moving the mail off
+
+`delete_from_source` in the module starts off, so the first runs only copy.
+Once `journalctl -u mail-fetch-gmail -u mail-fetch-outlook` shows matching
+message counts on both sides and a backup of `/Storage/Services` has run, set
+it to `true`; each later run then deletes what it copied from the account.
+Afterwards empty Outlook's Deleted Items and Recoverable Items by hand.
 
 ## Shell history
 

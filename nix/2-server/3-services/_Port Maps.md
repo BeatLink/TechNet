@@ -23,6 +23,8 @@ column, and their service definition lives in that host's own directory.
 | Synapse (Matrix)       | 8008  | 127.0.0.1; matrix.heimdall.technet — client API only, federation off |
 | mautrix-whatsapp       | 29318 | 127.0.0.1 |
 | mautrix-discord        | 29334 | 127.0.0.1 |
+| Dovecot (IMAP)         | 143   | 127.0.0.1 |
+| Dovecot (IMAP over TLS) | 993  | nginx `stream`, proxied to 143; mail.heimdall.technet |
 
 ## Monitoring
 

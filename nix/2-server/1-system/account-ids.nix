@@ -26,6 +26,7 @@ let
         "systemd-oom" = 984;
         trilium = 983;
         unbound = 982;
+        vmail = 966;
         wpa_supplicant = 972;
         "x-backups-agent" = 974;
         "x-monitor" = 977;
@@ -58,6 +59,7 @@ let
         "systemd-oom" = 981;
         trilium = 980;
         unbound = 979;
+        vmail = 958;
         wpa_supplicant = 963;
         "x-backups-agent" = 965;
         "x-monitor" = 970;
