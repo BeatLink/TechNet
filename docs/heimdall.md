@@ -268,11 +268,11 @@ least every 90 days. Run `init` again if `mail-fetch-outlook` reports
 
 ### Moving the mail off
 
-`delete_from_source` in the module starts off, so the first runs only copy.
-Once `journalctl -u mail-fetch-gmail -u mail-fetch-outlook` shows matching
-message counts on both sides and a backup of `/Storage/Services` has run, set
-it to `true`; each later run then deletes what it copied from the account.
-Afterwards empty Outlook's Deleted Items and Recoverable Items by hand.
+`delete_from_source` in the module is on, so each run deletes what it copied
+from the account and Heimdall holds the only copy, covered by the
+`/Storage/Services` backups. Set it to `false` to go back to copying only.
+Outlook keeps deleted mail in Recoverable Items for a while; empty it by hand
+to clear it from Microsoft's servers sooner.
 
 ## Shell history
 

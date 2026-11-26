@@ -19,8 +19,8 @@ let
     secrets_file = "${config.technet.secrets.path}/mail.yaml";
     secret = name: config.sops.secrets.${name}.path;
 
-    # Off until the first full copy has been checked against each account; on, every copied message is deleted from its account
-    delete_from_source = false;
+    # Every message is deleted from its account once it has been copied here
+    delete_from_source = true;
 
     mail-oauth = pkgs.writers.writePython3Bin "mail-oauth" { flakeIgnore = [ "E501" ]; } (builtins.readFile ./mail-oauth.py);
 
