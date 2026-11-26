@@ -44,7 +44,6 @@ let
             headers = bearer "x_media_tracker_mcp_token";
         };
         x-dev.url = "http://127.0.0.1:3921/mcp";
-        x-context.url = "http://127.0.0.1:3922/mcp";
         x-fitness.url = "http://127.0.0.1:3918/mcp";
         X-Tasks.url = "http://127.0.0.1:3917/mcp";
         trilium = {

@@ -13,7 +13,6 @@ let
             })
             [
                 "x-tasks"
-                "x-context"
                 "x-fitness"
                 "x-budget"
                 "x-media-tracker"
@@ -166,15 +165,6 @@ in
                             description = "Task Manager and Sync Server";
                             href = "https://tasks.heimdall.technet";
                             siteMonitor = "https://tasks.heimdall.technet/login"; # The root redirects to the login page when signed out
-                            statusStyle = "dot";
-                        };
-                    }
-                    {
-                        "X-Context" = {
-                            icon = "/x-app-icons/x-context.svg";
-                            description = "Contexts Gathering Tasks, Notes, Files, Emails and Links, and Sync Server";
-                            href = "https://context.heimdall.technet";
-                            siteMonitor = "https://context.heimdall.technet"; # The page itself; sign-in happens within it
                             statusStyle = "dot";
                         };
                     }
