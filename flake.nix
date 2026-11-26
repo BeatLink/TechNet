@@ -302,6 +302,8 @@
             checks =
                 let
                     inherit (nixpkgs) lib;
+                    # The Rock64 is a spare board that is not deployed (docs/rock64.md); its config stays, but CI no longer spends a runner on it
+                    notInCi = [ "Rock64" ];
                     ciModules = {
                         Odin = [
                             {
@@ -321,7 +323,9 @@
                 lib.genAttrs [ "x86_64-linux" "aarch64-linux" ] (
                     system:
                     lib.mapAttrs ciSystem (
-                        lib.filterAttrs (_: host: host.pkgs.stdenv.hostPlatform.system == system) self.nixosConfigurations
+                        lib.filterAttrs (
+                            name: host: host.pkgs.stdenv.hostPlatform.system == system && !(lib.elem name notInCi)
+                        ) self.nixosConfigurations
                     )
                 );
         };
