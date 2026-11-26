@@ -153,7 +153,6 @@ in
                 "waypipe-desktop"
                 "web-greeter"
                 "x-backups"
-                "x-context"
                 "x-monitor"
                 "x-music"
                 "x-nix"
