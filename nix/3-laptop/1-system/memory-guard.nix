@@ -12,7 +12,7 @@
         systemd.slices.user.sliceConfig = {
             MemoryHigh = "78%";
             MemoryMax = "85%";
-            MemorySwapMax = "8G";
+            MemorySwapMax = "6G";
         };
 
         # Nix Work Ceiling ###########################################################################################################################
@@ -21,7 +21,7 @@
         systemd.slices.nix-work.sliceConfig = {
             MemoryHigh = "30%";
             MemoryMax = "40%";
-            MemorySwapMax = "4G";
+            MemorySwapMax = "3G";
             CPUWeight = "idle";
             IOWeight = 10;
             ManagedOOMSwap = "kill";
