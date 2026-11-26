@@ -2,9 +2,8 @@
 #
 # The agent X-Nix on Heimdall reads, switches, collects and reboots this host through. It dials out to Heimdall over one WebSocket and signs in with its
 # own ed25519 key, whose private half lives only in this host's x-nix-agent.yaml. It switches this host from the Attic cache with the closure X-Nix
-# evaluated and built, and the module carries the sudo rules for that. On Odin it also builds and pushes the TechNet cache whenever Odin is up. On
-# Heimdall it dials X-Nix on the same machine, so X-Nix itself runs nothing as root, and it runs the jobs Heimdall takes: flake updates, the cache's
-# builds when Odin is away, and installs.
+# evaluated and built, and the module carries the sudo rules for that. On Heimdall it dials X-Nix on the same machine, so X-Nix itself runs nothing
+# as root, and it runs Heimdall's jobs: flake updates, every build of the TechNet cache, and installs.
 #
 {
     config,
@@ -22,9 +21,6 @@ let
         "Ragnarok"
         "Thor"
     ];
-
-    # Where the TechNet cache roots each build, the same folder as on Heimdall (x-nix.nix).
-    buildRoots = "/var/lib/x-nix-build-roots";
 in
 {
     imports = [ inputs.x-nix.nixosModules.agent ];
@@ -58,28 +54,5 @@ in
                 allowedSignersFile = ./allowed-signers;
             };
         };
-
-        # The TechNet cache builds on Odin whenever it is up, so its agent roots the builds and pushes them with this host's Attic token.
-        sops.secrets.attic_push_token = lib.mkIf (host == "Odin") {
-            group = "x-nix-agent";
-            mode = "0440";
-        };
-
-        systemd.tmpfiles.settings."X-Nix Agent" = lib.mkIf (host == "Odin") {
-            ${buildRoots}.d = {
-                user = "x-nix-agent";
-                group = "x-nix-agent";
-                mode = "0755";
-            };
-        };
-
-        environment.persistence."/persistent".directories = lib.mkIf (host == "Odin") [
-            {
-                directory = buildRoots;
-                user = "x-nix-agent";
-                group = "x-nix-agent";
-                mode = "0755";
-            }
-        ];
     };
 }

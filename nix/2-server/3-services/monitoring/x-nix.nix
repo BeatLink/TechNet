@@ -1,8 +1,8 @@
 # X-Nix ##############################################################################################################################################
 #
 # The NixOS deployment portal at nix.heimdall.technet, which runs the whole fleet's NixOS upkeep: it updates the flake, and the TechNet cache evaluates
-# and builds every host's closure nightly on Odin when it is up and on Heimdall otherwise, and pushes it to Attic, and each host switches once it drifts.
-# Every host, Heimdall included, is switched by its own X-Nix agent (x-nix-agent.nix), fetching what Odin, else Heimdall, built and pushed to the cache;
+# and builds every host's closure nightly on Heimdall, and pushes it to Attic, and each host switches once it drifts.
+# Every host, Heimdall included, is switched by its own X-Nix agent (x-nix-agent.nix), fetching what Heimdall built and pushed to the cache;
 # Heimdall's agent dials X-Nix on the same machine, so the server answering the web runs nothing as root. The agent module carries the sudo rules.
 #
 {
@@ -201,16 +201,13 @@ in
         };
         caches.technet = {
             name = "TechNet";
-            # The laptop builds far faster than the server, so it takes every job while its agent is connected; it is never woken for one.
-            host = [
-                "odin"
-                "heimdall"
-            ];
+            # Heimdall alone, though the laptop builds about five times faster, so no build loads the laptop and builds run while it is off.
+            host = [ "heimdall" ];
             flake = "technet-config";
             configurations = fleet;
             cache_url = cacheUrl;
             build_at = "04:00"; # The fleet's builds start after attic-gc at 03:00, whose database lock their uploads would contend with
-            eval_workers = 2; # Each worker can hold several GB, and on Odin they run beside the desktop and the builds; four pushed it out of memory
+            eval_workers = 2; # Each worker can hold several GB beside the builds and the services; four pushed Odin out of memory when it built
             # A hand-made build replaces the nightly one's root, so it stays rooted until deployed like that one would.
             build_root_dir = buildRoots;
             build_links = lib.genAttrs fleet lib.toLower;
