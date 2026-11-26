@@ -1,6 +1,7 @@
 # Mail ###############################################################################################################################################
 #
-# Moves mail off Gmail and Outlook.com into a Dovecot mailbox on Heimdall. imapsync copies every folder from each account on a timer, then deletes
+# Moves mail off Gmail and Outlook.com into a Dovecot mailbox on Heimdall. imapsync copies every folder from each account on a timer into one
+# shared Inbox, Drafts, Sent and Archive, with the rest under Gmail/ and Outlook/, then deletes
 # what it copied from the account once delete_from_source is on. Mail clients read the mailbox over IMAP at mail.heimdall.technet:993, and a
 # browser at https://mail.heimdall.technet, on the LAN and over WireGuard; sending still goes through each account's own SMTP server.
 #
@@ -19,8 +20,8 @@ let
     secrets_file = "${config.technet.secrets.path}/mail.yaml";
     secret = name: config.sops.secrets.${name}.path;
 
-    # Off until the first full copy has been checked against each account; on, every copied message is deleted from its account
-    delete_from_source = false;
+    # Every message is deleted from its account once it has been copied here
+    delete_from_source = true;
 
     mail-oauth = pkgs.writers.writePython3Bin "mail-oauth" { flakeIgnore = [ "E501" ]; } (builtins.readFile ./mail-oauth.py);
 
@@ -35,7 +36,7 @@ let
     '';
 
     # One imapsync run that copies an account into its own top-level folder of the Heimdall mailbox, prefixed by hand since --subfolder2 skips any source folder matching its name
-    # main_folders renames the account's main folders with a number so mail clients list them first and in the usual order
+    # main_folders sends the account's main folders into the shared top-level ones instead of its own folder
     fetch_account =
         {
             name,
@@ -71,7 +72,7 @@ let
                     ${prepare}
                     imapsync \
                         ${lib.trim source_arguments} \
-                        ${lib.concatMapStringsSep " " (folder: lib.escapeShellArg "--f1f2=${folder.name}=${description}/${folder.value}") (lib.attrsToList main_folders)} \
+                        ${lib.concatMapStringsSep " " (folder: lib.escapeShellArg "--f1f2=${folder.name}=${folder.value}") (lib.attrsToList main_folders)} \
                         --host2 127.0.0.1 --port2 ${toString imap_port} --nossl2 --notls2 \
                         --user2 "$(< ${secret "mail_username"})" --passfile2 ${secret "mail_password"} \
                         --regextrans2 's,^,${description}/,' \
@@ -126,14 +127,25 @@ in
                     mail_home = "${mail_directory}/%{user | username}";
                     mail_path = "~/Maildir";
 
-                    # Lets folder names such as "1. Inbox" hold a dot, which Maildir otherwise uses between folder levels
+                    # Lets folder names such as Gmail labels hold a dot, which Maildir otherwise uses between folder levels
                     mailbox_list_storage_escape_char = "%";
                     mail_uid = "vmail";
                     mail_gid = "vmail";
 
+                    # The shared main folders are marked so every mail client lists them first with their usual icons
                     "namespace inbox" = {
                         inbox = true;
                         separator = "/";
+                        mailbox = lib.mapAttrsToList (folder: special_use: {
+                            _section.name = folder;
+                            inherit special_use;
+                            auto = "subscribe";
+                        }) {
+                            Drafts = "\\Drafts";
+                            Sent = "\\Sent";
+                            Archive = "\\Archive";
+                            Trash = "\\Trash";
+                        };
                     };
 
                     "passdb passwd-file".passwd_file_path = users_file;
@@ -239,10 +251,10 @@ in
                 --regextrans2 's,^\[Gmail\]/,,'
             '';
             main_folders = {
-                "INBOX" = "1. Inbox";
-                "[Gmail]/Drafts" = "2. Drafts";
-                "[Gmail]/Sent Mail" = "3. Sent";
-                "[Gmail]/All Mail" = "4. Archive";
+                "INBOX" = "INBOX";
+                "[Gmail]/Drafts" = "Drafts";
+                "[Gmail]/Sent Mail" = "Sent";
+                "[Gmail]/All Mail" = "Archive";
             };
         })
 
@@ -261,11 +273,11 @@ in
                 --exclude '^(Deleted|Deleted Items|Junk|Junk Email|Outbox)$' --exclude '^Sync Issues'
             '';
             main_folders = {
-                "INBOX" = "1. Inbox";
-                "Inbox" = "1. Inbox";
-                "Drafts" = "2. Drafts";
-                "Sent" = "3. Sent";
-                "Archive" = "4. Archive";
+                "INBOX" = "INBOX";
+                "Inbox" = "INBOX";
+                "Drafts" = "Drafts";
+                "Sent" = "Sent";
+                "Archive" = "Archive";
             };
         })
     ];

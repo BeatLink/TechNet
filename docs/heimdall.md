@@ -221,10 +221,9 @@ it behaves like the official apps:
 
 [`mail`](../nix/2-server/3-services/communication/mail) moves mail off Gmail and
 Outlook.com into a Dovecot mailbox on Heimdall. Every 10 minutes imapsync copies
-each account's folders into a top-level `Gmail` or `Outlook` folder of that
-mailbox. Inside each, the main folders are numbered `1. Inbox`, `2. Drafts`,
-`3. Sent` and `4. Archive`, so every mail client lists them first and in that
-order. Read it from any IMAP client at `mail.heimdall.technet`, port 993 with
+both accounts into one shared `INBOX`, `Drafts`, `Sent` and `Archive`, marked as
+special folders so every mail client lists them first with their usual icons;
+Gmail labels and Outlook's other folders go under `Gmail/` and `Outlook/`. Read it from any IMAP client at `mail.heimdall.technet`, port 993 with
 SSL/TLS, or in a browser at `https://mail.heimdall.technet/` (Roundcube), on
 the LAN or over WireGuard; both sign in with `mail_username` and `mail_password`.
 Sending still goes through each account's own SMTP server. The mail sits as Maildir files under `/Storage/Services/Mail`,
@@ -242,7 +241,7 @@ unit sits in `failed` until they are replaced (`sops secrets/2-server/mail.yaml`
 ### Gmail
 
 Each label shows up as its own folder, so a message with two labels is copied
-twice. `[Gmail]/All Mail` goes last and lands in `Gmail/4. Archive`, holding only
+twice. `[Gmail]/All Mail` goes last and lands in `Archive`, holding only
 archived mail with no label. Before deletion is switched on, set Gmail's
 Settings > Forwarding and POP/IMAP to auto-expunge and to *Immediately delete
 the message forever*, and untick *Show in IMAP* for Important and Starred;
@@ -268,11 +267,11 @@ least every 90 days. Run `init` again if `mail-fetch-outlook` reports
 
 ### Moving the mail off
 
-`delete_from_source` in the module starts off, so the first runs only copy.
-Once `journalctl -u mail-fetch-gmail -u mail-fetch-outlook` shows matching
-message counts on both sides and a backup of `/Storage/Services` has run, set
-it to `true`; each later run then deletes what it copied from the account.
-Afterwards empty Outlook's Deleted Items and Recoverable Items by hand.
+`delete_from_source` in the module is on, so each run deletes what it copied
+from the account and Heimdall holds the only copy, covered by the
+`/Storage/Services` backups. Set it to `false` to go back to copying only.
+Outlook keeps deleted mail in Recoverable Items for a while; empty it by hand
+to clear it from Microsoft's servers sooner.
 
 ## Shell history
 
