@@ -11,32 +11,21 @@ let
     };
 in
 {
-    home-manager.users.beatlink = {
-        home = {
-            packages = [ trilium-desktop ];
-            persistence."/Storage/Apps/Core/Trilium" = {
-                directories = [
-                    ".local/share/trilium-data"
-                    ".config/trilium-37840" # Electron userData; Trilium names it after its port, so TRILIUM_PORT changes this path
-                ];
-            };
-        };
+    # Electron takes both the wm_class and the userData name from the asar's package.json, so a build handing it a loose main.cjs instead breaks the panel match and the persisted path at once
+    technet.desktop.apps.trilium = {
+        description = "Trilium Notes";
+        command = "${trilium-desktop}/bin/trilium";
+        desktopFile = "${trilium-desktop}/share/applications/Trilium.desktop";
+        socket = "$HOME/.config/trilium-37840/SingletonSocket";
+    };
 
-        # A unit rather than an autostart .desktop, so this Electron app runs in a cgroup of its own.
-        # Electron takes both the wm_class and the userData name from the asar's package.json, so a build handing it a loose main.cjs instead breaks the panel match and the persisted path at once
-        systemd.user.services.trilium = {
-            Unit = {
-                Description = "Trilium Notes";
-                PartOf = [ "graphical-session.target" ];
-                Requires = [ "display.target" ];
-                After = [ "display.target" ];
-            };
-            Service = {
-                ExecStart = "${trilium-desktop}/bin/trilium";
-                Restart = "on-failure";
-                RestartSec = 5;
-            };
-            Install.WantedBy = [ "display.target" ];
+    home-manager.users.beatlink.home = {
+        packages = [ trilium-desktop ];
+        persistence."/Storage/Apps/Core/Trilium" = {
+            directories = [
+                ".local/share/trilium-data"
+                ".config/trilium-37840" # Electron userData; Trilium names it after its port, so TRILIUM_PORT changes this path
+            ];
         };
     };
 }

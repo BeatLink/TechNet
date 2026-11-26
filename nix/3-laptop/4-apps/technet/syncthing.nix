@@ -6,8 +6,20 @@
 # The device IDs, folder set and the settings that have to agree across peers come from the shared mesh module in 0-common; what is left
 # here is Odin-specific -- the user service, the tray applet and where state persists.
 #
-{ config, inputs, ... }:
 {
+    config,
+    inputs,
+    pkgs,
+    ...
+}:
+{
+    technet.desktop.apps.syncthingtray = {
+        description = "Syncthing Tray";
+        command = "${pkgs.syncthingtray-minimal}/bin/syncthingtray";
+        args = [ "--wait" ];
+        desktopFile = "${pkgs.syncthingtray-minimal}/share/applications/syncthingtray.desktop";
+    };
+
     sops.secrets.syncthing_cert = {
         sopsFile = "${config.technet.secrets.path}/syncthing.yaml";
         owner = "beatlink";
@@ -37,17 +49,9 @@
                 syncthingtray-minimal
                 libxcb
             ];
-            # Qt aborts rather than waiting when no platform plugin loads, so this starts on display.target instead of graphical-session.target.
-            systemd.user.services.syncthingtray = {
-                Unit = {
-                    Requires = [ "display.target" ];
-                    After = [ "display.target" ];
-                };
-                Service = {
-                    Restart = "on-failure";
-                    RestartSec = 5;
-                };
-                Install.WantedBy = lib.mkForce [ "display.target" ];
+            systemd.user.services.syncthingtray.Unit = {
+                Requires = [ "tray.target" ];
+                After = [ "tray.target" ];
             };
 
             # A user unit, since Syncthing runs only in the session; the sops file's hash restarts it when the key is rotated.
@@ -103,10 +107,6 @@
             };
             services.syncthing = {
                 enable = true;
-                tray = {
-                    enable = true;
-                    command = "syncthingtray --wait";
-                };
                 cert = config.sops.secrets.syncthing_cert.path;
                 key = config.sops.secrets.syncthing_key.path;
                 guiAddress = "0.0.0.0:8384";

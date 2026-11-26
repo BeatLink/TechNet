@@ -1,4 +1,9 @@
-{ config, inputs, pkgs, ... }:
+{
+    config,
+    inputs,
+    pkgs,
+    ...
+}:
 let
     # WebKit divides by the DRM refresh rate, which is 0 while an output is connected but unlit, so pin it to the timer vblank monitor
     linux-sidebar =
@@ -10,6 +15,12 @@ let
             });
 in
 {
+    technet.desktop.apps.linux-sidebar = {
+        description = "Linux Sidebar";
+        command = "${linux-sidebar}/bin/linux-sidebar";
+        desktopFile = "${linux-sidebar}/share/applications/linux-sidebar.desktop";
+    };
+
     # The X-Tasks server's token, which the sidebar's X-Tasks section reads through its token command
     sops.secrets.x_tasks_access_token = {
         sopsFile = "${config.technet.secrets.path}/x-tasks.yaml";
@@ -20,23 +31,9 @@ in
         programs.linux-sidebar = {
             enable = true;
             package = linux-sidebar;
-            autostart = false; # The unit below starts it instead, once the display answers
+            autostart = false; # technet.desktop.apps starts it instead, once the display answers
         };
 
-        systemd.user.services.linux-sidebar = {
-            Unit = {
-                Description = "Linux Sidebar";
-                PartOf = [ "graphical-session.target" ];
-                Requires = [ "display.target" ];
-                After = [ "display.target" ];
-            };
-            Service = {
-                ExecStart = "${linux-sidebar}/bin/linux-sidebar";
-                Restart = "on-failure";
-                RestartSec = 5;
-            };
-            Install.WantedBy = [ "display.target" ];
-        };
         home = {
             # The settings, the layout and the notes all live here and are written by the
             # app, so none of them can be managed declaratively without making them
