@@ -14,6 +14,7 @@ let
             [
                 "x-tasks"
                 "x-fitness"
+                "x-budget"
                 "x-media-tracker"
                 "x-nix"
                 "x-backups"
@@ -173,6 +174,15 @@ in
                             description = "Workout, Diet and Body Tracker and Sync Server";
                             href = "https://fitness.heimdall.technet";
                             siteMonitor = "https://fitness.heimdall.technet/login"; # The root redirects to the login page when signed out
+                            statusStyle = "dot";
+                        };
+                    }
+                    {
+                        "X-Budget" = {
+                            icon = "/x-app-icons/x-budget.svg";
+                            description = "Budgets and Monthly Transactions, and Sync Server";
+                            href = "https://budget.heimdall.technet";
+                            siteMonitor = "https://budget.heimdall.technet";
                             statusStyle = "dot";
                         };
                     }
