@@ -188,24 +188,6 @@
         "type": "github"
       }
     },
-    "codex": {
-      "inputs": {
-        "nixpkgs": "nixpkgs_2"
-      },
-      "locked": {
-        "lastModified": 1795674894,
-        "narHash": "sha256-gjClzgb4bYikY4DPBoSvudR/Rx7c6ej1aYKIXJnn610=",
-        "owner": "x-tech-laboratories",
-        "repo": "CODEX",
-        "rev": "63dbebe46d616c11c89f84a5f4b805f1e7485a5e",
-        "type": "github"
-      },
-      "original": {
-        "owner": "x-tech-laboratories",
-        "repo": "CODEX",
-        "type": "github"
-      }
-    },
     "comet": {
       "inputs": {
         "nixpkgs": [
@@ -935,22 +917,6 @@
     },
     "nixpkgs_3": {
       "locked": {
-        "lastModified": 1795234589,
-        "narHash": "sha256-f/VVvxf5RsQgWVhUtefoca5ktVg0DA2bnkMOcmSnozo=",
-        "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "2786a2a72088ecf32aea5b3ec52099e6a7cff78f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "NixOS",
-        "ref": "nixos-unstable",
-        "repo": "nixpkgs",
-        "type": "github"
-      }
-    },
-    "nixpkgs_4": {
-      "locked": {
         "lastModified": 1785571196,
         "narHash": "sha256-KoTsyMQqnXQZq8deCEnu4QkyldkwH/bpMMhUcfMdGIw=",
         "owner": "NixOS",
@@ -1010,7 +976,7 @@
     "pinephone-kernel": {
       "inputs": {
         "mobile-nixos": "mobile-nixos_2",
-        "nixpkgs": "nixpkgs_4"
+        "nixpkgs": "nixpkgs_3"
       },
       "locked": {
         "lastModified": 1795321899,
@@ -1057,7 +1023,6 @@
         "calibre-web-nextgen": "calibre-web-nextgen",
         "claude-chat-manager": "claude-chat-manager",
         "claude-code": "claude-code",
-        "codex": "codex",
         "comet": "comet",
         "context": "context",
         "disko": "disko",
@@ -1073,7 +1038,7 @@
         "nix-vscode-extensions": "nix-vscode-extensions",
         "nixos-hardware": "nixos-hardware",
         "nixos-plymouth": "nixos-plymouth",
-        "nixpkgs": "nixpkgs_3",
+        "nixpkgs": "nixpkgs_2",
         "nixpkgs-atuin": "nixpkgs-atuin",
         "nixtool": "nixtool",
         "pinephone-charge": "pinephone-charge",
@@ -1576,11 +1541,11 @@
         "x-webview": "x-webview"
       },
       "locked": {
-        "lastModified": 1795597159,
-        "narHash": "sha256-AaVIqCUPJKkcHgW8qL53lb1sZxwouoqrkLEyPWyOHbE=",
+        "lastModified": 1795678206,
+        "narHash": "sha256-wKy/BuVxCbY6xPqG4OZ4cBLFfA98nxHT+fATzyn2uhc=",
         "owner": "x-tech-laboratories",
         "repo": "X-Tasks",
-        "rev": "5871e97773117c1cdb8a4d2fdef8f270a9bf0ec0",
+        "rev": "35c4db0186d2649a822af2fb3e404bfb54c13171",
         "type": "github"
       },
       "original": {

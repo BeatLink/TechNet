@@ -138,7 +138,6 @@ in
                 "blockurl"
                 "calibre-web-nextgen"
                 "claude-chat-manager"
-                "codex"
                 "comet"
                 "context"
                 "gmusicbrowser"

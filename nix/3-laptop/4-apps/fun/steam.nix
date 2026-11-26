@@ -4,7 +4,6 @@
 #
 
 {
-    config,
     lib,
     pkgs,
     inputs,
@@ -34,9 +33,6 @@ let
     # Active for as long as a game runs, so X-Monitor's backups on this host skip instead of starting.
     quietMarker = "gamemode-quiet.service";
 
-    # The CODEX daemon unloads its models on suspend, so the game gets the GPU; the commands do nothing when the daemon is not running.
-    codex = "${config.home-manager.users.beatlink.home.path}/bin/codex";
-
     systemctl = "${pkgs.systemd}/bin/systemctl";
     pkill = "${pkgs.procps}/bin/pkill";
 
@@ -45,7 +41,6 @@ let
         ${systemctl} stop ${lib.concatStringsSep " " pausedSystemUnits} || true
         ${systemctl} start ${quietMarker} || true
         ${lib.concatMapStringsSep "\n" (app: "${pkill} -f ${app} || true") killedApps}
-        ${codex} suspend || true
     '';
 
     # A game that dies without gamemode running this hook leaves these stopped until the next boot starts them again.
@@ -53,7 +48,6 @@ let
         ${systemctl} --user start ${lib.concatStringsSep " " pausedUserUnits} || true
         ${systemctl} start ${lib.concatStringsSep " " pausedSystemUnits} || true
         ${systemctl} stop ${quietMarker} || true
-        ${codex} resume || true
     '';
 in
 {

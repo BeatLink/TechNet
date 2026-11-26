@@ -30,8 +30,6 @@ let
     background_units = [
         "syncthing.service"
         "syncthingtray.service"
-        "codex-daemon.service"
-        "codex-daemon-watch.service"
         "variety.service"
         "aw-server.service"
         "awatcher.service"
