@@ -226,7 +226,13 @@ special folders so every mail client lists them first with their usual icons;
 Gmail labels and Outlook's other folders go under `Gmail/` and `Outlook/`. Read it from any IMAP client at `mail.heimdall.technet`, port 993 with
 SSL/TLS, or in a browser at `https://mail.heimdall.technet/` (Roundcube), on
 the LAN or over WireGuard; both sign in with `mail_username` and `mail_password`.
-Sending still goes through each account's own SMTP server. The mail sits as Maildir files under `/Storage/Services/Mail`,
+Clients send through Heimdall too, at `mail.heimdall.technet` port 465 with
+SSL/TLS and the same login: Postfix passes each message to Gmail or Outlook by
+its From address, using the same app password and sign-in as the fetch, and
+only those two addresses may send. Webmail sends the same way once its From
+identities are set to those addresses. A failed send stays queued and is
+retried. Each provider keeps its own copy of what was sent, which the next fetch
+moves into `Sent`, so clients should not save a second copy. The mail sits as Maildir files under `/Storage/Services/Mail`,
 which the `/Storage/Services` backups cover.
 
 `secrets/2-server/mail.yaml` ships with `CHANGEME` placeholders, and every mail
@@ -264,6 +270,10 @@ sudo -u vmail mail-oauth init /Storage/Services/Mail/oauth/outlook.json \
 Each run refreshes the token, so the sign-in lasts as long as it is used at
 least every 90 days. Run `init` again if `mail-fetch-outlook` reports
 `invalid_grant`.
+
+Sending through Outlook needs a sign-in that also granted `SMTP.Send`, so a
+sign-in made before sending was added keeps fetching but must run `init` once
+more before Outlook mail can go out.
 
 ### Moving the mail off
 
