@@ -1576,11 +1576,11 @@
         "x-webview": "x-webview"
       },
       "locked": {
-        "lastModified": 1795597159,
-        "narHash": "sha256-AaVIqCUPJKkcHgW8qL53lb1sZxwouoqrkLEyPWyOHbE=",
+        "lastModified": 1795677814,
+        "narHash": "sha256-PUS0m72eeZ4knqzu1E7MG6wHvsIp9OnRBcaEGsjzL7g=",
         "owner": "x-tech-laboratories",
         "repo": "X-Tasks",
-        "rev": "5871e97773117c1cdb8a4d2fdef8f270a9bf0ec0",
+        "rev": "09785c10a5f9fb86674aa1f3f6fc4fa386acd8a3",
         "type": "github"
       },
       "original": {
