@@ -1541,11 +1541,11 @@
         "x-webview": "x-webview"
       },
       "locked": {
-        "lastModified": 1795721284,
-        "narHash": "sha256-9mdHwRHTWIpU5tEM7z+1mYjnHavP/YpewrquRv6aCH4=",
+        "lastModified": 1795723961,
+        "narHash": "sha256-SadRFceK3H5ovme7+XlhphROWhNF7Kwoi9Ox9FnK6JA=",
         "owner": "x-tech-laboratories",
         "repo": "X-Tasks",
-        "rev": "52a6dfd269d8b88915921d651289c79fa70c5512",
+        "rev": "fd25571d63b52e909d7fd9a6cf843715ee4ea19d",
         "type": "github"
       },
       "original": {
