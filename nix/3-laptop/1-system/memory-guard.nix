@@ -46,6 +46,15 @@
 
         systemd.slices.user.sliceConfig.ManagedOOMSwap = "kill";
 
+        # Without this the desktop session is one group to oomd, and killing it logs the user out.
+        systemd.units."session-.scope" = {
+            overrideStrategy = "asDropin";
+            text = ''
+                [Scope]
+                ManagedOOMPreference=omit
+            '';
+        };
+
         # Build Width ################################################################################################################################
         # Three jobs of four threads fill the twelve threads once, rather than twelve jobs each spawning a compiler per thread.
         #

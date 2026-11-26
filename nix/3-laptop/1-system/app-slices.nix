@@ -3,13 +3,22 @@
 # Gives the browser, the editor, each Claude Code session and the background apps a slice of their own, so a runaway is limited and killed alone.
 #
 
-{ pkgs, ... }:
+{
+    config,
+    lib,
+    pkgs,
+    ...
+}:
 let
     claude_scope = pkgs.writeShellScript "claude-scope" ''
         if [ -S "$XDG_RUNTIME_DIR/bus" ]; then
             exec ${pkgs.systemd}/bin/systemd-run --user --scope --quiet --collect --unit="app-claude-$$" -- "$@"
         fi
         exec "$@"
+    '';
+
+    firefox_scope = pkgs.writeShellScriptBin "firefox" ''
+        exec ${claude_scope} ${config.programs.firefox.finalPackage}/bin/firefox "$@"
     '';
 
     scope_slices = {
@@ -30,6 +39,9 @@ let
 in
 {
     technet.vscodium.userSettings."claudeCode.claudeProcessWrapper" = "${claude_scope}";
+
+    # Cinnamon starts the browser inside the desktop session's own group, so the command on the path moves it out first.
+    environment.systemPackages = [ (lib.hiPrio firefox_scope) ];
 
     home-manager.users.beatlink =
         { lib, ... }:
