@@ -25,6 +25,9 @@ column, and their service definition lives in that host's own directory.
 | mautrix-discord        | 29334 | 127.0.0.1 |
 | Dovecot (IMAP)         | 143   | 127.0.0.1 |
 | Dovecot (IMAP over TLS) | 993  | nginx `stream`, proxied to 143; mail.heimdall.technet |
+| Postfix (submission)   | 587   | 127.0.0.1; sign-in required, relays through Gmail or Outlook |
+| Postfix (submission over TLS) | 465 | nginx `stream`, proxied to 587; mail.heimdall.technet |
+| Roundcube (webmail)    | —     | php-fpm via nginx; mail.heimdall.technet |
 
 ## Monitoring
 
@@ -90,7 +93,6 @@ column, and their service definition lives in that host's own directory.
 | X-Tasks      | 9002 | tasks.heimdall.technet |
 | X-Fitness    | 9003 | fitness.heimdall.technet |
 | X-Media-Tracker | 9004 | media-tracker.heimdall.technet |
-| X-Context    | 9005 | context.heimdall.technet |
 | ActivityWatch | 5600 | 127.0.0.1; activitywatch.heimdall.technet |
 
 ## X-Monitor Reachability Checks

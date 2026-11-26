@@ -38,7 +38,12 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       # A host's closure is tens of GiB unpacked, more than a stock runner has free
-      - uses: wimpysworld/nothing-but-nix@v12
+      - id: free-space
+        uses: wimpysworld/nothing-but-nix@v12
+        continue-on-error: true
+      # Its tool download from GitHub releases sometimes gets a 403; that happens before anything is removed, so one more try is safe
+      - if: steps.free-space.outcome == 'failure'
+        uses: wimpysworld/nothing-but-nix@v12
       - uses: cachix/install-nix-action@v31
         with:
           extra_nix_config: |

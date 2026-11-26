@@ -1,10 +1,11 @@
 # Mail OAuth #########################################################################################################################################
 #
-# Signs an Outlook.com account in once and then hands out fresh access tokens for IMAP. `init` walks through the browser sign-in and keeps the
-# refresh token in a state file; `token` trades it for an access token written to a file, so no token ever reaches the terminal or a command line.
+# Signs an Outlook.com account in once and then hands out fresh access tokens for IMAP and SMTP. `init` walks through the browser sign-in and
+# keeps the refresh token in a state file; `token` trades it for an access token written to a file or piped to the program that asked for it.
 #
 
 import argparse
+import fcntl
 import base64
 import hashlib
 import json
@@ -17,7 +18,10 @@ import urllib.request
 
 SIGN_IN_ENDPOINT = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
 EXCHANGE_ENDPOINT = "https://login.microsoftonline.com/common/oauth2/v2.0/token"
-SCOPE = "https://outlook.office.com/IMAP.AccessAsUser.All offline_access"
+SCOPE = "https://outlook.office.com/IMAP.AccessAsUser.All https://outlook.office.com/SMTP.Send offline_access"
+
+# What a sign-in made before sending was added asked for, so refreshing it never asks for more than was granted
+IMAP_ONLY_SCOPE = "https://outlook.office.com/IMAP.AccessAsUser.All offline_access"
 
 
 # State File #########################################################################################################################################
@@ -89,7 +93,7 @@ def sign_in(arguments):
         "code_verifier": code_verifier,
         "scope": SCOPE,
     })
-    write_state(arguments.state_file, {"client_id": arguments.client_id, "refresh_token": granted["refresh_token"]})
+    write_state(arguments.state_file, {"client_id": arguments.client_id, "scope": SCOPE, "refresh_token": granted["refresh_token"]})
     print(f"Signed in; the sign-in is kept in {arguments.state_file}.", file=sys.stderr)
 
 
@@ -99,19 +103,27 @@ def refresh_access_token(arguments):
     if not os.path.exists(arguments.state_file):
         sys.exit(f"{arguments.state_file} is missing; sign in first with `mail-oauth init`.")
 
-    state = read_state(arguments.state_file)
-    granted = request_tokens({
-        "client_id": state["client_id"],
-        "grant_type": "refresh_token",
-        "refresh_token": state["refresh_token"],
-        "scope": SCOPE,
-    })
+    # The fetch and a send can refresh at the same moment, so they take turns on the state file
+    with open(f"{arguments.state_file}.lock", "w", encoding="utf-8") as lock_file:
+        fcntl.flock(lock_file, fcntl.LOCK_EX)
 
-    # Microsoft replaces the refresh token as it is used, so the new one is kept for the next run
-    if granted.get("refresh_token"):
-        state["refresh_token"] = granted["refresh_token"]
-        write_state(arguments.state_file, state)
-    write_private_file(arguments.output, granted["access_token"] + "\n")
+        state = read_state(arguments.state_file)
+        granted = request_tokens({
+            "client_id": state["client_id"],
+            "grant_type": "refresh_token",
+            "refresh_token": state["refresh_token"],
+            "scope": state.get("scope", IMAP_ONLY_SCOPE),
+        })
+
+        # Microsoft replaces the refresh token as it is used, so the new one is kept for the next run
+        if granted.get("refresh_token"):
+            state["refresh_token"] = granted["refresh_token"]
+            write_state(arguments.state_file, state)
+
+    if arguments.output == "-":
+        print(granted["access_token"])
+    else:
+        write_private_file(arguments.output, granted["access_token"] + "\n")
 
 
 # Command Line #######################################################################################################################################
@@ -126,9 +138,9 @@ def main():
     init_command.add_argument("--redirect-uri", default="http://localhost")
     init_command.set_defaults(run=sign_in)
 
-    access_command = commands.add_parser("token", help="write a fresh access token to a file")
+    access_command = commands.add_parser("token", help="write a fresh access token to a file or standard output")
     access_command.add_argument("state_file")
-    access_command.add_argument("--output", required=True)
+    access_command.add_argument("--output", required=True, help="a file, or - to print it for a program reading it")
     access_command.set_defaults(run=refresh_access_token)
 
     arguments = parser.parse_args()

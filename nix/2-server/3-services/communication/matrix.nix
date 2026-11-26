@@ -24,6 +24,9 @@ let
     # Every account on this server may use the bridges fully, which keeps the account's name out of the repository
     bridge_permissions."${server_name}" = "admin";
 
+    # The bridges' default bot avatars live on maunium.net, which a server without federation cannot fetch
+    bot_avatar = "remove";
+
     bridge_units = [
         "mautrix-whatsapp"
         "mautrix-discord"
@@ -81,6 +84,8 @@ in
                         ${pkgs.openssl}/bin/openssl rand -hex 32 > ${registration_secret_file}
                         chown matrix-synapse:matrix-synapse ${registration_secret_file}
                     fi
+                    # The data pool's default ACLs override umask, so the mode is set outright
+                    chmod 600 ${registration_secret_file}
                 ''}"
             ];
 
@@ -129,6 +134,8 @@ in
                     EOF
                         chown matrix-synapse:matrix-synapse ${double_puppet_registration}
                     fi
+                    # The data pool's default ACLs override umask, so the modes are set outright
+                    chmod 600 ${double_puppet_environment} ${double_puppet_registration}
                 '';
             };
         }
@@ -206,7 +213,10 @@ in
                 environmentFile = double_puppet_environment;
                 settings = {
                     homeserver.address = synapse_address;
-                    appservice.hostname = "127.0.0.1";
+                    appservice = {
+                        hostname = "127.0.0.1";
+                        bot.avatar = bot_avatar;
+                    };
                     bridge.permissions = bridge_permissions;
                     double_puppet.secrets."${server_name}" = double_puppet_secret;
 
@@ -231,6 +241,7 @@ in
                     appservice = {
                         address = "http://127.0.0.1:29334";
                         hostname = "127.0.0.1";
+                        bot.avatar = bot_avatar;
                     };
                     bridge = {
                         permissions = bridge_permissions;

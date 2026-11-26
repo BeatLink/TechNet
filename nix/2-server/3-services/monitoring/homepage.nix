@@ -13,8 +13,8 @@ let
             })
             [
                 "x-tasks"
-                "x-context"
                 "x-fitness"
+                "x-budget"
                 "x-media-tracker"
                 "x-nix"
                 "x-backups"
@@ -169,20 +169,20 @@ in
                         };
                     }
                     {
-                        "X-Context" = {
-                            icon = "/x-app-icons/x-context.svg";
-                            description = "Contexts Gathering Tasks, Notes, Files, Emails and Links, and Sync Server";
-                            href = "https://context.heimdall.technet";
-                            siteMonitor = "https://context.heimdall.technet/login"; # The root redirects to the login page when signed out
-                            statusStyle = "dot";
-                        };
-                    }
-                    {
                         "X-Fitness" = {
                             icon = "/x-app-icons/x-fitness.svg";
                             description = "Workout, Diet and Body Tracker and Sync Server";
                             href = "https://fitness.heimdall.technet";
                             siteMonitor = "https://fitness.heimdall.technet/login"; # The root redirects to the login page when signed out
+                            statusStyle = "dot";
+                        };
+                    }
+                    {
+                        "X-Budget" = {
+                            icon = "/x-app-icons/x-budget.svg";
+                            description = "Budgets and Monthly Transactions, and Sync Server";
+                            href = "https://budget.heimdall.technet";
+                            siteMonitor = "https://budget.heimdall.technet";
                             statusStyle = "dot";
                         };
                     }
@@ -211,9 +211,9 @@ in
                     {
                         "Matrix" = {
                             icon = "matrix.png";
-                            href = "https://app.element.io";
+                            href = "https://matrix.heimdall.technet";
                             description = "Matrix";
-                            siteMonitor = "https://app.element.io";
+                            siteMonitor = "https://matrix.heimdall.technet";
                             statusStyle = "dot";
                         };
                     }

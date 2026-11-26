@@ -26,6 +26,7 @@ let
         "systemd-oom" = 984;
         trilium = 983;
         unbound = 982;
+        roundcube = 965;
         vmail = 966;
         wpa_supplicant = 972;
         "x-backups-agent" = 974;
@@ -59,6 +60,7 @@ let
         "systemd-oom" = 981;
         trilium = 980;
         unbound = 979;
+        roundcube = 957;
         vmail = 958;
         wpa_supplicant = 963;
         "x-backups-agent" = 965;
