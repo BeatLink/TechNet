@@ -10,15 +10,23 @@
     ...
 }:
 let
-    claude_scope = pkgs.writeShellScript "claude-scope" ''
-        if [ -S "$XDG_RUNTIME_DIR/bus" ]; then
-            exec ${pkgs.systemd}/bin/systemd-run --user --scope --quiet --collect --unit="app-claude-$$" -- "$@"
-        fi
-        exec "$@"
-    '';
+    scope_runner =
+        name:
+        pkgs.writeShellScript "${name}-scope" ''
+            if [ -S "$XDG_RUNTIME_DIR/bus" ]; then
+                exec ${pkgs.systemd}/bin/systemd-run --user --scope --quiet --collect --unit="app-${name}-$$" -- "$@"
+            fi
+            exec "$@"
+        '';
+
+    claude_scope = scope_runner "claude";
 
     firefox_scope = pkgs.writeShellScriptBin "firefox" ''
-        exec ${claude_scope} ${config.programs.firefox.finalPackage}/bin/firefox "$@"
+        exec ${scope_runner "firefox"} ${config.programs.firefox.finalPackage}/bin/firefox "$@"
+    '';
+
+    codium_scope = pkgs.writeShellScriptBin "codium" ''
+        exec ${scope_runner "codium"} ${config.home-manager.users.beatlink.programs.vscodium.package}/bin/codium "$@"
     '';
 
     scope_slices = {
@@ -44,6 +52,9 @@ in
     home-manager.users.beatlink =
         { lib, ... }:
         {
+            # Cinnamon moves the editor into its scope after it has started, so the helpers it had already forked stay in the session's group.
+            home.packages = [ (lib.hiPrio codium_scope) ];
+
             systemd.user.slices = {
                 browser.Slice = {
                     MemoryHigh = "40%";
