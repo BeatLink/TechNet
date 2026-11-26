@@ -11,6 +11,7 @@ let
         "x_nix_mcp_token"
         "x_backups_mcp_token"
         "x_media_tracker_mcp_token"
+        "x_budget_mcp_token"
         "trilium_mcp_token"
         "wikidata_mcp_token"
     ];
@@ -42,6 +43,10 @@ let
         x-media-tracker = {
             url = "https://media-tracker.heimdall.technet/api/mcp";
             headers = bearer "x_media_tracker_mcp_token";
+        };
+        x-budget = {
+            url = "https://budget.heimdall.technet/api/mcp";
+            headers = bearer "x_budget_mcp_token";
         };
         x-dev.url = "http://127.0.0.1:3921/mcp";
         x-fitness.url = "http://127.0.0.1:3918/mcp";

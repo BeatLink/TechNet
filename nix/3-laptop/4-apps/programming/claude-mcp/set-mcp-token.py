@@ -63,6 +63,7 @@ APPS = {
     "x-nix": dict(title="X-Nix", page="Your account", file="secrets/3-laptop/claude-mcp.yaml", key="x_nix_mcp_token"),
     "x-backups": dict(title="X-Backups", page="Your account", file="secrets/3-laptop/claude-mcp.yaml", key="x_backups_mcp_token"),
     "x-media-tracker": dict(title="X-Media-Tracker", page="Your account", file="secrets/3-laptop/claude-mcp.yaml", key="x_media_tracker_mcp_token"),
+    "x-budget": dict(title="X-Budget", page="Your account", file="secrets/3-laptop/claude-mcp.yaml", key="x_budget_mcp_token"),
     "trilium": dict(title="Trilium", page="Options > ETAPI", file="secrets/3-laptop/claude-mcp.yaml", key="trilium_mcp_token"),
     "wikidata": dict(title="Wikidata", page="Meta-Wiki Special:OAuthConsumerRegistration", file="secrets/3-laptop/claude-mcp.yaml", key="wikidata_mcp_token"),
 }
