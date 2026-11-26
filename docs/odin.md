@@ -77,26 +77,20 @@ store. Once, before the first deploy and again after any version bump:
 1. Sign in at <https://www.netacad.com/resources/lab-downloads> and download
    `CiscoPacketTracer_901_Ubuntu_64bit.deb` (the name and hash the package
    expects are in its nixpkgs `package.nix`).
-2. Add it to the store, then deploy as usual:
+2. Keep it on Heimdall, in `/Storage/Services/Attic/build_artifacts/`, beside the
+   cache, since X-Nix builds Odin's closure there and that build fails when this
+   one path cannot be fetched. Odin no longer builds, so it needs no copy.
+3. Add it to Heimdall's store and root it there, then deploy as usual:
 
 ```sh
-nix-store --add-fixed sha256 ~/Downloads/CiscoPacketTracer_901_Ubuntu_64bit.deb
+ssh heimdall
+P=$(sudo nix-store --add-fixed sha256 /Storage/Services/Attic/build_artifacts/CiscoPacketTracer_901_Ubuntu_64bit.deb)
+sudo nix-store --add-root /nix/var/nix/gcroots/packet-tracer-deb --indirect --realise "$P"
 ```
 
-The built system does not reference the `.deb`, so a garbage collection can
-drop it again; keep the download under `/Storage` for the next rebuild. The
-command is `packettracer9`; the AppImage forces `xcb`, so it runs under Xwayland
-on Wayland sessions.
-
-Heimdall needs it too, because X-Monitor builds Odin's closure there every night,
-and that build fails when this one path cannot be fetched.
-Syncthing already carries `/Storage/Files/Downloads` to Heimdall, so the `.deb`
-is on both machines. Run the same two commands on each, against the local file:
-
-```sh
-nix-store --add-fixed sha256 /Storage/Files/Downloads/CiscoPacketTracer_901_Ubuntu_64bit.deb
-sudo nix-store --add-root /nix/var/nix/gcroots/packet-tracer-deb --indirect --realise /nix/store/<hash>-CiscoPacketTracer_901_Ubuntu_64bit.deb
-```
+`build_artifacts` sits under Attic's `.nobackup` marker, so it is not backed up:
+losing it means downloading the `.deb` again. The command is `packettracer9`;
+the AppImage forces `xcb`, so it runs under Xwayland on Wayland sessions.
 
 The root is what makes it survive, since nothing in the built system refers to
 it. The deb and the package's closure are also in the Attic cache, so a host

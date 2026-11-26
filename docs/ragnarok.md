@@ -327,5 +327,5 @@ root reinstall.
 
 ## Rebuilding
 
-Ragnarok is the `ragnarok` deployment in X-Nix, built on Odin and switched by
+Ragnarok is the `ragnarok` deployment in X-Nix, built on Heimdall and switched by
 its own agent; it switches automatically when the flake changes.

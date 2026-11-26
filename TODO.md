@@ -29,8 +29,7 @@ failed until both pass; they next run on their own on 2026-12-04 and 2026-12-11.
 
 ## Confirm the November fixes held
 
-- [ ] Confirm X-Nix's nightly build on Odin finishes under its new 40% memory cap
-      ([`memory-guard.nix`](nix/3-laptop/1-system/memory-guard.nix)), and raise the cap if the build dies at it
+- [ ] Confirm X-Nix's nightly build on Heimdall finishes, now that Odin no longer builds
 - [ ] Confirm Tow-Boot no longer starts netconsole after Ragnarok's next reboot
 
 On 2026-11-13 Odin's agent peaked at 3.1 GB of its 11.7 GB cap with no OOM, but it logged nothing to show a build ran.
