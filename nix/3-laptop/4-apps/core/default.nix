@@ -1,6 +1,7 @@
 {
     imports = [
         ./codex.nix
+        ./codex-models.nix
         ./firefox.nix
         ./keepassxc.nix
         ./trilium.nix
