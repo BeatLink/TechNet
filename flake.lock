@@ -196,11 +196,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795792995,
-        "narHash": "sha256-sRXmNwVSfuf1d8Qwspk1MMDs8xLB6uMPjQZ0pd4QkNo=",
+        "lastModified": 1795794431,
+        "narHash": "sha256-nuTFX3DmNmrr1BLnXHtCbVIBLPV21cr7O0IBsK8wKLk=",
         "owner": "x-tech-laboratories",
         "repo": "CODEX",
-        "rev": "8e5c09e0c324b0dca4c936c288e3e68c9e4b4092",
+        "rev": "7fa3258514fc2ce29df9e75e25f9701a39c8aeb5",
         "type": "github"
       },
       "original": {
