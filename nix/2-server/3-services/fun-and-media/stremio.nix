@@ -125,7 +125,11 @@ in
 
                         "= /service-worker.js" = {
                             alias = "${serviceWorkerKillSwitch}";
-                            extraConfig = "add_header Cache-Control \"no-store\";";
+                            # merge keeps the HSTS header nginx.nix sets for the whole http block, which this add_header would otherwise drop
+                            extraConfig = ''
+                                add_header Cache-Control "no-store";
+                                add_header_inherit merge;
+                            '';
                         };
 
                         # The UI is a single-page app, so an unknown path has to come back as index.html
