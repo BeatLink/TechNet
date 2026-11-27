@@ -289,6 +289,8 @@ in
                 addSSL = true;
                 sslCertificate = config.sops.secrets.https_certificate.path;
                 sslCertificateKey = config.sops.secrets.https_certificate_key.path;
+                # The Roundcube module's Cache-Control here would otherwise drop the HSTS header nginx.nix sets for the whole http block
+                locations."/".extraConfig = "add_header_inherit merge;";
             };
         }
 
