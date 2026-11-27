@@ -1454,11 +1454,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795752060,
-        "narHash": "sha256-sDeaDMDjOvyo2DpB/J05aRrkUlqMhGdws4jc0uEFfaU=",
+        "lastModified": 1795802274,
+        "narHash": "sha256-DeNFzkWsxjypNyCLB2Xw8wnACNmHr1XqilYM3IjtIbs=",
         "owner": "x-tech-laboratories",
         "repo": "X-Budget",
-        "rev": "94b2839062b60e0fc73a7b0ae7c15ac152231544",
+        "rev": "1c83f855401bb050a18ced1f7cd5085419329ecd",
         "type": "github"
       },
       "original": {
@@ -1559,11 +1559,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795758384,
-        "narHash": "sha256-EWInMdnhcPXBgjtcSjvzETrSDJtzLJ1yeWQIpOSZIJg=",
+        "lastModified": 1795806979,
+        "narHash": "sha256-y6snbSJMcQDqhvV1vGsi+jQNbrNVo2yjyO+lm/Bf9pg=",
         "owner": "x-tech-laboratories",
         "repo": "X-Nix",
-        "rev": "133e63799e3f7e3a494695ef0c115f2c280c5acb",
+        "rev": "1e58f2ffca6165a1fc5d2c2ae47f59bce2d538d8",
         "type": "github"
       },
       "original": {
