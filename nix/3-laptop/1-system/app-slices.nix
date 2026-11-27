@@ -38,6 +38,7 @@ let
     background_units = [
         "syncthing.service"
         "syncthingtray.service"
+        "codex.service"
         "variety.service"
         "aw-server.service"
         "awatcher.service"

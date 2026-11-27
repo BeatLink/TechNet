@@ -1,5 +1,6 @@
 {
     imports = [
+        ./codex.nix
         ./firefox.nix
         ./keepassxc.nix
         ./trilium.nix

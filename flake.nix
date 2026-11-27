@@ -81,6 +81,10 @@
             url = "github:x-tech-laboratories/X-Budget";
             inputs.nixpkgs.follows = "nixpkgs";
         };
+        codex = {
+            url = "github:x-tech-laboratories/CODEX";
+            inputs.nixpkgs.follows = "nixpkgs";
+        };
         playitslowly = {
             url = "github:BeatLink/playitslowly";
             inputs.nixpkgs.follows = "nixpkgs";
