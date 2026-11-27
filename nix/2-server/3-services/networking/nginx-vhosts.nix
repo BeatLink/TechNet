@@ -50,6 +50,10 @@ in
                 addSSL = true;
                 sslCertificate = config.sops.secrets."https_certificate".path;
                 sslCertificateKey = config.sops.secrets."https_certificate_key".path;
+                # Browsers that reached a service over https keep to https for a day; kept short and without subdomains while plain http still answers.
+                extraConfig = ''
+                    add_header Strict-Transport-Security "max-age=86400" always;
+                '';
                 locations."/" = {
                     proxyPass = "http://${svc.host}:${toString svc.port}";
                     proxyWebsockets = true;
