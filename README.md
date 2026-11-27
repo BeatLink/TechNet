@@ -41,6 +41,14 @@ accessories.
 
 - [Architecture](docs/architecture.md) — filesystem paradigm and network
   addressing, common to every host
+- [Conventions](docs/conventions.md) — how the Nix is written, and the
+  configuration traps that shape it
+- [Deploying](docs/deploying.md) — how X-Nix deploys, what to check before
+  landing and after a switch, and CI
+- [Installing](docs/installing.md) — install traps common to every host
+- [Home automation](docs/home-automation.md) — Home Assistant, ESPHome and
+  Frigate
+- [Backups](docs/backups.md) — borg locking and Vorta traps
 - [Backup map](docs/backup-map.html) — which data each host backs up to which
   borg repository, today and once Odin's Vorta merge is finished; open it in a
   browser

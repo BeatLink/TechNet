@@ -145,6 +145,13 @@ with.
 The Rock64 has no SPI flash, so its firmware is the shared disk image written to
 its own SD card; see [Rock64](rock64.md).
 
+For a firmware hang, get the serial console first, then map the `lr` of any
+"Synchronous Abort" through `System.map` from a build that keeps the ELF.
+`Tow-Boot.builder.installPhase` lines merge, so a scratch override can copy
+`u-boot` and `System.map` out. A U-Boot `UCLASS_KEYBOARD` driver without `.ops`
+is one known cause: the uclass calls `ops->start` unchecked, which on the A64
+jumps into the SPL header in SRAM.
+
 ## Provenance
 
 The tree is three commits over U-Boot v2026.04, grouped by what they do:

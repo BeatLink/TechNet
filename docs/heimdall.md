@@ -445,6 +445,51 @@ newest release, which only succeeds if that release holds the exact same paths.
 The timer keeps a fixed random delay, so a switch's reload cannot fire it
 mid-switch.
 
+## Troubleshooting
+
+Home Assistant, ESPHome and Frigate have their own page:
+[home automation](home-automation.md).
+
+- **Hung fsyncs or a slow boot.** Read the sync-time column (the last field, in
+  ns) of `/proc/spl/kstat/zfs/data-pool-Heimdall/txgs` and `zpool list` CAP and
+  FRAG first. Every `zfs destroy` waits a full txg sync. During an initrd import,
+  `/proc/spl/kstat/zfs/import_progress` over initrd SSH shows the phase.
+- **`attic push` fails with "Connection timed out (os error 110)".** The real
+  error is in `journalctl -u atticd`: `Connection pool timed out`. atticd gives
+  SQLite one connection with a 30 s timeout, so anything slowing the database
+  starves it: check the dataset's `sync` is disabled, then txg sync times, then
+  `explain query plan` on the chunk lookup. After an atticd restart, wait a
+  minute before pushing.
+- **Load around 1.0 with nothing busy.** It is kernel WireGuard crypto relaying
+  between peers, in `kworker/*-wg-crypt-wireguard0` threads outside any service
+  cgroup, so `systemd-cgtop` shows nothing.
+- **Homepage shows no service cards** while its info widgets work. It substitutes
+  `{{HOMEPAGE_VAR_*}}` into `services.yaml` as raw text, so a `'` in a value
+  breaks the file. Test a widget without handling its credential through
+  `/api/services/proxy?group=<group>&service=<tile>&endpoint=<mapping>`.
+- **Jackett.** A sitelink not in the definition's `links` is reverted on restart
+  even though the POST succeeds, so a domain change means overriding the whole
+  definition in [`jackett.nix`](../nix/2-server/3-services/fun-and-media/jackett.nix).
+  "certificate validation failed: CN=heimdall.technet" means Pi-hole blocks the
+  indexer's domain. "A task was canceled" across many indexers is FlareSolverr
+  queueing; test them one at a time.
+- **Syncthing API calls fail to connect** while syncing works. The GUI listener
+  on `127.0.0.1:8384` can vanish with no log line; check `ss -ltn` and restart
+  the service. A folder whose `markerName` changed goes to `folder marker
+  missing` and stops; create the marker in its root by hand.
+- **X-Monitor.** Read its state through the API, not SQLite (`statushistory`
+  scans take minutes): `/metrics` with Basic auth on `127.0.0.1:9611`, after the
+  roughly five minutes of startup during which it answers "starting". A plugin's
+  secret is read once, at construction, on the X-Monitor host as `x-monitor`, so
+  it needs group `x-monitor-credentials` and mode 0440, and a restart after a
+  permission fix. A huge `x-monitor.db-wal` can make startup hang: stop the
+  service, run `PRAGMA wal_checkpoint(TRUNCATE);` and start it again.
+- **lnxlink** after an input bump: check `systemctl status lnxlink` for "MQTT
+  connection: Success"; a bump can build and still crash-loop on start.
+- **BlockURL** behaviour lives in its own repository; TechNet's `blockurl` input
+  takes only the sync server, so a server fix reaches Heimdall only after a
+  flake.lock bump.
+
 ## Unlocking
 
 Heimdall's root pool is unlocked by clevis against Odin's tang server, enabled in
@@ -469,10 +514,6 @@ ground to ground. This path has not been tested on the hardware yet.
 
 ## Rebuilding
 
-```sh
-nixtool run maintenance/rebuild --host Heimdall --action dry-activate
-nixtool run maintenance/rebuild --host Heimdall --action switch
-```
-
-Restarting a service group tends to be more disruptive here than on other hosts —
-read the unit list from `dry-activate` before switching.
+X-Nix switches Heimdall when `main` moves; see [deploying](deploying.md).
+Restarting a service group tends to be more disruptive here than on other hosts,
+so read the unit list from a `dry-activate` before landing a change.
