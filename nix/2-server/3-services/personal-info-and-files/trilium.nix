@@ -4,7 +4,7 @@ let
         preFixup = (previous.preFixup or "") + ''
             export PATH=${
                 pkgs.patchelf.overrideAttrs (_: rec {
-                    version = "0.15.2";
+                    version = "0.15.2"; # Newer patchelf overlaps segments and Trilium's node segfaults; nixpkgs#576397 does not fix this one
                     src = pkgs.fetchurl {
                         url = "https://github.com/NixOS/patchelf/releases/download/${version}/patchelf-${version}.tar.bz2";
                         hash = "sha256-F3RfVkFZyOIo/EEtplogSLhGxLa0Igt3y/IkFuAvLXw=";

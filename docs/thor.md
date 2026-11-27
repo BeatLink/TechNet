@@ -43,6 +43,12 @@ capture, say — each receive part of the byte stream, which looks exactly like 
 wrong baud rate: structured, repeating, but unreadable. If output is garbled,
 check for a second reader before touching the baud rate.
 
+U-Boot and the kernel stay at 115200, but `serial-getty@ttyS0` steps down
+through 57600, 38400 and 9600 on line noise, so probe each rate with a CR before
+concluding the line is dead. A logged-in shell goes back to 115200 with
+`stty 115200; exec bash --norc --noprofile`. Thor stops answering on serial while
+it is suspended.
+
 The adapter re-enumerates whenever the USB bus resets, which kills whatever is
 attached to it. Watching the stable `by-id` path and reattaching in a loop
 survives that:
@@ -80,7 +86,9 @@ So Thor is installed from Odin over USB mass storage instead, with
 Hold **volume up** during boot. The firmware drives USB from U-Boot's own stack,
 so none of the Linux driver gaps above apply. On the stock Tow-Boot build this
 reaches a menu; on the build described under [firmware](#firmware-and-the-boot-menu)
-it enters mass storage directly.
+it enters mass storage directly. If volume up does not get there, take the
+firmware prompt over [serial](#serial-console) and run `ums 0 mmc 1`: mmc 1 is
+the eMMC, mmc 0 the SD card and mmc 2 the SDIO Wi-Fi.
 
 ### 2. Connect Thor to Odin and identify the disk
 
@@ -307,7 +315,26 @@ IdleActionSec=5min
 
 An SSH or serial session is a session too, and its own idle time gates this, so
 a silent long job still wants `systemd-inhibit --what=sleep` — a closure copy
-cut off mid-way surfaces as `Broken pipe` rather than as a sleeping phone.
+cut off mid-way surfaces as `Broken pipe` rather than as a sleeping phone. Hold
+the inhibitor in a transient unit, since one backgrounded inside an `ssh` command
+dies with the connection:
+
+```sh
+systemd-run --user --unit=deploy-inhibit systemd-inhibit --what=idle:sleep --mode=block sleep 7200
+```
+
+`ssh thor` failing with "No route to host" means Thor is asleep. X-Nix sends a
+Wake-on-WLAN magic packet before every job on it (`wake_on_lan` in
+[`x-nix.nix`](../nix/2-server/3-services/monitoring/x-nix.nix)); by hand, send
+one to its Wi-Fi MAC with `nix run nixpkgs#wakeonlan`. If the LAN path still
+fails, check Thor's handshake on Heimdall with `wg show` and use its WireGuard
+address.
+
+The wake filter is `wifi-wake-filter` in `sleep.nix`. WireGuard cannot be a wake
+path: Heimdall retries a handshake to a sleeping peer every 5 s, which woke the
+phone within seconds. `wowlan_last_wake_reason` 0x23 means a pattern matched.
+Plain `rtcwake -m mem` bypasses `sleep.target` and the filter, so test the real
+path with `rtcwake -m no -s N` and then `systemctl suspend`.
 
 ### Caffeine is a trap
 
@@ -676,7 +703,8 @@ graphical.target` puts it all back.
 
 ## Unlocking
 
-Thor's root pool uses ZFS native encryption with a passphrase. Clevis unlocks it
+Thor's root is btrfs inside LUKS (`technet.storage.backend = "btrfs-luks"`).
+Slot 1 is the clevis binding and slot 0 the passphrase. Clevis unlocks it
 against Odin's tang server, which means it only unlocks where tang is reachable
 **and** Odin's session is unlocked — see [odin.md](odin.md). Away from home it
 falls back to prompting.
@@ -695,5 +723,43 @@ which brings up a CDC ECM link on `172.16.42.1` and reaches tang at
 [`19-thor-usb-link.nix`](../nix/3-laptop/1-system/19-thor-usb-link.nix).
 
 The passphrase is stored as `thor_encryption_key` in `secrets/admin/nixtool.yaml`.
-Keep it — ZFS native encryption has exactly one wrapping key per encryption root
-and no spare keyslots, so losing it means reinstalling.
+
+Serial cannot answer the prompt: Plymouth ignores serial consoles and the line
+looks frozen through a successful unlock. Answer it over initrd SSH instead, with
+`-tt` and exactly one trailing newline; one run answers every prompt:
+
+```sh
+printf '%s\n' "$(sudo cat /run/secrets/thor_encryption_key)" \
+  | ssh -tt -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+      root@thor.lan '/usr/bin/systemd-tty-ask-password-agent --query'
+```
+
+systemd creates nested subvolumes under `@root` (`tmp`, `var/tmp`, `srv`,
+`var/lib/portables`, `var/lib/machines`), so a rollback has to delete them before
+their parent.
+
+## Location
+
+- A QMI LOC session sends NMEA only over QMI; `/dev/ttyUSB1` stays silent.
+  [`gnss.nix`](../nix/5-phone/1-system/gnss.nix) bridges it to a socket, and
+  works around qmicli writing into a closed socket forever, which keeps GNSS
+  powered. Check a fix outdoors with `sudo nc -U /run/gnss-nmea.sock`, reading GGA
+  and GSV; indoors the receiver sees no satellites.
+- geoclue never answers `GetClient` from a uid with no agent, and on Thor only
+  phosh registers one, for `beatlink`. Run geoclue clients as `beatlink` user
+  units; `isSystem = true` does not bypass this.
+- Thor's Mali-400 offers only GLES 2.0. Organic Maps and MapLibre need 3.0 and
+  fall back to unusably slow software rendering; a map app here has to draw with
+  GLES 2.0 or a raster path such as SDL2. Prove GPU use by finding
+  `/dev/dri/renderD128` in `/proc/<pid>/fd`.
+
+## Rotation
+
+The same docked pose has three numbers. U-Boot's `rot` names the content's
+rotation, the device-tree `rotation = <90>` on the panel names its physical pose
+(DRM "Right Side Up", which Plymouth, fbcon and wlroots follow), and wlroots maps
+that to wl transform 270. U-Boot's fixups reach the device tree systemd-boot
+loads through the EFI DT fixup protocol. To change the docked pose, change U-Boot's
+`rot`, the DT `rotation` and the `landscape` value in
+[`dock-rotation.nix`](../nix/5-phone/1-system/dock-rotation.nix) together, and
+check the result on the phone.

@@ -294,6 +294,23 @@ keys and is also how a fresh container gets its first binding; it needs tang
 reachable. `clevis luks list -d <device>` shows the binding, and
 `journalctl -b -u clevis-luks-askpass` shows what askpass did during the boot.
 
+## IR blaster
+
+[`ir-blaster`](../nix/1-backup-server/3-services/ir-blaster/default.nix) sends IR
+from a CH340 (`1a86:7523`) USB serial adapter's TX pin driving a three-wire
+emitter, which works better on 5 V than 3.3 V. Mark bytes at a baud near a
+multiple of the 38 kHz carrier make the carrier; the dark fill between them
+flickers at the byte rate, which nearby receivers see, so the service picks a
+rate that puts the fill far above it. The page answers over WireGuard only, on
+port 9621.
+
+Learning goes through [`ir-learn`](../nix/0-common/3-services/ir-learn/default.nix)
+and a USB sound card's microphone input, not the CH340: the receiver eye passes
+the raw carrier without demodulating it, and the CH340 blanks bytes with framing
+errors to `00`. Wire the eye's red to 5 V, black to the sleeve and white to the
+tip, with AGC off and gain at 0. The built-in headphone output tops out at 48 kHz
+and cannot send a 38 kHz carrier.
+
 ## Planned move
 
 Ragnarok is to move to another house as the off-site backup. The move waits on

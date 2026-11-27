@@ -48,7 +48,7 @@
                     wifi = {
                         ssid = "TechNet Wi-Fi";
                         hidden = true;
-                        band = lib.mkDefault "a";
+                        band = lib.mkDefault "a"; # 2.4GHz shares Odin's MT7921 antenna with Bluetooth, lagging its keyboard dongle
                     };
                     wifi-security = {
                         key-mgmt = "wpa-psk";

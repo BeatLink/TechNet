@@ -12,16 +12,19 @@ treating as infrastructure rather than just a laptop.
 
 ## Deploying to Odin
 
-A bad deploy takes out the session you are working in. Always `dry-activate`
-first and read the unit list:
-
-```sh
-nixtool run maintenance/rebuild --host Odin --action dry-activate
-```
+X-Nix switches Odin on its own when `main` moves ([deploying](deploying.md)), and
+a bad deploy takes out the session you are working in. Review a risky change with
+a `dry-activate` through X-Nix and read the unit list.
 
 `would NOT stop the following changed units: display-manager.service` means the
 graphical session survives. If the display manager *would* restart, expect to be
 logged out.
+
+A switch that bumps the kernel restarts `nvidia-powerd` against the old loaded
+module, so it fails, every later switch exits 4 and X-Nix rolls each one back:
+generations climb while `/run/current-system` stays put. Compare `uname -r` with
+`readlink /run/current-system/kernel`; rebooting into the newest generation
+clears it.
 
 ## Desktop environments
 
@@ -119,9 +122,8 @@ enables it, in [`nixtool.nix`](../nix/3-laptop/4-apps/technet/nixtool.nix), whic
 renders `/etc/nixtool/nixtool-config.json`. Installer credentials are named as
 sops paths rather than values, so nothing sensitive reaches the Nix store.
 
-Every host is deployed from here. Its own command is under *Deploying to Odin*
-above; the others are in [Heimdall](heimdall.md), [Ragnarok](ragnarok.md) and
-[Thor](thor.md).
+nixtool installs hosts but no longer deploys them; that is X-Nix's job
+([deploying](deploying.md)).
 
 ### Install credentials
 
@@ -150,3 +152,45 @@ therefore slow.
 Note the limits of emulation: it works for *building*, but not for running
 foreign-architecture tools that talk to the host kernel. See the disko
 architecture note in [thor.md](thor.md#3-run-the-install).
+
+## Claude Code
+
+Every MCP server Claude Code uses is declared in
+[`claude-mcp`](../nix/3-laptop/4-apps/programming/claude-mcp/default.nix). Tokens
+live in `secrets/3-laptop/claude-mcp.yaml`, and a sops template linked to
+`/etc/claude-code/managed-mcp.json` fills them in; Claude Code treats that file
+as the only server list, so `claude mcp add` has no effect. Add a token with
+`set-mcp-token <server>` after adding the server to its `APPS`. Trilium's servers
+take the raw ETAPI token as `Authorization`, the X-apps `Bearer <token>`.
+
+[`app-slices.nix`](../nix/3-laptop/1-system/app-slices.nix) places desktop apps
+in user slices through prefix drop-ins on the transient `app-<id>-<pid>.scope`
+units GLib creates. An app started outside GLib, such as one restored by the
+session, stays in `session-N.scope`. The VS Code extension's
+`claudeProcessWrapper` gives each Claude session its own scope in
+`agents.slice`, capped by [`memory-guard.nix`](../nix/3-laptop/1-system/memory-guard.nix).
+
+## Troubleshooting
+
+- **IO pressure.** Rank `/sys/fs/cgroup/**/io.pressure` first, then
+  `/proc/<pid>/io`. Syncthing's own index database was the culprit once; its
+  `counts` table gives live and deleted totals at once, where scanning `files`
+  takes minutes.
+- **Wireless keyboard lag** is 2.4 GHz contention: the MT7921's Wi-Fi shares an
+  antenna with its Bluetooth. Check the band with
+  `nmcli -f ACTIVE,SSID,CHAN,FREQ device wifi list`; a switch does not
+  re-associate until the connection goes down and up.
+- **A WebKitGTK app dies with SIGFPE** and only a coredump, in
+  `WebKit::DisplayLink::platformInitialize`: a connected but unlit output (the
+  closed lid's `eDP-1`) reports a refresh rate of 0. The fix is in
+  [`linux-sidebar.nix`](../nix/3-laptop/4-apps/tools/linux-sidebar.nix).
+- **An app moved off Flatpak** that cannot find its files may carry
+  `~/.var/app/…` paths in its own database or config, as itch did in
+  `~/.config/itch/db/butler.db`. Grep for `.var/app` before changing persistence.
+- **Cinnamon.** `gdbus call --session --dest org.Cinnamon --object-path /org/Cinnamon --method org.Cinnamon.Eval '<js>'`
+  runs JavaScript in the live session. Re-enabling an applet reuses its cached
+  module, so new `applet.js` code needs
+  `imports.ui.extension.reloadExtension('<uuid>', imports.ui.extension.Type.APPLET)`.
+  Muffin reads `cinnamon-monitors.xml` only at session start, numbers monitors
+  in block order, and puts panels on the first block but hot corners on the
+  `<primary>` output, so the two must name the same output.
