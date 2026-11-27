@@ -49,14 +49,14 @@ let
             headers = bearer "x_budget_mcp_token";
         };
         x-dev.url = "http://127.0.0.1:3921/mcp";
-        # Served by Heimdall, so the desktop apps need not be open; X-Tasks reuses CODEX's token
+        # Served by Heimdall, so the desktop apps need not be open; X-Tasks has a token of its own, apart from CODEX's
         x-fitness = {
             url = "https://fitness.heimdall.technet/api/mcp";
             headers = bearer "x_fitness_mcp_token";
         };
         X-Tasks = {
             url = "https://tasks.heimdall.technet/api/mcp";
-            headers = bearer "x_tasks_codex_token";
+            headers = bearer "x_tasks_mcp_token";
         };
         trilium = {
             url = "http://127.0.0.1:37840/mcp";
@@ -96,12 +96,17 @@ let
     };
 in
 {
-    sops.secrets = builtins.listToAttrs (
-        map (token: {
-            name = token;
-            value.sopsFile = "${config.technet.secrets.path}/claude-mcp.yaml";
-        }) tokens
-    );
+    sops.secrets =
+        builtins.listToAttrs (
+            map (token: {
+                name = token;
+                value.sopsFile = "${config.technet.secrets.path}/claude-mcp.yaml";
+            }) tokens
+        )
+        // {
+            # Saved by scripts/set-codex-api-key.sh beside CODEX's keys; Claude Code's own, not CODEX's
+            x_tasks_mcp_token.sopsFile = "${config.technet.secrets.path}/codex.yaml";
+        };
 
     sops.templates."claude-managed-mcp.json" = {
         owner = "beatlink";
