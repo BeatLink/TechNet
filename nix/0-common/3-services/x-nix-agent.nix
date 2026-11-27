@@ -39,6 +39,8 @@ in
                 else
                     "wss://nix.heimdall.technet/api/agent";
             keyFile = config.sops.secrets.x_nix_agent_key.path;
+            # The agent refuses a server that does not sign with this key, Heimdall's x-nix-server-key.yaml; a rotation lists the new line beside this one first.
+            serverPublicKeys = [ "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJt/w3UoBWUZ16g4i7miu7FYY2aiujPJhBd98TGwNlBX x-nix-server" ];
             # Deploys from GitHub by itself once Heimdall has been gone half a day; only the laptop can evaluate the flake in reasonable time.
             pull = lib.mkIf (host == "Odin") {
                 enable = true;
