@@ -68,6 +68,9 @@ in
 
     sops.secrets.x_nix_password_hash.sopsFile = "${config.technet.secrets.path}/x-nix.yaml";
 
+    # The key X-Nix signs its login challenge and every message to the agents with, whose public half the agents list in x-nix-agent.nix.
+    sops.secrets.x_nix_server_key.sopsFile = "${config.technet.secrets.path}/x-nix-server-key.yaml";
+
     # Write deploy key on the TechNet repo that Update Flake pushes the new lock with, as Heimdall's agent runs it.
     sops.secrets.x_monitor_flake_deploy_key = {
         sopsFile = "${config.technet.secrets.path}/x-monitor.yaml";
@@ -98,6 +101,7 @@ in
         inherit port;
         serverName = "heimdall";
         passwordHashFile = config.sops.secrets.x_nix_password_hash.path;
+        serverKeyFile = config.sops.secrets.x_nix_server_key.path;
         # Each agent's key, whose private half is in that host's x-nix-agent.yaml.
         hosts = {
             heimdall = {
@@ -189,12 +193,16 @@ in
                 "systemctl is-active --quiet phosh.service"
             ];
         };
-        fleet.stages = [
-            "@arm"
-            "@backup"
-            "@desktop"
-            "@server"
-        ];
+        fleet = {
+            stages = [
+                "@arm"
+                "@backup"
+                "@desktop"
+                "@server"
+            ];
+            # Each automatic switch goes ahead on its own, rather than waiting for every earlier stage's hosts, such as the often-off phone and laptop.
+            auto_switch_staged = false;
+        };
         provisioning = {
             ssh_key = config.sops.secrets.x_nix_provision_key.path;
             agent_url = "wss://nix.heimdall.technet/api/agent";
