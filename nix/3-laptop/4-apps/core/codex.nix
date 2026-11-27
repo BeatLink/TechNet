@@ -23,6 +23,9 @@ let
             lib.splitString "\n" (builtins.readFile keysFile)
         );
     hasAnthropicKey = hasKey "anthropic_api_key";
+
+    # A token made on X-Tasks' Your account for CODEX; until it is saved, the old shared token is used
+    hasXTasksToken = hasKey "x_tasks_codex_token";
 in
 {
     imports = [ inputs.codex.nixosModules.default ];
@@ -36,6 +39,11 @@ in
             sopsFile = keysFile;
             owner = "beatlink";
         };
+
+        x_tasks_codex_token = lib.mkIf hasXTasksToken {
+            sopsFile = keysFile;
+            owner = "beatlink";
+        };
     };
 
     programs.codex.declared = {
@@ -45,7 +53,7 @@ in
         sources = {
             "codex.x-tasks" = {
                 address = "https://tasks.heimdall.technet";
-                token_file = secret "x_tasks_access_token";
+                token_file = secret (if hasXTasksToken then "x_tasks_codex_token" else "x_tasks_access_token");
             };
             "codex.trilium" = {
                 address = "https://trilium.heimdall.technet";
