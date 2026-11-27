@@ -59,7 +59,7 @@ let
             eval_agent = "heimdall"; # Evaluating the flake on the phone takes it out of service, so Heimdall evaluates for every remote host
             auto_switch = true;
             auto_switch_after = "0";
-            health_commands = [ "systemctl is-active --quiet sshd.service" ];
+            host_health_commands = [ "sshd" ];
         }
         // safety;
 in
@@ -177,11 +177,11 @@ in
             ];
             auto_switch = true;
             auto_switch_after = "0";
-            pre_switch_checks = [ "test \"$(df --output=pcent /boot | tail -1 | tr -dc 0-9)\" -lt 90" ];
-            health_commands = [
-                "systemctl is-active --quiet nginx.service"
-                "systemctl is-active --quiet sshd.service"
-                "systemctl is-active --quiet atticd.service"
+            host_pre_switch_checks = [ "boot-space" ];
+            host_health_commands = [
+                "nginx"
+                "sshd"
+                "atticd"
             ];
         }
         // safety;
@@ -189,10 +189,10 @@ in
         deployments.ragnarok = remote "Ragnarok" [ "backup" ];
         deployments.thor = remote "Thor" [ "arm" ] // {
             interval = "30m"; # The phone wakes on battery only every half hour
-            post_switch = "systemctl is-active -q phosh.service || systemctl restart phosh.service"; # A switch that touches phosh stops it and leaves the screen dark
-            health_commands = [
-                "systemctl is-active --quiet sshd.service"
-                "systemctl is-active --quiet phosh.service"
+            host_post_switch = [ "phosh" ]; # A switch that touches phosh stops it and leaves the screen dark
+            host_health_commands = [
+                "sshd"
+                "phosh"
             ];
         };
         fleet = {
