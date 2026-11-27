@@ -1559,11 +1559,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795757341,
-        "narHash": "sha256-om2egMk9rpx20sKyEOUbHO4yGZJ3xZUe2v07s9+0OH8=",
+        "lastModified": 1795758384,
+        "narHash": "sha256-EWInMdnhcPXBgjtcSjvzETrSDJtzLJ1yeWQIpOSZIJg=",
         "owner": "x-tech-laboratories",
         "repo": "X-Nix",
-        "rev": "dfddd8cedf066afd8598b15719ee0880e27fa5ba",
+        "rev": "133e63799e3f7e3a494695ef0c115f2c280c5acb",
         "type": "github"
       },
       "original": {
