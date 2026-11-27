@@ -52,6 +52,8 @@ in
                 endpoint = "http://127.0.0.1:18080/v1";
                 model = "gpt-oss-20b";
                 context_size = 32768;
+                # Every tool described is about 92k tokens, far over the context; the core set fits
+                tool_set = "core";
             };
         }
         // lib.optionalAttrs hasAnthropicKey {
