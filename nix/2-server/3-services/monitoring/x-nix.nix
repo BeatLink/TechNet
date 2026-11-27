@@ -134,6 +134,7 @@ in
             push_ssh_key = config.sops.secrets.x_monitor_flake_deploy_key.path; # Lives on Heimdall alone, which updates the flake for the whole fleet
             commit_signing_key = config.sops.secrets.x_nix_commit_signing_key.path;
             access_tokens_file = config.sops.secrets.x_nix_github_access_token_conf.path;
+            check_update = "evaluate"; # Building all four systems before every lock bump holds an update up for half an hour
             # Only my own repositories update the flake as soon as they move; everything upstream waits for update_at.
             watch_inputs = [
                 "app-separators"
