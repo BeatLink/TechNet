@@ -49,8 +49,15 @@ let
             headers = bearer "x_budget_mcp_token";
         };
         x-dev.url = "http://127.0.0.1:3921/mcp";
-        x-fitness.url = "http://127.0.0.1:3918/mcp";
-        X-Tasks.url = "http://127.0.0.1:3917/mcp";
+        # Served by Heimdall, so the desktop apps need not be open; X-Tasks reuses CODEX's token
+        x-fitness = {
+            url = "https://fitness.heimdall.technet/api/mcp";
+            headers = bearer "x_fitness_mcp_token";
+        };
+        X-Tasks = {
+            url = "https://tasks.heimdall.technet/api/mcp";
+            headers = bearer "x_tasks_codex_token";
+        };
         trilium = {
             url = "http://127.0.0.1:37840/mcp";
             headers.Authorization = config.sops.placeholder.trilium_mcp_token;
