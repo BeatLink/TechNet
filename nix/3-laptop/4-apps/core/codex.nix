@@ -48,9 +48,10 @@ in
 
     programs.codex.declared = {
         engines = {
+            # gpt-oss still runs as codex-llm on 18080 and can be added as the owner's own engine in Settings
             "codex.openai" = {
-                endpoint = "http://127.0.0.1:18080/v1";
-                model = "gpt-oss-20b";
+                endpoint = "http://127.0.0.1:18082/v1";
+                model = "qwen3.6-35b-a3b";
                 context_size = 32768;
                 # Every tool described is about 92k tokens, far over the context; the core set fits
                 tool_set = "core";
