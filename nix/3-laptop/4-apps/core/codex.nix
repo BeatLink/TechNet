@@ -47,8 +47,21 @@ in
     };
 
     programs.codex.declared = {
-        engines = lib.mkIf hasAnthropicKey {
+        engines = {
+            "codex.openai" = {
+                endpoint = "http://127.0.0.1:18080/v1";
+                model = "gpt-oss-20b";
+                context_size = 32768;
+            };
+        }
+        // lib.optionalAttrs hasAnthropicKey {
             "codex.anthropic".key_file = secret "anthropic_api_key";
+        };
+        engine = "openai";
+        embedder = {
+            endpoint = "http://127.0.0.1:18081/v1";
+            model = "qwen3-embedding-0.6b";
+            dimensions = 1024;
         };
         sources = {
             "codex.x-tasks" = {
