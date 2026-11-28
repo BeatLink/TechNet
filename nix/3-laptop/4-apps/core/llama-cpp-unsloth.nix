@@ -1,22 +1,52 @@
-# llama.cpp, Unsloth's Fork ###########################################################################################################################
+# llama.cpp, Unsloth's Prebuilt #######################################################################################################################
 #
-# The build Unsloth's Inkling 2 Mini guide names (https://unsloth.ai/docs/models/inkling-2-mini): b12649-mix-c7059d6, with looped-layer support.
-# Mainline builds before it give garbage from Inkling's looped layers (ggml-org/llama.cpp#32710, #32778). CUDA for Odin's 8.6 part only.
+# The build Unsloth's Inkling 2 Mini guide names (https://unsloth.ai/docs/models/inkling-2-mini): b12649-mix-c7059d6, upstream b12649 merged with the
+# Inkling PRs at release time (its release notes), from a commit that is not published, so the git tag alone does not load Inkling and only the
+# release archive is the tested build. The CUDA 12 portable archive, checked against the digest GitHub publishes for it, with its libraries
+# pointed at nixpkgs' CUDA 12 runtime and the driver's libcuda.
 #
 
-{ llama-cpp, fetchFromGitHub, cudaPackages, lib }:
-(llama-cpp.override { cudaSupport = true; }).overrideAttrs (previous: {
+{
+    stdenv,
+    fetchurl,
+    autoPatchelfHook,
+    autoAddDriverRunpath,
+    cudaPackages_12,
+    openssl,
+}:
+stdenv.mkDerivation {
+    pname = "llama-cpp-unsloth";
     version = "b12649-mix-c7059d6";
-    src = fetchFromGitHub {
-        owner = "unslothai";
-        repo = "llama.cpp";
-        tag = "b12649-mix-c7059d6";
-        hash = "sha256-lg4XMHZH76n93Bf5U9vsKMnjqQm/OLSkbuFfhzNO3Zw=";
+
+    src = fetchurl {
+        url = "https://github.com/unslothai/llama.cpp/releases/download/b12649-mix-c7059d6/app-b12649-mix-c7059d6-linux-x64-cuda12-portable.tar.gz";
+        hash = "sha256-Y/AxdRkn+waJSSjhi/RufxZMVVuIB8isTpY+ajfG1Cw=";
     };
-    # The web UI is built with npm in this tree; the server runs headless for CODEX, so it is left out
-    npmDeps = null;
-    nativeBuildInputs = builtins.filter (input: !(lib.hasInfix "npm-config-hook" (input.name or ""))) previous.nativeBuildInputs;
-    preConfigure = "";
-    buildInputs = previous.buildInputs ++ [ cudaPackages.cuda_nvml_dev ];
-    cmakeFlags = previous.cmakeFlags ++ [ "-DCMAKE_CUDA_ARCHITECTURES=86" "-DLLAMA_USE_PREBUILT_UI=OFF" "-DLLAMA_BUILD_UI=OFF" ];
-})
+
+    # The archive holds its files at the top, with no folder of its own
+    sourceRoot = ".";
+
+    nativeBuildInputs = [
+        autoPatchelfHook
+        autoAddDriverRunpath
+    ];
+
+    buildInputs = [
+        stdenv.cc.cc.lib
+        cudaPackages_12.cuda_cudart
+        cudaPackages_12.libcublas
+        openssl
+    ];
+
+    # libcuda comes from the NVIDIA driver at run time, through the driver runpath
+    autoPatchelfIgnoreMissingDeps = [ "libcuda.so.1" ];
+
+    # The binaries find their own libraries beside them ($ORIGIN), so everything stays in one folder
+    installPhase = ''
+        runHook preInstall
+        mkdir -p $out/bin
+        cp -a ./* $out/bin/
+        rm -f $out/bin/env-vars
+        runHook postInstall
+    '';
+}
