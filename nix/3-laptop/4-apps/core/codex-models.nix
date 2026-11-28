@@ -1,6 +1,6 @@
 # CODEX Local Models ##################################################################################################################################
 #
-# A server each for Inkling 2 Mini (PolyStrata), Qwen3.6-35B-A3B, Ternary Bonsai 2.5 27B and LFM2.5-8B-A1B (llama.cpp), as user units the owner starts by hand.
+# A server each for Inkling 2 Mini (PolyStrata), Qwen3.6-35B-A3B and Ternary Bonsai 2.5 27B (llama.cpp), as user units the owner starts by hand.
 # Every chat model answers on one port, the one CODEX is declared with, so the one running is the one CODEX uses; starting one stops the others.
 # A chat model holds /run/user/1000/codex-gpu.lock while it runs, so no other session loads the 4 GB GPU underneath it.
 #
@@ -28,11 +28,12 @@ let
         exe = polystrata.engine;
         args = [
             "--model" inkling_model
-            "--max-context" "16384"
+            "--max-context" "98304"
             "--expert-profile" "${inkling_state}/expert-profile.txt"
             "--attn-requant" "q5_k"
             "--loop-bf16"
             "--tail-skip" "4"
+            "--kv" "fp8"
         ];
         cwd = inkling_state;
         tokenizer = "${inkling_state}/tokenizer";
@@ -74,14 +75,14 @@ in
         # PolyStrata runs the looped layers itself and keeps most experts in RAM beside the 4 GB card
         codex-llm-inkling = chat {
             description = "Inkling 2 Mini";
-            others = [ "codex-llm-qwen" "codex-llm-bonsai" "codex-llm-lfm" ];
+            others = [ "codex-llm-qwen" "codex-llm-bonsai" ];
             prepare = inkling_prepare;
             exec = "${polystrata}/bin/polystrata-serve ${inkling_state}/strata.json ${toString chat_port}";
         };
 
         codex-llm-qwen = chat {
             description = "Qwen3.6-35B-A3B";
-            others = [ "codex-llm-inkling" "codex-llm-bonsai" "codex-llm-lfm" ];
+            others = [ "codex-llm-inkling" "codex-llm-bonsai" ];
             exec = "${llama}/bin/llama-server --host 127.0.0.1 --port ${toString chat_port} --model ${models}/Qwen3.6-35B-A3B-UD-IQ4_XS.gguf --alias qwen3.6-35b-a3b -ngl 999 --n-cpu-moe 39 -fa on -ctk q8_0 -ctv q8_0 -c 32768 -t 6 -b 1024 -ub 1024 --parallel 1 --jinja --reasoning-format auto";
         };
 
@@ -89,15 +90,8 @@ in
         # GPU layers left to the build's fit, the one setting that loaded on Odin
         codex-llm-bonsai = chat {
             description = "Ternary Bonsai 2.5 27B";
-            others = [ "codex-llm-inkling" "codex-llm-qwen" "codex-llm-lfm" ];
+            others = [ "codex-llm-inkling" "codex-llm-qwen" ];
             exec = "${llama}/bin/llama-server --host 127.0.0.1 --port ${toString chat_port} --model ${models}/Ternary-Bonsai-2.5-27B-Q2_0.gguf --alias ternary-bonsai-2.5-27b -fa on -ctk q8_0 -ctv q8_0 -c 32768 -t 6 -b 512 -ub 512 --parallel 1 --jinja --reasoning-format auto --temp 1.0 --top-p 0.95 --top-k 20 --min-p 0";
-        };
-
-        # Every layer on the GPU but the experts, which stay on the CPU, at the context CODEX is declared with
-        codex-llm-lfm = chat {
-            description = "LFM2.5-8B-A1B";
-            others = [ "codex-llm-inkling" "codex-llm-qwen" "codex-llm-bonsai" ];
-            exec = "${llama}/bin/llama-server --host 127.0.0.1 --port ${toString chat_port} --model ${models}/LFM2.5-8B-A1B-Q4_K_M.gguf --alias lfm2.5-8b-a1b -c 16384 -fa on -ctk q8_0 -ctv q8_0 -ngl 99 -ot .ffn.*_exps.=CPU --parallel 1 --jinja --temp 0.3 --min-p 0.15";
         };
     };
 }
