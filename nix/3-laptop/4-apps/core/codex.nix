@@ -52,8 +52,8 @@ in
             "codex.openai" = {
                 endpoint = "http://127.0.0.1:18082/v1";
                 model = "inkling-2-mini";
-                context_size = 32768;
-                # Every tool described is about 92k tokens, far over the context; the core set fits
+                context_size = 98304;
+                # Every tool described is about 92k tokens, nearly the whole context; the core set leaves room for the conversation
                 tool_set = "core";
             };
         }
