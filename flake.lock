@@ -1475,11 +1475,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795823268,
-        "narHash": "sha256-+RnHWG9XKxygL5l35++tZAMmTy0IoazqKcdAWfzUVh8=",
+        "lastModified": 1795856174,
+        "narHash": "sha256-mZ3BIeguRlCA6YUh4biensHYOzHbCIgmRy+g5S4P5kQ=",
         "owner": "x-tech-laboratories",
         "repo": "X-Fitness",
-        "rev": "3fc8d51337d7d32ee56b95c2d8a7baaa4c47e979",
+        "rev": "f551da4fbda46309cb17a5908c5347b46e0f91e2",
         "type": "github"
       },
       "original": {
@@ -1496,11 +1496,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1795747091,
-        "narHash": "sha256-tuNOt5EXboQj6wDrMTfJ0yleroZ8+nuE2h+maKakCx4=",
+        "lastModified": 1795857670,
+        "narHash": "sha256-7xfxeauMfN7ULML15rgtUvjn//yIekCGXrTNa1B06IY=",
         "owner": "x-tech-laboratories",
         "repo": "X-Media-Tracker",
-        "rev": "cdabd6a3d72a1d1b5e972db4ab87db2061ab6a65",
+        "rev": "2fbac908a69656bfcf071a1f42771e8eb1290f74",
         "type": "github"
       },
       "original": {
@@ -1596,11 +1596,11 @@
         "x-webview": "x-webview"
       },
       "locked": {
-        "lastModified": 1795790922,
-        "narHash": "sha256-EbDzPoJ5ZPvVATF1g5nUrNIKKLM5zgN0qaqVgiHD8e8=",
+        "lastModified": 1795856179,
+        "narHash": "sha256-OFUKE2dGOgvbY5bn80/vGLo5sRsN/CLKbEMiUqka5UM=",
         "owner": "x-tech-laboratories",
         "repo": "X-Tasks",
-        "rev": "41667a00803faa043d7d2237bcd7a99995b352f1",
+        "rev": "c30ad4c79ac9d21a240a0e3644e9b558027e90b8",
         "type": "github"
       },
       "original": {
