@@ -48,10 +48,10 @@ in
 
     programs.codex.declared = {
         engines = {
-            # gpt-oss still runs as codex-llm on 18080 and can be added as the owner's own engine in Settings
+            # Whichever of codex-llm-inkling, codex-llm-qwen and codex-llm-bonsai runs answers here; the model picker lists it
             "codex.openai" = {
                 endpoint = "http://127.0.0.1:18082/v1";
-                model = "qwen3.6-35b-a3b";
+                model = "inkling-2-mini";
                 context_size = 32768;
                 # Every tool described is about 92k tokens, far over the context; the core set fits
                 tool_set = "core";
