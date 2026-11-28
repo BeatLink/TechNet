@@ -1,6 +1,6 @@
 # CODEX Local Models ##################################################################################################################################
 #
-# A llama.cpp server each for Inkling 2 Mini, Qwen3.6-35B-A3B, Ternary Bonsai 2.5 27B and the embedder, as user units the owner starts by hand.
+# A llama.cpp server each for Inkling 2 Mini, Qwen3.6-35B-A3B and Ternary Bonsai 2.5 27B, as user units the owner starts by hand.
 # Every chat model answers on one port, the one CODEX is declared with, so the one running is the one CODEX uses; starting one stops the others.
 # A chat model holds /run/user/1000/codex-gpu.lock while it runs, so no other session loads the 4 GB GPU underneath it.
 #
@@ -18,7 +18,6 @@ let
     llama_unsloth = pkgs.callPackage ./llama-cpp-unsloth.nix { };
 
     flock = "${pkgs.util-linux}/bin/flock /run/user/1000/codex-gpu.lock";
-    embed_port = 18081;
     chat_port = 18082;
 
     chat = { description, others, exec }: {
@@ -61,15 +60,6 @@ in
             description = "Ternary Bonsai 2.5 27B";
             others = [ "codex-llm-inkling" "codex-llm-qwen" ];
             exec = "${llama}/bin/llama-server --host 127.0.0.1 --port ${toString chat_port} --model ${models}/Ternary-Bonsai-2.5-27B-Q2_0.gguf --alias ternary-bonsai-2.5-27b -fa on -ctk q8_0 -ctv q8_0 -c 32768 -t 6 -b 512 -ub 512 --parallel 1 --jinja --reasoning-format auto --temp 1.0 --top-p 0.95 --top-k 20 --min-p 0";
-        };
-
-        codex-embed = {
-            Unit.Description = "CODEX local embedder (Qwen3-Embedding-0.6B)";
-            Service = {
-                Slice = "background.slice";
-                ExecStart = "${llama}/bin/llama-server --host 127.0.0.1 --port ${toString embed_port} --model ${models}/Qwen3-Embedding-0.6B-Q8_0.gguf --embedding --pooling last --ctx-size 8192 --parallel 1 --threads 2 -ngl 0";
-                Restart = "no";
-            };
         };
     };
 }
