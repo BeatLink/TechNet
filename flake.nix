@@ -78,7 +78,7 @@
             inputs.nixpkgs.follows = "nixpkgs";
         };
         x-budget = {
-            url = "github:x-tech-laboratories/X-Budget";
+            url = "github:x-tech-laboratories/X-Budget?dir=nix";
             inputs.nixpkgs.follows = "nixpkgs";
         };
         codex = {

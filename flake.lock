@@ -1425,6 +1425,21 @@
         "url": "https://github.com/BeatLink/web-greeter"
       }
     },
+    "x-app": {
+      "locked": {
+        "lastModified": 1795856517,
+        "narHash": "sha256-vDPLnyg9xsXTb/sZYHpj38riTSm3wpis08yhxgUjBIA=",
+        "owner": "x-tech-laboratories",
+        "repo": "X-App",
+        "rev": "c3a81a84eb5efe8040a21db05403219583e91118",
+        "type": "github"
+      },
+      "original": {
+        "owner": "x-tech-laboratories",
+        "repo": "X-App",
+        "type": "github"
+      }
+    },
     "x-backups": {
       "inputs": {
         "flake-utils": "flake-utils_7",
@@ -1451,17 +1466,20 @@
         "flake-utils": "flake-utils_8",
         "nixpkgs": [
           "nixpkgs"
-        ]
+        ],
+        "x-app": "x-app"
       },
       "locked": {
-        "lastModified": 1795802274,
-        "narHash": "sha256-DeNFzkWsxjypNyCLB2Xw8wnACNmHr1XqilYM3IjtIbs=",
+        "dir": "nix",
+        "lastModified": 1795857506,
+        "narHash": "sha256-dvq4Bt/FSpBEfxZGA51JHme+BPgi8PFSI8Xw38vPOAw=",
         "owner": "x-tech-laboratories",
         "repo": "X-Budget",
-        "rev": "1c83f855401bb050a18ced1f7cd5085419329ecd",
+        "rev": "b92728eba799d5312a2a282099d0cb183f62d1a9",
         "type": "github"
       },
       "original": {
+        "dir": "nix",
         "owner": "x-tech-laboratories",
         "repo": "X-Budget",
         "type": "github"
