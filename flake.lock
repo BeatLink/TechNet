@@ -1632,11 +1632,11 @@
         "x-webview": "x-webview"
       },
       "locked": {
-        "lastModified": 1795860302,
-        "narHash": "sha256-fn+IbscZAwtx2vB8uISGUsQcv9kBSc+9OYfddvCtppc=",
+        "lastModified": 1795897076,
+        "narHash": "sha256-qkYvMHwaABFpxfx/DNjTXpab6BSgH/7sReX/DtDTZ2w=",
         "owner": "x-tech-laboratories",
         "repo": "X-Tasks",
-        "rev": "5cb891d4760c863169045e258d3e4c90eb92a5fb",
+        "rev": "b31a55657e0c93f42467620ba3ee6a236d2b131f",
         "type": "github"
       },
       "original": {
