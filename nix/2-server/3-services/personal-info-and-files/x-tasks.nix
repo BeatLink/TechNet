@@ -17,6 +17,8 @@
         enable = true;
         port = 9002;
         passwordHashFile = config.sops.secrets.x_tasks_password_hash.path;
+        # Where paired devices reach this server's sync, through nginx below.
+        syncAddress = "https://tasks.heimdall.technet/api/";
     };
 
     environment.persistence."/Storage/Services/X-Tasks".directories = [
@@ -31,5 +33,9 @@
     nginx-vhosts.x-tasks = {
         domain = "tasks.heimdall.technet";
         port = 9002;
+        extraConfig = {
+            # A device's first sync sends every row it holds in one call, which can pass nginx's 10M default.
+            extraConfig = "client_max_body_size 256m;";
+        };
     };
 }

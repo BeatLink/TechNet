@@ -18,6 +18,8 @@
         enable = true;
         port = 9004;
         passwordHashFile = config.sops.secrets.x_media_tracker_password_hash.path;
+        # Where paired devices reach this server's sync, through nginx below.
+        syncAddress = "https://media-tracker.heimdall.technet/api/";
     };
 
     environment.persistence."/Storage/Services/X-Media-Tracker".directories = [
@@ -33,9 +35,10 @@
         domain = "media-tracker.heimdall.technet";
         port = 9004;
         extraConfig = {
-            # A library refresh or a Trakt import answers only once every title is done, which for a large library can pass nginx's 60s default.
+            # A large library's refresh or Trakt import can pass nginx's 60s default, and a device's first sync its 10M one.
             extraConfig = ''
                 proxy_read_timeout 5m;
+                client_max_body_size 256m;
             '';
         };
     };
