@@ -95,6 +95,22 @@ in
                 address = "https://media-tracker.heimdall.technet/api/mcp";
                 tokenFile = secret "x_media_tracker_mcp_token";
             }
+            # The source apps' own MCP servers, each linked to its collector so the app has one specialist with both tool sets
+            {
+                id = "x-tasks";
+                name = "X-Tasks";
+                address = "https://tasks.heimdall.technet/api/mcp";
+                tokenFile = secret (if hasXTasksToken then "x_tasks_codex_token" else "x_tasks_access_token");
+                collector = "x-tasks";
+            }
+            # Trilium's built-in MCP server takes an ETAPI token as its Bearer token (https://docs.triliumnotes.org/user-guide/llm/mcp)
+            {
+                id = "trilium";
+                name = "Trilium";
+                address = "https://trilium.heimdall.technet/mcp";
+                tokenFile = secret "trilium_etapi_token";
+                collector = "trilium";
+            }
         ];
     };
 
