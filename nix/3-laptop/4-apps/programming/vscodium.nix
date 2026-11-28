@@ -24,6 +24,16 @@
                 mimeType = [ "x-scheme-handler/vscode" ];
             };
 
+            # Opens claude-cli:// deep links in a new terminal. Claude Code writes its own handler into ~/.local/share/applications, but that
+            # entry names a store path and the home rollback blanks it every boot, so links do nothing until a prompt is sent in a terminal session
+            xdg.desktopEntries.claude-cli-url-handler = {
+                name = "Claude Code - claude-cli:// URL Handler";
+                exec = "claude --handle-uri %u";
+                type = "Application";
+                noDisplay = true;
+                mimeType = [ "x-scheme-handler/claude-cli" ];
+            };
+
             home = {
                 # Claude Code's temp root, inside the persisted .claude below rather than on /tmp, so scratchpads and task output outlive a reboot along with the rest of its state
                 sessionVariables.CLAUDE_CODE_TMPDIR = "${config.home.homeDirectory}/.claude/tmp";
