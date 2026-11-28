@@ -78,11 +78,11 @@
             inputs.nixpkgs.follows = "nixpkgs";
         };
         x-budget = {
-            url = "github:x-tech-laboratories/X-Budget";
+            url = "github:x-tech-laboratories/X-Budget?dir=nix";
             inputs.nixpkgs.follows = "nixpkgs";
         };
         codex = {
-            url = "github:x-tech-laboratories/CODEX";
+            url = "github:x-tech-laboratories/CODEX?dir=nix";
             inputs.nixpkgs.follows = "nixpkgs";
         };
         playitslowly = {

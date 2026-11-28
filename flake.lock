@@ -196,14 +196,16 @@
         ]
       },
       "locked": {
-        "lastModified": 1795846692,
-        "narHash": "sha256-Cn18Ep+opLr64PXgsOXVHMjW+g9qMpi4hDqkibjv+GU=",
+        "dir": "nix",
+        "lastModified": 1795878860,
+        "narHash": "sha256-WnrWbtb3Dxaa/tPbpvr4N9dKu0DOEf50IBzWvVOjYmA=",
         "owner": "x-tech-laboratories",
         "repo": "CODEX",
-        "rev": "dfd4b76c16d7e3f737f95f9afa6c45a6f4f17e9b",
+        "rev": "ff14f2ca20ebf27954116404f294e3215287647e",
         "type": "github"
       },
       "original": {
+        "dir": "nix",
         "owner": "x-tech-laboratories",
         "repo": "CODEX",
         "type": "github"
@@ -1425,6 +1427,21 @@
         "url": "https://github.com/BeatLink/web-greeter"
       }
     },
+    "x-app": {
+      "locked": {
+        "lastModified": 1795856517,
+        "narHash": "sha256-vDPLnyg9xsXTb/sZYHpj38riTSm3wpis08yhxgUjBIA=",
+        "owner": "x-tech-laboratories",
+        "repo": "X-App",
+        "rev": "c3a81a84eb5efe8040a21db05403219583e91118",
+        "type": "github"
+      },
+      "original": {
+        "owner": "x-tech-laboratories",
+        "repo": "X-App",
+        "type": "github"
+      }
+    },
     "x-backups": {
       "inputs": {
         "flake-utils": "flake-utils_7",
@@ -1451,17 +1468,20 @@
         "flake-utils": "flake-utils_8",
         "nixpkgs": [
           "nixpkgs"
-        ]
+        ],
+        "x-app": "x-app"
       },
       "locked": {
-        "lastModified": 1795802274,
-        "narHash": "sha256-DeNFzkWsxjypNyCLB2Xw8wnACNmHr1XqilYM3IjtIbs=",
+        "dir": "nix",
+        "lastModified": 1795878920,
+        "narHash": "sha256-ISxUtIwXT4EnCCnL1bHWetgd92nifVd/RfKCylWNZnQ=",
         "owner": "x-tech-laboratories",
         "repo": "X-Budget",
-        "rev": "1c83f855401bb050a18ced1f7cd5085419329ecd",
+        "rev": "dbd955339a35419e1633f4bfce102a44b6733e25",
         "type": "github"
       },
       "original": {
+        "dir": "nix",
         "owner": "x-tech-laboratories",
         "repo": "X-Budget",
         "type": "github"
