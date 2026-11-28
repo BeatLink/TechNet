@@ -1,7 +1,7 @@
 # Mail ###############################################################################################################################################
 #
 # Moves mail off Gmail and Outlook.com into a Dovecot mailbox on Heimdall. imapsync copies every folder from each account on a timer into one
-# shared Inbox, Drafts, Sent and Archive, with the rest under Gmail/ and Outlook/, then deletes
+# shared Inbox, Drafts, Sent and Archive, with the rest under Gmail/ and Outlook/ (Gmail also as soon as mail arrives), then deletes
 # what it copied from the account once delete_from_source is on. Mail clients read the mailbox over IMAP at mail.heimdall.technet:993, and a
 # browser at https://mail.heimdall.technet, on the LAN and over WireGuard; clients send through Heimdall at mail.heimdall.technet:465, which
 # relays each message through Gmail or Outlook by its From address.
@@ -25,6 +25,21 @@ let
 
     # Every message is deleted from its account once it has been copied here
     delete_from_source = true;
+
+    gmail_new_mail_file = "/run/mail-notify-gmail/new-mail";
+    gmail_notify_config = pkgs.writeText "mail-notify-gmail.json" (builtins.toJSON {
+        configurations = [
+            {
+                host = "imap.gmail.com";
+                port = 993;
+                tls = true;
+                usernameCMD = "head -n 1 ${path_of "gmail_address"}";
+                passwordCMD = "head -n 1 ${path_of "gmail_app_password"}";
+                onNewMail = "${pkgs.coreutils}/bin/touch ${gmail_new_mail_file}";
+                boxes = [ { mailbox = "[Gmail]/All Mail"; } ];
+            }
+        ];
+    });
 
     mail-oauth = pkgs.writers.writePython3Bin "mail-oauth" { flakeIgnore = [ "E501" ]; } (builtins.readFile ./mail-oauth.py);
 
@@ -126,7 +141,7 @@ let
             systemd.timers."mail-fetch-${name}" = {
                 wantedBy = [ "timers.target" ];
                 timerConfig = {
-                    OnCalendar = "*:0/10";
+                    OnCalendar = "*:0/5";
                     Persistent = true;
                     RandomizedDelaySec = "1m";
                 };
@@ -404,6 +419,33 @@ in
                 "[Gmail]/All Mail" = "Archive";
             };
         })
+
+        # Gmail Push ---------------------------------------------------------------------------------------------------------------------------------
+        {
+            # Holds an IMAP IDLE connection open on All Mail, where every new Gmail message shows up, and marks each arrival for the path unit below
+            systemd.services.mail-notify-gmail = {
+                description = "Watch Gmail for new mail";
+                after = [ "network-online.target" ];
+                wants = [ "network-online.target" ];
+                wantedBy = [ "multi-user.target" ];
+                serviceConfig = {
+                    User = "vmail";
+                    Group = "vmail";
+                    RuntimeDirectory = "mail-notify-gmail";
+                    RuntimeDirectoryMode = "0700";
+                    ExecStartPre = pkgs.writeShellScript "mail-notify-gmail-check" (placeholder_check [ "gmail_address" "gmail_app_password" ]);
+                    ExecStart = "${pkgs.goimapnotify}/bin/goimapnotify -conf ${gmail_notify_config}";
+                    Restart = "always";
+                    RestartSec = "30s";
+                };
+            };
+
+            # Starts the Gmail fetch each time the watcher marks new mail; the fetch timer still catches anything a dropped connection misses
+            systemd.paths.mail-fetch-gmail = {
+                wantedBy = [ "paths.target" ];
+                pathConfig.PathModified = gmail_new_mail_file;
+            };
+        }
 
         # Outlook ####################################################################################################################################
         (fetch_account {
