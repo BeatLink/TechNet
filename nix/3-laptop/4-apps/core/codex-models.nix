@@ -41,11 +41,12 @@ in
 
     home-manager.users.beatlink.systemd.user.services = {
         # Unsloth's guide command (https://unsloth.ai/docs/models/inkling-2-mini) and sampling, without the vision projector and drafter it says
-        # can be left out; the context cut to what CODEX is declared with, as it says to when memory is limited; GPU layers left to the build's fit
+        # can be left out; the context cut to what CODEX is declared with, as it says to when memory is limited; GPU layers left to the build's fit,
+        # with a 256 MiB margin instead of its 1024 default, since the desktop runs on the integrated GPU
         codex-llm-inkling = chat {
             description = "Inkling 2 Mini";
             others = [ "codex-llm-qwen" "codex-llm-bonsai" ];
-            exec = "${llama_unsloth}/bin/llama-server --host 127.0.0.1 --port ${toString chat_port} --model ${models}/Inkling-2-Mini-UD-Q4_K_M.gguf --alias inkling-2-mini --temp 1.0 --top-p 1.0 --top-k 0 --min-p 0.0 --ctx-size 32768 --parallel 1";
+            exec = "${llama_unsloth}/bin/llama-server --host 127.0.0.1 --port ${toString chat_port} --model ${models}/Inkling-2-Mini-UD-Q4_K_M.gguf --alias inkling-2-mini --temp 1.0 --top-p 1.0 --top-k 0 --min-p 0.0 --ctx-size 32768 --parallel 1 --fit-target 256";
         };
 
         codex-llm-qwen = chat {
