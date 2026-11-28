@@ -193,15 +193,16 @@
         "flake-utils": "flake-utils_3",
         "nixpkgs": [
           "nixpkgs"
-        ]
+        ],
+        "x-app": "x-app"
       },
       "locked": {
         "dir": "nix",
-        "lastModified": 1795888730,
-        "narHash": "sha256-xCFvdkD8RFR3kuDaxE8q9XijcyRhj6SUSdw0Aie/41A=",
+        "lastModified": 1795890347,
+        "narHash": "sha256-3RoIzTOdSxb9bmbalcRrd/2elwEQkaALaU2L9MuHNzg=",
         "owner": "x-tech-laboratories",
         "repo": "CODEX",
-        "rev": "c654ca8d2f406a95dfe165ac1fbc7b576462f9d8",
+        "rev": "7e4ddd53e1c1ae47441ea9537877cc3adf587a9f",
         "type": "github"
       },
       "original": {
@@ -1429,6 +1430,21 @@
     },
     "x-app": {
       "locked": {
+        "lastModified": 1795889025,
+        "narHash": "sha256-O+SCUnREGiszUDsfsdeoj7CvSIYhExxGmovmMYHNOkw=",
+        "owner": "x-tech-laboratories",
+        "repo": "X-App",
+        "rev": "a9e3f327338f9ab857b3d1c8e04591a57a87699d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "x-tech-laboratories",
+        "repo": "X-App",
+        "type": "github"
+      }
+    },
+    "x-app_2": {
+      "locked": {
         "lastModified": 1795856517,
         "narHash": "sha256-vDPLnyg9xsXTb/sZYHpj38riTSm3wpis08yhxgUjBIA=",
         "owner": "x-tech-laboratories",
@@ -1469,7 +1485,7 @@
         "nixpkgs": [
           "nixpkgs"
         ],
-        "x-app": "x-app"
+        "x-app": "x-app_2"
       },
       "locked": {
         "dir": "nix",
