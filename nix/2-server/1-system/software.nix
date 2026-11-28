@@ -27,6 +27,16 @@
             nix.daemonIOSchedClass = "idle";
         }
 
+        # Build Width ################################################################################################################################
+        # Two jobs of two threads, at most four compilers on the four cores. Since X-Nix builds every host here, the default of four jobs each using
+        # every core ran sixteen rustc and cc1plus at up to 1GB apiece; on 2026-11-28 that pushed 10GB into swap and stalled the services.
+        {
+            nix.settings = {
+                max-jobs = 2;
+                cores = 2;
+            };
+        }
+
         # Build Space ################################################################################################################################
         # The nightly builds of every host share the root pool with / and once filled it, so the store is collected before them (X-Nix's gc.collect_at)
         # and during them.
