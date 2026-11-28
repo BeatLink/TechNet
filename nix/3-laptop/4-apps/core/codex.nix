@@ -61,11 +61,7 @@ in
             "codex.anthropic".key_file = secret "anthropic_api_key";
         };
         engine = "openai";
-        embedder = {
-            endpoint = "http://127.0.0.1:18081/v1";
-            model = "qwen3-embedding-0.6b";
-            dimensions = 1024;
-        };
+        # No embedder: its similarity links were poor, so the model proposes links (the Suggest links maintenance job) and search goes by words
         sources = {
             "codex.x-tasks" = {
                 address = "https://tasks.heimdall.technet";
