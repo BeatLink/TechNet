@@ -20,8 +20,8 @@ let
     chat_port = 18082;
 
     # PolyStrata keeps the model's tokenizer, run config, log and expert counts here
-    inkling_state = "/home/beatlink/.local/state/polystrata/inkling-2-mini-ud-iq4_xs";
-    inkling_model = "${models}/Inkling-2-Mini-UD-IQ4_XS.gguf";
+    inkling_state = "/home/beatlink/.local/state/polystrata/inkling-2-mini-ud-q2_k_xl";
+    inkling_model = "${models}/Inkling-2-Mini-UD-Q2_K_XL.gguf";
 
     # PolyStrata setup's run config for this file on a card that holds few of its experts
     inkling_config = pkgs.writeText "strata-inkling-2-mini.json" (builtins.toJSON {
@@ -37,12 +37,12 @@ let
         cwd = inkling_state;
         tokenizer = "${inkling_state}/tokenizer";
         model_name = "inkling-2-mini";
-        display_name = "Inkling 2 Mini UD-IQ4_XS";
+        display_name = "Inkling 2 Mini UD-Q2_K_XL";
         log = "${inkling_state}/strata.log";
         port = chat_port;
         mtp = false;
         gpu = 0;
-        reasoning_effort = 0.4;
+        reasoning_effort = "low";
     });
 
     # The tokenizer is read from the GGUF once; the config is copied so the server can save its settings beside it
