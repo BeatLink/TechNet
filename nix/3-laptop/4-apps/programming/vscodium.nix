@@ -16,6 +16,14 @@
         {
             programs.claude-code.enable = true;
 
+            xdg.desktopEntries.codium-vscode-url-handler = {
+                name = "VSCodium - vscode:// URL Handler";
+                exec = "codium --open-url %U";
+                type = "Application";
+                noDisplay = true;
+                mimeType = [ "x-scheme-handler/vscode" ];
+            };
+
             home = {
                 # Claude Code's temp root, inside the persisted .claude below rather than on /tmp, so scratchpads and task output outlive a reboot along with the rest of its state
                 sessionVariables.CLAUDE_CODE_TMPDIR = "${config.home.homeDirectory}/.claude/tmp";
